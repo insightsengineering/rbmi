@@ -59,7 +59,7 @@ devtools::load_all()
 
 
 
-n <- 1000
+n <- 10
 nv <- 3
 
 
@@ -67,7 +67,8 @@ covars <- tibble(
     id = 1:n,
     age = rnorm(n),
     group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),
-    sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F"))
+    sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F")),
+    strata = c("A","A","A","A","A","A","A","A","B", "B")
 )
 
 dat <- tibble(
@@ -90,18 +91,19 @@ dat[c(1,2,3,4,5,7), "outcome"] <- NA
 
 
 
-
-
-
 rmd <- rmDataConstructor$new(
     data = dat,
     vars = list(
         outcome = "outcome",
         visit = "visit",
         subjid = "id",
-        group = "group"
+        group = "group",
+        strata = "strata"
     )
 )
+
+
+rmd$sample_ids()
 
 implist <- list(
     list( id = "1", values = c(1,2,3)),

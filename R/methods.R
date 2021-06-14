@@ -12,7 +12,7 @@ method_bayesian <- function(
         same_cov = same_cov,
         n_imputations = n_imputations
     )
-    return( as_class(x, "mcmc"))
+    return( as_class(x, "method_mcmc"))
 }
 
 
@@ -22,7 +22,6 @@ method_bootstrap <- function(
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
-    stratification = c("c1", "c2"),
     n_imputations = 20
 ){
     x <- list(
@@ -30,10 +29,9 @@ method_bootstrap <- function(
         threshold = threshold,
         same_cov = same_cov,
         REML = REML,
-        stratification = stratification,
         n_imputations = n_imputations
     )
-    return( as_class(x, "bootstrap"))
+    return( as_class(x, "method_bootstrap"))
 }
 
 
@@ -43,7 +41,6 @@ method_conditionalmean <- function(
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
-    stratification = c("c1", "c2"),
     n_imputations = 20
 ){
     x <- list(
@@ -51,10 +48,9 @@ method_conditionalmean <- function(
         threshold = threshold,
         same_cov = same_cov,
         REML = REML,
-        stratification = stratification,
         n_imputations = n_imputations
     )
-    return( as_class(x, "bayesian"))
+    return( as_class(x, "method_bayesian"))
 }
 
 

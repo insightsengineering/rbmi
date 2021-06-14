@@ -11,4 +11,12 @@
 
 
 
+is_validate_long <- function(data, vars){
+    return(TRUE)
+}
+
+is_validate_ice<- function(data_ice, vars){
+    return(TRUE)
+}
+
 

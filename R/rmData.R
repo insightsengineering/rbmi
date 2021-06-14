@@ -8,6 +8,8 @@ rmDataConstructor <- R6::R6Class(
         data = NULL,
         vars = NULL,
         visits = NULL,
+        ids = NULL,
+        strata = NULL,
         subjects = list(),
         indexes = list(),
         is_missing = list(),
@@ -57,6 +59,10 @@ rmDataConstructor <- R6::R6Class(
             return(invisible(is_in))
         },
 
+        sample_ids = function(){
+            sample_ids(self$ids, self$strata)
+        },
+
         add_strategy = function(x) {},
         get_strategy = function(x) {},
 
@@ -68,7 +74,8 @@ rmDataConstructor <- R6::R6Class(
                 vars$outcome,
                 vars$group,
                 vars$visit,
-                vars$subjid
+                vars$subjid,
+                vars$strata
             )
 
             stopifnot(
@@ -79,6 +86,19 @@ rmDataConstructor <- R6::R6Class(
             subjects = unique(data[[vars$subjid]])
             for( id in subjects){
                 self$add_subject(id)
+            }
+            self$ids = names(self$subjects)
+
+            strata_index <- unlist(
+                lapply(self$indexes, function(x) x[1]),
+                use.names = FALSE
+            )
+            strata_data <- data[strata_index,]
+
+            if(length(vars$strata) > 0){
+                self$strata = as_strata(strata_data[,vars$strata])
+            } else {
+                self$strata = rep(1, nrow(strata_data))
             }
         }
 
@@ -148,8 +168,40 @@ rmDataConstructor <- R6::R6Class(
 )
 
 
+as_strata <- function(...){
+    x <- list(...)
+    df <- as.data.frame(x)
+    colnames(df) <- paste0("var", 1:length(x))
+    df_unique <- unique(df)
+    df_unique[,"ID"] <- seq_len(nrow(df_unique))
+    df[,"ORDER"] <- seq_len(nrow(df))
+    df_mapped <- merge(df, df_unique)
+    df_mapped[["ID"]][order(df_mapped[["ORDER"]])]
+}
 
 
+sample_ids <- function(ids, strata){
+    res <- tapply(
+        X = ids,
+        INDEX = strata,
+        FUN = function(x) {
+            y <- sample(length(x), size = length(x), replace = TRUE)
+            x[y]
+        }
+    )
+    return(unlist(res,use.names = FALSE))
+}
+
+# sample_ids( c(1,2,3) , c(1,2,1))
+#
+# sample(x = 3, size = length(3), replace= TRUE)
+#
+# as_strata( c(1,2,3), c(1,2,3))
+#
+# as_strata(
+#     c(5,1,1,2,2,2,3,3,3,5),
+#     c(5,1,2,2,2,3,3,3,4,5)
+# )
 
 
 
