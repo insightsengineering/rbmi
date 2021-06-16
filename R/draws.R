@@ -37,8 +37,8 @@ draws.method_condmean <- function(data, data_ice, vars, method){
 draws_bootstrap <- function(data, data_ice, vars, method){
 
     stopifnot(
-        is_validate_long(data, vars),
-        is_validate_ice(data_ice, vars)
+        is_valid_long(data, vars),
+        is_valid_ice(data_ice, vars)
     )
     longdata <- rmDataConstructor$new(data, vars)
 
