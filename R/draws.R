@@ -33,7 +33,6 @@ draws.method_condmean <- function(data, data_ice, vars, method){
 }
 
 
-#' @export
 draws_bootstrap <- function(data, data_ice, vars, method){
 
     stopifnot(
@@ -63,20 +62,15 @@ draws_bootstrap <- function(data, data_ice, vars, method){
         ids = longdata$ids
     )
 
-    samples <- replicate(
-        n = method$M - 1,
-        {
-            get_bootstrap_mmrm_coefs(
-                longdata = longdata,
-                method = method,
-                scaler = scaler,
-                initial = mmrm_initial
-            )
-        },
-        simplify = FALSE
+    samples <- append(
+        initial_sample,
+        get_bootstrap_samples(
+            longdata = longdata,
+            method = method,
+            scaler = scaler,
+            initial = iniital_sample
+        )
     )
-
-    samples <- append(initial_sample, samples)
 
     structures <- lappy(
         samples,
@@ -93,6 +87,33 @@ draws_bootstrap <- function(data, data_ice, vars, method){
     )
 
     return(result)
+}
+
+
+get_bootstrap_samples <- function(method, ...){
+    required_samples <- method$M - 1
+    samples <- vector("list", length = required_samples)
+    current_sample <- 1
+    failed_samples <- 0
+    failure_limit <- ceiling(method$threshold * required_samples)
+
+    while(current_sample <= required_samples & failed_samples <= failure_limit){
+        sample <- get_bootstrap_mmrm_coefs(
+            longdata = longdata,
+            method = method,
+            ...
+        )
+
+        if(sample$converged){
+            samples[[current_sample]] <- sample
+            current_sample <- current_sample + 1
+        }
+
+        if( !sample$converged | sample$structure != method$structure[[1]]){
+            failed_samples <- failed_samples + 1
+        }
+    }
+    return(samples)
 }
 
 
@@ -119,17 +140,11 @@ get_bootstrap_mmrm_coefs <- function(longdata, scaler = NULL, ...){
     result <- list(
         beta = scaler$unscale_beta(mmrm$beta),
         sigma = scaler$unscale_sigma(mmrm$sigma),
+        converged = mmrm$converged,
         structure = mmrm$structure,
         ids = ids_boot
     )
     return(result)
 }
-
-
-
-
-
-
-
 
 
