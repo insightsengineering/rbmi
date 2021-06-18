@@ -91,7 +91,7 @@ dat[c(1,2,3,4,5,7), "outcome"] <- NA
 
 
 
-rmd <- rmDataConstructor$new(
+rmd <- longDataConstructor$new(
     data = dat,
     vars = list(
         outcome = "outcome",

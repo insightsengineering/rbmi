@@ -39,7 +39,7 @@ draws_bootstrap <- function(data, data_ice, vars, method){
         is_valid_long(data, vars),
         is_valid_ice(data_ice, vars)
     )
-    longdata <- rmDataConstructor$new(data, vars)
+    longdata <- longDataConstructor$new(data, vars)
 
     model_df <- as_model_df(data, as_simple_formula(vars))
     scaler <- scalerConstructor$new(model_df)
