@@ -61,7 +61,7 @@ longDataConstructor <- R6::R6Class(
             }
 
             if(nmar.rm | na.rm){
-                keep <- (is_mar | (!nmar.rm)) & (is_miss | (!nmar.rm))
+                keep <- (is_mar | (!nmar.rm)) & (!is_miss | (!na.rm))
                 new_data <- new_data[keep,]
             }
 
@@ -126,7 +126,6 @@ longDataConstructor <- R6::R6Class(
 
             #validate_data_ice(dat_ice, vars, self$visits)
 
-
             for( subject in dat_ice[[self$vars$subjid]]){
 
                 dat_ice_pt <- dat_ice[dat_ice[[self$vars$subjid]] == subject,]
@@ -136,7 +135,7 @@ longDataConstructor <- R6::R6Class(
                 visit <- dat_ice_pt[[self$vars$visit]]
 
                 if(update){
-                    if( strategy_lock[[subject]]){
+                    if( self$strategy_lock[[subject]]){
                         current_strategy <- self$strategies[[subject]]
                         if(current_strategy == "MAR" &  new_strategy != "MAR"){
                             stop("Unable to change from MAR to non-MAR")
@@ -147,18 +146,25 @@ longDataConstructor <- R6::R6Class(
                     }
                 }
 
-                strategies[[pt]] <- new_strategy
-                subjects[[pt]]$strategy <- new_strategy
+                self$strategies[[subject]] <- new_strategy
+                self$subjects[[subject]]$strategy <- new_strategy
 
-                if(update)  return(invisible())
+                if(update) next()
 
                 index <- which(self$visits == visit)
 
-                is_mar <- seq_along(self$visits) < index
+                if( new_strategy != "MAR"){
+                    is_mar <- seq_along(self$visits) < index
+                } else {
+                    is_mar <- rep(TRUE, length(self$visits))
+                }
 
-                self$is_mar[[pt]] <- is_mar
-                subjects[[pt]]$is_mar <- is_mar
-                self$strategy_lock[[pt]] <- any(!is_missing[[pt]][[seq_along(visits) >= index]])
+                self$is_mar[[subject]] <- is_mar
+                self$subjects[[subject]]$is_mar <- is_mar
+
+                self$strategy_lock[[subject]] <- any(
+                    !self$is_missing[[subject]][seq_along(self$visits) >= index]
+                )
             }
         },
 

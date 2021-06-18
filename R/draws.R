@@ -35,10 +35,6 @@ draws.method_condmean <- function(data, data_ice, vars, method){
 
 draws_bootstrap <- function(data, data_ice, vars, method){
 
-    stopifnot(
-        is_valid_long(data, vars),
-        is_valid_ice(data_ice, vars)
-    )
     longdata <- longDataConstructor$new(data, vars)
 
     model_df <- as_model_df(data, as_simple_formula(vars))

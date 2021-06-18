@@ -222,9 +222,25 @@ test_that("validate_datalong_complete", {
 })
 
 
+test_that("validate_datalong_unifromStrata",{
+
+    expect_true(validate_datalong_unifromStrata(dat,vars))
+
+    vars2 <- vars
+    vars2$strata <- character(0)
+    expect_true(validate_datalong_unifromStrata(dat,vars2))
+
+    dat2 <- dat
+    dat2$strata[[1]] <- "AXS"
+    expect_error(validate_datalong_unifromStrata(dat2,vars))
+
+})
+
+
 test_that("validate_data_long",{
     expect_true(validate_datalong(dat, vars))
 })
+
 
 test_that("validate_data_ice",{
     expect_true(validate_dataice(dat, vars))

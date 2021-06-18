@@ -1,15 +1,6 @@
-# data is complete (see #13 )
-# All visits have at least 1 observation within each group/arm/igroup
-# covariates do not have any missing values
-# data is sorted (or do we sort it?)
-# group and visit are factors
-# Should subjid be a factor ?
 
 
-
-# TODO - Strata don't vary over time
 # TODO - More meaningful error messages
-# TODO - All groups have at least 2 of each visit
 
 validate_datalong <- function(data, vars){
     validate_datalong_varIsChar(vars)
@@ -17,6 +8,7 @@ validate_datalong <- function(data, vars){
     validate_datalong_types(data,vars)
     validate_datalong_notMissing(data, vars)
     validate_datalong_complete(data, vars)
+    validate_datalong_unifromStrata(data,vars)
     return(invisible(TRUE))
 }
 
@@ -59,7 +51,7 @@ validate_datalong_types <- function(data, vars){
     covars <- extract_covariates(vars$covariates)
     stopifnot(
         is_char_fact(data[[vars$subjid]]),
-        is_char_fact(data[[vars$subjid]]),
+        is_char_fact(data[[vars$group]]),
         is.factor(data[[vars$visit]]),
         is.numeric(data[[vars$outcome]])
     )
@@ -105,6 +97,24 @@ validate_datalong_complete <- function(data, vars){
     is_complete <- unlist(is_complete_list, use.names = FALSE)
     if( ! all(is_complete)){
         stop("At least one subject has incomplete data")
+    }
+    return(invisible(TRUE))
+}
+
+
+validate_datalong_unifromStrata <- function(data, vars){
+    for( var in vars$strata){
+        x <- tapply(
+            data[[var]],
+            data[[vars$subjid]],
+            function(x) length(unique(x))
+        )
+        if(!all(x ==1)){
+            stop(
+                "Stratification variable '", var,
+                "' is not constant within at least one subject"
+            )
+        }
     }
     return(invisible(TRUE))
 }

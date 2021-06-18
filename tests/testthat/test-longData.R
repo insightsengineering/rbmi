@@ -36,7 +36,8 @@ vars <- list(
     subjid = "subjid",
     group = "group",
     strata = "strata",
-    covariates = c("sex", "age")
+    covariates = c("sex", "age"),
+    method = "method"
 )
 
 ld <- longDataConstructor$new(
@@ -69,6 +70,8 @@ test_that("longData - Basics",{
 
 })
 
+
+
 test_that("longData - Sampling",{
 
     set.seed(101)
@@ -87,6 +90,7 @@ test_that("longData - Sampling",{
     ### Looking to see that re-sampling is working i.e. samples contain duplicates
     expect_true(any( apply(samps, 2, function(x) length(unique(x))) %in% c(1,2)))
 
+    expect_error(ld$get_data("-1231"))
 
     x <- ld$get_data( c("1","1","3"))
     y <- bind_rows(
@@ -98,26 +102,123 @@ test_that("longData - Sampling",{
     expect_true(all(x$subjid != y$subjid))
 
 
+
     imputes <- list(
         list(id = "1", values = c(1,2,3)),
+        list(id = "4", values = c()),
         list(id = "1", values = c(4,5,6)),
-        list(id = "2", values = c(7,8)),
-        list(id = "4", values = c())
+        list(id = "2", values = c(7,8))
+
     )
     x <- ld$get_data(imputes)
     pt2_val <- dat %>% filter(subjid == "2") %>% pull(outcome)
     pt2_val[is.na(pt2_val)] <- c(7,8)
     y <- bind_rows(
         dat %>% filter(subjid == "1") %>% mutate(outcome = c(1,2,3)),
-        dat %>% filter(subjid == "1") %>% mutate(outcome = c(4,5,6)),
-        dat %>% filter(subjid == "2") %>% mutate(outcome = pt2_val),
         dat %>% filter(subjid == "4"),
+        dat %>% filter(subjid == "1") %>% mutate(outcome = c(4,5,6)),
+        dat %>% filter(subjid == "2") %>% mutate(outcome = pt2_val)
+
     )
+    expect_equal( select(x, -subjid) , select(y,-subjid))
+    expect_true(all(x$subjid != y$subjid))
+
+
+
+    x <- ld$get_data(c("1","1","1","2"), na.rm = TRUE)
+    pt2_val <- dat %>% filter(subjid == "2") %>% pull(outcome)
+    y <- bind_rows(
+        dat %>% filter(subjid == "1"),
+        dat %>% filter(subjid == "1"),
+        dat %>% filter(subjid == "1"),
+        dat %>% filter(subjid == "2"),
+    ) %>%
+        filter(!is.na(outcome))
     expect_equal( select(x, -subjid) , select(y,-subjid))
     expect_true(all(x$subjid != y$subjid))
 })
 
 
+
+
+
+test_that("Strategies",{
+
+    expect_equal(
+        unlist(ld$strategies, use.names = FALSE),
+        rep("MAR", n)
+    )
+
+    dat_ice <- tribble(
+        ~visit, ~subjid, ~method,
+        "Visit 1" , "1",  "ABC",
+        "Visit 2",  "2",  "MAR",
+        "Visit 3",  "3",  "XYZ"
+    )
+
+    ld$set_strategies(dat_ice)
+
+    expect_equal(
+        unlist(ld$strategies, use.names = FALSE),
+        c("ABC", "MAR", "XYZ", "MAR")
+    )
+
+    expect_equal(
+        unlist(ld$strategy_lock, use.names = FALSE),
+        c(FALSE, TRUE, TRUE, FALSE)
+    )
+
+    expect_equal(
+        ld$strategies,
+        lapply( ld$subjects, function(x) x$strategy)
+    )
+
+    expect_equal(
+        ld$is_mar,
+        lapply( ld$subjects, function(x) x$is_mar)
+    )
+
+    expect_equal(
+        unlist(ld$is_mar, use.names = FALSE),
+        c(F,F,F,  T,T,T,  T,T,F,  T,T,T)
+    )
+
+
+    dat_ice <- tribble(
+        ~subjid, ~method,
+          "1",  "ABC",
+          "2",  "MAR",
+          "3",  "ABC"
+    )
+    ld$update_strategies(dat_ice)
+
+    expect_equal(
+        unlist(ld$is_mar, use.names = FALSE),
+        c(F,F,F,  T,T,T,  T,T,F,  T,T,T)
+    )
+
+    expect_equal(
+        unlist(ld$strategies, use.names = FALSE),
+        c("ABC", "MAR", "ABC", "MAR")
+    )
+
+    expect_equal(
+        ld$strategies,
+        lapply( ld$subjects, function(x) x$strategy)
+    )
+
+    dat_ice <- tribble(
+        ~visit, ~subjid, ~method,
+        "Visit 1" , "2",  "ABC",
+    )
+    expect_error(ld$update_strategies(dat_ice))
+
+    dat_ice <- tribble(
+         ~subjid, ~method,
+          "3",  "MAR",
+    )
+    expect_error(ld$update_strategies(dat_ice))
+})
 
 
 
@@ -158,3 +259,10 @@ test_that("as_strata", {
     expect_equal(as_strata( c("a","b","c"), c("a","a","a")), c(1,2,3))
     expect_equal(as_strata( c("a","a","c"), c("a","a","a")), c(1,1,2))
 })
+
+
+
+
+
+
+
