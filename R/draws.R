@@ -13,26 +13,35 @@
 # )
 
 
+#' TODO
+#'
+#' @name draws
+#' @param data TODO
+#' @param data_ice TODO
+#' @param vars TODO
+#' @param method TODO
+#'
 #' @export
 draws <- function(data, data_ice, vars, method){
     UseMethod("draws", method)
 }
 
 
-#' @export
+#' @rdname draws
 draws.method_bootstrap <- function(data, data_ice, vars, method){
     x <- draws_bootstrap(data, data_ice, vars, method)
     as_class(x, "bootstrap")
 }
 
 
-#' @export
+#' @rdname draws
 draws.method_condmean <- function(data, data_ice, vars, method){
     x <- draws_bootstrap(data, data_ice, vars, method)
     as_class(x, "condmean")
 }
 
 
+#' @rdname draws
 draws_bootstrap <- function(data, data_ice, vars, method){
 
     longdata <- longDataConstructor$new(data, vars)
@@ -51,7 +60,7 @@ draws_bootstrap <- function(data, data_ice, vars, method){
         method = method
     )
 
-    iniital_sample <- list(
+    inital_sample <- list(
         beta = scaler$unscale_beta(mmrm_initial$beta),
         sigma = scaler$unscale_sigma(mmrm_initial$sigma),
         structure = mmrm_initial$structure,
@@ -59,16 +68,16 @@ draws_bootstrap <- function(data, data_ice, vars, method){
     )
 
     samples <- append(
-        initial_sample,
+        inital_sample,
         get_bootstrap_samples(
             longdata = longdata,
             method = method,
             scaler = scaler,
-            initial = iniital_sample
+            initial = inital_sample
         )
     )
 
-    structures <- lappy(
+    structures <- lapply(
         samples,
         function(x) x[["structure"]]
     )
@@ -86,6 +95,10 @@ draws_bootstrap <- function(data, data_ice, vars, method){
 }
 
 
+#' Title
+#'
+#' @param ... TODO
+#' @param method TODO
 get_bootstrap_samples <- function(method, ...){
     required_samples <- method$M - 1
     samples <- vector("list", length = required_samples)
@@ -95,7 +108,6 @@ get_bootstrap_samples <- function(method, ...){
 
     while(current_sample <= required_samples & failed_samples <= failure_limit){
         sample <- get_bootstrap_mmrm_coefs(
-            longdata = longdata,
             method = method,
             ...
         )
@@ -113,6 +125,11 @@ get_bootstrap_samples <- function(method, ...){
 }
 
 
+#' Title
+#'
+#' @param longdata TODO
+#' @param scaler TODO
+#' @param ... TODO
 get_bootstrap_mmrm_coefs <- function(longdata, scaler = NULL, ...){
     vars <- longdata$vars
     ids_boot <- longdata$sample_ids()

@@ -1,14 +1,23 @@
 
-
+#' Title
+#'
+#' Descriptions
+#' @return TODO
 scalerConstructor <- R6::R6Class(
     classname = "scaler",
     public = list(
 
+        #' @field center TODO
         center = NULL,
+
+        #' @field scales TODO
         scales = NULL,
-        cat_flag = NULL,
 
 
+        #' @description
+        #' TODO
+        #' @param dat TODO
+        #' @return TODO
         initialize = function(dat){
 
             stopifnot(
@@ -41,9 +50,13 @@ scalerConstructor <- R6::R6Class(
             scales[cat_flag] <- 1
             self$center <- center
             self$scales <- scales
-            self$cat_flag <- cat_flag
         },
 
+
+        #' @description
+        #' TODO
+        #' @param dat TODO
+        #' @return TODO
         scale = function(dat){
             stopifnot(
                 ncol(dat) == length(self$center),
@@ -68,11 +81,21 @@ scalerConstructor <- R6::R6Class(
             return(dat)
         },
 
+
+        #' @description
+        #' TODO
+        #' @param sigma TODO
+        #' @return TODO
         unscale_sigma = function(sigma){
             stopifnot(is.matrix(sigma))
             return( sigma / self$scales[[1]]^2)
         },
 
+
+        #' @description
+        #' TODO
+        #' @param beta TODO
+        #' @return TODO
         unscale_beta = function(beta){
             stopifnot(
                 is.numeric(beta),
@@ -98,14 +121,16 @@ scalerConstructor <- R6::R6Class(
 )
 
 
-
+#' Title
+#'
+#' @param vars TODO
 as_simple_formula <- function(vars){
     variables <- c(
         vars$group,
         vars$visit,
         vars$covariates
     )
-    frm <- as.formula(
+    frm <- stats::as.formula(
         paste0(
             vars$outcome,
             "~ 1 + ",
@@ -115,11 +140,14 @@ as_simple_formula <- function(vars){
     return(frm)
 }
 
-
+#' Title
+#'
+#' @param dat TODO
+#' @param frm TODO
 as_model_df <- function(dat, frm){
-    design_mat <- model.matrix(frm, dat)
+    design_mat <- stats::model.matrix(frm, dat)
     stopifnot( nrow(design_mat) == nrow(dat) )
-    outcome <- as.character(attr(terms(frm), "variables")[[2]])
+    outcome <- as.character(attr(stats::terms(frm), "variables")[[2]])
     full_mat <- cbind(dat[[outcome]] , design_mat)
     design <- as.data.frame(full_mat)
     return(design)

@@ -1,4 +1,14 @@
-
+#' Title
+#'
+#' @name method
+#' @param burn_in TODO
+#' @param burn_between TODO
+#' @param same_cov TODO
+#' @param n_imputations TODO
+#' @param covariance TODO
+#' @param threshold TODO
+#' @param REML TODO
+#' @return TODO
 #' @export
 method_bayesian <- function(
     burn_in = 200,
@@ -16,6 +26,7 @@ method_bayesian <- function(
 }
 
 
+#' @rdname method
 #' @export
 method_bootstrap <- function(
     covariance = c("un", "ar1"),
@@ -35,6 +46,7 @@ method_bootstrap <- function(
 }
 
 
+#' @rdname method
 #' @export
 method_conditionalmean <- function(
     covariance = c("un", "ar1"),

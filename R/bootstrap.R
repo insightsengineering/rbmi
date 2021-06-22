@@ -1,19 +1,34 @@
-#
-#
-#
-# ### Example bootstrap function that takes an input grouping vector for the strata and returns indexes to sample
-# bootstrap_index <- function(group){
-#     indexes_list <- tapply(
-#         X = 1:length(group),
-#         INDEX = group,
-#         FUN = function(x) sample(x, replace= TRUE, size = length(x))
-#     )
-#     indexes <- unlist(indexes_list)
-#     names(indexes) <- NULL
-#     return(indexes)
-# }
-#
-#
-# ### Function to collapse multiple strata into a single grouping vector
-# strata <- collapse_strata( vector_1(), vector_2(), ...)
-#
+
+
+#' Title
+#'
+#' @param ...  TODO
+#'
+as_strata <- function(...){
+    x <- list(...)
+    df <- as.data.frame(x)
+    colnames(df) <- paste0("var", 1:length(x))
+    df_unique <- unique(df)
+    df_unique[,"ID"] <- seq_len(nrow(df_unique))
+    df[,"ORDER"] <- seq_len(nrow(df))
+    df_mapped <- merge(df, df_unique)
+    df_mapped[["ID"]][order(df_mapped[["ORDER"]])]
+}
+
+
+#' Title
+#'
+#' @param ids  TODO
+#' @param strata  TODO
+#'
+sample_ids <- function(ids, strata = rep(1, length(ids))){
+    res <- tapply(
+        X = ids,
+        INDEX = strata,
+        FUN = function(x) {
+            y <- sample(length(x), size = length(x), replace = TRUE)
+            x[y]
+        }
+    )
+    return(unlist(res,use.names = FALSE))
+}

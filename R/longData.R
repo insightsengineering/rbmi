@@ -1,24 +1,53 @@
 
-
+#' Title
+#'
+#' TODO Description
 #' @export
 longDataConstructor <- R6::R6Class(
     classname = "longData",
 
     public = list(
 
+        #' @field data TODO
         data = NULL,
+
+        #' @field vars TODO
         vars = NULL,
+
+        #' @field visits TODO
         visits = NULL,
+
+        #' @field ids TODO
         ids = NULL,
+
+        #' @field strata TODO
         strata = NULL,
+
+        #' @field is_mar TODO
         is_mar = list(),
+
+        #' @field strategies TODO
         strategies = list(),
+
+        #' @field strategy_lock TODO
         strategy_lock = list(),
+
+        #' @field subjects TODO
         subjects = list(),
+
+        #' @field indexes TODO
         indexes = list(),
+
+        #' @field is_missing TODO
         is_missing = list(),
 
 
+        #' @description
+        #' TODO
+        #' @param obj TODO
+        #' @param nmar.rm TODO
+        #' @param na.rm TODO
+        #' @return TODO
         get_data = function(obj, nmar.rm = FALSE, na.rm = FALSE){
 
             if( ! any(c("list", "character", "factor") %in% class(obj))){
@@ -72,6 +101,10 @@ longDataConstructor <- R6::R6Class(
         },
 
 
+        #' @description
+        #' TODO
+        #' @param id TODO
+        #' @return TODO
         add_subject = function(id) {
 
             ids <- self$data[[self$vars$subjid]]
@@ -106,6 +139,10 @@ longDataConstructor <- R6::R6Class(
         },
 
 
+        #' @description
+        #' TODO
+        #' @param ids TODO
+        #' @return TODO
         validate_ids = function(ids){
             is_in <- ids %in% names(self$subjects)
             if(! all(is_in)){
@@ -115,19 +152,31 @@ longDataConstructor <- R6::R6Class(
         },
 
 
+        #' @description
+        #' TODO
+        #' @return TODO
         sample_ids = function(){
             sample_ids(self$ids, self$strata)
         },
 
 
+        #' @description
+        #' TODO
+        #' @param dat_ice TODO
+        #' @return TODO
         update_strategies = function(dat_ice) {
             self$set_strategies(dat_ice, update = TRUE)
         },
 
 
+        #' @description
+        #' TODO
+        #' @param dat_ice TODO
+        #' @param update TODO
+        #' @return TODO
         set_strategies = function(dat_ice, update=FALSE) {
 
-            validate_data_ice(dat_ice, vars, self$visits)
+            validate_dataice(dat_ice, vars, self$visits)
 
             for( subject in dat_ice[[self$vars$subjid]]){
 
@@ -172,22 +221,27 @@ longDataConstructor <- R6::R6Class(
         },
 
 
+        #' @description
+        #' TODO
+        #' @return TODO
         set_strata = function(){
             ## Use first row to determine strata i.e. no time varying strata
             strata_index <- unlist(
-                lapply(self$indexes, function(x) x[1]),
+                lapply(self$indexes, function(x) x[[1]]),
                 use.names = FALSE
             )
             strata_data <- self$data[strata_index,]
-
-            if(length(vars$strata) > 0){
-                self$strata = as_strata(strata_data[,vars$strata])
+            if(length(self$vars$strata) > 0){
+                self$strata = as_strata(strata_data[,self$vars$strata])
             } else {
                 self$strata = rep(1, nrow(strata_data))
             }
         },
 
 
+        #' @description
+        #' TODO
+        #' @return TODO
         process_data = function(){
             subjects = unique(self$data[[self$vars$subjid]])
             for( id in subjects) self$add_subject(id)
@@ -197,6 +251,11 @@ longDataConstructor <- R6::R6Class(
         },
 
 
+        #' @description
+        #' TODO
+        #' @param data TODO
+        #' @param vars TODO
+        #' @return TODO
         initialize = function(data, vars){
             validate_datalong(data, vars)
             self$data = data
@@ -208,31 +267,11 @@ longDataConstructor <- R6::R6Class(
 )
 
 
-as_strata <- function(...){
-    x <- list(...)
-    df <- as.data.frame(x)
-    colnames(df) <- paste0("var", 1:length(x))
-    df_unique <- unique(df)
-    df_unique[,"ID"] <- seq_len(nrow(df_unique))
-    df[,"ORDER"] <- seq_len(nrow(df))
-    df_mapped <- merge(df, df_unique)
-    df_mapped[["ID"]][order(df_mapped[["ORDER"]])]
-}
 
 
-sample_ids <- function(ids, strata = rep(1, length(ids))){
-    res <- tapply(
-        X = ids,
-        INDEX = strata,
-        FUN = function(x) {
-            y <- sample(length(x), size = length(x), replace = TRUE)
-            x[y]
-        }
-    )
-    return(unlist(res,use.names = FALSE))
-}
-
-
+#' Title
+#'
+#' @param imputations TODO
 transpose_imputations = function(imputations){
 
     len <- length(imputations)
