@@ -21,16 +21,19 @@ longDataConstructor <- R6::R6Class(
 
         get_data = function(obj, nmar.rm = FALSE, na.rm = FALSE){
 
-            if( ! any(c("list", "character") %in% class(obj))){
-                stop("Invalid Input type")
+            if( ! any(c("list", "character", "factor") %in% class(obj))){
+                stop("Object must be a list, character or factor")
             }
 
             listFlag <- "list" %in% class(obj)
 
             if(listFlag) {
-                obj_expanded <- expand_imputations(obj)
+                obj_expanded <- transpose_imputations(obj)
                 ids <- obj_expanded$ids
                 values <- obj_expanded$values
+                if( ! any(c("character", "factor") %in% class(ids))){
+                    stop("Ids must be character or factor")
+                }
             } else {
                 ids <- obj
             }
@@ -124,7 +127,7 @@ longDataConstructor <- R6::R6Class(
 
         set_strategies = function(dat_ice, update=FALSE) {
 
-            #validate_data_ice(dat_ice, vars, self$visits)
+            validate_data_ice(dat_ice, vars, self$visits)
 
             for( subject in dat_ice[[self$vars$subjid]]){
 
@@ -230,7 +233,7 @@ sample_ids <- function(ids, strata = rep(1, length(ids))){
 }
 
 
-expand_imputations = function(imputations){
+transpose_imputations = function(imputations){
 
     len <- length(imputations)
     values <- vector(mode = "list", length = len)
