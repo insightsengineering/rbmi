@@ -7,21 +7,21 @@ library(purrr)
 library(mvtnorm)
 devtools::load_all()
 #
-# as_covmat <- function(sig, corr){
-#     len <- length(sig)
-#     cormat <- diag(rep(1, len))
-#     index <- 1
-#     for(i in 1:len){
-#         for( j in 1:len){
-#             if (i < j){
-#                 cormat[i,j] <- corr[index]
-#                 cormat[j,i] <- corr[index]
-#                 index <- index + 1
-#             }
-#         }
-#     }
-#     return((sig %*% t(sig)) * cormat)
-# }
+as_covmat <- function(sig, corr){
+    len <- length(sig)
+    cormat <- diag(rep(1, len))
+    index <- 1
+    for(i in 1:len){
+        for( j in 1:len){
+            if (i < j){
+                cormat[i,j] <- corr[index]
+                cormat[j,i] <- corr[index]
+                index <- index + 1
+            }
+        }
+    }
+    return((sig %*% t(sig)) * cormat)
+}
 #
 # ## Functions required to create our simulated datasets
 # get_sample <- function(mu, sigma){
@@ -55,7 +55,8 @@ devtools::load_all()
 #     mutate(pt = factor(pt))
 #
 
-
+as_covmat( c(1,2,3,4), c(0.2, 0.4, 0.6, 0.8 ,0.4, 0.5)) %>%
+    dput
 
 
 

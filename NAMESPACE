@@ -2,6 +2,7 @@
 
 export(as_class)
 export(draws)
+export(impute)
 export(longDataConstructor)
 export(method_bayesian)
 export(method_bootstrap)

@@ -14,6 +14,8 @@ longDataConstructor <- R6::R6Class(
         #' @field vars TODO
         vars = NULL,
 
+
+
         #' @field visits TODO
         visits = NULL,
 
@@ -23,6 +25,12 @@ longDataConstructor <- R6::R6Class(
         #' @field strata TODO
         strata = NULL,
 
+        #' @field values TOTO
+        values = list(),
+
+        #' @field impgroup TOTO
+        impgroup = list(),
+
         #' @field is_mar TODO
         is_mar = list(),
 
@@ -31,9 +39,6 @@ longDataConstructor <- R6::R6Class(
 
         #' @field strategy_lock TODO
         strategy_lock = list(),
-
-        #' @field subjects TODO
-        subjects = list(),
 
         #' @field indexes TODO
         indexes = list(),
@@ -110,9 +115,11 @@ longDataConstructor <- R6::R6Class(
             ids <- self$data[[self$vars$subjid]]
             indexes <- which(ids == id)
             data_subject <- self$data[indexes,]
-            is_missing <- is.na(data_subject[[self$vars$outcome]])
+            values <- data_subject[[self$vars$outcome]]
+            is_missing <- is.na(values)
             group <- unique(data_subject[[self$vars$group]])
-            existing_id <- id %in% names(self$subjects)
+            existing_id <- id %in% names(self$ids)
+            impgroup <- unique(data_subject[[self$vars$group]])
 
             stopifnot(
                 length(indexes) >= 1,
@@ -121,16 +128,8 @@ longDataConstructor <- R6::R6Class(
                 !existing_id
             )
 
-            self$subjects[[id]] <- list(
-                subjid = id,
-                indexes = indexes,
-                is_missing = is_missing,
-                is_mar = rep(TRUE, length(indexes)),
-                strategy = "MAR",
-                group = group,
-                longData = self
-            )
-
+            self$impgroup[[id]] <- impgroup
+            self$values[[id]] <- values
             self$is_mar[[id]] <- rep(TRUE, length(indexes))
             self$strategies[[id]] <- "MAR"
             self$strategy_lock[[id]] <- FALSE
@@ -144,7 +143,7 @@ longDataConstructor <- R6::R6Class(
         #' @param ids TODO
         #' @return TODO
         validate_ids = function(ids){
-            is_in <- ids %in% names(self$subjects)
+            is_in <- ids %in% self$ids
             if(! all(is_in)){
                 stop("subjids are not in self")
             }
@@ -199,7 +198,6 @@ longDataConstructor <- R6::R6Class(
                 }
 
                 self$strategies[[subject]] <- new_strategy
-                self$subjects[[subject]]$strategy <- new_strategy
 
                 if(update) next()
 
@@ -212,7 +210,6 @@ longDataConstructor <- R6::R6Class(
                 }
 
                 self$is_mar[[subject]] <- is_mar
-                self$subjects[[subject]]$is_mar <- is_mar
 
                 self$strategy_lock[[subject]] <- any(
                     !self$is_missing[[subject]][seq_along(self$visits) >= index]
@@ -245,7 +242,7 @@ longDataConstructor <- R6::R6Class(
         process_data = function(){
             subjects = unique(self$data[[self$vars$subjid]])
             for( id in subjects) self$add_subject(id)
-            self$ids = names(self$subjects)
+            self$ids = subjects
             self$visits = levels(self$data[[self$vars$visit]])
             self$set_strata()
         },

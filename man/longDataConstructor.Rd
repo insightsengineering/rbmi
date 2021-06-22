@@ -24,13 +24,15 @@ TODO Description
 
 \item{\code{strata}}{TODO}
 
+\item{\code{values}}{TOTO}
+
+\item{\code{impgroup}}{TOTO}
+
 \item{\code{is_mar}}{TODO}
 
 \item{\code{strategies}}{TODO}
 
 \item{\code{strategy_lock}}{TODO}
-
-\item{\code{subjects}}{TODO}
 
 \item{\code{indexes}}{TODO}
 
