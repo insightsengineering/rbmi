@@ -14,8 +14,6 @@ longDataConstructor <- R6::R6Class(
         #' @field vars TODO
         vars = NULL,
 
-
-
         #' @field visits TODO
         visits = NULL,
 
