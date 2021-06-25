@@ -40,7 +40,7 @@
 #     method = "method"
 # )
 #
-# missing_index <- sample(1:(n*nv), size = 150)
+# missing_index <- sample(1:(n*nv), size = 500)
 # dat[missing_index, vars$outcome] <- NA
 #
 #
@@ -78,7 +78,6 @@
 #     return(d)
 # }
 #
-#
 # time_it({
 #     x <- impute.bootstrap(
 #         obj,
@@ -86,5 +85,16 @@
 #         strategies = strategies()
 #     )
 # })
+#
+# profvis::profvis({
+#     x <- impute.bootstrap(
+#         obj,
+#         references = c("A" = "B", "B" = "B"),
+#         strategies = strategies()
+#     )
+# })
+#
+#
+#
 #
 #
