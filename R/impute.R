@@ -51,17 +51,23 @@ transpose_samples <- function(samples){
         for( grp in grp_names) sigma[[grp]][[i]] <-  sample$sigma[[grp]]
     }
 
-    ids <- vapply(samples, function(x) length(x$ids), numeric(1))
-    grp <- rep(seq_along(samples), ids)
-    vals <- unlist( lapply(samples, function(x) x$ids), use.names = FALSE)
-    index <- tapply(grp, vals, identity)
-    names(index) <- unique(vals)
+    index <- invert_indexes( lapply(samples, function(x) x$ids))
 
     list(
         beta = beta,
         sigma = sigma,
         index = index
     )
+}
+
+
+invert_indexes <- function(x){
+    lens <- vapply(x, function(x) length(x), numeric(1))
+    grp <- rep(seq_along(x), lens)
+    vals <- unlist(x, use.names = FALSE)
+    index <- split(grp, vals)
+    names(index) <- unique(vals)
+    return(index)
 }
 
 
