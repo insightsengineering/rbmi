@@ -228,32 +228,3 @@ strategies <- function(...){
     pkg_strats[["MAR"]] <- strategy_MAR
     return(pkg_strats)
 }
-
-
-
-
-strategy_MAR <- function(pars_group, pars_ref, index_mar){
-    return(pars_group)
-}
-
-strategy_JR <- function(pars_group, pars_ref, index_mar){
-    mu <- pars_group$mu
-    mu[!index_mar] <- pars_ref$mu[!index_mar]
-    pars <- list(
-        mu = mu,
-        sigma = pars_group$sigma  # TODO
-    )
-    return(pars)
-}
-
-strategy_CR <- function(pars_group, pars_ref, index_mar){
-    # TODO
-}
-
-strategy_CIR <- function(pars_group, pars_ref, index_mar){
-    # TODO
-}
-
-strategy_LMCF <- function(pars_group, pars_ref, index_mar){
-    # TODO
-}

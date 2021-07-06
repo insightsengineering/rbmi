@@ -1,0 +1,128 @@
+#' Compute covariance matrix for some reference-based methods (JR, CIR)
+#'
+#' @description Adapt covariance matrix in reference-based methods. Used for Copy Increments in
+#' Reference (CIR) and Jump To Reference (JTR) methods, to adapt the covariance matrix to different pre-deviation and post
+#' deviation covariance structures.
+#'
+#' TODO (params)
+#'
+#' @references
+#' TODO    insertRef{carpenter2013analysis}{rbmi}
+compute_sigma <- function(sigma_group, sigma_ref, index_mar){
+  
+  if(identical(sigma_group, sigma_ref)) {
+    return(sigma_ref)
+  }
+  size <- nrow(sigma_group)
+  
+  if(sum(index_mar) == size) { # i.e. if MAR assumption holds throughout the study
+    return(sigma_group)
+  } else if(sum(index_mar) == 0) { # i.e. if MAR assumption does not hold since the beginning of the study
+    return(sigma_ref)
+  }
+  
+  first_nonMAR <- which(!index_mar)[1]
+  last_MAR <- first_nonMAR -1
+  
+  T_11 <- sigma_group[1:last_MAR, 1:last_MAR]
+  inv_R_11 <- solve(sigma_ref[1:last_MAR, 1:last_MAR])
+  
+  sigma_11 <- T_11
+  
+  sigma_21 <- sigma_ref[first_nonMAR:size, 1:last_MAR]%*%inv_R_11%*%T_11
+  
+  sigma_12 <- t(sigma_21)
+  
+  sigma_22 <- sigma_ref[first_nonMAR:size,first_nonMAR:size] -
+    sigma_ref[first_nonMAR:size, 1:last_MAR]%*%
+    inv_R_11%*%
+    (sigma_ref[1:last_MAR, 1:last_MAR]-T_11)%*%
+    inv_R_11%*%sigma_ref[1:last_MAR, first_nonMAR:size]
+  
+  sigma <- rbind(cbind(sigma_11,sigma_12),cbind(sigma_21,sigma_22))
+  
+  return(sigma)
+}
+
+strategy_MAR <- function(pars_group, pars_ref, index_mar){
+  return(pars_group)
+}
+
+strategy_JR <- function(pars_group, pars_ref, index_mar){
+  
+  if(sum(index_mar) == length(pars_group$mu)) {
+    return(pars_group)
+  } else if(sum(index_mar) == 0) {
+    return(pars_ref)
+  }
+  
+  mu <- pars_group$mu
+  mu[!index_mar] <- pars_ref$mu[!index_mar]
+  
+  sigma <- compute_sigma(
+    sigma_group = pars_group$sigma,
+    sigma_ref = pars_ref$sigma,
+    index_mar = index_mar
+  )
+  
+  pars <- list(
+    mu = mu,
+    sigma = sigma
+  )
+  
+  return(pars)
+}
+
+strategy_CR <- function(pars_group, pars_ref, index_mar){
+  return(pars_ref)
+  
+}
+
+strategy_CIR <- function(pars_group, pars_ref, index_mar){
+  
+  if(sum(index_mar) == length(pars_group$mu)) {
+    return(pars_group)
+  } else if(sum(index_mar) == 0) {
+    return(pars_ref)
+  }
+  
+  mu <- pars_group$mu
+  last_mar <- which(!index_mar)[1] - 1
+  increments_from_last_mar_ref <- pars_ref$mu[!index_mar] - pars_ref$mu[last_mar] 
+  mu[!index_mar] <- mu[last_mar] + increments_from_last_mar_ref
+  
+  sigma <- compute_sigma(
+    sigma_group = pars_group$sigma,
+    sigma_ref = pars_ref$sigma,
+    index_mar = index_mar
+  )
+  
+  pars <- list(
+    mu = mu,
+    sigma = sigma
+  )
+  
+  return(pars)
+}
+
+strategy_LMCF <- function(pars_group, pars_ref, index_mar){
+  
+  if(sum(index_mar) == length(pars_group$mu)) {
+    return(pars_group)
+  } else if(sum(index_mar) == 0) {
+    
+    # TODO
+    return()
+  }
+  
+  mu <- pars_group$mu
+  last_mar <- which(!index_mar)[1] - 1
+  mu[!index_mar] <- mu[last_mar]
+  
+  pars <- list(
+    mu = mu,
+    sigma = pars_group$sigma
+  )
+  
+  return(pars)
+}
