@@ -4,7 +4,7 @@
 
 test_that("adjusted unconditional covariance matrix for JR and CIR is correct (same_cov = TRUE)", {
 
-    sigma_group <- sigma_ref = diag(rep(1,3)) + 0.5
+    sigma_group <- sigma_ref <- diag(rep(1,3)) + 0.5
     index_mar <- c(TRUE, TRUE, FALSE)
 
     expect_equal(compute_sigma(sigma_group, sigma_ref, index_mar), sigma_ref)

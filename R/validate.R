@@ -26,8 +26,8 @@ validate_datalong_varIsChar <- function(vars){
         is_char_one(vars$group),
         is_char_one(vars$visit),
         is_char_one(vars$subjid),
-        is.character(vars$strata),
-        is.character(covars)
+        is.character(vars$strata) | is.null(vars$strata),
+        is.character(covars) | is.null(covars)
     )
     return(invisible(TRUE))
 }
@@ -121,6 +121,7 @@ validate_datalong_unifromStrata <- function(data, vars){
 
 
 extract_covariates <- function(x){
+    if(is.null(x)) return(x)
     x_split <- strsplit(x, ":|\\*")
     unique(unlist(x_split, use.names = FALSE))
 }

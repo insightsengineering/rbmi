@@ -1,5 +1,7 @@
-library(dplyr)
-library(testthat)
+suppressPackageStartupMessages({
+    library(dplyr)
+    library(testthat)
+})
 
 n <- 10
 nv <- 3
@@ -76,12 +78,20 @@ test_that("validate_datalong_varIsChar",{
     expect_error(validate_datalong_varIsChar(vars2))
 
     vars2 <- vars
+    vars2$strata <- 1
+    expect_error(validate_datalong_varIsChar(vars2))
+
+    vars2 <- vars
     vars2$strata <- NULL
+    expect_true(validate_datalong_varIsChar(vars2))
+
+    vars2 <- vars
+    vars2$covariates <- 1
     expect_error(validate_datalong_varIsChar(vars2))
 
     vars2 <- vars
     vars2$covariates <- NULL
-    expect_error(validate_datalong_varIsChar(vars2))
+    expect_true(validate_datalong_varIsChar(vars2))
 
     vars2 <- vars
     vars2$subjid <- c("v1", "v2")

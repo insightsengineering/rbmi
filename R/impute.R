@@ -1,12 +1,93 @@
 
 
+
+
+#' impute
+#'
+#' TODO - Description
+#'
+#' @param draws TODO
+#' @param data_ice TODO
+#' @param references TODO
+#' @param strategies TODO
 #' @export
-impute <- function(draws,  data_ice, references, strategies = strategies()){
-    UseMethod("impute", draws,  data_ice, references, strategies)
+impute <- function(draws,  data_ice, references, strategies){
+    UseMethod("impute")
 }
 
 
-impute.bootstrap <- function(draws,  data_ice = NULL, references, strategies){
+
+#' impute.bootstrap
+#'
+#' TODO - Description
+#'
+#' @param draws TODO
+#' @param data_ice TODO
+#' @param references TODO
+#' @param strategies TODO
+#' @export
+impute.bootstrap <- function(draws,  data_ice = NULL, references, strategies = getStrategies()){
+    impute_internal(
+        draws = draws,
+        data_ice = data_ice,
+        references = references,
+        strategies = strategies,
+        conditionalMean = FALSE
+    )
+}
+
+
+
+#' impute.bayesian
+#'
+#' TODO - Description
+#'
+#' @param draws TODO
+#' @param data_ice TODO
+#' @param references TODO
+#' @param strategies TODO
+#' @export
+impute.bayesian <- function(draws,  data_ice = NULL, references, strategies = getStrategies()){
+    impute_internal(
+        draws = draws,
+        data_ice = data_ice,
+        references = references,
+        strategies = strategies,
+        conditionalMean = FALSE
+    )
+}
+
+
+#' impute.condmean
+#'
+#' TODO - Description
+#'
+#' @param draws TODO
+#' @param data_ice TODO
+#' @param references TODO
+#' @param strategies TODO
+#' @export
+impute.condmean <- function(draws,  data_ice = NULL, references, strategies = getStrategies()){
+    impute_internal(
+        draws = draws,
+        data_ice = data_ice,
+        references = references,
+        strategies = strategies,
+        conditionalMean = TRUE
+    )
+}
+
+
+#' impute_internal
+#'
+#' TODO - Description
+#'
+#' @param draws TODO
+#' @param data_ice TODO
+#' @param references TODO
+#' @param strategies TODO
+#' @param conditionalMean TODO
+impute_internal <- function(draws, data_ice = NULL, references, strategies, conditionalMean = FALSE){
 
     validate_references(references, draws$longdata)
     validate_strategies(strategies, draws$longdata)
@@ -26,15 +107,22 @@ impute.bootstrap <- function(draws,  data_ice = NULL, references, strategies){
             sigma = samples_grouped$sigma,
             longdata = draws$longdata,
             references = references,
-            strategies = strategies
+            strategies = strategies,
+            conditionalMean = conditionalMean
         ),
         SIMPLIFY = FALSE
     )
-    return(imputes)
+
+    x <- untranspose_samples(imputes, samples_grouped$index)
+    return(x)
 }
 
 
-
+#' transpose_samples
+#'
+#' TODO - Description
+#'
+#' @param samples TODO
 transpose_samples <- function(samples){
 
     beta <- list()
@@ -61,16 +149,59 @@ transpose_samples <- function(samples){
 }
 
 
+#' untranspose_samples
+#'
+#' TODO - Description
+#'
+#' @param imputes TODO
+#' @param indexes TODO
+untranspose_samples <- function(imputes, indexes){
+    number_of_samples <- max(unlist(indexes))
+
+    HOLD <- list()
+    for( i in seq_len(number_of_samples)) HOLD[[i]] <- list()
+
+    for( imp in imputes){
+        id <- imp$id
+        for( j in seq_along(imp$values)){
+            sample_index <- indexes[[id]][[j]]
+            hold_index <- length(HOLD[[sample_index]]) + 1
+            HOLD[[sample_index]][[hold_index]] <- list(
+                id = id,
+                values = imp$values[[j]]
+            )
+        }
+    }
+    return(HOLD)
+}
+
+
+#' invert_indexes
+#'
+#' TODO - Description
+#'
+#' @param x TODO
 invert_indexes <- function(x){
     lens <- vapply(x, function(x) length(x), numeric(1))
     grp <- rep(seq_along(x), lens)
     vals <- unlist(x, use.names = FALSE)
     index <- split(grp, vals)
-    names(index) <- unique(vals)
     return(index)
 }
 
 
+#' get_parameters
+#'
+#' TODO - Description
+#'
+#' @param id TODO
+#' @param index TODO
+#' @param beta TODO
+#' @param sigma TODO
+#' @param longdata TODO
+#' @param references TODO
+#' @param strategies TODO
+#' @param conditionalMean TODO
 impute_data_individual <- function(
     id,
     index,
@@ -78,11 +209,12 @@ impute_data_individual <- function(
     sigma,
     longdata,
     references,
-    strategies
+    strategies,
+    conditionalMean
 ){
     result <- list(
         id = id,
-        values = numeric(0)
+        values = replicate(n = length(index), numeric(0))
     )
     values <- longdata$values[[id]]
     if(!any(is.na(values))) return(result)
@@ -106,13 +238,13 @@ impute_data_individual <- function(
     dat_pt_mod <- as_model_df(dat_pt, as_simple_formula(vars))
     dat_ref_mod <- as_model_df(dat_ref, as_simple_formula(vars))
 
-    parameters_group <- get_parameters(
+    parameters_group <- get_visit_distribution_parameters(
         dat = dat_pt_mod[-1],
         beta = beta[index],
         sigma = sigma[[group_pt]][index]
     )
 
-    parameters_reference <- get_parameters(
+    parameters_reference <- get_visit_distribution_parameters(
         dat = dat_ref_mod[-1],
         beta = beta[index],
         sigma = sigma[[group_ref]][index]
@@ -132,13 +264,25 @@ impute_data_individual <- function(
         values = values
     )
 
-    imputed_outcome <- lapply(conditional_parameters, impute_outcome)
+    if(conditionalMean){
+        imputed_outcome <- lapply(conditional_parameters, function(x) as.vector(x$mu))
+    } else {
+        imputed_outcome <- lapply(conditional_parameters, impute_outcome)
+    }
+
     result$values <- imputed_outcome
     return(result)
 }
 
 
-get_parameters <- function(dat, beta, sigma){
+#' as_visit_distribution_parameters
+#'
+#' TODO - Description
+#'
+#' @param dat TODO
+#' @param beta TODO
+#' @param sigma TODO
+get_visit_distribution_parameters <- function(dat, beta, sigma){
     beta_mat <- matrix(
         unlist(beta, use.names = FALSE),
         nrow = length(beta[[1]]),
@@ -157,6 +301,11 @@ get_parameters <- function(dat, beta, sigma){
 }
 
 
+#' impute_outcome
+#'
+#' TODO - Description
+#'
+#' @param conditional_parameters TODO
 impute_outcome <- function(conditional_parameters){
 
     if(length(conditional_parameters$mu) == 1){
@@ -174,10 +323,16 @@ impute_outcome <- function(conditional_parameters){
             checkSymmetry = FALSE
         )
     }
-    return(result)
+    return(as.vector(result))
 }
 
 
+#' get_conditional_parameters
+#'
+#' TODO - Description
+#'
+#' @param pars TODO
+#' @param values TODO
 get_conditional_parameters <- function(pars, values){
     is_miss <- is.na(values)
 
@@ -203,15 +358,35 @@ get_conditional_parameters <- function(pars, values){
 }
 
 
+#' validate_references
+#'
+#' TODO - Description
+#'
+#' @param references TODO
+#' @param longdata TODO
 validate_references <- function(references, longdata){
     # TODO
 }
 
+
+#' validate_strategies
+#'
+#' TODO - Description
+#'
+#' @param strategies TODO
+#' @param longdata TODO
 validate_strategies <- function(strategies, longdata){
     # TODO
 }
 
-strategies <- function(...){
+
+#' strategies
+#'
+#' TODO - Description
+#'
+#' @param ... TODO
+#' @export
+getStrategies <- function(...){
     user_strats <- list(...)
     pkg_strats <- list(
         "JR" = strategy_JR,

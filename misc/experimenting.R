@@ -55,10 +55,9 @@ as_covmat <- function(sig, corr){
 #     mutate(pt = factor(pt))
 #
 
-as_covmat( c(1,2,3,4), c(0.2, 0.4, 0.6, 0.8 ,0.4, 0.5)) %>%
-    dput
+as_covmat( c(1,2,3,4), c(0.2, 0.4, 0.6, 0.8 ,0.4, 0.5)) %>% dput
 
-
+as_covmat( c(1,2,3), c(0.2, 0.4, 0.6, 0.8 )) %>% dput
 
 n <- 10
 nv <- 3
