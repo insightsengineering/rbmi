@@ -18,7 +18,7 @@ parameters {
 
 model {
 
-    vector[J] mu[N] = to_vector_of_arrays( Q * theta, J);
+    #include /common_stan_code/compute_mu.stan
 
     Sigma ~ inv_wishart(J+2, Sigma_reml);
 
