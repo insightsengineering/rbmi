@@ -1,14 +1,22 @@
 long2wide <- function(vec_long,
                       J) {
     len <- length(vec_long)
-    stopifnot(len%%J == 0)
+    
+    assert_that(
+        len%%J == 0,
+        msg = "length(vec_long) must be a multiple of J"
+    )
+    
     wide_mat <- matrix(vec_long, nrow = len/J, ncol = J, byrow = TRUE)
     return(wide_mat)
 }
 
 get_obs_missingness_patterns <- function(outcome) {
   
-    stopifnot(is.matrix(outcome))
+    assert_that(
+        is.matrix(outcome),
+        msg = "outcome must be a matrix"
+    )
   
     y_obs <- matrix(1, nrow = nrow(outcome), ncol = ncol(outcome))
     y_obs[is.na(outcome)] <- 0
@@ -28,9 +36,14 @@ prepare_data_mcmc <- function(outcome,
                               same_cov,
                               Sigma_reml) {
   
-    stopifnot(
-        is.list(Sigma_reml) |
-            is.factor(groups)
+    assert_that(
+        is.list(Sigma_reml),
+        msg = "Sigma_reml must be a list of covariance matrices"
+    )
+  
+    assert_that(
+        is.factor(groups),
+        msg = "groups must be a factor"
     )
   
     J <- nrow(Sigma_reml[[1]])
