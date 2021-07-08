@@ -334,27 +334,28 @@ impute_outcome <- function(conditional_parameters){
 #' @param pars TODO
 #' @param values TODO
 get_conditional_parameters <- function(pars, values){
-    is_miss <- is.na(values)
+    q <- is.na(values)
 
-    if(sum(is_miss) == length(values)){
-        return(pars)
-    }
+    if(sum(q) == length(values)) return(pars)
+    if(sum(q) == 0) return( list(mu = numeric(0), sigma = numeric(0)))
 
-    a <- values[!is_miss]
-    k <- sum(is_miss)
-    j <- sum(!is_miss)
-    mu1 <- matrix(nrow = k, pars$mu[is_miss])
-    mu2 <- matrix(nrow = j, pars$mu[!is_miss])
-    sig11 <- matrix(nrow =k, ncol = k, pars$sigma[is_miss,is_miss])
-    sig12 <- matrix(nrow =k, ncol = j, pars$sigma[is_miss,!is_miss])
-    sig21 <- matrix(nrow =j, ncol = k, pars$sigma[!is_miss,is_miss])
-    sig22 <- matrix(nrow =j, ncol = j, pars$sigma[!is_miss,!is_miss])
-    sig22_inv <- solve(sig22)
-    sig22_inv_12 <-  sig12 %*% sig22_inv
+    a <- values[!q]
+
+    mu1 <- matrix(nrow = sum(q), pars$mu[q])
+    mu2 <- matrix(nrow = sum(!q), pars$mu[!q])
+
+    sig11 <- pars$sigma[q,q, drop = FALSE]
+    sig12 <- pars$sigma[q,!q, drop = FALSE]
+    sig21 <- pars$sigma[!q,q, drop = FALSE]
+    sig22 <- pars$sigma[!q,!q, drop = FALSE]
+
+    sig22_inv_12 <-  sig12 %*% solve(sig22)
+
     list(
-        mu = mu1 -  sig22_inv_12 %*% (a - mu2),
-        sigma = sig11 + sig22_inv_12 %*% sig21
+        mu = mu1 + sig22_inv_12 %*% (a - mu2),
+        sigma = sig11 - sig22_inv_12 %*% sig21
     )
+
 }
 
 
@@ -380,26 +381,3 @@ validate_strategies <- function(strategies, longdata){
 }
 
 
-#' strategies
-#'
-#' TODO - Description
-#'
-#' @param ... TODO
-#' @export
-getStrategies <- function(...){
-    user_strats <- list(...)
-    pkg_strats <- list(
-        "JR" = strategy_JR,
-        "CR" = strategy_CR,
-        "CIR" = strategy_CIR,
-        "LMCF" = strategy_LMCF
-    )
-    for(i in names(user_strats)) {
-        stopifnot(
-            is.function(user_strats[[i]])
-        )
-        pkg_strats[[i]] <- user_strats[[i]]
-    }
-    pkg_strats[["MAR"]] <- strategy_MAR
-    return(pkg_strats)
-}

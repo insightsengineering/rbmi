@@ -129,3 +129,36 @@ test_that("mean and covariance under JR are as expected", {
     )
 
 })
+
+
+
+
+test_that( "getStrategies", {
+
+    output_actual <- getStrategies()
+    output_expected <- list(
+        "JR" = strategy_JR,
+        "CR" = strategy_CR,
+        "CIR" = strategy_CIR,
+        "LMCF" = strategy_LMCF,
+        "MAR" = strategy_MAR
+    )
+    expect_equal(output_actual, output_expected)
+
+
+    myfun <- function(x) x
+    output_actual <- getStrategies( fun = myfun, JR = myfun, MAR = myfun)
+    output_expected <- list(
+        "JR" = myfun,
+        "CR" = strategy_CR,
+        "CIR" = strategy_CIR,
+        "LMCF" = strategy_LMCF,
+        "fun" = myfun,
+        "MAR" = strategy_MAR
+    )
+    expect_equal(output_actual, output_expected)
+})
+
+
+
+

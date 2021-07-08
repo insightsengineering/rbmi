@@ -1,6 +1,10 @@
 devtools::load_all()
-library(dplyr)
-library(testthat)
+
+suppressPackageStartupMessages({
+    library(dplyr)
+    library(testthat)
+})
+
 
 
 dat <- structure(
@@ -111,16 +115,7 @@ obj <- list(
 
 
 
-expect_valid_structure <- function(x){
-    for( i in x){
-        for(j in i){
-            cond1 <- all( names(j) %in% c("id", "values"))
-            cond2 <- (is.character(j[["id"]]) & length(j[["id"]]) == 1)
-            cond3 <- is.numeric( j[["values"]])
-            expect_true(cond1 & cond2 & cond3)
-        }
-    }
-}
+
 
 
 test_that("Basic Usage",{
@@ -137,6 +132,18 @@ test_that("Basic Usage",{
 
     class(obj) <- "condmean"
     x4 <- impute( draws = obj, references = c("A" = "A", "B" = "B") )
+
+
+    expect_valid_structure <- function(x){
+        for( i in x){
+            for(j in i){
+                cond1 <- all( names(j) %in% c("id", "values"))
+                cond2 <- (is.character(j[["id"]]) & length(j[["id"]]) == 1)
+                cond3 <- is.numeric( j[["values"]])
+                expect_true(cond1 & cond2 & cond3)
+            }
+        }
+    }
 
     ### The return object is in the expected format
     expect_valid_structure(x1)
@@ -193,37 +200,161 @@ test_that("Basic Usage",{
 
 
 
+test_that( "transpose_samples", {
+
+    input <- list(
+        list(
+            ids =  c("Tom", "Harry", "Phil", "Ben"),
+            beta = c(1,2,3),
+            sigma = list( "A" = 9, "B" = 8, "C" = 7 )
+        ),
+        list(
+            ids = c("Ben", "Ben", "Phil"),
+            beta = c(4,5,6),
+            sigma = list( "A" = iris, "B" = 2, "C" = 3 )
+        )
+    )
+
+    output_actual <- transpose_samples(input)
+
+    output_expected <- list(
+        beta = list(
+            c(1,2,3),
+            c(4,5,6)
+        ),
+        sigma = list(
+            "A" = list(9,iris),
+            "B" = list(8,2),
+            "C" = list(7,3)
+        ),
+        index = list(
+            "Ben" = c(1,2,2),
+            "Harry" = c(1),
+            "Phil" = c(1,2),
+            "Tom" = c(1)
+        )
+    )
+
+    expect_equal(output_actual, output_expected)
+})
 
 
 
 
 
 
+test_that( "invert_indexes", {
+
+    input <- list(
+        c("Tom", "Harry", "Phil", "Ben"),
+        c("Ben", "Ben", "Phil")
+    )
+
+    output_actual <- invert_indexes(input)
+
+    output_expected <- list(
+        "Ben" = c(1,2,2),
+        "Harry" = c(1),
+        "Phil" = c(1,2),
+        "Tom" = c(1)
+    )
+
+    expect_equal(output_actual, output_expected)
+
+})
 
 
 
 
+test_that( "untranspose_samples", {
+
+    input_imputes <- list(
+        list(id = "Ben", values = list(numeric(0), numeric(0), numeric(0))),
+        list(id = "Harry", values = list(c(1,2))),
+        list(id = "Phil", values = list(c(3,4),c(5,6))),
+        list(id = "Tom", values = list(c(7, 8, 9)))
+    )
+
+    input_index <- list(
+        "Ben" = c(1,2,2),
+        "Harry" = 1,
+        "Phil" = c(1,2),
+        "Tom" = 1
+    )
+
+    output_actual <- untranspose_samples(input_imputes, input_index)
+
+    output_expected <- list(
+        list(
+            list( id = "Ben", values = numeric(0)),
+            list( id = "Harry", values = c(1,2)),
+            list( id = "Phil", values = c(3,4)),
+            list( id = "Tom", values = c(7, 8, 9))
+        ),
+        list(
+            list( id = "Ben", values = numeric(0)),
+            list( id = "Ben", values = numeric(0)),
+            list( id = "Phil", values = c(5,6))
+        )
+    )
+
+    expect_equal(output_actual, output_expected)
+
+})
 
 
 
+test_that("get_conditional_parameters", {
+
+    input_pars <- list(
+        "mu" = c(2,3,4),
+        "sigma" = structure(c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9), .Dim = c(3L, 3L))
+    )
+
+    input_values = c(NA, NA, 8)
+    output_actual <- get_conditional_parameters(input_pars , input_values)
+    output_expected <- list(
+        mu = structure(c(2.53333333333333, 4.6), .Dim = c(2L, 1L)),
+        sigma = structure(c(0.84,  -0.0799999999999999, -0.08, 2.56), .Dim = c(2L, 2L))
+    )
+    expect_equal(output_actual, output_expected)
 
 
+    input_values = c(NA, 8, NA)
+    output_actual <- get_conditional_parameters(input_pars , input_values)
+    output_expected <- list(
+        mu = structure(c(2.5, 8.5), .Dim = c(2L, 1L)),
+        sigma = structure(c(0.96, 0.84, 0.84, 5.76), .Dim = c(2L, 2L))
+    )
+    expect_equal(output_actual, output_expected)
 
-impute <- function(draws,  data_ice, references, strategies = strategies()){}
 
-impute.bootstrap <- function(draws,  data_ice = NULL, references, strategies)
+    input_values = c(1, NA, 2)
+    output_actual <- get_conditional_parameters(input_pars , input_values)
+    output_expected <- list(
+        mu = structure(c(2.26984126984127), .Dim = c(1L, 1L)),
+        sigma = structure(c(2.55238095238095), .Dim = c(1L, 1L))
+    )
+    expect_equal(output_actual, output_expected)
 
-impute.bayesian <- function(draws,  data_ice = NULL, references, strategies){}
 
-impute.condmean <- function(draws,  data_ice = NULL, references, strategies){}
+    ### If all values are unknown then it should just return the full
+    ### distribution as there is nothing to condition over
+    input_values = c(NA, NA, NA)
+    output_actual <- get_conditional_parameters(input_pars , input_values)
+    output_expected <- input_pars
+    expect_equal(output_actual, output_expected)
 
-impute_internal <- function(draws, data_ice = NULL, references, strategies, conditionalMean = FALSE){}
 
-transpose_samples <- function(samples){}
+    ### If all values are already available then return nothing as
+    ### nothing needs to be imputed
+    input_values <- c(1,2,3)
+    output_actual <- get_conditional_parameters(input_pars , input_values)
+    output_expected <- list(mu = numeric(0) , sigma = numeric(0))
+    expect_equal(output_actual, output_expected)
+})
 
-untranspose_samples <- function(imputes, indexes){}
 
-invert_indexes <- function(x){}
 
 impute_data_individual <- function(
     id,
@@ -235,20 +366,12 @@ impute_data_individual <- function(
     strategies,
     conditionalMean
 ){}
-
-
-
 impute_outcome <- function(conditional_parameters){}
-
-get_conditional_parameters <- function(pars, values){}
-
 validate_references <- function(references, longdata){}
-
 validate_strategies <- function(strategies, longdata){}
-
-getStrategies <- function(...){}
-
 get_visit_distribution_parameters <- function(dat, beta, sigma){}
+
+
 
 
 

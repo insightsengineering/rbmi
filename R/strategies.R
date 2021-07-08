@@ -138,3 +138,28 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar){
     return(pars)
 }
 
+
+
+#' strategies
+#'
+#' TODO - Description
+#'
+#' @param ... TODO
+#' @export
+getStrategies <- function(...){
+    user_strats <- list(...)
+    pkg_strats <- list(
+        "JR" = strategy_JR,
+        "CR" = strategy_CR,
+        "CIR" = strategy_CIR,
+        "LMCF" = strategy_LMCF
+    )
+    for(i in names(user_strats)) {
+        stopifnot(
+            is.function(user_strats[[i]])
+        )
+        pkg_strats[[i]] <- user_strats[[i]]
+    }
+    pkg_strats[["MAR"]] <- strategy_MAR
+    return(pkg_strats)
+}
