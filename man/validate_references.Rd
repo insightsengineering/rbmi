@@ -2,15 +2,19 @@
 % Please edit documentation in R/impute.R
 \name{validate_references}
 \alias{validate_references}
-\title{validate_references}
+\title{Validate user supplied references}
 \usage{
-validate_references(references, longdata)
+validate_references(references, control)
 }
 \arguments{
-\item{references}{TODO}
+\item{references}{named character vector}
 
-\item{longdata}{TODO}
+\item{control}{factor variable (should be the \code{group} variable from the source dataset)}
+}
+\value{
+Will error if there is an issue otherwise will return \code{TRUE}
 }
 \description{
-TODO - Description
+Checks to ensure that the user specified references are
+expect values (i.e. those found within the source data)
 }

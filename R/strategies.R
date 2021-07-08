@@ -140,11 +140,37 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar){
 
 
 
-#' strategies
+#' Define imputation strategies
 #'
-#' TODO - Description
+#' Returns a list defining the imputation strategies to be used to create the
+#' multivariate normal distribution parameters by merging those of the source group and reference
+#' group per patient.
 #'
-#' @param ... TODO
+#' By default Jump to Reference (JR), Copy Reference (CR),
+#' Copy Increments from Reference (CIR), Last Mean Carried Forward (LMCF) and
+#' Missing at Random (MAR) are defined.
+#'
+#' The user can define their own strategy functions (or overwrite the pre-defined ones)
+#' by specifying a named input to the function i.e. `NEW = function(...) ...`.
+#' Only exception is MAR which cannot be overwritten
+#'
+#' All user defined functions must take 3 inputs `pars_group`, `pars_ref` & `index_mar`.
+#' `pars_group` and `pars_ref` are both lists with elements `mu` and `sigma` representing
+#' the multivariate normal distribution parameters for the subjects current and reference group
+#' respectively.  `index_mar` will be a logical vector specifying which visits the subject met
+#' the MAR assumption at. The function must return a list with elements `mu` and `sigma`.
+#'
+#' @param ... User defined methods to be added to the return list. Input must be a function
+#'
+#' @examples
+#' \dontrun{
+#' getStrategies()
+#' getStrategies(
+#'     NEW = function(pars_group, pars_ref, index_mar) <code>,
+#'     JR = function(pars_group, pars_ref, index_mar) <more code>
+#' )
+#' }
+#'
 #' @export
 getStrategies <- function(...){
     user_strats <- list(...)
@@ -155,8 +181,9 @@ getStrategies <- function(...){
         "LMCF" = strategy_LMCF
     )
     for(i in names(user_strats)) {
-        stopifnot(
-            is.function(user_strats[[i]])
+        assert_that(
+            is.function(user_strats[[i]]),
+            msg = sprintf("Input %s must be a function", i)
         )
         pkg_strats[[i]] <- user_strats[[i]]
     }

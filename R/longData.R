@@ -119,11 +119,24 @@ longDataConstructor <- R6::R6Class(
             existing_id <- id %in% names(self$ids)
             impgroup <- unique(data_subject[[self$vars$group]])
 
-            stopifnot(
+            assert_that(
                 length(indexes) >= 1,
+                msg = sprintf("Subject %s is not found in the dataset", id)
+            )
+
+            assert_that(
                 length(group) == 1,
+                msg = sprintf("Subject %s doesn't have a `group`", id)
+            )
+
+            assert_that(
                 length(is_missing) == length(indexes),
-                !existing_id
+                msg = sprintf("Subject %s has a mismatch between number of expected values", id)
+            )
+
+            assert_that(
+                !existing_id,
+                msg = sprintf("Subject %s already exists...", id)
             )
 
             self$impgroup[[id]] <- impgroup
@@ -178,7 +191,11 @@ longDataConstructor <- R6::R6Class(
             for( subject in dat_ice[[self$vars$subjid]]){
 
                 dat_ice_pt <- dat_ice[dat_ice[[self$vars$subjid]] == subject,]
-                stopifnot(nrow(dat_ice_pt) == 1)
+
+                assert_that(
+                    nrow(dat_ice_pt) == 1,
+                    msg = sprintf("Subject %s has more than 1 row in the ice dataset", subject)
+                )
 
                 new_strategy <- dat_ice_pt[[self$vars$method]]
                 visit <- dat_ice_pt[[self$vars$visit]]

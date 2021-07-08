@@ -1,4 +1,4 @@
-devtools::load_all()
+# devtools::load_all()
 
 suppressPackageStartupMessages({
     library(dplyr)
@@ -81,36 +81,13 @@ vars <- list(
     method = "method"
 )
 
-
-
 ld <- longDataConstructor$new(
     data = dat,
     vars = vars
 )
 
 
-beta <- c( -2.80, 4.93, 2.01, 4.66, 1.27, 3.14)
 
-sigma <- list(
-    "A" = structure(c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9), .Dim = c(3L,3L)),
-    "B" = structure(c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9), .Dim = c(3L,3L))
-)
-
-obj <- list(
-    samples = list(
-        list(
-            ids =  c("Tom", "Harry", "Phil", "Ben"),
-            beta = beta,
-            sigma = sigma
-        ),
-        list(
-            ids = c("Ben", "Ben", "Phil"),
-            beta = beta,
-            sigma = sigma
-        )
-    ),
-    longdata = ld
-)
 
 
 
@@ -120,18 +97,41 @@ obj <- list(
 
 test_that("Basic Usage",{
 
+    beta <- c( -2.80, 4.93, 2.01, 4.66, 1.27, 3.14)
+
+    sigma <- list(
+        "A" = structure(c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9), .Dim = c(3L,3L)),
+        "B" = structure(c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9), .Dim = c(3L,3L))
+    )
+
+    drawsObj <- list(
+        samples = list(
+            list(
+                ids =  c("Tom", "Harry", "Phil", "Ben"),
+                beta = beta,
+                sigma = sigma
+            ),
+            list(
+                ids = c("Ben", "Ben", "Phil"),
+                beta = beta,
+                sigma = sigma
+            )
+        ),
+        longdata = ld
+    )
+
     set.seed(101)
-    class(obj) <- "bootstrap"
-    x1 <- impute( draws = obj, references = c("A" = "A", "B" = "B") )
+    class(drawsObj) <- "bootstrap"
+    x1 <- impute( draws = drawsObj, references = c("A" = "A", "B" = "B") )
 
-    class(obj) <- "bayesian"
-    x2 <- impute( draws = obj, references = c("A" = "A", "B" = "B") )
+    class(drawsObj) <- "bayesian"
+    x2 <- impute( draws = drawsObj, references = c("A" = "A", "B" = "B") )
 
-    class(obj) <- "condmean"
-    x3 <- impute( draws = obj, references = c("A" = "A", "B" = "B") )
+    class(drawsObj) <- "condmean"
+    x3 <- impute( draws = drawsObj, references = c("A" = "A", "B" = "B") )
 
-    class(obj) <- "condmean"
-    x4 <- impute( draws = obj, references = c("A" = "A", "B" = "B") )
+    class(drawsObj) <- "condmean"
+    x4 <- impute( draws = drawsObj, references = c("A" = "A", "B" = "B") )
 
 
     expect_valid_structure <- function(x){
@@ -356,23 +356,146 @@ test_that("get_conditional_parameters", {
 
 
 
-impute_data_individual <- function(
-    id,
-    index,
-    beta,
-    sigma,
-    longdata,
-    references,
-    strategies,
-    conditionalMean
-){}
-impute_outcome <- function(conditional_parameters){}
-validate_references <- function(references, longdata){}
-validate_strategies <- function(strategies, longdata){}
-get_visit_distribution_parameters <- function(dat, beta, sigma){}
+test_that("impute_outcome", {
+
+
+    ##### Univariate
+    x <- impute_outcome(list(mu = 5, sigma = 10))
+    expect_length(x, 1)
+    expect_true( is.numeric(x))
+
+    set.seed(101)
+    x <- replicate(n = 10000, impute_outcome(list(mu = 5, sigma = 10)))
+    mu <- mean(x)
+    sig <- sd(x)
+    expect_true(   4.9 <= mu  & mu <= 5.1)
+    expect_true(   9.9 <= sig & sig <= 10.1 )
 
 
 
+    ##### Multivariate
+
+    # as_covmat( c(2, 4, 6), c(0.3, 0.5, 0.7)) %>% dput
+    pars <- list(
+        mu = c(8,10, 12),
+        sigma = structure(c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36), .Dim = c(3L,3L))
+    )
+
+    x <- impute_outcome(pars)
+    expect_length(x, 3)
+    expect_true( is.numeric(x))
+
+    set.seed(101)
+    vals <- replicate( n = 20000, impute_outcome(pars), simplify = FALSE)
+    x <- matrix(unlist(vals), ncol = 3, byrow = TRUE)
+
+    # Means
+    mu <- apply(x, 2, mean)
+    expect_true( all((pars$mu - 0.1) <= mu  & mu <= (pars$mu + 0.1)))
+
+    # Variances
+    sig <- apply(x, 2, sd)
+    d_sig <- sqrt(diag(pars$sigma))
+    expect_true( all(  (d_sig- 0.1) <= sig & sig <= (d_sig + 0.1) ))
+
+    # Correlations
+    corr <- cor(x)
+    corr_expec <- c(0.3, 0.5, 0.7)
+    corr_obs <- c( corr[1,2], corr[1,3], corr[2,3])
+    expect_true( all(  (corr_obs- 0.1) <= corr_expec & corr_expec <= (corr_obs + 0.1) ))
+
+
+    ###### Non-compatible matrices
+    pars <- list(
+        mu = c(8,10),
+        sigma = structure(c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36), .Dim = c(3L,3L))
+    )
+    expect_error(impute_outcome(pars))
+
+
+    pars <- list(
+        mu = c(8),
+        sigma = structure(c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36), .Dim = c(3L,3L))
+    )
+    expect_error(impute_outcome(pars))
+
+
+    pars <- list(
+        mu = c(8,2),
+        sigma = 1
+    )
+    expect_error(impute_outcome(pars))
+
+
+    ##### Missing value handling
+    pars <- list(
+        mu = c(2, NA),
+        sigma = 1
+    )
+    expect_error(impute_outcome(pars))
+
+
+    pars <- list(
+        mu = c(1, 2, 4),
+        sigma = structure(c(4, 2.4, 6, 2.4, NA, 16.8, 6, 16.8, 36), .Dim = c(3L,3L))
+    )
+    expect_error(impute_outcome(pars))
+
+
+    pars <- list(
+        mu = c(NA),
+        sigma = 1
+    )
+    expect_error(impute_outcome(pars))
+
+
+    pars <- list(
+        mu = c(1),
+        sigma = NA
+    )
+    expect_error(impute_outcome(pars))
+})
+
+
+#
+# vars <- list(
+#     outcome = "outcome",
+#     visit = "visit",
+#     subjid = "subjid",
+#     group = "group",
+#     strata = "strata",
+#     covariates = c("sex", "age"),
+#     method = "method"
+# )
+#
+# ld <- longDataConstructor$new(
+#     data = dat,
+#     vars = vars
+# )
+#
+#
+# ld$get_data( c("Harry", "Harry", "Phil"))
+#
+# ld$get_data(list(
+#     list( id = "Harry", values = c(100, 200)),
+#     list( id = "Harry", values = c(700, 800)),
+#     list( id = "Phil", values = 999)
+# ))
+
+
+# impute_data_individual <- function(
+#     id,
+#     index,
+#     beta,
+#     sigma,
+#     longdata,
+#     references,
+#     strategies,
+#     conditionalMean
+# ){}
+# validate_references <- function(references, longdata){}
+# validate_strategies <- function(strategies, longdata){}
+# get_visit_distribution_parameters <- function(dat, beta, sigma){}
 
 
 

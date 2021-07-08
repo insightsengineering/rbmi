@@ -89,11 +89,13 @@ impute.condmean <- function(draws,  data_ice = NULL, references, strategies = ge
 #' @param conditionalMean TODO
 impute_internal <- function(draws, data_ice = NULL, references, strategies, conditionalMean = FALSE){
 
-    validate_references(references, draws$longdata)
+    longdata <- draws$longdata
+
+    validate_references(references, longdata$data[[longdata$vars$group]])
     validate_strategies(strategies, draws$longdata)
 
     if(!is.null(data_ice)){
-        draws$longdata$update_strategies(data_ice)
+        longdata$update_strategies(data_ice)
     }
 
     samples_grouped <- transpose_samples(draws$samples)
@@ -105,7 +107,7 @@ impute_internal <- function(draws, data_ice = NULL, references, strategies, cond
         MoreArgs = list(
             beta = samples_grouped$beta,
             sigma = samples_grouped$sigma,
-            longdata = draws$longdata,
+            longdata = longdata,
             references = references,
             strategies = strategies,
             conditionalMean = conditionalMean
@@ -304,19 +306,33 @@ get_visit_distribution_parameters <- function(dat, beta, sigma){
 }
 
 
-#' impute_outcome
+#' Sample outcome value
 #'
-#' TODO - Description
+#' Draws a random sample from a multivariate normal distribution
 #'
-#' @param conditional_parameters TODO
+#' @param conditional_parameters a list with elements `mu` and `sigma` which
+#' contain the mean vector and covariance matrix to sample from
 impute_outcome <- function(conditional_parameters){
 
+    assert_that(
+        all(!is.na(conditional_parameters$mu)),
+        all(!is.na(conditional_parameters$sigma)),
+        msg = "Sigma or Mu contain missing values"
+    )
+
     if(length(conditional_parameters$mu) == 1){
+
+        assert_that(
+            length(conditional_parameters$sigma) == 1,
+            msg = "Sigma is not of a compatable size with mu"
+        )
+
         result <- rnorm(
             n = 1,
             mean = conditional_parameters$mu,
             sd = conditional_parameters$sigma
         )
+
     } else {
         result <- mvtnorm::rmvnorm(
             n = 1,
@@ -373,14 +389,40 @@ get_conditional_parameters <- function(pars, values){
 }
 
 
-#' validate_references
+#' Validate user supplied references
 #'
-#' TODO - Description
+#' Checks to ensure that the user specified references are
+#' expect values (i.e. those found within the source data)
 #'
-#' @param references TODO
-#' @param longdata TODO
-validate_references <- function(references, longdata){
-    # TODO
+#' @param references named character vector
+#' @param control factor variable (should be the `group` variable from the source dataset)
+#'
+#' @return
+#' Will error if there is an issue otherwise will return `TRUE`
+validate_references <- function(references, control){
+
+    assert_that(
+        is.character(references),
+        !is.null(names(references)),
+        msg = "`references` should be a named character vector"
+    )
+
+    assert_that(
+        is.factor(control),
+        msg = "`control` should be a factor vector"
+    )
+
+    unique_refs <- unique(c(references, names(references)))
+    valid_refs <- unique(as.character(control))
+
+    assert_that(
+        all(unique_refs %in% valid_refs),
+        msg = paste0(
+            "`references` contains values that are not present in the",
+            "`group` variable of your source dataset"
+        )
+    )
+    return(invisible(TRUE))
 }
 
 

@@ -37,7 +37,10 @@ as_simple_formula <- function(vars){
 #' @param frm TODO
 as_model_df <- function(dat, frm){
     design_mat <- stats::model.matrix(frm, dat)
-    stopifnot( nrow(design_mat) == nrow(dat) )
+    assert_that(
+        nrow(design_mat) == nrow(dat),
+        msg = "Model matrix has less rows than input dataset. You may have missing values."
+    )
     outcome <- as.character(attr(stats::terms(frm), "variables")[[2]])
     full_mat <- cbind(dat[[outcome]] , design_mat)
     design <- as.data.frame(full_mat)

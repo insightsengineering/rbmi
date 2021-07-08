@@ -19,47 +19,117 @@ validate_dataice<- function(data_ice, vars, visits){
 }
 
 
+#' Validate inputs for `var`
+#'
+#' Checks that the required variable names are defined within `var` and
+#' are of appropriate datatypes
+#'
+#' @param var named list indicating the names of key variables in the source dataset
 validate_datalong_varIsChar <- function(vars){
     covars <- extract_covariates(vars$covariates)
-    stopifnot(
+
+    assert_that(
         is_char_one(vars$outcome),
+        msg = "`vars$outcome` should be a length 1 character"
+    )
+
+    assert_that(
         is_char_one(vars$group),
+        msg = "`vars$group` should be a length 1 character"
+    )
+
+    assert_that(
         is_char_one(vars$visit),
+        msg = "`vars$visit` should be a length 1 character"
+    )
+
+    assert_that(
         is_char_one(vars$subjid),
+        msg = "`vars$subjid` should be a length 1 character"
+    )
+
+    assert_that(
+        is.character(vars$covars) | is.null(vars$covars),
+        msg = "`vars$covars` should be a character vector or NULL"
+    )
+
+    assert_that(
         is.character(vars$strata) | is.null(vars$strata),
-        is.character(covars) | is.null(covars)
+        msg = "`vars$strata` should be a character vector or NULL"
     )
     return(invisible(TRUE))
 }
 
 
 validate_datalong_varExists <- function(data, vars){
-    covars <- extract_covariates(vars$covariates)
-    stopifnot(
+
+
+    assert_that(
         vars$outcome %in% names(data),
-        vars$group %in% names(data),
-        vars$visit %in% names(data),
-        vars$subjid %in% names(data),
-        all(vars$strata %in% names(data)) | is.null(vars$strata),
-        all(covars %in% names(data)) | is.null(covars)
+        msg = sprintf("Cannot find %s in `data`", vars$outcome )
     )
+
+    assert_that(
+        vars$group %in% names(data),
+        msg = sprintf("Cannot find %s in `data`", vars$group )
+    )
+
+    assert_that(
+        vars$visit %in% names(data),
+        msg = sprintf("Cannot find %s in `data`", vars$visit )
+    )
+
+    assert_that(
+        vars$subjid %in% names(data),
+        msg = sprintf("Cannot find %s in `data`", vars$subjid )
+    )
+
+    assert_that(
+        all(vars$strata %in% names(data)) | is.null(vars$strata),
+        msg = "One of more variables listed in `vars$strata` do not exist in `data`"
+    )
+
+    covars <- extract_covariates(vars$covariates)
+    assert_that(
+        all(covars %in% names(data)) | is.null(covars),
+        msg = "One of more variables listed in `vars$covariates` do not exist in `data`"
+    )
+
     return(invisible(TRUE))
 }
 
 
 validate_datalong_types <- function(data, vars){
     covars <- extract_covariates(vars$covariates)
-    stopifnot(
+
+    assert_that(
         is_char_fact(data[[vars$subjid]]),
-        is_char_fact(data[[vars$group]]),
-        is.factor(data[[vars$visit]]),
-        is.numeric(data[[vars$outcome]])
+        msg = sprintf("Variable `%s` should be of type character or factor", vars$subjid)
     )
-    if(!is.null(c(covars, vars$strata))){
-        for( var in covars){
-            if( !is_num_char_fact(data[[var]])){
-                stop("Invalid Data Type")
-            }
+
+    assert_that(
+        is_char_fact(data[[vars$group]]),
+        msg = sprintf("Variable `%s` should be of type character or factor", vars$group)
+    )
+
+    assert_that(
+        is.factor(data[[vars$visit]]),
+        msg = sprintf("Variable `%s` should be of type factor", vars$visit)
+    )
+
+    assert_that(
+        is.numeric(data[[vars$outcome]]),
+        msg = sprintf("Variable `%s` should be of type numeric", vars$outcome)
+    )
+
+    additional_vars <- c(covars, vars$strata)
+
+    if(!is.null(additional_vars)){
+        for( var in additional_vars){
+            assert_that(
+                is_num_char_fact(data[[var]]),
+                msg = sprintf("Variable `%s` should be of type numeric, factor or character", var)
+            )
         }
     }
     return(invisible(TRUE))

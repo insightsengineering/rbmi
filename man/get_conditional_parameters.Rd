@@ -2,15 +2,25 @@
 % Please edit documentation in R/impute.R
 \name{get_conditional_parameters}
 \alias{get_conditional_parameters}
-\title{get_conditional_parameters}
+\title{Derive conditional multivariate normal parameters}
 \usage{
 get_conditional_parameters(pars, values)
 }
 \arguments{
-\item{pars}{TODO}
+\item{pars}{a list with values "mu" and "sigma" defining the mean vector and
+covariance matrix respectively}
 
-\item{values}{TODO}
+\item{values}{a vector of known values to condition on, must be same length as pars$mu.
+Missing values must be represented by an NA}
+}
+\value{
+A list with the conditional distribution parameters
+\itemize{
+\item mu - The conditional mean vector
+\item sigma - The conditional covariance matrix
+}
 }
 \description{
-TODO - Description
+Takes parameters for a multivariate normal distribution + known values
+to calculate the conditional distribution for the unknown values
 }
