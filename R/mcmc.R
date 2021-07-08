@@ -88,28 +88,48 @@ prepare_data_mcmc <- function(outcome,
 
 #' @importFrom rstan sampling
 run_mcmc <- function(
-    stan_model,
     data,
     n_imputations,
     burn_in,
     burn_between,
-    initial_values) {
+    initial_values,
+    same_cov) {
     
-    suppressWarnings({
-        stan_fit <- sampling(
-            object = stan_model,
-            data = data,
-            pars = c("beta", "Sigma"),
-            chains = 1,
-            warmup = burn_in,
-            thin = burn_between,
-            iter = burn_in + burn_between*n_imputations,
-            init = initial_values)
-    })
+    if(same_cov) {
+        
+        suppressWarnings({
+            stan_fit <- sampling(
+                object = stanmodels$MMRM_same_cov,
+                data = data,
+                pars = c("beta", "Sigma"),
+                chains = 1,
+                warmup = burn_in,
+                thin = burn_between,
+                iter = burn_in + burn_between*n_imputations,
+                init = initial_values)
+        })
+        
+    } else {
+        
+        suppressWarnings({
+            stan_fit <- sampling(
+                object = stanmodels$MMRM_diff_cov,
+                data = data,
+                pars = c("beta", "Sigma"),
+                chains = 1,
+                warmup = burn_in,
+                thin = burn_between,
+                iter = burn_in + burn_between*n_imputations,
+                init = initial_values)
+        }) 
+        
+    }
     
     return(stan_fit)
     
 }
+
+
 
 #' @importFrom rstan extract
 extract_draws <- function(stan_fit) {
