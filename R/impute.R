@@ -212,20 +212,23 @@ impute_data_individual <- function(
     strategies,
     conditionalMean
 ){
+
+    # Define default return value if nothing needs to be imputed
     result <- list(
         id = id,
         values = replicate(n = length(index), numeric(0))
     )
+
     values <- longdata$values[[id]]
     if(!any(is.na(values))) return(result)
 
+
+    # Extract all required data for the given subject
     index_mar <- longdata$is_mar[[id]]
     strategy <- longdata$strategies[[id]]
     vars <- longdata$vars
-
     group_pt <- longdata$impgroup[[id]]
     group_ref <- references[group_pt]
-
     dat_pt <- longdata$get_data(id)
 
     # Dummy outcome value to stop rows being dropped by model.matrix
@@ -327,12 +330,23 @@ impute_outcome <- function(conditional_parameters){
 }
 
 
-#' get_conditional_parameters
+
+
+#' Derive conditional multivariate normal parameters
 #'
-#' TODO - Description
+#' Takes parameters for a multivariate normal distribution + known values
+#' to calculate the conditional distribution for the unknown values
 #'
-#' @param pars TODO
-#' @param values TODO
+#' @param pars a list with values "mu" and "sigma" defining the mean vector and
+#' covariance matrix respectively
+#' @param values a vector of known values to condition on, must be same length as pars$mu.
+#' Missing values must be represented by an NA
+#'
+#' @return A list with the conditional distribution parameters
+#' \itemize{
+#'   \item mu - The conditional mean vector
+#'   \item sigma - The conditional covariance matrix
+#' }
 get_conditional_parameters <- function(pars, values){
     q <- is.na(values)
 
