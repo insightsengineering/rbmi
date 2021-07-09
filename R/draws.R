@@ -17,6 +17,18 @@ draws <- function(data, data_ice, vars, method){
 #' @rdname draws
 draws.method_bootstrap <- function(data, data_ice, vars, method){
     x <- draws_bootstrap(data, data_ice, vars, method)
+
+    ### Set ids to be the unique patient values in order
+    ### for `impute()` to work as expect for this method (retain
+    ### boot_ids for reference)
+    x$samples <- lapply(
+        x$samples,
+        function(x){
+            x$ids_boot <- x$ids
+            x$ids <- unique(data[[vars$subjid]])
+            return(x)
+        }
+    )
     as_class(x, "bootstrap")
 }
 
@@ -87,7 +99,7 @@ draws_bootstrap <- function(data, data_ice, vars, method){
 #' @param ... TODO
 #' @param method TODO
 get_bootstrap_samples <- function(method, ...){
-    required_samples <- method$M - 1
+    required_samples <- method$M - 1 # -1 as the first sample is done in advance on the full dataset
     samples <- vector("list", length = required_samples)
     current_sample <- 1
     failed_samples <- 0
