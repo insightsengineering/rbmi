@@ -172,6 +172,21 @@ longDataConstructor <- R6::R6Class(
 
         #' @description
         #' TODO
+        #' @return TODO
+        extract_by_id = function(id){
+            list(
+                is_mar = self$is_mar[[id]],
+                is_missing = self$is_missing[[id]],
+                strategy = self$strategies[[id]],
+                group = self$impgroup[[id]],
+                data = self$get_data(id),
+                outcome = self$values[[id]],
+                strategy_lock = self$strategy_lock[[id]]
+            )
+        },
+
+        #' @description
+        #' TODO
         #' @param dat_ice TODO
         #' @return TODO
         update_strategies = function(dat_ice) {

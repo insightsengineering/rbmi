@@ -221,22 +221,17 @@ impute_data_individual <- function(
         values = replicate(n = length(index), numeric(0))
     )
 
-    values <- longdata$values[[id]]
-    if(!any(is.na(values))) return(result)
+    id_data <- longdata$extract_by_id(id)
 
+    if( sum(id_data$is_missing) == 0 ) return(result)
 
-    # Extract all required data for the given subject
-    index_mar <- longdata$is_mar[[id]]
-    strategy <- longdata$strategies[[id]]
     vars <- longdata$vars
-    group_pt <- longdata$impgroup[[id]]
+    group_pt <- id_data$group
     group_ref <- references[group_pt]
-    dat_pt <- longdata$get_data(id)
 
-    # Dummy outcome value to stop rows being dropped by model.matrix
-    dat_pt[,vars$outcome] <- 1
 
-    # TODO - Enforce group as a factor ?
+    dat_pt <- id_data$data
+    dat_pt[,vars$outcome] <- 1  # Dummy outcome value to stop rows being dropped by model.matrix
     dat_ref <- dat_pt
     dat_ref[,vars$group] <- factor(group_ref, levels = levels(group_pt))
 
@@ -244,29 +239,29 @@ impute_data_individual <- function(
     dat_ref_mod <- as_model_df(dat_ref, as_simple_formula(vars))
 
     parameters_group <- get_visit_distribution_parameters(
-        dat = dat_pt_mod[-1],
+        dat = dat_pt_mod[-1],  # -1 as first col from as_model_df is the outcome variable
         beta = beta[index],
         sigma = sigma[[group_pt]][index]
     )
 
     parameters_reference <- get_visit_distribution_parameters(
-        dat = dat_ref_mod[-1],
+        dat = dat_ref_mod[-1], # -1 as first col from as_model_df is the outcome variable
         beta = beta[index],
         sigma = sigma[[group_ref]][index]
     )
 
     pars <- mapply(
-        strategies[[strategy]],
+        strategies[[id_data$strategy]],
         parameters_group,
         parameters_reference,
-        MoreArgs = list(index_mar = index_mar),
+        MoreArgs = list(index_mar = id_data$is_mar),
         SIMPLIFY = FALSE
     )
 
     conditional_parameters <- lapply(
         pars,
         get_conditional_parameters,
-        values = values
+        values = id_data$outcome
     )
 
     if(conditionalMean){
