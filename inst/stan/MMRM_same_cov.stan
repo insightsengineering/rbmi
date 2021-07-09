@@ -1,24 +1,23 @@
 #include /common_stan_code/user_defined_functions.stan
 
 data {
-
-    #include /common_stan_code/data_common.stan
+#include /common_stan_code/data_common.stan
     matrix[J, J] Sigma_reml; // covariance matrix estimated from MMRM
 }
 
 transformed data{
-    #include /common_stan_code/transformed_data_common.stan
+#include /common_stan_code/transformed_data_common.stan
 }
 
 parameters {
-    #include /common_stan_code/regr_coef_def.stan
+#include /common_stan_code/regr_coef_def.stan
 
     cov_matrix[J] Sigma; // covariance matrix
 }
 
 model {
 
-    #include /common_stan_code/compute_mu.stan
+#include /common_stan_code/compute_mu.stan
 
     Sigma ~ inv_wishart(J+2, Sigma_reml);
 
@@ -48,5 +47,5 @@ model {
 }
 
 generated quantities {
-    #include /common_stan_code/regr_coef_recover.stan
+#include /common_stan_code/regr_coef_recover.stan
 }
