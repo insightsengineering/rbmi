@@ -5,7 +5,9 @@
 #' Reference (CIR) and Jump To Reference (JTR) methods, to adapt the covariance matrix
 #' to different pre-deviation and post deviation covariance structures.
 #'
-#' TODO (params)
+#' @param sigma_group TODO
+#' @param sigma_ref TODO
+#' @param index_mar TODO
 #'
 #' @references
 #' TODO    insertRef{carpenter2013analysis}{rbmi}
@@ -53,11 +55,30 @@ compute_sigma <- function(sigma_group, sigma_ref, index_mar){
 }
 
 
+#' Title
+#'
+#' @description
+#' TODO
+#'
+#' @param pars_group TODO
+#' @param pars_ref TODO
+#' @param index_mar TODO
+#' @export
 strategy_MAR <- function(pars_group, pars_ref, index_mar){
     return(pars_group)
 }
 
 
+
+#' Title
+#'
+#' @description
+#' TODO
+#'
+#' @param pars_group TODO
+#' @param pars_ref TODO
+#' @param index_mar TODO
+#' @export
 strategy_JR <- function(pars_group, pars_ref, index_mar){
 
     if(sum(index_mar) == length(pars_group$mu)) {
@@ -84,11 +105,30 @@ strategy_JR <- function(pars_group, pars_ref, index_mar){
 }
 
 
+#' Title
+#'
+#' @description
+#' TODO
+#'
+#' @param pars_group TODO
+#' @param pars_ref TODO
+#' @param index_mar TODO
+#' @export
 strategy_CR <- function(pars_group, pars_ref, index_mar){
     return(pars_ref)
 }
 
 
+
+#' Title
+#'
+#' @description
+#' TODO
+#'
+#' @param pars_group TODO
+#' @param pars_ref TODO
+#' @param index_mar TODO
+#' @export
 strategy_CIR <- function(pars_group, pars_ref, index_mar){
 
     if(sum(index_mar) == length(pars_group$mu)) {
@@ -117,6 +157,15 @@ strategy_CIR <- function(pars_group, pars_ref, index_mar){
 }
 
 
+#' Title
+#'
+#' @description
+#' TODO
+#'
+#' @param pars_group TODO
+#' @param pars_ref TODO
+#' @param index_mar TODO
+#' @export
 strategy_LMCF <- function(pars_group, pars_ref, index_mar){
 
     if(sum(index_mar) == length(pars_group$mu)) {

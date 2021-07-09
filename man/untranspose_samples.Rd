@@ -7,9 +7,9 @@
 untranspose_samples(samples, indexes)
 }
 \arguments{
-\item{indexes}{A list of indexes created by \code{\link[rbmi]{transpose_samples}}}
+\item{samples}{A list of "sample" objects created by \code{\link[rbmi]{impute_data_individual}}}
 
-\item{imputes}{A list of "sample" objects created by \code{\link[rbmi]{impute_data_individual}}}
+\item{indexes}{A list of indexes created by \code{\link[rbmi]{transpose_samples}}}
 }
 \description{
 Takes a sample object created by \code{\link[rbmi]{impute_data_individual}}

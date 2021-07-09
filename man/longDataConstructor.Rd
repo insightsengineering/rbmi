@@ -142,6 +142,13 @@ TODO
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$extract_by_id(id)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{id}}{TODO}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 TODO
 }

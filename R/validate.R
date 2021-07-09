@@ -19,12 +19,12 @@ validate_dataice<- function(data_ice, vars, visits){
 }
 
 
-#' Validate inputs for `var`
+#' Validate inputs for `vars`
 #'
-#' Checks that the required variable names are defined within `var` and
+#' Checks that the required variable names are defined within `vars` and
 #' are of appropriate datatypes
 #'
-#' @param var named list indicating the names of key variables in the source dataset
+#' @param vars named list indicating the names of key variables in the source dataset
 validate_datalong_varIsChar <- function(vars){
     covars <- extract_covariates(vars$covariates)
 

@@ -6,12 +6,17 @@
 \usage{
 compute_sigma(sigma_group, sigma_ref, index_mar)
 }
+\arguments{
+\item{sigma_group}{TODO}
+
+\item{sigma_ref}{TODO}
+
+\item{index_mar}{TODO}
+}
 \description{
 Adapt covariance matrix in reference-based methods. Used for Copy Increments in
 Reference (CIR) and Jump To Reference (JTR) methods, to adapt the covariance matrix
 to different pre-deviation and post deviation covariance structures.
-
-TODO (params)
 }
 \references{
 TODO    insertRef{carpenter2013analysis}{rbmi}

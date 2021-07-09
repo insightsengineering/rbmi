@@ -2,14 +2,14 @@
 % Please edit documentation in R/validate.R
 \name{validate_datalong_varIsChar}
 \alias{validate_datalong_varIsChar}
-\title{Validate inputs for \code{var}}
+\title{Validate inputs for \code{vars}}
 \usage{
 validate_datalong_varIsChar(vars)
 }
 \arguments{
-\item{var}{named list indicating the names of key variables in the source dataset}
+\item{vars}{named list indicating the names of key variables in the source dataset}
 }
 \description{
-Checks that the required variable names are defined within \code{var} and
+Checks that the required variable names are defined within \code{vars} and
 are of appropriate datatypes
 }
