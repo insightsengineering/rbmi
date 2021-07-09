@@ -457,45 +457,59 @@ test_that("impute_outcome", {
 })
 
 
-#
-# vars <- list(
-#     outcome = "outcome",
-#     visit = "visit",
-#     subjid = "subjid",
-#     group = "group",
-#     strata = "strata",
-#     covariates = c("sex", "age"),
-#     method = "method"
-# )
-#
-# ld <- longDataConstructor$new(
-#     data = dat,
-#     vars = vars
-# )
-#
-#
-# ld$get_data( c("Harry", "Harry", "Phil"))
-#
-# ld$get_data(list(
-#     list( id = "Harry", values = c(100, 200)),
-#     list( id = "Harry", values = c(700, 800)),
-#     list( id = "Phil", values = 999)
-# ))
+
+test_that("get_visit_distribution_parameters",{
+
+    beta <- list( c(1,2,3) , c(4,5,6))
+    dat <- data.frame(  a = c(1,2), b = c(3,4) , c = c(5,6))
+    sigma <- list( 1, 5)
+
+    x <- get_visit_distribution_parameters( dat, beta, sigma)
+    expect_equal(
+        x[[1]]$mu,
+        c(1*1 + 2*3 + 3*5,  1*2 + 2*4 + 3*6)
+    )
+    expect_equal(
+        x[[2]]$mu,
+        c(4*1 + 5*3 + 6*5,  4*2 + 5*4 + 6*6)
+    )
+    expect_equal( x[[1]]$sigma, 1 )
+    expect_equal( x[[2]]$sigma, 5 )
+
+    beta <- list( c(1,2,3) , c(4,5,6))
+    dat <- data.frame(  a = c(1,2), b = c(3,4) , c = c(5,6))
+    sigma <- list(1)
+    expect_error(get_visit_distribution_parameters( dat, beta, sigma))
+
+    beta <- list( c(1,2) , c(4,5))
+    dat <- data.frame(  a = c(1,2), b = c(3,4) , c = c(5,6))
+    sigma <- list(1,5)
+    expect_error(get_visit_distribution_parameters( dat, beta, sigma))
+
+    beta <- list( c(1,2,3) , c(4,5,6))
+    dat <- data.frame(  a = c(1,2), b = c(3,4))
+    sigma <- list(1,5)
+    expect_error(get_visit_distribution_parameters( dat, beta, sigma))
+})
 
 
-# impute_data_individual <- function(
-#     id,
-#     index,
-#     beta,
-#     sigma,
-#     longdata,
-#     references,
-#     strategies,
-#     conditionalMean
-# ){}
-# validate_strategies <- function(strategies, longdata){}
-# get_visit_distribution_parameters <- function(dat, beta, sigma){}
+test_that("validate_strategies",{
 
+    strats <- list("MAR" = function(x) x)
+    expect_true(validate_strategies( strats, ld$strategies))
+    expect_true(validate_strategies( strats, "MAR"))
+    expect_error(validate_strategies( strats, "NMAR"))
+
+    strats <- list("MAR" = function(x) x, "NMAR" = function(x) x)
+    expect_true(validate_strategies( strats, "NMAR"))
+
+    strats <- list("MAR" = function(x) x, "NMAR" = 1)
+    expect_error(validate_strategies( strats, "NMAR"))
+
+    strats <- c("NMAR")
+    expect_error(validate_strategies( strats, "NMAR"))
+
+})
 
 
 

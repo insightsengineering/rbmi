@@ -92,7 +92,7 @@ impute_internal <- function(draws, data_ice = NULL, references, strategies, cond
     longdata <- draws$longdata
 
     validate_references(references, longdata$data[[longdata$vars$group]])
-    validate_strategies(strategies, draws$longdata)
+    validate_strategies(strategies, longdata$strategies)
 
     if(!is.null(data_ice)){
         longdata$update_strategies(data_ice)
@@ -287,7 +287,7 @@ get_visit_distribution_parameters <- function(dat, beta, sigma){
         unlist(beta, use.names = FALSE),
         nrow = length(beta[[1]]),
         ncol = length(beta),
-        byrow = TRUE
+        byrow = FALSE
     )
     mu <- as.matrix(dat) %*% beta_mat
     parameters <- list()
@@ -434,14 +434,42 @@ validate_references <- function(references, control){
 }
 
 
-#' validate_strategies
+#' Validate user specified strategies
 #'
-#' TODO - Description
+#' Compares the user provided strategies to those that are
+#' required (the reference). Will error if not all values
+#' of reference have been defined
 #'
-#' @param strategies TODO
-#' @param longdata TODO
-validate_strategies <- function(strategies, longdata){
-    # TODO
+#' @param strategies named list of strategies
+#' @param reference list or character vector of strategies that need to be defined
+#'
+#' @return
+#' Will error if there is an issue otherwise will return `TRUE`
+validate_strategies <- function(strategies, reference){
+
+    strat_names <- names(strategies)
+
+    assert_that(
+        is.list(strategies),
+        !is.null(strat_names),
+        all(vapply( strategies, is.function, logical(1))),
+        msg = "`strategies` must be a named list of functions"
+    )
+
+    assert_that(
+        length(strat_names) == length(unique(strat_names)),
+        msg = "`strategies` must be uniquely named"
+    )
+
+    unique_references <- unique(unlist(reference, use.names = FALSE))
+
+    for( ref in unique_references){
+        assert_that(
+            ref %in% strat_names,
+            msg = sprintf("Required strategy `%s` has not been defined", ref)
+        )
+    }
+    return(invisible(TRUE))
 }
 
 
