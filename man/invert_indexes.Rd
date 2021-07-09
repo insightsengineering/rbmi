@@ -2,13 +2,26 @@
 % Please edit documentation in R/impute.R
 \name{invert_indexes}
 \alias{invert_indexes}
-\title{invert_indexes}
+\title{Invert and derive indexes}
 \usage{
 invert_indexes(x)
 }
 \arguments{
-\item{x}{TODO}
+\item{x}{list of elements to invert and calculate index from (see details)}
 }
 \description{
-TODO - Description
+Takes a list of elements and creates a new list
+containing 1 entry per unique element value containing
+the indexes of which original elements it occurred in.
+}
+\details{
+This functions purpose is best illustrated by an example:
+
+input:
+
+\code{list(  c("A", "B", "C"),  c("A", "A", "B"))}
+
+becomes:
+
+\code{list(  "A" = c(1,2,2),  "B" = c(1,2), "C" = 1 )}
 }

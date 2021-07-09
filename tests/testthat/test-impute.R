@@ -490,6 +490,11 @@ test_that("get_visit_distribution_parameters",{
     dat <- data.frame(  a = c(1,2), b = c(3,4))
     sigma <- list(1,5)
     expect_error(get_visit_distribution_parameters( dat, beta, sigma))
+
+    beta <- list( c(1,2,3) , c(4,5))
+    dat <- data.frame(  a = c(1,2), b = c(3,4), c = c(5,6))
+    sigma <- list(1,5)
+    expect_error(get_visit_distribution_parameters( dat, beta, sigma))
 })
 
 

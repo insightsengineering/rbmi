@@ -2,7 +2,7 @@
 % Please edit documentation in R/impute.R
 \name{impute_data_individual}
 \alias{impute_data_individual}
-\title{get_parameters}
+\title{impute_data_individual}
 \usage{
 impute_data_individual(
   id,

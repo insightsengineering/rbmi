@@ -2,15 +2,20 @@
 % Please edit documentation in R/impute.R
 \name{validate_strategies}
 \alias{validate_strategies}
-\title{validate_strategies}
+\title{Validate user specified strategies}
 \usage{
-validate_strategies(strategies, longdata)
+validate_strategies(strategies, reference)
 }
 \arguments{
-\item{strategies}{TODO}
+\item{strategies}{named list of strategies}
 
-\item{longdata}{TODO}
+\item{reference}{list or character vector of strategies that need to be defined}
+}
+\value{
+Will error if there is an issue otherwise will return \code{TRUE}
 }
 \description{
-TODO - Description
+Compares the user provided strategies to those that are
+required (the reference). Will error if not all values
+of reference have been defined
 }

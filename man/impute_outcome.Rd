@@ -2,13 +2,14 @@
 % Please edit documentation in R/impute.R
 \name{impute_outcome}
 \alias{impute_outcome}
-\title{impute_outcome}
+\title{Sample outcome value}
 \usage{
 impute_outcome(conditional_parameters)
 }
 \arguments{
-\item{conditional_parameters}{TODO}
+\item{conditional_parameters}{a list with elements \code{mu} and \code{sigma} which
+contain the mean vector and covariance matrix to sample from}
 }
 \description{
-TODO - Description
+Draws a random sample from a multivariate normal distribution
 }

@@ -2,15 +2,18 @@
 % Please edit documentation in R/impute.R
 \name{untranspose_samples}
 \alias{untranspose_samples}
-\title{untranspose_samples}
+\title{Invert Samples}
 \usage{
-untranspose_samples(imputes, indexes)
+untranspose_samples(samples, indexes)
 }
 \arguments{
-\item{imputes}{TODO}
+\item{indexes}{A list of indexes created by \code{\link[rbmi]{transpose_samples}}}
 
-\item{indexes}{TODO}
+\item{imputes}{A list of "sample" objects created by \code{\link[rbmi]{impute_data_individual}}}
 }
 \description{
-TODO - Description
+Takes a sample object created by \code{\link[rbmi]{impute_data_individual}}
+and inverts it based upon the original transposition done by
+\code{\link[rbmi]{transpose_samples}} in order to group by the
+sample number instead of the subject ID
 }
