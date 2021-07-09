@@ -401,10 +401,23 @@ get_conditional_parameters <- function(pars, values){
 #' Will error if there is an issue otherwise will return `TRUE`
 validate_references <- function(references, control){
 
+    ref_names <- names(references)
+
     assert_that(
         is.character(references),
-        !is.null(names(references)),
-        msg = "`references` should be a named character vector"
+        !is.null(ref_names),
+        all(!is.na(references)),
+        msg = "`references` should be a non-missing named character vector"
+    )
+
+    assert_that(
+        all( ref_names != ""),
+        msg = "All values of `references` must be named"
+    )
+
+    assert_that(
+        length(unique(ref_names)) == length(ref_names),
+        msg = "`references` must have unique names"
     )
 
     assert_that(
@@ -412,7 +425,7 @@ validate_references <- function(references, control){
         msg = "`control` should be a factor vector"
     )
 
-    unique_refs <- unique(c(references, names(references)))
+    unique_refs <- unique(c(references, ref_names))
     valid_refs <- unique(as.character(control))
 
     assert_that(

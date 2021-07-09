@@ -493,9 +493,43 @@ test_that("impute_outcome", {
 #     strategies,
 #     conditionalMean
 # ){}
-# validate_references <- function(references, longdata){}
 # validate_strategies <- function(strategies, longdata){}
 # get_visit_distribution_parameters <- function(dat, beta, sigma){}
 
 
 
+
+test_that("validate_references",{
+
+    control <- factor( c("A", "B", "C"), levels = c("A", "B", "C", "D"))
+
+    ref <- c("A" = "B")
+    expect_true(validate_references(ref, control))
+
+    ref <- c("A" = "B", "C" = "A")
+    expect_true(validate_references(ref, control))
+
+    ref <- c("A" = "B", "B" = "B", "C" = "C")
+    expect_true(validate_references(ref, control))
+
+    ref <- c("X" = "A")
+    expect_error(validate_references(ref, control))
+
+    ref <- c("A" = "X")
+    expect_error(validate_references(ref, control))
+
+    ref <- c("A")
+    expect_error(validate_references(ref, control))
+
+    ref <- c(1,2,3)
+    expect_error(validate_references(ref, control))
+
+    ref <- factor("A")
+    expect_error(validate_references(ref, control))
+
+    ref <- c("A" = NA,  "B" = "C")
+    expect_error(validate_references(ref, control))
+
+    ref <- c("A", "B" = "C")
+    expect_error(validate_references(ref, control))
+})
