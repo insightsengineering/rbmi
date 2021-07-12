@@ -29,16 +29,27 @@ get_obs_missingness_patterns <- function(outcome) {
                 M = M))
 }
 
-prepare_data_mcmc <- function(outcome,
-                              groups,
-                              Q,
-                              R,
-                              same_cov,
-                              Sigma_reml) {
+match_groups_sigmas <- function(
+    sigma_reml,
+    group_sigma
+) {
+
+    return(sigma_reml[order(group_sigma)])
+
+}
+
+prepare_data_mcmc <- function(
+    outcome,
+    groups,
+    Q,
+    R,
+    same_cov,
+    sigma_reml,
+    group_sigma) {
 
     assert_that(
-        is.list(Sigma_reml),
-        msg = "Sigma_reml must be a list of covariance matrices"
+        is.list(sigma_reml),
+        msg = "sigma_reml must be a list of covariance matrices"
     )
 
     assert_that(
@@ -46,7 +57,7 @@ prepare_data_mcmc <- function(outcome,
         msg = "groups must be a factor"
     )
 
-    J <- nrow(Sigma_reml[[1]])
+    J <- nrow(sigma_reml[[1]])
 
     outcome <- long2wide(vec_long = outcome,
                          J = J)
@@ -65,10 +76,18 @@ prepare_data_mcmc <- function(outcome,
                      R = R,
                      y = outcome,
                      y_observed = obs_miss_patterns$missingness_patterns,
-                     Sigma_reml = Sigma_reml[[1]])
+                     sigma_reml = sigma_reml[[1]])
     } else {
+
+        assert_that(
+            length(sigma_reml) == nlevels(groups),
+            msg = "The number of covariance matrices must be equal to the number of groups"
+        )
+
         G <- nlevels(groups)
         which_arm <- as.numeric(groups)[seq(1, N*J, by = J)]
+
+        sigma_reml <- match_groups_sigmas(sigma_reml, group_sigma)
 
         data <- list(J = J,
                      N = N,
@@ -79,7 +98,7 @@ prepare_data_mcmc <- function(outcome,
                      R = R,
                      y = outcome,
                      y_observed = obs_miss_patterns$missingness_patterns,
-                     Sigma_reml = Sigma_reml,
+                     sigma_reml = sigma_reml,
                      G = G,
                      which_arm = which_arm)
     }
