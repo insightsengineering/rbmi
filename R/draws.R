@@ -159,4 +159,3 @@ get_bootstrap_mmrm_coefs <- function(longdata, scaler = NULL, ...){
     return(result)
 }
 
-
