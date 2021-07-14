@@ -14,7 +14,7 @@ test_that("locf",{
 
 
 test_that("expand",{
-    df <- dplyr::tibble(
+    input_df <- dplyr::tibble(
         pt = c("a", "a", "b"),
         vis = c("1", "2", "1"),
         outcome = c(1,2,3),
@@ -29,7 +29,7 @@ test_that("expand",{
     )
 
     df_actual <- expand(
-        df,
+        input_df,
         pt = c("a", "b", "c"),
         vis = c("1", "2", "3") ,
         .fill_vars = "covar",
@@ -40,7 +40,7 @@ test_that("expand",{
 
 
 
-    df <- dplyr::tibble(
+    input_df <- dplyr::tibble(
         pt = c("a", "a", "b"),
         vis = c("1", "2", "1"),
         outcome = c(1,NA,3),
@@ -48,7 +48,7 @@ test_that("expand",{
     )
 
     df_actual <- expand(
-        df,
+        input_df,
         .fill_vars = "covar",
         .fill_group = "pt"
     )
@@ -66,7 +66,7 @@ test_that("expand",{
 
 
     df_actual <- expand(
-        df,
+        input_df,
         .fill_vars = "covar",
         .fill_group = "pt"
     )
@@ -82,22 +82,22 @@ test_that("expand",{
 
 
     expect_error(
-        expand( df, .fill_vars = "covar2", .fill_group = "pt" ),
+        expand( input_df, .fill_vars = "covar2", .fill_group = "pt" ),
         regexp = "covar2"
     )
 
     expect_error(
-        expand( df, .fill_vars = "covar", .fill_group = "pt2" ),
+        expand( input_df, .fill_vars = "covar", .fill_group = "pt2" ),
         regexp = "pt2"
     )
 
     expect_error(
-        expand( df, pt2 = c("a", "b", "c")),
+        expand( input_df, pt2 = c("a", "b", "c")),
         regexp = "`pt2`"
     )
 
     expect_error(
-        expand( df, pt = c("b", "c")),
+        expand( input_df, pt = c("b", "c")),
         regexp = "`pt`"
     )
 
