@@ -84,7 +84,7 @@ expand <- function(data, ..., .fill_fun = locf, .fill_vars = NULL, .fill_group =
         }
     }
 
-    class(df2) <- class(df)
+    class(df2) <- class(data)
     return(df2)
 }
 

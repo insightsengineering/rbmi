@@ -14,14 +14,14 @@ test_that("locf",{
 
 
 test_that("expand",{
-    df <- tibble(
+    df <- dplyr::tibble(
         pt = c("a", "a", "b"),
         vis = c("1", "2", "1"),
         outcome = c(1,2,3),
         covar = c("x", "y", "z")
     )
 
-    df_expected <- tibble(
+    df_expected <- dplyr::tibble(
         pt = factor(c("a", "a", "a", "b", "b", "b", "c", "c", "c"), labels = c("a", "b", "c")),
         vis = factor(c("1", "2", "3","1", "2", "3","1", "2", "3"), labels = c("1", "2", "3")),
         outcome = c(1, 2, NA, 3, NA, NA, NA,  NA, NA),
@@ -40,7 +40,7 @@ test_that("expand",{
 
 
 
-    df <- tibble(
+    df <- dplyr::tibble(
         pt = c("a", "a", "b"),
         vis = c("1", "2", "1"),
         outcome = c(1,NA,3),
@@ -53,7 +53,7 @@ test_that("expand",{
         .fill_group = "pt"
     )
 
-    df_expected <- tibble(
+    df_expected <- dplyr::tibble(
         pt = c("a", "a", "b"),
         vis = c("1", "2", "1"),
         outcome = c(1,NA,3),
@@ -71,7 +71,7 @@ test_that("expand",{
         .fill_group = "pt"
     )
 
-    df_expected <- tibble(
+    df_expected <- dplyr::tibble(
         pt = c("a", "a", "b"),
         vis = c("1", "2", "1"),
         outcome = c(1,NA,3),
