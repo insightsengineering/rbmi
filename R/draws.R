@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # draws(
 #     data = data.frame(...),               # Dataset with all required variables
 #     vars = list(
@@ -12,8 +11,6 @@
 #     data_ice = data.frame(),
 #     method = method_obj()                  #  A "method" object
 # )
-=======
->>>>>>> remotes/origin/develop
 
 
 #' TODO
@@ -33,9 +30,6 @@ draws <- function(data, data_ice, vars, method){
 #' @rdname draws
 draws.method_approxbayes <- function(data, data_ice, vars, method){
     x <- draws_bootstrap(data, data_ice, vars, method)
-<<<<<<< HEAD
-    as_class(x, "approxbayes")
-=======
 
     ### Set ids to be the unique patient values in order
     ### for `impute()` to work as expect for this method (retain
@@ -48,10 +42,8 @@ draws.method_approxbayes <- function(data, data_ice, vars, method){
             return(x)
         }
     )
-    as_class(x, "bootstrap")
->>>>>>> remotes/origin/develop
+    as_class(x, "approxbayes")
 }
-
 
 #' @rdname draws
 draws.method_condmean <- function(data, data_ice, vars, method){
@@ -134,17 +126,12 @@ draws_bootstrap <- function(data, data_ice, vars, method){
 #'
 #' @param ... TODO
 #' @param method TODO
-<<<<<<< HEAD
 get_bootstrap_samples <- function(longdata,
                                   method,
                                   scaler,
                                   initial = NULL){
 
     required_samples <- method$n_imputations - 1
-=======
-get_bootstrap_samples <- function(method, ...){
-    required_samples <- method$M - 1 # -1 as the first sample is done in advance on the full dataset
->>>>>>> remotes/origin/develop
     samples <- vector("list", length = required_samples)
     current_sample <- 1
     failed_samples <- 0
@@ -195,7 +182,3 @@ get_bootstrap_samples <- function(method, ...){
     }
     return(samples)
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> remotes/origin/develop
