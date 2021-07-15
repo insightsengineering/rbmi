@@ -43,6 +43,9 @@ longDataConstructor <- R6::R6Class(
 
         #' @field is_missing TODO
         is_missing = list(),
+        
+        #' @field is_post_ice TODO
+        is_post_ice = list(),
 
 
         #' @description
@@ -142,6 +145,7 @@ longDataConstructor <- R6::R6Class(
             self$impgroup[[id]] <- impgroup
             self$values[[id]] <- values
             self$is_mar[[id]] <- rep(TRUE, length(indexes))
+            self$is_post_ice[[id]] <- rep(FALSE, length(indexes))
             self$strategies[[id]] <- "MAR"
             self$strategy_lock[[id]] <- FALSE
             self$indexes[[id]] <- indexes
@@ -239,11 +243,14 @@ longDataConstructor <- R6::R6Class(
                 } else {
                     is_mar <- rep(TRUE, length(self$visits))
                 }
+                
+                is_post_ice <- seq_along(self$visits) >= index
+                self$is_post_ice[[subject]] <- is_post_ice
 
                 self$is_mar[[subject]] <- is_mar
 
                 self$strategy_lock[[subject]] <- any(
-                    !self$is_missing[[subject]][seq_along(self$visits) >= index]
+                    !self$is_missing[[subject]][is_post_ice]
                 )
             }
         },

@@ -26,35 +26,15 @@ impute <- function(draws,  data_ice, references, strategies){
 #' @param references TODO
 #' @param strategies TODO
 #' @export
-impute.bootstrap <- function(draws,  data_ice = NULL, references, strategies = getStrategies()){
-    impute_internal(
+impute.random <- function(draws,  data_ice = NULL, references, strategies = getStrategies()){
+    result <- impute_internal(
         draws = draws,
         data_ice = data_ice,
         references = references,
         strategies = strategies,
         conditionalMean = FALSE
     )
-}
-
-
-
-#' impute.bayesian
-#'
-#' TODO - Description
-#'
-#' @param draws TODO
-#' @param data_ice TODO
-#' @param references TODO
-#' @param strategies TODO
-#' @export
-impute.bayesian <- function(draws,  data_ice = NULL, references, strategies = getStrategies()){
-    impute_internal(
-        draws = draws,
-        data_ice = data_ice,
-        references = references,
-        strategies = strategies,
-        conditionalMean = FALSE
-    )
+    return(as_class(result, "imputation"))
 }
 
 
@@ -68,13 +48,14 @@ impute.bayesian <- function(draws,  data_ice = NULL, references, strategies = ge
 #' @param strategies TODO
 #' @export
 impute.condmean <- function(draws,  data_ice = NULL, references, strategies = getStrategies()){
-    impute_internal(
+    result <- impute_internal(
         draws = draws,
         data_ice = data_ice,
         references = references,
         strategies = strategies,
         conditionalMean = TRUE
     )
+    return(as_class(result, "imputation"))
 }
 
 
@@ -115,7 +96,11 @@ impute_internal <- function(draws, data_ice = NULL, references, strategies, cond
         SIMPLIFY = FALSE
     )
 
-    x <- untranspose_samples(imputes, samples_grouped$index)
+    x <- list(
+        imputations = untranspose_samples(imputes, samples_grouped$index),
+        longdata = longdata,
+        method = draws$method
+    )
     return(x)
 }
 
@@ -144,11 +129,12 @@ transpose_samples <- function(samples){
 
     index <- invert_indexes( lapply(samples, function(x) x$ids))
 
-    list(
+    x <- list(
         beta = beta,
         sigma = sigma,
         index = index
     )
+    return(x)
 }
 
 
@@ -406,11 +392,11 @@ get_conditional_parameters <- function(pars, values){
 
     sig22_inv_12 <-  sig12 %*% solve(sig22)
 
-    list(
+    x <- list(
         mu = mu1 + sig22_inv_12 %*% (a - mu2),
         sigma = sig11 - sig22_inv_12 %*% sig21
     )
-
+    return(x)
 }
 
 

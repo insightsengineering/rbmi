@@ -37,6 +37,8 @@ TODO Description
 \item{\code{indexes}}{TODO}
 
 \item{\code{is_missing}}{TODO}
+
+\item{\code{is_post_ice}}{TODO}
 }
 \if{html}{\out{</div>}}
 }

@@ -7,95 +7,40 @@ suppressPackageStartupMessages({
 
 
 
-dat <- structure(
-    list(
 
-        subjid = c(
-            "Tom", "Tom", "Tom",
-            "Harry", "Harry", "Harry",
-            "Phil", "Phil", "Phil",
-            "Ben", "Ben", "Ben"
-        ),
 
-        age = c(
-             0.04, 0.04, 0.04,
-            -0.14, -0.14, -0.14,
-            -0.03, -0.03, -0.03,
-            -0.33, -0.33, -0.33
-        ),
 
-        group = structure(
-            c(2L, 2L, 2L,
-              2L, 2L, 2L,
-              1L, 1L, 1L,
-              1L, 1L, 1L),
-            .Label = c("A", "B"),
-            class = "factor"
-        ),
+test_that("Basic Usage",{
 
-        sex = structure(
-            c(2L, 2L, 2L,
-              1L, 1L, 1L,
-              1L, 1L, 1L,
-              2L, 2L, 2L),
-            .Label = c("M", "F"),
-            class = "factor"
-        ),
-
-        strata = c(
-            "A", "A", "A",
-            "A", "A", "A",
-            "A", "A", "A",
-            "B", "B", "B"
-        ),
-
+    dat <- tibble(
+        subjid = rep(c("Tom", "Harry", "Phil", "Ben"), each = 3),
+        age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
+        group = factor(rep(c("B", "B", "A", "A"), each = 3), levels = c("A", "B")),
+        sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),
+        strata = rep(c("A", "A", "A", "B"), each = 3),
+        visit = factor(rep(c("Visit 1", "Visit 2", "Visit 3"), 4)),
         outcome = c(
             NA, NA, NA,
             NA, 4.14, NA,
             NA, -1.34, 2.41,
             -1.53, 1.03, 2.58
-        ),
+        )
+    )
 
-        visit = structure(
-            c(
-                1L, 2L, 3L,
-                1L, 2L, 3L,
-                1L, 2L, 3L,
-                1L, 2L, 3L
-            ),
-            .Label = c("Visit 1", "Visit 2", "Visit 3"),
-            class = "factor")
-    ),
-    row.names = c(NA,  -12L),
-    class = c("tbl_df", "tbl", "data.frame")
-)
+    vars <- list(
+        outcome = "outcome",
+        visit = "visit",
+        subjid = "subjid",
+        group = "group",
+        strata = "strata",
+        covariates = c("sex", "age"),
+        method = "method"
+    )
 
-
-vars <- list(
-    outcome = "outcome",
-    visit = "visit",
-    subjid = "subjid",
-    group = "group",
-    strata = "strata",
-    covariates = c("sex", "age"),
-    method = "method"
-)
-
-ld <- longDataConstructor$new(
-    data = dat,
-    vars = vars
-)
-
-
-
-
-
-
-
-
-
-
-test_that("Basic Usage",{
+    ld <- longDataConstructor$new(
+        data = dat,
+        vars = vars
+    )
 
     beta <- c( -2.80, 4.93, 2.01, 4.66, 1.27, 3.14)
 
@@ -121,24 +66,19 @@ test_that("Basic Usage",{
     )
 
     set.seed(101)
-    class(drawsObj) <- "bootstrap"
+    class(drawsObj) <- "random"
     x1 <- impute( draws = drawsObj, references = c("A" = "A", "B" = "B") )
-
-    class(drawsObj) <- "bayesian"
     x2 <- impute( draws = drawsObj, references = c("A" = "A", "B" = "B") )
 
     class(drawsObj) <- "condmean"
-    x3 <- impute( draws = drawsObj, references = c("A" = "A", "B" = "B") )
-
-    class(drawsObj) <- "condmean"
+    x3 <- impute(draws = drawsObj, references = c("A" = "A", "B" = "B"))
     x4 <- impute( draws = drawsObj, references = c("A" = "A", "B" = "B") )
 
-
     expect_valid_structure <- function(x){
-        for( i in x){
+        for( i in x$imputations){
             for(j in i){
                 cond1 <- all( names(j) %in% c("id", "values"))
-                cond2 <- (is.character(j[["id"]]) & length(j[["id"]]) == 1)
+                cond2 <- is.character(j[["id"]]) & length(j[["id"]]) == 1
                 cond3 <- is.numeric( j[["values"]])
                 expect_true(cond1 & cond2 & cond3)
             }
@@ -149,6 +89,7 @@ test_that("Basic Usage",{
     expect_valid_structure(x1)
     expect_valid_structure(x2)
     expect_valid_structure(x3)
+    expect_valid_structure(x4)
 
     ### That conditional mean always returns the same deterministic value
     expect_equal(x3, x4)
@@ -159,8 +100,8 @@ test_that("Basic Usage",{
 
 
     ### That the sample names match those requested
-    samp_1_names <- vapply( x1[[1]], function(x) x$id, character(1))
-    samp_2_names <- vapply( x1[[2]], function(x) x$id, character(1))
+    samp_1_names <- vapply( x1$imputations[[1]], function(x) x$id, character(1))
+    samp_2_names <- vapply( x1$imputations[[2]], function(x) x$id, character(1))
     real_1_names <- c("Tom", "Harry", "Phil", "Ben")
     real_2_names <- c("Ben", "Ben", "Phil")
 
@@ -176,22 +117,22 @@ test_that("Basic Usage",{
 
     ### That specific names have the correct number of missing values
     expect_length(
-        Filter( function(x) x$id == "Tom", x1[[1]])[[1]]$values,
+        Filter( function(x) x$id == "Tom", x1$imputations[[1]])[[1]]$values,
         3
     )
 
     expect_length(
-        Filter( function(x) x$id == "Harry", x1[[1]])[[1]]$values,
+        Filter( function(x) x$id == "Harry", x1$imputations[[1]])[[1]]$values,
         2
     )
 
     expect_length(
-        Filter( function(x) x$id == "Phil", x1[[1]])[[1]]$values,
+        Filter( function(x) x$id == "Phil", x1$imputations[[1]])[[1]]$values,
         1
     )
 
     expect_length(
-        Filter( function(x) x$id == "Ben", x1[[1]])[[1]]$values,
+        Filter( function(x) x$id == "Ben", x1$imputations[[1]])[[1]]$values,
         0
     )
 })
@@ -499,6 +440,36 @@ test_that("get_visit_distribution_parameters",{
 
 
 test_that("validate_strategies",{
+    
+    dat <- tibble(
+        subjid = rep(c("Tom", "Harry", "Phil", "Ben"), each = 3),
+        age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
+        group = factor(rep(c("B", "B", "A", "A"), each = 3), levels = c("A", "B")),
+        sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),
+        strata = rep(c("A", "A", "A", "B"), each = 3),
+        visit = factor(rep(c("Visit 1", "Visit 2", "Visit 3"), 4)),
+        outcome = c(
+            NA, NA, NA,
+            NA, 4.14, NA,
+            NA, -1.34, 2.41,
+            -1.53, 1.03, 2.58
+        )
+    )
+
+    vars <- list(
+        outcome = "outcome",
+        visit = "visit",
+        subjid = "subjid",
+        group = "group",
+        strata = "strata",
+        covariates = c("sex", "age"),
+        method = "method"
+    )
+
+    ld <- longDataConstructor$new(
+        data = dat,
+        vars = vars
+    )
 
     strats <- list("MAR" = function(x) x)
     expect_true(validate_strategies( strats, ld$strategies))
