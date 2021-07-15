@@ -1,3 +1,15 @@
+remove_blank_spaces <- function(strings) {
+
+    searchString <- ' '
+    replacementString <- ''
+    strings_nospaces <- gsub(
+        searchString,
+        replacementString,
+        strings
+    )
+    return(strings_nospaces)
+}
+
 designmat_to_formula <- function(
     designmat,
     outcome_var
@@ -119,6 +131,14 @@ fit_mmrm <- function(
 
     designmat <- as.data.frame(designmat)
 
+    # remove blank spaces (otherwise formula cannot be built properly)
+    colnames(designmat) <- remove_blank_spaces(colnames(designmat))
+    vars <- lapply(
+        vars,
+        remove_blank_spaces
+    )
+    levels(group) <- remove_blank_spaces(levels(group))
+
     # create dummy variables for each arm (needed when same_cov = FALSE)
     groups_mat <- stats::model.matrix(~ 0 + group)
     colnames(groups_mat) <- levels(group)
@@ -178,8 +198,8 @@ fit_mmrm <- function(
         "beta" = params$beta,
         "sigma" = params$sigma,
         "theta" = params$theta,
-        "converged" = converged,
-        "structure" = cov_struct
+        "structure" = cov_struct,
+        "converged" = converged
     )
 
     return(return_obj)

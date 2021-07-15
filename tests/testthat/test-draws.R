@@ -1,7 +1,7 @@
 library(dplyr)
 library(testthat)
 
-n <- 4
+n <- 20
 nv <- 3
 
 covars <- tibble(
@@ -9,7 +9,7 @@ covars <- tibble(
     age = rnorm(n),
     group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),
     sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F")),
-    strata = c("A","A", "A", "B")
+    strata = c(rep("A",n/2), rep("B", n/2))
 )
 
 dat <- tibble(
@@ -27,7 +27,7 @@ dat <- tibble(
     ungroup() %>%
     mutate(subjid = as.character(subjid))
 
-dat[c(1,2,3,4,6,7), "outcome"] <- NA
+#dat[c(1,2,3,4,6,7), "outcome"] <- NA
 
 
 vars <- list(
@@ -43,12 +43,17 @@ vars <- list(
 data_ice <- NULL
 
 method <- list(
-    covariance = c("un"),
+    covariance = c("us"),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
-    n_imputations = 2
+    n_imputations = 3
 )
+
+
+test_that(
+    "draws using bootstrap has expected output",
+    {
 
 draws_params <- draws_bootstrap(
     data = dat,
@@ -56,6 +61,8 @@ draws_params <- draws_bootstrap(
     vars = vars,
     method = method
 )
+ expect_length(draws_params, 3)
+})
 
 
 

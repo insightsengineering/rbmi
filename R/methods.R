@@ -29,7 +29,7 @@ method_bayes <- function(
 #' @rdname method
 #' @export
 method_approxbayes <- function(
-    covariance = c("un", "toep", "cs", "ar1"),
+    covariance = c("us", "toep", "cs", "ar1"),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
@@ -49,7 +49,7 @@ method_approxbayes <- function(
 #' @rdname method
 #' @export
 method_condmean <- function(
-    covariance = c("un", "toep", "cs", "ar1"),
+    covariance = c("us", "toep", "cs", "ar1"),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
