@@ -52,7 +52,7 @@ formula_mmrm <- function(
     # fixed effects formula
     formula_fixeff <- designmat_to_formula(
         designmat = designmat,
-        outcome_var = vars$response
+        outcome_var = vars$outcome
     )
 
     # random effects for covariance structure
@@ -92,7 +92,7 @@ extract_params <- function(fit) {
 
 check_mmrm <- function(fit) {
 
-    return(ifelse(fit$fit$convergence == 0, "TRUE", "FALSE"))
+    return(ifelse(fit$fit$convergence == 0, TRUE, FALSE))
 
 }
 
@@ -146,7 +146,7 @@ fit_mmrm <- function(
         colnames(groups_mat),
         vars$subjid,
         vars$visit,
-        vars$response
+        vars$outcome
     )
 
     # set optimizer
@@ -157,14 +157,16 @@ fit_mmrm <- function(
     )
 
     # fit mmrm
-    fit <- glmmTMB(
-        formula,
-        data = designmat_extended,
-        dispformula = ~0,
-        REML = REML,
-        start = initial_values,
-        control = control
-    )
+    suppressWarnings({
+        fit <- glmmTMB(
+            formula,
+            data = designmat_extended,
+            dispformula = ~0,
+            REML = REML,
+            start = initial_values,
+            control = control
+        )
+    })
 
     # extract regression coefficients and covariance matrices
     params <- extract_params(fit)
@@ -221,8 +223,8 @@ fit_mmrm_multiopt <- function(
         iter <- iter + 1
     }
 
-    if(iter > length(optimizer)) {
-        fit$optimizer <- NULL
+    if(!converged) {
+        fit$optimizer <- "None"
     }
 
     return(fit)
