@@ -28,9 +28,9 @@ draws <- function(data, data_ice, vars, method){
 
 
 #' @rdname draws
-draws.method_bootstrap <- function(data, data_ice, vars, method){
+draws.method_approxbayes <- function(data, data_ice, vars, method){
     x <- draws_bootstrap(data, data_ice, vars, method)
-    as_class(x, "bootstrap")
+    as_class(x, "approxbayes")
 }
 
 
@@ -51,29 +51,39 @@ draws_bootstrap <- function(data, data_ice, vars, method){
 
     model_df_scaled <- scaler$scale(model_df)
 
-    mmrm_initial <- fit_mmrm(
-        data = model_df_scaled[,-1],
+    mmrm_initial <- fit_mmrm_multiopt(
+        designmat = model_df_scaled[,-1],
         outcome = model_df_scaled[,1],
-        ids = data[[vars$subjid]],
-        visits = data[[vars$visits]],
-        groups = data[[vars$groups]],
-        method = method
+        subjid = data[[vars$subjid]],
+        visit = data[[vars$visit]],
+        group = data[[vars$group]],
+        vars = vars,
+        cov_struct = method$cov_struct,
+        REML = method$REML,
+        same_cov = method$same_cov,
+        initial_values = NULL,
+        optimizer =  c("L-BFGS-B", "BFGS", "Nelder-Mead")
     )
 
-    inital_sample <- list(
+    initial_sample <- list(
         beta = scaler$unscale_beta(mmrm_initial$beta),
         sigma = scaler$unscale_sigma(mmrm_initial$sigma),
         structure = mmrm_initial$structure,
-        ids = longdata$ids
+        subjid = longdata$ids
+    )
+
+    init_opt <- list(
+        beta = mmrm_initial$beta,
+        theta = mmrm_initial$theta
     )
 
     samples <- append(
-        inital_sample,
+        initial_sample,
         get_bootstrap_samples(
             longdata = longdata,
             method = method,
             scaler = scaler,
-            initial = inital_sample
+            initial = init_opt
         )
     )
 
@@ -82,13 +92,17 @@ draws_bootstrap <- function(data, data_ice, vars, method){
         function(x) x[["structure"]]
     )
 
-    ## TODO - Code to summarise structures
+    optimizers <- lapply(
+        samples,
+        function(x) x[["optimizer"]]
+    )
 
     result <- list(
         method = method,
         data = longdata,
         samples = samples,
-        structures = structures
+        structures = structures,
+        optimizers = optimizers
     )
 
     return(result)
@@ -99,65 +113,96 @@ draws_bootstrap <- function(data, data_ice, vars, method){
 #'
 #' @param ... TODO
 #' @param method TODO
-get_bootstrap_samples <- function(method, ...){
-    required_samples <- method$M - 1
+get_bootstrap_samples <- function(longdata,
+                                  method,
+                                  scaler,
+                                  initial = NULL){
+
+    required_samples <- method$n_imputations - 1
     samples <- vector("list", length = required_samples)
     current_sample <- 1
     failed_samples <- 0
     failure_limit <- ceiling(method$threshold * required_samples)
 
     while(current_sample <= required_samples & failed_samples <= failure_limit){
-        sample <- get_bootstrap_mmrm_coefs(
-            method = method,
-            ...
+
+        # create bootstrapped sample
+        vars <- longdata$vars
+        ids_boot <- longdata$sample_ids()
+        dat_boot <- longdata$get_data(ids_boot)
+
+        model_df <- as_model_df(dat_boot, as_simple_formula(vars))
+        model_df_scaled <- scaler$scale(model_df)
+
+        # fit mmrm
+        mmrm_fit <- fit_mmrm_multiopt(
+            designmat = model_df_scaled[,-1],
+            outcome = model_df_scaled[,1],
+            subjid = data[[vars$subjid]],
+            visit = data[[vars$visit]],
+            group = data[[vars$group]],
+            vars = vars,
+            cov_struct = method$covariance,
+            REML = method$REML,
+            same_cov = method$same_cov,
+            initial_values = initial,
+            optimizer = c("BFGS", "L-BFGS-B", "Nelder-Mead")
         )
 
-        if(sample$converged){
+        if(mmrm_fit$converged){
+            sample <- list(
+                beta = scaler$unscale_beta(mmrm_fit$beta),
+                sigma = scaler$unscale_sigma(mmrm_fit$sigma),
+                structure = mmrm_fit$structure,
+                optimizer = mmrm_fit$optimizer,
+                subjid = ids_boot
+            )
+
             samples[[current_sample]] <- sample
             current_sample <- current_sample + 1
-        }
 
-        if( !sample$converged | sample$structure != method$structure[[1]]){
+        } else {
             failed_samples <- failed_samples + 1
         }
+
     }
     return(samples)
 }
 
 
-#' Title
-#'
-#' @param longdata TODO
-#' @param scaler TODO
-#' @param ... TODO
-get_bootstrap_mmrm_coefs <- function(longdata, scaler = NULL, ...){
-    vars <- longdata$vars
-    ids_boot <- longdata$sample_ids()
-    dat_boot <- longdata$get_data(ids_boot)
-
-    model_df <- as_model_df(dat_boot, as_simple_formula(vars))
-
-    if(!is.null(scaler)){
-        model_df <- scaler$scale(model_df)
-    }
-
-    mmrm <- fit_mmrm(
-        data = model_df[,-1],
-        outcome = model_df[,1],
-        ids = dat_boot[[vars$subjid]],
-        visits = dat_boot[[vars$visits]],
-        groups = dat_boot[[vars$groups]],
-        ...
-    )
-
-    result <- list(
-        beta = scaler$unscale_beta(mmrm$beta),
-        sigma = scaler$unscale_sigma(mmrm$sigma),
-        converged = mmrm$converged,
-        structure = mmrm$structure,
-        ids = ids_boot
-    )
-    return(result)
-}
+# #' Title
+# #'
+# #' @param longdata TODO
+# #' @param scaler TODO
+# #' @param ... TODO
+# get_bootstrap_mmrm_coefs <- function(longdata, scaler = NULL, ...){
+#     vars <- longdata$vars
+#     ids_boot <- longdata$sample_ids()
+#     dat_boot <- longdata$get_data(ids_boot)
+#
+#     model_df <- as_model_df(dat_boot, as_simple_formula(vars))
+#
+#     if(!is.null(scaler)){
+#         model_df <- scaler$scale(model_df)
+#     }
+#
+#     mmrm <- fit_mmrm(
+#         data = model_df[,-1],
+#         outcome = model_df[,1],
+#         subjid = dat_boot[[vars$subjid]],
+#         visit = dat_boot[[vars$visit]],
+#         group = dat_boot[[vars$group]],
+#         ...
+#     )
+#
+#     result <- list(
+#         beta = scaler$unscale_beta(mmrm$beta),
+#         sigma = scaler$unscale_sigma(mmrm$sigma),
+#         converged = mmrm$converged,
+#         structure = mmrm$structure,
+#         subjid = ids_boot
+#     )
+#     return(result)
+# }
 
 

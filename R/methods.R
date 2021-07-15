@@ -10,7 +10,7 @@
 #' @param REML TODO
 #' @return TODO
 #' @export
-method_bayesian <- function(
+method_bayes <- function(
     burn_in = 200,
     burn_between = 50,
     same_cov = TRUE,
@@ -22,14 +22,14 @@ method_bayesian <- function(
         same_cov = same_cov,
         n_imputations = n_imputations
     )
-    return( as_class(x, "method_mcmc"))
+    return( as_class(x, "method_bayes"))
 }
 
 
 #' @rdname method
 #' @export
-method_bootstrap <- function(
-    covariance = c("un", "ar1"),
+method_approxbayes <- function(
+    covariance = c("un", "toep", "cs", "ar1"),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
@@ -42,14 +42,14 @@ method_bootstrap <- function(
         REML = REML,
         n_imputations = n_imputations
     )
-    return( as_class(x, "method_bootstrap"))
+    return( as_class(x, "method_approxbayes"))
 }
 
 
 #' @rdname method
 #' @export
-method_conditionalmean <- function(
-    covariance = c("un", "ar1"),
+method_condmean <- function(
+    covariance = c("un", "toep", "cs", "ar1"),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
@@ -62,7 +62,7 @@ method_conditionalmean <- function(
         REML = REML,
         n_imputations = n_imputations
     )
-    return( as_class(x, "method_bayesian"))
+    return( as_class(x, "method_condmean"))
 }
 
 
