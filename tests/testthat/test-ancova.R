@@ -1,11 +1,13 @@
 
 
+suppressPackageStartupMessages(library(dplyr))
 
 
 
-f2n <- function(x) as.numeric(x) - 1
 
 test_that( "ancova", {
+    
+    f2n <- function(x) as.numeric(x) - 1
     
     ##################
     #
@@ -141,5 +143,3 @@ test_that( "ancova", {
     
     expect_equal( result_expected, result_actual)
 })
-
-

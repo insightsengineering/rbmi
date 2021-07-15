@@ -17,7 +17,7 @@ delta_template <- function(imputations) {
             strat[!ld$is_missing[[id]]] <- NA_character_
             df <- list()
             df[[ld$vars$subjid]] <- id
-            df[[ld$vars$visit]] <- ld$visits
+            df[[ld$vars$visit]] <- factor(ld$visits, labels = ld$visits)
             df[[ld$vars$group]] <- ld$impgroup[[id]]
             df[["is_mar"]] <- ld$is_mar[[id]]
             df[["is_missing"]] <- ld$is_missing[[id]]
@@ -36,16 +36,30 @@ delta_template <- function(imputations) {
 #' @description
 #' TODO
 #'
-#' @param visit_delta TODO
-#' @param lag_scale TODO
+#' @param delta TODO
+#' @param dlag TODO
 #' @param is_post_ice TODO
-d_lagscale <- function(visit_delta, lag_scale, is_post_ice) {
-    result <- rep(0, length(lag_scale))
+d_lagscale <- function(delta, dlag, is_post_ice) {
+    
+    assert_that(
+        is.numeric(dlag),
+        is.numeric(delta),
+        is.logical(is_post_ice),
+        msg = "`dlag` and `delta` must be numeric, `is_post_ice` must be logical"
+    )
+    
+    assert_that(
+        length(delta) == length(dlag),
+        length(delta) == length(is_post_ice),
+        msg = "`delta`, `dlag` and `is_post_ice` must all be the same length"
+    )
+    
+    result <- rep(0, length(dlag))
     if (all(!is_post_ice)) {
         return(result)
     }
-    is_post_ice_scale <- visit_delta[is_post_ice]
-    is_post_ice_lag <- lag_scale[seq_len(length(is_post_ice_scale))]
+    is_post_ice_scale <- delta[is_post_ice]
+    is_post_ice_lag <- dlag[seq_len(length(is_post_ice_scale))]
     vals <- cumsum(is_post_ice_lag * is_post_ice_scale)
     result[is_post_ice] <- vals
     return(result)
@@ -64,22 +78,22 @@ d_lagscale <- function(visit_delta, lag_scale, is_post_ice) {
 #' non-missing post-ice data will have a delta of 0 assigned. See details for more information (TODO).
 #' 
 #' @export 
-delta_lag_scale <- function(
+delta_lagscale <- function(
     imputations, 
-    visit_delta, 
-    lag_scale =  c(1, rep(0, length(visit_delta) - 1)), 
+    delta, 
+    dlag =  c(1, rep(0, length(delta) - 1)), 
     missing_only = TRUE
 ){
     dat <- delta_template(imputations)
     ld <- imputations$longdata
     
     assert_that(
-        is.numeric(visit_delta),
-        is.numeric(lag_scale),
-        length(visit_delta) == length(lag_scale),
-        length(visit_delta) == length(ld$visits),
+        is.numeric(delta),
+        is.numeric(dlag),
+        length(delta) == length(dlag),
+        length(delta) == length(ld$visits),
         msg = sprintf(
-            "`visit_delta` and `visit_delta` must both be a length %s numeric vector",
+            "`delta` and `dlag` must both be a length %s numeric vector",
             length(ld$visits)
         )
     )
@@ -94,8 +108,8 @@ delta_lag_scale <- function(
         ld$ids,
         function(id) {
             d_lagscale(
-                visit_delta = visit_delta,
-                lag_scale = lag_scale,
+                delta = delta,
+                dlag = dlag,
                 is_post_ice = ld$is_post_ice[[id]]
             )
         }

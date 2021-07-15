@@ -4,12 +4,12 @@
 \alias{d_lagscale}
 \title{Title}
 \usage{
-d_lagscale(visit_delta, lag_scale, is_post_ice)
+d_lagscale(delta, dlag, is_post_ice)
 }
 \arguments{
-\item{visit_delta}{TODO}
+\item{delta}{TODO}
 
-\item{lag_scale}{TODO}
+\item{dlag}{TODO}
 
 \item{is_post_ice}{TODO}
 }
