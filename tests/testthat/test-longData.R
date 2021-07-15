@@ -1,5 +1,8 @@
-library(dplyr)
-library(testthat)
+
+suppressPackageStartupMessages({
+    library(dplyr)
+    library(testthat)
+})
 
 n <- 4
 nv <- 3
@@ -52,7 +55,6 @@ test_that("longData - Basics",{
     subject_names <- unique(dat$subjid)
     expect_equal( names(ld$is_mar), subject_names)
     expect_equal( names(ld$is_missing), subject_names)
-    expect_equal( names(ld$subjects), subject_names)
     expect_equal( ld$ids, subject_names)
 
     expect_equal( ld$visits,  levels(dat$visit))
@@ -168,15 +170,6 @@ test_that("Strategies",{
         c(FALSE, TRUE, TRUE, FALSE)
     )
 
-    expect_equal(
-        ld$strategies,
-        lapply( ld$subjects, function(x) x$strategy)
-    )
-
-    expect_equal(
-        ld$is_mar,
-        lapply( ld$subjects, function(x) x$is_mar)
-    )
 
     expect_equal(
         unlist(ld$is_mar, use.names = FALSE),
@@ -200,11 +193,6 @@ test_that("Strategies",{
     expect_equal(
         unlist(ld$strategies, use.names = FALSE),
         c("ABC", "MAR", "ABC", "MAR")
-    )
-
-    expect_equal(
-        ld$strategies,
-        lapply( ld$subjects, function(x) x$strategy)
     )
 
     dat_ice <- tribble(

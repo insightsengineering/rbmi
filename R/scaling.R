@@ -20,9 +20,10 @@ scalerConstructor <- R6::R6Class(
         #' @return TODO
         initialize = function(dat){
 
-            stopifnot(
+            assert_that(
                 is.data.frame(dat) | is.matrix(dat),
-                all( vapply(dat, is.numeric, logical(1)))
+                all( vapply(dat, is.numeric, logical(1))),
+                msg = "Input must be a numeric dataframe or matrix"
             )
 
             cat_flag <- vapply(
@@ -58,10 +59,16 @@ scalerConstructor <- R6::R6Class(
         #' @param dat TODO
         #' @return TODO
         scale = function(dat){
-            stopifnot(
-                ncol(dat) == length(self$center),
+
+            assert_that(
                 is.data.frame(dat) | is.matrix(dat),
-                all( vapply(dat, is.numeric, logical(1)))
+                all( vapply(dat, is.numeric, logical(1))),
+                msg = "Input must be a numeric dataframe or matrix"
+            )
+
+            assert_that(
+                ncol(dat) == length(self$center),
+                msg = sprintf("Input must have %s columns", length(self$center))
             )
 
             dat <- sweep(
@@ -87,7 +94,10 @@ scalerConstructor <- R6::R6Class(
         #' @param sigma TODO
         #' @return TODO
         unscale_sigma = function(sigma){
-            stopifnot(is.matrix(sigma))
+            assert_that(
+                is.matrix(sigma),
+                msg = "Input must be a matrix"
+            )
             return( sigma / self$scales[[1]]^2)
         },
 
@@ -97,9 +107,13 @@ scalerConstructor <- R6::R6Class(
         #' @param beta TODO
         #' @return TODO
         unscale_beta = function(beta){
-            stopifnot(
+
+            len <- length(self$center) - 1
+
+            assert_that(
                 is.numeric(beta),
-                length(beta) == (length(self$center) - 1)
+                length(beta) == len,
+                msg = sprintf("`beta` must be a numeric vector of length %s", len)
             )
 
             b_0 <- beta[1]
@@ -121,37 +135,6 @@ scalerConstructor <- R6::R6Class(
 )
 
 
-#' Title
-#'
-#' @param vars TODO
-as_simple_formula <- function(vars){
-    variables <- c(
-        vars$group,
-        vars$visit,
-        vars$covariates
-    )
-    frm <- stats::as.formula(
-        paste0(
-            vars$outcome,
-            "~ 1 + ",
-            paste0( variables, collapse = " + " )
-        )
-    )
-    return(frm)
-}
-
-#' Title
-#'
-#' @param dat TODO
-#' @param frm TODO
-as_model_df <- function(dat, frm){
-    design_mat <- stats::model.matrix(frm, dat)
-    stopifnot( nrow(design_mat) == nrow(dat) )
-    outcome <- as.character(attr(stats::terms(frm), "variables")[[2]])
-    full_mat <- cbind(dat[[outcome]] , design_mat)
-    design <- as.data.frame(full_mat)
-    return(design)
-}
 
 
 

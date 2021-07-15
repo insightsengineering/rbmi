@@ -24,17 +24,21 @@ TODO Description
 
 \item{\code{strata}}{TODO}
 
+\item{\code{values}}{TOTO}
+
+\item{\code{impgroup}}{TOTO}
+
 \item{\code{is_mar}}{TODO}
 
 \item{\code{strategies}}{TODO}
 
 \item{\code{strategy_lock}}{TODO}
 
-\item{\code{subjects}}{TODO}
-
 \item{\code{indexes}}{TODO}
 
 \item{\code{is_missing}}{TODO}
+
+\item{\code{is_post_ice}}{TODO}
 }
 \if{html}{\out{</div>}}
 }
@@ -45,6 +49,7 @@ TODO Description
 \item \href{#method-add_subject}{\code{longDataConstructor$add_subject()}}
 \item \href{#method-validate_ids}{\code{longDataConstructor$validate_ids()}}
 \item \href{#method-sample_ids}{\code{longDataConstructor$sample_ids()}}
+\item \href{#method-extract_by_id}{\code{longDataConstructor$extract_by_id()}}
 \item \href{#method-update_strategies}{\code{longDataConstructor$update_strategies()}}
 \item \href{#method-set_strategies}{\code{longDataConstructor$set_strategies()}}
 \item \href{#method-set_strata}{\code{longDataConstructor$set_strata()}}
@@ -126,6 +131,26 @@ TODO
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$sample_ids()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+TODO
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-extract_by_id"></a>}}
+\if{latex}{\out{\hypertarget{method-extract_by_id}{}}}
+\subsection{Method \code{extract_by_id()}}{
+TODO
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$extract_by_id(id)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{id}}{TODO}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 TODO
 }

@@ -23,6 +23,12 @@ longDataConstructor <- R6::R6Class(
         #' @field strata TODO
         strata = NULL,
 
+        #' @field values TOTO
+        values = list(),
+
+        #' @field impgroup TOTO
+        impgroup = list(),
+
         #' @field is_mar TODO
         is_mar = list(),
 
@@ -32,14 +38,14 @@ longDataConstructor <- R6::R6Class(
         #' @field strategy_lock TODO
         strategy_lock = list(),
 
-        #' @field subjects TODO
-        subjects = list(),
-
         #' @field indexes TODO
         indexes = list(),
 
         #' @field is_missing TODO
         is_missing = list(),
+        
+        #' @field is_post_ice TODO
+        is_post_ice = list(),
 
 
         #' @description
@@ -110,28 +116,36 @@ longDataConstructor <- R6::R6Class(
             ids <- self$data[[self$vars$subjid]]
             indexes <- which(ids == id)
             data_subject <- self$data[indexes,]
-            is_missing <- is.na(data_subject[[self$vars$outcome]])
+            values <- data_subject[[self$vars$outcome]]
+            is_missing <- is.na(values)
             group <- unique(data_subject[[self$vars$group]])
-            existing_id <- id %in% names(self$subjects)
+            existing_id <- id %in% names(self$ids)
+            impgroup <- unique(data_subject[[self$vars$group]])
 
-            stopifnot(
+            assert_that(
                 length(indexes) >= 1,
+                msg = sprintf("Subject %s is not found in the dataset", id)
+            )
+
+            assert_that(
                 length(group) == 1,
+                msg = sprintf("Subject %s doesn't have a `group`", id)
+            )
+
+            assert_that(
                 length(is_missing) == length(indexes),
-                !existing_id
+                msg = sprintf("Subject %s has a mismatch between number of expected values", id)
             )
 
-            self$subjects[[id]] <- list(
-                subjid = id,
-                indexes = indexes,
-                is_missing = is_missing,
-                is_mar = rep(TRUE, length(indexes)),
-                strategy = "MAR",
-                group = group,
-                longData = self
+            assert_that(
+                !existing_id,
+                msg = sprintf("Subject %s already exists...", id)
             )
 
+            self$impgroup[[id]] <- impgroup
+            self$values[[id]] <- values
             self$is_mar[[id]] <- rep(TRUE, length(indexes))
+            self$is_post_ice[[id]] <- rep(FALSE, length(indexes))
             self$strategies[[id]] <- "MAR"
             self$strategy_lock[[id]] <- FALSE
             self$indexes[[id]] <- indexes
@@ -144,7 +158,7 @@ longDataConstructor <- R6::R6Class(
         #' @param ids TODO
         #' @return TODO
         validate_ids = function(ids){
-            is_in <- ids %in% names(self$subjects)
+            is_in <- ids %in% self$ids
             if(! all(is_in)){
                 stop("subjids are not in self")
             }
@@ -159,6 +173,22 @@ longDataConstructor <- R6::R6Class(
             sample_ids(self$ids, self$strata)
         },
 
+
+        #' @description
+        #' TODO
+        #' @param id TODO
+        #' @return TODO
+        extract_by_id = function(id){
+            list(
+                is_mar = self$is_mar[[id]],
+                is_missing = self$is_missing[[id]],
+                strategy = self$strategies[[id]],
+                group = self$impgroup[[id]],
+                data = self$get_data(id),
+                outcome = self$values[[id]],
+                strategy_lock = self$strategy_lock[[id]]
+            )
+        },
 
         #' @description
         #' TODO
@@ -181,7 +211,11 @@ longDataConstructor <- R6::R6Class(
             for( subject in dat_ice[[self$vars$subjid]]){
 
                 dat_ice_pt <- dat_ice[dat_ice[[self$vars$subjid]] == subject,]
-                stopifnot(nrow(dat_ice_pt) == 1)
+
+                assert_that(
+                    nrow(dat_ice_pt) == 1,
+                    msg = sprintf("Subject %s has more than 1 row in the ice dataset", subject)
+                )
 
                 new_strategy <- dat_ice_pt[[self$vars$method]]
                 visit <- dat_ice_pt[[self$vars$visit]]
@@ -199,7 +233,6 @@ longDataConstructor <- R6::R6Class(
                 }
 
                 self$strategies[[subject]] <- new_strategy
-                self$subjects[[subject]]$strategy <- new_strategy
 
                 if(update) next()
 
@@ -210,12 +243,14 @@ longDataConstructor <- R6::R6Class(
                 } else {
                     is_mar <- rep(TRUE, length(self$visits))
                 }
+                
+                is_post_ice <- seq_along(self$visits) >= index
+                self$is_post_ice[[subject]] <- is_post_ice
 
                 self$is_mar[[subject]] <- is_mar
-                self$subjects[[subject]]$is_mar <- is_mar
 
                 self$strategy_lock[[subject]] <- any(
-                    !self$is_missing[[subject]][seq_along(self$visits) >= index]
+                    !self$is_missing[[subject]][is_post_ice]
                 )
             }
         },
@@ -245,7 +280,7 @@ longDataConstructor <- R6::R6Class(
         process_data = function(){
             subjects = unique(self$data[[self$vars$subjid]])
             for( id in subjects) self$add_subject(id)
-            self$ids = names(self$subjects)
+            self$ids = subjects
             self$visits = levels(self$data[[self$vars$visit]])
             self$set_strata()
         },
