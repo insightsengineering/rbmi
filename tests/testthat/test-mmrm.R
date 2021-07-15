@@ -16,7 +16,7 @@ vars <- list(
     "subjid" = "subjid",
     "visit" = "visit",
     "group" = "group",
-    "response" = "response"
+    "outcome" = "response"
 )
 
 formula <- response ~ pred + visit*group
@@ -29,7 +29,7 @@ test_that(
     {
         formula_output <- designmat_to_formula(
             designmat = designmat,
-            outcome_var = vars$response
+            outcome_var = vars$outcome
         )
 
         expect_true(is.formula(formula_output))
@@ -204,3 +204,46 @@ test_that(
         expect_equal(fit$structure, "us")
 
     })
+
+test_that(
+    "MMRM model with multiple optimizers has expected output",
+    {
+        same_cov <- TRUE
+
+        fit <- fit_mmrm_multiopt(
+            designmat = designmat,
+            outcome = data$response,
+            subjid = data$subjid,
+            visit = data$visit,
+            group = data$group,
+            vars = vars,
+            cov_struct = "us",
+            REML = TRUE,
+            same_cov = same_cov,
+            initial_values = NULL,
+            optimizer = c("BFGS")
+        )
+
+        expect_length(fit, 6)
+        expect_true(fit$converged)
+        expect_equal(fit$optimizer, "BFGS")
+
+        fit <- fit_mmrm_multiopt(
+            designmat = designmat,
+            outcome = data$response,
+            subjid = data$subjid,
+            visit = data$visit,
+            group = data$group,
+            vars = vars,
+            cov_struct = "us",
+            REML = TRUE,
+            same_cov = same_cov,
+            initial_values = NULL,
+            optimizer = c("Nelder-Mead", "L-BFGS-B")
+        )
+
+        expect_length(fit, 6)
+        expect_true(fit$converged)
+        expect_equal(fit$optimizer, "L-BFGS-B")
+
+        })
