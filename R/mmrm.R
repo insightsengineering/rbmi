@@ -10,6 +10,7 @@ remove_blank_spaces <- function(strings) {
     return(strings_nospaces)
 }
 
+#' @importFrom stats reformulate
 designmat_to_formula <- function(
     designmat,
     outcome_var
@@ -53,6 +54,7 @@ random_effects_expr <- function(
     return(expr)
 }
 
+#' @importFrom stats as.formula
 formula_mmrm <- function(
     designmat,
     vars,
@@ -109,6 +111,7 @@ check_mmrm <- function(fit) {
 }
 
 #' @importFrom glmmTMB glmmTMB glmmTMBControl
+#' @importFrom stats optim
 fit_mmrm <- function(
     designmat,
     outcome,
