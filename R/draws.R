@@ -12,6 +12,7 @@ draws <- function(data, data_ice, vars, method){
 }
 
 #' @rdname draws
+#' @export
 draws.method_approxbayes <- function(data, data_ice, vars, method){
     x <- draws_bootstrap(data, data_ice, vars, method)
 
@@ -29,12 +30,13 @@ draws.method_approxbayes <- function(data, data_ice, vars, method){
 }
 
 #' @rdname draws
+#' @export
 draws.method_condmean <- function(data, data_ice, vars, method){
     x <- draws_bootstrap(data, data_ice, vars, method)
     as_class(x, "condmean")
 }
 
-#' @rdname draws
+#' Title
 draws_bootstrap <- function(data, data_ice, vars, method){
 
     longdata <- longDataConstructor$new(data, vars)
@@ -132,9 +134,9 @@ get_bootstrap_samples <- function(longdata,
         mmrm_fit <- fit_mmrm_multiopt(
             designmat = model_df_scaled[,-1],
             outcome = model_df_scaled[,1],
-            subjid = data[[vars$subjid]],
-            visit = data[[vars$visit]],
-            group = data[[vars$group]],
+            subjid = dat_boot[[vars$subjid]],
+            visit = dat_boot[[vars$visit]],
+            group = dat_boot[[vars$group]],
             vars = vars,
             cov_struct = method$covariance,
             REML = method$REML,

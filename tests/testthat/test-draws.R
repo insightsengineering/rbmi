@@ -31,7 +31,6 @@ dat <- tibble(
 
 #dat[c(1,2,3,4,6,7), "outcome"] <- NA
 
-
 vars <- list(
     outcome = "outcome",
     visit = "visit",
@@ -52,70 +51,99 @@ method <- list(
     n_imputations = 3
 )
 
-test_draws_boot <- function(draws_boot) {
-    expect_type(draws_boot, "list")
+# function for checking output from get_bootstrap_samples
+test_boot_samples <- function(samples) {
 
-    expect_true( all(sapply(draws_boot, typeof) == "list") )
-    expect_true( all(sapply(draws_boot, length) == 6) )
-    expect_true( all(sapply(draws_boot, function(x) length(x$ids_boot)) == n) )
+    # test output type
+    expect_type(samples, "list")
 
-    converged <- sapply(draws_boot, function(x) x$converged)
-    structures <- sapply(draws_boot, function(x) x$structure)
+    # test output type of every sample
+    expect_true( all(sapply(samples, typeof) == "list") )
 
+    # test length of ids equals sample size
+    expect_true( all(sapply(samples, function(x) length(x$ids_boot)) == n) )
+
+    # check that optimizer always converged and structure is always as set-up
+    converged <- sapply(samples, function(x) x$converged)
+    structures <- sapply(samples, function(x) x$structure)
     expect_true( all(converged) )
     expect_true( all(structures == "ar1") )
 
-    sigmas <- lapply(draws_boot, function(x) x$sigma)
+    # check that sigma is a list of length one (since same_cov = TRUE)
+    sigmas <- lapply(samples, function(x) x$sigma)
     expect_true( all(sapply(sigmas, typeof)  == "list") )
     expect_true( all(sapply(sigmas, length)  == 1) )
 }
 
+# function for checking output from draws_bootstrap
+test_draws_condmean_and_approxbayes <- function(draws_boot) {
+
+    # check that output is a list object
+    expect_type(draws_boot, "list")
+
+    # check that length of objects is as expected
+    expect_length(draws_boot, 5)
+    expect_length(draws_boot$samples, 3)
+    expect_length(draws_boot$structures, 3)
+    expect_length(draws_boot$optimizers, 3)
+
+    # check that all structures are as expected
+    expect_true( all(draws_boot$structures == "ar1") )
+
+    # check that samples object is as expected
+    test_boot_samples(draws_boot$samples)
+}
+
 test_that(
-    "get bootstrap sample draws properly",
+    "get_bootstrap_samples has expected output ",
     {
 
+        # prepare input arguments
         longdata <- longDataConstructor$new(dat, vars)
-        model_df <- as_model_df(data, as_simple_formula(vars))
+        model_df <- as_model_df(dat, as_simple_formula(vars))
         scaler <- scalerConstructor$new(model_df)
 
+        # call function
         draws_boot <- get_bootstrap_samples(
             longdata = longdata,
             method = method,
             scaler = scaler
         )
 
+        # check length (n_imputations - 1)
         expect_length(draws_boot, 2)
-        test_draws_boot(draws_boot)
+
+        # check that each element has 6 sub-elements
+        expect_true( all(sapply(draws_boot, length) == 6) )
+
+        # check samples
+        test_boot_samples(draws_boot)
     }
 )
 
 test_that(
-    "wrapper draws using bootstrap has expected output",
+    "wrapper function draws_bootstrap has expected output",
     {
 
-        draws_params <- draws_bootstrap(
+        # call function
+        draws_boot <- draws_bootstrap(
             data = dat,
             data_ice = NULL,
             vars = vars,
             method = method
         )
-        expect_type(draws_params, "list")
-        expect_type(draws_params$samples, "list")
 
-        expect_length(draws_params, 5)
-        expect_length(draws_params$samples, 3)
-        expect_length(draws_params$structures, 3)
-        expect_length(draws_params$optimizers, 3)
+        # check output
+        expect_true( all(sapply(draws_boot$samples, length) == 6) )
+        test_draws_condmean_and_approxbayes(draws_boot)
 
-        expect_true( all(draws_params$structures == "ar1") )
-
-        test_draws_boot(draws_params$samples)
     })
 
 test_that(
-    "draws has expected output",
+    "draws has expected output for condmean and approxbayes",
     {
-        boot_draws <- draws(
+        ############## method: approxbayes
+        draws_boot <- draws(
             dat,
             data_ice = NULL,
             vars,
@@ -127,6 +155,32 @@ test_that(
                 n_imputations = 3
             )
         )
+
+        ids <- lapply(
+            draws_boot$samples,
+            function(x) x$ids
+        )
+
+        expect_true( all(sapply(ids, function(x) identical(x, unique(dat$subjid)))) )
+        expect_true( all(sapply(draws_boot$samples, length) == 7) )
+        test_draws_condmean_and_approxbayes(draws_boot)
+
+        ############## method: condmean
+        draws_boot <- draws(
+            dat,
+            data_ice = NULL,
+            vars,
+            method = method_condmean(
+                covariance = "ar1",
+                threshold = 0.01,
+                same_cov = TRUE,
+                REML = TRUE,
+                n_imputations = 3
+            )
+        )
+
+        expect_true( all(sapply(draws_boot$samples, length) == 6) )
+        test_draws_condmean_and_approxbayes(draws_boot)
     }
 )
 

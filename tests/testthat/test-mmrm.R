@@ -1,16 +1,19 @@
 set.seed(123)
 
+# function for checking whether x is a formula object
 is.formula <- function(x) {
     is.call(x) && x[[1]] == quote(`~`)
 }
 
+n <- 14
+nv <- 3
 data <- data.frame(
-    pred = rnorm(42),
-    subjid = as.factor(rep(1:14, each = 3)),
-    visit = as.factor(rep(c(1,2,3), 14)),
-    group = as.factor(rep(c("A", "B"), each = 21))
+    pred = rnorm(n*nv),
+    subjid = as.factor(rep(1:n, each = nv)),
+    visit = as.factor(rep(1:nv, n)),
+    group = as.factor(rep(c("A", "B"), each = n*nv/2))
 )
-data$response <- data$pred + 0.5*(as.numeric(data$group) - 1) + rnorm(42, sd = 0.1)
+data$response <- data$pred + 0.5*(as.numeric(data$group) - 1) + rnorm(n*nv, sd = 0.1)
 
 vars <- list(
     "subjid" = "subjid",
@@ -23,6 +26,104 @@ formula <- response ~ pred + visit*group
 designmat <- model.matrix(formula, data)
 
 names_groups <- c("A", "B")
+
+compute_n_params <- function(cov_struct, nv) {
+    if(cov_struct == "us") {
+        n_params <- nv*(nv+1)/2
+    } else if(cov_struct == "toep") {
+        n_params <- 2*nv - 1
+    } else if(cov_struct == "cs") {
+        n_params <- nv + 1
+    } else if(cov_struct == "ar1") {
+        n_params <- 2
+    }
+
+    return(n_params)
+}
+
+test_fit_mmrm_same_cov <- function(fit, cov_struct, nv) {
+
+    n_params <- compute_n_params(cov_struct, nv)
+
+    expect_type(fit, "list")
+
+    expect_vector(fit$beta)
+    expect_length(fit$beta, 7)
+
+    expect_type(fit$sigma, "list")
+    expect_length(fit$sigma, 1)
+    expect_true(is.matrix(fit$sigma[[1]]))
+    expect_equal(dim(fit$sigma[[1]]), c(nv,nv))
+
+    expect_vector(fit$theta)
+    expect_length(fit$theta, n_params)
+
+    expect_true(fit$converged %in% c(TRUE, FALSE))
+
+    expect_equal(fit$structure, cov_struct)
+
+}
+
+test_fit_mmrm_diff_cov <- function(fit, cov_struct, nv) {
+
+    n_params <- 2*compute_n_params(cov_struct, nv)
+
+    expect_type(fit, "list")
+
+    expect_vector(fit$beta)
+    expect_length(fit$beta, 7)
+
+    expect_type(fit$sigma, "list")
+    expect_length(fit$sigma, 2)
+    expect_true(is.matrix(fit$sigma[[1]]))
+    expect_equal(dim(fit$sigma[[1]]), c(nv,nv))
+    expect_true(is.matrix(fit$sigma[[2]]))
+    expect_equal(dim(fit$sigma[[2]]), c(nv,nv))
+
+    expect_vector(fit$theta)
+    expect_length(fit$theta, n_params)
+
+    expect_true(fit$converged %in% c(TRUE, FALSE))
+
+    expect_equal(fit$structure, cov_struct)
+
+}
+
+test_that(
+    "black spaces are correctly removed",
+    {
+        string_list <- list(
+            "subjid" = "subjid  ",
+            "visit" = "vis it",
+            "group" = "group 12  3",
+            "outcome" = " respons e 4"
+        )
+
+        string_char <- c("c h  ar 1", "char  2 ")
+
+        string_list_nospaces <- lapply(
+            string_list,
+            remove_blank_spaces
+        )
+
+        string_char_nospaces <- remove_blank_spaces(string_char)
+
+        expect_equal(
+            string_list_nospaces,
+            list(
+                "subjid" = "subjid",
+                "visit" = "visit",
+                "group" = "group123",
+                "outcome" = "response4"
+            )
+        )
+
+        expect_equal(
+            string_char_nospaces,
+            c("char1", "char2")
+        )
+    }
+)
 
 test_that(
     "designmat_to_formula returns a formula object",
@@ -39,6 +140,8 @@ test_that(
 test_that(
     "random effect expression is built correctly",
     {
+
+        ################## same_cov = TRUE
         same_cov = TRUE
         expected_output <- " + us(0 + visit | subjid)"
 
@@ -59,6 +162,7 @@ test_that(
             )
         )
 
+        ################## same_cov = FALSE
         same_cov = FALSE
         expected_output <- " + us(0 + A:visit | subjid) + us(0 + B:visit | subjid)"
 
@@ -88,6 +192,7 @@ test_that(
 test_that(
     "formula is build correctly",
     {
+        ################## same_cov = TRUE
         same_cov = TRUE
         expected_output <- as.formula(response ~ pred + visit2 + visit3 + groupB + visit2:groupB +
                                           visit3:groupB + us(0 + visit | subjid))
@@ -106,6 +211,7 @@ test_that(
         expect_true(is.formula(formula))
         expect_equal(formula, expected_output)
 
+        ################## same_cov = FALSE
         same_cov = FALSE
         expected_output <- as.formula(response ~ pred + visit2 + visit3 + groupB + visit2:groupB +
                                           visit3:groupB + us(0 + A:visit | subjid) + us(0 + B:visit | subjid))
@@ -130,37 +236,77 @@ test_that(
     {
         same_cov <- TRUE
 
+        ############# US
         fit <- fit_mmrm(
-        designmat = designmat,
-        outcome = data$response,
-        subjid = data$subjid,
-        visit = data$visit,
-        group = data$group,
-        vars = vars,
-        cov_struct = "us",
-        REML = TRUE,
-        same_cov = same_cov,
-        initial_values = NULL,
-        optimizer = "L-BFGS-B"
+            designmat = designmat,
+            outcome = data$response,
+            subjid = data$subjid,
+            visit = data$visit,
+            group = data$group,
+            vars = vars,
+            cov_struct = "us",
+            REML = TRUE,
+            same_cov = same_cov,
+            initial_values = NULL,
+            optimizer = "L-BFGS-B"
         )
 
-        expect_type(fit, "list")
         expect_length(fit, 5)
+        test_fit_mmrm_same_cov(fit, "us", nv)
 
-        expect_vector(fit$beta)
-        expect_length(fit$beta, 7)
+        ############# TOEP
+        fit <- fit_mmrm(
+            designmat = designmat,
+            outcome = data$response,
+            subjid = data$subjid,
+            visit = data$visit,
+            group = data$group,
+            vars = vars,
+            cov_struct = "toep",
+            REML = TRUE,
+            same_cov = same_cov,
+            initial_values = NULL,
+            optimizer = "BFGS"
+        )
 
-        expect_type(fit$sigma, "list")
-        expect_length(fit$sigma, 1)
-        expect_true(is.matrix(fit$sigma[[1]]))
-        expect_equal(dim(fit$sigma[[1]]), c(3,3))
+        expect_length(fit, 5)
+        test_fit_mmrm_same_cov(fit, "toep", nv)
 
-        expect_vector(fit$theta)
-        expect_length(fit$theta, 6)
+        ############# CS
+        fit <- fit_mmrm(
+            designmat = designmat,
+            outcome = data$response,
+            subjid = data$subjid,
+            visit = data$visit,
+            group = data$group,
+            vars = vars,
+            cov_struct = "cs",
+            REML = TRUE,
+            same_cov = same_cov,
+            initial_values = NULL,
+            optimizer = "BFGS"
+        )
 
-        expect_true(fit$converged %in% c(TRUE, FALSE))
+        expect_length(fit, 5)
+        test_fit_mmrm_same_cov(fit, "cs", nv)
 
-        expect_equal(fit$structure, "us")
+        ############# AR1
+        fit <- fit_mmrm(
+            designmat = designmat,
+            outcome = data$response,
+            subjid = data$subjid,
+            visit = data$visit,
+            group = data$group,
+            vars = vars,
+            cov_struct = "ar1",
+            REML = TRUE,
+            same_cov = same_cov,
+            initial_values = NULL,
+            optimizer = "BFGS"
+        )
+
+        expect_length(fit, 5)
+        test_fit_mmrm_same_cov(fit, "ar1", nv)
 
     })
 
@@ -183,31 +329,39 @@ test_that(
             optimizer = "L-BFGS-B"
         )
 
-        expect_type(fit, "list")
         expect_length(fit, 5)
+        test_fit_mmrm_diff_cov(fit, "us", nv)
 
-        expect_vector(fit$beta)
-        expect_length(fit$beta, 7)
+    })
 
-        expect_type(fit$sigma, "list")
-        expect_length(fit$sigma, 2)
-        expect_true(is.matrix(fit$sigma[[1]]))
-        expect_equal(dim(fit$sigma[[1]]), c(3,3))
-        expect_true(is.matrix(fit$sigma[[2]]))
-        expect_equal(dim(fit$sigma[[2]]), c(3,3))
+test_that(
+    "MMRM model fit has expected output structure (REML = FALSE)",
+    {
+        same_cov <- TRUE
 
-        expect_vector(fit$theta)
-        expect_length(fit$theta, 12)
+        fit <- fit_mmrm(
+            designmat = designmat,
+            outcome = data$response,
+            subjid = data$subjid,
+            visit = data$visit,
+            group = data$group,
+            vars = vars,
+            cov_struct = "us",
+            REML = FALSE,
+            same_cov = same_cov,
+            initial_values = NULL,
+            optimizer = "L-BFGS-B"
+        )
 
-        expect_true(fit$converged %in% c(TRUE, FALSE))
-
-        expect_equal(fit$structure, "us")
+        expect_length(fit, 5)
+        test_fit_mmrm_same_cov(fit, "us", nv)
 
     })
 
 test_that(
     "MMRM model with multiple optimizers has expected output",
     {
+        ########### SINGLE OPTIMIZER
         same_cov <- TRUE
 
         fit <- fit_mmrm_multiopt(
@@ -228,6 +382,9 @@ test_that(
         expect_true(fit$converged)
         expect_equal(fit$optimizer, "BFGS")
 
+        test_fit_mmrm_same_cov(fit, "us", nv)
+
+        ########### TWO OPTIMIZERS
         fit <- fit_mmrm_multiopt(
             designmat = designmat,
             outcome = data$response,
@@ -246,4 +403,5 @@ test_that(
         expect_true(fit$converged)
         expect_equal(fit$optimizer, "L-BFGS-B")
 
-        })
+        test_fit_mmrm_same_cov(fit, "us", nv)
+    })

@@ -4,7 +4,6 @@
 \alias{draws}
 \alias{draws.method_approxbayes}
 \alias{draws.method_condmean}
-\alias{draws_bootstrap}
 \title{TODO}
 \usage{
 draws(data, data_ice, vars, method)
@@ -12,8 +11,6 @@ draws(data, data_ice, vars, method)
 \method{draws}{method_approxbayes}(data, data_ice, vars, method)
 
 \method{draws}{method_condmean}(data, data_ice, vars, method)
-
-draws_bootstrap(data, data_ice, vars, method)
 }
 \arguments{
 \item{data}{TODO}
