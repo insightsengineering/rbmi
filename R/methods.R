@@ -35,6 +35,8 @@ method_approxbayes <- function(
     REML = TRUE,
     n_imputations = 20
 ){
+    covariance <- match.arg(covariance)
+
     x <- list(
         covariance = covariance,
         threshold = threshold,
@@ -55,6 +57,8 @@ method_condmean <- function(
     REML = TRUE,
     n_imputations = 20
 ){
+    covariance <- match.arg(covariance)
+
     x <- list(
         covariance = covariance,
         threshold = threshold,

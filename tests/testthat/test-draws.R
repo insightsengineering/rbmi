@@ -116,10 +116,16 @@ test_that(
     "draws has expected output",
     {
         boot_draws <- draws(
-            data,
+            dat,
             data_ice = NULL,
             vars,
-            method = method_approxbayes(method)
+            method = method_approxbayes(
+                covariance = "ar1",
+                threshold = 0.01,
+                same_cov = TRUE,
+                REML = TRUE,
+                n_imputations = 3
+            )
         )
     }
 )
