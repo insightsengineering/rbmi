@@ -11,7 +11,6 @@ draws <- function(data, data_ice, vars, method){
     UseMethod("draws", method)
 }
 
-
 #' @rdname draws
 draws.method_approxbayes <- function(data, data_ice, vars, method){
     x <- draws_bootstrap(data, data_ice, vars, method)
@@ -22,7 +21,6 @@ draws.method_approxbayes <- function(data, data_ice, vars, method){
     x$samples <- lapply(
         x$samples,
         function(x){
-            x$ids_boot <- x$ids
             x$ids <- unique(data[[vars$subjid]])
             return(x)
         }
@@ -36,15 +34,14 @@ draws.method_condmean <- function(data, data_ice, vars, method){
     as_class(x, "condmean")
 }
 
-
 #' @rdname draws
 draws_bootstrap <- function(data, data_ice, vars, method){
 
     longdata <- longDataConstructor$new(data, vars)
 
     model_df <- as_model_df(data, as_simple_formula(vars))
-    scaler <- scalerConstructor$new(model_df)
 
+    scaler <- scalerConstructor$new(model_df)
     model_df_scaled <- scaler$scale(model_df)
 
     mmrm_initial <- fit_mmrm_multiopt(
@@ -67,7 +64,7 @@ draws_bootstrap <- function(data, data_ice, vars, method){
         structure = mmrm_initial$structure,
         converged = mmrm_initial$converged,
         optimizer = mmrm_initial$optimizer,
-        subjid = longdata$ids
+        ids_boot = longdata$ids
     )
 
     init_opt <- list(
@@ -105,7 +102,6 @@ draws_bootstrap <- function(data, data_ice, vars, method){
 
     return(result)
 }
-
 
 #' Title
 #'
@@ -154,7 +150,7 @@ get_bootstrap_samples <- function(longdata,
                 structure = mmrm_fit$structure,
                 converged = mmrm_fit$converged,
                 optimizer = mmrm_fit$optimizer,
-                subjid = ids_boot
+                ids_boot = ids_boot
             )
 
             samples[[current_sample]] <- sample

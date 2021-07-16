@@ -1,6 +1,8 @@
 library(dplyr)
 library(testthat)
 
+set.seed(101)
+
 n <- 20
 nv <- 3
 
@@ -43,26 +45,84 @@ vars <- list(
 data_ice <- NULL
 
 method <- list(
-    covariance = c("us"),
+    covariance = "ar1",
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
     n_imputations = 3
 )
 
+test_draws_boot <- function(draws_boot) {
+    expect_type(draws_boot, "list")
+
+    expect_true( all(sapply(draws_boot, typeof) == "list") )
+    expect_true( all(sapply(draws_boot, length) == 6) )
+    expect_true( all(sapply(draws_boot, function(x) length(x$ids_boot)) == n) )
+
+    converged <- sapply(draws_boot, function(x) x$converged)
+    structures <- sapply(draws_boot, function(x) x$structure)
+
+    expect_true( all(converged) )
+    expect_true( all(structures == "ar1") )
+
+    sigmas <- lapply(draws_boot, function(x) x$sigma)
+    expect_true( all(sapply(sigmas, typeof)  == "list") )
+    expect_true( all(sapply(sigmas, length)  == 1) )
+}
 
 test_that(
-    "draws using bootstrap has expected output",
+    "get bootstrap sample draws properly",
     {
 
-draws_params <- draws_bootstrap(
-    data = dat,
-    data_ice = NULL,
-    vars = vars,
-    method = method
+        longdata <- longDataConstructor$new(dat, vars)
+        model_df <- as_model_df(data, as_simple_formula(vars))
+        scaler <- scalerConstructor$new(model_df)
+
+        draws_boot <- get_bootstrap_samples(
+            longdata = longdata,
+            method = method,
+            scaler = scaler
+        )
+
+        expect_length(draws_boot, 2)
+        test_draws_boot(draws_boot)
+    }
 )
- expect_length(draws_params, 3)
-})
+
+test_that(
+    "wrapper draws using bootstrap has expected output",
+    {
+
+        draws_params <- draws_bootstrap(
+            data = dat,
+            data_ice = NULL,
+            vars = vars,
+            method = method
+        )
+        expect_type(draws_params, "list")
+        expect_type(draws_params$samples, "list")
+
+        expect_length(draws_params, 5)
+        expect_length(draws_params$samples, 3)
+        expect_length(draws_params$structures, 3)
+        expect_length(draws_params$optimizers, 3)
+
+        expect_true( all(draws_params$structures == "ar1") )
+
+        test_draws_boot(draws_params$samples)
+    })
+
+test_that(
+    "draws has expected output",
+    {
+        boot_draws <- draws(
+            data,
+            data_ice = NULL,
+            vars,
+            method = method_approxbayes(method)
+        )
+    }
+)
 
 
 
