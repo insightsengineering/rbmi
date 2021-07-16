@@ -15,7 +15,7 @@ method_bayes(
 )
 
 method_approxbayes(
-  covariance = c("un", "toep", "cs", "ar1"),
+  covariance = c("us", "toep", "cs", "ar1"),
   threshold = 0.01,
   same_cov = TRUE,
   REML = TRUE,
@@ -23,7 +23,7 @@ method_approxbayes(
 )
 
 method_condmean(
-  covariance = c("un", "toep", "cs", "ar1"),
+  covariance = c("us", "toep", "cs", "ar1"),
   threshold = 0.01,
   same_cov = TRUE,
   REML = TRUE,
