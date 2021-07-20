@@ -205,7 +205,6 @@ fit_mmrm <- function(
     return(return_obj)
 }
 
-
 fit_mmrm_multiopt <- function(
     designmat,
     outcome,
