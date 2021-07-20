@@ -3,7 +3,7 @@ library(testthat)
 
 set.seed(101)
 
-n <- 20
+n <- 16
 nv <- 3
 
 covars <- tibble(
@@ -48,11 +48,12 @@ method <- list(
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
-    n_imputations = 3
+    n_samples = 3,
+    type = "bootstrap"
 )
 
-# function for checking output from get_bootstrap_samples
-test_boot_samples <- function(samples) {
+# function for checking output from get_bootstrap_samples (and jackknife)
+test_boot_samples <- function(samples, method) {
 
     # test output type
     expect_type(samples, "list")
@@ -60,14 +61,18 @@ test_boot_samples <- function(samples) {
     # test output type of every sample
     expect_true( all(sapply(samples, typeof) == "list") )
 
-    # test length of ids equals sample size
-    expect_true( all(sapply(samples, function(x) length(x$ids_boot)) == n) )
+    # test length of ids equals sample size (in case of jackknife we can check for actual ids)
+    if(method$type == "bootstrap") {
+        expect_true( all(sapply(samples, function(x) length(x$ids_boot)) == n) )
+    } else if(method$type == "jackknife") {
+        expect_true( all(sapply(1:length(samples),
+                                function(i) identical(samples[[i]]$ids_boot, as.character(covars$subjid[-i]))) ))
+    }
 
-    # check that optimizer always converged and structure is always as set-up
+    # check that converged is logical
     converged <- sapply(samples, function(x) x$converged)
-    structures <- sapply(samples, function(x) x$structure)
-    expect_true( all(converged) )
-    expect_true( all(structures == "ar1") )
+
+    expect_true( all(converged %in% c(TRUE, FALSE)) )
 
     # check that sigma is a list of length one (since same_cov = TRUE)
     sigmas <- lapply(samples, function(x) x$sigma)
@@ -76,26 +81,46 @@ test_boot_samples <- function(samples) {
 }
 
 # function for checking output from draws_bootstrap
-test_draws_condmean_and_approxbayes <- function(draws_boot) {
+test_draws_condmean_and_approxbayes <- function(draws_boot, method) {
 
     # check that output is a list object
     expect_type(draws_boot, "list")
 
     # check that length of objects is as expected
-    expect_length(draws_boot, 5)
-    expect_length(draws_boot$samples, 3)
-    expect_length(draws_boot$structures, 3)
-    expect_length(draws_boot$optimizers, 3)
+    expect_length(draws_boot, 4)
 
-    # check that all structures are as expected
-    expect_true( all(draws_boot$structures == "ar1") )
+    if(method$type == "bootstrap") {
+        expect_length(draws_boot$samples, method$n_samples)
+        expect_length(draws_boot$optimizers, method$n_samples)
+    } else if(method$type == "jackknife") {
+        expect_length(draws_boot$samples, n+1)
+        expect_length(draws_boot$optimizers, n+1)
+    }
 
     # check that samples object is as expected
-    test_boot_samples(draws_boot$samples)
+    if(method$type == "bootstrap") {
+
+        test_boot_samples(draws_boot$samples, method)
+
+    } else if(method$type == "jackknife") {
+        # test separately first element (fit on original sample)
+        # from actual jackknife based samples
+
+        test_boot_samples(draws_boot$samples[-1], method)
+
+        mmrm_initial <- draws_boot$samples[[1]]
+
+        # check that mmrm fit on original data return equal ids as original data
+        expect_equal(mmrm_initial$ids_boot, as.character(covars$subjid))
+
+        # check that sigma is a list of length one (since same_cov = TRUE)
+        expect_equal( typeof(mmrm_initial$sigma), "list")
+        expect_length( mmrm_initial$sigma, 1)
+    }
 }
 
 test_that(
-    "get_bootstrap_samples has expected output ",
+    "get_bootstrap_samples has expected output",
     {
 
         # prepare input arguments
@@ -110,19 +135,48 @@ test_that(
             scaler = scaler
         )
 
-        # check length (n_imputations - 1)
+        # check length (n_samples - 1)
         expect_length(draws_boot, 2)
 
-        # check that each element has 6 sub-elements
-        expect_true( all(sapply(draws_boot, length) == 6) )
+        # check that each element has 5 sub-elements
+        expect_true( all(sapply(draws_boot, length) == 5) )
 
         # check samples
-        test_boot_samples(draws_boot)
+        test_boot_samples(draws_boot, method)
     }
 )
 
 test_that(
-    "wrapper function draws_bootstrap has expected output",
+    "get_jackknife_samples has expected output",
+    {
+
+        # prepare input arguments
+        longdata <- longDataConstructor$new(dat, vars)
+        model_df <- as_model_df(dat, as_simple_formula(vars))
+        scaler <- scalerConstructor$new(model_df)
+
+        method$type = "jackknife"
+
+        # call function
+        draws_boot <- get_jackknife_samples(
+            longdata = longdata,
+            method = method,
+            scaler = scaler
+        )
+
+        # check length (number of subjects)
+        expect_length(draws_boot, n)
+
+        # check that each element has 5 sub-elements
+        expect_true( all(sapply(draws_boot, length) == 5) )
+
+        # check samples
+        test_boot_samples(draws_boot, method)
+    }
+)
+
+test_that(
+    "wrapper function draws_bootstrap has expected output (bootstrap)",
     {
 
         # call function
@@ -134,8 +188,29 @@ test_that(
         )
 
         # check output
-        expect_true( all(sapply(draws_boot$samples, length) == 6) )
-        test_draws_condmean_and_approxbayes(draws_boot)
+        expect_true( all(sapply(draws_boot$samples, length) == 5) )
+        test_draws_condmean_and_approxbayes(draws_boot, method)
+
+    })
+
+test_that(
+    "wrapper function draws_bootstrap has expected output (jackknife)",
+    {
+
+        # prepare input arguments
+        method$type = "jackknife"
+
+        # call function
+        draws_boot <- draws_bootstrap(
+            data = dat,
+            data_ice = NULL,
+            vars = vars,
+            method = method
+        )
+
+        # check output
+        expect_true( all(sapply(draws_boot$samples, length) == 5) )
+        test_draws_condmean_and_approxbayes(draws_boot, method)
 
     })
 
@@ -162,8 +237,8 @@ test_that(
         )
 
         expect_true( all(sapply(ids, function(x) identical(x, unique(dat$subjid)))) )
-        expect_true( all(sapply(draws_boot$samples, length) == 7) )
-        test_draws_condmean_and_approxbayes(draws_boot)
+        expect_true( all(sapply(draws_boot$samples, length) == 6) )
+        test_draws_condmean_and_approxbayes(draws_boot, method)
 
         ############## method: condmean
         draws_boot <- draws(
@@ -175,12 +250,13 @@ test_that(
                 threshold = 0.01,
                 same_cov = TRUE,
                 REML = TRUE,
-                n_imputations = 3
+                n_samples = 3,
+                type = "bootstrap"
             )
         )
 
-        expect_true( all(sapply(draws_boot$samples, length) == 6) )
-        test_draws_condmean_and_approxbayes(draws_boot)
+        expect_true( all(sapply(draws_boot$samples, length) == 5) )
+        test_draws_condmean_and_approxbayes(draws_boot, method)
     }
 )
 

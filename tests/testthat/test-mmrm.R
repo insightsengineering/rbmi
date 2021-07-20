@@ -1,3 +1,5 @@
+library(glmmTMB)
+
 set.seed(123)
 
 # function for checking whether x is a formula object
@@ -60,8 +62,6 @@ test_fit_mmrm_same_cov <- function(fit, cov_struct, nv) {
 
     expect_true(fit$converged %in% c(TRUE, FALSE))
 
-    expect_equal(fit$structure, cov_struct)
-
 }
 
 test_fit_mmrm_diff_cov <- function(fit, cov_struct, nv) {
@@ -84,8 +84,6 @@ test_fit_mmrm_diff_cov <- function(fit, cov_struct, nv) {
     expect_length(fit$theta, n_params)
 
     expect_true(fit$converged %in% c(TRUE, FALSE))
-
-    expect_equal(fit$structure, cov_struct)
 
 }
 
@@ -205,11 +203,8 @@ test_that(
             same_cov = same_cov
         )
 
-        # set formula environment to be the same since we don't want to test it
-        attr(formula, ".Environment") <- attr(expected_output, ".Environment")
-
         expect_true(is.formula(formula))
-        expect_equal(formula, expected_output)
+        expect_equal(formula, expected_output, ignore_attr = TRUE)
 
         ################## same_cov = FALSE
         same_cov = FALSE
@@ -224,11 +219,8 @@ test_that(
             same_cov = same_cov
         )
 
-        # set formula environment to be the same since we don't want to test it
-        attr(formula, ".Environment") <- attr(expected_output, ".Environment")
-
         expect_true(is.formula(formula))
-        expect_equal(formula, expected_output)
+        expect_equal(formula, expected_output, ignore_attr = TRUE)
     })
 
 test_that(
@@ -251,7 +243,7 @@ test_that(
             optimizer = "L-BFGS-B"
         )
 
-        expect_length(fit, 5)
+        expect_length(fit, 4)
         test_fit_mmrm_same_cov(fit, "us", nv)
 
         ############# TOEP
@@ -269,7 +261,7 @@ test_that(
             optimizer = "BFGS"
         )
 
-        expect_length(fit, 5)
+        expect_length(fit, 4)
         test_fit_mmrm_same_cov(fit, "toep", nv)
 
         ############# CS
@@ -287,7 +279,7 @@ test_that(
             optimizer = "BFGS"
         )
 
-        expect_length(fit, 5)
+        expect_length(fit, 4)
         test_fit_mmrm_same_cov(fit, "cs", nv)
 
         ############# AR1
@@ -305,7 +297,7 @@ test_that(
             optimizer = "BFGS"
         )
 
-        expect_length(fit, 5)
+        expect_length(fit, 4)
         test_fit_mmrm_same_cov(fit, "ar1", nv)
 
     })
@@ -329,7 +321,7 @@ test_that(
             optimizer = "L-BFGS-B"
         )
 
-        expect_length(fit, 5)
+        expect_length(fit, 4)
         test_fit_mmrm_diff_cov(fit, "us", nv)
 
     })
@@ -353,10 +345,121 @@ test_that(
             optimizer = "L-BFGS-B"
         )
 
-        expect_length(fit, 5)
+        expect_length(fit, 4)
         test_fit_mmrm_same_cov(fit, "us", nv)
 
     })
+
+test_that(
+    "MMRM returns expected estimates (same_cov = TRUE)",
+    {
+        same_cov <- TRUE
+
+        fit <- fit_mmrm(
+            designmat = designmat,
+            outcome = data$response,
+            subjid = data$subjid,
+            visit = data$visit,
+            group = data$group,
+            vars = vars,
+            cov_struct = "us",
+            REML = TRUE,
+            same_cov = same_cov,
+            initial_values = NULL,
+            optimizer = "BFGS"
+        )
+
+        formula_ext <- response ~ pred + visit*group + us(0 + visit | subjid)
+        control <- glmmTMBControl(
+            optimizer = optim,
+            optArgs = list(method = "BFGS"),
+            parallel = 1
+        )
+
+        fit_expected <- glmmTMB(
+            formula_ext,
+            dispformula = ~0,
+            data = data,
+            REML = TRUE,
+            control = control)
+
+        beta <- fixef(fit_expected)$cond
+        sigma <- VarCorr(fit_expected)$cond
+        theta <- getME(fit_expected, name = "theta") # needed for initialization
+
+        converged <- ifelse(fit_expected$fit$convergence == 0, TRUE, FALSE)
+
+        output_expected <- list(
+            beta = beta,
+            sigma = sigma,
+            theta = theta,
+            converged = converged
+        )
+
+        expect_equal(fit, output_expected, ignore_attr = TRUE)
+
+    }
+)
+
+test_that(
+    "MMRM returns expected estimates (same_cov = FALSE)",
+    {
+        same_cov <- FALSE
+
+        fit <- fit_mmrm(
+            designmat = designmat,
+            outcome = data$response,
+            subjid = data$subjid,
+            visit = data$visit,
+            group = data$group,
+            vars = vars,
+            cov_struct = "us",
+            REML = TRUE,
+            same_cov = same_cov,
+            initial_values = NULL,
+            optimizer = "BFGS"
+        )
+
+
+        levels(data$group) <- remove_blank_spaces(levels(data$group))
+
+        # create dummy variables for each arm
+        groups_mat <- stats::model.matrix(~ 0 + data$group)
+        colnames(groups_mat) <- levels(data$group)
+        data <- cbind(data,
+                      "A" = groups_mat[,1],
+                      "B" = groups_mat[,2])
+        formula_ext <- response ~ pred + visit*group + us(0 + visit:A | subjid) + us(0 + visit:B | subjid)
+        control <- glmmTMBControl(
+            optimizer = optim,
+            optArgs = list(method = "BFGS"),
+            parallel = 1
+        )
+
+        fit_expected <- glmmTMB(
+            formula_ext,
+            dispformula = ~0,
+            data = data,
+            REML = TRUE,
+            control = control)
+
+        beta <- fixef(fit_expected)$cond
+        sigma <- VarCorr(fit_expected)$cond
+        theta <- getME(fit_expected, name = "theta") # needed for initialization
+
+        converged <- ifelse(fit_expected$fit$convergence == 0, TRUE, FALSE)
+
+        output_expected <- list(
+            beta = beta,
+            sigma = sigma,
+            theta = theta,
+            converged = converged
+        )
+
+        expect_equal(fit, output_expected, ignore_attr = TRUE)
+
+    }
+)
 
 test_that(
     "MMRM model with multiple optimizers has expected output",
@@ -378,7 +481,7 @@ test_that(
             optimizer = c("BFGS")
         )
 
-        expect_length(fit, 6)
+        expect_length(fit, 5)
         expect_true(fit$converged)
         expect_equal(fit$optimizer, "BFGS")
 
@@ -399,7 +502,7 @@ test_that(
             optimizer = c("Nelder-Mead", "L-BFGS-B")
         )
 
-        expect_length(fit, 6)
+        expect_length(fit, 5)
         expect_true(fit$converged)
         expect_equal(fit$optimizer, "L-BFGS-B")
 

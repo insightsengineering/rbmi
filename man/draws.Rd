@@ -2,15 +2,15 @@
 % Please edit documentation in R/draws.R
 \name{draws}
 \alias{draws}
-\alias{draws.method_approxbayes}
-\alias{draws.method_condmean}
+\alias{draws.approxbayes}
+\alias{draws.condmean}
 \title{TODO}
 \usage{
 draws(data, data_ice, vars, method)
 
-\method{draws}{method_approxbayes}(data, data_ice, vars, method)
+\method{draws}{approxbayes}(data, data_ice, vars, method)
 
-\method{draws}{method_condmean}(data, data_ice, vars, method)
+\method{draws}{condmean}(data, data_ice, vars, method)
 }
 \arguments{
 \item{data}{TODO}

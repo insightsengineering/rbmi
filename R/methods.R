@@ -22,7 +22,7 @@ method_bayes <- function(
         same_cov = same_cov,
         n_imputations = n_imputations
     )
-    return( as_class(x, "method_bayes"))
+    return( as_class(x, "bayes"))
 }
 
 
@@ -44,7 +44,7 @@ method_approxbayes <- function(
         REML = REML,
         n_imputations = n_imputations
     )
-    return( as_class(x, "method_approxbayes"))
+    return( as_class(x, "approxbayes"))
 }
 
 
@@ -55,18 +55,28 @@ method_condmean <- function(
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
-    n_imputations = 20
+    n_samples = NULL,
+    type = c("bootstrap", "jackknife")
 ){
     covariance <- match.arg(covariance)
+    type <- match.arg(type)
+
+    if(type == "bootstrap") {
+        assert_that(
+            !is.null(n_samples),
+            msg = "n_samples must not be NULL when type is bootstrap"
+        )
+    }
 
     x <- list(
         covariance = covariance,
         threshold = threshold,
         same_cov = same_cov,
         REML = REML,
-        n_imputations = n_imputations
+        n_samples = n_samples,
+        type = type
     )
-    return( as_class(x, "method_condmean"))
+    return( as_class(x, "condmean"))
 }
 
 

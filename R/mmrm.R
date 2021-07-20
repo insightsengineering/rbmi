@@ -1,10 +1,8 @@
 remove_blank_spaces <- function(strings) {
 
-    searchString <- ' '
-    replacementString <- ''
     strings_nospaces <- gsub(
-        searchString,
-        replacementString,
+        ' ',
+        '',
         strings
     )
     return(strings_nospaces)
@@ -104,7 +102,7 @@ extract_params <- function(fit) {
     return(params)
 }
 
-check_mmrm <- function(fit) {
+is_converged <- function(fit) {
 
     return(ifelse(fit$fit$convergence == 0, TRUE, FALSE))
 
@@ -195,13 +193,12 @@ fit_mmrm <- function(
     params <- extract_params(fit)
 
     # check convergence
-    converged <- check_mmrm(fit)
+    converged <- is_converged(fit)
 
     return_obj <- list(
         "beta" = params$beta,
         "sigma" = params$sigma,
         "theta" = params$theta,
-        "structure" = cov_struct,
         "converged" = converged
     )
 

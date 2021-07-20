@@ -13,7 +13,11 @@ draws <- function(data, data_ice, vars, method){
 
 #' @rdname draws
 #' @export
-draws.method_approxbayes <- function(data, data_ice, vars, method){
+draws.approxbayes <- function(data, data_ice, vars, method){
+
+    method$type <- "bootstrap" # just for internal use
+    method$n_samples <- method$n_imputations # just for internal use
+
     x <- draws_bootstrap(data, data_ice, vars, method)
 
     ### Set ids to be the unique patient values in order
@@ -26,12 +30,16 @@ draws.method_approxbayes <- function(data, data_ice, vars, method){
             return(x)
         }
     )
+
+    # remove useless elements from output of `method`
+    x$method$type <- x$method$n_samples <- NULL
+
     as_class(x, "approxbayes")
 }
 
 #' @rdname draws
 #' @export
-draws.method_condmean <- function(data, data_ice, vars, method){
+draws.condmean <- function(data, data_ice, vars, method){
     x <- draws_bootstrap(data, data_ice, vars, method)
     as_class(x, "condmean")
 }
@@ -63,7 +71,6 @@ draws_bootstrap <- function(data, data_ice, vars, method){
     initial_sample <- list(
         beta = scaler$unscale_beta(mmrm_initial$beta),
         sigma = lapply(mmrm_initial$sigma, scaler$unscale_sigma),
-        structure = mmrm_initial$structure,
         converged = mmrm_initial$converged,
         optimizer = mmrm_initial$optimizer,
         ids_boot = longdata$ids
@@ -74,20 +81,28 @@ draws_bootstrap <- function(data, data_ice, vars, method){
         theta = mmrm_initial$theta
     )
 
-    samples <- append(
-        list(initial_sample),
-        get_bootstrap_samples(
-            longdata = longdata,
-            method = method,
-            scaler = scaler,
-            initial = init_opt
+    if(method$type == "bootstrap") {
+        samples <- append(
+            list(initial_sample),
+            get_bootstrap_samples(
+                longdata = longdata,
+                method = method,
+                scaler = scaler,
+                initial = init_opt
+            )
         )
-    )
 
-    structures <- lapply(
-        samples,
-        function(x) x[["structure"]]
-    )
+    } else if(method$type == "jackknife") {
+        samples <- append(
+            list(initial_sample),
+            get_jackknife_samples(
+                longdata = longdata,
+                method = method,
+                scaler = scaler,
+                initial = init_opt
+            )
+        )
+    }
 
     optimizers <- lapply(
         samples,
@@ -98,7 +113,6 @@ draws_bootstrap <- function(data, data_ice, vars, method){
         method = method,
         data = longdata,
         samples = samples,
-        structures = structures,
         optimizers = optimizers
     )
 
@@ -114,7 +128,9 @@ get_bootstrap_samples <- function(longdata,
                                   scaler,
                                   initial = NULL){
 
-    required_samples <- method$n_imputations - 1
+    vars <- longdata$vars
+
+    required_samples <- method$n_samples - 1 # -1 as the first sample is done in advance on the full dataset
     samples <- vector("list", length = required_samples)
     current_sample <- 1
     failed_samples <- 0
@@ -123,7 +139,6 @@ get_bootstrap_samples <- function(longdata,
     while(current_sample <= required_samples & failed_samples <= failure_limit){
 
         # create bootstrapped sample
-        vars <- longdata$vars
         ids_boot <- longdata$sample_ids()
         dat_boot <- longdata$get_data(ids_boot)
 
@@ -149,7 +164,6 @@ get_bootstrap_samples <- function(longdata,
             sample <- list(
                 beta = scaler$unscale_beta(mmrm_fit$beta),
                 sigma = lapply(mmrm_fit$sigma, scaler$unscale_sigma),
-                structure = mmrm_fit$structure,
                 converged = mmrm_fit$converged,
                 optimizer = mmrm_fit$optimizer,
                 ids_boot = ids_boot
@@ -159,6 +173,71 @@ get_bootstrap_samples <- function(longdata,
             current_sample <- current_sample + 1
 
         } else {
+            failed_samples <- failed_samples + 1
+        }
+
+    }
+
+    if(failed_samples > failure_limit) {
+        stop(paste0("More than ", failure_limit, " failed fits. Increase the failures threshold or set a different covariance structure"))
+    }
+
+    return(samples)
+}
+
+#' Title
+#'
+#' @param ... TODO
+#' @param method TODO
+get_jackknife_samples <- function(longdata,
+                                  method,
+                                  scaler,
+                                  initial = NULL){
+
+    vars <- longdata$vars
+    ids <- longdata$ids
+
+    required_samples <- length(ids)
+    samples <- vector("list", length = required_samples)
+    current_sample <- 1
+    failed_samples <- 0
+    failure_limit <- ceiling(method$threshold * required_samples)
+
+    while(current_sample <= required_samples & failed_samples <= failure_limit){
+
+        ids_boot <- ids[-current_sample]
+        dat_boot <- longdata$get_data(ids_boot)
+
+        model_df <- as_model_df(dat_boot, as_simple_formula(vars))
+        model_df_scaled <- scaler$scale(model_df)
+
+        # fit mmrm
+        mmrm_fit <- fit_mmrm_multiopt(
+            designmat = model_df_scaled[,-1],
+            outcome = model_df_scaled[,1],
+            subjid = dat_boot[[vars$subjid]],
+            visit = dat_boot[[vars$visit]],
+            group = dat_boot[[vars$group]],
+            vars = vars,
+            cov_struct = method$covariance,
+            REML = method$REML,
+            same_cov = method$same_cov,
+            initial_values = initial,
+            optimizer = c("BFGS", "L-BFGS-B", "Nelder-Mead")
+        )
+
+        sample <- list(
+            beta = scaler$unscale_beta(mmrm_fit$beta),
+            sigma = lapply(mmrm_fit$sigma, scaler$unscale_sigma),
+            converged = mmrm_fit$converged,
+            optimizer = mmrm_fit$optimizer,
+            ids_boot = ids_boot
+        )
+
+        samples[[current_sample]] <- sample
+        current_sample <- current_sample + 1
+
+        if(!mmrm_fit$converged) {
             failed_samples <- failed_samples + 1
         }
 
