@@ -159,7 +159,7 @@ get_bootstrap_samples <- function(longdata,
             REML = method$REML,
             same_cov = method$same_cov,
             initial_values = initial,
-            optimizer = c("BFGS", "L-BFGS-B", "Nelder-Mead")
+            optimizer = c("L-BFGS-B", "BFGS", "Nelder-Mead")
         )
 
         if(mmrm_fit$converged){
@@ -230,7 +230,7 @@ get_jackknife_samples <- function(longdata,
             REML = method$REML,
             same_cov = method$same_cov,
             initial_values = initial,
-            optimizer = c("BFGS", "L-BFGS-B", "Nelder-Mead")
+            optimizer = c("L-BFGS-B", "BFGS", "Nelder-Mead")
         )
 
         sample <- list(
