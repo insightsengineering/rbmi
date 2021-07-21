@@ -82,27 +82,28 @@ draws_bootstrap <- function(data, data_ice, vars, method){
     )
 
     if(method$type == "bootstrap") {
-        samples <- append(
-            list(initial_sample),
-            get_bootstrap_samples(
-                longdata = longdata,
-                method = method,
-                scaler = scaler,
-                initial = init_opt
-            )
+        samples <- get_bootstrap_samples(
+            longdata = longdata,
+            method = method,
+            scaler = scaler,
+            initial = init_opt
         )
 
     } else if(method$type == "jackknife") {
-        samples <- append(
-            list(initial_sample),
-            get_jackknife_samples(
-                longdata = longdata,
-                method = method,
-                scaler = scaler,
-                initial = init_opt
-            )
+        samples <- get_jackknife_samples(
+            longdata = longdata,
+            method = method,
+            scaler = scaler,
+            initial = init_opt
         )
     }
+
+    n_failures <- samples$n_failures
+
+    samples <- append(
+        list(initial_sample),
+        samples$samples
+    )
 
     optimizers <- lapply(
         samples,
@@ -113,7 +114,8 @@ draws_bootstrap <- function(data, data_ice, vars, method){
         method = method,
         data = longdata,
         samples = samples,
-        optimizers = optimizers
+        optimizers = optimizers,
+        n_failures = n_failures
     )
 
     return(result)
@@ -182,7 +184,12 @@ get_bootstrap_samples <- function(longdata,
         stop(paste0("More than ", failure_limit, " failed fits. Increase the failures threshold or set a different covariance structure"))
     }
 
-    return(samples)
+    return(
+        list(
+            samples = samples,
+            n_failures = failed_samples
+        )
+    )
 }
 
 #' Title
@@ -242,5 +249,15 @@ get_jackknife_samples <- function(longdata,
         }
 
     }
-    return(samples)
+
+    if(failed_samples > failure_limit) {
+        stop(paste0("More than ", failure_limit, " failed fits. Increase the failures threshold or set a different covariance structure"))
+    }
+
+    return(
+        list(
+            samples = samples,
+            n_failures = failed_samples
+        )
+    )
 }

@@ -87,7 +87,7 @@ test_draws_condmean_and_approxbayes <- function(draws_boot, method) {
     expect_type(draws_boot, "list")
 
     # check that length of objects is as expected
-    expect_length(draws_boot, 4)
+    expect_length(draws_boot, 5)
 
     if(method$type == "bootstrap") {
         expect_length(draws_boot$samples, method$n_samples)
@@ -135,14 +135,17 @@ test_that(
             scaler = scaler
         )
 
-        # check length (n_samples - 1)
+        # check length of object
         expect_length(draws_boot, 2)
 
+        # check length of samples object (n_samples - 1)
+        expect_length(draws_boot$samples, 2)
+
         # check that each element has 5 sub-elements
-        expect_true( all(sapply(draws_boot, length) == 5) )
+        expect_true( all(sapply(draws_boot$samples, length) == 5) )
 
         # check samples
-        test_boot_samples(draws_boot, method)
+        test_boot_samples(draws_boot$samples, method)
     }
 )
 
@@ -164,14 +167,17 @@ test_that(
             scaler = scaler
         )
 
+        # check length of object
+        expect_length(draws_boot, 2)
+
         # check length (number of subjects)
-        expect_length(draws_boot, n)
+        expect_length(draws_boot$samples, n)
 
         # check that each element has 5 sub-elements
-        expect_true( all(sapply(draws_boot, length) == 5) )
+        expect_true( all(sapply(draws_boot$samples, length) == 5) )
 
         # check samples
-        test_boot_samples(draws_boot, method)
+        test_boot_samples(draws_boot$samples, method)
     }
 )
 
