@@ -26,7 +26,7 @@ impute <- function(draws,  data_ice, references, strategies){
 #' @param references TODO
 #' @param strategies TODO
 #' @export
-impute.random <- function(draws,  data_ice = NULL, references, strategies = getStrategies()){
+impute.random <- function(draws, data_ice = NULL, references, strategies = getStrategies()){
     result <- impute_internal(
         draws = draws,
         data_ice = data_ice,
