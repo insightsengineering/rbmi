@@ -169,6 +169,7 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
     ret <- list(
         est = est[1],  # First estimate should be original dataset
         ci = ci,
+        se = NA,
         pvalue = min(pvals[index]) * length(pvals[index])
     )
     return(ret)
@@ -225,6 +226,7 @@ normal_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
     ret <- list(
         est = point,
         ci = ci,
+        se = se,
         pvalue = min(pvals[index]) * length(pvals[index])
     )
     return(ret)
