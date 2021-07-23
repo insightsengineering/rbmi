@@ -87,8 +87,8 @@ validate_analysis_results <- function(results){
     )
     
     assert_that(
-        vapply(results, is.list, logical(1)),
-        vapply(results, function(x) !is.null(names(x)), logical(1)),
+        all(vapply(results, is.list, logical(1))),
+        all(vapply(results, function(x) !is.null(names(x)), logical(1))),
         msg = "Individual analysis results must be a named list"
     )
     

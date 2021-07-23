@@ -73,7 +73,7 @@ expand <- function(data, ...) {
 #' @param vars variables that need to be imputed (character vector)
 #' @param group variables to group `vars` by when performing locf (character vector)
 #' @param order additional variables to sort by before performing locf (character vector)
-#' @export 
+#' @export
 fill_locf <- function(data, vars, group = NULL, order = NULL) {
 
     if (!is.null(group)) {
@@ -146,4 +146,26 @@ assert_variables_exist <- function(data, vars) {
         )
     }
     return(TRUE)
+}
+
+
+
+
+#' Expand and impute with locf
+#'
+#' @param data TODO
+#' @param ... TODO
+#' @param fill_vars TODO
+#' @param fill_group TODO
+#'
+#' @export
+expand_locf <- function(data, ..., fill_vars, fill_group) {
+    data_expanded <- expand(data, ...)
+    data_filled <- fill_locf(
+        data = data_expanded,
+        vars = fill_vars,
+        group = fill_group,
+        order = names(list(...))
+    )
+    return(data_filled)
 }
