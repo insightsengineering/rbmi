@@ -6,21 +6,28 @@ name: R-CMD-check
 
 jobs:
   R-CMD-check:
-    runs-on: ubuntu-latest
+    
     
     strategy:
       matrix:
        include:
-         - v1: 10.x
-           v2: "prod"
-         - v1: 12.x
-           v2: "dev"    
+         - rver: 10.x
+           os: ubuntu-latest
+           rspm_date: "prod"
+         - rver: 12.x
+           os: macos-latest
+           rspm_date: "dev"
+           
+    runs-on: ${{ matrix.os }}
+    
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      rspm_date: ${{ matrix.rspm_date }}
+      
     steps:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-r@v1
-      - run: echo $v1 ; echo $v2
+      - run: echo $rspm_date 
       
       
       
