@@ -62,7 +62,7 @@ test_that("Basic Usage",{
                 sigma = sigma
             )
         ),
-        longdata = ld
+        data = ld
     )
 
     set.seed(101)

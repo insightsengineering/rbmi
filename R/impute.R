@@ -70,13 +70,13 @@ impute.condmean <- function(draws,  data_ice = NULL, references, strategies = ge
 #' @param conditionalMean TODO
 impute_internal <- function(draws, data_ice = NULL, references, strategies, conditionalMean = FALSE){
 
-    longdata <- draws$longdata
+    data <- draws$data
 
-    validate_references(references, longdata$data[[longdata$vars$group]])
-    validate_strategies(strategies, longdata$strategies)
+    validate_references(references, data$data[[data$vars$group]])
+    validate_strategies(strategies, data$strategies)
 
     if(!is.null(data_ice)){
-        longdata$update_strategies(data_ice)
+        data$update_strategies(data_ice)
     }
 
     samples_grouped <- transpose_samples(draws$samples)
@@ -88,7 +88,7 @@ impute_internal <- function(draws, data_ice = NULL, references, strategies, cond
         MoreArgs = list(
             beta = samples_grouped$beta,
             sigma = samples_grouped$sigma,
-            longdata = longdata,
+            data = data,
             references = references,
             strategies = strategies,
             conditionalMean = conditionalMean
@@ -98,7 +98,7 @@ impute_internal <- function(draws, data_ice = NULL, references, strategies, cond
 
     x <- list(
         imputations = untranspose_samples(imputes, samples_grouped$index),
-        longdata = longdata,
+        data = data,
         method = draws$method
     )
     return(x)
@@ -203,7 +203,7 @@ invert_indexes <- function(x){
 #' @param index TODO
 #' @param beta TODO
 #' @param sigma TODO
-#' @param longdata TODO
+#' @param data TODO
 #' @param references TODO
 #' @param strategies TODO
 #' @param conditionalMean TODO
@@ -212,7 +212,7 @@ impute_data_individual <- function(
     index,
     beta,
     sigma,
-    longdata,
+    data,
     references,
     strategies,
     conditionalMean
@@ -224,11 +224,11 @@ impute_data_individual <- function(
         values = replicate(n = length(index), numeric(0))
     )
 
-    id_data <- longdata$extract_by_id(id)
+    id_data <- data$extract_by_id(id)
 
     if( sum(id_data$is_missing) == 0 ) return(result)
 
-    vars <- longdata$vars
+    vars <- data$vars
     group_pt <- id_data$group
     group_ref <- references[group_pt]
 
