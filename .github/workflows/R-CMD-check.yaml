@@ -45,24 +45,18 @@ jobs:
         with:
           path: ./rpkg
           key: ${{ runner.os }}-rpkg-${{ hashFiles('DESCRIPTION') }}
-          restore-keys: |
-            ${{ runner.os }}-rpkg-
 
       - uses: actions/cache@v2
         if: startsWith(runner.os, 'macOS')
         with:
           path: ./rpkg
           key: ${{ runner.os }}-rpkg-${{ hashFiles('DESCRIPTION') }}
-          restore-keys: |
-            ${{ runner.os }}-rpkg-
 
       - uses: actions/cache@v2
         if: startsWith(runner.os, 'Windows')
         with:
           path: .\rpkg
           key: ${{ runner.os }}-rpkg-${{ hashFiles('DESCRIPTION') }}
-          restore-keys: |
-            ${{ runner.os }}-rpkg-
       
       - name: Install R packages
         run: |
