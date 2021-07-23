@@ -11,34 +11,36 @@ jobs:
     strategy:
       matrix:
        include:
-         - rver: 10.x
-           os: ubuntu-latest
-           rspm_date: "prod"
-         - rver: 12.x
-           os: macos-latest
-           rspm_date: "dev"
+         - R: "4.1.0"
+           os: "ubuntu-latest"
+           rspm_date: "2021-05-27"
+         - R: "4.1.0"
+           os: "macos-latest"
+           rspm_date: "2021-05-27"
+         - R: "3.5.3"
+           os: "ubuntu-latest"
+           rspm_date: "2019-04-01"
            
     runs-on: ${{ matrix.os }}
     
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      rspm_date: ${{ matrix.rspm_date }}
       
     steps:
-      - uses: actions/checkout@v2
-      - uses: r-lib/actions/setup-r@v1
-      - run: echo $rspm_date 
-      
-      
-      
-      
-      # - name: Install dependencies
-      #   run: |
-      #     install.packages(c("remotes", "rcmdcheck"))
-      #     remotes::install_deps(dependencies = TRUE)
-      #   shell: Rscript {0}
-      # - name: Check
-      #   run: |
-      #     options(crayon.enabled = TRUE)
-      #     rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
-      #   shell: Rscript {0}
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install R
+        uses: r-lib/actions/setup-r@v1
+        with:
+          r-version: ${{ matrix.R }}
+      - name: Install R packages
+        run: |
+          options(repos = "https://packagemanager.rstudio.com/cran/${{ matrix.rspm_date }}")
+          install.packages(c("remotes", "rcmdcheck"))
+          remotes::install_deps(dependencies = TRUE, upgrade = FALSE)
+        shell: Rscript {0}
+      - name: Check
+        run: |
+          options(crayon.enabled = TRUE)
+          rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "warning")
+        shell: Rscript {0}
