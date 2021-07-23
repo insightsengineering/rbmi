@@ -2,32 +2,33 @@
 % Please edit documentation in R/methods.R
 \name{method}
 \alias{method}
-\alias{method_bayesian}
-\alias{method_bootstrap}
-\alias{method_conditionalmean}
+\alias{method_bayes}
+\alias{method_approxbayes}
+\alias{method_condmean}
 \title{Title}
 \usage{
-method_bayesian(
+method_bayes(
   burn_in = 200,
   burn_between = 50,
   same_cov = TRUE,
   n_imputations = 20
 )
 
-method_bootstrap(
-  covariance = c("un", "ar1"),
+method_approxbayes(
+  covariance = c("us", "toep", "cs", "ar1"),
   threshold = 0.01,
   same_cov = TRUE,
   REML = TRUE,
   n_imputations = 20
 )
 
-method_conditionalmean(
-  covariance = c("un", "ar1"),
+method_condmean(
+  covariance = c("us", "toep", "cs", "ar1"),
   threshold = 0.01,
   same_cov = TRUE,
   REML = TRUE,
-  n_imputations = 20
+  n_samples = NULL,
+  type = c("bootstrap", "jackknife")
 )
 }
 \arguments{

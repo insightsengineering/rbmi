@@ -36,7 +36,8 @@ as_simple_formula <- function(vars){
 #' @param dat TODO
 #' @param frm TODO
 as_model_df <- function(dat, frm){
-    design_mat <- stats::model.matrix(frm, dat)
+    #design_mat <- stats::model.matrix(frm, dat)
+    design_mat = stats::model.matrix(frm, stats::model.frame(frm, dat, na.action=function(x) x))
     assert_that(
         nrow(design_mat) == nrow(dat),
         msg = "Model matrix has less rows than input dataset. You may have missing values."

@@ -1,5 +1,3 @@
-
-
 #' TODO
 #'
 #' @name draws
@@ -13,9 +11,13 @@ draws <- function(data, data_ice, vars, method){
     UseMethod("draws", method)
 }
 
-
 #' @rdname draws
-draws.method_bootstrap <- function(data, data_ice, vars, method){
+#' @export
+draws.approxbayes <- function(data, data_ice, vars, method){
+
+    method$type <- "bootstrap" # just for internal use
+    method$n_samples <- method$n_imputations # just for internal use
+
     x <- draws_bootstrap(data, data_ice, vars, method)
 
     ### Set ids to be the unique patient values in order
@@ -24,138 +26,238 @@ draws.method_bootstrap <- function(data, data_ice, vars, method){
     x$samples <- lapply(
         x$samples,
         function(x){
-            x$ids_boot <- x$ids
             x$ids <- unique(data[[vars$subjid]])
             return(x)
         }
     )
-    as_class(x, "bootstrap")
+
+    # remove useless elements from output of `method`
+    x$method$type <- x$method$n_samples <- NULL
+
+    as_class(x, "approxbayes")
 }
 
-
 #' @rdname draws
-draws.method_condmean <- function(data, data_ice, vars, method){
+#' @export
+draws.condmean <- function(data, data_ice, vars, method){
     x <- draws_bootstrap(data, data_ice, vars, method)
     as_class(x, "condmean")
 }
 
-
-#' @rdname draws
+#' Title
 draws_bootstrap <- function(data, data_ice, vars, method){
 
     longdata <- longDataConstructor$new(data, vars)
 
     model_df <- as_model_df(data, as_simple_formula(vars))
-    scaler <- scalerConstructor$new(model_df)
 
+    scaler <- scalerConstructor$new(model_df)
     model_df_scaled <- scaler$scale(model_df)
 
-    mmrm_initial <- fit_mmrm(
-        data = model_df_scaled[,-1],
+    mmrm_initial <- fit_mmrm_multiopt(
+        designmat = model_df_scaled[,-1],
         outcome = model_df_scaled[,1],
-        ids = data[[vars$subjid]],
-        visits = data[[vars$visits]],
-        groups = data[[vars$groups]],
-        method = method
+        subjid = data[[vars$subjid]],
+        visit = data[[vars$visit]],
+        group = data[[vars$group]],
+        vars = vars,
+        cov_struct = method$covariance,
+        REML = method$REML,
+        same_cov = method$same_cov,
+        initial_values = NULL,
+        optimizer =  c("L-BFGS-B", "BFGS", "Nelder-Mead")
     )
 
-    inital_sample <- list(
+    initial_sample <- list(
         beta = scaler$unscale_beta(mmrm_initial$beta),
-        sigma = scaler$unscale_sigma(mmrm_initial$sigma),
-        structure = mmrm_initial$structure,
-        ids = longdata$ids
+        sigma = lapply(mmrm_initial$sigma, scaler$unscale_sigma),
+        converged = mmrm_initial$converged,
+        optimizer = mmrm_initial$optimizer,
+        ids_boot = longdata$ids
     )
 
-    samples <- append(
-        inital_sample,
-        get_bootstrap_samples(
+    init_opt <- list(
+        beta = mmrm_initial$beta,
+        theta = mmrm_initial$theta
+    )
+
+    if(method$type == "bootstrap") {
+        samples <- get_bootstrap_samples(
             longdata = longdata,
             method = method,
             scaler = scaler,
-            initial = inital_sample
+            initial = init_opt
         )
+
+    } else if(method$type == "jackknife") {
+        samples <- get_jackknife_samples(
+            longdata = longdata,
+            method = method,
+            scaler = scaler,
+            initial = init_opt
+        )
+    }
+
+    n_failures <- samples$n_failures
+
+    samples <- append(
+        list(initial_sample),
+        samples$samples
     )
 
-    structures <- lapply(
+    optimizers <- lapply(
         samples,
-        function(x) x[["structure"]]
+        function(x) x[["optimizer"]]
     )
-
-    ## TODO - Code to summarise structures
 
     result <- list(
         method = method,
         data = longdata,
         samples = samples,
-        structures = structures
+        optimizers = optimizers,
+        n_failures = n_failures
     )
 
     return(result)
 }
 
-
 #' Title
 #'
 #' @param ... TODO
 #' @param method TODO
-get_bootstrap_samples <- function(method, ...){
-    required_samples <- method$M - 1 # -1 as the first sample is done in advance on the full dataset
+get_bootstrap_samples <- function(longdata,
+                                  method,
+                                  scaler,
+                                  initial = NULL){
+
+    vars <- longdata$vars
+
+    required_samples <- method$n_samples - 1 # -1 as the first sample is done in advance on the full dataset
     samples <- vector("list", length = required_samples)
     current_sample <- 1
     failed_samples <- 0
     failure_limit <- ceiling(method$threshold * required_samples)
 
     while(current_sample <= required_samples & failed_samples <= failure_limit){
-        sample <- get_bootstrap_mmrm_coefs(
-            method = method,
-            ...
+
+        # create bootstrapped sample
+        ids_boot <- longdata$sample_ids()
+        dat_boot <- longdata$get_data(ids_boot)
+
+        model_df <- as_model_df(dat_boot, as_simple_formula(vars))
+        model_df_scaled <- scaler$scale(model_df)
+
+        # fit mmrm
+        mmrm_fit <- fit_mmrm_multiopt(
+            designmat = model_df_scaled[,-1],
+            outcome = model_df_scaled[,1],
+            subjid = dat_boot[[vars$subjid]],
+            visit = dat_boot[[vars$visit]],
+            group = dat_boot[[vars$group]],
+            vars = vars,
+            cov_struct = method$covariance,
+            REML = method$REML,
+            same_cov = method$same_cov,
+            initial_values = initial,
+            optimizer = c("L-BFGS-B", "BFGS", "Nelder-Mead")
         )
 
-        if(sample$converged){
+        if(mmrm_fit$converged){
+            sample <- list(
+                beta = scaler$unscale_beta(mmrm_fit$beta),
+                sigma = lapply(mmrm_fit$sigma, scaler$unscale_sigma),
+                converged = mmrm_fit$converged,
+                optimizer = mmrm_fit$optimizer,
+                ids_boot = ids_boot
+            )
+
             samples[[current_sample]] <- sample
             current_sample <- current_sample + 1
-        }
 
-        if( !sample$converged | sample$structure != method$structure[[1]]){
+        } else {
             failed_samples <- failed_samples + 1
         }
-    }
-    return(samples)
-}
 
+    }
+
+    if(failed_samples > failure_limit) {
+        stop(paste0("More than ", failure_limit, " failed fits. Increase the failures threshold or set a different covariance structure"))
+    }
+
+    return(
+        list(
+            samples = samples,
+            n_failures = failed_samples
+        )
+    )
+}
 
 #' Title
 #'
-#' @param longdata TODO
-#' @param scaler TODO
 #' @param ... TODO
-get_bootstrap_mmrm_coefs <- function(longdata, scaler = NULL, ...){
+#' @param method TODO
+get_jackknife_samples <- function(longdata,
+                                  method,
+                                  scaler,
+                                  initial = NULL){
+
     vars <- longdata$vars
-    ids_boot <- longdata$sample_ids()
-    dat_boot <- longdata$get_data(ids_boot)
+    ids <- longdata$ids
 
-    model_df <- as_model_df(dat_boot, as_simple_formula(vars))
+    required_samples <- length(ids)
+    samples <- vector("list", length = required_samples)
+    current_sample <- 1
+    failed_samples <- 0
+    failure_limit <- ceiling(method$threshold * required_samples)
 
-    if(!is.null(scaler)){
-        model_df <- scaler$scale(model_df)
+    while(current_sample <= required_samples & failed_samples <= failure_limit){
+
+        ids_boot <- ids[-current_sample]
+        dat_boot <- longdata$get_data(ids_boot)
+
+        model_df <- as_model_df(dat_boot, as_simple_formula(vars))
+        model_df_scaled <- scaler$scale(model_df)
+
+        # fit mmrm
+        mmrm_fit <- fit_mmrm_multiopt(
+            designmat = model_df_scaled[,-1],
+            outcome = model_df_scaled[,1],
+            subjid = dat_boot[[vars$subjid]],
+            visit = dat_boot[[vars$visit]],
+            group = dat_boot[[vars$group]],
+            vars = vars,
+            cov_struct = method$covariance,
+            REML = method$REML,
+            same_cov = method$same_cov,
+            initial_values = initial,
+            optimizer = c("L-BFGS-B", "BFGS", "Nelder-Mead")
+        )
+
+        sample <- list(
+            beta = scaler$unscale_beta(mmrm_fit$beta),
+            sigma = lapply(mmrm_fit$sigma, scaler$unscale_sigma),
+            converged = mmrm_fit$converged,
+            optimizer = mmrm_fit$optimizer,
+            ids_boot = ids_boot
+        )
+
+        samples[[current_sample]] <- sample
+        current_sample <- current_sample + 1
+
+        if(!mmrm_fit$converged) {
+            failed_samples <- failed_samples + 1
+        }
+
     }
 
-    mmrm <- fit_mmrm(
-        data = model_df[,-1],
-        outcome = model_df[,1],
-        ids = dat_boot[[vars$subjid]],
-        visits = dat_boot[[vars$visits]],
-        groups = dat_boot[[vars$groups]],
-        ...
-    )
+    if(failed_samples > failure_limit) {
+        stop(paste0("More than ", failure_limit, " failed fits. Increase the failures threshold or set a different covariance structure"))
+    }
 
-    result <- list(
-        beta = scaler$unscale_beta(mmrm$beta),
-        sigma = scaler$unscale_sigma(mmrm$sigma),
-        converged = mmrm$converged,
-        structure = mmrm$structure,
-        ids = ids_boot
+    return(
+        list(
+            samples = samples,
+            n_failures = failed_samples
+        )
     )
-    return(result)
 }
-

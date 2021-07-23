@@ -4,7 +4,7 @@
 \alias{get_bootstrap_samples}
 \title{Title}
 \usage{
-get_bootstrap_samples(method, ...)
+get_bootstrap_samples(longdata, method, scaler, initial = NULL)
 }
 \arguments{
 \item{method}{TODO}
