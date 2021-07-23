@@ -79,7 +79,7 @@ test_that("pool", {
     pool(results_jack, alternative = "greater")
 
 
-    results <- results %>% as_class("rubin")
+    results <- results_boot %>% as_class("rubin")
     pool(results)
 
 
