@@ -27,18 +27,52 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       
     steps:
+    
       - name: Checkout
         uses: actions/checkout@v2
+        
       - name: Install R
         uses: r-lib/actions/setup-r@v1
         with:
           r-version: ${{ matrix.R }}
+          
+      - name: Install Additional Linux Dependencies
+        if: ${{ matrix.os }} == "ubuntu-latest"
+        run: sudo apt install libcurl4-openssl-dev
+      
+      - uses: actions/cache@v2
+        if: startsWith(runner.os, 'Linux')
+        with:
+          path: ./rpkg
+          key: ${{ runner.os }}-rpkg-${{ hashFiles('DESCRIPTION') }}
+          restore-keys: |
+            ${{ runner.os }}-rpkg-
+
+      - uses: actions/cache@v2
+        if: startsWith(runner.os, 'macOS')
+        with:
+          path: ./rpkg
+          key: ${{ runner.os }}-rpkg-${{ hashFiles('DESCRIPTION') }}
+          restore-keys: |
+            ${{ runner.os }}-rpkg-
+
+      - uses: actions/cache@v2
+        if: startsWith(runner.os, 'Windows')
+        with:
+          path: .\rpkg
+          key: ${{ runner.os }}-rpkg-${{ hashFiles('DESCRIPTION') }}
+          restore-keys: |
+            ${{ runner.os }}-rpkg-
+      
       - name: Install R packages
         run: |
+          dir.create("./rpkg", showWarnings = FALSE)
+          .libPaths("./rpkg")
           options(repos = "https://packagemanager.rstudio.com/cran/${{ matrix.rspm_date }}")
           install.packages(c("remotes", "rcmdcheck"))
           remotes::install_deps(dependencies = TRUE, upgrade = FALSE)
         shell: Rscript {0}
+        
       - name: Check
         run: |
           options(crayon.enabled = TRUE)
