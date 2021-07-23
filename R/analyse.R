@@ -68,7 +68,7 @@ analyse <- function(imputations, fun, delta = NULL, ...) {
     )
 
     class(results) <- new_class
-
+    return(results)
 }
 
 
