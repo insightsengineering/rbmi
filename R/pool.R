@@ -96,13 +96,18 @@ pool_.rubin <- function(results, conf.level, alternative, ...) {
     ses <- results$se
     dfs <- results$df
     alpha <- 1 - conf.level
+    
+    assert_that(
+        all(!is.na(ses)),
+        msg = "Standard Errors for Rubin's rules can not be NA"
+    )
 
     M <- length(ests)
     est_point <- mean(ests)
 
     var_w <- mean(ses^2)
     var_b <- var(ests)
-    var_t <- var_w + (1 + 1 / M) * var_b
+    var_t <- var_w + var_b + var_b / M
 
     v_com <- unique(dfs)
 
@@ -125,8 +130,9 @@ pool_.rubin <- function(results, conf.level, alternative, ...) {
         se = sqrt(var_t),
         alpha = alpha,
         alternative = alternative,
-        qfun = function(p, ...) qt(p, df = df),
-        pfun = function(q, lower.tail, ...) pt(q, df = df, lower.tail = lower.tail)
+        qfun = qt,
+        pfun = pt,
+        df = df
     )
 
     return(ret)
@@ -195,17 +201,18 @@ pool_bootstrap_normal <- function(est, conf.level, alternative) {
 #' @param alternative TODO
 #' @param qfun TODO
 #' @param pfun TODO
-normal_ci <- function(point, se, alpha, alternative, qfun, pfun) {
+#' @param ... TODO
+normal_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
     ci <- switch(
         alternative,
-        two.sided = c(-1, 1) * qfun(1 - alpha / 2),
-        greater =  c(-Inf, 1) *  qfun(1 - alpha),
-        less = c(-1, Inf) * qfun(1 - alpha)
+        two.sided = c(-1, 1) * qfun(1 - alpha / 2, ...),
+        greater =  c(-Inf, 1) *  qfun(1 - alpha, ...),
+        less = c(-1, Inf) * qfun(1 - alpha, ...)
     ) * se + point
 
     pvals <- c(
-        pfun(point, sd = se, lower.tail = TRUE),
-        pfun(point, sd = se, lower.tail = FALSE)
+        pfun(point / se, lower.tail = TRUE, ...),
+        pfun(point / se, lower.tail = FALSE, ...)
     )
 
     index <- switch(

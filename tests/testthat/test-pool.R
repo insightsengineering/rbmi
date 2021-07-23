@@ -1,83 +1,86 @@
 
 
 
-# ########################
-# #
-# #  Bootstrap
-# #
-# #
+
+test_that("pool", {
+    set.seed(101)
 
 
-# vals <- rnorm(500, 0, 1)
-# samp <- lapply(
-#     seq_len(length(vals)),
-#     function(x){
-#         vals2 <- sample(vals, size = length(vals), replace = TRUE)
-#         list("p1" = list("est" = mean(vals2), "se" = sd(vals2), "df" = NA))
-#     }
-# )
-# real <- list(list("p1" = list("est" = mean(vals), "se" = sd(vals), "df" = NA)))
-# results <- append(real, samp) 
+    mu <- 0
+    sd <- 1
+    n <- 2000
+    n_boot <- 5000
+    vals <- rnorm(n, mu, sd)
 
-# results <- results %>% as_class("bootstrap")
-
-# ### reference CIs 
-#  c(-1, 1) * 1.96 * sqrt(1 / 500) + mean(vals)
-
-# pool(results, type = "normal")
-# pool(results, type = "percentile")
-
-# pool(results, type = "normal", alternative = "less")
-# pool(results, type = "percentile", alternative = "less")
-
-# pool(results, type = "normal", alternative = "greater")
-# pool(results, type = "percentile", alternative = "greater")
+    runanalysis <- function(x) {
+        list("p1" = list(est = mean(x), se = sqrt(var(x) / length(x)), df = NA))
+    }
 
 
-# results <- results %>% as_class("rubin")
-# pool(results)
+    ########  Bootstrap
+
+    results_boot <- append(
+        list(runanalysis(vals)),
+        lapply(seq_len(n_boot), function(x) runanalysis(sample(vals, size = n, replace = TRUE)))
+    ) %>%
+        as_class("bootstrap")
 
 
-# ########################
-# #
-# #  Jackknife
-# #
-# #
+    ########  Jackknife
 
-
-# vals <- rnorm(500, 0, 1)
-# samp <- lapply(
-#     seq_len(length(vals)),
-#     function(x){
-#         vals2 <- vals[-x]
-#         list("p1" = list("est" = mean(vals2), "se" = sd(vals2), "df" = NA))
-#     }
-# )
-# real <- list(list("p1" = list("est" = mean(vals), "se" = sd(vals), "df" = NA)))
-# results <- append(real, samp) %>% as_class("jackknife")
-
-# ### reference CIs 
-#  c(-1, 1) * 1.96 * sqrt(1 / 500) + mean(vals)
-
-# pool(results)
-# pool(results, alternative = "less")
-# pool(results, alternative = "greater")
+    results_jack <- append(
+        list(runanalysis(vals)),
+        lapply(seq_len(n), function(i) runanalysis(vals[-i]))
+    ) %>%
+        as_class("jackknife")
 
 
 
+    ###### reference CIs
+    real_mu <- mean(vals)
+    real_se <- sqrt(var(vals) / n)
 
 
+    boot_norm <- pool(results_boot, type = "normal")
+    boot_perc <- pool(results_boot, type = "percentile")
+    jack <- pool(results_jack)
+
+
+    expect_results <- function(res, real_mu, real_se) {
+        conf <- res$conf.level
+
+        pars <- res$pars[[1]]
+
+        real_ci <- real_mu + c(-1, 1) * qnorm( (1 - (1 - conf) / 2) * 1.005) * real_se
+        ci <- pars$ci
+
+        expect_true(real_ci[1] < ci[1] & real_ci[2] > ci[2])
+
+        expect_true((real_mu - abs(real_mu * 0.01)) < pars$est)
+        expect_true((real_mu + abs(real_mu * 0.01)) > pars$est)
+
+    }
+
+    expect_results(boot_norm, real_mu, real_se)
+    expect_results(boot_perc, real_mu, real_se)
+    expect_results(jack, real_mu, real_se)
 
 
 
 
+    ### TODO - Need to implement actual tests
+
+    pool(results_boot, type = "normal", alternative = "less")
+    pool(results_boot, type = "percentile", alternative = "less")
+    pool(results_jack, alternative = "less")
+
+    pool(results_boot, type = "normal", alternative = "greater")
+    pool(results_boot, type = "percentile", alternative = "greater")
+    pool(results_jack, alternative = "greater")
 
 
+    results <- results %>% as_class("rubin")
+    pool(results)
 
 
-# x <- rnorm(1000000, 0)
-# x <- c(mean(x), x)
-
-# pool_bootstrap_normal(x, 0.95, "less")
-# pool_bootstrap_percentile(x, 0.95, "less")
-
+})
