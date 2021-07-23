@@ -7,19 +7,18 @@ name: R-CMD-check
 jobs:
   R-CMD-check:
     
-    
     strategy:
       matrix:
        include:
          - R: "4.1.0"
            os: "ubuntu-latest"
            rspm_date: "2021-05-27"
-         - R: "4.1.0"
-           os: "macos-latest"
-           rspm_date: "2021-05-27"
-         - R: "3.5.3"
-           os: "ubuntu-latest"
-           rspm_date: "2019-04-01"
+        #  - R: "4.1.0"
+        #    os: "macos-latest"
+        #    rspm_date: "2021-05-27"
+        #  - R: "3.5.3"
+        #    os: "ubuntu-latest"
+        #    rspm_date: "2019-04-01"
            
     runs-on: ${{ matrix.os }}
     
@@ -56,7 +55,6 @@ jobs:
         
       - name: Check
         run: |
-          dir.create("gha_rpkg", showWarnings = FALSE)
           .libPaths("gha_rpkg")
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "warning")

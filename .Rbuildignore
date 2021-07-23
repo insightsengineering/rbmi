@@ -5,3 +5,4 @@
 ^codecov\.yml$
 ^misc/
 ^\.lintr$
+^gha_rpkg
