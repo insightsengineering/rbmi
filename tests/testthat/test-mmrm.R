@@ -43,30 +43,13 @@ compute_n_params <- function(cov_struct, nv) {
     return(n_params)
 }
 
-test_fit_mmrm_same_cov <- function(fit, cov_struct, nv) {
+test_fit_mmrm <- function(fit, cov_struct, nv, same_cov) {
 
     n_params <- compute_n_params(cov_struct, nv)
 
-    expect_type(fit, "list")
-
-    expect_vector(fit$beta)
-    expect_length(fit$beta, 7)
-
-    expect_type(fit$sigma, "list")
-    expect_length(fit$sigma, 1)
-    expect_true(is.matrix(fit$sigma[[1]]))
-    expect_equal(dim(fit$sigma[[1]]), c(nv,nv))
-
-    expect_vector(fit$theta)
-    expect_length(fit$theta, n_params)
-
-    expect_true(fit$converged %in% c(TRUE, FALSE))
-
-}
-
-test_fit_mmrm_diff_cov <- function(fit, cov_struct, nv) {
-
-    n_params <- 2*compute_n_params(cov_struct, nv)
+    if(!same_cov) {
+        n_params <- 2*n_params
+    }
 
     expect_type(fit, "list")
 
@@ -244,7 +227,7 @@ test_that(
         )
 
         expect_length(fit, 4)
-        test_fit_mmrm_same_cov(fit, "us", nv)
+        test_fit_mmrm(fit, "us", nv, same_cov)
 
         ############# TOEP
         fit <- fit_mmrm(
@@ -262,7 +245,7 @@ test_that(
         )
 
         expect_length(fit, 4)
-        test_fit_mmrm_same_cov(fit, "toep", nv)
+        test_fit_mmrm(fit, "toep", nv, same_cov)
 
         ############# CS
         fit <- fit_mmrm(
@@ -280,7 +263,7 @@ test_that(
         )
 
         expect_length(fit, 4)
-        test_fit_mmrm_same_cov(fit, "cs", nv)
+        test_fit_mmrm(fit, "cs", nv, same_cov)
 
         ############# AR1
         fit <- fit_mmrm(
@@ -298,7 +281,7 @@ test_that(
         )
 
         expect_length(fit, 4)
-        test_fit_mmrm_same_cov(fit, "ar1", nv)
+        test_fit_mmrm(fit, "ar1", nv, same_cov)
 
     })
 
@@ -322,7 +305,7 @@ test_that(
         )
 
         expect_length(fit, 4)
-        test_fit_mmrm_diff_cov(fit, "us", nv)
+        test_fit_mmrm(fit, "us", nv, same_cov)
 
     })
 
@@ -346,7 +329,7 @@ test_that(
         )
 
         expect_length(fit, 4)
-        test_fit_mmrm_same_cov(fit, "us", nv)
+        test_fit_mmrm(fit, "us", nv, same_cov)
 
     })
 
@@ -391,7 +374,7 @@ test_that(
 
         output_expected <- list(
             beta = beta,
-            sigma = sigma,
+            sigma = list(sigma[[1]], sigma[[1]]),
             theta = theta,
             converged = converged
         )
@@ -485,7 +468,7 @@ test_that(
         expect_true(fit$converged)
         expect_equal(fit$optimizer, "BFGS")
 
-        test_fit_mmrm_same_cov(fit, "us", nv)
+        test_fit_mmrm(fit, "us", nv, same_cov)
 
         ########### TWO OPTIMIZERS
         fit <- fit_mmrm_multiopt(
@@ -506,5 +489,5 @@ test_that(
         expect_true(fit$converged)
         expect_equal(fit$optimizer, "L-BFGS-B")
 
-        test_fit_mmrm_same_cov(fit, "us", nv)
+        test_fit_mmrm(fit, "us", nv, same_cov)
     })

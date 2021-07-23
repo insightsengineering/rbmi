@@ -77,7 +77,7 @@ test_boot_samples <- function(samples, method) {
     # check that sigma is a list of length one (since same_cov = TRUE)
     sigmas <- lapply(samples, function(x) x$sigma)
     expect_true( all(sapply(sigmas, typeof)  == "list") )
-    expect_true( all(sapply(sigmas, length)  == 1) )
+    expect_true( all(sapply(sigmas, length)  == 2) )
 }
 
 # function for checking output from draws_bootstrap
@@ -115,7 +115,7 @@ test_draws_condmean_and_approxbayes <- function(draws_boot, method) {
 
         # check that sigma is a list of length one (since same_cov = TRUE)
         expect_equal( typeof(mmrm_initial$sigma), "list")
-        expect_length( mmrm_initial$sigma, 1)
+        expect_length( mmrm_initial$sigma, 2)
     }
 }
 

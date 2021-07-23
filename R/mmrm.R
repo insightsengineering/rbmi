@@ -224,6 +224,12 @@ fit_mmrm <- function(
     # extract regression coefficients and covariance matrices
     params <- extract_params(fit)
 
+    # adjust covariance matrix
+    if(same_cov) {
+        params$sigma <- list(params$sigma[[1]], params$sigma[[1]])
+    }
+    names(params$sigma) <- levels(group)
+
     return_obj <- list(
         "beta" = params$beta,
         "sigma" = params$sigma,
