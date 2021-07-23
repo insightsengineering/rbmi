@@ -37,7 +37,7 @@ jobs:
           r-version: ${{ matrix.R }}
           
       - name: Install Additional Linux Dependencies
-        if: ${{ matrix.os }} == "ubuntu-latest"
+        if: startsWith(runner.os, 'Linux')
         run: sudo apt install libcurl4-openssl-dev
       
       - uses: actions/cache@v2
