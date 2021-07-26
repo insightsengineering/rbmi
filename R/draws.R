@@ -45,6 +45,11 @@ draws.condmean <- function(data, data_ice, vars, method){
 }
 
 #' Title
+#' 
+#' @param data TODO
+#' @param data_ice TODO
+#' @param vars TODO
+#' @param method TODO
 draws_bootstrap <- function(data, data_ice, vars, method){
 
     longdata <- longDataConstructor$new(data, vars)
@@ -121,14 +126,19 @@ draws_bootstrap <- function(data, data_ice, vars, method){
     return(result)
 }
 
-#' Title
+
+#' Title - TODO
 #'
-#' @param ... TODO
+#' @param longdata TODO
 #' @param method TODO
-get_bootstrap_samples <- function(longdata,
-                                  method,
-                                  scaler,
-                                  initial = NULL){
+#' @param scaler TODO
+#' @param initial TODO
+get_bootstrap_samples <- function(
+    longdata,
+    method,
+    scaler,
+    initial = NULL
+){
 
     vars <- longdata$vars
 
@@ -194,12 +204,16 @@ get_bootstrap_samples <- function(longdata,
 
 #' Title
 #'
-#' @param ... TODO
+#' @param longdata TODO
 #' @param method TODO
-get_jackknife_samples <- function(longdata,
-                                  method,
-                                  scaler,
-                                  initial = NULL){
+#' @param scaler TODO
+#' @param initial TODO
+get_jackknife_samples <- function(
+    longdata,
+    method,
+    scaler,
+    initial = NULL
+){
 
     vars <- longdata$vars
     ids <- longdata$ids

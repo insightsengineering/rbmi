@@ -14,12 +14,12 @@ delta_lagscale(
 \arguments{
 \item{imputations}{TODO}
 
+\item{delta}{TODO}
+
+\item{dlag}{TODO}
+
 \item{missing_only}{If false delta adjustments will be calculated for non-missing post-ice data. If true then
 non-missing post-ice data will have a delta of 0 assigned. See details for more information (TODO).}
-
-\item{visit_delta}{TODO}
-
-\item{lag_scale}{TODO}
 }
 \description{
 TODO

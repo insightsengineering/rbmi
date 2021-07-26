@@ -6,3 +6,4 @@
 ^misc/
 ^\.lintr$
 ^gha_rpkg
+^.gitignore$

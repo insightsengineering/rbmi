@@ -8,6 +8,7 @@
 #' @param covariance TODO
 #' @param threshold TODO
 #' @param REML TODO
+#' @param type TODO
 #' @return TODO
 #' @export
 method_bayes <- function(
@@ -55,7 +56,7 @@ method_condmean <- function(
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
-    n_samples = NULL,
+    n_imputations = NULL,
     type = c("bootstrap", "jackknife")
 ){
     covariance <- match.arg(covariance)
@@ -63,8 +64,8 @@ method_condmean <- function(
 
     if(type == "bootstrap") {
         assert_that(
-            !is.null(n_samples),
-            msg = "n_samples must not be NULL when type is bootstrap"
+            !is.null(n_imputations),
+            msg = "n_imputations must not be NULL when type is bootstrap"
         )
     }
 
@@ -73,7 +74,7 @@ method_condmean <- function(
         threshold = threshold,
         same_cov = same_cov,
         REML = REML,
-        n_samples = n_samples,
+        n_imputations = n_imputations,
         type = type
     )
     return( as_class(x, "condmean"))
