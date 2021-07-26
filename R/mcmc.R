@@ -31,21 +31,78 @@ get_obs_missingness_patterns <- function(outcome) {
 
 match_groups_sigmas <- function(
     sigma_reml,
-    group_sigma
+    levels_group
 ) {
 
-    return(sigma_reml[order(group_sigma)])
+    return(sigma_reml[order(levels_group)])
 
 }
 
-prepare_data_mcmc <- function(
+QR_decomp <- function(designmat, N, J) {
+    qr_obj = qr(designmat)
+    Q = qr.Q(qr = qr_obj)* sqrt(N*J - 1)
+    R = qr.R(qr = qr_obj)/ sqrt(N*J - 1)
+
+    ret_obj <- list(
+        Q = Q,
+        R = R
+    )
+
+    return(ret_obj)
+}
+
+run_mcmc <- function(
+    designmat,
     outcome,
-    groups,
-    Q,
-    R,
-    same_cov,
+    group,
     sigma_reml,
-    group_sigma) {
+    n_imputations,
+    burn_in,
+    burn_between,
+    initial_values,
+    same_cov
+) {
+    data <- prepare_data_mcmc(
+        designmat,
+        outcome,
+        group,
+        same_cov,
+        sigma_reml
+    )
+
+    fit <- fit_mcmc(
+        data,
+        n_imputations,
+        burn_in,
+        burn_between,
+        initial_values,
+        same_cov
+    )
+
+    check_mcmc(fit)
+
+    draws <- extract_draws(fit)
+
+    draws$sigma <- lapply(
+        draws$sigma,
+        function(x) names(x) <- levels(group)
+    )
+
+    ret_obj <- list(
+        "beta" = draws$beta,
+        "sigma" = draws$sigma,
+        "fit" = fit
+    )
+
+    return(ret_obj)
+}
+
+prepare_data_mcmc <- function(
+    designmat,
+    outcome,
+    group,
+    same_cov,
+    sigma_reml) {
 
     assert_that(
         is.list(sigma_reml),
@@ -53,8 +110,8 @@ prepare_data_mcmc <- function(
     )
 
     assert_that(
-        is.factor(groups),
-        msg = "groups must be a factor"
+        is.factor(group),
+        msg = "group must be a factor"
     )
 
     J <- nrow(sigma_reml[[1]])
@@ -66,39 +123,41 @@ prepare_data_mcmc <- function(
     obs_miss_patterns <- get_obs_missingness_patterns(outcome)
     outcome[is.na(outcome)] <- 1000
 
+    QR_mat <- QR_decomp(designmat, N, J)
+
     if(same_cov) {
         data <- list(J = J,
                      N = N,
-                     P = ncol(Q),
+                     P = ncol(designmat),
                      n_missingness_patterns = nrow(obs_miss_patterns$missingness_patterns),
                      M = obs_miss_patterns$M,
-                     Q = Q,
-                     R = R,
+                     Q = QR_mat$Q,
+                     R = QR_mat$R,
                      y = outcome,
                      y_observed = obs_miss_patterns$missingness_patterns,
-                     sigma_reml = sigma_reml[[1]])
+                     Sigma_reml = sigma_reml[[1]])
     } else {
 
         assert_that(
-            length(sigma_reml) == nlevels(groups),
+            length(sigma_reml) == nlevels(group),
             msg = "The number of covariance matrices must be equal to the number of groups"
         )
 
-        G <- nlevels(groups)
-        which_arm <- as.numeric(groups)[seq(1, N*J, by = J)]
+        G <- nlevels(group)
+        which_arm <- as.numeric(group)[seq(1, N*J, by = J)]
 
-        sigma_reml <- match_groups_sigmas(sigma_reml, group_sigma)
+        sigma_reml <- match_groups_sigmas(sigma_reml, levels(group))
 
         data <- list(J = J,
                      N = N,
-                     P = ncol(Q),
+                     P = ncol(designmat),
                      n_missingness_patterns = nrow(obs_miss_patterns$missingness_patterns),
                      M = obs_miss_patterns$M,
-                     Q = Q,
-                     R = R,
+                     Q = QR_mat$Q,
+                     R = QR_mat$R,
                      y = outcome,
                      y_observed = obs_miss_patterns$missingness_patterns,
-                     sigma_reml = sigma_reml,
+                     Sigma_reml = sigma_reml,
                      G = G,
                      which_arm = which_arm)
     }
@@ -109,13 +168,15 @@ prepare_data_mcmc <- function(
 #' @import methods
 #' @useDynLib rbmi, .registration = TRUE
 #' @importFrom rstan sampling
-run_mcmc <- function(
+fit_mcmc <- function(
     data,
     n_imputations,
     burn_in,
     burn_between,
     initial_values,
     same_cov) {
+
+    initial_values = list(initial_values)
 
     if(same_cov) {
 
@@ -151,12 +212,38 @@ run_mcmc <- function(
 
 }
 
+#' Title
+split_dim <- function(a, n) {
+    setNames(lapply(split(a, arrayInd(seq_along(a), dim(a))[, n]),
+                    array, dim = dim(a)[-n], dimnames(a)[-n]),
+             dimnames(a)[[n]])
 
+}
 
 #' @importFrom rstan extract
 extract_draws <- function(stan_fit) {
 
-    return(extract(stan_fit, pars = c("beta", "Sigma")))
+    pars <- extract(stan_fit, pars = c("beta", "Sigma"))
+    names(pars) <- c("beta", "sigma")
+
+    ##################### from array to list
+    pars$sigma <- split_dim(pars$sigma, 1)
+
+    if(length(dim(pars$sigma[[1]])) == 3) { # if same_cov == FALSE
+        pars$sigma <- lapply(
+            pars$sigma,
+            function(x) split_dim(x, 1)
+        )
+    } else {
+        pars$sigma <- lapply(
+            pars$sigma,
+            function(x) list(x,x)
+        )
+    }
+
+    pars$beta <- split_dim(pars$beta, 1)
+
+    return(pars)
 }
 
 #' @importFrom rstan summary

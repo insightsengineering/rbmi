@@ -13,6 +13,13 @@ draws <- function(data, data_ice, vars, method){
 
 #' @rdname draws
 #' @export
+draws.bayes <- function(data, data_ice, vars, method) {
+    x <- draws_bayes(data, data_ice, vars, method)
+    as_class(x, "bayes")
+}
+
+#' @rdname draws
+#' @export
 draws.approxbayes <- function(data, data_ice, vars, method){
 
     method$type <- "bootstrap" # just for internal use
@@ -42,6 +49,58 @@ draws.approxbayes <- function(data, data_ice, vars, method){
 draws.condmean <- function(data, data_ice, vars, method){
     x <- draws_bootstrap(data, data_ice, vars, method)
     as_class(x, "condmean")
+}
+
+
+#' Title
+draws_bayes <- function(data, data_ice, vars, method) {
+
+    longdata <- longDataConstructor$new(data, vars)
+
+    model_df <- as_model_df(data, as_simple_formula(vars))
+
+    scaler <- scalerConstructor$new(model_df)
+    model_df_scaled <- scaler$scale(model_df)
+
+    mmrm_initial <- fit_mmrm_multiopt(
+        designmat = model_df_scaled[,-1],
+        outcome = model_df_scaled[,1],
+        subjid = data[[vars$subjid]],
+        visit = data[[vars$visit]],
+        group = data[[vars$group]],
+        vars = vars,
+        cov_struct = "us",
+        REML = TRUE,
+        same_cov = method$same_cov,
+        initial_values = NULL,
+        optimizer =  c("L-BFGS-B", "BFGS", "Nelder-Mead")
+    )
+
+    fit <- run_mcmc(
+        designmat = model_df_scaled[,-1],
+        outcome = model_df_scaled[,1],
+        group = data[[vars$group]],
+        sigma_reml = mmrm_initial$sigma,
+        n_imputations = method$n_imputations,
+        burn_in = method$burn_in,
+        burn_between = method$burn_between,
+        initial_values = list(
+            beta = mmrm_initial$beta,
+            sigma = mmrm_initial$sigma
+        ),
+        same_cov = method$same_cov
+    )
+
+    result <- list(
+        method = method,
+        samples = list(
+            beta = scaler$unscale_beta(fit$beta),
+            sigma = lapply(fit$sigma, scaler$unscale_sigma)
+        ),
+        fit = fit$fit
+    )
+
+    return(result)
 }
 
 #' Title
