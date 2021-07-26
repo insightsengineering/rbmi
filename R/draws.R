@@ -16,7 +16,7 @@ draws <- function(data, data_ice, vars, method){
 draws.approxbayes <- function(data, data_ice, vars, method){
 
     method$type <- "bootstrap" # just for internal use
-    method$n_samples <- method$n_imputations # just for internal use
+    method$n_samples <- method$n_samples # just for internal use
 
     x <- draws_bootstrap(data, data_ice, vars, method)
 

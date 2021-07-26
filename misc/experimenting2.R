@@ -20,7 +20,7 @@ vars <- list(
     covariates = "basval"
 )
 
-method <- method_bootstrap(n_imputations = 5, covariance = "us" ) 
+method <- method_bootstrap(n_samples = 5, covariance = "us" ) 
 
 levels_visit = levels(data$VISIT)
 J = nlevels(data$VISIT)

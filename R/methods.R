@@ -4,7 +4,7 @@
 #' @param burn_in TODO
 #' @param burn_between TODO
 #' @param same_cov TODO
-#' @param n_imputations TODO
+#' @param n_samples TODO
 #' @param covariance TODO
 #' @param threshold TODO
 #' @param REML TODO
@@ -15,13 +15,13 @@ method_bayes <- function(
     burn_in = 200,
     burn_between = 50,
     same_cov = TRUE,
-    n_imputations = 20
+    n_samples = 20
 ){
     x <- list(
         burn_in = burn_in,
         burn_between = burn_between,
         same_cov = same_cov,
-        n_imputations = n_imputations
+        n_samples = n_samples
     )
     return( as_class(x, "bayes"))
 }
@@ -34,7 +34,7 @@ method_approxbayes <- function(
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
-    n_imputations = 20
+    n_samples = 20
 ){
     covariance <- match.arg(covariance)
 
@@ -43,7 +43,7 @@ method_approxbayes <- function(
         threshold = threshold,
         same_cov = same_cov,
         REML = REML,
-        n_imputations = n_imputations
+        n_samples = n_samples
     )
     return( as_class(x, "approxbayes"))
 }
@@ -56,7 +56,7 @@ method_condmean <- function(
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
-    n_imputations = NULL,
+    n_samples = NULL,
     type = c("bootstrap", "jackknife")
 ){
     covariance <- match.arg(covariance)
@@ -64,8 +64,8 @@ method_condmean <- function(
 
     if(type == "bootstrap") {
         assert_that(
-            !is.null(n_imputations),
-            msg = "n_imputations must not be NULL when type is bootstrap"
+            !is.null(n_samples),
+            msg = "n_samples must not be NULL when type is bootstrap"
         )
     }
 
@@ -74,7 +74,7 @@ method_condmean <- function(
         threshold = threshold,
         same_cov = same_cov,
         REML = REML,
-        n_imputations = n_imputations,
+        n_samples = n_samples,
         type = type
     )
     return( as_class(x, "condmean"))
