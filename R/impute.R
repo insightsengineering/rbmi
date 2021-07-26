@@ -1,152 +1,491 @@
 
-# impute.stochastic <- function(draws, reference){
-#     Map(
-#         impute_data,
-#         draws@samples,
-#         data = draws@data,
-#         vars = draws@vars ,
-#         formula = draws@formula,
-#         references = references,
-#         strategy = draws@strategy
-#     )
-# }
-#
-# impute.deterministic <- function(draws, reference){
-#
-#     fun <- function(draw, data, ...){
-#         index <- draw@index
-#         dat <- data[index,]
-#         impute_data(
-#             draw = draw,
-#             data = dat,
-#             ...
-#         )
-#     }
-#
-#     Map(
-#         fun,
-#         draws@samples,
-#         data = draws@data,
-#         vars = draws@vars ,
-#         formula = draws@formula,
-#         references = references,
-#         strategy = draws@strategy
-#     )
-# }
-#
-#
-#
-#
-# impute_data <- function(sample, data, vars, formula, references, strategy){
-#     validate_references(data[,vars$group], references)
-#     pts <- unique(data[,vars$subjid])
-#
-#     fun <- function(pt){
-#         index <- dat[,vars$subjid == pt]
-#         dat_pt <- dat[, index]
-#         impute_data_individual(
-#             dat_pt,
-#             vars,
-#             formula,
-#             references,
-#             strategy,
-#             sample$beta,
-#             sample$sigma
-#         )
-#     }
-#     Map(fun, pts)
-# }
-#
-# impute_data_individual <- function(
-#     dat_pt,
-#     vars,
-#     formula,
-#     references,
-#     strategy,
-#     beta,
-#     sigma,
-#     type
-# ){
-#     index_missing <- is.na(dat_pt[, vars$outcome])
-#
-#     if(!any(index_missing)){
-#         return(c())
-#     }
-#
-#
-#     group_pt <- unique(dat_pt[,vars$group])
-#     group_ref <- reference[group_pt]
-#
-#     dat_ref <- dat_pt
-#     dat_ref[,vars$group] <- group_ref
-#
-#     parameters_group <- list(
-#         mu = get_mu( dat_pt, formula, beta),
-#         sigma = sigma[group_pt]
-#     )
-#
-#     parameters_reference <- list(
-#         mu = get_mu( dat_ref, formula, beta),
-#         sigma = sigma[group_ref]
-#     )
-#
-#     pars <- merge_parameters(
-#         parameters_group,
-#         parameters_reference,
-#         strategy = strategy,
-#         index = index_mar
-#     )
-#
-#     conditional_parameters <- get_conditional_parameters(pars, index_missing)
-#     imputed_outcome <- impute_outcome(conditional_parameters)
-#     dat_pr[index_missing,vars$outcome] <- imputed_outcome
-#
-#     return(dat_pr)
-# }
-#
-#
-# impute_outcome <- function(conditional_parameters){
-#     # TODO
-# }
-#
-# get_conditional_parameters <- function(pars, index_missing){
-#     # TODO
-# }
-#
-# merge_parameters <- function(pars_group, pars_ref, strat = strat, mar_index = mar_index){
-#     # TODO
-# }
-#
-# get_mu <- function(dat_pr, frm, beta){
-#     # TODO
-# }
-#
-# validate_references <- function(group, references){
-#     # TODO
-# }
-#
-# strategy.MAR <- function(parameters_group, parameters_reference){
-#     # TODO
-# }
-#
-# strategy.JR <- function(parameters_group, parameters_reference){
-#     # TODO
-# }
-#
-# strategy.CR <- function(parameters_group, parameters_reference){
-#     # TODO
-# }
-#
-# strategy.CIR <- function(parameters_group, parameters_reference){
-#     # TODO
-# }
-#
-# strategy.LMCF <- function(parameters_group, parameters_reference){
-#     # TODO
-# }
-#
-#
-#
-#
-#
-#
+
+
+
+#' impute
+#'
+#' TODO - Description
+#'
+#' @param draws TODO
+#' @param data_ice TODO
+#' @param references TODO
+#' @param strategies TODO
+#' @export
+impute <- function(draws,  data_ice, references, strategies){
+    UseMethod("impute")
+}
+
+
+
+#' impute.bootstrap
+#'
+#' TODO - Description
+#'
+#' @param draws TODO
+#' @param data_ice TODO
+#' @param references TODO
+#' @param strategies TODO
+#' @export
+impute.random <- function(draws, data_ice = NULL, references, strategies = getStrategies()){
+    result <- impute_internal(
+        draws = draws,
+        data_ice = data_ice,
+        references = references,
+        strategies = strategies,
+        conditionalMean = FALSE
+    )
+    return(as_class(result, "imputation"))
+}
+
+
+#' impute.condmean
+#'
+#' TODO - Description
+#'
+#' @param draws TODO
+#' @param data_ice TODO
+#' @param references TODO
+#' @param strategies TODO
+#' @export
+impute.condmean <- function(draws,  data_ice = NULL, references, strategies = getStrategies()){
+    result <- impute_internal(
+        draws = draws,
+        data_ice = data_ice,
+        references = references,
+        strategies = strategies,
+        conditionalMean = TRUE
+    )
+    return(as_class(result, "imputation"))
+}
+
+
+#' impute_internal
+#'
+#' TODO - Description
+#'
+#' @param draws TODO
+#' @param data_ice TODO
+#' @param references TODO
+#' @param strategies TODO
+#' @param conditionalMean TODO
+impute_internal <- function(draws, data_ice = NULL, references, strategies, conditionalMean = FALSE){
+
+    data <- draws$data
+
+    validate_references(references, data$data[[data$vars$group]])
+    validate_strategies(strategies, data$strategies)
+
+    if(!is.null(data_ice)){
+        data$update_strategies(data_ice)
+    }
+
+    samples_grouped <- transpose_samples(draws$samples)
+
+    imputes <- mapply(
+        impute_data_individual,
+        names(samples_grouped$index),
+        samples_grouped$index,
+        MoreArgs = list(
+            beta = samples_grouped$beta,
+            sigma = samples_grouped$sigma,
+            data = data,
+            references = references,
+            strategies = strategies,
+            conditionalMean = conditionalMean
+        ),
+        SIMPLIFY = FALSE
+    )
+
+    x <- list(
+        imputations = untranspose_samples(imputes, samples_grouped$index),
+        data = data,
+        method = draws$method
+    )
+    return(x)
+}
+
+
+#' Transpose Samples
+#'
+#' Transposes samples generated by \code{\link[rbmi]{draws}} so that they are grouped
+#' by `subjid` instead of by sample number.
+#'
+#' @param samples A list of samples generated by \code{\link[rbmi]{draws}}
+transpose_samples <- function(samples){
+
+    beta <- list()
+    sigma <- list()
+
+    grp_names <- names(samples[[1]]$sigma)
+    for( grp in grp_names) {
+        sigma[[grp]] <-  vector(mode = "list", length = length(samples))
+    }
+
+    for( i in seq_along(samples)){
+        sample <- samples[[i]]
+        beta[[i]] <- sample$beta
+        for( grp in grp_names) sigma[[grp]][[i]] <-  sample$sigma[[grp]]
+    }
+
+    index <- invert_indexes( lapply(samples, function(x) x$ids))
+
+    x <- list(
+        beta = beta,
+        sigma = sigma,
+        index = index
+    )
+    return(x)
+}
+
+
+#' Invert Samples
+#'
+#' Takes a sample object created by \code{\link[rbmi]{impute_data_individual}}
+#' and inverts it based upon the original transposition done by
+#' \code{\link[rbmi]{transpose_samples}} in order to group by the
+#' sample number instead of the subject ID
+#'
+#' @param samples A list of "sample" objects created by \code{\link[rbmi]{impute_data_individual}}
+#' @param indexes A list of indexes created by \code{\link[rbmi]{transpose_samples}}
+untranspose_samples <- function(samples, indexes){
+    number_of_samples <- max(unlist(indexes))
+
+    HOLD <- list()
+    for( i in seq_len(number_of_samples)) HOLD[[i]] <- list()
+
+    for( samp in samples){
+        id <- samp$id
+        for( j in seq_along(samp$values)){
+            sample_index <- indexes[[id]][[j]]
+            hold_index <- length(HOLD[[sample_index]]) + 1
+            HOLD[[sample_index]][[hold_index]] <- list(
+                id = id,
+                values = samp$values[[j]]
+            )
+        }
+    }
+    return(HOLD)
+}
+
+
+#' Invert and derive indexes
+#'
+#' Takes a list of elements and creates a new list
+#' containing 1 entry per unique element value containing
+#' the indexes of which original elements it occurred in.
+#'
+#' @details
+#' This functions purpose is best illustrated by an example:
+#'
+#' input:
+#'
+#' \code{list(  c("A", "B", "C"),  c("A", "A", "B"))}
+#'
+#' becomes:
+#'
+#' \code{list(  "A" = c(1,2,2),  "B" = c(1,2), "C" = 1 )}
+#'
+#' @param x list of elements to invert and calculate index from (see details)
+invert_indexes <- function(x){
+    lens <- vapply(x, function(x) length(x), numeric(1))
+    grp <- rep(seq_along(x), lens)
+    vals <- unlist(x, use.names = FALSE)
+    index <- split(grp, vals)
+    return(index)
+}
+
+
+#' impute_data_individual
+#'
+#' TODO - Description
+#'
+#' @param id TODO
+#' @param index TODO
+#' @param beta TODO
+#' @param sigma TODO
+#' @param data TODO
+#' @param references TODO
+#' @param strategies TODO
+#' @param conditionalMean TODO
+impute_data_individual <- function(
+    id,
+    index,
+    beta,
+    sigma,
+    data,
+    references,
+    strategies,
+    conditionalMean
+){
+
+    # Define default return value if nothing needs to be imputed
+    result <- list(
+        id = id,
+        values = replicate(n = length(index), numeric(0))
+    )
+
+    id_data <- data$extract_by_id(id)
+
+    if( sum(id_data$is_missing) == 0 ) return(result)
+
+    vars <- data$vars
+    group_pt <- id_data$group
+    group_ref <- references[group_pt]
+
+
+    dat_pt <- id_data$data
+    dat_pt[,vars$outcome] <- 1  # Dummy outcome value to stop rows being dropped by model.matrix
+    dat_ref <- dat_pt
+    dat_ref[,vars$group] <- factor(group_ref, levels = levels(group_pt))
+
+    dat_pt_mod <- as_model_df(dat_pt, as_simple_formula(vars))
+    dat_ref_mod <- as_model_df(dat_ref, as_simple_formula(vars))
+
+    parameters_group <- get_visit_distribution_parameters(
+        dat = dat_pt_mod[-1],  # -1 as first col from as_model_df is the outcome variable
+        beta = beta[index],
+        sigma = sigma[[group_pt]][index]
+    )
+
+    parameters_reference <- get_visit_distribution_parameters(
+        dat = dat_ref_mod[-1], # -1 as first col from as_model_df is the outcome variable
+        beta = beta[index],
+        sigma = sigma[[group_ref]][index]
+    )
+
+    pars <- mapply(
+        strategies[[id_data$strategy]],
+        parameters_group,
+        parameters_reference,
+        MoreArgs = list(index_mar = id_data$is_mar),
+        SIMPLIFY = FALSE
+    )
+
+    conditional_parameters <- lapply(
+        pars,
+        get_conditional_parameters,
+        values = id_data$outcome
+    )
+
+    if(conditionalMean){
+        imputed_outcome <- lapply(conditional_parameters, function(x) as.vector(x$mu))
+    } else {
+        imputed_outcome <- lapply(conditional_parameters, impute_outcome)
+    }
+
+    result$values <- imputed_outcome
+    return(result)
+}
+
+
+#' Derive visit distribution parameters
+#'
+#' Takes patient level data and beta coefficients and expands them
+#' to get an patient specific estimate for the visit distribution parameters
+#' `mu` and `sigma`. Returns the values in a specific format
+#' which is expected by downstream functions in the imputation process
+#' (namely  `list(list(mu = ..., sigma = ...), list(mu = ..., sigma = ...))`)
+#'
+#' @param dat Patient level dataset, must be 1 row per visit. Column order must
+#' be in the same order as beta. The number of columns must match the length of beta
+#' @param beta List of model beta coefficients 1 for each sample i.e. `list( c(1,2,3) , c(4,5,6), c(7,8,9))`
+#' all values of beta must be the same length and must be the same length and order as `dat`
+#' @param sigma List of sigma. Must have the same number of entries as `beta`
+get_visit_distribution_parameters <- function(dat, beta, sigma){
+
+    assert_that(
+        length(unique(vapply(beta, length, numeric(1)))) == 1,
+        msg = "All elements of beta must be the same length"
+    )
+
+    beta_mat <- matrix(
+        unlist(beta, use.names = FALSE),
+        nrow = length(beta[[1]]),
+        ncol = length(beta),
+        byrow = FALSE
+    )
+    mu <- as.matrix(dat) %*% beta_mat
+    parameters <- list()
+    for(i in seq_along(beta)){
+        parameters[[i]] <- list(
+            mu = mu[,i],
+            sigma = sigma[[i]]
+        )
+    }
+    return(parameters)
+}
+
+
+#' Sample outcome value
+#'
+#' Draws a random sample from a multivariate normal distribution
+#'
+#' @param conditional_parameters a list with elements `mu` and `sigma` which
+#' contain the mean vector and covariance matrix to sample from
+#' @importFrom stats rnorm
+impute_outcome <- function(conditional_parameters){
+
+    assert_that(
+        all(!is.na(conditional_parameters$mu)),
+        all(!is.na(conditional_parameters$sigma)),
+        msg = "Sigma or Mu contain missing values"
+    )
+
+    if(length(conditional_parameters$mu) == 1){
+
+        assert_that(
+            length(conditional_parameters$sigma) == 1,
+            msg = "Sigma is not of a compatable size with mu"
+        )
+
+        result <- rnorm(
+            n = 1,
+            mean = conditional_parameters$mu,
+            sd = conditional_parameters$sigma
+        )
+
+    } else {
+        result <- mvtnorm::rmvnorm(
+            n = 1,
+            mean = conditional_parameters$mu,
+            sigma = conditional_parameters$sigma,
+            method = "chol",
+            checkSymmetry = FALSE
+        )
+    }
+    return(as.vector(result))
+}
+
+
+
+
+#' Derive conditional multivariate normal parameters
+#'
+#' Takes parameters for a multivariate normal distribution + known values
+#' to calculate the conditional distribution for the unknown values
+#'
+#' @param pars a list with values "mu" and "sigma" defining the mean vector and
+#' covariance matrix respectively
+#' @param values a vector of known values to condition on, must be same length as pars$mu.
+#' Missing values must be represented by an NA
+#'
+#' @return A list with the conditional distribution parameters
+#' \itemize{
+#'   \item mu - The conditional mean vector
+#'   \item sigma - The conditional covariance matrix
+#' }
+get_conditional_parameters <- function(pars, values){
+    q <- is.na(values)
+
+    if(sum(q) == length(values)) return(pars)
+    if(sum(q) == 0) return( list(mu = numeric(0), sigma = numeric(0)))
+
+    a <- values[!q]
+
+    mu1 <- matrix(nrow = sum(q), pars$mu[q])
+    mu2 <- matrix(nrow = sum(!q), pars$mu[!q])
+
+    sig11 <- pars$sigma[q,q, drop = FALSE]
+    sig12 <- pars$sigma[q,!q, drop = FALSE]
+    sig21 <- pars$sigma[!q,q, drop = FALSE]
+    sig22 <- pars$sigma[!q,!q, drop = FALSE]
+
+    sig22_inv_12 <-  sig12 %*% solve(sig22)
+
+    x <- list(
+        mu = mu1 + sig22_inv_12 %*% (a - mu2),
+        sigma = sig11 - sig22_inv_12 %*% sig21
+    )
+    return(x)
+}
+
+
+#' Validate user supplied references
+#'
+#' Checks to ensure that the user specified references are
+#' expect values (i.e. those found within the source data)
+#'
+#' @param references named character vector
+#' @param control factor variable (should be the `group` variable from the source dataset)
+#'
+#' @return
+#' Will error if there is an issue otherwise will return `TRUE`
+validate_references <- function(references, control){
+
+    ref_names <- names(references)
+
+    assert_that(
+        is.character(references),
+        !is.null(ref_names),
+        all(!is.na(references)),
+        msg = "`references` should be a non-missing named character vector"
+    )
+
+    assert_that(
+        all( ref_names != ""),
+        msg = "All values of `references` must be named"
+    )
+
+    assert_that(
+        length(unique(ref_names)) == length(ref_names),
+        msg = "`references` must have unique names"
+    )
+
+    assert_that(
+        is.factor(control),
+        msg = "`control` should be a factor vector"
+    )
+
+    unique_refs <- unique(c(references, ref_names))
+    valid_refs <- unique(as.character(control))
+
+    assert_that(
+        all(unique_refs %in% valid_refs),
+        msg = paste0(
+            "`references` contains values that are not present in the",
+            "`group` variable of your source dataset"
+        )
+    )
+    return(invisible(TRUE))
+}
+
+
+#' Validate user specified strategies
+#'
+#' Compares the user provided strategies to those that are
+#' required (the reference). Will error if not all values
+#' of reference have been defined
+#'
+#' @param strategies named list of strategies
+#' @param reference list or character vector of strategies that need to be defined
+#'
+#' @return
+#' Will error if there is an issue otherwise will return `TRUE`
+validate_strategies <- function(strategies, reference){
+
+    strat_names <- names(strategies)
+
+    assert_that(
+        is.list(strategies),
+        !is.null(strat_names),
+        all(vapply( strategies, is.function, logical(1))),
+        msg = "`strategies` must be a named list of functions"
+    )
+
+    assert_that(
+        length(strat_names) == length(unique(strat_names)),
+        msg = "`strategies` must be uniquely named"
+    )
+
+    unique_references <- unique(unlist(reference, use.names = FALSE))
+
+    for( ref in unique_references){
+        assert_that(
+            ref %in% strat_names,
+            msg = sprintf("Required strategy `%s` has not been defined", ref)
+        )
+    }
+    return(invisible(TRUE))
+}
+
+

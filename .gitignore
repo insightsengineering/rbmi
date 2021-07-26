@@ -46,3 +46,5 @@ po/*~
 
 # C++ code from Stan
 src/
+
+.DS_store
