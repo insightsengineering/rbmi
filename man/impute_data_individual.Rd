@@ -9,7 +9,7 @@ impute_data_individual(
   index,
   beta,
   sigma,
-  longdata,
+  data,
   references,
   strategies,
   conditionalMean
@@ -24,7 +24,7 @@ impute_data_individual(
 
 \item{sigma}{TODO}
 
-\item{longdata}{TODO}
+\item{data}{TODO}
 
 \item{references}{TODO}
 
