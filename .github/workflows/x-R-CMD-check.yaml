@@ -1,0 +1,61 @@
+# # For help debugging build failures open an issue on the RStudio community with the 'github-actions' tag.
+# # https://community.rstudio.com/new-topic?category=Package%20development&tags=github-actions
+# on: push
+
+# name: R-CMD-check
+
+# jobs:
+#   R-CMD-check:
+    
+#     strategy:
+#       matrix:
+#        include:
+#          - R: "4.1.0"
+#            os: "ubuntu-latest"
+#            rspm_date: "2021-05-27"
+#         #  - R: "4.1.0"
+#         #    os: "macos-latest"
+#         #    rspm_date: "2021-05-27"
+#         #  - R: "3.5.3"
+#         #    os: "ubuntu-latest"
+#         #    rspm_date: "2019-04-01"
+           
+#     runs-on: ${{ matrix.os }}
+    
+#     env:
+#       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      
+#     steps:
+    
+#       - name: Checkout
+#         uses: actions/checkout@v2
+        
+#       - name: Install R
+#         uses: r-lib/actions/setup-r@v1
+#         with:
+#           r-version: ${{ matrix.R }}
+          
+#       - name: Install Additional Linux Dependencies
+#         if: startsWith(runner.os, 'Linux')
+#         run: sudo apt install libcurl4-openssl-dev
+      
+#       - uses: actions/cache@v2
+#         with:
+#           path: gha_rpkg
+#           key: ${{ matrix.os }}-${{ matrix.rspm_date }}-${{ hashFiles('DESCRIPTION') }}
+      
+#       - name: Install R packages
+#         run: |
+#           dir.create("gha_rpkg", showWarnings = FALSE)
+#           .libPaths("gha_rpkg")
+#           options(repos = "https://packagemanager.rstudio.com/cran/${{ matrix.rspm_date }}")
+#           install.packages(c("remotes", "rcmdcheck"))
+#           remotes::install_deps(dependencies = TRUE, upgrade = FALSE)
+#         shell: Rscript {0}
+        
+#       - name: Check
+#         run: |
+#           .libPaths("gha_rpkg")
+#           options(crayon.enabled = TRUE)
+#           rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "warning")
+#         shell: Rscript {0}
