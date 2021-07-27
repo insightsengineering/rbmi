@@ -36,14 +36,19 @@ as_simple_formula <- function(vars){
 #' @param dat TODO
 #' @param frm TODO
 as_model_df <- function(dat, frm){
-    #design_mat <- stats::model.matrix(frm, dat)
-    design_mat = stats::model.matrix(frm, stats::model.frame(frm, dat, na.action=function(x) x))
+
+    outcome <- as.character(attr(stats::terms(frm), "variables")[[2]])
+    dat[[outcome]][is.na(dat[[outcome]])] <- Inf
+    design_mat <- stats::model.matrix(frm, dat)
+    dat[[outcome]][is.infinite(dat[[outcome]])] <- NA
+
     assert_that(
         nrow(design_mat) == nrow(dat),
         msg = "Model matrix has less rows than input dataset. You may have missing values."
     )
-    outcome <- as.character(attr(stats::terms(frm), "variables")[[2]])
+
     full_mat <- cbind(dat[[outcome]] , design_mat)
+    colnames(full_mat)[1] <- outcome
     design <- as.data.frame(full_mat)
     return(design)
 }
