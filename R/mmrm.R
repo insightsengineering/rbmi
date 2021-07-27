@@ -91,6 +91,7 @@ extract_params <- function(fit) {
 
     beta <- fixef(fit)$cond
     sigma <- VarCorr(fit)$cond
+    lapply(sigma, function(x) attr(x, "stddev") = NULL)) # not needed, and would be wrong when scaling
     theta <- getME(fit, name = "theta") # needed for initialization
 
     params <- list(
