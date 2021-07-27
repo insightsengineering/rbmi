@@ -368,13 +368,14 @@ test_that(
 
         beta <- fixef(fit_expected)$cond
         sigma <- VarCorr(fit_expected)$cond
-        theta <- getME(fit_expected, name = "theta") # needed for initialization
+        sigma <- lapply(sigma, function(x) as.matrix(data.frame(x)))
+        theta <- getME(fit_expected, name = "theta")
 
         converged <- ifelse(fit_expected$fit$convergence == 0, TRUE, FALSE)
 
         output_expected <- list(
             beta = beta,
-            sigma = list(sigma[[1]], sigma[[1]]),
+            sigma = list("A" = sigma[[1]], "B" = sigma[[1]]),
             theta = theta,
             converged = converged
         )
@@ -412,7 +413,7 @@ test_that(
         data <- cbind(data,
                       "A" = groups_mat[,1],
                       "B" = groups_mat[,2])
-        formula_ext <- response ~ pred + visit*group + us(0 + visit:A | subjid) + us(0 + visit:B | subjid)
+        formula_ext <- response ~ pred + visit*group + us(0 + A:visit | subjid) + us(0 + B:visit | subjid)
         control <- glmmTMBControl(
             optimizer = optim,
             optArgs = list(method = "BFGS"),
@@ -428,7 +429,9 @@ test_that(
 
         beta <- fixef(fit_expected)$cond
         sigma <- VarCorr(fit_expected)$cond
-        theta <- getME(fit_expected, name = "theta") # needed for initialization
+        sigma <- lapply(sigma, function(x) as.matrix(data.frame(x)))
+        names(sigma) <- c("A", "B")
+        theta <- getME(fit_expected, name = "theta")
 
         converged <- ifelse(fit_expected$fit$convergence == 0, TRUE, FALSE)
 

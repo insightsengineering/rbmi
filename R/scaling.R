@@ -98,7 +98,7 @@ scalerConstructor <- R6::R6Class(
                 is.matrix(sigma),
                 msg = "Input must be a matrix"
             )
-            return( sigma / self$scales[[1]]^2)
+            return( sigma * self$scales[[1]]^2)
         },
 
 

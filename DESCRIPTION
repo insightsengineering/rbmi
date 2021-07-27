@@ -17,10 +17,10 @@ Suggests:
     dplyr,
     covr,
     testthat (>= 3.0.0)
-Config/testthat/edition: 3
 Biarch: true
 Depends: 
     R (>= 3.4.0)
+Config/testthat/edition: 2
 Imports: 
     methods,
     Rcpp (>= 0.12.0),
