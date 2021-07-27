@@ -29,6 +29,7 @@ jobs:
         
       - name: Install R
         uses: r-lib/actions/setup-r@v1
+        id: install-r
         with:
           r-version: ${{ matrix.R }}
           
@@ -36,16 +37,20 @@ jobs:
         if: startsWith(runner.os, 'Linux')
         run: sudo apt install libcurl4-openssl-dev
       
+      - name: Determine dependencies
+        run: |
+          saveRDS(read.dcf("DESCRIPTION")[, "Imports"], ".github/r-depends.rds"
+      
       - uses: actions/cache@v2
         with:
           path: .github/rpkg/*
-          key: ${{ matrix.config.os }}-${{ matrix.config.R }}-${{ hashFiles('DESCRIPTION') }}
+          key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
       
       - name: Install R packages
         run: |
           dir.create(".github/rpkg", showWarnings = FALSE)
           .libPaths(".github/rpkg")
-          options(repos = "${{ matrix.config.pkg_repo }})
+          options(repos = "${{ matrix.config.pkg_repo }}")
           install.packages(c("remotes", "rcmdcheck"))
           remotes::install_deps(dependencies = TRUE, upgrade = FALSE)
         shell: Rscript {0}
