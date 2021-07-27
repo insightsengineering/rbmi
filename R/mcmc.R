@@ -67,15 +67,16 @@ run_mcmc <- function(
         outcome,
         group,
         same_cov,
-        sigma_reml
+        sigma_reml,
+        initial_values
     )
 
     fit <- fit_mcmc(
-        data,
+        data$data,
         n_imputations,
         burn_in,
         burn_between,
-        initial_values,
+        data$initial_values,
         same_cov
     )
 
@@ -91,12 +92,30 @@ run_mcmc <- function(
     return(ret_obj)
 }
 
+listmat_to_array <- function(listmat) {
+
+    assert_that(
+        is.list(listmat),
+        msg = "input must be a list"
+    )
+
+    dims <- c(length(listmat), dim(listmat[[1]]))
+    res_array <- array(as.numeric(unlist(listmat)), dim = dims)
+
+    for(i in 1:dims[1]) {
+    res_array[i,,] <- listmat[[i]]
+    }
+
+    return(res_array)
+}
+
 prepare_data_mcmc <- function(
     designmat,
     outcome,
     group,
     same_cov,
-    sigma_reml) {
+    sigma_reml,
+    initial_values) {
 
     assert_that(
         is.list(sigma_reml),
@@ -119,7 +138,14 @@ prepare_data_mcmc <- function(
 
     QR_mat <- QR_decomp(designmat, N, J)
 
+    names(initial_values) <- c("beta", "Sigma")
+    initial_values$theta <- as.vector(QR_mat$R %*% initial_values$beta)
+    initial_values$beta <- NULL
+
     if(same_cov) {
+
+        initial_values$Sigma <- initial_values$Sigma[[1]]
+
         data <- list(J = J,
                      N = N,
                      P = ncol(designmat),
@@ -141,6 +167,8 @@ prepare_data_mcmc <- function(
         which_arm <- as.numeric(group)[seq(1, N*J, by = J)]
 
         sigma_reml <- match_groups_sigmas(sigma_reml, levels(group))
+        sigma_reml <- listmat_to_array(sigma_reml)
+        initial_values$Sigma <- listmat_to_array(initial_values$Sigma)
 
         data <- list(J = J,
                      N = N,
@@ -156,6 +184,13 @@ prepare_data_mcmc <- function(
                      which_arm = which_arm)
     }
 
+    ret_obj <- list(
+        data = data,
+        initial_values = initial_values
+    )
+
+    return(ret_obj)
+
 }
 
 #' @import Rcpp
@@ -170,8 +205,9 @@ fit_mcmc <- function(
     initial_values,
     same_cov) {
 
-    initial_values = list(initial_values)
+    initial_values <- list(initial_values)
 
+    browser()
     if(same_cov) {
 
         suppressWarnings({
