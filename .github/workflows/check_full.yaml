@@ -40,6 +40,7 @@ jobs:
       - name: Determine dependencies
         run: |
           saveRDS(read.dcf("DESCRIPTION")[, c("Imports", "Suggests"], ".github/r-depends.rds")
+        shell: Rscript {0}
       
       - uses: actions/cache@v2
         with:
