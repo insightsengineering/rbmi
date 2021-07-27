@@ -86,12 +86,13 @@ formula_mmrm <- function(
     return(formula)
 }
 
+
 #' @importFrom glmmTMB fixef VarCorr getME
 extract_params <- function(fit) {
 
     beta <- fixef(fit)$cond
     sigma <- VarCorr(fit)$cond
-    lapply(sigma, function(x) attr(x, "stddev") = NULL)) # not needed, and would be wrong when scaling
+    sigma <- lapply(sigma, function(x) as.matrix(data.frame(x))) # remove all attributes
     theta <- getME(fit, name = "theta") # needed for initialization
 
     params <- list(
