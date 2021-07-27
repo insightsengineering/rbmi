@@ -39,7 +39,7 @@ jobs:
       
       - name: Determine dependencies
         run: |
-          saveRDS(read.dcf("DESCRIPTION")[, "Imports"], ".github/r-depends.rds"
+          saveRDS(read.dcf("DESCRIPTION")[, c("Imports", "Suggests"], ".github/r-depends.rds")
       
       - uses: actions/cache@v2
         with:
