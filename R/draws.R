@@ -91,12 +91,26 @@ draws_bayes <- function(data, data_ice, vars, method) {
         same_cov = method$same_cov
     )
 
+    fit$samples$sigma <- lapply(
+        fit$samples$sigma,
+        function(sample_cov) setNames(sample_cov, levels(data[[vars$group]]))
+    )
+
+    samples <- mapply(function(x,y) list("beta" = x, "sigma" = y),
+                      fit$samples$beta,
+                      fit$samples$sigma,
+                      SIMPLIFY = FALSE
+    )
+
+    samples <- lapply(
+        samples,
+        function(x) {x$ids <- longdata$ids; return(x)}
+    )
+
     result <- list(
         method = method,
-        samples = list(
-            beta = scaler$unscale_beta(fit$beta),
-            sigma = lapply(fit$sigma, scaler$unscale_sigma)
-        ),
+        samples = samples,
+        data = longdata,
         fit = fit$fit
     )
 

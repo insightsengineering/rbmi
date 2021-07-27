@@ -79,18 +79,12 @@ run_mcmc <- function(
         same_cov
     )
 
-    check_mcmc(fit)
+    check_mcmc(fit, n_imputations)
 
     draws <- extract_draws(fit)
 
-    draws$sigma <- lapply(
-        draws$sigma,
-        function(x) names(x) <- levels(group)
-    )
-
     ret_obj <- list(
-        "beta" = draws$beta,
-        "sigma" = draws$sigma,
+        "samples" = draws,
         "fit" = fit
     )
 
@@ -242,6 +236,7 @@ extract_draws <- function(stan_fit) {
     }
 
     pars$beta <- split_dim(pars$beta, 1)
+    pars$beta <- lapply(pars$beta, as.vector)
 
     return(pars)
 }
@@ -280,10 +275,7 @@ check_hmc_diagn <- function(stan_fit) {
     return(invisible(NULL))
 }
 
-check_mcmc <- function(stan_fit, threshold_lowESS = 0.4) {
-
-    pars <- extract_draws(stan_fit)
-    n_draws <- nrow(pars$beta)
+check_mcmc <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
 
     check_ESS(
         stan_fit = stan_fit,
