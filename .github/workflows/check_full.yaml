@@ -35,7 +35,7 @@ jobs:
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
 
     env:
-      RSPM: ${{ matrix.config.rspm }}
+      RSPM_ROOT: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
