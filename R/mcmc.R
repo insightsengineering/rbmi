@@ -207,7 +207,6 @@ fit_mcmc <- function(
 
     initial_values <- list(initial_values)
 
-    browser()
     if(same_cov) {
 
         suppressWarnings({
