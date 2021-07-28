@@ -24,6 +24,7 @@ jobs:
     
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_LIBS_USER: .github/rpkg
       
     steps:
     
@@ -40,8 +41,9 @@ jobs:
         if: startsWith(runner.os, 'Linux')
         run: sudo apt install libcurl4-openssl-dev
       
-      - name: Determine dependencies
+      - name: Determine dependencies & Create Package Directory
         run: |
+          dir.create(".github/rpkg", showWarnings = FALSE)
           saveRDS(read.dcf("DESCRIPTION")[, c("Imports", "Suggests")], ".github/r-depends.rds")
         shell: Rscript {0}
       
@@ -52,8 +54,6 @@ jobs:
       
       - name: Install R packages
         run: |
-          dir.create(".github/rpkg", showWarnings = FALSE)
-          .libPaths(".github/rpkg")
           options(repos = "${{ matrix.config.pkg_repo }}")
           install.packages(c("remotes", "rcmdcheck"))
           remotes::install_deps(dependencies = TRUE, upgrade = FALSE)
@@ -61,7 +61,6 @@ jobs:
         
       - name: Check
         run: |
-          .libPaths(".github/rpkg")
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
