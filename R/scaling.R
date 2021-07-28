@@ -71,21 +71,25 @@ scalerConstructor <- R6::R6Class(
                 msg = sprintf("Input must have %s columns", length(self$center))
             )
 
-            dat <- sweep(
-                dat,
+            dat2 <- dat
+
+            dat2 <- sweep(
+                dat2,
                 MARGIN = 2,
                 STATS = self$center,
                 FUN = `-`
             )
 
-            dat <- sweep(
-                dat,
+            dat2 <- sweep(
+                dat2,
                 MARGIN = 2,
                 STATS = self$scales,
                 FUN = `/`
             )
 
-            return(dat)
+            class(dat2) <- class(dat)
+
+            return(dat2)
         },
 
 
@@ -95,8 +99,8 @@ scalerConstructor <- R6::R6Class(
         #' @return TODO
         unscale_sigma = function(sigma){
             assert_that(
-                is.matrix(sigma),
-                msg = "Input must be a matrix"
+                is.matrix(sigma) | (is.numeric(sigma) & length(sigma) == 1),
+                msg = "Input must be a matrix or a length 1 numeric vector"
             )
             return( sigma * self$scales[[1]]^2)
         },

@@ -43,7 +43,9 @@ as_model_df <- function(dat, frm){
         msg = "Model matrix has less rows than input dataset. You may have missing values."
     )
     outcome <- as.character(attr(stats::terms(frm), "variables")[[2]])
-    full_mat <- cbind(dat[[outcome]] , design_mat)
+    full_mat <- cbind(dat[[outcome]], design_mat)
+    colnames(full_mat) <- c(outcome, colnames(design_mat))
     design <- as.data.frame(full_mat)
+    class(design) <- class(dat)
     return(design)
 }
