@@ -31,10 +31,17 @@ as_simple_formula <- function(vars){
 }
 
 
-#' Title
+#' Expand dataframe into a design matrix
 #'
-#' @param dat TODO
-#' @param frm TODO
+#' Expands out a dataframe using a formula to create a design matrix.
+#' Key details are that it will always place the outcome variable into 
+#' the first column of the return object.
+#'
+#' The outcome column may contain NA's but none of the other variables
+#' listed in the formula should contain missing values
+#'
+#' @param dat a data.frame
+#' @param frm a formula
 as_model_df <- function(dat, frm){
 
     outcome <- as.character(attr(stats::terms(frm), "variables")[[2]])
