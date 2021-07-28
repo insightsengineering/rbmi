@@ -2,15 +2,19 @@
 % Please edit documentation in R/draws.R
 \name{get_bootstrap_samples}
 \alias{get_bootstrap_samples}
-\title{Title}
+\title{Title - TODO}
 \usage{
 get_bootstrap_samples(longdata, method, scaler, initial = NULL)
 }
 \arguments{
+\item{longdata}{TODO}
+
 \item{method}{TODO}
 
-\item{...}{TODO}
+\item{scaler}{TODO}
+
+\item{initial}{TODO}
 }
 \description{
-Title
+Title - TODO
 }

@@ -7,19 +7,14 @@
 \alias{method_condmean}
 \title{Title}
 \usage{
-method_bayes(
-  burn_in = 200,
-  burn_between = 50,
-  same_cov = TRUE,
-  n_imputations = 20
-)
+method_bayes(burn_in = 200, burn_between = 50, same_cov = TRUE, n_samples = 20)
 
 method_approxbayes(
   covariance = c("us", "toep", "cs", "ar1"),
   threshold = 0.01,
   same_cov = TRUE,
   REML = TRUE,
-  n_imputations = 20
+  n_samples = 20
 )
 
 method_condmean(
@@ -38,13 +33,15 @@ method_condmean(
 
 \item{same_cov}{TODO}
 
-\item{n_imputations}{TODO}
+\item{n_samples}{TODO}
 
 \item{covariance}{TODO}
 
 \item{threshold}{TODO}
 
 \item{REML}{TODO}
+
+\item{type}{TODO}
 }
 \value{
 TODO

@@ -26,7 +26,13 @@ pool_(results, conf.level, alternative, ...)
 \arguments{
 \item{results}{TODO}
 
+\item{conf.level}{TODO}
+
+\item{alternative}{TODO}
+
 \item{...}{TODO}
+
+\item{type}{TODO}
 }
 \description{
 TODO

@@ -72,8 +72,8 @@ d_lagscale <- function(delta, dlag, is_post_ice) {
 #' TODO
 #'
 #' @param imputations TODO
-#' @param visit_delta TODO
-#' @param lag_scale TODO
+#' @param delta TODO
+#' @param dlag TODO
 #' @param missing_only If false delta adjustments will be calculated for non-missing post-ice data. If true then
 #' non-missing post-ice data will have a delta of 0 assigned. See details for more information (TODO).
 #' 
