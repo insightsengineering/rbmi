@@ -11,7 +11,12 @@
 #       - main
 #       - master
 
-on: [push, pull_request]
+on: 
+  push:
+    branches:
+      - main
+      - master 
+  pull_request:
 
 name: Check-Full
 
@@ -46,6 +51,9 @@ jobs:
         id: install-r
         with:
           r-version: ${{ matrix.config.R }}
+        
+      - name: Install Pandoc
+        uses: r-lib/actions/setup-pandoc@v1
           
       - name: Install Additional Linux Dependencies
         if: startsWith(runner.os, 'Linux')
