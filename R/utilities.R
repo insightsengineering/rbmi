@@ -38,9 +38,10 @@ as_simple_formula <- function(vars){
 as_model_df <- function(dat, frm){
 
     outcome <- as.character(attr(stats::terms(frm), "variables")[[2]])
-    dat[[outcome]][is.na(dat[[outcome]])] <- Inf
+    is_missing <- is.na(dat[[outcome]])
+    dat[[outcome]][is_missing] <- 999
     design_mat <- stats::model.matrix(frm, dat)
-    dat[[outcome]][is.infinite(dat[[outcome]])] <- NA
+    dat[[outcome]][is_missing] <- NA
 
     assert_that(
         nrow(design_mat) == nrow(dat),
