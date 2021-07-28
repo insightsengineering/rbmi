@@ -2,6 +2,7 @@
 #' Title
 #'
 #' TODO Description
+#' @import R6
 #' @export
 longDataConstructor <- R6::R6Class(
     classname = "longData",
