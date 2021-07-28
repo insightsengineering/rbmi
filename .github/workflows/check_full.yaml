@@ -12,11 +12,14 @@ jobs:
       fail-fast: false
       matrix:
        config:
+         - { R: "devel", os: "ubuntu-20.04", pkg_repo: "https://packagemanager.rstudio.com/all/__linux__/focal/latest"}
+         - { R: "release", os: "ubuntu-18.04", pkg_repo: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
          - { R: "release", os: "ubuntu-20.04", pkg_repo: "https://packagemanager.rstudio.com/all/__linux__/focal/latest"}
-         - { R: "3.5.3", os: "ubuntu-20.04", pkg_repo: "https://packagemanager.rstudio.com/cran/__linux__/focal/2019-04-01"}
          - { R: "release", os: "macos-latest", pkg_repo: "https://cran.rstudio.com/"}
          - { R: "release", os: "windows-latest", pkg_repo: "https://cran.rstudio.com/"}
-           
+         - { R: "3.6.3", os: "ubuntu-20.04", pkg_repo: "https://packagemanager.rstudio.com/cran/__linux__/focal/2020-03-02"}
+         - { R: "3.5.3", os: "ubuntu-20.04", pkg_repo: "https://packagemanager.rstudio.com/cran/__linux__/focal/2019-04-01"}
+         
     runs-on: ${{ matrix.config.os }}
     
     env:
