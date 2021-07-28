@@ -368,6 +368,7 @@ test_that(
 
         beta <- fixef(fit_expected)$cond
         sigma <- VarCorr(fit_expected)$cond
+        sigma <- lapply(sigma, function(x) as.matrix(data.frame(x)))
         theta <- getME(fit_expected, name = "theta")
 
         converged <- ifelse(fit_expected$fit$convergence == 0, TRUE, FALSE)
@@ -428,6 +429,7 @@ test_that(
 
         beta <- fixef(fit_expected)$cond
         sigma <- VarCorr(fit_expected)$cond
+        sigma <- lapply(sigma, function(x) as.matrix(data.frame(x)))
         names(sigma) <- c("A", "B")
         theta <- getME(fit_expected, name = "theta")
 

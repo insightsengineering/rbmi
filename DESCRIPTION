@@ -19,6 +19,8 @@ RoxygenNote: 7.1.1
 Suggests: 
     dplyr,
     covr,
+    tidyr,
+    nlme,
     testthat
 Config/testthat/edition: 2
 Imports: 
