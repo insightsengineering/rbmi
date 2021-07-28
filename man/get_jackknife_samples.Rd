@@ -7,9 +7,13 @@
 get_jackknife_samples(longdata, method, scaler, initial = NULL)
 }
 \arguments{
+\item{longdata}{TODO}
+
 \item{method}{TODO}
 
-\item{...}{TODO}
+\item{scaler}{TODO}
+
+\item{initial}{TODO}
 }
 \description{
 Title

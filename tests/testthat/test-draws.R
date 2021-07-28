@@ -233,7 +233,7 @@ test_that(
                 threshold = 0.01,
                 same_cov = TRUE,
                 REML = TRUE,
-                n_imputations = 3
+                n_samples = 3
             )
         )
 

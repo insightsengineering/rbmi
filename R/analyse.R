@@ -30,7 +30,7 @@ analyse <- function(imputations, fun, delta = NULL, ...) {
         expected_vars <- c(
             vars$subjid,
             vars$visit,
-            "delta",
+            "delta"
         )
         assert_that(
             all(expected_vars %in% names(delta)),
