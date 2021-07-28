@@ -8,8 +8,8 @@ Authors@R:
              email = "craig.gower-page@roche.com"),
       person(given = "Alessandro",
              family = "Noci",
-             role = "aut"
-             email = "alessandro.noci@roche.com")
+             role = "aut",
+             email = "alessandro.noci@roche.com"))
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Encoding: UTF-8
