@@ -7,7 +7,7 @@ suppressPackageStartupMessages({
 
 
 
-test_that("as_model_df",{
+test_that("as_model_df", {
 
     x <- tibble(
         x = c(NA, 1, 2, 3),
@@ -16,9 +16,9 @@ test_that("as_model_df",{
         w = c("A", "A", "B", "B")
     )
 
-    actual_output <- as_model_df(x , x ~ y +  z* w)
+    actual_output <- as_model_df(x, x ~ y + z * w)
 
-    expected_output <- data.frame(
+    expected_output <- tibble(
         v1 = c(NA, 1, 2, 3),
         v2 = c(1, 1, 1, 1),
         v3 = c(5, 6, 7, 8),
