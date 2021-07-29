@@ -268,3 +268,58 @@ test_that(
 
 
 
+
+
+
+test_that("nmar data is removed as expected",{
+    # In order to test if nmar is being removed correctly we will
+    # create a dataset flag seveal patients as being nmar then compare
+    # the output of draws on this dataset vs the same dataset after 
+    # manually removing those observations
+
+    set.seed(101)
+
+    mysig <- as_covmat(
+        sig = c(1, 3, 5),
+        corr = c(0.3, 0.5, 0.8)
+    )
+
+    dat <- get_sim_data(20, mysig)
+
+    nmar_ids <- sample(unique(dat$id), size = 4)
+
+    dat2 <- dat %>%
+        mutate(outcome = if_else(id %in% nmar_ids & visit %in% c("visit_2", "visit_3"), NA_real_, outcome))
+
+    dat_ice <- tibble(
+        id = nmar_ids,
+        method = "CR",
+        visit = "visit_2"
+    )
+
+    vars <- list(
+        outcome = "outcome",
+        visit = "visit",
+        method = "method",
+        subjid = "id",
+        group = "group",
+        covariates = c("age", "sex")
+    )
+
+    method <- method_condmean(type = "jackknife")
+    d1 <- draws(dat, dat_ice, vars, method)
+    d2 <- draws(dat2, dat_ice, vars, method)
+    expect_equal(d1$samples, d2$samples)
+
+
+    method <- method_approxbayes(n_samples = 5)
+    set.seed(101)
+    d1 <- draws(dat, dat_ice, vars, method)
+    set.seed(101)
+    d2 <- draws(dat2, dat_ice, vars, method)
+    expect_equal(d1$samples, d2$samples)
+})
+
+
+
+
