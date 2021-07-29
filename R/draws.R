@@ -7,7 +7,7 @@
 #' @param method TODO
 #'
 #' @export
-draws <- function(data, data_ice, vars, method){
+draws <- function(data, data_ice, vars, method) {
     UseMethod("draws", method)
 }
 
@@ -20,10 +20,10 @@ draws.bayes <- function(data, data_ice, vars, method) {
 
 #' @rdname draws
 #' @export
-draws.approxbayes <- function(data, data_ice, vars, method){
+draws.approxbayes <- function(data, data_ice, vars, method) {
 
     method$type <- "bootstrap" # just for internal use
-    method$n_samples <- method$n_imputations # just for internal use
+    method$n_samples <- method$n_samples # just for internal use
 
     x <- draws_bootstrap(data, data_ice, vars, method)
 
@@ -46,7 +46,7 @@ draws.approxbayes <- function(data, data_ice, vars, method){
 
 #' @rdname draws
 #' @export
-draws.condmean <- function(data, data_ice, vars, method){
+draws.condmean <- function(data, data_ice, vars, method) {
     x <- draws_bootstrap(data, data_ice, vars, method)
     as_class(x, "condmean")
 }
@@ -118,21 +118,28 @@ draws_bayes <- function(data, data_ice, vars, method) {
 }
 
 #' Title
-draws_bootstrap <- function(data, data_ice, vars, method){
+#'
+#' @param data TODO
+#' @param data_ice TODO
+#' @param vars TODO
+#' @param method TODO
+draws_bootstrap <- function(data, data_ice, vars, method) {
 
     longdata <- longDataConstructor$new(data, vars)
+    longdata$set_strategies(data_ice)
 
-    model_df <- as_model_df(data, as_simple_formula(vars))
+    data2 <- longdata$get_data(longdata$ids, nmar.rm = TRUE, na.rm = TRUE)
+    model_df <- as_model_df(data2, as_simple_formula(vars))
 
     scaler <- scalerConstructor$new(model_df)
     model_df_scaled <- scaler$scale(model_df)
 
     mmrm_initial <- fit_mmrm_multiopt(
-        designmat = model_df_scaled[,-1],
-        outcome = model_df_scaled[,1],
-        subjid = data[[vars$subjid]],
-        visit = data[[vars$visit]],
-        group = data[[vars$group]],
+        designmat = model_df_scaled[, -1],
+        outcome = model_df_scaled[, 1],
+        subjid = data2[[vars$subjid]],
+        visit = data2[[vars$visit]],
+        group = data2[[vars$group]],
         vars = vars,
         cov_struct = method$covariance,
         REML = method$REML,
@@ -194,14 +201,19 @@ draws_bootstrap <- function(data, data_ice, vars, method){
     return(result)
 }
 
-#' Title
+
+#' Title - TODO
 #'
-#' @param ... TODO
+#' @param longdata TODO
 #' @param method TODO
-get_bootstrap_samples <- function(longdata,
-                                  method,
-                                  scaler,
-                                  initial = NULL){
+#' @param scaler TODO
+#' @param initial TODO
+get_bootstrap_samples <- function(
+    longdata,
+    method,
+    scaler,
+    initial = NULL
+){
 
     vars <- longdata$vars
 
@@ -215,7 +227,7 @@ get_bootstrap_samples <- function(longdata,
 
         # create bootstrapped sample
         ids_boot <- longdata$sample_ids()
-        dat_boot <- longdata$get_data(ids_boot)
+        dat_boot <- longdata$get_data(ids_boot, nmar.rm = TRUE, na.rm = TRUE)
 
         model_df <- as_model_df(dat_boot, as_simple_formula(vars))
         model_df_scaled <- scaler$scale(model_df)
@@ -267,12 +279,16 @@ get_bootstrap_samples <- function(longdata,
 
 #' Title
 #'
-#' @param ... TODO
+#' @param longdata TODO
 #' @param method TODO
-get_jackknife_samples <- function(longdata,
-                                  method,
-                                  scaler,
-                                  initial = NULL){
+#' @param scaler TODO
+#' @param initial TODO
+get_jackknife_samples <- function(
+    longdata,
+    method,
+    scaler,
+    initial = NULL
+){
 
     vars <- longdata$vars
     ids <- longdata$ids
@@ -286,7 +302,7 @@ get_jackknife_samples <- function(longdata,
     while(current_sample <= required_samples & failed_samples <= failure_limit){
 
         ids_boot <- ids[-current_sample]
-        dat_boot <- longdata$get_data(ids_boot)
+        dat_boot <- longdata$get_data(ids_boot, nmar.rm = TRUE, na.rm = TRUE)
 
         model_df <- as_model_df(dat_boot, as_simple_formula(vars))
         model_df_scaled <- scaler$scale(model_df)

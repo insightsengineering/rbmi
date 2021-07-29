@@ -2,11 +2,14 @@ Package: rbmi
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    c(person(given = "Craig",
+             family = "Gower-Page",
+             role = c("aut", "cre"),
+             email = "craig.gower-page@roche.com"),
+      person(given = "Alessandro",
+             family = "Noci",
+             role = "aut",
+             email = "alessandro.noci@roche.com"))
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -20,6 +23,9 @@ Suggests:
 Biarch: true
 Depends: 
     R (>= 3.4.0)
+    tidyr,
+    nlme,
+    testthat
 Config/testthat/edition: 2
 Imports: 
     methods,

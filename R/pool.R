@@ -4,6 +4,9 @@
 #'
 #' @name pool
 #' @param results TODO
+#' @param conf.level TODO
+#' @param alternative TODO
+#' @param type TODO
 #' @param ... TODO
 #'
 #' @export
@@ -27,7 +30,7 @@ pool <- function(
     results_transpose <- transpose_results(results)
     pars <- lapply(
         results_transpose,
-        getS3method("pool_", class(results)),
+        utils::getS3method("pool_", class(results)),
         conf.level,
         alternative,
         ...
@@ -48,7 +51,7 @@ pool_ <- function(results, conf.level, alternative, ...) {
 }
 
 
-
+#' @importFrom stats qnorm pnorm
 #' @rdname pool
 #' @export
 pool_.jackknife <- function(results, conf.level, alternative, ...){
@@ -88,7 +91,7 @@ pool_.bootstrap <- function(
 
 
 
-
+#' @importFrom stats qt pt var
 #' @rdname pool
 #' @export
 pool_.rubin <- function(results, conf.level, alternative, ...) {
@@ -182,6 +185,7 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
 #' @param est TODO
 #' @param conf.level TODO
 #' @param alternative TODO
+#' @importFrom stats sd qnorm pnorm quantile
 pool_bootstrap_normal <- function(est, conf.level, alternative) {
     alpha <- 1 - conf.level
     est_point <- est[1] # First estimate should be original dataset

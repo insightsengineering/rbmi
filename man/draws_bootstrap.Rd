@@ -6,6 +6,15 @@
 \usage{
 draws_bootstrap(data, data_ice, vars, method)
 }
+\arguments{
+\item{data}{TODO}
+
+\item{data_ice}{TODO}
+
+\item{vars}{TODO}
+
+\item{method}{TODO}
+}
 \description{
 Title
 }

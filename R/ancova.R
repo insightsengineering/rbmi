@@ -1,7 +1,4 @@
 
-
-
-
 #' Ancova
 #'
 #' @description
@@ -14,6 +11,8 @@
 #' @param visit TODO
 #' @param visit_level TODO
 #'
+#' @importFrom stats lm coef vcov df.residual
+#' 
 #' @export
 ancova <- function(data, outcome, group, covariates = NULL, visit = NULL, visit_level = NULL){
 
