@@ -5,18 +5,18 @@ suppressPackageStartupMessages(library(dplyr))
 
 
 
-test_that( "ancova", {
-    
+test_that("ancova", {
+
     f2n <- function(x) as.numeric(x) - 1
-    
+
     ##################
     #
     # Basic usage
     #
     #
-    
+
     set.seed(101)
-    
+
     n <- 1000
     dat <- tibble(
         age1 = rnorm(n),
@@ -34,19 +34,22 @@ test_that( "ancova", {
             "df" = df.residual(mod)
         )
     )
-    result_actual <- ancova(dat, outcome = "out", group = "grp", covariates = c("age1", "age2"))
-    
-    expect_equal( result_expected, result_actual)
-    
-    
+    result_actual <- ancova(
+        dat,
+        list(outcome = "out", group = "grp", covariates = c("age1", "age2"))
+    )
+
+    expect_equal(result_expected, result_actual)
+
+
     ##################
     #
     # No Covariates
     #
     #
-    
+
     set.seed(101)
-    
+
     n <- 1000
     dat <- tibble(
         age1 = rnorm(n),
@@ -64,18 +67,18 @@ test_that( "ancova", {
             "df" = df.residual(mod)
         )
     )
-    result_actual <- ancova(dat, outcome = "out", group = "grp")
-    
-    expect_equal( result_expected, result_actual)
-    
-    
-    
+    result_actual <- ancova(dat, list(outcome = "out", group = "grp"))
+
+    expect_equal(result_expected, result_actual)
+
+
+
     ##################
     #
     # Single visit
     #
     #
-    
+
     n <- 1000
     dat <- tibble(
         age1 = rnorm(n),
@@ -94,25 +97,27 @@ test_that( "ancova", {
             "df" = df.residual(mod)
         )
     )
-    
+
     result_actual <- ancova(
         dat,
-        outcome = "out", 
-        group = "grp", 
-        covariates = c("age1", "age2"),
-        visit = "vis",
+        list(
+            outcome = "out",
+            group = "grp",
+            covariates = c("age1", "age2"),
+            visit = "vis"
+        ),
         visit_level = "visit 1"
     )
-    
+
     expect_equal(result_expected, result_actual)
-    
-    
+
+
     ##################
     #
     # Multiple Visits
     #
     #
-    
+
     n <- 1000
     dat <- tibble(
         age1 = rnorm(n),
@@ -131,15 +136,17 @@ test_that( "ancova", {
             "df" = df.residual(mod)
         )
     )
-    
+
     result_actual <- ancova(
         dat,
-        outcome = "out", 
-        group = "grp", 
-        covariates = c("age1", "age2"),
-        visit = "vis",
+        list(
+            outcome = "out",
+            group = "grp",
+            covariates = c("age1", "age2"),
+            visit = "vis"
+        ),
         visit_level = "visit 1"
     )
-    
-    expect_equal( result_expected, result_actual)
+
+    expect_equal(result_expected, result_actual)
 })

@@ -14,7 +14,13 @@
 #' @importFrom stats lm coef vcov df.residual
 #' 
 #' @export
-ancova <- function(data, outcome, group, covariates = NULL, visit = NULL, visit_level = NULL){
+ancova <- function(data, vars, visit_level = NULL){
+
+    outcome <- vars[["outcome"]]
+    group <- vars[["group"]]
+    covariates <- vars[["covariates"]]
+    visit <- vars[["visit"]]
+
 
     assert_that(
         is.character(outcome),
@@ -78,7 +84,7 @@ ancova <- function(data, outcome, group, covariates = NULL, visit = NULL, visit_
 
     frm <- as_simple_formula(list(group = group, outcome = outcome, covariates = covariates))
 
-    mod <- lm( formula = frm, data = data2)
+    mod <- lm(formula = frm, data = data2)
 
     # TODO - LOCF
     x <- list(
