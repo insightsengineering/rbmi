@@ -27,4 +27,5 @@ Imports:
     R6,
     assertthat,
     mvtnorm,
-    glmmTMB
+    glmmTMB,
+    emmeans
