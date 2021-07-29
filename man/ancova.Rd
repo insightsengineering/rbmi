@@ -4,25 +4,12 @@
 \alias{ancova}
 \title{Ancova}
 \usage{
-ancova(
-  data,
-  outcome,
-  group,
-  covariates = NULL,
-  visit = NULL,
-  visit_level = NULL
-)
+ancova(data, vars, visit_level = NULL)
 }
 \arguments{
 \item{data}{TODO}
 
-\item{outcome}{TODO}
-
-\item{group}{TODO}
-
-\item{covariates}{TODO}
-
-\item{visit}{TODO}
+\item{vars}{TODO}
 
 \item{visit_level}{TODO}
 }
