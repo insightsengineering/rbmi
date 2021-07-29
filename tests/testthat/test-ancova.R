@@ -154,8 +154,8 @@ test_that("ancova", {
 
 test_that("least_square_means", {
 
+    ###### Check that treatment effect is unaffected
     set.seed(101)
-
     n <- 1000
     dat <- tibble(
         age1 = rnorm(n),
@@ -176,26 +176,28 @@ test_that("least_square_means", {
         mod2$lsm_1$est - mod2$lsm_0$est
     )
 
-    # x <- tibble(
-    #     b = c(2, 4, 6),
-    #     c = c(6, 8, 10)
-    # )
+    ####### Direct comparison to emmeans
+    i2 <- iris
+    i2[["group"]] <- factor(rep(c("A", "B"), each = 75))
+    i2[["group2"]] <- sample(c("A", "B", "C", "D"), size = 150, replace = TRUE)
 
-    # sigma <- matrix(c(1, 2, 3, 4), nrow = 2, byrow = TRUE)
+    mod <- lm(data = i2, Sepal.Length ~ Sepal.Width + Species * group2 + group)
 
-    # result_actual <- least_square_means(x,  ~ b + c - 1, c(1, 2), sigma)
-    # result_expected <- list(
-    #     est = sum(c(4, 8) * c(1, 2)),
-    #     se = (c(4, 8) %*% sigma %*% c(4, 8)) %>%
-    #         sqrt() %>%
-    #         as.vector(),
-    #     df = NA
-    # )
+    x <- as.data.frame(emmeans::emmeans(mod, "group"))
 
-    # expect_equal(result_actual, result_expected)
+    result_expected <- list(
+        list(est = x$emmean[[1]], se = x$SE[[1]], df = x$df[[1]]),
+        list(est = x$emmean[[2]], se = x$SE[[2]], df = x$df[[2]])
+    )
+
+    result_actual <- list(
+        lsmeans(mod, group = "A"),
+        lsmeans(mod, group = "B")
+    )
+
+    expect_equal(result_actual, result_expected)
 
 })
-
 
 
 
