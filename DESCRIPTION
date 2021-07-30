@@ -21,11 +21,11 @@ Suggests:
     covr,
     tidyr,
     nlme,
-    testthat
+    testthat,
+    emmeans
 Config/testthat/edition: 2
 Imports: 
     R6,
     assertthat,
     mvtnorm,
-    glmmTMB,
-    emmeans
+    glmmTMB
