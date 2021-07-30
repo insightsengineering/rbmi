@@ -22,7 +22,8 @@ Suggests:
     tidyr,
     nlme,
     testthat,
-    emmeans
+    emmeans,
+    mvtnorm
 Biarch: true
 Config/testthat/edition: 2
 Imports: 
@@ -33,7 +34,6 @@ Imports:
     rstantools (>= 2.1.1),
     R6,
     assertthat,
-    mvtnorm,
     glmmTMB
 LinkingTo: 
     BH (>= 1.66.0),

@@ -13,11 +13,6 @@ validate_datalong <- function(data, vars){
 }
 
 
-validate_dataice<- function(data_ice, vars, visits){
-    # TODO
-    return(invisible(TRUE))
-}
-
 
 #' Validate inputs for `vars`
 #'
@@ -46,6 +41,11 @@ validate_datalong_varIsChar <- function(vars){
     assert_that(
         is_char_one(vars$subjid),
         msg = "`vars$subjid` should be a length 1 character"
+    )
+
+    assert_that(
+        is_char_one(vars$method),
+        msg = "`vars$method` should be a length 1 character"
     )
 
     assert_that(
@@ -209,5 +209,56 @@ is_char_fact <- function(x){
 
 is_num_char_fact <- function(x){
     is.numeric(x) | is.character(x) | is.factor(x)
+}
+
+
+
+
+
+validate_dataice <- function(data, data_ice, vars, update = FALSE){
+    validate_datalong_varIsChar(vars)
+
+    method <- vars$method
+    visit <- vars$visit
+    subjid <- vars$subjid
+
+    assert_that(
+        is.character(data_ice[[method]]),
+        all(!is.na(data_ice[[method]])),
+        msg = "`data_ice[[vars$method]]` must be a non-missing character vector"
+    )
+
+    assert_that(
+        is_char_fact(data_ice[[subjid]]),
+        all(!is.na(data_ice[[subjid]])),
+        msg = "`data_ice[[vars$subjid]]` must be a non-missing character or factor vector"
+    )
+
+    assert_that(
+        all( as.character(data_ice[[subjid]]) %in% as.character(data[[subjid]])),
+        msg = "`data_ice[[vars$subjid]]` contains values that aren't in `data[[vars$subjid]]`"
+    )
+
+    if(!update){
+        valid_visits <- unique(as.character(data[[visit]]))
+
+        assert_that(
+            is.character(data_ice[[visit]]),
+            all(!is.na(data_ice[[visit]])),
+            msg = "`data_ice[[vars$visit]]` must be a non-missing character or factor vector"
+        )
+
+        assert_that(
+            all(as.character(data_ice[[visit]]) %in% valid_visits),
+            msg = "`data_ice[[vars$visit]]` contains values that are not in `data[[vars$visit]]`"
+        )
+    }
+
+    assert_that(
+        length(data_ice[[subjid]]) == length(unique(data_ice[[subjid]])),
+        msg = "`data_ice` must contain at most 1 row per subjects. If you have multiple ICEs please use the first Non-MAR ICE"
+    )
+
+    return(TRUE)
 }
 

@@ -331,28 +331,11 @@ impute_outcome <- function(conditional_parameters){
         msg = "Sigma or Mu contain missing values"
     )
 
-    if(length(conditional_parameters$mu) == 1){
+    result <- sample_mvnorm(
+        conditional_parameters$mu,
+        conditional_parameters$sigma
+    )
 
-        assert_that(
-            length(conditional_parameters$sigma) == 1,
-            msg = "Sigma is not of a compatable size with mu"
-        )
-
-        result <- rnorm(
-            n = 1,
-            mean = conditional_parameters$mu,
-            sd = sqrt(conditional_parameters$sigma)
-        )
-
-    } else {
-        result <- mvtnorm::rmvnorm(
-            n = 1,
-            mean = conditional_parameters$mu,
-            sigma = conditional_parameters$sigma,
-            method = "chol",
-            checkSymmetry = FALSE
-        )
-    }
     return(as.vector(result))
 }
 

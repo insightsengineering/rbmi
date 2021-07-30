@@ -274,7 +274,7 @@ test_that(
 test_that("nmar data is removed as expected",{
     # In order to test if nmar is being removed correctly we will
     # create a dataset flag seveal patients as being nmar then compare
-    # the output of draws on this dataset vs the same dataset after 
+    # the output of draws on this dataset vs the same dataset after
     # manually removing those observations
 
     set.seed(101)
@@ -303,6 +303,7 @@ test_that("nmar data is removed as expected",{
         method = "method",
         subjid = "id",
         group = "group",
+        method = "method",
         covariates = c("age", "sex")
     )
 

@@ -45,3 +45,64 @@ test_that("as_model_df", {
     expect_error(as_model_df(i3, Sepal.Length ~ Sepal.Width * Species))
 })
 
+
+
+
+test_that("sample_mvnorm", {
+
+    set.seed(101)
+
+    z <- as_covmat(c(1, 3, 4, 2), c(0.1, 0.2, 0.4, 0.3, 0.1, 0.2))
+    m <- c(5, 15, 30, 45)
+
+    x <- sample_mvnorm(m, z)
+    expect_true(nrow(x) == 1)
+    expect_true(ncol(x) == 4)
+
+    vals <- replicate(n = 150000, {sample_mvnorm(m, z)})
+    x2 <- matrix(unlist(vals), ncol = ncol(z), byrow = TRUE)
+    x2_v <- var(x2)
+    x2_m <- apply(x2, 2, mean)
+
+    lower_limit_v <- as.vector(z) * 0.98
+    upper_limit_v <- as.vector(z) * 1.02
+    obsv <- as.vector(x2_v)
+    expect_true(all((lower_limit_v < obsv) & (obsv < upper_limit_v)))
+
+    lower_limit_m <- as.vector(m) * 0.99
+    upper_limit_m <- as.vector(m) * 1.01
+    obsm <- as.vector(x2_m)
+    expect_true(all((lower_limit_m < obsm) & (obsm < upper_limit_m)))
+
+})
+
+
+
+test_that("record_warnings", {
+
+    fun <- function(x) {
+        return(x)
+    }
+    result_actual <- record_warnings(fun(iris))
+    result_expected <- list(results = iris, warnings = NULL)
+    expect_equal(result_actual, result_expected)
+
+
+    fun <- function(x) {
+        warning("w1")
+        warning("w2")
+        return(x)
+    }
+    result_actual <- record_warnings(fun(2))
+    result_expected <- list(results = 2, warnings = c("w1", "w2"))
+    expect_equal(result_actual, result_expected)
+
+
+    fun <- function(x) {
+        warning("w1")
+        warning("w2")
+        stop("an error")
+        return(x)
+    }
+    expect_error(record_warnings(fun(2)), "an error")
+})
