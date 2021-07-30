@@ -63,10 +63,24 @@ draws_bayes <- function(data, data_ice, vars, method) {
     longdata$set_strategies(data_ice)
 
     data2 <- longdata$get_data(longdata$ids, nmar.rm = TRUE, na.rm = TRUE)
+
+    # TODO: FIND BETTER SOLUTION (e.g. allow for deleting nmar data as NA)
+    data2$subjid2 <- data2[[vars$subjid]]
+    data2$visit2 <- data2[[vars$visit]]
+    data2 <- expand(
+        data2,
+        subjid2 = unique(data2[["subjid2"]]),
+        visit2 = levels(data2[["visit2"]])
+    )
+    outcome <- data2[[vars$outcome]]
+    data2 <- data
+    data2[[vars$outcome]] <- outcome
+
     model_df <- as_model_df(data2, as_simple_formula(vars))
 
     scaler <- scalerConstructor$new(model_df)
     model_df_scaled <- scaler$scale(model_df)
+
 
     mmrm_initial <- fit_mmrm_multiopt(
         designmat = model_df_scaled[,-1],
