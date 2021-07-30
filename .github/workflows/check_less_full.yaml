@@ -13,7 +13,8 @@
 
 on: 
   pull_request:
-    - develop
+    branches:
+      - develop
 
 name: Check-Full
 
