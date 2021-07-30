@@ -199,13 +199,13 @@ test_that("Strategies",{
         ~visit, ~subjid, ~method,
         "Visit 1" , "2",  "ABC",
     )
-    expect_error(ld$update_strategies(dat_ice))
+    expect_error(ld$update_strategies(dat_ice), "Unable to change from MAR to non-MAR")
 
     dat_ice <- tribble(
          ~subjid, ~method,
           "3",  "MAR",
     )
-    expect_error(ld$update_strategies(dat_ice))
+    expect_error(ld$update_strategies(dat_ice), "Unable to change from non-MAR to MAR")
 })
 
 

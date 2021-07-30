@@ -56,3 +56,9 @@ get_sim_data <- function(n, sigma){
     return(dat)
 }
 
+time_it <- function(expr){
+    start <- Sys.time()
+    expr
+    stop <- Sys.time()
+    difftime(stop, start, units = "secs")
+}

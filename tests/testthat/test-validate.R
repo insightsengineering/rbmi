@@ -38,6 +38,7 @@ vars <- list(
     subjid = "subjid",
     group = "group",
     strata = "strata",
+    method = "method",
     covariates = c("sex", "age")
 )
 
@@ -253,7 +254,61 @@ test_that("validate_data_long",{
 
 
 test_that("validate_data_ice",{
-    expect_true(validate_dataice(dat, vars))
+
+    di <- data.frame(
+        subjid = c("1", "1"),
+        method = c("MAR", "MAR"),
+        visit = c("Visit 1"),
+        stringsAsFactors = FALSE
+    )
+
+    expect_error(validate_dataice(dat, di, vars), regexp = "must contain at most 1 row per")
+
+    di <- data.frame(
+        subjid = c("1", "2"),
+        method = c("MAR", "MAR"),
+        visit = c("Visit 20"),
+        stringsAsFactors = FALSE
+    )
+
+    expect_error(validate_dataice(dat, di, vars),  regexp = "vars\\$visit.*contains values that are")
+
+    di <- data.frame(
+        subjid = c("1", "2"),
+        method = c("MAR", NA),
+        visit = c("Visit 1"),
+        stringsAsFactors = FALSE
+    )
+
+    expect_error(validate_dataice(dat, di, vars),  regexp = "vars\\$method.* must be a non")
+
+    di <- data.frame(
+        subjid = c("1", "abc"),
+        method = c("MAR", "CR"),
+        visit = c("Visit 1"),
+        stringsAsFactors = FALSE
+    )
+
+    expect_error(validate_dataice(dat, di, vars),  regexp = "vars\\$subjid.* contains values that aren't")
+
+    di <- data.frame(
+        subjid = c("1", "2"),
+        method = c("MAR", "CR"),
+        visit = c("Visit 1"),
+        stringsAsFactors = FALSE
+    )
+
+    expect_true(validate_dataice(dat, di, vars))
+
+    di <- data.frame(
+        subjid = c("1", "2"),
+        method = c("MAR", "CR"),
+        visit = c("Visit 122"),
+        stringsAsFactors = FALSE
+    )
+
+    expect_true(validate_dataice(dat, di, vars, update = TRUE))
+
 })
 
 
