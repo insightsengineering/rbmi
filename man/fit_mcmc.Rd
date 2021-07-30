@@ -7,6 +7,8 @@
 fit_mcmc(data, n_imputations, burn_in, burn_between, initial_values, same_cov)
 }
 \arguments{
+\item{data}{TODO}
+
 \item{n_imputations}{TODO}
 
 \item{burn_in}{TODO}
@@ -16,8 +18,6 @@ fit_mcmc(data, n_imputations, burn_in, burn_between, initial_values, same_cov)
 \item{initial_values}{TODO}
 
 \item{same_cov}{TODO}
-
-\item{datta}{TODO}
 }
 \description{
 Title - TODO

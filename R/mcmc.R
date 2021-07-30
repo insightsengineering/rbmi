@@ -233,7 +233,7 @@ prepare_data_mcmc <- function(
 
 #' Title - TODO
 #'
-#' @param datta TODO
+#' @param data TODO
 #' @param n_imputations TODO
 #' @param burn_in TODO
 #' @param burn_between TODO
