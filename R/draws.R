@@ -15,7 +15,7 @@ draws <- function(data, data_ice, vars, method) {
 #' @export
 draws.bayes <- function(data, data_ice, vars, method) {
     x <- draws_bayes(data, data_ice, vars, method)
-    as_class(x, "bayes")
+    as_class(x, "random")
 }
 
 #' @rdname draws
@@ -41,7 +41,7 @@ draws.approxbayes <- function(data, data_ice, vars, method) {
     # remove useless elements from output of `method`
     x$method$type <- x$method$n_samples <- NULL
 
-    as_class(x, "approxbayes")
+    as_class(x, "random")
 }
 
 #' @rdname draws
@@ -77,11 +77,11 @@ draws_bayes <- function(data, data_ice, vars, method) {
     )
 
     fit <- run_mcmc(
-        designmat = model_df_scaled[,-1],
-        outcome = model_df_scaled[,1],
+        designmat = model_df_scaled[, -1],
+        outcome = model_df_scaled[, 1, drop = TRUE],
         group = data[[vars$group]],
         sigma_reml = mmrm_initial$sigma,
-        n_imputations = method$n_imputations,
+        n_imputations = method$n_samples,
         burn_in = method$burn_in,
         burn_between = method$burn_between,
         initial_values = list(
@@ -97,8 +97,8 @@ draws_bayes <- function(data, data_ice, vars, method) {
     )
 
     samples <- mapply(function(x,y) list("beta" = x, "sigma" = y),
-                      fit$samples$beta,
-                      fit$samples$sigma,
+                      lapply(fit$samples$beta, scaler$unscale_beta),
+                      lapply(fit$samples$sigma, function(covs) lapply(covs, scaler$unscale_sigma)),
                       SIMPLIFY = FALSE
     )
 
