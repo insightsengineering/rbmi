@@ -1,13 +1,13 @@
 
 
 #' Title
-#' 
-#' @description 
+#'
+#' @description
 #' TODO
-#' 
+#'
 #' @param imputations TODO
-#' 
-#' @export 
+#'
+#' @export
 delta_template <- function(imputations) {
     ld <- imputations$longdata
     x <- lapply(
@@ -15,16 +15,30 @@ delta_template <- function(imputations) {
         function(id) {
             strat <- ifelse(ld$is_mar[[id]], "MAR", ld$strategies[[id]])
             strat[!ld$is_missing[[id]]] <- NA_character_
-            df <- list()
+
+            df <- data.frame(
+                "is_mar" = ld$is_mar[[id]],
+                "is_missing" = ld$is_missing[[id]],
+                "is_post_ice" = ld$is_post_ice[[id]],
+                "strategy" = strat,
+                "delta" = 0
+            )
             df[[ld$vars$subjid]] <- id
             df[[ld$vars$visit]] <- factor(ld$visits, labels = ld$visits)
             df[[ld$vars$group]] <- ld$impgroup[[id]]
-            df[["is_mar"]] <- ld$is_mar[[id]]
-            df[["is_missing"]] <- ld$is_missing[[id]]
-            df[["is_post_ice"]] <- ld$is_post_ice[[id]]
-            df[["strategy"]] <- strat
-            df[["delta"]] <- 0
-            return(as.data.frame(df, stringsAsFactors = FALSE))
+
+            vars <- c(
+                ld$vars$subjid,
+                ld$vars$visit,
+                ld$vars$group,
+                "is_mar",
+                "is_missing",
+                "is_post_ice",
+                "strategy",
+                "delta"
+            )
+
+            return(df[, vars])
         }
     )
     Reduce(rbind, x)
