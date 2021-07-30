@@ -2,10 +2,19 @@
 % Please edit documentation in R/draws.R
 \name{draws_bayes}
 \alias{draws_bayes}
-\title{Title}
+\title{Title - TODO}
 \usage{
 draws_bayes(data, data_ice, vars, method)
 }
+\arguments{
+\item{data}{TODO}
+
+\item{data_ice}{TODO}
+
+\item{vars}{TODO}
+
+\item{method}{TODO}
+}
 \description{
-Title
+Title - TODO
 }

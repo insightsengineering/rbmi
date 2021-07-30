@@ -1,3 +1,7 @@
+#' Title - TODO
+#'
+#' @param vec_long TODO
+#' @param J TODO
 long2wide <- function(vec_long,
                       J) {
     len <- length(vec_long)
@@ -11,6 +15,9 @@ long2wide <- function(vec_long,
     return(wide_mat)
 }
 
+#' Title - TODO
+#'
+#' @param outcome TODO
 get_obs_missingness_patterns <- function(outcome) {
 
     assert_that(
@@ -29,6 +36,10 @@ get_obs_missingness_patterns <- function(outcome) {
                 M = M))
 }
 
+#' Title - TODO
+#'
+#' @param sigma_reml TODO
+#' @param levels_group TODO
 match_groups_sigmas <- function(
     sigma_reml,
     levels_group
@@ -38,6 +49,11 @@ match_groups_sigmas <- function(
 
 }
 
+#' Title - TODO
+#'
+#' @param designmat TODO
+#' @param N TODO
+#' @param J TODO
 QR_decomp <- function(designmat, N, J) {
     qr_obj = qr(designmat)
     Q = qr.Q(qr = qr_obj)* sqrt(N*J - 1)
@@ -51,6 +67,17 @@ QR_decomp <- function(designmat, N, J) {
     return(ret_obj)
 }
 
+#' Title - TODO
+#'
+#' @param designmat TODO
+#' @param outcome TODO
+#' @param group TODO
+#' @param sigma_reml TODO
+#' @param n_imputations TODO
+#' @param burn_in TODO
+#' @param burn_between TODO
+#' @param initial_values TODO
+#' @param same_cov TODO
 run_mcmc <- function(
     designmat,
     outcome,
@@ -92,6 +119,9 @@ run_mcmc <- function(
     return(ret_obj)
 }
 
+#' Title - TODO
+#'
+#' @param listmat TODO
 listmat_to_array <- function(listmat) {
 
     assert_that(
@@ -109,6 +139,14 @@ listmat_to_array <- function(listmat) {
     return(res_array)
 }
 
+#' Title - TODO
+#'
+#' @param designmat TODO
+#' @param outcome TODO
+#' @param group TODO
+#' @param same_cov TODO
+#' @param sigma_reml TODO
+#' @param initial_values TODO
 prepare_data_mcmc <- function(
     designmat,
     outcome,
@@ -193,6 +231,14 @@ prepare_data_mcmc <- function(
 
 }
 
+#' Title - TODO
+#'
+#' @param datta TODO
+#' @param n_imputations TODO
+#' @param burn_in TODO
+#' @param burn_between TODO
+#' @param initial_values TODO
+#' @param same_cov TODO
 #' @import Rcpp
 #' @import methods
 #' @useDynLib rbmi, .registration = TRUE
@@ -241,7 +287,10 @@ fit_mcmc <- function(
 
 }
 
-#' Title
+#' Title - TODO
+#'
+#' @param a TODO
+#' @param n TODO
 split_dim <- function(a, n) {
     setNames(lapply(split(a, arrayInd(seq_along(a), dim(a))[, n]),
                     array, dim = dim(a)[-n], dimnames(a)[-n]),
@@ -249,6 +298,9 @@ split_dim <- function(a, n) {
 
 }
 
+#' Title - TODO
+#'
+#' @param stan_fit TODO
 #' @importFrom rstan extract
 extract_draws <- function(stan_fit) {
 
@@ -276,12 +328,20 @@ extract_draws <- function(stan_fit) {
     return(pars)
 }
 
+#' Title - TODO
+#'
+#' @param stan_fit TODO
 #' @importFrom rstan summary
 get_ESS <- function(stan_fit) {
 
     return(rstan::summary(stan_fit, pars = c("beta", "Sigma"))$summary[,"n_eff"])
 }
 
+#' Title - TODO
+#'
+#' @param stan_fit TODO
+#' @param n_draws TODO
+#' @param threshold TODO
 check_ESS <- function(stan_fit, n_draws, threshold = 0.4) {
 
     ESS <- get_ESS(stan_fit)
@@ -296,6 +356,9 @@ check_ESS <- function(stan_fit, n_draws, threshold = 0.4) {
     return(invisible(NULL))
 }
 
+#' Title - TODO
+#'
+#' @param stan_fit TODO
 #' @importFrom rstan get_divergent_iterations get_bfmi get_max_treedepth_iterations
 check_hmc_diagn <- function(stan_fit) {
 
@@ -310,6 +373,11 @@ check_hmc_diagn <- function(stan_fit) {
     return(invisible(NULL))
 }
 
+#' Title - TODO
+#'
+#' @param stan_fit TODO
+#' @param n_draws TODO
+#' @param threshold_lowESS TODO
 check_mcmc <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
 
     check_ESS(

@@ -51,7 +51,12 @@ draws.condmean <- function(data, data_ice, vars, method) {
 }
 
 
-#' Title
+#' Title - TODO
+#'
+#' @param data TODO
+#' @param data_ice TODO
+#' @param vars TODO
+#' @param method TODO
 draws_bayes <- function(data, data_ice, vars, method) {
 
     longdata <- longDataConstructor$new(data, vars)
