@@ -75,3 +75,34 @@ test_that("sample_mvnorm", {
     expect_true(all((lower_limit_m < obsm) & (obsm < upper_limit_m)))
 
 })
+
+
+
+test_that("record_warnings", {
+
+    fun <- function(x) {
+        return(x)
+    }
+    result_actual <- record_warnings(fun(iris))
+    result_expected <- list(results = iris, warnings = NULL)
+    expect_equal(result_actual, result_expected)
+
+
+    fun <- function(x) {
+        warning("w1")
+        warning("w2")
+        return(x)
+    }
+    result_actual <- record_warnings(fun(2))
+    result_expected <- list(results = 2, warnings = c("w1", "w2"))
+    expect_equal(result_actual, result_expected)
+
+
+    fun <- function(x) {
+        warning("w1")
+        warning("w2")
+        stop("an error")
+        return(x)
+    }
+    expect_error(record_warnings(fun(2)), "an error")
+})

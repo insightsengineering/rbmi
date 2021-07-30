@@ -182,23 +182,10 @@ fit_mmrm <- function(
     ###################### fit mmrm
 
     ignorable_warnings <- c(
-        paste0("In Matrix::sparseMatrix(dims = c(0, 0), i = integer(0), j = integer(0), : 'giveCsparse' has been deprecated; setting 'repr =\"T\"' for you",
-               sep = "")
+        "In Matrix::sparseMatrix(dims = c(0, 0), i = integer(0), j = integer(0), : 'giveCsparse' has been deprecated; setting 'repr =\"T\"' for you"
     )
 
-    # function to return fit object and warning
-    with_warning = function (expr) {
-        self = environment()
-        warning = NULL
-
-        result = withCallingHandlers(expr, warning = function (w) {
-            self$warning = w
-            tryInvokeRestart('muffleWarning')
-        })
-        list(result = result, warn = warning)
-    }
-
-    fit <- with_warning( expr = {
+    fit <- record_warnings({
         glmmTMB(
             formula,
             data = designmat_extended,
@@ -206,22 +193,23 @@ fit_mmrm <- function(
             REML = REML,
             start = initial_values,
             control = control
-        )})
+        )
+    })
 
     # check convergence
-    converged <- is_converged(fit$result)
+    converged <- is_converged(fit$results)
 
     # handle warning: display only warnings if
     # 1) fit does converge
     # 2) the warning is not in ignorable_warnings
-
-    if(!is.null(fit$warn)) {
-        if(converged && !fit$warn$message %in% ignorable_warnings) {
-            warning(fit$warn$message)
-        }
+    if(converged){
+        warnings <- fit$warnings
+        warnings_not_allowed <- warnings[!warnings %in% ignorable_warnings]
+        for (i in warnings_not_allowed) warning(warnings_not_allowed)
     }
 
-    fit <- fit$result
+
+    fit <- fit$results
 
     # extract regression coefficients and covariance matrices
     params <- extract_params(fit)
@@ -285,3 +273,4 @@ fit_mmrm_multiopt <- function(
 
     return(fit)
 }
+
