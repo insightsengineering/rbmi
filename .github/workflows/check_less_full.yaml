@@ -12,13 +12,8 @@
 #       - master
 
 on: 
-  push:
-    branches:
-      - main
-      - master 
   pull_request:
-      - main
-      - master
+    - develop
 
 name: Check-Full
 
@@ -26,14 +21,9 @@ jobs:
   R-CMD-check:
     
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
        config:
-         - { R: "devel", os: "ubuntu-20.04", pkg_repo: "https://packagemanager.rstudio.com/all/__linux__/focal/latest"}
-         - { R: "release", os: "ubuntu-18.04", pkg_repo: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-         - { R: "release", os: "ubuntu-20.04", pkg_repo: "https://packagemanager.rstudio.com/all/__linux__/focal/latest"}
-         - { R: "release", os: "macos-latest", pkg_repo: "https://cran.rstudio.com/"}
-         - { R: "release", os: "windows-latest", pkg_repo: "https://cran.rstudio.com/"}
          - { R: "4.0.4", os: "ubuntu-20.04", pkg_repo: "https://packagemanager.rstudio.com/cran/__linux__/focal/2021-04-20"}
          - { R: "3.6.3", os: "ubuntu-20.04", pkg_repo: "https://packagemanager.rstudio.com/cran/__linux__/focal/2020-04-02"}
          
