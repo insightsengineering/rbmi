@@ -60,8 +60,10 @@ draws.condmean <- function(data, data_ice, vars, method) {
 draws_bayes <- function(data, data_ice, vars, method) {
 
     longdata <- longDataConstructor$new(data, vars)
+    longdata$set_strategies(data_ice)
 
-    model_df <- as_model_df(data, as_simple_formula(vars))
+    data2 <- longdata$get_data(longdata$ids, nmar.rm = TRUE, na.rm = TRUE)
+    model_df <- as_model_df(data2, as_simple_formula(vars))
 
     scaler <- scalerConstructor$new(model_df)
     model_df_scaled <- scaler$scale(model_df)
@@ -69,9 +71,9 @@ draws_bayes <- function(data, data_ice, vars, method) {
     mmrm_initial <- fit_mmrm_multiopt(
         designmat = model_df_scaled[,-1],
         outcome = model_df_scaled[,1],
-        subjid = data[[vars$subjid]],
-        visit = data[[vars$visit]],
-        group = data[[vars$group]],
+        subjid = data2[[vars$subjid]],
+        visit = data2[[vars$visit]],
+        group = data2[[vars$group]],
         vars = vars,
         cov_struct = "us",
         REML = TRUE,
@@ -83,7 +85,7 @@ draws_bayes <- function(data, data_ice, vars, method) {
     fit <- run_mcmc(
         designmat = model_df_scaled[, -1],
         outcome = model_df_scaled[, 1, drop = TRUE],
-        group = data[[vars$group]],
+        group = data2[[vars$group]],
         sigma_reml = mmrm_initial$sigma,
         n_imputations = method$n_samples,
         burn_in = method$burn_in,
@@ -97,7 +99,7 @@ draws_bayes <- function(data, data_ice, vars, method) {
 
     fit$samples$sigma <- lapply(
         fit$samples$sigma,
-        function(sample_cov) setNames(sample_cov, levels(data[[vars$group]]))
+        function(sample_cov) setNames(sample_cov, levels(data2[[vars$group]]))
     )
 
     samples <- mapply(function(x,y) list("beta" = x, "sigma" = y),
