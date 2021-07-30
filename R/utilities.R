@@ -60,3 +60,35 @@ as_model_df <- function(dat, frm){
     class(design) <- class(dat)
     return(design)
 }
+
+
+#' Title - TODO
+#' 
+#' Converts all character variables within a dataframe to factor
+#' 
+#' @param data A dataframe
+char2fct <- function(data) {
+    for (v in colnames(data)) {
+        if (is.character(data[[v]])) {
+            data[[v]] <- factor(data[[v]])
+        }
+    }
+    return(data)
+}
+
+
+#' Title - TODO
+#'
+#' A wrapper around if() else() to prevent unexpected
+#' interactions between ifelse() and factor variables
+#' 
+#' @param x True / False
+#' @param a value to return if True
+#' @param b value to return if False
+ife <- function(x, a, b){
+    if (x) {
+        return(a)
+    } else {
+        return(b)
+    }
+}
