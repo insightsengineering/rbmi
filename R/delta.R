@@ -24,12 +24,11 @@ delta_template <- function(imputations) {
             df[["is_post_ice"]] <- ld$is_post_ice[[id]]
             df[["strategy"]] <- strat
             df[["delta"]] <- 0
-            return(as.data.frame(df))
+            return(as.data.frame(df, stringsAsFactors = FALSE))
         }
     )
     Reduce(rbind, x)
 }
-
 
 #' Title
 #'
