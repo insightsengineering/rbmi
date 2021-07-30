@@ -341,7 +341,7 @@ impute_outcome <- function(conditional_parameters){
         result <- rnorm(
             n = 1,
             mean = conditional_parameters$mu,
-            sd = conditional_parameters$sigma
+            sd = sqrt(conditional_parameters$sigma)
         )
 
     } else {
