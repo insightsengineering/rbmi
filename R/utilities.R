@@ -81,14 +81,46 @@ char2fct <- function(data) {
 #'
 #' A wrapper around if() else() to prevent unexpected
 #' interactions between ifelse() and factor variables
-#' 
+#'
 #' @param x True / False
 #' @param a value to return if True
 #' @param b value to return if False
-ife <- function(x, a, b){
+ife <- function(x, a, b) {
     if (x) {
         return(a)
     } else {
         return(b)
     }
 }
+
+
+
+
+
+#' Sample random values from the multivariate normal distribution
+#'
+#' @param mu mean vector
+#' @param sigma covariance matrix
+#'
+#' Samples multivariate normal variables by multiplying
+#' univariate random normal variables by the cholesky
+#' decomposition of the covariance matrix.
+#'
+#' If mu is length 1 then just uses rnorm instead.
+sample_mvnorm <- function(mu, sigma) {
+    if (length(sigma) == 1 & length(mu) == 1) {
+        return(rnorm(1, mu, sigma))
+    }
+    assert_that(
+        is.matrix(sigma),
+        nrow(sigma) == ncol(sigma),
+        nrow(sigma) == length(mu),
+        msg = "`mu` and `sigma` are not of compatible sizes"
+    )
+    x <- rnorm(nrow(sigma), mean = 0, sd = 1)
+    (x %*% chol(sigma)) + as.vector(mu)
+}
+
+
+
+

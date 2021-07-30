@@ -27,5 +27,4 @@ Config/testthat/edition: 2
 Imports: 
     R6,
     assertthat,
-    mvtnorm,
     glmmTMB
