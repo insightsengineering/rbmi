@@ -181,7 +181,7 @@ TODO
 \subsection{Method \code{set_strategies()}}{
 TODO
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$set_strategies(dat_ice, update = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$set_strategies(dat_ice = NULL, update = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

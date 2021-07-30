@@ -44,7 +44,7 @@ longDataConstructor <- R6::R6Class(
 
         #' @field is_missing TODO
         is_missing = list(),
-        
+
         #' @field is_post_ice TODO
         is_post_ice = list(),
 
@@ -205,9 +205,11 @@ longDataConstructor <- R6::R6Class(
         #' @param dat_ice TODO
         #' @param update TODO
         #' @return TODO
-        set_strategies = function(dat_ice, update=FALSE) {
+        set_strategies = function(dat_ice = NULL, update=FALSE) {
 
-            validate_dataice(dat_ice, vars, self$visits)
+            if(is.null(dat_ice)) return(self)
+
+            validate_dataice(self$data, dat_ice, self$vars, update)
 
             for( subject in dat_ice[[self$vars$subjid]]){
 
@@ -244,7 +246,7 @@ longDataConstructor <- R6::R6Class(
                 } else {
                     is_mar <- rep(TRUE, length(self$visits))
                 }
-                
+
                 is_post_ice <- seq_along(self$visits) >= index
                 self$is_post_ice[[subject]] <- is_post_ice
 

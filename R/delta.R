@@ -21,7 +21,8 @@ delta_template <- function(imputations) {
                 "is_missing" = ld$is_missing[[id]],
                 "is_post_ice" = ld$is_post_ice[[id]],
                 "strategy" = strat,
-                "delta" = 0
+                "delta" = 0,
+                stringsAsFactors = FALSE
             )
             df[[ld$vars$subjid]] <- id
             df[[ld$vars$visit]] <- factor(ld$visits, labels = ld$visits)
@@ -53,20 +54,20 @@ delta_template <- function(imputations) {
 #' @param dlag TODO
 #' @param is_post_ice TODO
 d_lagscale <- function(delta, dlag, is_post_ice) {
-    
+
     assert_that(
         is.numeric(dlag),
         is.numeric(delta),
         is.logical(is_post_ice),
         msg = "`dlag` and `delta` must be numeric, `is_post_ice` must be logical"
     )
-    
+
     assert_that(
         length(delta) == length(dlag),
         length(delta) == length(is_post_ice),
         msg = "`delta`, `dlag` and `is_post_ice` must all be the same length"
     )
-    
+
     result <- rep(0, length(dlag))
     if (all(!is_post_ice)) {
         return(result)
@@ -89,17 +90,17 @@ d_lagscale <- function(delta, dlag, is_post_ice) {
 #' @param dlag TODO
 #' @param missing_only If false delta adjustments will be calculated for non-missing post-ice data. If true then
 #' non-missing post-ice data will have a delta of 0 assigned. See details for more information (TODO).
-#' 
-#' @export 
+#'
+#' @export
 delta_lagscale <- function(
-    imputations, 
-    delta, 
-    dlag =  c(1, rep(0, length(delta) - 1)), 
+    imputations,
+    delta,
+    dlag =  c(1, rep(0, length(delta) - 1)),
     missing_only = TRUE
 ){
     dat <- delta_template(imputations)
     ld <- imputations$longdata
-    
+
     assert_that(
         is.numeric(delta),
         is.numeric(dlag),
@@ -110,13 +111,13 @@ delta_lagscale <- function(
             length(ld$visits)
         )
     )
-    
+
     assert_that(
         is.logical(missing_only) ,
         length(missing_only) == 1,
         msg = "`missing_only` must be TRUE or FALSE"
     )
-    
+
     delta_list <- lapply(
         ld$ids,
         function(id) {
@@ -130,12 +131,12 @@ delta_lagscale <- function(
     delta <- unlist(delta_list)
     assert_that(length(delta) == length(dat[["delta"]]))
     dat["delta"] <- delta
-    
+
     if( missing_only){
         ## Correction to remove any delta assigned to none missing values
         dat$delta[!dat[["is_missing"]] & dat[["is_post_ice"]]] <- 0
     }
-    
+
     return(dat)
 }
 
@@ -143,18 +144,18 @@ delta_lagscale <- function(
 
 
 #' Title
-#' 
-#' @description 
+#'
+#' @description
 #' TODO
-#' 
+#'
 #' @param data TODO
 #' @param delta TODO
 #' @param group TODO
 #' @param outcome TODO
-#' 
-#' @export 
+#'
+#' @export
 apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL){
-    
+
     assert_that(
         is.character(group),
         length(group) >= 1,
@@ -162,48 +163,48 @@ apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL){
         length(outcome) == 1,
         msg = "`group` and `outcome` must be character vectors"
     )
-    
+
     assert_that(
         is.data.frame(data),
         is.data.frame(delta) | is.null(delta),
         msg = "`dat` and `delta` must be data.frames"
     )
-    
+
     assert_that(
         !"delta" %in% names(data),
         msg = " `delta` is a reserved variable name should not be already defined in `data`"
     )
-    
+
     if (is.null(delta)) {
         return(data)
     }
     if( nrow(delta) == 0 ){
         return(data)
     }
-    
+
     for (var in c(group, outcome)) {
         assert_that(
             var %in% names(data),
             msg = sprintf("Variable `%s` is not in `data`", var)
         )
     }
-    
+
     for (var in c(group, "delta")) {
         assert_that(
             var %in% names(delta),
             msg = sprintf("Variable `%s` is not in `data`", var)
         )
     }
-    
+
     delta_min <- delta[, c(group, "delta")]
-    
+
     data2 <- merge(data, delta_min, all.x = TRUE, by = group)
-    
+
     data2[is.na(data2[["delta"]]), "delta"] <- 0
     data2[[outcome]] <- data2[[outcome]] + data2[["delta"]]
-    
+
     data3 <- data2[, names(data)]
-    
+
     assert_that(
         ncol(data3) == ncol(data),
         nrow(data3) == nrow(data),
