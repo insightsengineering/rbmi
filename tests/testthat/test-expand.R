@@ -162,3 +162,4 @@ test_that("fill_locf", {
     expect_error(fill_locf(input_df, vars = c("v1", "v2"), order = "v3"), regexp = "`v3`")
 
 })
+
