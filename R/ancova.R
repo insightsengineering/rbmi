@@ -12,7 +12,6 @@
 #'
 #' @export
 ancova <- function(data, vars, visit_level = NULL) {
-
     outcome <- vars[["outcome"]]
     group <- vars[["group"]]
     covariates <- vars[["covariates"]]
@@ -37,6 +36,11 @@ ancova <- function(data, vars, visit_level = NULL) {
     )
 
     expected_vars <- c(extract_covariates(covariates), outcome, group)
+
+    assert_that(
+        ! visit %in% expected_vars,
+        msg = "The `vars$visit` variable cannot be a covariate in an ANCOVA model. Please adjust `vars$covariates` accordingly"
+    )
 
     if (!is.null(visit_level) | !is.null(visit)) {
 
