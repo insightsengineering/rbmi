@@ -22,8 +22,8 @@ Suggests:
     tidyr,
     nlme,
     testthat,
-    emmeans,
-    mvtnorm
+    mvtnorm,
+    emmeans
 Config/testthat/edition: 2
 Imports: 
     R6,
