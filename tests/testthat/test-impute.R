@@ -306,11 +306,11 @@ test_that("impute_outcome", {
     expect_true( is.numeric(x))
 
     set.seed(101)
-    x <- replicate(n = 10000, impute_outcome(list(mu = 5, sigma = 10)))
+    x <- replicate(n = 20000, impute_outcome(list(mu = 5, sigma = 10)))
     mu <- mean(x)
-    sig <- sd(x)
+    sig <- sd(x)^2
     expect_true(   4.9 <= mu  & mu <= 5.1)
-    expect_true(   9.9 <= sig & sig <= 10.1 )
+    expect_true(   9.8 <= sig & sig <= 10.2 )
 
 
 
@@ -440,7 +440,7 @@ test_that("get_visit_distribution_parameters",{
 
 
 test_that("validate_strategies",{
-    
+
     dat <- tibble(
         subjid = rep(c("Tom", "Harry", "Phil", "Ben"), each = 3),
         age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
