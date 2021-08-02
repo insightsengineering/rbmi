@@ -55,7 +55,7 @@ analyse <- function(imputations, fun, delta = NULL, ...) {
         }
     )
 
-    validate_analysis_results(results)
+    
 
     new_class <- switch(class(imputations$method),
         bayes = "rubin",
@@ -68,54 +68,10 @@ analyse <- function(imputations, fun, delta = NULL, ...) {
     )
 
     class(results) <- new_class
+    validate_analyse(results)
     return(results)
 }
 
-
-
-#' Validate analysis results objects
-#'
-#' @description
-#' TODO
-#'
-#' @param results TODO
-validate_analysis_results <- function(results){
-
-    assert_that(
-        is.list(results),
-        msg = "Analysis results must be a list"
-    )
-
-    assert_that(
-        all(vapply(results, is.list, logical(1))),
-        all(vapply(results, function(x) !is.null(names(x)), logical(1))),
-        msg = "Individual analysis results must be a named list"
-    )
-
-    results_names <- lapply(results, names)
-    results_names_len <- vapply(results_names, length, numeric(1))
-    unique_names <- unique(unlist(results_names, use.names = FALSE))
-
-    assert_that(
-        length(unique(results_names_len)) == 1,
-        length(unique_names) == results_names_len[1],
-        msg = "All analysis results must contain the exact same named elements"
-    )
-
-    results_unnested <- unlist(results, recursive = FALSE, use.names = FALSE)
-
-    devnull <- lapply(
-        results_unnested,
-        function(x){
-            assert_that(
-                is.list(x),
-                all(c("est", "se", "df") %in% names(x)),
-                msg = "Each analysis result element must be a list with elements `est`, `se` & `df`"
-            )
-        }
-    )
-    return(invisible(TRUE))
-}
 
 
 #' Extract imputated datasets
