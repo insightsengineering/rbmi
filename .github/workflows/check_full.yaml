@@ -30,8 +30,7 @@ jobs:
     
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_LIBS_USER: .github/rpkg
-      
+          
     steps:
     
       - name: Checkout
@@ -52,7 +51,7 @@ jobs:
       
       - name: Determine dependencies & Create Package Directory
         run: |
-          dir.create(".github/rpkg", showWarnings = FALSE)
+          dir.create(".github/rpkg")
           saveRDS(read.dcf("DESCRIPTION")[, c("Imports", "Suggests")], ".github/r-depends.rds")
         shell: Rscript {0}
       
@@ -64,8 +63,8 @@ jobs:
       - name: Install R packages
         run: |
           options(repos = "${{ matrix.config.pkg_repo }}")
-          install.packages(c("remotes", "rcmdcheck"))
-          remotes::install_deps(dependencies = TRUE, upgrade = FALSE)
+          install.packages(c("remotes", "rcmdcheck"), repos = ".github/rpkg")
+          remotes::install_deps(dependencies = TRUE, upgrade = FALSE, repos = ".github/rpkg")
         shell: Rscript {0}
         
       - name: Check
