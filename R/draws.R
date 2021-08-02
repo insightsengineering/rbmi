@@ -62,29 +62,19 @@ draws_bayes <- function(data, data_ice, vars, method) {
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
 
-    data2 <- longdata$get_data(longdata$ids, nmar.rm = TRUE, na.rm = TRUE)
+    # remove non-MAR data
+    data2 <- longdata$get_data(longdata$ids, nmar.rm = FALSE, na.rm = FALSE)
+    isMAR <- unlist(longdata$is_mar)
+    data2[!isMAR, vars$outcome] <- NA
 
-    # TODO: FIND BETTER SOLUTION (e.g. allow for deleting nmar data as NA)
-    data_all <- longdata$get_data(longdata$ids, nmar.rm = FALSE, na.rm = FALSE)
-    ids_all <- unique(data_all[[vars$subjid]])
-    visit_all <- levels(data_all[[vars$visit]])
-    data2$subjid2 <- as.factor(data2[[vars$subjid]])
-    data2$visit2 <- as.factor(data2[[vars$visit]])
-    data2 <- expand(
-        data2,
-        subjid2 = ids_all,
-        visit2 = visit_all
-    )
-    outcome <- data2[[vars$outcome]]
-    data2 <- data
-    data2[[vars$outcome]] <- outcome
-
+    # compute design matrix
     model_df <- as_model_df(data2, as_simple_formula(vars))
 
+    # scale input data
     scaler <- scalerConstructor$new(model_df)
     model_df_scaled <- scaler$scale(model_df)
 
-
+    # fit MMRM (needed for initial values)
     mmrm_initial <- fit_mmrm_multiopt(
         designmat = model_df_scaled[,-1],
         outcome = model_df_scaled[,1],
@@ -99,6 +89,7 @@ draws_bayes <- function(data, data_ice, vars, method) {
         optimizer =  c("L-BFGS-B", "BFGS", "Nelder-Mead")
     )
 
+    # run MCMC
     fit <- run_mcmc(
         designmat = model_df_scaled[, -1],
         outcome = model_df_scaled[, 1, drop = TRUE],
@@ -114,17 +105,20 @@ draws_bayes <- function(data, data_ice, vars, method) {
         same_cov = method$same_cov
     )
 
+    # set names of covariance matrices
     fit$samples$sigma <- lapply(
         fit$samples$sigma,
         function(sample_cov) setNames(sample_cov, levels(data2[[vars$group]]))
     )
 
+    # unscale samples
     samples <- mapply(function(x,y) list("beta" = x, "sigma" = y),
                       lapply(fit$samples$beta, scaler$unscale_beta),
                       lapply(fit$samples$sigma, function(covs) lapply(covs, scaler$unscale_sigma)),
                       SIMPLIFY = FALSE
     )
 
+    # set ids associated to each sample
     samples <- lapply(
         samples,
         function(x) {x$ids <- longdata$ids; return(x)}
