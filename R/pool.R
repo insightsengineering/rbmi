@@ -26,7 +26,8 @@ pool <- function(
         msg = "`conf.level` must be between 0 and 1"
     )
 
-    validate_analysis_results(results)
+    validate_analyse(results)
+
     results_transpose <- transpose_results(results)
     pars <- lapply(
         results_transpose,
@@ -42,6 +43,9 @@ pool <- function(
     )
     return(ret)
 }
+
+
+
 
 
 #' @rdname pool
