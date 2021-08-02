@@ -65,12 +65,15 @@ draws_bayes <- function(data, data_ice, vars, method) {
     data2 <- longdata$get_data(longdata$ids, nmar.rm = TRUE, na.rm = TRUE)
 
     # TODO: FIND BETTER SOLUTION (e.g. allow for deleting nmar data as NA)
-    data2$subjid2 <- data2[[vars$subjid]]
-    data2$visit2 <- data2[[vars$visit]]
+    data_all <- longdata$get_data(longdata$ids, nmar.rm = FALSE, na.rm = FALSE)
+    ids_all <- unique(data_all[[vars$subjid]])
+    visit_all <- levels(data_all[[vars$visit]])
+    data2$subjid2 <- as.factor(data2[[vars$subjid]])
+    data2$visit2 <- as.factor(data2[[vars$visit]])
     data2 <- expand(
         data2,
-        subjid2 = unique(data2[["subjid2"]]),
-        visit2 = levels(data2[["visit2"]])
+        subjid2 = ids_all,
+        visit2 = visit_all
     )
     outcome <- data2[[vars$outcome]]
     data2 <- data
