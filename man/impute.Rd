@@ -2,19 +2,37 @@
 % Please edit documentation in R/impute.R
 \name{impute}
 \alias{impute}
-\title{impute}
+\title{Create Imputed Datasets}
 \usage{
-impute(draws, data_ice, references, strategies)
+impute(draws, references, update_ice = NULL, strategies = getStrategies())
 }
 \arguments{
-\item{draws}{TODO}
+\item{draws}{A draws object created by \link[rbmi]{draws}.}
 
-\item{data_ice}{TODO}
+\item{references}{a named vector. Identifies the references to be used when calculating the imputed
+values. Should be of the form c("Group" = "Reference").}
 
-\item{references}{TODO}
+\item{update_ice}{an optional dataframe. Updates the imputation method that was originally set via
+the \code{data_ice} option in \code{draws}. See the details section for more information.}
 
-\item{strategies}{TODO}
+\item{strategies}{a named list of functions. Defines the imputation functions to be used. The names
+of of the list should mirror the values specified in \code{method} column of \code{data_ice}.
+Default = \code{getStrategies()}. See \link[rbmi]{getStrategies} for more details.}
 }
 \description{
-TODO - Description
+\code{impute} is used to create imputed datasets based upon the data and options specified in the
+call to \link[rbmi]{draws}. One imputed dataset is created per \code{draw} "sample".
+}
+\details{
+\code{update_ice} can be used to update the imputation method that was originally set via
+the \code{data_ice} option in \code{draws}.
+The \code{update_ice} dataframe must contain two columns, one for the subject ID and another for method,
+whose names are the same as
+those defined in \code{vars} in the call to \code{draws}. You can only update the imputation method, specifying
+a visit column has no effect. If you wish to change the ICE visit date you will need to re-run \code{draws}.
+A key limitation is that you can only switch between a MAR and a non-MAR method (or vice versa)
+if that subject has no non-missing post ICE data.
+As an example, if a subject had their ICE on "Visit 2" but still had values in the dataset for
+"Visit 3" then the function will throw and error if you try to switch them from MAR to a non-MAR method or
+from a non-MAR method to MAR.
 }

@@ -4,20 +4,14 @@
 \alias{impute_internal}
 \title{impute_internal}
 \usage{
-impute_internal(
-  draws,
-  data_ice = NULL,
-  references,
-  strategies,
-  conditionalMean = FALSE
-)
+impute_internal(draws, references, update_ice, strategies, conditionalMean)
 }
 \arguments{
 \item{draws}{TODO}
 
-\item{data_ice}{TODO}
-
 \item{references}{TODO}
+
+\item{update_ice}{TODO}
 
 \item{strategies}{TODO}
 

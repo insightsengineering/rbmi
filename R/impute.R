@@ -2,34 +2,50 @@
 
 
 
-#' impute
+#' Create Imputed Datasets
 #'
-#' TODO - Description
+#' `impute` is used to create imputed datasets based upon the data and options specified in the
+#' call to \link[rbmi]{draws}. One imputed dataset is created per `draw` "sample".
 #'
-#' @param draws TODO
-#' @param data_ice TODO
-#' @param references TODO
-#' @param strategies TODO
+#' @param draws A draws object created by \link[rbmi]{draws}.
+#'
+#' @param references a named vector. Identifies the references to be used when calculating the imputed
+#' values. Should be of the form c("Group" = "Reference").
+#'
+#' @param update_ice an optional dataframe. Updates the imputation method that was originally set via
+#' the `data_ice` option in `draws`. See the details section for more information.
+#'
+#' @param strategies a named list of functions. Defines the imputation functions to be used. The names
+#' of of the list should mirror the values specified in `method` column of `data_ice`.
+#' Default = `getStrategies()`. See \link[rbmi]{getStrategies} for more details.
+#'
+#' @details
+#'
+#' `update_ice` can be used to update the imputation method that was originally set via
+#' the `data_ice` option in `draws`.
+#' The `update_ice` dataframe must contain two columns, one for the subject ID and another for method,
+#' whose names are the same as
+#' those defined in `vars` in the call to `draws`. You can only update the imputation method, specifying
+#' a visit column has no effect. If you wish to change the ICE visit date you will need to re-run `draws`.
+#' A key limitation is that you can only switch between a MAR and a non-MAR method (or vice versa)
+#' if that subject has no non-missing post ICE data.
+#' As an example, if a subject had their ICE on "Visit 2" but still had values in the dataset for
+#' "Visit 3" then the function will throw and error if you try to switch them from MAR to a non-MAR method or
+#' from a non-MAR method to MAR.
+#'
 #' @export
-impute <- function(draws,  data_ice, references, strategies){
+impute <- function(draws, references, update_ice = NULL, strategies = getStrategies()) {
     UseMethod("impute")
 }
 
 
 
-#' impute.bootstrap
-#'
-#' TODO - Description
-#'
-#' @param draws TODO
-#' @param data_ice TODO
-#' @param references TODO
-#' @param strategies TODO
+#' @rdname validate_analyse
 #' @export
-impute.random <- function(draws, data_ice = NULL, references, strategies = getStrategies()){
+impute.random <- function(draws, references, update_ice = NULL, strategies = getStrategies()){
     result <- impute_internal(
         draws = draws,
-        data_ice = data_ice,
+        update_ice = update_ice,
         references = references,
         strategies = strategies,
         conditionalMean = FALSE
@@ -38,19 +54,14 @@ impute.random <- function(draws, data_ice = NULL, references, strategies = getSt
 }
 
 
-#' impute.condmean
-#'
-#' TODO - Description
-#'
-#' @param draws TODO
-#' @param data_ice TODO
-#' @param references TODO
-#' @param strategies TODO
+
+
+#' @rdname validate_analyse
 #' @export
-impute.condmean <- function(draws,  data_ice = NULL, references, strategies = getStrategies()){
+impute.condmean <- function(draws, references, update_ice = NULL, strategies = getStrategies()){
     result <- impute_internal(
         draws = draws,
-        data_ice = data_ice,
+        update_ice = update_ice,
         references = references,
         strategies = strategies,
         conditionalMean = TRUE
@@ -64,19 +75,19 @@ impute.condmean <- function(draws,  data_ice = NULL, references, strategies = ge
 #' TODO - Description
 #'
 #' @param draws TODO
-#' @param data_ice TODO
+#' @param update_ice TODO
 #' @param references TODO
 #' @param strategies TODO
 #' @param conditionalMean TODO
-impute_internal <- function(draws, data_ice = NULL, references, strategies, conditionalMean = FALSE){
+impute_internal <- function(draws, references, update_ice, strategies, conditionalMean){
 
     data <- draws$data
 
     validate_references(references, data$data[[data$vars$group]])
     validate_strategies(strategies, data$strategies)
 
-    if(!is.null(data_ice)){
-        data$update_strategies(data_ice)
+    if(!is.null(update_ice)){
+        data$update_strategies(update_ice)
     }
 
     samples_grouped <- transpose_samples(draws$samples)
