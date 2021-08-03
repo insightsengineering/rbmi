@@ -142,3 +142,36 @@ record_warnings <- function(expr) {
 
     list(results = result, warnings = env$warning)
 }
+
+#' Is value absent
+#' 
+#' Returns true if a value is either NULL, NA or "".
+#' In the case of a vector all values must be NULL/NA/""
+#' for x to be regarded as absent.
+#' 
+#' @param x a value to check if it is absent or not
+#' @param na do NAs count as absent
+#' @param blank do blanks i.e. "" count as absent
+is_absent <- function(x, na = TRUE, blank = TRUE) {
+
+
+    if (is.null(x)) {
+        return(TRUE)
+    }
+
+
+    if (na) {
+        if (all(is.na(x))) {
+            return(TRUE)
+        }
+    }
+
+    if (blank & is.character(x)) {
+        if (all(x == "")) {
+            return(TRUE)
+        }
+    }
+
+    return(FALSE)
+
+}

@@ -9,7 +9,7 @@ sigma <- as_covmat(
     c(0.3, 0.4, 0.45, 0.4, 0.3, 0.2, 0.1, 0.2, 0.3, 0.4)
 )
 
-dat <- get_sim_data(n = 1000, sigma)
+dat <- get_sim_data(n = 300, sigma)
 
 
 get_na_prob <- function(x){
@@ -17,8 +17,8 @@ get_na_prob <- function(x){
         x == "visit_1" ~ 0,
         x == "visit_2" ~ 0.2,
         x == "visit_3" ~ 0.3,
-        x == "visit_4" ~ 0.3,
-        x == "visit_5" ~ 0.5
+        x == "visit_4" ~ 0.4,
+        x == "visit_5" ~ 0.7
     )
 }
 

@@ -149,6 +149,47 @@ test_that("ancova", {
     )["trt"]
 
     expect_equal(result_expected, result_actual)
+
+
+
+    ##################
+    #
+    # Visit variable handling 
+    #
+    #
+
+    n <- 1000
+    dat <- tibble(
+        age1 = rnorm(n),
+        age2 = rnorm(n),
+        vis = sample(c("visit 1", "visit 2"), size = n, replace = TRUE),
+        grp = factor(sample(c("A", "B"), size = n, replace = TRUE)),
+        out = rnorm(n, mean = 50 + 3 * f2n(grp) + 4 * age1 + 8 * age2,  sd = 20)
+    )
+
+    vars <- list(
+        outcome = "out",
+        group = "grp",
+        covariates = c("age1", "age2")
+    )
+
+    vars$visit <- "vi"
+
+    expect_error(
+        ancova(dat, vars, visit_level = "k"),
+        regex = "`vi`"
+    )
+
+    vars$visit <- "vi"
+    res1 <- ancova(dat, vars)
+    vars$visit <- "vis"
+    res2 <- ancova(dat, vars)
+    expect_equal(res1, res2)
+
+    expect_error(
+        ancova(dat, vars, visit_level = "k"),
+        regex = "`k`"
+    )
 })
 
 

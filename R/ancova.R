@@ -37,23 +37,27 @@ ancova <- function(data, vars, visit_level = NULL) {
 
     expected_vars <- c(extract_covariates(covariates), outcome, group)
 
-    assert_that(
-        ! visit %in% expected_vars,
-        msg = "The `vars$visit` variable cannot be a covariate in an ANCOVA model. Please adjust `vars$covariates` accordingly"
-    )
+    if(!is_absent(visit)) {
+        assert_that(
+            ! visit %in% expected_vars,
+            msg = "The `vars$visit` variable cannot be a covariate in an ANCOVA model. Please adjust `vars$covariates` accordingly"
+        )
+    }
 
-    if (!is.null(visit_level) | !is.null(visit)) {
+    if (!is_absent(visit_level)) {
 
         assert_that(
             is.character(visit),
             length(visit) == 1,
-            msg = "`visit` must be a length 1 character"
+            nchar(visit) >= 1,
+            msg = "`vars$visit` must be a single non-empty string"
         )
 
         assert_that(
             is.character(visit_level),
             length(visit_level) == 1,
-            msg = "`visit_level` must be a length 1 character"
+            nchar(visit_level) >= 1,
+            msg = "`visit_level` must be a single non-empty string"
         )
 
        expected_vars <- c(expected_vars, visit)
@@ -66,22 +70,25 @@ ancova <- function(data, vars, visit_level = NULL) {
         )
     }
 
+    if (!is_absent(visit_level)) {
+        assert_that(
+            visit_level %in% data[[visit]],
+            msg = sprintf("`%s` is not present within `data[[vars$visit]]`", visit_level)
+        )
+        data <- data[data[[visit]] == visit_level, ]
+    }
+
     assert_that(
         is.factor(data[[group]]),
         length(levels(data[[group]])) == 2,
-        msg = "Group variable `%s` must be a factor variable with 2 levels"
+        length(unique(data[[group]])) == 2,
+        msg = "`data[[vars$group]]` must be a factor variable with 2 levels"
     )
 
     # Manually convert to dummary variables to make extraction easier
     data[[group]] <- as.numeric(data[[group]]) - 1
 
-    data2 <- ife(
-        !is.null(visit),
-        data[data[[visit]] == visit_level, ],
-        data
-    )
-
-    data2 <- data2[, c(extract_covariates(covariates), outcome, group)]
+    data2 <- data[, c(extract_covariates(covariates), outcome, group)]
 
     frm <- as_simple_formula(list(group = group, outcome = outcome, covariates = covariates))
 
