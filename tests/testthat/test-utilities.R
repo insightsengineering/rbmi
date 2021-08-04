@@ -106,3 +106,29 @@ test_that("record_warnings", {
     }
     expect_error(record_warnings(fun(2)), "an error")
 })
+
+
+
+test_that("is_absent",{
+
+
+    expect_true(is_absent(NULL))
+    expect_true(is_absent(NA))
+    expect_true(is_absent(""))
+
+    expect_true(is_absent(NULL, blank=FALSE))
+    expect_true(is_absent(NA, blank = FALSE))
+    expect_true(is_absent("", na = FALSE))
+
+    expect_false(is_absent(NA, na = FALSE))
+    expect_false(is_absent("", blank = FALSE))
+
+    expect_false(is_absent("abc"))
+    expect_false(is_absent(c("abc", "zya", NULL)))
+    expect_false(is_absent(c("abc", NA, "adw")))
+    expect_false(is_absent(c("adw", "")))
+    expect_false(is_absent(1))
+    expect_false(is_absent(c(1, 2, 3, NA)))
+    expect_false(is_absent(factor(c("A", ""))))
+
+})

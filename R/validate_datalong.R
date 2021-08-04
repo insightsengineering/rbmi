@@ -216,6 +216,7 @@ is_num_char_fact <- function(x){
 
 
 validate_dataice <- function(data, data_ice, vars, update = FALSE){
+
     validate_datalong_varIsChar(vars)
 
     method <- vars$method
@@ -243,7 +244,7 @@ validate_dataice <- function(data, data_ice, vars, update = FALSE){
         valid_visits <- unique(as.character(data[[visit]]))
 
         assert_that(
-            is.character(data_ice[[visit]]),
+            is.character(data_ice[[visit]]) | is.factor(data_ice[[visit]]),
             all(!is.na(data_ice[[visit]])),
             msg = "`data_ice[[vars$visit]]` must be a non-missing character or factor vector"
         )
