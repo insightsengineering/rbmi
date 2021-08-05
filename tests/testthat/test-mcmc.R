@@ -64,4 +64,30 @@ test_that("Covariance matrices are sort correctly", {
     expect_equal(ordered_sigma,
                  expected_output)
 
-    })
+})
+
+test_that("QR decomposition is performed correctly", {
+
+    N <- 6
+    J = 2
+    designmat <- cbind(rep(1,N*J), rnorm(N*J))
+    QR <- QR_decomp(designmat, N, J)
+
+    expect_equal(QR$Q %*% QR$R, designmat)
+})
+
+test_that("List of matrices is correctly transformed into array", {
+
+    mat <- rbind(c(1, 0.2), c(0.2, 1))
+    input <- list(mat, mat+1, mat+2)
+
+    actual_output <- listmat_to_array(input)
+
+    expected_output <- array(NA, dim = c(3,2,2))
+    for(i in 1:3) {
+        expected_output[i,,] <- mat + i-1
+    }
+    expect_equal(actual_output, expected_output)
+
+})
+

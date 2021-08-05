@@ -134,7 +134,7 @@ test_draws <- function(draws_obj, method) {
         # check that samples object is as expected
         test_samples_bayes(draws_obj$samples)
     } else {
-        stop(paste("class of method", class(method),"is not as expected"))
+        stop(paste("class of method is", class(method),": not expected"))
     }
 }
 
