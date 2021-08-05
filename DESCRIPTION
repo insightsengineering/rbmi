@@ -22,9 +22,14 @@ Suggests:
     tidyr,
     nlme,
     testthat,
+<<<<<<< HEAD
     emmeans,
     mvtnorm
 Biarch: true
+=======
+    mvtnorm,
+    emmeans
+>>>>>>> develop
 Config/testthat/edition: 2
 Imports: 
     methods,

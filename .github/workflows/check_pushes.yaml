@@ -1,0 +1,24 @@
+
+
+on: [push]
+
+name: Check Pushes
+
+jobs:
+  R-CMD-check:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/insightsengineering/tidyverse_4.1.0_bioc_3.13:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Install dependencies
+        run: remotes::install_deps(dependencies = TRUE)
+        shell: Rscript {0}
+        
+      - name: Check
+        run: |
+          options(crayon.enabled = TRUE)
+          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
+        shell: Rscript {0}

@@ -4,16 +4,20 @@ on:
   pull_request:
     branches:
       - develop
-
-name: Check-Historic
+  schedule:
+    - cron: '0 4 * * 1,2,3,4,5'
+    
+name: Check Develop
 
 jobs:
-  R-CMD-check:
+    
+  R-CMD-Check-develop:
     
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
        config:
+         - { R: "release", os: "ubuntu-20.04", pkg_repo: "https://packagemanager.rstudio.com/all/__linux__/focal/latest"}
          - { R: "4.0.4", os: "ubuntu-20.04", pkg_repo: "https://packagemanager.rstudio.com/cran/__linux__/focal/2021-04-20"}
          - { R: "3.6.3", os: "ubuntu-20.04", pkg_repo: "https://packagemanager.rstudio.com/cran/__linux__/focal/2020-04-02"}
          
@@ -21,10 +25,9 @@ jobs:
     
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_LIBS_USER: .github/rpkg
-      
-    steps:
+      R_TEST_NIGHTLY: ${{ github.event_name == 'success' && 'TRUE' || 'FALSE' }}
     
+    steps: 
       - name: Checkout
         uses: actions/checkout@v2
         
@@ -43,17 +46,19 @@ jobs:
       
       - name: Determine dependencies & Create Package Directory
         run: |
-          dir.create(".github/rpkg", showWarnings = FALSE)
+          dir.create(".github/rpkg")
           saveRDS(read.dcf("DESCRIPTION")[, c("Imports", "Suggests")], ".github/r-depends.rds")
         shell: Rscript {0}
       
-      - uses: actions/cache@v2
+      - name: Cache Installed R packages
+        uses: actions/cache@v2
         with:
           path: .github/rpkg/*
           key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
       
       - name: Install R packages
         run: |
+          .libPaths(".github/rpkg")
           options(repos = "${{ matrix.config.pkg_repo }}")
           install.packages(c("remotes", "rcmdcheck"))
           remotes::install_deps(dependencies = TRUE, upgrade = FALSE)
@@ -61,6 +66,7 @@ jobs:
         
       - name: Check
         run: |
+          .libPaths(".github/rpkg")
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
@@ -71,3 +77,4 @@ jobs:
         with:
           name: ${{ matrix.config.os }}-r${{ matrix.config.r }}-results
           path: check
+
