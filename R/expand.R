@@ -5,6 +5,11 @@
 #'
 #' Returns a vector after applied last observation carried forward imputation
 #' @param x a vector
+#'
+#' @examples
+#' \dontrun{
+#' locf(c(NA, 1,2,3,NA,4)) # Returns c(NA, 1, 2, 3, 3, 4)
+#' }
 #' @export
 locf <- function(x) {
     inds <- cumsum(!is.na(x))
@@ -16,12 +21,64 @@ locf <- function(x) {
 
 
 
-#' Expand dataframes
+#' Expand and fill in missing dataframe rows
 #'
-#' Expands specific variables of a dataframe to ensure all combinations are present
+#' These functions are essentially wrappers around [base::expand.grid()] to ensure that missing
+#' combinations of data are inserted into a dataframe with imputation/fill methods for updating
+#' covariate values of newly created rows
 #'
-#' @param data Dataset to expand
-#' @param ... variables and the levels that should be expanded out
+#' @param data Dataset to expand or fill in
+#' @param ... variables and the levels that should be expanded out (note that duplicate entries of
+#' levels will result in multiple rows for that level)
+#' @param vars character vector containing the names of variables that need to be filled in
+#' @param group character vector containing the names of variables to group
+#' by when performing LOCF imputation of `var`
+#' @param order character vector containing the names of additional variables to sort the dataframe
+#' by before performing LOCF
+#'
+#' @details
+#'
+#' The [draws()] function makes the assumption that all subjects and visits are present in the dataframe
+#' and that all covariate values are none missing; `expand()`, `fill_locf()` and `expand_locf()` are utility
+#' functions to support users in ensuring that their dataframes conform to these assumptions.
+#'
+#' `expand()` takes vectors for expected levels in a dataframe and expands out all combinations inserting any
+#' missing rows into the dataframe. Note that all "expanded" variables are cast as factors.
+#'
+#' `fill_locf()` applies LOCF imputation to named covariates to fill in any NAs created by the insertion of new
+#' rows by `expand()` (though do note that no distinction is made between existing NAs and newly created NAs).
+#' Note that the dataframe is sorted by `c(vars, order)` before performing the LOCF imputation; the dataframe
+#' will be returned in the original sort order however.
+#'
+#' `expand_locf()` a simple composition function of `fill_locf()` and `expand()` i.e. `fill_locf(expand(...))`
+#'
+#' @examples
+#' \dontrun{
+#'
+#' dat_expanded <- expand(
+#'     data = dat,
+#'     subject = c("pt1", "pt2", "pt3", "pt4"),
+#'     visit = c("vis1", "vis2", "vis3")
+#' )
+#'
+#' dat_filled <- fill_loc(
+#'     data = dat_expanded,
+#'     vars = c("Sex", "Age"),
+#'     group = "subject",
+#'     order = "visit"
+#' )
+#'
+#' ## Or
+#'
+#' dat_filled <- expand_locf(
+#'     data = dat,
+#'     subject = c("pt1", "pt2", "pt3", "pt4"),
+#'     visit = c("vis1", "vis2", "vis3"),
+#'     vars = c("Sex", "Age"),
+#'     group = "subject",
+#'     order = "visit"
+#' )
+#' }
 #' @export
 expand <- function(data, ...) {
     vars <- list(...)
@@ -64,15 +121,7 @@ expand <- function(data, ...) {
 
 
 
-#' Fill missing values using locf
-#'
-#' Imputes missing values in a dataframe using last observation carried forward
-#' imputation
-#'
-#' @param data Dataset to impute missing values in
-#' @param vars variables that need to be imputed (character vector)
-#' @param group variables to group `vars` by when performing locf (character vector)
-#' @param order additional variables to sort by before performing locf (character vector)
+#' @rdname expand
 #' @export
 fill_locf <- function(data, vars, group = NULL, order = NULL) {
 
@@ -126,7 +175,12 @@ fill_locf <- function(data, vars, group = NULL, order = NULL) {
 
 }
 
-
+#' Assert that all variables exist within a dataset
+#'
+#' Performs an assertion check to ensure that a vector of variable exists within a data.frame as expected
+#'
+#' @param data a data.frame
+#' @param vars a character vector of variable names
 assert_variables_exist <- function(data, vars) {
 
     assert_that(
@@ -151,20 +205,14 @@ assert_variables_exist <- function(data, vars) {
 
 
 
-#' Expand and impute with locf
-#'
-#' @param data TODO
-#' @param ... TODO
-#' @param fill_vars TODO
-#' @param fill_group TODO
-#'
+#' @rdname expand
 #' @export
-expand_locf <- function(data, ..., fill_vars, fill_group) {
+expand_locf <- function(data, ..., vars, group) {
     data_expanded <- expand(data, ...)
     data_filled <- fill_locf(
         data = data_expanded,
-        vars = fill_vars,
-        group = fill_group,
+        vars = vars,
+        group = group,
         order = names(list(...))
     )
     return(data_filled)

@@ -17,7 +17,6 @@ ancova <- function(data, vars, visit_level = NULL) {
     covariates <- vars[["covariates"]]
     visit <- vars[["visit"]]
 
-
     assert_that(
         is.character(outcome),
         length(outcome) == 1,

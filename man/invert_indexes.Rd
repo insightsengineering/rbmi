@@ -17,11 +17,9 @@ the indexes of which original elements it occurred in.
 \details{
 This functions purpose is best illustrated by an example:
 
-input:
+input:\preformatted{list( c("A", "B", "C"), c("A", "A", "B"))\}
+}
 
-\code{list(  c("A", "B", "C"),  c("A", "A", "B"))}
-
-becomes:
-
-\code{list(  "A" = c(1,2,2),  "B" = c(1,2), "C" = 1 )}
+becomes:\preformatted{list( "A" = c(1,2,2), "B" = c(1,2), "C" = 1 )
+}
 }
