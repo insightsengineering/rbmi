@@ -89,6 +89,7 @@ run_mcmc <- function(
     initial_values,
     same_cov
 ) {
+
     data <- prepare_data_mcmc(
         designmat,
         outcome,
