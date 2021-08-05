@@ -10,7 +10,7 @@ expand(data, ...)
 
 fill_locf(data, vars, group = NULL, order = NULL)
 
-expand_locf(data, ..., vars, group)
+expand_locf(data, ..., vars, group, order)
 }
 \arguments{
 \item{data}{Dataset to expand or fill in}
@@ -41,7 +41,7 @@ missing rows into the dataframe. Note that all "expanded" variables are cast as 
 
 \code{fill_locf()} applies LOCF imputation to named covariates to fill in any NAs created by the insertion of new
 rows by \code{expand()} (though do note that no distinction is made between existing NAs and newly created NAs).
-Note that the dataframe is sorted by \code{c(vars, order)} before performing the LOCF imputation; the dataframe
+Note that the dataframe is sorted by \code{c(group, order)} before performing the LOCF imputation; the dataframe
 will be returned in the original sort order however.
 
 \code{expand_locf()} a simple composition function of \code{fill_locf()} and \code{expand()} i.e. \code{fill_locf(expand(...))}

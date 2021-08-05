@@ -47,7 +47,7 @@ locf <- function(x) {
 #'
 #' `fill_locf()` applies LOCF imputation to named covariates to fill in any NAs created by the insertion of new
 #' rows by `expand()` (though do note that no distinction is made between existing NAs and newly created NAs).
-#' Note that the dataframe is sorted by `c(vars, order)` before performing the LOCF imputation; the dataframe
+#' Note that the dataframe is sorted by `c(group, order)` before performing the LOCF imputation; the dataframe
 #' will be returned in the original sort order however.
 #'
 #' `expand_locf()` a simple composition function of `fill_locf()` and `expand()` i.e. `fill_locf(expand(...))`
@@ -207,13 +207,13 @@ assert_variables_exist <- function(data, vars) {
 
 #' @rdname expand
 #' @export
-expand_locf <- function(data, ..., vars, group) {
+expand_locf <- function(data, ..., vars, group, order) {
     data_expanded <- expand(data, ...)
     data_filled <- fill_locf(
         data = data_expanded,
         vars = vars,
         group = group,
-        order = names(list(...))
+        order = order
     )
     return(data_filled)
 }
