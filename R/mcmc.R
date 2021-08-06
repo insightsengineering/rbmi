@@ -90,6 +90,31 @@ run_mcmc <- function(
     same_cov
 ) {
 
+    assert_that(
+        is.list(sigma_reml),
+        msg = "sigma_reml must be a list of covariance matrices"
+    )
+
+    assert_that(
+        is.factor(group),
+        msg = "group must be a factor"
+    )
+
+    assert_that(
+        is.matrix(designmat) | is.data.frame(designmat),
+        msg = "designmat must be a matrix or a dataframe"
+    )
+
+    assert_that(
+        is.vector(outcome) & nrow(designmat) == length(outcome),
+        msg = "outcome must be a vector of length equal to the number of rows of the design matrix"
+    )
+
+    assert_that(
+        is.list(initial_values) & length(initial_values) == 2,
+        msg = "initial_values must be a list of length 2"
+    )
+
     data <- prepare_data_mcmc(
         designmat,
         outcome,
@@ -155,16 +180,6 @@ prepare_data_mcmc <- function(
     same_cov,
     sigma_reml,
     initial_values) {
-
-    assert_that(
-        is.list(sigma_reml),
-        msg = "sigma_reml must be a list of covariance matrices"
-    )
-
-    assert_that(
-        is.factor(group),
-        msg = "group must be a factor"
-    )
 
     J <- nrow(sigma_reml[[1]])
 
