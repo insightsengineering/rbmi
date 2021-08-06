@@ -53,12 +53,12 @@ draws.condmean <- function(data, data_ice, vars, method) {
 #' Title - TODO
 #'
 #' @param longdata TODO
-remove_nmar_as_NA <- function(longdata) {
+remove_nmar_as_NA <- function(longdata, outcome_var) {
 
     # remove non-MAR data
     data <- longdata$get_data(longdata$ids, nmar.rm = FALSE, na.rm = FALSE)
     isMAR <- unlist(longdata$is_mar)
-    data[!isMAR, vars$outcome] <- NA
+    data[!isMAR, outcome_var] <- NA
 
     return(data)
 }
@@ -74,7 +74,7 @@ draws_bayes <- function(data, data_ice, vars, method) {
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
 
-    data2 <- remove_nmar_as_NA(longdata)
+    data2 <- remove_nmar_as_NA(longdata, vars$outcome)
 
     # compute design matrix
     model_df <- as_model_df(data2, as_simple_formula(vars))
