@@ -307,6 +307,7 @@ fit_mcmc <- function(
 #'
 #' @param a TODO
 #' @param n TODO
+#' @importFrom stats setNames
 split_dim <- function(a, n) {
     setNames(lapply(split(a, arrayInd(seq_along(a), dim(a))[, n]),
                     array, dim = dim(a)[-n], dimnames(a)[-n]),
