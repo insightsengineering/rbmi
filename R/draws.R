@@ -53,6 +53,7 @@ draws.condmean <- function(data, data_ice, vars, method) {
 #' Title - TODO
 #'
 #' @param longdata TODO
+#' @param outcome_var TODO
 remove_nmar_as_NA <- function(longdata, outcome_var) {
 
     # remove non-MAR data
@@ -69,6 +70,7 @@ remove_nmar_as_NA <- function(longdata, outcome_var) {
 #' @param data_ice TODO
 #' @param vars TODO
 #' @param method TODO
+#' @importFrom stats setNames
 draws_bayes <- function(data, data_ice, vars, method) {
 
     longdata <- longDataConstructor$new(data, vars)
