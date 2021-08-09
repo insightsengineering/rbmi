@@ -4,7 +4,7 @@
 \alias{remove_nmar_as_NA}
 \title{Title - TODO}
 \usage{
-remove_nmar_as_NA(longdata, outcome_var)
+remove_nmar_as_NA(longdata)
 }
 \arguments{
 \item{longdata}{TODO}

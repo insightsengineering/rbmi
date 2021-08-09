@@ -36,10 +36,19 @@ functions {
         return submat;
     }
 
+    int integer_division(int a, int b) {
+        // perform a/b
+        int i = 0;
+        while(b*(i+1) <= a) {
+            i = i + 1;
+        }
+        return(i);
+    }
+
     vector[] to_vector_of_arrays(vector vec, int length_array) {
         // treansform a vector into a vector of arrays. Example: vec = [1,2,3,4,5,6] and
         // length_array = 2, then output = [1,2; 3,4; 5,6]
-        vector[length_array] res[num_elements(vec)/length_array];
+        vector[length_array] res[integer_division(num_elements(vec),length_array)];
 
         int j = 1;
         int i = 1;
