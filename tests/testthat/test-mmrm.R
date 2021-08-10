@@ -618,6 +618,13 @@ test_that(
     "MMRM returns expected estimates under different model specifications (same_cov = TRUE)",
     {
         same_cov = TRUE
+
+        formula_expr <- "outcome ~ sex*visit + age*visit + visit*group"
+        test_mmrm_formula(data, vars, formula_expr, same_cov)
+
+        formula_expr <- "outcome ~ sex*group + age*group + visit*group"
+        test_mmrm_formula(data, vars, formula_expr, same_cov)
+
         formula_expr <- "outcome ~ sex + age + sex:age + sex*visit + age:group + visit*group"
         test_mmrm_formula(data, vars, formula_expr, same_cov)
 
@@ -637,6 +644,13 @@ test_that(
     "MMRM returns expected estimates under different model specifications (same_cov = FALSE)",
     {
         same_cov = FALSE
+
+        formula_expr <- "outcome ~ sex*visit + age*visit + visit*group"
+        test_mmrm_formula(data, vars, formula_expr, same_cov)
+
+        formula_expr <- "outcome ~ sex*group + age*group + visit*group"
+        test_mmrm_formula(data, vars, formula_expr, same_cov)
+
         formula_expr <- "outcome ~ sex + age + sex:age + sex*visit + age:group + visit*group"
         test_mmrm_formula(data, vars, formula_expr, same_cov)
 
