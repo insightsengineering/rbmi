@@ -25,7 +25,7 @@ jobs:
     
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_TEST_NIGHTLY: ${{ github.event_name == 'success' && 'TRUE' || 'FALSE' }}
+      R_TEST_NIGHTLY: ${{ github.event_name == 'schedule' && 'TRUE' || 'FALSE' }}
     
     steps: 
       - name: Checkout

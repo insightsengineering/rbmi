@@ -13,10 +13,16 @@ draws <- function(data, data_ice, vars, method) {
 
 #' @rdname draws
 #' @export
+draws.bayes <- function(data, data_ice, vars, method) {
+    x <- draws_bayes(data, data_ice, vars, method)
+    as_class(x, "random")
+}
+
+#' @rdname draws
+#' @export
 draws.approxbayes <- function(data, data_ice, vars, method) {
 
     method$type <- "bootstrap" # just for internal use
-    method$n_samples <- method$n_samples # just for internal use
 
     x <- draws_bootstrap(data, data_ice, vars, method)
 
@@ -32,9 +38,9 @@ draws.approxbayes <- function(data, data_ice, vars, method) {
     )
 
     # remove useless elements from output of `method`
-    x$method$type <- x$method$n_samples <- NULL
+    x$method$type <- NULL
 
-    as_class(x, "approxbayes")
+    as_class(x, "random")
 }
 
 #' @rdname draws
@@ -44,8 +50,103 @@ draws.condmean <- function(data, data_ice, vars, method) {
     as_class(x, "condmean")
 }
 
+#' Title - TODO
+#'
+#' @param longdata TODO
+#' @param outcome_var TODO
+remove_nmar_as_NA <- function(longdata) {
+
+    # remove non-MAR data
+    data <- longdata$get_data(longdata$ids, nmar.rm = FALSE, na.rm = FALSE)
+    isMAR <- unlist(longdata$is_mar)
+    data[!isMAR, longdata$vars$outcome] <- NA
+
+    return(data)
+}
+
+#' Title - TODO
+#'
+#' @param data TODO
+#' @param data_ice TODO
+#' @param vars TODO
+#' @param method TODO
+#' @importFrom stats setNames
+draws_bayes <- function(data, data_ice, vars, method) {
+
+    longdata <- longDataConstructor$new(data, vars)
+    longdata$set_strategies(data_ice)
+
+    data2 <- remove_nmar_as_NA(longdata)
+
+    # compute design matrix
+    model_df <- as_model_df(data2, as_simple_formula(vars))
+
+    # scale input data
+    scaler <- scalerConstructor$new(model_df)
+    model_df_scaled <- scaler$scale(model_df)
+
+    # fit MMRM (needed for initial values)
+    mmrm_initial <- fit_mmrm_multiopt(
+        designmat = model_df_scaled[,-1],
+        outcome = model_df_scaled[,1],
+        subjid = data2[[vars$subjid]],
+        visit = data2[[vars$visit]],
+        group = data2[[vars$group]],
+        vars = vars,
+        cov_struct = "us",
+        REML = TRUE,
+        same_cov = method$same_cov,
+        initial_values = NULL,
+        optimizer =  c("L-BFGS-B", "BFGS", "Nelder-Mead")
+    )
+
+    # run MCMC
+    fit <- run_mcmc(
+        designmat = model_df_scaled[, -1],
+        outcome = model_df_scaled[, 1, drop = TRUE],
+        group = data2[[vars$group]],
+        sigma_reml = mmrm_initial$sigma,
+        n_imputations = method$n_samples,
+        burn_in = method$burn_in,
+        burn_between = method$burn_between,
+        initial_values = list(
+            beta = mmrm_initial$beta,
+            sigma = mmrm_initial$sigma
+        ),
+        same_cov = method$same_cov
+    )
+
+    # set names of covariance matrices
+    fit$samples$sigma <- lapply(
+        fit$samples$sigma,
+        function(sample_cov) setNames(sample_cov, levels(data2[[vars$group]]))
+    )
+
+    # unscale samples
+    samples <- mapply(function(x,y) list("beta" = x, "sigma" = y),
+                      lapply(fit$samples$beta, scaler$unscale_beta),
+                      lapply(fit$samples$sigma, function(covs) lapply(covs, scaler$unscale_sigma)),
+                      SIMPLIFY = FALSE
+    )
+
+    # set ids associated to each sample
+    samples <- lapply(
+        samples,
+        function(x) {x$ids <- longdata$ids; return(x)}
+    )
+
+    result <- list(
+        method = method,
+        samples = samples,
+        data = longdata,
+        fit = fit$fit
+    )
+
+    return(result)
+}
+
 #' Title
-#' 
+#'
 #' @param data TODO
 #' @param data_ice TODO
 #' @param vars TODO

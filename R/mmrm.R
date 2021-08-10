@@ -1,13 +1,28 @@
-remove_blank_spaces <- function(strings) {
+
+#' Title
+#'
+#' @param strings TODO
+#' @param chr TODO
+remove_character <- function(strings, chr) {
+
+    assert_that(
+        is.character(chr),
+        msg = "chr must be a character"
+    )
 
     strings_nospaces <- gsub(
-        ' ',
+        chr,
         '',
         strings
     )
+
     return(strings_nospaces)
 }
 
+#' Title
+#'
+#' @param designmat TODO
+#' @param outcome_var TODO
 #' @importFrom stats reformulate
 designmat_to_formula <- function(
     designmat,
@@ -22,6 +37,12 @@ designmat_to_formula <- function(
     return(formula)
 }
 
+#' Title
+#'
+#' @param vars TODO
+#' @param names_groups TODO
+#' @param cov_struct TODO
+#' @param same_cov TODO
 random_effects_expr <- function(
     vars,
     names_groups,
@@ -52,6 +73,13 @@ random_effects_expr <- function(
     return(expr)
 }
 
+#' Title
+#'
+#' @param designmat TODO
+#' @param vars TODO
+#' @param names_groups TODO
+#' @param cov_struct TODO
+#' @param same_cov TODO
 #' @importFrom stats as.formula
 formula_mmrm <- function(
     designmat,
@@ -86,7 +114,9 @@ formula_mmrm <- function(
     return(formula)
 }
 
-
+#' Title
+#'
+#' @param fit TODO
 #' @importFrom glmmTMB fixef VarCorr getME
 extract_params <- function(fit) {
 
@@ -104,14 +134,30 @@ extract_params <- function(fit) {
     return(params)
 }
 
+#' Title
+#'
+#' @param fit TODO
 is_converged <- function(fit) {
 
     return(ifelse(fit$fit$convergence == 0, TRUE, FALSE))
 
 }
 
+#' Title
+#'
+#' @param designmat TODO
+#' @param outcome TODO
+#' @param subjid TODO
+#' @param visit TODO
+#' @param group TODO
+#' @param vars TODO
+#' @param cov_struct TODO
+#' @param REML TODO
+#' @param same_cov TODO
+#' @param initial_values TODO
+#' @param optimizer TODO
 #' @importFrom glmmTMB glmmTMB glmmTMBControl
-#' @importFrom stats optim
+#' @importFrom stats optim model.matrix
 fit_mmrm <- function(
     designmat,
     outcome,
@@ -135,12 +181,13 @@ fit_mmrm <- function(
     designmat <- as.data.frame(designmat)
 
     # remove blank spaces (otherwise formula cannot be built properly)
-    colnames(designmat) <- remove_blank_spaces(colnames(designmat))
+    colnames(designmat) <- remove_character(colnames(designmat), " ")
+    colnames(designmat) <- remove_character(colnames(designmat), ":")
     vars <- lapply(
         vars,
-        remove_blank_spaces
+        function(x) remove_character(x, " ")
     )
-    levels(group) <- remove_blank_spaces(levels(group))
+    levels(group) <- remove_character(levels(group), " ")
 
     # create dummy variables for each arm (needed when same_cov = FALSE)
     groups_mat <- stats::model.matrix(~ 0 + group)
@@ -230,6 +277,19 @@ fit_mmrm <- function(
     return(return_obj)
 }
 
+#' Title
+#'
+#' @param designmat TODO
+#' @param outcome TODO
+#' @param subjid TODO
+#' @param visit TODO
+#' @param group TODO
+#' @param vars TODO
+#' @param cov_struct TODO
+#' @param REML TODO
+#' @param same_cov TODO
+#' @param initial_values TODO
+#' @param optimizer TODO
 fit_mmrm_multiopt <- function(
     designmat,
     outcome,

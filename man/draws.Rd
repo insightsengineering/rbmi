@@ -2,11 +2,14 @@
 % Please edit documentation in R/draws.R
 \name{draws}
 \alias{draws}
+\alias{draws.bayes}
 \alias{draws.approxbayes}
 \alias{draws.condmean}
 \title{TODO}
 \usage{
 draws(data, data_ice, vars, method)
+
+\method{draws}{bayes}(data, data_ice, vars, method)
 
 \method{draws}{approxbayes}(data, data_ice, vars, method)
 
