@@ -24,8 +24,10 @@ jobs:
          - { image: "gowerc/rbmi:r410"}
 
     runs-on: ubuntu-latest
+
     container:
       image: ${{ matrix.config.image }}
+
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_TEST_NIGHTLY: ${{ github.event_name == 'schedule' && 'TRUE' || 'FALSE' }}
@@ -39,11 +41,4 @@ jobs:
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
-
-      - name: Upload check results
-        if: failure()
-        uses: actions/upload-artifact@main
-        with:
-          name: ${{ matrix.config.image }}-results
-          path: check
 
