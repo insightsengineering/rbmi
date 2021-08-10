@@ -19,9 +19,9 @@ jobs:
       fail-fast: false
       matrix:
        config:
-         - { image: "gowerc/rbmi:363"}
-         - { image: "gowerc/rbmi:404"}
-         - { image: "gowerc/rbmi:410"}
+         - { image: "gowerc/rbmi:r363"}
+         - { image: "gowerc/rbmi:r404"}
+         - { image: "gowerc/rbmi:r410"}
 
     runs-on: ubuntu-latest
     container:
