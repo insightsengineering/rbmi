@@ -7,25 +7,48 @@ is.formula <- function(x) {
     is.call(x) && x[[1]] == quote(`~`)
 }
 
-n <- 14
+set.seed(101)
+
+n <- 30
 nv <- 3
-data <- data.frame(
-    pred = rnorm(n*nv),
-    subjid = as.factor(rep(1:n, each = nv)),
-    visit = as.factor(rep(1:nv, n)),
-    group = as.factor(rep(c("A", "B"), each = n*nv/2))
+
+covars <- tibble(
+    subjid = 1:n,
+    age = rnorm(n),
+    group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),
+    sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F")),
+    strata = c(rep("A",n/2), rep("B", n/2))
 )
-data$response <- data$pred + 0.5*(as.numeric(data$group) - 1) + rnorm(n*nv, sd = 0.1)
+
+data <- tibble(
+    subjid = rep.int(1:n, nv)
+) %>%
+    left_join(covars, by = "subjid") %>%
+    mutate( outcome = rnorm(
+        n(),
+        age * 3 + (as.numeric(sex) - 1) * 3 + (as.numeric(group) - 1) * 4,
+        sd = 3
+    )) %>%
+    arrange(subjid) %>%
+    group_by(subjid) %>%
+    mutate( visit = factor(paste0("Visit", 1:n())))  %>%
+    ungroup() %>%
+    mutate(subjid = as.character(subjid))
 
 vars <- list(
-    "subjid" = "subjid",
-    "visit" = "visit",
-    "group" = "group",
-    "outcome" = "response"
+    outcome = "outcome",
+    visit = "visit",
+    subjid = "subjid",
+    group = "group",
+    strata = "strata",
+    covariates = c("sex", "age", "group*visit"),
+    method = "method"
 )
 
-formula <- response ~ pred + visit*group
+formula <- outcome ~ sex + age + visit*group
 designmat <- model.matrix(formula, data)
+
+data[sample(1:(nv*n), size = 7), "outcome"] <- NA
 
 names_groups <- c("A", "B")
 
@@ -54,7 +77,7 @@ test_fit_mmrm <- function(fit, cov_struct, nv, same_cov) {
     expect_type(fit, "list")
 
     expect_vector(fit$beta)
-    expect_length(fit$beta, 7)
+    expect_length(fit$beta, 8)
 
     expect_type(fit$sigma, "list")
     expect_length(fit$sigma, 2)
@@ -196,8 +219,8 @@ test_that(
     {
         ################## same_cov = TRUE
         same_cov = TRUE
-        expected_output <- as.formula(response ~ pred + visit2 + visit3 + groupB + visit2:groupB +
-                                          visit3:groupB + us(0 + visit | subjid))
+        expected_output <- as.formula(outcome ~ sexF + age + visitVisit2 + visitVisit3 + groupB + visitVisit2:groupB +
+                                          visitVisit3:groupB + us(0 + visit | subjid))
 
         formula <- formula_mmrm(
             designmat,
@@ -212,8 +235,8 @@ test_that(
 
         ################## same_cov = FALSE
         same_cov = FALSE
-        expected_output <- as.formula(response ~ pred + visit2 + visit3 + groupB + visit2:groupB +
-                                          visit3:groupB + us(0 + A:visit | subjid) + us(0 + B:visit | subjid))
+        expected_output <- as.formula(outcome ~ sexF + age + visitVisit2 + visitVisit3 + groupB + visitVisit2:groupB +
+                                          visitVisit3:groupB + us(0 + A:visit | subjid) + us(0 + B:visit | subjid))
 
         formula <- formula_mmrm(
             designmat,
@@ -235,7 +258,7 @@ test_that(
         ############# US
         fit <- fit_mmrm(
             designmat = designmat,
-            outcome = data$response,
+            outcome = data$outcome,
             subjid = data$subjid,
             visit = data$visit,
             group = data$group,
@@ -253,7 +276,7 @@ test_that(
         ############# TOEP
         fit <- fit_mmrm(
             designmat = designmat,
-            outcome = data$response,
+            outcome = data$outcome,
             subjid = data$subjid,
             visit = data$visit,
             group = data$group,
@@ -271,7 +294,7 @@ test_that(
         ############# CS
         fit <- fit_mmrm(
             designmat = designmat,
-            outcome = data$response,
+            outcome = data$outcome,
             subjid = data$subjid,
             visit = data$visit,
             group = data$group,
@@ -289,7 +312,7 @@ test_that(
         ############# AR1
         fit <- fit_mmrm(
             designmat = designmat,
-            outcome = data$response,
+            outcome = data$outcome,
             subjid = data$subjid,
             visit = data$visit,
             group = data$group,
@@ -313,7 +336,7 @@ test_that(
 
         fit <- fit_mmrm(
             designmat = designmat,
-            outcome = data$response,
+            outcome = data$outcome,
             subjid = data$subjid,
             visit = data$visit,
             group = data$group,
@@ -337,7 +360,7 @@ test_that(
 
         fit <- fit_mmrm(
             designmat = designmat,
-            outcome = data$response,
+            outcome = data$outcome,
             subjid = data$subjid,
             visit = data$visit,
             group = data$group,
@@ -361,7 +384,7 @@ test_that(
 
         fit <- fit_mmrm(
             designmat = designmat,
-            outcome = data$response,
+            outcome = data$outcome,
             subjid = data$subjid,
             visit = data$visit,
             group = data$group,
@@ -373,7 +396,7 @@ test_that(
             optimizer = "BFGS"
         )
 
-        formula_ext <- response ~ pred + visit*group + us(0 + visit | subjid)
+        formula_ext <- outcome ~ sex + age + visit*group + us(0 + visit | subjid)
         control <- glmmTMBControl(
             optimizer = optim,
             optArgs = list(method = "BFGS"),
@@ -414,7 +437,7 @@ test_that(
 
         fit <- fit_mmrm(
             designmat = designmat,
-            outcome = data$response,
+            outcome = data$outcome,
             subjid = data$subjid,
             visit = data$visit,
             group = data$group,
@@ -423,7 +446,7 @@ test_that(
             REML = TRUE,
             same_cov = same_cov,
             initial_values = NULL,
-            optimizer = "BFGS"
+            optimizer = "L-BFGS-B"
         )
 
 
@@ -435,10 +458,10 @@ test_that(
         data <- cbind(data,
                       "A" = groups_mat[,1],
                       "B" = groups_mat[,2])
-        formula_ext <- response ~ pred + visit*group + us(0 + A:visit | subjid) + us(0 + B:visit | subjid)
+        formula_ext <- outcome ~ sex + age + visit*group + us(0 + A:visit | subjid) + us(0 + B:visit | subjid)
         control <- glmmTMBControl(
             optimizer = optim,
-            optArgs = list(method = "BFGS"),
+            optArgs = list(method = "L-BFGS-B"),
             parallel = 1
         )
 
@@ -478,7 +501,7 @@ test_that(
 
         fit <- fit_mmrm_multiopt(
             designmat = designmat,
-            outcome = data$response,
+            outcome = data$outcome,
             subjid = data$subjid,
             visit = data$visit,
             group = data$group,
@@ -499,7 +522,7 @@ test_that(
         ########### TWO OPTIMIZERS
         fit <- fit_mmrm_multiopt(
             designmat = designmat,
-            outcome = data$response,
+            outcome = data$outcome,
             subjid = data$subjid,
             visit = data$visit,
             group = data$group,
@@ -518,3 +541,113 @@ test_that(
         test_fit_mmrm(fit, "us", nv, same_cov)
     })
 
+
+test_mmrm_formula <- function(data, vars, formula_expr, same_cov) {
+
+    formula <- as.formula(formula_expr)
+    designmat <- as_model_df(data, formula)
+
+    fit <- fit_mmrm(
+        designmat = designmat[,-1],
+        outcome = data$outcome,
+        subjid = data$subjid,
+        visit = data$visit,
+        group = data$group,
+        vars = vars,
+        cov_struct = "us",
+        REML = TRUE,
+        same_cov = same_cov,
+        initial_values = NULL,
+        optimizer = "BFGS"
+    )
+    names(fit$beta) <- NULL
+
+    if(same_cov) {
+        formula_ext <- as.formula(
+            paste0(formula_expr, " + us(0 + visit | subjid)")
+        )
+    } else {
+        formula_ext <- as.formula(
+            paste0(formula_expr, " + us(0 + A:visit | subjid) + us(0 + B:visit | subjid)")
+        )
+        names_data <- colnames(data)
+        data <- cbind(data, model.matrix(~ 0 + data$group))
+        colnames(data) <- c(names_data, c("A", "B"))
+    }
+
+    control <- glmmTMBControl(
+        optimizer = optim,
+        optArgs = list(method = "BFGS"),
+        parallel = 1
+    )
+
+    fit_expected <- glmmTMB(
+        formula_ext,
+        dispformula = ~0,
+        data = data,
+        REML = TRUE,
+        control = control)
+
+    beta <- fixef(fit_expected)$cond
+    names(beta) <- NULL
+
+    sigma <- VarCorr(fit_expected)$cond
+    sigma <- lapply(sigma, function(x) as.matrix(data.frame(x)))
+    if(same_cov) {
+        sigma = list("A" = sigma[[1]], "B" = sigma[[1]])
+    } else {
+        sigma = list("A" = sigma[[1]], "B" = sigma[[2]])
+    }
+
+    theta <- getME(fit_expected, name = "theta")
+
+    converged <- ifelse(fit_expected$fit$convergence == 0, TRUE, FALSE)
+
+    output_expected <- list(
+        beta = beta,
+        sigma = sigma,
+        theta = theta,
+        converged = converged
+    )
+
+    expect_equal(fit, output_expected, ignore_attr = TRUE)
+
+}
+
+test_that(
+    "MMRM returns expected estimates under different model specifications (same_cov = TRUE)",
+    {
+        same_cov = TRUE
+        formula_expr <- "outcome ~ sex + age + sex:age + sex*visit + age:group + visit*group"
+        test_mmrm_formula(data, vars, formula_expr, same_cov)
+
+        formula_expr <- "outcome ~ visit + age*visit*group + sex + visit*group"
+        test_mmrm_formula(data, vars, formula_expr, same_cov)
+
+        formula_expr <- "outcome ~ sex^2"
+        test_mmrm_formula(data, vars, formula_expr, same_cov)
+
+        formula_expr <- "outcome ~ age:sex^2 + sex:age*group + visit*group"
+        test_mmrm_formula(data, vars, formula_expr, same_cov)
+
+    }
+)
+
+test_that(
+    "MMRM returns expected estimates under different model specifications (same_cov = FALSE)",
+    {
+        same_cov = FALSE
+        formula_expr <- "outcome ~ sex + age + sex:age + sex*visit + age:group + visit*group"
+        test_mmrm_formula(data, vars, formula_expr, same_cov)
+
+        formula_expr <- "outcome ~ visit + age*visit*group + sex + visit*group"
+        test_mmrm_formula(data, vars, formula_expr, same_cov)
+
+        formula_expr <- "outcome ~ sex^2"
+        test_mmrm_formula(data, vars, formula_expr, same_cov)
+
+        formula_expr <- "outcome ~ age:sex^2 + sex:age*group + visit*group"
+        test_mmrm_formula(data, vars, formula_expr, same_cov)
+
+    }
+)

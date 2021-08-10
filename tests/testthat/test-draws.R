@@ -3,7 +3,7 @@ library(testthat)
 
 set.seed(101)
 
-n <- 10
+n <- 20
 nv <- 3
 
 covars <- tibble(
@@ -37,7 +37,7 @@ vars <- list(
     subjid = "subjid",
     group = "group",
     strata = "strata",
-    covariates = c("sex", "age"),
+    covariates = c("sex", "age", "group*visit"),
     method = "method"
 )
 
