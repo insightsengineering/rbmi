@@ -71,7 +71,7 @@ test_fit_mmrm <- function(fit, cov_struct, nv, same_cov) {
 }
 
 test_that(
-    "black spaces are correctly removed",
+    "black spaces and : are correctly removed",
     {
         string_list <- list(
             "subjid" = "subjid  ",
@@ -84,10 +84,10 @@ test_that(
 
         string_list_nospaces <- lapply(
             string_list,
-            remove_blank_spaces
+            function(x) remove_character(x, " ")
         )
 
-        string_char_nospaces <- remove_blank_spaces(string_char)
+        string_char_nospaces <- remove_character(string_char, " ")
 
         expect_equal(
             string_list_nospaces,
@@ -102,6 +102,27 @@ test_that(
         expect_equal(
             string_char_nospaces,
             c("char1", "char2")
+        )
+
+        string_list <- list(
+            "subjid" = "subjid:visit",
+            "visit" = "visit",
+            "group" = "group:visit",
+            "outcome" = "response:visit"
+        )
+        actual_output <- lapply(
+            string_list,
+            function(x) remove_character(x, ":")
+        )
+
+        expect_equal(
+            actual_output,
+            list(
+                "subjid" = "subjidvisit",
+                "visit" = "visit",
+                "group" = "groupvisit",
+                "outcome" = "responsevisit"
+            )
         )
     }
 )
@@ -367,6 +388,7 @@ test_that(
             control = control)
 
         beta <- fixef(fit_expected)$cond
+        names(beta) <- remove_character(names(beta), ":")
         sigma <- VarCorr(fit_expected)$cond
         sigma <- lapply(sigma, function(x) as.matrix(data.frame(x)))
         theta <- getME(fit_expected, name = "theta")
@@ -405,7 +427,7 @@ test_that(
         )
 
 
-        levels(data$group) <- remove_blank_spaces(levels(data$group))
+        levels(data$group) <- remove_character(levels(data$group), " ")
 
         # create dummy variables for each arm
         groups_mat <- stats::model.matrix(~ 0 + data$group)
@@ -428,6 +450,7 @@ test_that(
             control = control)
 
         beta <- fixef(fit_expected)$cond
+        names(beta) <- remove_character(names(beta), ":")
         sigma <- VarCorr(fit_expected)$cond
         sigma <- lapply(sigma, function(x) as.matrix(data.frame(x)))
         names(sigma) <- c("A", "B")
@@ -494,3 +517,4 @@ test_that(
 
         test_fit_mmrm(fit, "us", nv, same_cov)
     })
+

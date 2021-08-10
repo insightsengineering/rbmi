@@ -34,7 +34,7 @@ as_simple_formula <- function(vars){
 #' Expand dataframe into a design matrix
 #'
 #' Expands out a dataframe using a formula to create a design matrix.
-#' Key details are that it will always place the outcome variable into 
+#' Key details are that it will always place the outcome variable into
 #' the first column of the return object.
 #'
 #' The outcome column may contain NA's but none of the other variables
@@ -63,9 +63,9 @@ as_model_df <- function(dat, frm){
 
 
 #' Title - TODO
-#' 
+#'
 #' Converts all character variables within a dataframe to factor
-#' 
+#'
 #' @param data A dataframe
 char2fct <- function(data) {
     for (v in colnames(data)) {
@@ -109,7 +109,7 @@ ife <- function(x, a, b) {
 #' If mu is length 1 then just uses rnorm instead.
 sample_mvnorm <- function(mu, sigma) {
     if (length(sigma) == 1 & length(mu) == 1) {
-        return(rnorm(1, mu, sigma))
+        return(rnorm(1, mu, sqrt(sigma)))
     }
     assert_that(
         is.matrix(sigma),
