@@ -79,7 +79,7 @@ impute <- function(draws, references, update_ice = NULL, strategies = getStrateg
 
 
 
-#' @rdname validate_analyse
+#' @rdname impute
 #' @export
 impute.random <- function(draws, references, update_ice = NULL, strategies = getStrategies()){
     result <- impute_internal(
@@ -95,7 +95,7 @@ impute.random <- function(draws, references, update_ice = NULL, strategies = get
 
 
 
-#' @rdname validate_analyse
+#' @rdname impute
 #' @export
 impute.condmean <- function(draws, references, update_ice = NULL, strategies = getStrategies()){
     result <- impute_internal(
@@ -269,12 +269,13 @@ invert_indexes <- function(x){
 #'
 #' @param id Character string identifying the subject
 #'
-#' @param index The sample indexes which the subject belongs to i.e c(1,1,1,2,2,4)
+#' @param index The sample indexes which the subject belongs to i.e `c(1,1,1,2,2,4)`
 #'
-#' @param beta A list of beta coeficients for each sample, i.e. beta[[1]] is the set of beta coeficients for the first
-#' sample
+#' @param beta A list of beta coeficients for each sample, i.e. `beta[[1]]` is the set of beta coeficients
+#' for the first sample
 #'
-#' @param sigma A list of the sigma coeficients for each sample split by group i.e. sigma[[1]][["A"]] would give the sigma coeficients for group A for the first sample
+#' @param sigma A list of the sigma coeficients for each sample split by group i.e. `sigma[[1]][["A"]]`
+#' would give the sigma coeficients for group A for the first sample
 #'
 #' @param data A longdata object created by [longDataConstructor()]
 #'
