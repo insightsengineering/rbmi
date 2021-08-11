@@ -50,7 +50,7 @@ get_ld <- function(){
         vars = vars
     )
     
-    return(list(ld = ld, dat = dat))
+    return(list(ld = ld, dat = dat, n = n, nv =nv))
 }
 
 
@@ -75,8 +75,8 @@ test_that("longData - Basics", {
     )
 
     expect_equal(
-        unlist(ld$is_mar, use.names = FALSE) ,
-        rep(TRUE, n * nv)
+        unlist(ld$is_mar, use.names = FALSE),
+        rep(TRUE, dobj$n * dobj$nv)
     )
 
 })
@@ -165,7 +165,7 @@ test_that("Strategies",{
 
     expect_equal(
         unlist(ld$strategies, use.names = FALSE),
-        rep("MAR", n)
+        rep("MAR", dobj$n)
     )
 
     dat_ice <- tribble(
@@ -313,6 +313,7 @@ test_that("as_strata", {
     expect_equal(as_strata( c("a","b","c"), c("a","a","a")), c(1,2,3))
     expect_equal(as_strata( c("a","a","c"), c("a","a","a")), c(1,1,2))
 })
+
 
 
 

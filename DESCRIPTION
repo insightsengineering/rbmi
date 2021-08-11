@@ -10,8 +10,7 @@ Authors@R:
              family = "Noci",
              role = "aut",
              email = "alessandro.noci@roche.com"))
-Description: Implements reference based multiple imputation allowing for the imputation
-    of longditudinal datasets based upon pre-defined strategies
+Description: Implements reference based multiple imputation allowing for the imputation of longditudinal datasets using pre-defined strategies.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
