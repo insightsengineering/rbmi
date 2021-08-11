@@ -55,7 +55,8 @@ vars2$covariates <- c("age", "sex")
 anaobj <- analyse(
     imputeobj,
     fun = rbmi::ancova,
-    vars = vars2
+    vars = vars2,
+    visit_level = ""
 )
 
 poolobj <- pool(

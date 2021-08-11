@@ -1,9 +1,9 @@
-suppressPackageStartupMessages( {
-    library(testthat)
+suppressPackageStartupMessages({
     library(dplyr)
+    library(testthat)
+    library(tibble)
     library(glmmTMB)
-}
-)
+})
 
 test_that("transformation from long to wide format works", {
     vec_long = c(c(NA, 1, 2), c(1, NA, 2), c(3, NA, 4))

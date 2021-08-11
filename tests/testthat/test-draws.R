@@ -1,5 +1,8 @@
-library(dplyr)
-library(testthat)
+suppressPackageStartupMessages({
+    library(dplyr)
+    library(testthat)
+    library(tibble)
+})
 
 set.seed(101)
 
