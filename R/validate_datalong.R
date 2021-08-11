@@ -190,11 +190,6 @@ validate_datalong_unifromStrata <- function(data, vars){
 }
 
 
-extract_covariates <- function(x){
-    if(is.null(x)) return(x)
-    x_split <- strsplit(x, ":|\\*")
-    unique(unlist(x_split, use.names = FALSE))
-}
 
 
 is_char_one <- function(x){

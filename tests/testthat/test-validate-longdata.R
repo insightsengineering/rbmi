@@ -45,12 +45,16 @@ vars <- list(
 
 
 test_that("extract_covariates",{
-    expect_equal(extract_covariates("age") , "age")
-    expect_equal(extract_covariates(c("age", "sex")) , c("age", "sex"))
-    expect_equal(extract_covariates(c("age:sex")) , c("age", "sex"))
-    expect_equal(extract_covariates(c("age*sex")) , c("age", "sex"))
-    expect_equal(extract_covariates(c("age", "age*sex")) , c("age", "sex"))
-    expect_equal(extract_covariates("") , character(0))
+    expect_equal(extract_covariates("age"), "age")
+    expect_equal(extract_covariates(c("age", "sex")), c("age", "sex"))
+    expect_equal(extract_covariates(c("age:sex")), c("age", "sex"))
+    expect_equal(extract_covariates(c("age*sex")), c("age", "sex"))
+    expect_equal(extract_covariates(c("age", "age*sex")), c("age", "sex"))
+    expect_equal(extract_covariates(c("age", " age*sex ")), c("age", "sex"))
+    expect_equal(extract_covariates(c("age", " age *sex ")), c("age", "sex"))
+    expect_equal(extract_covariates(c("age", " age * sex")), c("age", "sex"))
+    expect_equal(extract_covariates(c("age", " age :   sex ")), c("age", "sex"))
+    expect_equal(extract_covariates(""), character(0))
 })
 
 

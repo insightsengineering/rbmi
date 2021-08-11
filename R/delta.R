@@ -9,7 +9,7 @@
 #'
 #' @export
 delta_template <- function(imputations) {
-    ld <- imputations$longdata
+    ld <- imputations$data
     x <- lapply(
         ld$ids,
         function(id) {
@@ -26,7 +26,7 @@ delta_template <- function(imputations) {
             )
             df[[ld$vars$subjid]] <- id
             df[[ld$vars$visit]] <- factor(ld$visits, labels = ld$visits)
-            df[[ld$vars$group]] <- ld$impgroup[[id]]
+            df[[ld$vars$group]] <- ld$group[[id]]
 
             vars <- c(
                 ld$vars$subjid,
