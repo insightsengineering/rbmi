@@ -87,7 +87,8 @@ run_mcmc <- function(
     burn_in,
     burn_between,
     initial_values,
-    same_cov
+    same_cov,
+    verbose = TRUE
 ) {
 
     assert_that(
@@ -130,7 +131,8 @@ run_mcmc <- function(
         burn_in,
         burn_between,
         data$initial_values,
-        same_cov
+        same_cov,
+        verbose
     )
 
     check_mcmc(fit, n_imputations)
@@ -159,7 +161,7 @@ listmat_to_array <- function(listmat) {
     res_array <- array(as.numeric(unlist(listmat)), dim = dims)
 
     for(i in 1:dims[1]) {
-    res_array[i,,] <- listmat[[i]]
+        res_array[i,,] <- listmat[[i]]
     }
 
     return(res_array)
@@ -265,37 +267,39 @@ fit_mcmc <- function(
     burn_in,
     burn_between,
     initial_values,
-    same_cov) {
+    same_cov,
+    verbose = TRUE) {
 
     initial_values <- list(initial_values)
 
+    # set verbose (if verbose = TRUE than refresh is set to default value)
+    refresh <- ifelse(verbose, (burn_in + burn_between*n_imputations)/10, 0)
+
     if(same_cov) {
 
-        suppressWarnings({
-            stan_fit <- sampling(
-                object = stanmodels$MMRM_same_cov,
-                data = data,
-                pars = c("beta", "Sigma"),
-                chains = 1,
-                warmup = burn_in,
-                thin = burn_between,
-                iter = burn_in + burn_between*n_imputations,
-                init = initial_values)
-        })
+        stan_fit <- sampling(
+            object = stanmodels$MMRM_same_cov,
+            data = data,
+            pars = c("beta", "Sigma"),
+            chains = 1,
+            warmup = burn_in,
+            thin = burn_between,
+            iter = burn_in + burn_between*n_imputations,
+            init = initial_values,
+            refresh = refresh)
 
     } else {
 
-        suppressWarnings({
-            stan_fit <- sampling(
-                object = stanmodels$MMRM_diff_cov,
-                data = data,
-                pars = c("beta", "Sigma"),
-                chains = 1,
-                warmup = burn_in,
-                thin = burn_between,
-                iter = burn_in + burn_between*n_imputations,
-                init = initial_values)
-        })
+        stan_fit <- sampling(
+            object = stanmodels$MMRM_diff_cov,
+            data = data,
+            pars = c("beta", "Sigma"),
+            chains = 1,
+            warmup = burn_in,
+            thin = burn_between,
+            iter = burn_in + burn_between*n_imputations,
+            init = initial_values,
+            refresh = refresh)
 
     }
 

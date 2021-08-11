@@ -165,14 +165,15 @@ test_that("Posterior mean of mcmc equals (restricted) ML estimates", {
         outcome = dat$outcome,
         group = dat$group,
         sigma_reml = sigma_reml,
-        n_imputations = 100,
+        n_imputations = 10,
         burn_in = 200,
         burn_between = 1,
         initial_values = list(
             "beta" = betas_reml,
             "Sigma" = sigma_reml
         ),
-        same_cov = TRUE
+        same_cov = TRUE,
+        verbose = FALSE
     )
 
     s <- rstan::summary(fit$fit, pars = c("beta", "Sigma"))$summary
