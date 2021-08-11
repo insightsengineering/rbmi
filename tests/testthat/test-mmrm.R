@@ -93,6 +93,78 @@ test_fit_mmrm <- function(fit, cov_struct, nv, same_cov) {
 
 }
 
+test_mmrm_numeric <- function(data, vars, formula_expr, same_cov) {
+
+    formula <- as.formula(formula_expr)
+    designmat <- as_model_df(data, formula)
+
+    fit <- fit_mmrm(
+        designmat = designmat[,-1],
+        outcome = data$outcome,
+        subjid = data$subjid,
+        visit = data$visit,
+        group = data$group,
+        vars = vars,
+        cov_struct = "us",
+        REML = TRUE,
+        same_cov = same_cov,
+        initial_values = NULL,
+        optimizer = "BFGS"
+    )
+    names(fit$beta) <- NULL
+
+    if(same_cov) {
+        formula_ext <- as.formula(
+            paste0(formula_expr, " + us(0 + visit | subjid)")
+        )
+    } else {
+        formula_ext <- as.formula(
+            paste0(formula_expr, " + us(0 + A:visit | subjid) + us(0 + B:visit | subjid)")
+        )
+        names_data <- colnames(data)
+        data <- cbind(data, model.matrix(~ 0 + data$group))
+        colnames(data) <- c(names_data, c("A", "B"))
+    }
+
+    control <- glmmTMBControl(
+        optimizer = optim,
+        optArgs = list(method = "BFGS"),
+        parallel = 1
+    )
+
+    fit_expected <- glmmTMB(
+        formula_ext,
+        dispformula = ~0,
+        data = data,
+        REML = TRUE,
+        control = control)
+
+    beta <- fixef(fit_expected)$cond
+    names(beta) <- NULL
+
+    sigma <- VarCorr(fit_expected)$cond
+    sigma <- lapply(sigma, function(x) as.matrix(data.frame(x)))
+    if(same_cov) {
+        sigma = list("A" = sigma[[1]], "B" = sigma[[1]])
+    } else {
+        sigma = list("A" = sigma[[1]], "B" = sigma[[2]])
+    }
+
+    theta <- getME(fit_expected, name = "theta")
+
+    converged <- ifelse(fit_expected$fit$convergence == 0, TRUE, FALSE)
+
+    output_expected <- list(
+        beta = beta,
+        sigma = sigma,
+        theta = theta,
+        converged = converged
+    )
+
+    expect_equal(fit, output_expected, ignore_attr = TRUE)
+
+}
+
 test_that(
     "black spaces and : are correctly removed",
     {
@@ -541,104 +613,31 @@ test_that(
         test_fit_mmrm(fit, "us", nv, same_cov)
     })
 
-
-test_mmrm_formula <- function(data, vars, formula_expr, same_cov) {
-
-    formula <- as.formula(formula_expr)
-    designmat <- as_model_df(data, formula)
-
-    fit <- fit_mmrm(
-        designmat = designmat[,-1],
-        outcome = data$outcome,
-        subjid = data$subjid,
-        visit = data$visit,
-        group = data$group,
-        vars = vars,
-        cov_struct = "us",
-        REML = TRUE,
-        same_cov = same_cov,
-        initial_values = NULL,
-        optimizer = "BFGS"
-    )
-    names(fit$beta) <- NULL
-
-    if(same_cov) {
-        formula_ext <- as.formula(
-            paste0(formula_expr, " + us(0 + visit | subjid)")
-        )
-    } else {
-        formula_ext <- as.formula(
-            paste0(formula_expr, " + us(0 + A:visit | subjid) + us(0 + B:visit | subjid)")
-        )
-        names_data <- colnames(data)
-        data <- cbind(data, model.matrix(~ 0 + data$group))
-        colnames(data) <- c(names_data, c("A", "B"))
-    }
-
-    control <- glmmTMBControl(
-        optimizer = optim,
-        optArgs = list(method = "BFGS"),
-        parallel = 1
-    )
-
-    fit_expected <- glmmTMB(
-        formula_ext,
-        dispformula = ~0,
-        data = data,
-        REML = TRUE,
-        control = control)
-
-    beta <- fixef(fit_expected)$cond
-    names(beta) <- NULL
-
-    sigma <- VarCorr(fit_expected)$cond
-    sigma <- lapply(sigma, function(x) as.matrix(data.frame(x)))
-    if(same_cov) {
-        sigma = list("A" = sigma[[1]], "B" = sigma[[1]])
-    } else {
-        sigma = list("A" = sigma[[1]], "B" = sigma[[2]])
-    }
-
-    theta <- getME(fit_expected, name = "theta")
-
-    converged <- ifelse(fit_expected$fit$convergence == 0, TRUE, FALSE)
-
-    output_expected <- list(
-        beta = beta,
-        sigma = sigma,
-        theta = theta,
-        converged = converged
-    )
-
-    expect_equal(fit, output_expected, ignore_attr = TRUE)
-
-}
-
 test_that(
     "MMRM returns expected estimates under different model specifications (same_cov = TRUE)",
     {
         same_cov = TRUE
 
         formula_expr <- "outcome ~ sex*visit + age*visit + visit*group"
-        test_mmrm_formula(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(data, vars, formula_expr, same_cov)
 
         formula_expr <- "outcome ~ sex*group + age*group + visit*group"
-        test_mmrm_formula(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(data, vars, formula_expr, same_cov)
 
         formula_expr <- "outcome ~ sex*group*visit + age*group*visit + visit*group"
-        test_mmrm_formula(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(data, vars, formula_expr, same_cov)
 
         formula_expr <- "outcome ~ sex + age + sex:age + sex*visit + age:group + visit*group"
-        test_mmrm_formula(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(data, vars, formula_expr, same_cov)
 
         formula_expr <- "outcome ~ visit + age*visit*group + sex + visit*group"
-        test_mmrm_formula(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(data, vars, formula_expr, same_cov)
 
         formula_expr <- "outcome ~ sex^2"
-        test_mmrm_formula(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(data, vars, formula_expr, same_cov)
 
         formula_expr <- "outcome ~ age:sex^2 + sex:age*group + visit*group"
-        test_mmrm_formula(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(data, vars, formula_expr, same_cov)
 
     }
 )
@@ -649,25 +648,25 @@ test_that(
         same_cov = FALSE
 
         formula_expr <- "outcome ~ sex*visit + age*visit + visit*group"
-        test_mmrm_formula(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(data, vars, formula_expr, same_cov)
 
         formula_expr <- "outcome ~ sex*group + age*group + visit*group"
-        test_mmrm_formula(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(data, vars, formula_expr, same_cov)
 
         formula_expr <- "outcome ~ sex*group*visit + age*group*visit + visit*group"
-        test_mmrm_formula(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(data, vars, formula_expr, same_cov)
 
         formula_expr <- "outcome ~ sex + age + sex:age + sex*visit + age:group + visit*group"
-        test_mmrm_formula(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(data, vars, formula_expr, same_cov)
 
         formula_expr <- "outcome ~ visit + age*visit*group + sex + visit*group"
-        test_mmrm_formula(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(data, vars, formula_expr, same_cov)
 
         formula_expr <- "outcome ~ sex^2"
-        test_mmrm_formula(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(data, vars, formula_expr, same_cov)
 
         formula_expr <- "outcome ~ age:sex^2 + sex:age*group + visit*group"
-        test_mmrm_formula(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(data, vars, formula_expr, same_cov)
 
     }
 )
