@@ -276,12 +276,8 @@ fit_mcmc <- function(
     refresh <- ifelse(verbose, (burn_in + burn_between*n_imputations)/10, 0)
 
     ignorable_warnings <- c(
-        "Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
-        Running the chains for more iterations may help. See
-        http://mc-stan.org/misc/warnings.html#bulk-ess",
-        "Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
-Running the chains for more iterations may help. See
-http://mc-stan.org/misc/warnings.html#tail-ess"
+        "Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.\nRunning the chains for more iterations may help. See\nhttp://mc-stan.org/misc/warnings.html#bulk-ess",
+        "Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.\nRunning the chains for more iterations may help. See\nhttp://mc-stan.org/misc/warnings.html#tail-ess"
     )
 
     if(same_cov) {
