@@ -170,6 +170,7 @@ betas_reml <- pars$beta
 
 test_that("Posterior mean of mcmc equals (restricted) ML estimates", {
 
+    set.seed(101)
     fit <- run_mcmc(
         designmat = designmat,
         outcome = dat$outcome,
