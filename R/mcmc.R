@@ -78,6 +78,7 @@ QR_decomp <- function(designmat, N, J) {
 #' @param burn_between TODO
 #' @param initial_values TODO
 #' @param same_cov TODO
+#' @param verbose TODO
 run_mcmc <- function(
     designmat,
     outcome,
@@ -257,6 +258,7 @@ prepare_data_mcmc <- function(
 #' @param burn_between TODO
 #' @param initial_values TODO
 #' @param same_cov TODO
+#' @param verbose TODO
 #' @import Rcpp
 #' @import methods
 #' @useDynLib rbmi, .registration = TRUE
