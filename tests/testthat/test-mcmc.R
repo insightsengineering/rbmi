@@ -109,7 +109,7 @@ test_that("Posterior mean of mcmc equals (restricted) ML estimates", {
 
     set.seed(101)
 
-    n <- 100
+    n <- 500
     nv <- 2
 
     covars <- tibble(
