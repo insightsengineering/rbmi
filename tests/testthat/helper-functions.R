@@ -1,3 +1,8 @@
+suppressPackageStartupMessages({
+    library(dplyr)
+    library(tibble)
+})
+
 set_col_names <- function(x, nam) {
     colnames(x) <- nam
     return(x)

@@ -53,7 +53,6 @@ draws.condmean <- function(data, data_ice, vars, method) {
 #' Title - TODO
 #'
 #' @param longdata TODO
-#' @param outcome_var TODO
 remove_nmar_as_NA <- function(longdata) {
 
     # remove non-MAR data

@@ -79,7 +79,7 @@ impute <- function(draws, references, update_ice = NULL, strategies = getStrateg
 
 
 
-#' @rdname validate_analyse
+#' @rdname impute
 #' @export
 impute.random <- function(draws, references, update_ice = NULL, strategies = getStrategies()){
     result <- impute_internal(
@@ -95,7 +95,7 @@ impute.random <- function(draws, references, update_ice = NULL, strategies = get
 
 
 
-#' @rdname validate_analyse
+#' @rdname impute
 #' @export
 impute.condmean <- function(draws, references, update_ice = NULL, strategies = getStrategies()){
     result <- impute_internal(
@@ -130,7 +130,7 @@ impute.condmean <- function(draws, references, update_ice = NULL, strategies = g
 #' will impute by taking a random draw from the multivariate normal distribution.
 impute_internal <- function(draws, references, update_ice, strategies, conditionalMean){
 
-    data <- draws$data
+    data <- draws$data$clone(deep = TRUE)
 
     validate_references(references, data$data[[data$vars$group]])
     validate_strategies(strategies, data$strategies)
@@ -269,12 +269,13 @@ invert_indexes <- function(x){
 #'
 #' @param id Character string identifying the subject
 #'
-#' @param index The sample indexes which the subject belongs to i.e c(1,1,1,2,2,4)
+#' @param index The sample indexes which the subject belongs to i.e `c(1,1,1,2,2,4)`
 #'
-#' @param beta A list of beta coeficients for each sample, i.e. beta[[1]] is the set of beta coeficients for the first
-#' sample
+#' @param beta A list of beta coeficients for each sample, i.e. `beta[[1]]` is the set of beta coeficients
+#' for the first sample
 #'
-#' @param sigma A list of the sigma coeficients for each sample split by group i.e. sigma[[1]][["A"]] would give the sigma coeficients for group A for the first sample
+#' @param sigma A list of the sigma coeficients for each sample split by group i.e. `sigma[[1]][["A"]]`
+#' would give the sigma coeficients for group A for the first sample
 #'
 #' @param data A longdata object created by [longDataConstructor()]
 #'
@@ -306,17 +307,17 @@ impute_data_individual <- function(
 
     id_data <- data$extract_by_id(id)
 
-    if( sum(id_data$is_missing) == 0 ) return(result)
+    if( sum(id_data$is_missing) == 0) return(result)
 
     vars <- data$vars
-    group_pt <- id_data$group
-    group_ref <- references[group_pt]
+    group_pt <- as.character(id_data$group)
+    group_ref <- as.character(references[[group_pt]])
 
 
     dat_pt <- id_data$data
-    dat_pt[,vars$outcome] <- 1  # Dummy outcome value to stop rows being dropped by model.matrix
+    dat_pt[, vars$outcome] <- 1  # Dummy outcome value to stop rows being dropped by model.matrix
     dat_ref <- dat_pt
-    dat_ref[,vars$group] <- factor(group_ref, levels = levels(group_pt))
+    dat_ref[, vars$group] <- factor(group_ref, levels = levels(id_data$group))
 
     dat_pt_mod <- as_model_df(dat_pt, as_simple_formula(vars))
     dat_ref_mod <- as_model_df(dat_ref, as_simple_formula(vars))

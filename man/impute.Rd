@@ -2,9 +2,15 @@
 % Please edit documentation in R/impute.R
 \name{impute}
 \alias{impute}
+\alias{impute.random}
+\alias{impute.condmean}
 \title{Create Imputed Datasets}
 \usage{
 impute(draws, references, update_ice = NULL, strategies = getStrategies())
+
+\method{impute}{random}(draws, references, update_ice = NULL, strategies = getStrategies())
+
+\method{impute}{condmean}(draws, references, update_ice = NULL, strategies = getStrategies())
 }
 \arguments{
 \item{draws}{A draws object created by \code{\link[=draws]{draws()}}.}

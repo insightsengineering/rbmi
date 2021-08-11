@@ -18,12 +18,13 @@ impute_data_individual(
 \arguments{
 \item{id}{Character string identifying the subject}
 
-\item{index}{The sample indexes which the subject belongs to i.e c(1,1,1,2,2,4)}
+\item{index}{The sample indexes which the subject belongs to i.e \code{c(1,1,1,2,2,4)}}
 
-\item{beta}{A list of beta coeficients for each sample, i.e. beta[\link{1}] is the set of beta coeficients for the first
-sample}
+\item{beta}{A list of beta coeficients for each sample, i.e. \code{beta[[1]]} is the set of beta coeficients
+for the first sample}
 
-\item{sigma}{A list of the sigma coeficients for each sample split by group i.e. sigma[\link{1}][\link{"A"}] would give the sigma coeficients for group A for the first sample}
+\item{sigma}{A list of the sigma coeficients for each sample split by group i.e. \code{sigma[[1]][["A"]]}
+would give the sigma coeficients for group A for the first sample}
 
 \item{data}{A longdata object created by \code{\link[=longDataConstructor]{longDataConstructor()}}}
 
