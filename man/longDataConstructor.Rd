@@ -125,10 +125,14 @@ ld$get_data(obj)
 Will return a dataframe consisting of all observations for pt1 twice and all of the observations for "pt3" once.
 The first set of observations for "pt1" will have missing values filled in with \code{c(1,2,3)} and the second set will
 be filled in by \code{c(4,5,6)}. The length of the values must be equal to \code{sum(self$is_missing[[id]])}.
+
+If \code{obj} is not NULL then all subject IDs will be scrambled in order to ensure that they are unique
+i.e. If the "pt2" is requested twice then this process guarantees that each set of observations
+be have a unique subject ID number.
 }
 
 \subsection{Returns}{
-TODO
+A dataframe
 }
 }
 \if{html}{\out{<hr>}}
