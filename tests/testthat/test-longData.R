@@ -4,53 +4,62 @@ suppressPackageStartupMessages({
     library(testthat)
 })
 
-n <- 4
-nv <- 3
 
-covars <- tibble(
-    subjid = 1:n,
-    age = rnorm(n),
-    group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),
-    sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F")),
-    strata = c("A","A", "A", "B")
-)
+get_ld <- function(){
+    n <- 4
+    nv <- 3
 
-dat <- tibble(
-    subjid = rep.int(1:n, nv)
-) %>%
-    left_join(covars, by = "subjid") %>%
-    mutate( outcome = rnorm(
-        n(),
-        age * 3 + (as.numeric(sex) - 1) * 3 + (as.numeric(group) - 1) * 4,
-        sd = 3
-    )) %>%
-    arrange(subjid) %>%
-    group_by(subjid) %>%
-    mutate( visit = factor(paste0("Visit ", 1:n())))  %>%
-    ungroup() %>%
-    mutate(subjid = as.character(subjid))
+    covars <- tibble(
+        subjid = 1:n,
+        age = rnorm(n),
+        group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),
+        sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F")),
+        strata = c("A","A", "A", "B")
+    )
 
-dat[c(1,2,3,4,6,7), "outcome"] <- NA
+    dat <- tibble(
+        subjid = rep.int(1:n, nv)
+    ) %>%
+        left_join(covars, by = "subjid") %>%
+        mutate( outcome = rnorm(
+            n(),
+            age * 3 + (as.numeric(sex) - 1) * 3 + (as.numeric(group) - 1) * 4,
+            sd = 3
+        )) %>%
+        arrange(subjid) %>%
+        group_by(subjid) %>%
+        mutate( visit = factor(paste0("Visit ", 1:n())))  %>%
+        ungroup() %>%
+        mutate(subjid = as.character(subjid))
 
-
-vars <- list(
-    outcome = "outcome",
-    visit = "visit",
-    subjid = "subjid",
-    group = "group",
-    strata = "strata",
-    covariates = c("sex", "age"),
-    method = "method"
-)
-
-ld <- longDataConstructor$new(
-    data = dat,
-    vars = vars
-)
+    dat[c(1,2,3,4,6,7), "outcome"] <- NA
 
 
+    vars <- list(
+        outcome = "outcome",
+        visit = "visit",
+        subjid = "subjid",
+        group = "group",
+        strata = "strata",
+        covariates = c("sex", "age"),
+        method = "method"
+    )
 
-test_that("longData - Basics",{
+    ld <- longDataConstructor$new(
+        data = dat,
+        vars = vars
+    )
+    
+    return(list(ld = ld, dat = dat))
+}
+
+
+
+test_that("longData - Basics", {
+
+    dobj <- get_ld()
+    ld <- dobj$ld
+    dat <- dobj$dat
 
     subject_names <- unique(dat$subjid)
     expect_equal( names(ld$is_mar), subject_names)
@@ -75,6 +84,10 @@ test_that("longData - Basics",{
 
 
 test_that("longData - Sampling",{
+
+    dobj <- get_ld()
+    ld <- dobj$ld
+    dat <- dobj$dat
 
     set.seed(101)
     samps <- replicate(
@@ -146,6 +159,10 @@ test_that("longData - Sampling",{
 
 test_that("Strategies",{
 
+    dobj <- get_ld()
+    ld <- dobj$ld
+    dat <- dobj$dat
+
     expect_equal(
         unlist(ld$strategies, use.names = FALSE),
         rep("MAR", n)
@@ -176,6 +193,7 @@ test_that("Strategies",{
         c(F,F,F,  T,T,T,  T,T,F,  T,T,T)
     )
 
+    pre_update_ice_visit <- ld$visit_ice
 
     dat_ice <- tribble(
         ~subjid, ~method,
@@ -184,6 +202,10 @@ test_that("Strategies",{
           "3",  "ABC"
     )
     ld$update_strategies(dat_ice)
+
+    post_update_ice_visit <- ld$visit_ice
+
+    expect_equal(pre_update_ice_visit, post_update_ice_visit)
 
     expect_equal(
         unlist(ld$is_mar, use.names = FALSE),
@@ -207,6 +229,50 @@ test_that("Strategies",{
     )
     expect_error(ld$update_strategies(dat_ice), "Unable to change from non-MAR to MAR")
 })
+
+
+test_that("strategies part 2",{
+
+    dobj <- get_ld()
+    ld <- dobj$ld
+    dat <- dobj$dat
+
+
+    dat_ice <- tribble(
+        ~visit, ~subjid, ~method,
+        "Visit 1" , "1",  "ABC",
+        "Visit 2",  "2",  "MAR",
+        "Visit 3",  "3",  "XYZ"
+    )
+
+    ld$set_strategies(dat_ice)
+    pre_update_ld <- ld$clone(deep = TRUE)
+
+
+    dat_ice <- tribble(
+        ~subjid, ~method, ~visit,
+        "1", "ABC", "Visit 2",
+        "2", "MAR", "Visit 7",
+        "3", "XYZ", "Visit 1"
+    )
+    ld$update_strategies(dat_ice)
+    expect_equal(ld, pre_update_ld)
+
+
+
+    dat_ice <- tribble(
+        ~subjid, ~method, ~visit,
+        "1", "LKJ", "Visit 2",
+        "2", "MAR", "Visit 7",
+        "3", "XYZ", "Visit 1"
+    )
+    ld$update_strategies(dat_ice)
+    expect_equal(ld$is_mar, pre_update_ld$is_mar)
+    expect_equal(ld$visit_ice, pre_update_ld$visit_ice)
+    expect_equal(unlist(ld$strategies, use.names = FALSE), c("LKJ", "MAR", "XYZ", "MAR"))
+})
+
+
 
 
 
