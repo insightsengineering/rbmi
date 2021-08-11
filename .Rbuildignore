@@ -3,7 +3,6 @@
 ^LICENSE\.md$
 ^\.github$
 ^codecov\.yml$
-^misc/
+^misc$
 ^\.lintr$
-^gha_rpkg
 ^.gitignore$
