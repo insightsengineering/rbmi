@@ -52,7 +52,7 @@ test_that("delta_template & delta_lagscale",{
         as.data.frame()
 
     expect_equal(
-        delta_template(list(longdata = ld)),
+        delta_template(list(data = ld)),
         output_expected
     )
 
@@ -63,7 +63,7 @@ test_that("delta_template & delta_lagscale",{
         mutate(delta = c(0, 0, 0, -12, 0, 0, -6, -24 -6))
 
     expect_equal(
-        delta_lagscale(list(longdata = ld), delta, dlag),
+        delta_lagscale(list(data = ld), delta, dlag),
         output_expected2
     )
 })

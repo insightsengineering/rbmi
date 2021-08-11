@@ -1,5 +1,6 @@
 library(testthat)
 library(rbmi)
+library(dplyr)
 
 test_check("rbmi")
 
