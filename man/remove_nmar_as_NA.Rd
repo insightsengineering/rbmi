@@ -8,8 +8,6 @@ remove_nmar_as_NA(longdata)
 }
 \arguments{
 \item{longdata}{TODO}
-
-\item{outcome_var}{TODO}
 }
 \description{
 Title - TODO

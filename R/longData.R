@@ -45,10 +45,10 @@ longDataConstructor <- R6::R6Class(
         #' @field values A list indexed by subject storing the original outcome values
         values = list(),
 
-        #' @field impgroup A list indexed by subject storing the a single character indicating which imputation
+        #' @field group A list indexed by subject storing the a single character indicating which imputation
         #' group the subject belongs to. This is typically the subjects treatment group but can vary. It is used
         #' to determine what reference group should be used when imputing the subjects data.
-        impgroup = list(),
+        group = list(),
 
         #' @field is_mar A list indexed by subject storing logical values indicating if the subjects outcome values
         #' are MAR or not. This list is defaulted to TRUE for all subjects & outcomes and is then
@@ -189,12 +189,11 @@ longDataConstructor <- R6::R6Class(
 
             ids <- self$data[[self$vars$subjid]]
             indexes <- which(ids == id)
-            data_subject <- self$data[indexes,]
+            data_subject <- self$data[indexes, ]
             values <- data_subject[[self$vars$outcome]]
             is_missing <- is.na(values)
             group <- unique(data_subject[[self$vars$group]])
             existing_id <- id %in% names(self$ids)
-            impgroup <- unique(data_subject[[self$vars$group]])
 
             assert_that(
                 length(indexes) >= 1,
@@ -203,7 +202,15 @@ longDataConstructor <- R6::R6Class(
 
             assert_that(
                 length(group) == 1,
-                msg = sprintf("Subject %s doesn't have a `group`", id)
+                !is.na(group),
+                is.factor(group),
+                msg = sprintf(
+                    paste0(
+                        "Subject %s either belongs to multiple groups, or ",
+                        "their group is missing, or group is not a factor"
+                    ),
+                    id
+                )
             )
 
             assert_that(
@@ -216,7 +223,7 @@ longDataConstructor <- R6::R6Class(
                 msg = sprintf("Subject %s already exists...", id)
             )
 
-            self$impgroup[[id]] <- impgroup
+            self$group[[id]] <- group
             self$values[[id]] <- values
             self$is_mar[[id]] <- rep(TRUE, length(indexes))
             self$is_post_ice[[id]] <- rep(FALSE, length(indexes))
@@ -257,7 +264,7 @@ longDataConstructor <- R6::R6Class(
                 is_mar = self$is_mar[[id]],
                 is_missing = self$is_missing[[id]],
                 strategy = self$strategies[[id]],
-                group = self$impgroup[[id]],
+                group = self$group[[id]],
                 data = self$get_data(id),
                 outcome = self$values[[id]],
                 strategy_lock = self$strategy_lock[[id]]
@@ -310,23 +317,22 @@ longDataConstructor <- R6::R6Class(
 
                 self$strategies[[subject]] <- new_strategy
 
-                if(update) next()
-
                 index <- which(self$visits == visit)
 
-                if( new_strategy != "MAR"){
-                    is_mar <- seq_along(self$visits) < index
+                if (new_strategy != "MAR") {
+                    self$is_mar[[subject]] <- seq_along(self$visits) < index
                 } else {
-                    is_mar <- rep(TRUE, length(self$visits))
+                    self$is_mar[[subject]] <- rep(TRUE, length(self$visits))
                 }
+
+                if (update) next()
 
                 is_post_ice <- seq_along(self$visits) >= index
                 self$is_post_ice[[subject]] <- is_post_ice
 
-                self$is_mar[[subject]] <- is_mar
-
-                self$strategy_lock[[subject]] <- any(
-                    !self$is_missing[[subject]][is_post_ice]
+                # Lock strategy if patient has non-missing data post their ICE
+                self$strategy_lock[[subject]] <- !all(
+                    self$is_missing[[subject]][is_post_ice]
                 )
             }
         },
