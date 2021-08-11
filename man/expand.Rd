@@ -2,15 +2,75 @@
 % Please edit documentation in R/expand.R
 \name{expand}
 \alias{expand}
-\title{Expand dataframes}
+\alias{fill_locf}
+\alias{expand_locf}
+\title{Expand and fill in missing dataframe rows}
 \usage{
 expand(data, ...)
+
+fill_locf(data, vars, group = NULL, order = NULL)
+
+expand_locf(data, ..., vars, group, order)
 }
 \arguments{
-\item{data}{Dataset to expand}
+\item{data}{Dataset to expand or fill in}
 
-\item{...}{variables and the levels that should be expanded out}
+\item{...}{variables and the levels that should be expanded out (note that duplicate entries of
+levels will result in multiple rows for that level)}
+
+\item{vars}{character vector containing the names of variables that need to be filled in}
+
+\item{group}{character vector containing the names of variables to group
+by when performing LOCF imputation of \code{var}}
+
+\item{order}{character vector containing the names of additional variables to sort the dataframe
+by before performing LOCF}
 }
 \description{
-Expands specific variables of a dataframe to ensure all combinations are present
+These functions are essentially wrappers around \code{\link[base:expand.grid]{base::expand.grid()}} to ensure that missing
+combinations of data are inserted into a dataframe with imputation/fill methods for updating
+covariate values of newly created rows
+}
+\details{
+The \code{\link[=draws]{draws()}} function makes the assumption that all subjects and visits are present in the dataframe
+and that all covariate values are none missing; \code{expand()}, \code{fill_locf()} and \code{expand_locf()} are utility
+functions to support users in ensuring that their dataframes conform to these assumptions.
+
+\code{expand()} takes vectors for expected levels in a dataframe and expands out all combinations inserting any
+missing rows into the dataframe. Note that all "expanded" variables are cast as factors.
+
+\code{fill_locf()} applies LOCF imputation to named covariates to fill in any NAs created by the insertion of new
+rows by \code{expand()} (though do note that no distinction is made between existing NAs and newly created NAs).
+Note that the dataframe is sorted by \code{c(group, order)} before performing the LOCF imputation; the dataframe
+will be returned in the original sort order however.
+
+\code{expand_locf()} a simple composition function of \code{fill_locf()} and \code{expand()} i.e. \code{fill_locf(expand(...))}
+}
+\examples{
+\dontrun{
+
+dat_expanded <- expand(
+    data = dat,
+    subject = c("pt1", "pt2", "pt3", "pt4"),
+    visit = c("vis1", "vis2", "vis3")
+)
+
+dat_filled <- fill_loc(
+    data = dat_expanded,
+    vars = c("Sex", "Age"),
+    group = "subject",
+    order = "visit"
+)
+
+## Or
+
+dat_filled <- expand_locf(
+    data = dat,
+    subject = c("pt1", "pt2", "pt3", "pt4"),
+    visit = c("vis1", "vis2", "vis3"),
+    vars = c("Sex", "Age"),
+    group = "subject",
+    order = "visit"
+)
+}
 }

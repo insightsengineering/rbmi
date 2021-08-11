@@ -7,13 +7,13 @@
 untranspose_samples(samples, indexes)
 }
 \arguments{
-\item{samples}{A list of "sample" objects created by \code{\link[rbmi]{impute_data_individual}}}
+\item{samples}{A list of "sample" objects created by \code{\link[=impute_data_individual]{impute_data_individual()}}}
 
-\item{indexes}{A list of indexes created by \code{\link[rbmi]{transpose_samples}}}
+\item{indexes}{A list of indexes created by \code{\link[=transpose_samples]{transpose_samples()}}}
 }
 \description{
-Takes a sample object created by \code{\link[rbmi]{impute_data_individual}}
+Takes a sample object created by \code{\link[=impute_data_individual]{impute_data_individual()}}
 and inverts it based upon the original transposition done by
-\code{\link[rbmi]{transpose_samples}} in order to group by the
+\url{transpose_samples} in order to group by the
 sample number instead of the subject ID
 }

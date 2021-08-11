@@ -2,43 +2,71 @@
 % Please edit documentation in R/longData.R
 \name{longDataConstructor}
 \alias{longDataConstructor}
-\title{Title}
+\title{R6 Class for Storing / Accessing & Sampling Longitudinal Data}
 \description{
-Title
-
-Title
+A longdata object allows for efficient storage and recall of longitudinal datasets for use in
+bootstrap sampling. The object works by de-constructing data into lists based upon subject id
+enabling efficient lookup.
 }
 \details{
-TODO Description
+The object also handles multiple other operations specific to rbmi such as defining whether an
+outcome value is MAR / Missing or not as well as tracking which imputation strategy is assigned
+to each subject
+
+It is recognised that this objects functionality is fairly overloaded and is hoped that this can
+be split out into more area specific objects / functions in the future. Further additions of functionality
+to this object should be avoided.
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{data}}{TODO}
+\item{\code{data}}{The original dataset passed to the constructor}
 
-\item{\code{vars}}{TODO}
+\item{\code{vars}}{The vars object (list of key variables) passed to the constructor}
 
-\item{\code{visits}}{TODO}
+\item{\code{visits}}{A character vector containing the distinct visit levels}
 
-\item{\code{ids}}{TODO}
+\item{\code{ids}}{A character vector containing the unique ids of each subject in \code{self$data}}
 
-\item{\code{strata}}{TODO}
+\item{\code{strata}}{A numeric vector indicating which strata each corresponding value of \code{self$ids} belongs to.
+If no stratification variable is defined this will default to 1 for all subjects (i.e. same group).
+This field is only used as part of the \code{self$sample_ids()} function to enable stratified bootstrap
+sampling}
 
-\item{\code{values}}{TOTO}
+\item{\code{values}}{A list indexed by subject storing the original outcome values}
 
-\item{\code{impgroup}}{TOTO}
+\item{\code{impgroup}}{A list indexed by subject storing the a single character indicating which imputation
+group the subject belongs to. This is typically the subjects treatment group but can vary. It is used
+to determine what reference group should be used when imputing the subjects data.}
 
-\item{\code{is_mar}}{TODO}
+\item{\code{is_mar}}{A list indexed by subject storing logical values indicating if the subjects outcome values
+are MAR or not. This list is defaulted to TRUE for all subjects & outcomes and is then
+modified by calls to \code{self$set_strategies()}.}
 
-\item{\code{strategies}}{TODO}
+\item{\code{strategies}}{A list indexed by subject storing a single character value indicating the imputation
+strategy assigned to a specific subject. This list is defaulted to "MAR" for all subjects and is then
+modified by calls to either \code{self$set_strategies()} or \code{self$update_strategies()}.}
 
-\item{\code{strategy_lock}}{TODO}
+\item{\code{strategy_lock}}{A list indexed by subject storing a single logical value indicating whether a
+patients imputation strategy is locked or not. If a strategy is locked it means that it can't change
+from MAR to non-MAR or non-MAR to MAR. Strategies are locked if the patient has non-missing after
+their ICE. This list is populated by a call to \code{self$set_strategies()}.}
 
-\item{\code{indexes}}{TODO}
+\item{\code{indexes}}{A list indexed by subject storing a numeric vector of indexes which specify which rows in the
+original dataset below to this subject i.e. to recover the full data for subject "pt3" you can use
+\code{self$data[self$indexes[["pt3"]],]}. This may seem redundant over filtering the data directly
+however it enables efficient bootstrap sampling of the data i.e.\preformatted{indexes <- unlist(self$indexes[c("pt3", "pt3")])
+self$data[indexes,]
+}
 
-\item{\code{is_missing}}{TODO}
+This list is populated during the object initialisation.}
 
-\item{\code{is_post_ice}}{TODO}
+\item{\code{is_missing}}{A list indexed by subject storing a logical vector indicating whether the corresponding
+outcome of a subject is missing. This list is populated during the object initialisation.}
+
+\item{\code{is_post_ice}}{A list indexed by subject storing a logical vector indicating whether the corresponding
+outcome of a subject is post the date of their ICE. If no ICE data has been provided this defaults to False
+for all observations. This list is populated by a call to \code{self$set_strategies()}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -62,22 +90,43 @@ TODO Description
 \if{html}{\out{<a id="method-get_data"></a>}}
 \if{latex}{\out{\hypertarget{method-get_data}{}}}
 \subsection{Method \code{get_data()}}{
-TODO
+Returns a dataframe based upon required subject IDs. Replaces missing values if new values are provided.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$get_data(obj, nmar.rm = FALSE, na.rm = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$get_data(obj = NULL, nmar.rm = FALSE, na.rm = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{obj}}{TODO}
+\item{\code{obj}}{Either NULL, a character vector of subjects IDs or a list of lists
+with elements "id" and "values". See details.}
 
-\item{\code{nmar.rm}}{TODO}
+\item{\code{nmar.rm}}{logical value. If TRUE will remove observations that are not regarded as MAR (as
+determined from \code{self$is_mar})}
 
-\item{\code{na.rm}}{TODO}
+\item{\code{na.rm}}{logical value. If TRUE will remove outcome values that are missing (as
+determined from \code{self$is_missing})}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Details}{
+If \code{obj} is NULL then the full original dataset is returned. If \code{obj} is a character vector then a new
+dataset consisting of just those subjects is returned; if the character vector contains duplicate entries
+then that subject will be returned multiple times. If \code{obj} is a list of lists with elements \code{id} and \code{values}
+then a dataset of those subjects will be returned but with missing values filled in by the values in \code{values}.
+i.e.\preformatted{obj <- list(
+  list( id = "pt1", values = c(1,2,3)),
+  list( id = "pt1", values = c(4,5,6)),
+  list( id = "pt3", values = c(7,8))
+)
+ld$get_data(obj)
+}
+
+Will return a dataframe consisting of all observations for pt1 twice and all of the observations for "pt3" once.
+The first set of observations for "pt1" will have missing values filled in with \code{c(1,2,3)} and the second set will
+be filled in by \code{c(4,5,6)}. The length of the values must be equal to \code{sum(self$is_missing[[id]])}.
+}
+
 \subsection{Returns}{
 TODO
 }

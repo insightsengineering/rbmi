@@ -2,7 +2,7 @@
 % Please edit documentation in R/impute.R
 \name{impute_data_individual}
 \alias{impute_data_individual}
-\title{impute_data_individual}
+\title{Impute data for a single subject}
 \usage{
 impute_data_individual(
   id,
@@ -16,22 +16,33 @@ impute_data_individual(
 )
 }
 \arguments{
-\item{id}{TODO}
+\item{id}{Character string identifying the subject}
 
-\item{index}{TODO}
+\item{index}{The sample indexes which the subject belongs to i.e c(1,1,1,2,2,4)}
 
-\item{beta}{TODO}
+\item{beta}{A list of beta coeficients for each sample, i.e. beta[\link{1}] is the set of beta coeficients for the first
+sample}
 
-\item{sigma}{TODO}
+\item{sigma}{A list of the sigma coeficients for each sample split by group i.e. sigma[\link{1}][\link{"A"}] would give the sigma coeficients for group A for the first sample}
 
-\item{data}{TODO}
+\item{data}{A longdata object created by \code{\link[=longDataConstructor]{longDataConstructor()}}}
 
-\item{references}{TODO}
+\item{references}{a named vector. Identifies the references to be used when generating the imputed
+values. Should be of the form \code{c("Group" = "Reference", "Group" = "Reference")}.}
 
-\item{strategies}{TODO}
+\item{strategies}{a named list of functions. Defines the imputation functions to be used. The names
+of of the list should mirror the values specified in \code{method} column of \code{data_ice}.
+Default = \code{getStrategies()}. See \code{\link[=getStrategies]{getStrategies()}} for more details.}
 
-\item{conditionalMean}{TODO}
+\item{conditionalMean}{logical. If TRUE will impute using the conditional mean values, if values
+will impute by taking a random draw from the multivariate normal distribution.}
 }
 \description{
-TODO - Description
+This function performs the imputation for a single subject at a time implementing the process as detailed
+in \code{\link[=impute]{impute()}}.
+}
+\details{
+Note that this function performs all of the required imputations for a subject at the same time. I.e.
+if a subject is used in samples  1,3,5,9 then these are all performed at once. The function supports patients
+belonging to the same sample multiple times i.e.  1,1,2,3,5,5
 }
