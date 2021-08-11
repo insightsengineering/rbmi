@@ -99,7 +99,7 @@ delta_lagscale <- function(
     missing_only = TRUE
 ){
     dat <- delta_template(imputations)
-    ld <- imputations$longdata
+    ld <- imputations$data
 
     assert_that(
         is.numeric(delta),
