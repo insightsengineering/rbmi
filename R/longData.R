@@ -33,6 +33,7 @@ longDataConstructor <- R6::R6Class(
         #' @field visits A character vector containing the distinct visit levels
         visits = NULL,
 
+
         #' @field ids A character vector containing the unique ids of each subject in `self$data`
         ids = NULL,
 
@@ -41,6 +42,11 @@ longDataConstructor <- R6::R6Class(
         #' This field is only used as part of the `self$sample_ids()` function to enable stratified bootstrap
         #' sampling
         strata = NULL,
+
+
+        #' @field visit_ice A list indexed by subject storing the visit which the patient had their ICE on
+        visit_ice = list(),
+
 
         #' @field values A list indexed by subject storing the original outcome values
         values = list(),
@@ -301,24 +307,27 @@ longDataConstructor <- R6::R6Class(
                 )
 
                 new_strategy <- dat_ice_pt[[self$vars$method]]
-                visit <- dat_ice_pt[[self$vars$visit]]
-
-                if(update){
-                    if( self$strategy_lock[[subject]]){
+                
+                if (!update) {
+                    self$visit_ice[[subject]] <- dat_ice_pt[[self$vars$visit]]
+                } else {
+                    if (self$strategy_lock[[subject]]) {
                         current_strategy <- self$strategies[[subject]]
-                        if(current_strategy == "MAR" &  new_strategy != "MAR"){
+                        if (current_strategy == "MAR" & new_strategy != "MAR") {
                             stop("Unable to change from MAR to non-MAR")
                         }
-                        if(current_strategy!= "MAR" & new_strategy == "MAR"){
+                        if (current_strategy != "MAR" & new_strategy == "MAR") {
                             stop("Unable to change from non-MAR to MAR")
                         }
                     }
                 }
 
+                visit <- self$visit_ice[[subject]]
+
                 self$strategies[[subject]] <- new_strategy
 
                 index <- which(self$visits == visit)
-
+                
                 if (new_strategy != "MAR") {
                     self$is_mar[[subject]] <- seq_along(self$visits) < index
                 } else {
