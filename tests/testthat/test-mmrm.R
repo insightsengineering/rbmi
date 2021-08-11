@@ -625,6 +625,9 @@ test_that(
         formula_expr <- "outcome ~ sex*group + age*group + visit*group"
         test_mmrm_formula(data, vars, formula_expr, same_cov)
 
+        formula_expr <- "outcome ~ sex*group*visit + age*group*visit + visit*group"
+        test_mmrm_formula(data, vars, formula_expr, same_cov)
+
         formula_expr <- "outcome ~ sex + age + sex:age + sex*visit + age:group + visit*group"
         test_mmrm_formula(data, vars, formula_expr, same_cov)
 
@@ -649,6 +652,9 @@ test_that(
         test_mmrm_formula(data, vars, formula_expr, same_cov)
 
         formula_expr <- "outcome ~ sex*group + age*group + visit*group"
+        test_mmrm_formula(data, vars, formula_expr, same_cov)
+
+        formula_expr <- "outcome ~ sex*group*visit + age*group*visit + visit*group"
         test_mmrm_formula(data, vars, formula_expr, same_cov)
 
         formula_expr <- "outcome ~ sex + age + sex:age + sex*visit + age:group + visit*group"
