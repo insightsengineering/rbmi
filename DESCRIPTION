@@ -23,6 +23,7 @@ Suggests:
     nlme,
     testthat,
     emmeans,
+    tibble,
     mvtnorm
 Biarch: true
 Config/testthat/edition: 2
