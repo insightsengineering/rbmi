@@ -130,7 +130,7 @@ impute.condmean <- function(draws, references, update_ice = NULL, strategies = g
 #' will impute by taking a random draw from the multivariate normal distribution.
 impute_internal <- function(draws, references, update_ice, strategies, conditionalMean){
 
-    data <- draws$data
+    data <- draws$data$clone(deep = TRUE)
 
     validate_references(references, data$data[[data$vars$group]])
     validate_strategies(strategies, data$strategies)
@@ -306,17 +306,17 @@ impute_data_individual <- function(
 
     id_data <- data$extract_by_id(id)
 
-    if( sum(id_data$is_missing) == 0 ) return(result)
+    if( sum(id_data$is_missing) == 0) return(result)
 
     vars <- data$vars
-    group_pt <- id_data$group
-    group_ref <- references[group_pt]
+    group_pt <- as.character(id_data$group)
+    group_ref <- as.character(references[[group_pt]])
 
 
     dat_pt <- id_data$data
-    dat_pt[,vars$outcome] <- 1  # Dummy outcome value to stop rows being dropped by model.matrix
+    dat_pt[, vars$outcome] <- 1  # Dummy outcome value to stop rows being dropped by model.matrix
     dat_ref <- dat_pt
-    dat_ref[,vars$group] <- factor(group_ref, levels = levels(group_pt))
+    dat_ref[, vars$group] <- factor(group_ref, levels = levels(id_data$group))
 
     dat_pt_mod <- as_model_df(dat_pt, as_simple_formula(vars))
     dat_ref_mod <- as_model_df(dat_ref, as_simple_formula(vars))

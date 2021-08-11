@@ -144,17 +144,15 @@ record_warnings <- function(expr) {
 }
 
 #' Is value absent
-#' 
+#'
 #' Returns true if a value is either NULL, NA or "".
 #' In the case of a vector all values must be NULL/NA/""
 #' for x to be regarded as absent.
-#' 
+#'
 #' @param x a value to check if it is absent or not
 #' @param na do NAs count as absent
 #' @param blank do blanks i.e. "" count as absent
 is_absent <- function(x, na = TRUE, blank = TRUE) {
-
-
     if (is.null(x)) {
         return(TRUE)
     }
@@ -173,5 +171,24 @@ is_absent <- function(x, na = TRUE, blank = TRUE) {
     }
 
     return(FALSE)
+}
 
+
+
+
+#' Extract Variables from string vector
+#'
+#' Takes a string including potentially model terms like `*` and `:` and
+#' extracts out the individual variables
+#'
+#' i.e.  `c("v1", "v2", "v2*v3", "v1:v2")` becomes `c("v1", "v2", "v3")`
+#'
+#' @param x string of variable names potentially including interaction terms
+extract_covariates <- function(x) {
+    if(is.null(x)) return(x)
+    x_split <- strsplit(x, ":|\\*")
+    x_vec <- unlist(x_split, use.names = FALSE)
+    x_nws <- trimws(x_vec)
+    x_uni <- unique(x_nws)
+    return(x_uni)
 }
