@@ -5,6 +5,10 @@
 #' @param burn_between TODO
 #' @param same_cov TODO
 #' @param n_samples TODO
+#' @param covariance TODO
+#' @param threshold TODO
+#' @param REML TODO
+#' @param type TODO
 #' @param verbose TODO
 #' @return TODO
 #' @export

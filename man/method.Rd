@@ -42,6 +42,14 @@ method_condmean(
 \item{n_samples}{TODO}
 
 \item{verbose}{TODO}
+
+\item{covariance}{TODO}
+
+\item{threshold}{TODO}
+
+\item{REML}{TODO}
+
+\item{type}{TODO}
 }
 \value{
 TODO
