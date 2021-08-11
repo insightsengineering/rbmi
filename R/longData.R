@@ -1,7 +1,22 @@
 
-#' Title
+#' R6 Class for Storing / Accessing & Sampling Longitudinal Data
 #'
-#' TODO Description
+#' @description
+#'
+#' A longdata object allows for efficient storage and recall of longitudinal datasets for use in
+#' bootstrap sampling. The object works by de-constructing data into lists based upon subject id
+#' enabling efficient lookup.
+#'
+#' @details
+#'
+#' The object also handles multiple other operations specific to rbmi such as defining whether an
+#' outcome value is MAR / Missing or not as well as tracking which imputation strategy is assigned
+#' to each subject
+#'
+#' It is recognised that this objects functionality is fairly overloaded and is hoped that this can
+#' be split out into more area specific objects / functions in the future. Further additions of functionality
+#' to this object should be avoided.
+#'
 #' @import R6
 #' @export
 longDataConstructor <- R6::R6Class(
@@ -9,53 +24,111 @@ longDataConstructor <- R6::R6Class(
 
     public = list(
 
-        #' @field data TODO
+        #' @field data The original dataset passed to the constructor
         data = NULL,
 
-        #' @field vars TODO
+        #' @field vars The vars object (list of key variables) passed to the constructor
         vars = NULL,
 
-        #' @field visits TODO
+        #' @field visits A character vector containing the distinct visit levels
         visits = NULL,
 
-        #' @field ids TODO
+        #' @field ids A character vector containing the unique ids of each subject in `self$data`
         ids = NULL,
 
-        #' @field strata TODO
+        #' @field strata A numeric vector indicating which strata each corresponding value of `self$ids` belongs to.
+        #' If no stratification variable is defined this will default to 1 for all subjects (i.e. same group).
+        #' This field is only used as part of the `self$sample_ids()` function to enable stratified bootstrap
+        #' sampling
         strata = NULL,
 
-        #' @field values TOTO
+        #' @field values A list indexed by subject storing the original outcome values
         values = list(),
 
-        #' @field impgroup TOTO
+        #' @field impgroup A list indexed by subject storing the a single character indicating which imputation
+        #' group the subject belongs to. This is typically the subjects treatment group but can vary. It is used
+        #' to determine what reference group should be used when imputing the subjects data.
         impgroup = list(),
 
-        #' @field is_mar TODO
+        #' @field is_mar A list indexed by subject storing logical values indicating if the subjects outcome values
+        #' are MAR or not. This list is defaulted to TRUE for all subjects & outcomes and is then
+        #' modified by calls to `self$set_strategies()`.
         is_mar = list(),
 
-        #' @field strategies TODO
+        #' @field strategies A list indexed by subject storing a single character value indicating the imputation
+        #' strategy assigned to a specific subject. This list is defaulted to "MAR" for all subjects and is then
+        #' modified by calls to either `self$set_strategies()` or `self$update_strategies()`.
         strategies = list(),
 
-        #' @field strategy_lock TODO
+        #' @field strategy_lock A list indexed by subject storing a single logical value indicating whether a
+        #' patients imputation strategy is locked or not. If a strategy is locked it means that it can't change
+        #' from MAR to non-MAR or non-MAR to MAR. Strategies are locked if the patient has non-missing after
+        #' their ICE. This list is populated by a call to `self$set_strategies()`.
         strategy_lock = list(),
 
-        #' @field indexes TODO
+        #' @field indexes A list indexed by subject storing a numeric vector of indexes which specify which rows in the
+        #' original dataset below to this subject i.e. to recover the full data for subject "pt3" you can use
+        #' `self$data[self$indexes[["pt3"]],]`. This may seem redundant over filtering the data directly
+        #' however it enables efficient bootstrap sampling of the data i.e.
+        #' ```
+        #' indexes <- unlist(self$indexes[c("pt3", "pt3")])
+        #' self$data[indexes,]
+        #' ```
+        #' This list is populated during the object initialisation.
         indexes = list(),
 
-        #' @field is_missing TODO
+        #' @field is_missing A list indexed by subject storing a logical vector indicating whether the corresponding
+        #' outcome of a subject is missing. This list is populated during the object initialisation.
         is_missing = list(),
 
-        #' @field is_post_ice TODO
+        #' @field is_post_ice A list indexed by subject storing a logical vector indicating whether the corresponding
+        #' outcome of a subject is post the date of their ICE. If no ICE data has been provided this defaults to False
+        #' for all observations. This list is populated by a call to `self$set_strategies()`.
         is_post_ice = list(),
 
 
         #' @description
-        #' TODO
-        #' @param obj TODO
-        #' @param nmar.rm TODO
-        #' @param na.rm TODO
-        #' @return TODO
-        get_data = function(obj, nmar.rm = FALSE, na.rm = FALSE){
+        #'
+        #' Returns a dataframe based upon required subject IDs. Replaces missing values if new values are provided.
+        #'
+        #' @param obj Either NULL, a character vector of subjects IDs or a list of lists
+        #' with elements "id" and "values". See details.
+        #'
+        #' @param nmar.rm logical value. If TRUE will remove observations that are not regarded as MAR (as
+        #' determined from `self$is_mar`)
+        #'
+        #' @param na.rm logical value. If TRUE will remove outcome values that are missing (as
+        #' determined from `self$is_missing`)
+        #'
+        #' @details
+        #'
+        #' If `obj` is NULL then the full original dataset is returned. If `obj` is a character vector then a new
+        #' dataset consisting of just those subjects is returned; if the character vector contains duplicate entries
+        #' then that subject will be returned multiple times. If `obj` is a list of lists with elements `id` and `values`
+        #' then a dataset of those subjects will be returned but with missing values filled in by the values in `values`.
+        #' i.e.
+        #' ```
+        #' obj <- list(
+        #'   list( id = "pt1", values = c(1,2,3)),
+        #'   list( id = "pt1", values = c(4,5,6)),
+        #'   list( id = "pt3", values = c(7,8))
+        #' )
+        #' ld$get_data(obj)
+        #' ```
+        #' Will return a dataframe consisting of all observations for pt1 twice and all of the observations for "pt3" once.
+        #' The first set of observations for "pt1" will have missing values filled in with `c(1,2,3)` and the second set will
+        #' be filled in by `c(4,5,6)`. The length of the values must be equal to `sum(self$is_missing[[id]])`.
+        #'
+        #' If `obj` is not NULL then all subject IDs will be scrambled in order to ensure that they are unique
+        #' i.e. If the "pt2" is requested twice then this process guarantees that each set of observations
+        #' be have a unique subject ID number.
+        #'
+        #' @return
+        #'
+        #' A dataframe
+        get_data = function(obj = NULL, nmar.rm = FALSE, na.rm = FALSE){
+
+            if(is.null(obj)) return(self$data)
 
             if( ! any(c("list", "character", "factor") %in% class(obj))){
                 stop("Object must be a list, character or factor")

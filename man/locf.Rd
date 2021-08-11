@@ -12,3 +12,8 @@ locf(x)
 \description{
 Returns a vector after applied last observation carried forward imputation
 }
+\examples{
+\dontrun{
+locf(c(NA, 1,2,3,NA,4)) # Returns c(NA, 1, 2, 3, 3, 4)
+}
+}

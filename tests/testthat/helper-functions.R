@@ -33,7 +33,7 @@ trunctate <- function(x, n) {
 }
 
 
-get_sim_data <- function(n, sigma){
+get_sim_data <- function(n, sigma, trt = 4){
     nv <- ncol(sigma)
     covars <- tibble(
         id = 1:n,
@@ -50,7 +50,7 @@ get_sim_data <- function(n, sigma){
         mutate(visit = factor(visit)) %>%
         arrange(id, visit) %>%
         left_join(covars, by = "id") %>%
-        mutate(outcome = outcome + 5 + 3 * age + 3 * f2n(sex) + 4 * f2n(group)) %>%
+        mutate(outcome = outcome + 5 + 3 * age + 3 * f2n(sex) + trt * f2n(group)) %>%
         mutate(id = as.character(id))
 
     return(dat)
