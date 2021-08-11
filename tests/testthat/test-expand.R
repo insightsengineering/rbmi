@@ -1,4 +1,8 @@
-
+suppressPackageStartupMessages({
+    library(dplyr)
+    library(testthat)
+    library(tibble)
+})
 
 test_that("locf", {
 

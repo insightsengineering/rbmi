@@ -1,3 +1,9 @@
+suppressPackageStartupMessages({
+    library(dplyr)
+    library(testthat)
+    library(tibble)
+})
+
 test_that("transformation from long to wide format works", {
     vec_long = c(c(NA, 1, 2), c(1, NA, 2), c(3, NA, 4))
     vec_wide_true = rbind(c(NA, 1, 2), c(1, NA, 2), c(3, NA, 4))
