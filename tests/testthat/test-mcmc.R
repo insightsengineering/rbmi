@@ -207,7 +207,8 @@ test_that("Posterior mean of mcmc equals (restricted) ML estimates", {
 
 test_that("Warnings management works properly", {
 
-    expect_warning(
+    expect_warning( {
+        set.seed(101)
         fit <- run_mcmc(
             designmat = designmat,
             outcome = dat$outcome,
@@ -223,5 +224,6 @@ test_that("Warnings management works properly", {
             same_cov = TRUE,
             verbose = FALSE
         )
+    }
     )
 })
