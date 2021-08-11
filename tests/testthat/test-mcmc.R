@@ -165,7 +165,7 @@ test_that("Posterior mean of mcmc equals (restricted) ML estimates", {
         outcome = dat$outcome,
         group = dat$group,
         sigma_reml = sigma_reml,
-        n_imputations = 10,
+        n_imputations = 1000,
         burn_in = 200,
         burn_between = 1,
         initial_values = list(
@@ -185,10 +185,10 @@ test_that("Posterior mean of mcmc equals (restricted) ML estimates", {
 
     expect_true(is.list(fit))
     expect_true(is.list(fit$samples))
-    expect_length(fit$samples$beta, 100)
+    expect_length(fit$samples$beta, 1000)
 
     expect_true(all(sapply(fit$samples$sigma, is.list)))
-    expect_length(fit$samples$sigma, 100)
+    expect_length(fit$samples$sigma, 1000)
     expect_true(all(sapply(fit$samples$sigma, function(x) length(x) == 2)))
 
     expect_true(all(CI_mean_low < reml_est & CI_mean_high > reml_est))

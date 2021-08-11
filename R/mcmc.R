@@ -275,35 +275,60 @@ fit_mcmc <- function(
     # set verbose (if verbose = TRUE than refresh is set to default value)
     refresh <- ifelse(verbose, (burn_in + burn_between*n_imputations)/10, 0)
 
+    ignorable_warnings <- c(
+        "Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+        Running the chains for more iterations may help. See
+        http://mc-stan.org/misc/warnings.html#bulk-ess",
+        "Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+http://mc-stan.org/misc/warnings.html#tail-ess"
+    )
+
     if(same_cov) {
 
-        stan_fit <- sampling(
-            object = stanmodels$MMRM_same_cov,
-            data = data,
-            pars = c("beta", "Sigma"),
-            chains = 1,
-            warmup = burn_in,
-            thin = burn_between,
-            iter = burn_in + burn_between*n_imputations,
-            init = initial_values,
-            refresh = refresh)
+        stan_fit <- record_warnings({
+            sampling(
+                object = stanmodels$MMRM_same_cov,
+                data = data,
+                pars = c("beta", "Sigma"),
+                chains = 1,
+                warmup = burn_in,
+                thin = burn_between,
+                iter = burn_in + burn_between*n_imputations,
+                init = initial_values,
+                refresh = refresh)
+        })
+
+        # handle warning: display only warnings if
+        # 1) the warning is not in ignorable_warnings
+        warnings <- stan_fit$warnings
+        warnings_not_allowed <- warnings[!warnings %in% ignorable_warnings]
+        for (i in warnings_not_allowed) warning(warnings_not_allowed)
 
     } else {
 
-        stan_fit <- sampling(
-            object = stanmodels$MMRM_diff_cov,
-            data = data,
-            pars = c("beta", "Sigma"),
-            chains = 1,
-            warmup = burn_in,
-            thin = burn_between,
-            iter = burn_in + burn_between*n_imputations,
-            init = initial_values,
-            refresh = refresh)
+        stan_fit <- record_warnings({
+            sampling(
+                object = stanmodels$MMRM_diff_cov,
+                data = data,
+                pars = c("beta", "Sigma"),
+                chains = 1,
+                warmup = burn_in,
+                thin = burn_between,
+                iter = burn_in + burn_between*n_imputations,
+                init = initial_values,
+                refresh = refresh)
+        })
+
+        # handle warning: display only warnings if
+        # 1) the warning is not in ignorable_warnings
+        warnings <- stan_fit$warnings
+        warnings_not_allowed <- warnings[!warnings %in% ignorable_warnings]
+        for (i in warnings_not_allowed) warning(warnings_not_allowed)
 
     }
 
-    return(stan_fit)
+    return(stan_fit$results)
 
 }
 
