@@ -33,6 +33,8 @@ If no stratification variable is defined this will default to 1 for all subjects
 This field is only used as part of the \code{self$sample_ids()} function to enable stratified bootstrap
 sampling}
 
+\item{\code{visit_ice}}{A list indexed by subject storing the visit which the patient had their ICE on}
+
 \item{\code{values}}{A list indexed by subject storing the original outcome values}
 
 \item{\code{group}}{A list indexed by subject storing the a single character indicating which imputation

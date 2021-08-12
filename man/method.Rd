@@ -7,7 +7,13 @@
 \alias{method_condmean}
 \title{Title}
 \usage{
-method_bayes(burn_in = 200, burn_between = 50, same_cov = TRUE, n_samples = 20)
+method_bayes(
+  burn_in = 200,
+  burn_between = 50,
+  same_cov = TRUE,
+  n_samples = 20,
+  verbose = TRUE
+)
 
 method_approxbayes(
   covariance = c("us", "toep", "cs", "ar1"),
@@ -34,6 +40,8 @@ method_condmean(
 \item{same_cov}{TODO}
 
 \item{n_samples}{TODO}
+
+\item{verbose}{TODO}
 
 \item{covariance}{TODO}
 

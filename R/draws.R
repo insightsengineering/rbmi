@@ -112,7 +112,8 @@ draws_bayes <- function(data, data_ice, vars, method) {
             beta = mmrm_initial$beta,
             sigma = mmrm_initial$sigma
         ),
-        same_cov = method$same_cov
+        same_cov = method$same_cov,
+        verbose = method$verbose
     )
 
     # set names of covariance matrices

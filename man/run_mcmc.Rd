@@ -13,7 +13,8 @@ run_mcmc(
   burn_in,
   burn_between,
   initial_values,
-  same_cov
+  same_cov,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ run_mcmc(
 \item{initial_values}{TODO}
 
 \item{same_cov}{TODO}
+
+\item{verbose}{TODO}
 }
 \description{
 Title - TODO
