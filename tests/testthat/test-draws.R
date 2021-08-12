@@ -1,5 +1,8 @@
-library(dplyr)
-library(testthat)
+suppressPackageStartupMessages({
+    library(dplyr)
+    library(testthat)
+    library(tibble)
+})
 
 set.seed(101)
 
@@ -260,7 +263,8 @@ test_that(
             burn_in = 200,
             burn_between = 2,
             same_cov = TRUE,
-            n_samples = 3
+            n_samples = 3,
+            verbose = FALSE
         )
 
         draws_obj <- draws(
@@ -325,17 +329,23 @@ test_that("nmar data is removed as expected",{
     d2 <- draws(dat2, dat_ice, vars, method)
     expect_equal(d1$samples, d2$samples)
 
+
     method <- method_bayes(
         burn_in = 200,
         burn_between = 2,
         same_cov = TRUE,
-        n_samples = 3
+        n_samples = 3,
+        verbose = FALSE
     )
 
-    set.seed(101)
-    d1 <- draws(dat, dat_ice, vars, method)
-    set.seed(101)
-    d2 <- draws(dat2, dat_ice, vars, method)
-    expect_equal(d1$samples, d2$samples)
 
+    set.seed(101)
+    suppressWarnings( { # warnings from stan may arise since only 3 samples are done. Not useful here.
+        d1 <- draws(dat, dat_ice, vars, method)
+    })
+    set.seed(101)
+    suppressWarnings( { # warnings from stan may arise since only 3 samples are done. Not useful here.
+        d2 <- draws(dat2, dat_ice, vars, method)
+        expect_equal(d1$samples, d2$samples)
+    })
 })

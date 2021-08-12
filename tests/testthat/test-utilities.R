@@ -1,10 +1,8 @@
-
-
 suppressPackageStartupMessages({
     library(dplyr)
     library(testthat)
+    library(tibble)
 })
-
 
 
 test_that("as_model_df", {

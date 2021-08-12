@@ -78,6 +78,7 @@ QR_decomp <- function(designmat, N, J) {
 #' @param burn_between TODO
 #' @param initial_values TODO
 #' @param same_cov TODO
+#' @param verbose TODO
 run_mcmc <- function(
     designmat,
     outcome,
@@ -87,7 +88,8 @@ run_mcmc <- function(
     burn_in,
     burn_between,
     initial_values,
-    same_cov
+    same_cov,
+    verbose = TRUE
 ) {
 
     assert_that(
@@ -130,7 +132,8 @@ run_mcmc <- function(
         burn_in,
         burn_between,
         data$initial_values,
-        same_cov
+        same_cov,
+        verbose
     )
 
     check_mcmc(fit, n_imputations)
@@ -159,7 +162,7 @@ listmat_to_array <- function(listmat) {
     res_array <- array(as.numeric(unlist(listmat)), dim = dims)
 
     for(i in 1:dims[1]) {
-    res_array[i,,] <- listmat[[i]]
+        res_array[i,,] <- listmat[[i]]
     }
 
     return(res_array)
@@ -255,6 +258,7 @@ prepare_data_mcmc <- function(
 #' @param burn_between TODO
 #' @param initial_values TODO
 #' @param same_cov TODO
+#' @param verbose TODO
 #' @import Rcpp
 #' @import methods
 #' @useDynLib rbmi, .registration = TRUE
@@ -265,14 +269,23 @@ fit_mcmc <- function(
     burn_in,
     burn_between,
     initial_values,
-    same_cov) {
+    same_cov,
+    verbose = TRUE) {
 
     initial_values <- list(initial_values)
 
+    # set verbose (if verbose = TRUE than refresh is set to default value)
+    refresh <- ifelse(verbose, (burn_in + burn_between*n_imputations)/10, 0)
+
+    ignorable_warnings <- c(
+        "Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.\nRunning the chains for more iterations may help. See\nhttp://mc-stan.org/misc/warnings.html#bulk-ess",
+        "Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.\nRunning the chains for more iterations may help. See\nhttp://mc-stan.org/misc/warnings.html#tail-ess"
+    )
+
     if(same_cov) {
 
-        suppressWarnings({
-            stan_fit <- sampling(
+        stan_fit <- record_warnings({
+            sampling(
                 object = stanmodels$MMRM_same_cov,
                 data = data,
                 pars = c("beta", "Sigma"),
@@ -280,13 +293,20 @@ fit_mcmc <- function(
                 warmup = burn_in,
                 thin = burn_between,
                 iter = burn_in + burn_between*n_imputations,
-                init = initial_values)
+                init = initial_values,
+                refresh = refresh)
         })
+
+        # handle warning: display only warnings if
+        # 1) the warning is not in ignorable_warnings
+        warnings <- stan_fit$warnings
+        warnings_not_allowed <- warnings[!warnings %in% ignorable_warnings]
+        for (i in warnings_not_allowed) warning(warnings_not_allowed)
 
     } else {
 
-        suppressWarnings({
-            stan_fit <- sampling(
+        stan_fit <- record_warnings({
+            sampling(
                 object = stanmodels$MMRM_diff_cov,
                 data = data,
                 pars = c("beta", "Sigma"),
@@ -294,12 +314,19 @@ fit_mcmc <- function(
                 warmup = burn_in,
                 thin = burn_between,
                 iter = burn_in + burn_between*n_imputations,
-                init = initial_values)
+                init = initial_values,
+                refresh = refresh)
         })
+
+        # handle warning: display only warnings if
+        # 1) the warning is not in ignorable_warnings
+        warnings <- stan_fit$warnings
+        warnings_not_allowed <- warnings[!warnings %in% ignorable_warnings]
+        for (i in warnings_not_allowed) warning(warnings_not_allowed)
 
     }
 
-    return(stan_fit)
+    return(stan_fit$results)
 
 }
 

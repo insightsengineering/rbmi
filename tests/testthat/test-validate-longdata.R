@@ -1,6 +1,7 @@
 suppressPackageStartupMessages({
     library(dplyr)
     library(testthat)
+    library(tibble)
 })
 
 n <- 10

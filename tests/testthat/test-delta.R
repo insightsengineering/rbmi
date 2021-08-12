@@ -1,6 +1,8 @@
-
-
-suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages({
+    library(dplyr)
+    library(testthat)
+    library(tibble)
+})
 
 
 test_that("delta_template & delta_lagscale",{

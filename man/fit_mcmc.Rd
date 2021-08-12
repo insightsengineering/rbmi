@@ -4,7 +4,15 @@
 \alias{fit_mcmc}
 \title{Title - TODO}
 \usage{
-fit_mcmc(data, n_imputations, burn_in, burn_between, initial_values, same_cov)
+fit_mcmc(
+  data,
+  n_imputations,
+  burn_in,
+  burn_between,
+  initial_values,
+  same_cov,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{data}{TODO}
@@ -18,6 +26,8 @@ fit_mcmc(data, n_imputations, burn_in, burn_between, initial_values, same_cov)
 \item{initial_values}{TODO}
 
 \item{same_cov}{TODO}
+
+\item{verbose}{TODO}
 }
 \description{
 Title - TODO
