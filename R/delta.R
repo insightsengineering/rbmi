@@ -198,7 +198,21 @@ apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL){
 
     delta_min <- delta[, c(group, "delta")]
 
-    data2 <- merge(data, delta_min, all.x = TRUE, by = group)
+    # We insert a variable in order to recover the original sort order of our dataframe
+    # We use a obfuscated name in order to prevent variable overwriting
+    sort_var <- "sort_variable_awdji394thgmngrq2rqb2"
+    data[[sort_var]] <- seq_len(nrow(data))
+
+    data2 <- merge(
+        data,
+        delta_min,
+        all.x = TRUE,
+        by = group
+    )
+
+    # Restore sort order and remove variable
+    data2 <- data2[order(data2[[sort_var]]), ]
+    data[[sort_var]] <- NULL  # As we rely on the names of data later to reduce data2
 
     data2[is.na(data2[["delta"]]), "delta"] <- 0
     data2[[outcome]] <- data2[[outcome]] + data2[["delta"]]

@@ -108,7 +108,8 @@ test_that("longData - Sampling",{
 
     expect_error(ld$get_data("-1231"))
 
-    x <- ld$get_data( c("1","1","3"))
+    x <- ld$get_data(c("1", "1", "3"))
+    
     y <- bind_rows(
         dat %>% filter(subjid == "1"),
         dat %>% filter(subjid == "1"),
@@ -127,21 +128,26 @@ test_that("longData - Sampling",{
 
     )
     x <- ld$get_data(imputes)
-    pt2_val <- dat %>% filter(subjid == "2") %>% pull(outcome)
-    pt2_val[is.na(pt2_val)] <- c(7,8)
-    y <- bind_rows(
-        dat %>% filter(subjid == "1") %>% mutate(outcome = c(1,2,3)),
-        dat %>% filter(subjid == "4"),
-        dat %>% filter(subjid == "1") %>% mutate(outcome = c(4,5,6)),
-        dat %>% filter(subjid == "2") %>% mutate(outcome = pt2_val)
+    pt2_val <- dat %>%
+        filter(subjid == "2") %>%
+        pull(outcome)
 
+    pt2_val[is.na(pt2_val)] <- c(7, 8)
+
+    y <- bind_rows(
+        dat %>% filter(subjid == "1") %>% mutate(outcome = c(1, 2, 3)),
+        dat %>% filter(subjid == "4"),
+        dat %>% filter(subjid == "1") %>% mutate(outcome = c(4, 5, 6)),
+        dat %>% filter(subjid == "2") %>% mutate(outcome = pt2_val)
     )
-    expect_equal( select(x, -subjid) , select(y,-subjid))
+
+    expect_equal(select(x, -subjid), select(y, -subjid))
     expect_true(all(x$subjid != y$subjid))
 
 
 
     x <- ld$get_data(c("1","1","1","2"), na.rm = TRUE)
+    
     pt2_val <- dat %>% filter(subjid == "2") %>% pull(outcome)
     y <- bind_rows(
         dat %>% filter(subjid == "1"),
@@ -316,6 +322,36 @@ test_that("as_strata", {
 })
 
 
+
+test_that("idmap", {
+    # The idmap option provides a mapping vectoring linking new_ids to old_ids
+    dobj <- get_ld()
+    ld <- dobj$ld
+    dat <- dobj$dat
+
+    x <- ld$get_data(c("1", "1", "3"), idmap = TRUE)
+    expect_equal(
+        attr(x, "idmap"),
+        c("new_pt_1" = "1", "new_pt_2" = "1", "new_pt_3" = "3")
+    )
+
+    x <- ld$get_data(c("1", "1", "3"), idmap = TRUE, na.rm = TRUE)
+    expect_equal(
+        attr(x, "idmap"),
+        c("new_pt_1" = "1", "new_pt_2" = "1", "new_pt_3" = "3")
+    )
+
+    imps <- list(
+        list(id = "1", values = c(1, 2, 3)),
+        list(id = "3", values = c(4)),
+        list(id = "3", values = 5)
+    )
+    x <- ld$get_data(imps, idmap = TRUE)
+    expect_equal(
+        attr(x, "idmap"),
+        c("new_pt_1" = "1", "new_pt_2" = "3", "new_pt_3" = "3")
+    )
+})
 
 
 
