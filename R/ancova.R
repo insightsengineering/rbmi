@@ -1,32 +1,56 @@
 
-#' Ancova
+#' Analysis of Covariance
 #'
-#' @description
+#' Performs an analysis of covariance between two groups returning the estimated "treatment effect"
+#' as well as the least squared means of each group.
+#'
+#' @param data A dataframe containing the variables to be used in the model
+#' @param vars A named list containing the names of the variables for `group`, `visit`, `outcome` and any `covariates`. 
+#' See details.
+#' @param visits an optional character vector specifying which visits to perform ancova at. If `NULL` all all available 
+#' visits (as determined by `unique(data[[vars$visit]])`) will be looped over.
+#'
+#' @details
 #' TODO
 #'
-#' @param data TODO
-#' @param vars TODO
-#' @param visit_level TODO
-#'
-#' @importFrom stats lm coef vcov df.residual
-#'
 #' @export
-ancova <- function(data, vars, visit_level = NULL) {
+ancova <- function(data, vars, visits = NULL) {
     outcome <- vars[["outcome"]]
     group <- vars[["group"]]
     covariates <- vars[["covariates"]]
     visit <- vars[["visit"]]
 
+    expected_vars <- c(extract_covariates(covariates), outcome, group)
+
+
+    assert_that(
+        ! any(visit %in% expected_vars),
+        msg = "The `vars$visit` variable cannot be a covariate in an ANCOVA model. Please adjust `vars$covariates` accordingly"
+    )
+
+    for (var in c(visit, expected_vars)) {
+        assert_that(
+            var %in% names(data),
+            msg = sprintf("Variable `%s` doesn't exist in data", var)
+        )
+    }
+
     assert_that(
         is.character(outcome),
         length(outcome) == 1,
-        msg = "`outcome` must be a length 1 character"
+        msg = "`vars$outcome` must be a length 1 character"
     )
 
     assert_that(
         is.character(group),
         length(group) == 1,
-        msg = "`outcome` must be a length 1 character"
+        msg = "`vars$group` must be a length 1 character"
+    )
+
+    assert_that(
+        is.character(visit),
+        length(visit) == 1,
+        msg = "`vars$visit` must be a length 1 character"
     )
 
     assert_that(
@@ -34,48 +58,48 @@ ancova <- function(data, vars, visit_level = NULL) {
         msg = "`covariates` must be a character vector"
     )
 
-    expected_vars <- c(extract_covariates(covariates), outcome, group)
+    assert_that(
+        is.null(visits) | is.character(visits),
+        msg = "`visits` must be NULL or a character vector"
+    )
 
-    if(!is_absent(visit)) {
+    if (is.null(visits)) {
+        visits <- unique(data[[visit]])
+    }
+
+    for (i in visits) {
         assert_that(
-            ! visit %in% expected_vars,
-            msg = "The `vars$visit` variable cannot be a covariate in an ANCOVA model. Please adjust `vars$covariates` accordingly"
+            i %in% data[[visit]],
+            msg = sprintf("Visit `%s` does not appear in `data[[vars$visit]]`", i)
         )
     }
 
-    if (!is_absent(visit_level)) {
+    res <- lapply(
+        visits,
+        function(x) {
+            data2 <- data[data[[visit]] == x, ]
+            res <- ancova_single(data2, outcome, group, covariates)
+            names(res) <- paste0(names(res), "_", x)
+            return(res)
+        }
+    )
+    return(unlist(res, recursive = FALSE))
+}
 
-        assert_that(
-            is.character(visit),
-            length(visit) == 1,
-            nchar(visit) >= 1,
-            msg = "`vars$visit` must be a single non-empty string"
-        )
 
-        assert_that(
-            is.character(visit_level),
-            length(visit_level) == 1,
-            nchar(visit_level) >= 1,
-            msg = "`visit_level` must be a single non-empty string"
-        )
 
-       expected_vars <- c(expected_vars, visit)
-    }
-
-    for (var in expected_vars) {
-        assert_that(
-            var %in% names(data),
-            msg = sprintf("Variable `%s` doesn't exist in data", var)
-        )
-    }
-
-    if (!is_absent(visit_level)) {
-        assert_that(
-            visit_level %in% data[[visit]],
-            msg = sprintf("`%s` is not present within `data[[vars$visit]]`", visit_level)
-        )
-        data <- data[data[[visit]] == visit_level, ]
-    }
+#' Perform
+#'
+#' @description
+#' TODO
+#'
+#' @param data TODO
+#' @param outcome TODO
+#' @param group TODO
+#' @param covariates TODO
+#'
+#' @importFrom stats lm coef vcov df.residual
+ancova_single <- function(data, outcome, group, covariates) {
 
     assert_that(
         is.factor(data[[group]]),
@@ -106,8 +130,8 @@ ancova <- function(data, vars, visit_level = NULL) {
             se = sqrt(vcov(mod)[group, group]),
             df = df.residual(mod)
         ),
-        lsm_0 = lsm0,
-        lsm_1 = lsm1
+        lsm_ref = lsm0,
+        lsm_alt = lsm1
     )
     return(x)
 }
