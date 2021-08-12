@@ -9,14 +9,14 @@ suppressPackageStartupMessages({
 
 
 
-expect_pool_est <- function(pool, expected, margin = 0.2){
-    expect_gt(pool$pars$trt$est, expected - margin)
-    expect_lt(pool$pars$trt$est, expected + margin)
+expect_pool_est <- function(pool, expected, margin = 0.3){
+    expect_gt(pool$pars$trt_visit_3$est, expected - margin)
+    expect_lt(pool$pars$trt_visit_3$est, expected + margin)
 
-    lsm_trt <- (pool$pars$lsm_1$est - pool$pars$lsm_0$est)
+    lsm_trt <- (pool$pars$lsm_alt_visit_3$est - pool$pars$lsm_ref_visit_3$est)
 
-    expect_gt(lsm_trt - pool$pars$trt$est, -0.005)
-    expect_lt(lsm_trt - pool$pars$trt$est,  0.005)
+    expect_gt(lsm_trt - pool$pars$trt_visit_3$est, -0.005)
+    expect_lt(lsm_trt - pool$pars$trt_visit_3$est,  0.005)
 }
 
 
@@ -25,7 +25,7 @@ expect_pool_est <- function(pool, expected, margin = 0.2){
 
 
 test_that("Basic Usage - Approx Bayes", {
-    sigma <- as_covmat(c(3,4,5), c(0.8, 0.6, 0.4))
+    sigma <- as_covmat(c(3,4,1), c(0.8, 0.6, 0.4))
 
     set.seed(21)
 
@@ -73,7 +73,7 @@ test_that("Basic Usage - Approx Bayes", {
         imputeobj,
         fun = rbmi::ancova,
         vars = vars2,
-        visit_level = "visit_3"
+        visits = "visit_3"
     )
 
     poolobj <- pool(
@@ -98,11 +98,11 @@ test_that("Basic Usage - Approx Bayes", {
 
 test_that("Basic Usage - Bayesian", {
 
-    sigma <- as_covmat(c(3,4,5), c(0.8, 0.6, 0.4))
+    sigma <- as_covmat(c(3,2,0.5), c(0.8, 0.6, 0.4))
 
-    set.seed(21)
+    set.seed(1031)
 
-    dat <- get_sim_data(400, sigma, trt = 8) %>%
+    dat <- get_sim_data(500, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
         mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
         select(-is_miss)
@@ -156,14 +156,14 @@ test_that("Basic Usage - Bayesian", {
         imputeobj,
         fun = rbmi::ancova,
         vars = vars2,
-        visit_level = "visit_3"
+        visits = "visit_3"
     )
 
     anaobj_upd <- analyse(
         imputeobj_upd,
         fun = rbmi::ancova,
         vars = vars2,
-        visit_level = "visit_3"
+        visits = "visit_3"
     )
 
     poolobj_upd <- pool(anaobj_upd)
@@ -188,7 +188,7 @@ test_that("Basic Usage - Bayesian", {
 
 test_that("Basic Usage - Condmean", {
 
-    sigma <- as_covmat(c(3,4,5), c(0.8, 0.6, 0.4))
+    sigma <- as_covmat(c(3,4,1), c(0.8, 0.6, 0.4))
 
     set.seed(21)
 
@@ -246,14 +246,14 @@ test_that("Basic Usage - Condmean", {
         imputeobj,
         fun = rbmi::ancova,
         vars = vars2,
-        visit_level = "visit_3"
+        visits = "visit_3"
     )
 
     anaobj_upd <- analyse(
         imputeobj_upd,
         fun = rbmi::ancova,
         vars = vars2,
-        visit_level = "visit_3"
+        visits = "visit_3"
     )
 
     poolobj_upd <- pool(anaobj_upd)
@@ -278,7 +278,7 @@ test_that("Basic Usage - Condmean", {
 
 
 test_that("Custom Strategies and Custom analysis functions",{
-    sigma <- as_covmat(c(3,4,5), c(0.8, 0.6, 0.4))
+    sigma <- as_covmat(c(3,4,1), c(0.8, 0.6, 0.4))
 
     set.seed(21)
 
