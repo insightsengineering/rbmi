@@ -102,7 +102,6 @@ test_draws <- function(draws_obj, method) {
             # check that length of objects is as expected
             expect_length(draws_obj, 5)
             expect_length(draws_obj$samples, method$n_samples)
-            expect_length(draws_obj$optimizers, method$n_samples)
 
             # check that samples object is as expected
             test_samples_condmean(draws_obj$samples, method)
@@ -111,7 +110,6 @@ test_draws <- function(draws_obj, method) {
             # check that length of objects is as expected
             expect_length(draws_obj, 5)
             expect_length(draws_obj$samples, n+1)
-            expect_length(draws_obj$optimizers, n+1)
 
             # check that samples object is as expected
 
@@ -131,7 +129,7 @@ test_draws <- function(draws_obj, method) {
         }
     } else if(class(method) %in% c("bayes", "approxbayes") ) {
         # check that length of objects is as expected
-        ifelse(class(method) == "bayes", expect_length(draws_obj, 4), expect_length(draws_obj, 5))
+        expect_length(draws_obj, 5)
         expect_length(draws_obj$samples, method$n_samples)
 
         # check that samples object is as expected

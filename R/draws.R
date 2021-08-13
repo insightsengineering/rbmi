@@ -78,7 +78,8 @@ draws_bayes <- function(data, data_ice, vars, method) {
     data2 <- remove_nmar_as_NA(longdata)
 
     # compute design matrix
-    model_df <- as_model_df(data2, as_simple_formula(vars))
+    frm <- as_simple_formula(vars)
+    model_df <- as_model_df(data2, frm)
 
     # scale input data
     scaler <- scalerConstructor$new(model_df)
@@ -139,7 +140,8 @@ draws_bayes <- function(data, data_ice, vars, method) {
         method = method,
         samples = samples,
         data = longdata,
-        fit = fit$fit
+        fit = fit$fit,
+        formula = frm
     )
 
     return(result)
@@ -157,7 +159,8 @@ draws_bootstrap <- function(data, data_ice, vars, method) {
     longdata$set_strategies(data_ice)
 
     data2 <- longdata$get_data(longdata$ids, nmar.rm = TRUE, na.rm = TRUE)
-    model_df <- as_model_df(data2, as_simple_formula(vars))
+    frm <- as_simple_formula(vars)
+    model_df <- as_model_df(data2, frm)
 
     scaler <- scalerConstructor$new(model_df)
     model_df_scaled <- scaler$scale(model_df)
@@ -213,17 +216,12 @@ draws_bootstrap <- function(data, data_ice, vars, method) {
         samples$samples
     )
 
-    optimizers <- lapply(
-        samples,
-        function(x) x[["optimizer"]]
-    )
-
     result <- list(
         method = method,
         data = longdata,
         samples = samples,
-        optimizers = optimizers,
-        n_failures = n_failures
+        n_failures = n_failures,
+        formula = frm
     )
 
     return(result)
