@@ -113,14 +113,14 @@ test_mmrm_numeric <- function(data, vars, formula_expr, same_cov) {
     )
     names(fit$beta) <- NULL
 
-    if(same_cov) {
-        formula_ext <- as.formula(
-            paste0(formula_expr, " + us(0 + visit | subjid)")
-        )
-    } else {
-        formula_ext <- as.formula(
-            paste0(formula_expr, " + us(0 + A:visit | subjid) + us(0 + B:visit | subjid)")
-        )
+    covariance <- ifelse(
+        same_cov,
+        " + us(0 + visit | subjid)",
+        " + us(0 + A:visit | subjid) + us(0 + B:visit | subjid)"
+    )
+    formula_ext <- as.formula(  paste0(formula_expr, covariance ) )
+
+    if(!same_cov) {
         names_data <- colnames(data)
         data <- cbind(data, model.matrix(~ 0 + data$group))
         colnames(data) <- c(names_data, c("A", "B"))
