@@ -277,7 +277,7 @@ fit_mcmc <- function(
         "Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.\nRunning the chains for more iterations may help. See\nhttp://mc-stan.org/misc/warnings.html#tail-ess"
     )
 
-    stan_model <- ifelse(same_cov, stanmodels$MMRM_same_cov, stanmodels$MMRM_diff_cov)
+    stan_model <- if(same_cov) stanmodels$MMRM_same_cov else stanmodels$MMRM_diff_cov
 
     stan_fit <- record_warnings({
         sampling(
