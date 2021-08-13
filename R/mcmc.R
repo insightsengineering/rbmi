@@ -184,35 +184,39 @@ prepare_data_mcmc <- function(
     sigma_reml,
     initial_values) {
 
+    # transform outcome to NxJ matrix
     J <- nrow(sigma_reml[[1]])
-
     outcome <- long2wide(vec_long = outcome,
                          J = J)
     N <- nrow(outcome)
 
+    # get missingness patterns
     obs_miss_patterns <- get_obs_missingness_patterns(outcome)
+
+    # Stan does not handle NAs
     outcome[is.na(outcome)] <- 1000
 
+    # QR decomposition
     QR_mat <- QR_decomp(designmat, N, J)
 
+    # adapt initial values to QR transformation
     names(initial_values) <- c("beta", "Sigma")
     initial_values$theta <- as.vector(QR_mat$R %*% initial_values$beta)
     initial_values$beta <- NULL
 
+    # set values as per "data" block in Stan files
+    data <- list(J = J,
+                 N = N,
+                 P = ncol(designmat),
+                 n_missingness_patterns = nrow(obs_miss_patterns$missingness_patterns),
+                 M = obs_miss_patterns$M,
+                 Q = QR_mat$Q,
+                 R = QR_mat$R,
+                 y = outcome,
+                 y_observed = obs_miss_patterns$missingness_patterns)
+
     if(same_cov) {
-
-        initial_values$Sigma <- initial_values$Sigma[[1]]
-
-        data <- list(J = J,
-                     N = N,
-                     P = ncol(designmat),
-                     n_missingness_patterns = nrow(obs_miss_patterns$missingness_patterns),
-                     M = obs_miss_patterns$M,
-                     Q = QR_mat$Q,
-                     R = QR_mat$R,
-                     y = outcome,
-                     y_observed = obs_miss_patterns$missingness_patterns,
-                     Sigma_reml = sigma_reml[[1]])
+        data$Sigma_reml <- sigma_reml[[1]]
     } else {
 
         assert_that(
@@ -227,18 +231,9 @@ prepare_data_mcmc <- function(
         sigma_reml <- listmat_to_array(sigma_reml)
         initial_values$Sigma <- listmat_to_array(initial_values$Sigma)
 
-        data <- list(J = J,
-                     N = N,
-                     P = ncol(designmat),
-                     n_missingness_patterns = nrow(obs_miss_patterns$missingness_patterns),
-                     M = obs_miss_patterns$M,
-                     Q = QR_mat$Q,
-                     R = QR_mat$R,
-                     y = outcome,
-                     y_observed = obs_miss_patterns$missingness_patterns,
-                     Sigma_reml = sigma_reml,
-                     G = G,
-                     which_arm = which_arm)
+        data$Sigma_reml <- sigma_reml
+        data$G <- G
+        data$which_arm <- which_arm
     }
 
     ret_obj <- list(
@@ -274,7 +269,7 @@ fit_mcmc <- function(
 
     initial_values <- list(initial_values)
 
-    # set verbose (if verbose = TRUE than refresh is set to default value)
+    # set verbose (if verbose = TRUE then refresh is set to default value)
     refresh <- ifelse(verbose, (burn_in + burn_between*n_imputations)/10, 0)
 
     ignorable_warnings <- c(
@@ -282,49 +277,26 @@ fit_mcmc <- function(
         "Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.\nRunning the chains for more iterations may help. See\nhttp://mc-stan.org/misc/warnings.html#tail-ess"
     )
 
-    if(same_cov) {
+    stan_model <- ifelse(same_cov, stanmodels$MMRM_same_cov, stanmodels$MMRM_diff_cov)
 
-        stan_fit <- record_warnings({
-            sampling(
-                object = stanmodels$MMRM_same_cov,
-                data = data,
-                pars = c("beta", "Sigma"),
-                chains = 1,
-                warmup = burn_in,
-                thin = burn_between,
-                iter = burn_in + burn_between*n_imputations,
-                init = initial_values,
-                refresh = refresh)
-        })
+    stan_fit <- record_warnings({
+        sampling(
+            object = stan_model,
+            data = data,
+            pars = c("beta", "Sigma"),
+            chains = 1,
+            warmup = burn_in,
+            thin = burn_between,
+            iter = burn_in + burn_between*n_imputations,
+            init = initial_values,
+            refresh = refresh)
+    })
 
-        # handle warning: display only warnings if
-        # 1) the warning is not in ignorable_warnings
-        warnings <- stan_fit$warnings
-        warnings_not_allowed <- warnings[!warnings %in% ignorable_warnings]
-        for (i in warnings_not_allowed) warning(warnings_not_allowed)
-
-    } else {
-
-        stan_fit <- record_warnings({
-            sampling(
-                object = stanmodels$MMRM_diff_cov,
-                data = data,
-                pars = c("beta", "Sigma"),
-                chains = 1,
-                warmup = burn_in,
-                thin = burn_between,
-                iter = burn_in + burn_between*n_imputations,
-                init = initial_values,
-                refresh = refresh)
-        })
-
-        # handle warning: display only warnings if
-        # 1) the warning is not in ignorable_warnings
-        warnings <- stan_fit$warnings
-        warnings_not_allowed <- warnings[!warnings %in% ignorable_warnings]
-        for (i in warnings_not_allowed) warning(warnings_not_allowed)
-
-    }
+    # handle warning: display only warnings if
+    # 1) the warning is not in ignorable_warnings
+    warnings <- stan_fit$warnings
+    warnings_not_allowed <- warnings[!warnings %in% ignorable_warnings]
+    for (i in warnings_not_allowed) warning(warnings_not_allowed)
 
     return(stan_fit$results)
 
@@ -393,7 +365,7 @@ check_ESS <- function(stan_fit, n_draws, threshold = 0.4) {
     n_low_ESS <- sum(ESS/n_draws < threshold)
 
     if(any(ESS/n_draws < threshold)) {
-        warning(paste0("The Effective Sample Size is below ",threshold*100,"% for ", n_low_ESS ," parameters. Please consider increasing burn-in and/or burn-between"),
+        warning(paste0("The Effective Sample Size is below ",threshold*100,"% for ", n_low_ESS ," parameters. Please consider increasing burn-in and/or burn-between, or the number of samples"),
                 call. = FALSE)
     }
 
