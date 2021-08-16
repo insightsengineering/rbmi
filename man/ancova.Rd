@@ -2,17 +2,23 @@
 % Please edit documentation in R/ancova.R
 \name{ancova}
 \alias{ancova}
-\title{Ancova}
+\title{Analysis of Covariance}
 \usage{
-ancova(data, vars, visit_level = NULL)
+ancova(data, vars, visits = NULL)
 }
 \arguments{
-\item{data}{TODO}
+\item{data}{A dataframe containing the variables to be used in the model}
 
-\item{vars}{TODO}
+\item{vars}{A named list containing the names of the variables for \code{group}, \code{visit}, \code{outcome} and any \code{covariates}.
+See details.}
 
-\item{visit_level}{TODO}
+\item{visits}{an optional character vector specifying which visits to perform ancova at. If \code{NULL} all all available
+visits (as determined by \code{unique(data[[vars$visit]])}) will be looped over.}
 }
 \description{
+Performs an analysis of covariance between two groups returning the estimated "treatment effect"
+as well as the least squared means of each group.
+}
+\details{
 TODO
 }

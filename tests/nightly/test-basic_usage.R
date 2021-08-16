@@ -17,25 +17,27 @@ expect_contains <- function(x, y){
     expect_within(y, x)
 }
 
+
 expect_pool_est <- function(pool, expected, margin = 0.2){
     expect_within(
         pool$pars$trt$est,
         c(expected - margin, expected + margin)
     )
 
-    lsm_trt <- (pool$pars$lsm_1$est - pool$pars$lsm_0$est)
+    lsm_trt <- (pool$pars$lsm_alt_visit_3$est - pool$pars$lsm_ref_visit_3$est)
 
     expect_within(
         lsm_trt - pool$pars$trt$est,
         c(-0.005, 0.005)
     )
+
 }
 
 
 
 
 test_that("Basic Usage - Approx Bayes", {
-    sigma <- as_covmat(c(3,4,5), c(0.8, 0.6, 0.4))
+    sigma <- as_covmat(c(3,4,1), c(0.8, 0.6, 0.4))
 
     set.seed(2131)
 
@@ -83,7 +85,7 @@ test_that("Basic Usage - Approx Bayes", {
         imputeobj,
         fun = rbmi::ancova,
         vars = vars2,
-        visit_level = "visit_3"
+        visits = "visit_3"
     )
 
     poolobj <- pool(
@@ -108,7 +110,7 @@ test_that("Basic Usage - Approx Bayes", {
 
 test_that("Basic Usage - Bayesian", {
 
-    sigma <- as_covmat(c(3,2,1), c(0.8, 0.3, 0.1))
+    sigma <- as_covmat(c(3,2,0.7), c(0.8, 0.3, 0.1))
 
     set.seed(2111)
 
@@ -166,14 +168,14 @@ test_that("Basic Usage - Bayesian", {
         imputeobj,
         fun = rbmi::ancova,
         vars = vars2,
-        visit_level = "visit_3"
+        visits = "visit_3"
     )
 
     anaobj_upd <- analyse(
         imputeobj_upd,
         fun = rbmi::ancova,
         vars = vars2,
-        visit_level = "visit_3"
+        visits = "visit_3"
     )
 
     poolobj_upd <- pool(anaobj_upd)
@@ -256,14 +258,14 @@ test_that("Basic Usage - Condmean", {
         imputeobj,
         fun = rbmi::ancova,
         vars = vars2,
-        visit_level = "visit_3"
+        visits = "visit_3"
     )
 
     anaobj_upd <- analyse(
         imputeobj_upd,
         fun = rbmi::ancova,
         vars = vars2,
-        visit_level = "visit_3"
+        visits = "visit_3"
     )
 
     poolobj_upd <- pool(anaobj_upd)
@@ -288,8 +290,9 @@ test_that("Basic Usage - Condmean", {
 
 
 test_that("Custom Strategies and Custom analysis functions",{
-    sigma <- as_covmat(c(3,2,0.5), c(0.5, 0.3, 0.2))
 
+    sigma <- as_covmat(c(3,2,0.5), c(0.5, 0.3, 0.2))
+  
     set.seed(52131)
 
     dat <- get_sim_data(800, sigma, trt = 8) %>%
