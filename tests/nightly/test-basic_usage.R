@@ -8,18 +8,30 @@ suppressPackageStartupMessages({
 
 
 
+expect_within <- function(x, bounds) {
+    expect_gt(x, bounds[1])
+    expect_lt(x, bounds[2])
+}
 
-expect_pool_est <- function(pool, expected, margin = 0.3){
-    expect_gt(pool$pars$trt_visit_3$est, expected - margin)
-    expect_lt(pool$pars$trt_visit_3$est, expected + margin)
-
-    lsm_trt <- (pool$pars$lsm_alt_visit_3$est - pool$pars$lsm_ref_visit_3$est)
-
-    expect_gt(lsm_trt - pool$pars$trt_visit_3$est, -0.005)
-    expect_lt(lsm_trt - pool$pars$trt_visit_3$est,  0.005)
+expect_contains <- function(x, y){
+    expect_within(y, x)
 }
 
 
+expect_pool_est <- function(pool, expected, margin = 0.2){
+    expect_within(
+        pool$pars$trt$est,
+        c(expected - margin, expected + margin)
+    )
+
+    lsm_trt <- (pool$pars$lsm_alt_visit_3$est - pool$pars$lsm_ref_visit_3$est)
+
+    expect_within(
+        lsm_trt - pool$pars$trt$est,
+        c(-0.005, 0.005)
+    )
+
+}
 
 
 
@@ -27,9 +39,9 @@ expect_pool_est <- function(pool, expected, margin = 0.3){
 test_that("Basic Usage - Approx Bayes", {
     sigma <- as_covmat(c(3,4,1), c(0.8, 0.6, 0.4))
 
-    set.seed(21)
+    set.seed(2131)
 
-    dat <- get_sim_data(400, sigma, trt = 8) %>%
+    dat <- get_sim_data(600, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
         mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
         select(-is_miss)
@@ -58,7 +70,7 @@ test_that("Basic Usage - Approx Bayes", {
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method_approxbayes(n_samples = 150)
+        method = method_approxbayes(n_samples = 200)
     )
 
     imputeobj <- impute(
@@ -98,11 +110,11 @@ test_that("Basic Usage - Approx Bayes", {
 
 test_that("Basic Usage - Bayesian", {
 
-    sigma <- as_covmat(c(3,2,0.5), c(0.8, 0.6, 0.4))
+    sigma <- as_covmat(c(3,2,0.7), c(0.8, 0.3, 0.1))
 
-    set.seed(1031)
+    set.seed(2111)
 
-    dat <- get_sim_data(500, sigma, trt = 8) %>%
+    dat <- get_sim_data(600, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
         mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
         select(-is_miss)
@@ -131,7 +143,7 @@ test_that("Basic Usage - Bayesian", {
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method_bayes(n_samples = 200)
+        method = method_bayes(n_samples = 250)
     )
 
     ### Check to see if updating ice works and if it impacts the original values
@@ -188,11 +200,11 @@ test_that("Basic Usage - Bayesian", {
 
 test_that("Basic Usage - Condmean", {
 
-    sigma <- as_covmat(c(3,4,1), c(0.8, 0.6, 0.4))
+    sigma <- as_covmat(c(3,4,1), c(0.8, 0.3, 0.1))
 
     set.seed(21)
 
-    dat <- get_sim_data(400, sigma, trt = 8) %>%
+    dat <- get_sim_data(700, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
         mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
         select(-is_miss)
@@ -221,7 +233,7 @@ test_that("Basic Usage - Condmean", {
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method_condmean(n_samples = 150)
+        method = method_condmean(n_samples = 250)
     )
 
     ### Check to see if updating ice works and if it impacts the original values
@@ -278,11 +290,12 @@ test_that("Basic Usage - Condmean", {
 
 
 test_that("Custom Strategies and Custom analysis functions",{
-    sigma <- as_covmat(c(3,4,1), c(0.8, 0.6, 0.4))
 
-    set.seed(21)
+    sigma <- as_covmat(c(3,2,0.5), c(0.5, 0.3, 0.2))
+  
+    set.seed(52131)
 
-    dat <- get_sim_data(400, sigma, trt = 8) %>%
+    dat <- get_sim_data(800, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
         mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
         select(-is_miss)
@@ -312,7 +325,7 @@ test_that("Custom Strategies and Custom analysis functions",{
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method_condmean(n_samples = 150)
+        method = method_condmean(n_samples = 250)
     )
 
 
@@ -324,7 +337,7 @@ test_that("Custom Strategies and Custom analysis functions",{
 
     myfun <- function(dat){
         dat <- dat %>% filter(visit == "visit_3")
-        mod <- lm(data = dat, outcome ~ group)
+        mod <- lm(data = dat, outcome ~ group + age + sex)
         list(
             "treatment_effect" = list(
                 "est" = coef(mod)[[2]],
@@ -341,8 +354,11 @@ test_that("Custom Strategies and Custom analysis functions",{
 
     poolobj <- pool(anaobj)
 
-    expect_gt(poolobj$pars$treatment_effect$est, 4 - 0.2)
-    expect_lt(poolobj$pars$treatment_effect$est, 4 + 0.2)
+    expect_within(
+        poolobj$pars$treatment_effect$est,
+        4 + c(-0.3, 0.3)
+    )
+
 
 
     dat_delta <- delta_template(imputeobj) %>%
@@ -357,11 +373,51 @@ test_that("Custom Strategies and Custom analysis functions",{
 
     poolobj_delta <- pool(anaobj_delta)
 
-    expect_gt(poolobj_delta$pars$treatment_effect$est, 14 - 0.2)
-    expect_lt(poolobj_delta$pars$treatment_effect$est, 14 + 0.2)
+    expect_contains(
+        poolobj_delta$pars$treatment_effect$ci,
+        14
+    )
 
 
+
+    dat_delta <- delta_template(imputeobj) %>%
+        as_tibble() %>%
+        mutate(delta = if_else(group == "B" & is_missing, 40, 0))
+
+
+    anaobj_delta <- analyse(
+        imputeobj,
+        fun = myfun,
+        delta = dat_delta
+    )
+
+    poolobj_delta <- pool(anaobj_delta)
+
+    expect_contains(
+        poolobj_delta$pars$treatment_effect$ci,
+        24
+    )
+
+
+
+    ddat <- tibble(
+        id = "1",
+        visit = "visit_2",
+        delta = 40
+    )
+
+    exdat1 <- extract_imputed_dfs(imputeobj, c(1, 2, 3), idmap = TRUE)
+    exdat2 <- extract_imputed_dfs(imputeobj, c(2, 2, 1), idmap = TRUE)
+    exdat3 <- extract_imputed_dfs(imputeobj, 2, ddat, idmap = TRUE)
+ 
+    expect_equal(exdat1[1], exdat2[3])
+    expect_equal(select(exdat1[[2]], -outcome), select(exdat3[[1]], -outcome))
+
+    # The number of places outcome should differ between exdat1 and exdat3 is equal
+    # to the number of times that subject "1" was chosen to be in the sample
+    expect_equal(
+        nrow(exdat1[[2]]) - sum(exdat1[[2]]$outcome == exdat3[[1]]$outcome),
+        sum(attr(exdat1[[2]], "idmap") == "1")
+    )
 })
-
-
 

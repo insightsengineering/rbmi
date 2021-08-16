@@ -94,7 +94,12 @@ for all observations. This list is populated by a call to \code{self$set_strateg
 \subsection{Method \code{get_data()}}{
 Returns a dataframe based upon required subject IDs. Replaces missing values if new values are provided.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$get_data(obj = NULL, nmar.rm = FALSE, na.rm = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$get_data(
+  obj = NULL,
+  nmar.rm = FALSE,
+  na.rm = FALSE,
+  idmap = FALSE
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -108,6 +113,9 @@ determined from \code{self$is_mar})}
 
 \item{\code{na.rm}}{logical value. If TRUE will remove outcome values that are missing (as
 determined from \code{self$is_missing})}
+
+\item{\code{idmap}}{logical value. If TRUE will add an attribute \code{idmap} which contains a mapping from the
+new subject ids to the old subject ids}
 }
 \if{html}{\out{</div>}}
 }

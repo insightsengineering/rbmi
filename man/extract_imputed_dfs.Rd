@@ -4,12 +4,21 @@
 \alias{extract_imputed_dfs}
 \title{Extract imputated datasets}
 \usage{
-extract_imputed_dfs(imputations, index = seq_along(imputations$imputations))
+extract_imputed_dfs(
+  imputations,
+  index = seq_along(imputations$imputations),
+  delta = NULL,
+  idmap = FALSE
+)
 }
 \arguments{
 \item{imputations}{TODO}
 
 \item{index}{TODO}
+
+\item{delta}{TODO}
+
+\item{idmap}{TODO}
 }
 \description{
 TODO

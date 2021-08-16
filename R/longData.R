@@ -106,6 +106,9 @@ longDataConstructor <- R6::R6Class(
         #' @param na.rm logical value. If TRUE will remove outcome values that are missing (as
         #' determined from `self$is_missing`)
         #'
+        #' @param idmap logical value. If TRUE will add an attribute `idmap` which contains a mapping from the
+        #' new subject ids to the old subject ids
+        #'
         #' @details
         #'
         #' If `obj` is NULL then the full original dataset is returned. If `obj` is a character vector then a new
@@ -132,7 +135,7 @@ longDataConstructor <- R6::R6Class(
         #' @return
         #'
         #' A dataframe
-        get_data = function(obj = NULL, nmar.rm = FALSE, na.rm = FALSE){
+        get_data = function(obj = NULL, nmar.rm = FALSE, na.rm = FALSE, idmap = FALSE){
 
             if(is.null(obj)) return(self$data)
 
@@ -156,31 +159,39 @@ longDataConstructor <- R6::R6Class(
             self$validate_ids(ids)
             indexes <- self$indexes[ids]
 
-            if( listFlag | nmar.rm | na.rm){
+            if (listFlag | nmar.rm | na.rm) {
                 is_miss <- unlist(self$is_missing[ids], use.names = FALSE)
                 is_mar <- unlist(self$is_mar[ids], use.names = FALSE)
             }
 
-            new_ids <- mapply(
-                function(x,y) rep(paste0("new_pt_",x), times = length(y)),
+            new_ids_full <- mapply(
+                function(x, y) rep(paste0("new_pt_", x), times = length(y)),
                 seq_along(indexes),
                 indexes,
                 SIMPLIFY = FALSE
             )
 
-            new_ids <- unlist(new_ids, use.names = FALSE)
-            indexes <- unlist(indexes, use.names = FALSE)
+            new_ids_full <- unlist(new_ids_full, use.names = FALSE)
+            indexes_vec <- unlist(indexes, use.names = FALSE)
 
-            new_data <- self$data[indexes,]
-            new_data[[self$vars$subjid]] <- new_ids
+            new_data <- self$data[indexes_vec, ]
+
+            new_data[[self$vars$subjid]] <- new_ids_full
 
             if(listFlag){
                 new_data[is_miss ,self$vars$outcome] <- values
             }
 
-            if(nmar.rm | na.rm){
+            if (nmar.rm | na.rm) {
                 keep <- (is_mar | (!nmar.rm)) & (!is_miss | (!na.rm))
-                new_data <- new_data[keep,]
+                new_data <- new_data[keep, ]
+            }
+
+            if(idmap){
+                new_ids_single <- vapply(seq_along(indexes), function(x) paste0("new_pt_", x), character(1))
+                id_map <- ids
+                names(id_map) <- new_ids_single
+                attr(new_data, "idmap") <- id_map
             }
 
             return(new_data)
@@ -418,8 +429,6 @@ transpose_imputations = function(imputations){
     )
     return(result)
 }
-
-
 
 
 
