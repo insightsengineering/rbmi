@@ -48,29 +48,47 @@ test_that("as_model_df", {
 
 test_that("sample_mvnorm", {
 
-    set.seed(101)
+    # Sample singe value
+    set.seed(3516)
+    m <- 10
+    z <- 16
+    x <- replicate(n = 100000, {
+        sample_mvnorm(m, z)
+    })
 
-    z <- as_covmat(c(1, 3, 4, 2), c(0.1, 0.2, 0.4, 0.3, 0.1, 0.2))
+    xm <- mean(x)
+    xv <- var(x)
+
+    expect_true(all( abs(xm - m) < (m - (m * 0.99))))
+    expect_true(all( abs(xv - z) < (z - (z * 0.95))))
+
+
+
+
+    # Sample multiple values
+    set.seed(351)
+
+    z <- as_covmat(c(5, 3, 4, 2), c(0.6, 0.2, 0.7, 0.3, 0.8, 0.2))
     m <- c(5, 15, 30, 45)
 
     x <- sample_mvnorm(m, z)
     expect_true(nrow(x) == 1)
     expect_true(ncol(x) == 4)
 
-    vals <- replicate(n = 150000, {sample_mvnorm(m, z)})
+    vals <- replicate(n = 100000, {sample_mvnorm(m, z)})
     x2 <- matrix(unlist(vals), ncol = ncol(z), byrow = TRUE)
     x2_v <- var(x2)
     x2_m <- apply(x2, 2, mean)
 
-    lower_limit_v <- as.vector(z) * 0.98
-    upper_limit_v <- as.vector(z) * 1.02
-    obsv <- as.vector(x2_v)
-    expect_true(all((lower_limit_v < obsv) & (obsv < upper_limit_v)))
+    z_vec <- as.vector(z)
 
-    lower_limit_m <- as.vector(m) * 0.99
-    upper_limit_m <- as.vector(m) * 1.01
-    obsm <- as.vector(x2_m)
-    expect_true(all((lower_limit_m < obsm) & (obsm < upper_limit_m)))
+    expect_true(all(
+        abs(x2_m - m) < (x2_m - (m * 0.98))
+    ))
+
+    expect_true(all(
+        abs(as.vector(x2_v - z)) < (z_vec - (z_vec * 0.95))
+    ))
 
 })
 
