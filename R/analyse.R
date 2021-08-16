@@ -14,6 +14,7 @@
 #'
 #' @export
 analyse <- function(imputations, fun, delta = NULL, ...) {
+
     assert_that(
         is.function(fun),
         msg = "`fun` must be a function"
@@ -43,13 +44,10 @@ analyse <- function(imputations, fun, delta = NULL, ...) {
 
     results <- lapply(
         imputations$imputations,
-        function(x){
+        function(x, ...) {
             dat2 <- extract_imputed_df(x, imputations$data, delta)
             fun(dat2, ...)
         },
-        ld = imputations$data,
-        delta = delta,
-        fun = fun,
         ...
     )
 
