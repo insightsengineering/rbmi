@@ -228,9 +228,7 @@ fit_mmrm <- function(
 
     ###################### fit mmrm
 
-    ignorable_warnings <- c(
-        "In Matrix::sparseMatrix(dims = c(0, 0), i = integer(0), j = integer(0), : 'giveCsparse' has been deprecated; setting 'repr =\"T\"' for you"
-    )
+
 
     fit <- record_warnings({
         glmmTMB(
@@ -246,15 +244,19 @@ fit_mmrm <- function(
     # check convergence
     converged <- is_converged(fit$results)
 
+    ignorable_warnings <- c(
+        "'giveCsparse' has been deprecated; setting 'repr = \"T\"' for you"
+    )
+
     # handle warning: display only warnings if
     # 1) fit does converge
     # 2) the warning is not in ignorable_warnings
-    if(converged){
+    if (converged) {
         warnings <- fit$warnings
-        warnings_not_allowed <- warnings[!warnings %in% ignorable_warnings]
-        for (i in warnings_not_allowed) warning(warnings_not_allowed)
+        warnings_to_ignore <- str_contains(warnings, ignorable_warnings)
+        warnings_to_raise <- warnings[!warnings_to_ignore]
+        for (i in warnings_to_raise) warning(i)
     }
-
 
     fit <- fit$results
 
@@ -333,4 +335,8 @@ fit_mmrm_multiopt <- function(
 
     return(fit)
 }
+
+
+
+
 

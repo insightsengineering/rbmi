@@ -130,3 +130,29 @@ test_that("is_absent",{
     expect_false(is_absent(factor(c("A", ""))))
 
 })
+
+
+test_that("str_contains",{
+
+    expect_equal(
+        str_contains(c("abcde", "xyzj", "faiwx"), c("x")),
+        c(FALSE, TRUE, TRUE)
+    )
+
+    # Make sure its resistant to regex
+    expect_equal(
+        str_contains(c("abcde", "xyzj$", "^faiwx"), c("x")),
+        c(FALSE, TRUE, TRUE)
+    )
+
+    expect_equal(
+        str_contains(c("abcde", "xyzj$", "^faiwx"), c("x", "y", "z", "x", "q")),
+        c(FALSE, TRUE, TRUE)
+    )
+
+    expect_equal(
+        str_contains(c("abcde", "xyzj$", "^faiwx"), c("xyzj", "awdawd")),
+        c(FALSE, TRUE, FALSE)
+    )
+
+})

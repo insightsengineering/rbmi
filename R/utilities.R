@@ -192,3 +192,21 @@ extract_covariates <- function(x) {
     x_uni <- unique(x_nws)
     return(x_uni)
 }
+
+
+
+#' Does a string contain a substring
+#'
+#' @param x character vector
+#' @param subs a character vector of substrings to look for
+#'
+#' @description
+#' Loops over `x` returning `TRUE`/`FALSE` if any element of `subs` occours as a substring within it
+str_contains <- function(x, subs) {
+    strings <- x
+    res_list <- lapply(subs, function(x) grepl(x, strings, fixed = T))
+    res_matrix <- matrix(unlist(res_list), nrow = length(res_list), byrow = TRUE)
+    res <- unlist(apply(res_matrix, MARGIN = 2, any, simplify = FALSE), use.names = TRUE)
+    assert_that(length(res) == length(strings))
+    return(res)
+}

@@ -6,42 +6,50 @@ suppressPackageStartupMessages({
     library(tibble)
 })
 
-
+bign <- 1400
+sigma <- as_covmat(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
+nsamp <- 250
 
 expect_within <- function(x, bounds) {
     expect_gt(x, bounds[1])
     expect_lt(x, bounds[2])
 }
 
-expect_contains <- function(x, y){
+
+expect_contains <- function(x, y) {
     expect_within(y, x)
 }
 
 
-expect_pool_est <- function(pool, expected, margin = 0.2){
-    expect_within(
-        pool$pars$trt$est,
-        c(expected - margin, expected + margin)
+expect_pool_est <- function(po, expected, param = "trt_visit_3") {
+    expect_contains(
+        po$pars[[param]]$ci,
+        expected
     )
 
-    lsm_trt <- (pool$pars$lsm_alt_visit_3$est - pool$pars$lsm_ref_visit_3$est)
-
-    expect_within(
-        lsm_trt - pool$pars$trt$est,
-        c(-0.005, 0.005)
+    expect_contains(
+        po$pars[[param]]$ci,
+        po$pars[[param]]$est
     )
 
+    if ("lsm_alt_visit_3" %in% names(po$pars)) {
+          lsm_trt <- (po$pars$lsm_alt_visit_3$est - po$pars$lsm_ref_visit_3$est)
+
+        expect_within(
+            lsm_trt - po$pars[[param]]$est,
+            c(-0.005, 0.005)
+        )
+    }
 }
 
 
 
 
 test_that("Basic Usage - Approx Bayes", {
-    sigma <- as_covmat(c(3,4,1), c(0.8, 0.6, 0.4))
 
-    set.seed(2131)
+    set.seed(1512)
 
-    dat <- get_sim_data(600, sigma, trt = 8) %>%
+    dat <- get_sim_data(bign, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
         mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
         select(-is_miss)
@@ -70,7 +78,7 @@ test_that("Basic Usage - Approx Bayes", {
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method_approxbayes(n_samples = 200)
+        method = method_approxbayes(n_samples = nsamp)
     )
 
     imputeobj <- impute(
@@ -90,7 +98,7 @@ test_that("Basic Usage - Approx Bayes", {
 
     poolobj <- pool(
         results = anaobj,
-        conf.level = 0.95,
+        conf.level = 0.99,
         alternative = "two.sided"
     )
 
@@ -110,11 +118,9 @@ test_that("Basic Usage - Approx Bayes", {
 
 test_that("Basic Usage - Bayesian", {
 
-    sigma <- as_covmat(c(3,2,0.7), c(0.8, 0.3, 0.1))
+    set.seed(5123)
 
-    set.seed(2111)
-
-    dat <- get_sim_data(600, sigma, trt = 8) %>%
+    dat <- get_sim_data(bign, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
         mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
         select(-is_miss)
@@ -143,7 +149,7 @@ test_that("Basic Usage - Bayesian", {
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method_bayes(n_samples = 250)
+        method = method_bayes(n_samples = nsamp)
     )
 
     ### Check to see if updating ice works and if it impacts the original values
@@ -178,11 +184,15 @@ test_that("Basic Usage - Bayesian", {
         visits = "visit_3"
     )
 
-    poolobj_upd <- pool(anaobj_upd)
+    poolobj_upd <- pool(
+        results = anaobj_upd,
+        conf.level = 0.99,
+        alternative = "two.sided"
+    )
 
     poolobj <- pool(
         results = anaobj,
-        conf.level = 0.95,
+        conf.level = 0.99,
         alternative = "two.sided"
     )
 
@@ -200,11 +210,9 @@ test_that("Basic Usage - Bayesian", {
 
 test_that("Basic Usage - Condmean", {
 
-    sigma <- as_covmat(c(3,4,1), c(0.8, 0.3, 0.1))
+    set.seed(4642)
 
-    set.seed(21)
-
-    dat <- get_sim_data(700, sigma, trt = 8) %>%
+    dat <- get_sim_data(bign, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
         mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
         select(-is_miss)
@@ -233,7 +241,7 @@ test_that("Basic Usage - Condmean", {
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method_condmean(n_samples = 250)
+        method = method_condmean(n_samples = nsamp)
     )
 
     ### Check to see if updating ice works and if it impacts the original values
@@ -272,7 +280,7 @@ test_that("Basic Usage - Condmean", {
 
     poolobj <- pool(
         results = anaobj,
-        conf.level = 0.95,
+        conf.level = 0.99,
         alternative = "two.sided"
     )
 
@@ -291,11 +299,9 @@ test_that("Basic Usage - Condmean", {
 
 test_that("Custom Strategies and Custom analysis functions",{
 
-    sigma <- as_covmat(c(3,2,0.5), c(0.5, 0.3, 0.2))
-  
-    set.seed(52131)
+    set.seed(8368)
 
-    dat <- get_sim_data(800, sigma, trt = 8) %>%
+    dat <- get_sim_data(bign, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
         mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
         select(-is_miss)
@@ -325,7 +331,7 @@ test_that("Custom Strategies and Custom analysis functions",{
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method_condmean(n_samples = 250)
+        method = method_condmean(n_samples = nsamp)
     )
 
 
@@ -373,10 +379,7 @@ test_that("Custom Strategies and Custom analysis functions",{
 
     poolobj_delta <- pool(anaobj_delta)
 
-    expect_contains(
-        poolobj_delta$pars$treatment_effect$ci,
-        14
-    )
+    expect_pool_est(poolobj_delta, 14, "treatment_effect")
 
 
 
@@ -393,10 +396,8 @@ test_that("Custom Strategies and Custom analysis functions",{
 
     poolobj_delta <- pool(anaobj_delta)
 
-    expect_contains(
-        poolobj_delta$pars$treatment_effect$ci,
-        24
-    )
+    expect_pool_est(poolobj_delta, 24, "treatment_effect")
+
 
 
 

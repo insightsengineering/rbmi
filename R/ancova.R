@@ -15,13 +15,13 @@
 #'
 #' @export
 ancova <- function(data, vars, visits = NULL) {
+
     outcome <- vars[["outcome"]]
     group <- vars[["group"]]
     covariates <- vars[["covariates"]]
     visit <- vars[["visit"]]
 
     expected_vars <- c(extract_covariates(covariates), outcome, group)
-
 
     assert_that(
         ! any(visit %in% expected_vars),

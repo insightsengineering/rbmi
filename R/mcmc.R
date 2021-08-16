@@ -15,6 +15,7 @@ long2wide <- function(vec_long,
     return(wide_mat)
 }
 
+
 #' Title - TODO
 #'
 #' @param outcome TODO
@@ -28,26 +29,29 @@ get_obs_missingness_patterns <- function(outcome) {
     y_obs <- matrix(1, nrow = nrow(outcome), ncol = ncol(outcome))
     y_obs[is.na(outcome)] <- 0
     missingness_patterns <- unique(y_obs)
-    M <- apply(y_obs,
-               1,
-               function(y) which(apply(missingness_patterns, 1, function(x) identical(x, y))==TRUE))
+    M <- apply(
+        y_obs,
+        1,
+        function(y) which(apply(missingness_patterns, 1, function(x) identical(x, y)) == TRUE)
+    )
 
-    return(list(missingness_patterns = missingness_patterns,
-                M = M))
+    res <- list(
+        missingness_patterns = missingness_patterns,
+        M = M
+    )
+
+    return(res)
 }
+
 
 #' Title - TODO
 #'
 #' @param sigma_reml TODO
 #' @param levels_group TODO
-match_groups_sigmas <- function(
-    sigma_reml,
-    levels_group
-) {
-
+match_groups_sigmas <- function(sigma_reml, levels_group) {
     return(sigma_reml[order(levels_group)])
-
 }
+
 
 #' Title - TODO
 #'
@@ -66,6 +70,7 @@ QR_decomp <- function(designmat, N, J) {
 
     return(ret_obj)
 }
+
 
 #' Title - TODO
 #'
@@ -148,6 +153,7 @@ run_mcmc <- function(
     return(ret_obj)
 }
 
+
 #' Title - TODO
 #'
 #' @param listmat TODO
@@ -168,6 +174,7 @@ listmat_to_array <- function(listmat) {
     return(res_array)
 }
 
+
 #' Title - TODO
 #'
 #' @param designmat TODO
@@ -182,7 +189,8 @@ prepare_data_mcmc <- function(
     group,
     same_cov,
     sigma_reml,
-    initial_values) {
+    initial_values
+) {
 
     # transform outcome to NxJ matrix
     J <- nrow(sigma_reml[[1]])
@@ -205,15 +213,17 @@ prepare_data_mcmc <- function(
     initial_values$beta <- NULL
 
     # set values as per "data" block in Stan files
-    data <- list(J = J,
-                 N = N,
-                 P = ncol(designmat),
-                 n_missingness_patterns = nrow(obs_miss_patterns$missingness_patterns),
-                 M = obs_miss_patterns$M,
-                 Q = QR_mat$Q,
-                 R = QR_mat$R,
-                 y = outcome,
-                 y_observed = obs_miss_patterns$missingness_patterns)
+    data <- list(
+        J = J,
+        N = N,
+        P = ncol(designmat),
+        n_missingness_patterns = nrow(obs_miss_patterns$missingness_patterns),
+        M = obs_miss_patterns$M,
+        Q = QR_mat$Q,
+        R = QR_mat$R,
+        y = outcome,
+        y_observed = obs_miss_patterns$missingness_patterns
+    )
 
     if(same_cov) {
         data$Sigma_reml <- sigma_reml[[1]]
@@ -265,19 +275,23 @@ fit_mcmc <- function(
     burn_between,
     initial_values,
     same_cov,
-    verbose = TRUE) {
+    verbose = TRUE
+) {
 
     initial_values <- list(initial_values)
 
     # set verbose (if verbose = TRUE then refresh is set to default value)
-    refresh <- ifelse(verbose, (burn_in + burn_between*n_imputations)/10, 0)
-
-    ignorable_warnings <- c(
-        "Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.\nRunning the chains for more iterations may help. See\nhttp://mc-stan.org/misc/warnings.html#bulk-ess",
-        "Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.\nRunning the chains for more iterations may help. See\nhttp://mc-stan.org/misc/warnings.html#tail-ess"
+    refresh <- ife(
+        verbose,
+        (burn_in + burn_between * n_imputations) / 10,
+        0
     )
 
-    stan_model <- if(same_cov) stanmodels$MMRM_same_cov else stanmodels$MMRM_diff_cov
+    stan_model <- ife(
+        same_cov,
+        stanmodels$MMRM_same_cov,
+        stanmodels$MMRM_diff_cov
+    )
 
     stan_fit <- record_warnings({
         sampling(
@@ -287,10 +301,16 @@ fit_mcmc <- function(
             chains = 1,
             warmup = burn_in,
             thin = burn_between,
-            iter = burn_in + burn_between*n_imputations,
+            iter = burn_in + burn_between * n_imputations,
             init = initial_values,
-            refresh = refresh)
+            refresh = refresh
+        )
     })
+
+    ignorable_warnings <- c(
+        "Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.\nRunning the chains for more iterations may help. See\nhttp://mc-stan.org/misc/warnings.html#bulk-ess",
+        "Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.\nRunning the chains for more iterations may help. See\nhttp://mc-stan.org/misc/warnings.html#tail-ess"
+    )
 
     # handle warning: display only warnings if
     # 1) the warning is not in ignorable_warnings
@@ -299,8 +319,8 @@ fit_mcmc <- function(
     for (i in warnings_not_allowed) warning(warnings_not_allowed)
 
     return(stan_fit$results)
-
 }
+
 
 #' Title - TODO
 #'
@@ -313,6 +333,7 @@ split_dim <- function(a, n) {
              dimnames(a)[[n]])
 
 }
+
 
 #' Title - TODO
 #'
@@ -344,14 +365,15 @@ extract_draws <- function(stan_fit) {
     return(pars)
 }
 
+
 #' Title - TODO
 #'
 #' @param stan_fit TODO
 #' @importFrom rstan summary
 get_ESS <- function(stan_fit) {
-
     return(rstan::summary(stan_fit, pars = c("beta", "Sigma"))$summary[,"n_eff"])
 }
+
 
 #' Title - TODO
 #'
@@ -372,6 +394,7 @@ check_ESS <- function(stan_fit, n_draws, threshold = 0.4) {
     return(invisible(NULL))
 }
 
+
 #' Title - TODO
 #'
 #' @param stan_fit TODO
@@ -388,6 +411,7 @@ check_hmc_diagn <- function(stan_fit) {
 
     return(invisible(NULL))
 }
+
 
 #' Title - TODO
 #'
