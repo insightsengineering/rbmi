@@ -38,7 +38,7 @@ lscombinations <- function(data, mterms, fix) {
 #' 
 #' @param model TODO
 #' @param ... TODO
-#' @importFrom stats model.matrix terms
+#' @importFrom stats model.matrix terms reformulate
 lsmeans <- function(model, ...) {
 
     fix <- list(...)

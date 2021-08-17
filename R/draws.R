@@ -11,12 +11,14 @@ draws <- function(data, data_ice, vars, method) {
     UseMethod("draws", method)
 }
 
+
 #' @rdname draws
 #' @export
 draws.bayes <- function(data, data_ice, vars, method) {
     x <- draws_bayes(data, data_ice, vars, method)
-    as_class(x, "random")
+    as_class(x, c("random", "draws"))
 }
+
 
 #' @rdname draws
 #' @export
@@ -40,14 +42,15 @@ draws.approxbayes <- function(data, data_ice, vars, method) {
     # remove useless elements from output of `method`
     x$method$type <- NULL
 
-    as_class(x, "random")
+    as_class(x, c("random", "draws"))
 }
+
 
 #' @rdname draws
 #' @export
 draws.condmean <- function(data, data_ice, vars, method) {
     x <- draws_bootstrap(data, data_ice, vars, method)
-    as_class(x, "condmean")
+    as_class(x, c("condmean", "draws"))
 }
 
 #' Title - TODO
@@ -62,6 +65,7 @@ remove_nmar_as_NA <- function(longdata) {
 
     return(data)
 }
+
 
 #' Title - TODO
 #'
@@ -87,12 +91,11 @@ draws_bayes <- function(data, data_ice, vars, method) {
 
     # fit MMRM (needed for initial values)
     mmrm_initial <- fit_mmrm_multiopt(
-        designmat = model_df_scaled[,-1],
-        outcome = model_df_scaled[,1],
+        designmat = model_df_scaled[, -1, drop = FALSE],
+        outcome = as.data.frame(model_df_scaled)[, 1],
         subjid = data2[[vars$subjid]],
         visit = data2[[vars$visit]],
         group = data2[[vars$group]],
-        vars = vars,
         cov_struct = "us",
         REML = TRUE,
         same_cov = method$same_cov,
@@ -147,6 +150,7 @@ draws_bayes <- function(data, data_ice, vars, method) {
     return(result)
 }
 
+
 #' Title
 #'
 #' @param data TODO
@@ -166,12 +170,11 @@ draws_bootstrap <- function(data, data_ice, vars, method) {
     model_df_scaled <- scaler$scale(model_df)
 
     mmrm_initial <- fit_mmrm_multiopt(
-        designmat = model_df_scaled[, -1],
-        outcome = model_df_scaled[, 1],
+        designmat = model_df_scaled[, -1, drop = FALSE],
+        outcome = as.data.frame(model_df_scaled)[, 1],
         subjid = data2[[vars$subjid]],
         visit = data2[[vars$visit]],
         group = data2[[vars$group]],
-        vars = vars,
         cov_struct = method$covariance,
         REML = method$REML,
         same_cov = method$same_cov,
@@ -260,12 +263,11 @@ get_bootstrap_samples <- function(
 
         # fit mmrm
         mmrm_fit <- fit_mmrm_multiopt(
-            designmat = model_df_scaled[,-1],
-            outcome = model_df_scaled[,1],
+            designmat = model_df_scaled[, -1, drop = FALSE],
+            outcome = as.data.frame(model_df_scaled)[, 1],
             subjid = dat_boot[[vars$subjid]],
             visit = dat_boot[[vars$visit]],
             group = dat_boot[[vars$group]],
-            vars = vars,
             cov_struct = method$covariance,
             REML = method$REML,
             same_cov = method$same_cov,
@@ -303,6 +305,7 @@ get_bootstrap_samples <- function(
     )
 }
 
+
 #' Title
 #'
 #' @param longdata TODO
@@ -335,12 +338,11 @@ get_jackknife_samples <- function(
 
         # fit mmrm
         mmrm_fit <- fit_mmrm_multiopt(
-            designmat = model_df_scaled[,-1],
-            outcome = model_df_scaled[,1],
+            designmat = model_df_scaled[, -1, drop = FALSE],
+            outcome = as.data.frame(model_df_scaled)[, 1],
             subjid = dat_boot[[vars$subjid]],
             visit = dat_boot[[vars$visit]],
             group = dat_boot[[vars$group]],
-            vars = vars,
             cov_struct = method$covariance,
             REML = method$REML,
             same_cov = method$same_cov,
@@ -375,4 +377,45 @@ get_jackknife_samples <- function(
             n_failures = failed_samples
         )
     )
+}
+
+
+#' Print Draws Object
+#'
+#' @param x A draws object
+#' @param ... not used
+#' @export
+print.draws <- function (x, ...) {
+
+    frm <- as.character(x$formula)
+    frm_str <- sprintf("%s ~ %s", frm[[2]], frm[[3]])
+
+    meth <- switch(
+         class(x$method),
+         "approxbayes" = "Approximate Bayes",
+         "condmean" = "Conditional Mean",
+         "bayes" = "Bayes"
+    )
+
+    meth_args <- mapply(
+        function(x, y) sprintf("    %s: %s", y, x),
+        x$method,
+        names(x$method),
+        USE.NAMES = FALSE
+    )
+
+    string <- c(
+        "Draws Object",
+        "------------",
+        sprintf("Number of Samples: %s", length(x$samples)),
+        sprintf("Number of Failed Samples: %s", x$n_failures),
+        sprintf("Model Formula: %s", frm_str),
+        sprintf("Imputation Type: %s", class(x)[[1]]),
+        "Method:",
+        sprintf("    Type: %s", meth),
+        meth_args
+    )
+
+    cat(string, sep = "\n")
+    return(invisible(x))
 }

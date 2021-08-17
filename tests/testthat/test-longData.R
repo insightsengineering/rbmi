@@ -6,6 +6,26 @@ suppressPackageStartupMessages({
 })
 
 
+ld_2_list <- function(ld) {
+    list(
+        visits = ld$visits,
+        is_mar = ld$is_mar,
+        data = ld$data,
+        ids = ld$ids,
+        group = ld$group,
+        indexes = ld$indexes,
+        vars = ld$vars,
+        strata = ld$strata,
+        strategies = ld$strategies,
+        strat_lock = ld$strategy_lock,
+        values = ld$values,
+        visit_ice = ld$visit_ice,
+        is_missing = ld$is_missing,
+        is_post_ice = ld$is_post_ice
+    )
+}
+
+
 get_ld <- function(){
     n <- 4
     nv <- 3
@@ -240,6 +260,9 @@ test_that("Strategies",{
 
 test_that("strategies part 2",{
 
+    # Here we check to see that using `update_strategies` only updates the method and not
+    # the visits (or anything else for that matter)
+
     dobj <- get_ld()
     ld <- dobj$ld
     dat <- dobj$dat
@@ -253,7 +276,7 @@ test_that("strategies part 2",{
     )
 
     ld$set_strategies(dat_ice)
-    pre_update_ld <- ld$clone(deep = TRUE)
+    pre_update_ld <- ld_2_list(ld)
 
 
     dat_ice <- tribble(
@@ -263,8 +286,7 @@ test_that("strategies part 2",{
         "3", "XYZ", "Visit 1"
     )
     ld$update_strategies(dat_ice)
-    expect_equal(ld, pre_update_ld)
-
+    expect_equal(ld_2_list(ld), pre_update_ld)
 
 
     dat_ice <- tribble(

@@ -4,21 +4,12 @@
 \alias{random_effects_expr}
 \title{Title}
 \usage{
-random_effects_expr(
-  vars,
-  names_groups,
-  cov_struct = c("us", "toep", "cs", "ar1"),
-  same_cov
-)
+random_effects_expr(cov_struct = c("us", "toep", "cs", "ar1"), groups = NULL)
 }
 \arguments{
-\item{vars}{TODO}
-
-\item{names_groups}{TODO}
-
 \item{cov_struct}{TODO}
 
-\item{same_cov}{TODO}
+\item{groups}{TODO}
 }
 \description{
 Title

@@ -6,19 +6,9 @@ suppressPackageStartupMessages({
     library(tibble)
 })
 
-bign <- 1400
+bign <- 90
 sigma <- as_covmat(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
-nsamp <- 250
-
-expect_within <- function(x, bounds) {
-    expect_gt(x, bounds[1])
-    expect_lt(x, bounds[2])
-}
-
-
-expect_contains <- function(x, y) {
-    expect_within(y, x)
-}
+nsamp <- 10
 
 
 expect_pool_est <- function(po, expected, param = "trt_visit_3") {
@@ -46,6 +36,8 @@ expect_pool_est <- function(po, expected, param = "trt_visit_3") {
 
 
 test_that("Basic Usage - Approx Bayes", {
+
+    skip_if_not(is_nightly())
 
     set.seed(1512)
 
@@ -103,7 +95,6 @@ test_that("Basic Usage - Approx Bayes", {
     )
 
     expect_pool_est(poolobj, 4)
-
 })
 
 
@@ -117,7 +108,9 @@ test_that("Basic Usage - Approx Bayes", {
 
 
 test_that("Basic Usage - Bayesian", {
-
+    
+    skip_if_not(is_nightly())
+    
     set.seed(5123)
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
@@ -198,17 +191,15 @@ test_that("Basic Usage - Bayesian", {
 
     expect_pool_est(poolobj_upd, 4)
     expect_pool_est(poolobj, 8)
-
 })
 
 
 
 
 
-
-
-
 test_that("Basic Usage - Condmean", {
+
+    skip_if_not(is_nightly())
 
     set.seed(4642)
 
@@ -286,8 +277,6 @@ test_that("Basic Usage - Condmean", {
 
     expect_pool_est(poolobj_upd, 8)
     expect_pool_est(poolobj, 4)
-
-
 })
 
 
@@ -298,6 +287,8 @@ test_that("Basic Usage - Condmean", {
 
 
 test_that("Custom Strategies and Custom analysis functions",{
+
+    skip_if_not(is_nightly())
 
     set.seed(8368)
 
@@ -410,7 +401,7 @@ test_that("Custom Strategies and Custom analysis functions",{
     exdat1 <- extract_imputed_dfs(imputeobj, c(1, 2, 3), idmap = TRUE)
     exdat2 <- extract_imputed_dfs(imputeobj, c(2, 2, 1), idmap = TRUE)
     exdat3 <- extract_imputed_dfs(imputeobj, 2, ddat, idmap = TRUE)
- 
+
     expect_equal(exdat1[1], exdat2[3])
     expect_equal(select(exdat1[[2]], -outcome), select(exdat3[[1]], -outcome))
 

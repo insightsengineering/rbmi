@@ -68,3 +68,20 @@ time_it <- function(expr){
     stop <- Sys.time()
     difftime(stop, start, units = "secs")
 }
+
+
+
+expect_within <- function(x, bounds) {
+    expect_gt(x, bounds[1])
+    expect_lt(x, bounds[2])
+}
+
+
+expect_contains <- function(x, y) {
+    expect_within(y, x)
+}
+
+
+is_nightly <- function(){
+    Sys.getenv("R_TEST_NIGHTLY") == "TRUE"
+}
