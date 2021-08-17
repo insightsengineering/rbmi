@@ -203,9 +203,68 @@ args_default <- list(
     optimizer = "L-BFGS-B"
 )
 
-# TODO
-#    mmrm_df
-#    mmrm_frm
+
+
+test_that("as_mmrm_df & as_mmrm_formula", {
+
+    sigma <- as_covmat(c(2, 6, 3), c(0.4,0.7,0.5))
+    dat <- get_sim_data(100, sigma)
+
+
+    #### Without Groupings
+    x <- as_mmrm_df(
+        designmat = dat,
+        outcome = dat$outcome,
+        visit = dat$visit,
+        subjid = dat$id
+    )
+
+    expect_equal(ncol(x), ncol(dat) + 3)
+    expect_equal(
+        colnames(x),
+        c(paste0("V", seq_len(ncol(dat))), "outcome", "visit", "subjid")
+    )
+    expect_equal(nrow(x), nrow(dat))
+
+    frm_actual <- as_mmrm_formula(x, "us")
+    frm_expected <- outcome ~ V1 + V2 + V3 + V4 + V5 + V6 + us(0 + visit | subjid) - 1
+    expect_equal(frm_expected, frm_actual, ignore_attr = TRUE)
+
+
+    #### With Groupings
+    x <- as_mmrm_df(
+        designmat = dat,
+        outcome = dat$outcome,
+        visit = dat$visit,
+        subjid = dat$id,
+        groups = sample(c("A", "B", "C"), size = nrow(x), replace = TRUE)
+    )
+
+    expect_equal(ncol(x), ncol(dat) + 6)
+    expect_equal(
+        colnames(x),
+        c(paste0("V", seq_len(ncol(dat))), "outcome", "visit", "subjid", "G1", "G2", "G3")
+    )
+    expect_equal(nrow(x), nrow(dat))
+
+
+    frm_actual <- as_mmrm_formula(x, "us")
+    frm_expected <- outcome ~ V1 + V2 + V3 + V4 + V5 + V6 +
+        us(0 + G1:visit | subjid) +
+        us(0 + G2:visit | subjid) +
+        us(0 + G3:visit | subjid) - 1
+    expect_equal(frm_expected, frm_actual, ignore_attr = TRUE)
+
+
+    frm_actual <- as_mmrm_formula(x, "toep")
+    frm_expected <- outcome ~ V1 + V2 + V3 + V4 + V5 + V6 +
+        toep(0 + G1:visit | subjid) +
+        toep(0 + G2:visit | subjid) +
+        toep(0 + G3:visit | subjid) - 1
+    expect_equal(frm_expected, frm_actual, ignore_attr = TRUE)
+    expect_error(as_mmrm_formula(x, "toep2"), regexp = "'arg' should be one of")
+})
+
 
 
 

@@ -63,12 +63,9 @@ test_that("sample_mvnorm", {
     expect_true(all( abs(xv - z) < (z - (z * 0.95))))
 
 
-
-
     # Sample multiple values
     set.seed(351)
-
-    z <- as_covmat(c(5, 3, 4, 2), c(0.6, 0.2, 0.7, 0.3, 0.8, 0.2))
+    z <- as_covmat(c(5, 3, 4, 2), c(0.2, 0.4, 0.6, 0.3, 0.1, 0.7))
     m <- c(5, 15, 30, 45)
 
     x <- sample_mvnorm(m, z)

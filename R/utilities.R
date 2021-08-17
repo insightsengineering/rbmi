@@ -31,6 +31,7 @@ as_simple_formula <- function(vars){
 }
 
 
+
 #' Expand dataframe into a design matrix
 #'
 #' Expands out a dataframe using a formula to create a design matrix.
@@ -62,6 +63,7 @@ as_model_df <- function(dat, frm){
 }
 
 
+
 #' Title - TODO
 #'
 #' Converts all character variables within a dataframe to factor
@@ -75,6 +77,7 @@ char2fct <- function(data) {
     }
     return(data)
 }
+
 
 
 #' Title - TODO
@@ -92,8 +95,6 @@ ife <- function(x, a, b) {
         return(b)
     }
 }
-
-
 
 
 
@@ -123,7 +124,6 @@ sample_mvnorm <- function(mu, sigma) {
 
 
 
-
 #' Capture Warnings
 #'
 #' This function silences all warnings and instead returns
@@ -143,6 +143,8 @@ record_warnings <- function(expr) {
     list(results = result, warnings = env$warning)
 }
 
+
+
 #' Is value absent
 #'
 #' Returns true if a value is either NULL, NA or "".
@@ -156,7 +158,6 @@ is_absent <- function(x, na = TRUE, blank = TRUE) {
     if (is.null(x)) {
         return(TRUE)
     }
-
 
     if (na) {
         if (all(is.na(x))) {
@@ -175,7 +176,6 @@ is_absent <- function(x, na = TRUE, blank = TRUE) {
 
 
 
-
 #' Extract Variables from string vector
 #'
 #' Takes a string including potentially model terms like `*` and `:` and
@@ -185,7 +185,7 @@ is_absent <- function(x, na = TRUE, blank = TRUE) {
 #'
 #' @param x string of variable names potentially including interaction terms
 extract_covariates <- function(x) {
-    if(is.null(x)) return(x)
+    if (is.null(x)) return(x)
     x_split <- strsplit(x, ":|\\*")
     x_vec <- unlist(x_split, use.names = FALSE)
     x_nws <- trimws(x_vec)
