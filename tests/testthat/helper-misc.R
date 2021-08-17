@@ -12,20 +12,17 @@ set_col_names <- function(x, nam) {
 f2n <- function(x) as.numeric(x) - 1
 
 as_covmat <- function(sig, corr) {
-    len <- length(sig)
-    cormat <- diag(rep(1, len))
-    index <- 1
-    for (i in 1:len) {
-        for (j in 1:len) {
-            if (i < j) {
-                cormat[i, j] <- corr[index]
-                cormat[j, i] <- corr[index]
-                index <- index + 1
-            }
-        }
-    }
-    return((sig %*% t(sig)) * cormat)
+    x <- diag(rep(1, length(sig)))
+    x[upper.tri(x)] <- cor
+    x <- t(x)
+    x[upper.tri(x)] <- cor
+    res <- (sig %*% t(sig)) * x
+    assert_that(isSymmetric(res))
 }
+
+
+
+
 
 strip_names <- function(x) {
     names(x) <- NULL
