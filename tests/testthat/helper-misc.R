@@ -40,7 +40,7 @@ trunctate <- function(x, n) {
 
 get_sim_data <- function(n, sigma, trt = 4){
     nv <- ncol(sigma)
-    covars <- tibble(
+    covars <- tibble::tibble(
         id = 1:n,
         age = rnorm(n),
         group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),

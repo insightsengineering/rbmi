@@ -4,7 +4,7 @@
 \alias{impute_internal}
 \title{Create Imputed Datasets}
 \usage{
-impute_internal(draws, references, update_ice, strategies, conditionalMean)
+impute_internal(draws, references, update_ice, strategies, condmean)
 }
 \arguments{
 \item{draws}{A draws object created by \code{\link[=draws]{draws()}}.}
@@ -19,7 +19,7 @@ the \code{data_ice} option in \code{draws}. See the details section for more inf
 of of the list should mirror the values specified in \code{method} column of \code{data_ice}.
 Default = \code{getStrategies()}. See \code{\link[=getStrategies]{getStrategies()}} for more details.}
 
-\item{conditionalMean}{logical. If TRUE will impute using the conditional mean values, if values
+\item{condmean}{logical. If TRUE will impute using the conditional mean values, if values
 will impute by taking a random draw from the multivariate normal distribution.}
 }
 \description{

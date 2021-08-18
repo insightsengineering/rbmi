@@ -12,7 +12,7 @@ impute_data_individual(
   data,
   references,
   strategies,
-  conditionalMean
+  condmean
 )
 }
 \arguments{
@@ -35,7 +35,7 @@ values. Should be of the form \code{c("Group" = "Reference", "Group" = "Referenc
 of of the list should mirror the values specified in \code{method} column of \code{data_ice}.
 Default = \code{getStrategies()}. See \code{\link[=getStrategies]{getStrategies()}} for more details.}
 
-\item{conditionalMean}{logical. If TRUE will impute using the conditional mean values, if values
+\item{condmean}{logical. If TRUE will impute using the conditional mean values, if values
 will impute by taking a random draw from the multivariate normal distribution.}
 }
 \description{

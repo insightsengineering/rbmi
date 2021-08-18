@@ -15,6 +15,8 @@
 #' @export
 analyse <- function(imputations, fun, delta = NULL, ...) {
 
+    analysis_call <- match.call()
+
     assert_that(
         is.function(fun),
         msg = "`fun` must be a function"
@@ -51,6 +53,13 @@ analyse <- function(imputations, fun, delta = NULL, ...) {
         ...
     )
 
+    ret <- list(
+        results = results,
+        call = analysis_call,
+        delta = delta,
+        fun = fun
+    )
+
     new_class <- switch(class(imputations$method),
         bayes = "rubin",
         approxbayes = "rubin",
@@ -61,9 +70,10 @@ analyse <- function(imputations, fun, delta = NULL, ...) {
         )
     )
 
-    class(results) <- new_class
-    validate_analyse(results)
-    return(results)
+    class(ret$results) <- new_class
+    class(ret) <- c(new_class, "analysis")
+    validate_analyse(ret$results)
+    return(ret)
 }
 
 
@@ -132,3 +142,29 @@ extract_imputed_df <- function(imputation, ld, delta = NULL, idmap = FALSE) {
 
     return(dat2)
 }
+
+
+
+#' Print Analysis Object
+#'
+#' @param x (`analysis`)\cr input
+#' @param ... not used
+#' @export
+print.analysis <- function(x, ...) {
+
+    string <- c(
+        "",
+        "Analysis Object",
+        "---------------",
+        sprintf("Number of Results: %s", length(x$results)),
+        sprintf("Analysis Function: %s", capture.output(x$call[["fun"]])),
+        sprintf("Delta Applied: %s", !is.null(x$delta)),
+        "Analysis Parameters:",
+        sprintf("    %s", names(x$results[[1]])),
+        ""
+    )
+
+    cat(string, sep = "\n")
+    return(invisible(x))
+}
+

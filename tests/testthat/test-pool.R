@@ -19,19 +19,19 @@ test_that("pool", {
 
     ########  Bootstrap
 
-    results_boot <- append(
-        list(runanalysis(vals)),
+    results_boot <- list( results = append(
+        list(results = runanalysis(vals)),
         lapply(seq_len(n_boot), function(x) runanalysis(sample(vals, size = n, replace = TRUE)))
-    ) %>%
+    )) %>%
         as_class("bootstrap")
 
 
     ########  Jackknife
 
-    results_jack <- append(
+    results_jack <- list( results = append(
         list(runanalysis(vals)),
         lapply(seq_len(n), function(i) runanalysis(vals[-i]))
-    ) %>%
+    )) %>%
         as_class("jackknife")
 
 

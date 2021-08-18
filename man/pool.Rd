@@ -12,16 +12,16 @@ pool(
   results,
   conf.level = 0.95,
   alternative = c("two.sided", "less", "greater"),
-  ...
+  type = c("percentile", "normal")
 )
 
-pool_(results, conf.level, alternative, ...)
+pool_(results, conf.level, alternative, type)
 
-\method{pool_}{jackknife}(results, conf.level, alternative, ...)
+\method{pool_}{jackknife}(results, conf.level, alternative, type)
 
-\method{pool_}{bootstrap}(results, conf.level, alternative, type = c("percentile", "normal"), ...)
+\method{pool_}{bootstrap}(results, conf.level, alternative, type = c("percentile", "normal"))
 
-\method{pool_}{rubin}(results, conf.level, alternative, ...)
+\method{pool_}{rubin}(results, conf.level, alternative, type)
 }
 \arguments{
 \item{results}{TODO}
@@ -29,8 +29,6 @@ pool_(results, conf.level, alternative, ...)
 \item{conf.level}{TODO}
 
 \item{alternative}{TODO}
-
-\item{...}{TODO}
 
 \item{type}{TODO}
 }
