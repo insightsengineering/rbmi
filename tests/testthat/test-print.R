@@ -42,7 +42,9 @@ get_data <- function(n){
 
 
 test_that("print - Approx Bayes", {
+    
     dobj <- get_data(100)
+    set.seed(2513)
 
     drawobj_ab <- draws(
         data = dobj$dat,
@@ -87,6 +89,7 @@ test_that("print - Approx Bayes", {
 test_that("print - Bayes", {
 
     dobj <- get_data(100)
+    set.seed(2513)
 
     suppressWarnings({
         drawobj_b <- draws(
@@ -131,6 +134,7 @@ test_that("print - Bayes", {
 
 test_that("print - condmean (bootstrap)", {
     dobj <- get_data(89)
+    set.seed(2513)
 
     drawobj_cmb <- draws(
         data = dobj$dat,
@@ -180,6 +184,7 @@ test_that("print - Condmean (jackknife)", {
     skip_if_not(is_nightly())
 
     dobj <- get_data(60)
+    set.seed(2513)
 
     drawobj_cmj <- draws(
         data = dobj$dat,

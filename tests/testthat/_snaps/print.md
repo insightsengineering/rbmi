@@ -84,9 +84,9 @@
            trt_visit_2    8.015   0.193  <NA>   <NA>  <NA> 
          lsm_ref_visit_2  6.768   0.126  <NA>   <NA>  <NA> 
          lsm_alt_visit_2  14.784  0.145  <NA>   <NA>  <NA> 
-           trt_visit_3    3.487   0.573  2.747  Inf    1   
-         lsm_ref_visit_3  6.819   0.389  6.315  Inf    1   
-         lsm_alt_visit_3  10.306  0.433  9.746  Inf    1   
+           trt_visit_3    3.497   0.563  2.771  Inf    1   
+         lsm_ref_visit_3  6.818   0.383  6.323  Inf    1   
+         lsm_alt_visit_3  10.316  0.445  9.74   Inf    1   
         ---------------------------------------------------
       
 
@@ -169,9 +169,9 @@
            trt_visit_1    7.313   0.418   <NA>    <NA>    <NA>  
          lsm_ref_visit_1  7.204   0.274   <NA>    <NA>    <NA>  
          lsm_alt_visit_1  14.516  0.315   <NA>    <NA>    <NA>  
-           trt_visit_3    8.054   0.223  7.585   8.523   <0.001 
-         lsm_ref_visit_3  6.732   0.174  6.353    7.11   <0.001 
-         lsm_alt_visit_3  14.785  0.126  14.533  15.038  <0.001 
+           trt_visit_3    7.999   0.198  7.591   8.406   <0.001 
+         lsm_ref_visit_3  6.771   0.134  6.494   7.049   <0.001 
+         lsm_alt_visit_3  14.77   0.141  14.483  15.057  <0.001 
         --------------------------------------------------------
       
 
@@ -256,15 +256,15 @@
         ====================================================
             parameter      est     se   lci    uci    pval  
         ----------------------------------------------------
-           trt_visit_1    7.584   <NA>  -Inf  7.935   0.143 
-         lsm_ref_visit_1  6.937   <NA>  -Inf  7.733   0.143 
-         lsm_alt_visit_1  14.522  <NA>  -Inf  15.292  0.143 
-           trt_visit_2    8.356   <NA>  -Inf  8.365   0.143 
-         lsm_ref_visit_2  6.583   <NA>  -Inf  7.566   0.143 
-         lsm_alt_visit_2  14.94   <NA>  -Inf  15.231  0.143 
-           trt_visit_3    4.397   <NA>  -Inf  4.397   0.143 
-         lsm_ref_visit_3  6.891   <NA>  -Inf  7.604   0.143 
-         lsm_alt_visit_3  11.287  <NA>  -Inf  11.575  0.143 
+           trt_visit_1    7.584   <NA>  -Inf  9.055   0.143 
+         lsm_ref_visit_1  6.937   <NA>  -Inf  7.737   0.143 
+         lsm_alt_visit_1  14.522  <NA>  -Inf  15.297  0.143 
+           trt_visit_2    8.356   <NA>  -Inf   9.31   0.143 
+         lsm_ref_visit_2  6.583   <NA>  -Inf  7.426   0.143 
+         lsm_alt_visit_2  14.94   <NA>  -Inf  15.62   0.143 
+           trt_visit_3    4.397   <NA>  -Inf  4.603   0.143 
+         lsm_ref_visit_3  6.891   <NA>  -Inf  7.486   0.143 
+         lsm_alt_visit_3  11.287  <NA>  -Inf  12.09   0.143 
         ----------------------------------------------------
       
 
@@ -286,15 +286,15 @@
         ======================================================
             parameter      est     se    lci    uci     pval  
         ------------------------------------------------------
-           trt_visit_1    7.584   0.869  -Inf  9.014   <0.001 
-         lsm_ref_visit_1  6.937   0.305  -Inf   7.44   <0.001 
-         lsm_alt_visit_1  14.522  0.788  -Inf  15.818  <0.001 
-           trt_visit_2    8.356   0.592  -Inf   9.33   <0.001 
-         lsm_ref_visit_2  6.583   0.397  -Inf  7.237   <0.001 
-         lsm_alt_visit_2  14.94   0.386  -Inf  15.575  <0.001 
-           trt_visit_3    4.397   0.76   -Inf  5.647   <0.001 
-         lsm_ref_visit_3  6.891   0.293  -Inf  7.373   <0.001 
-         lsm_alt_visit_3  11.287  0.657  -Inf  12.367  <0.001 
+           trt_visit_1    7.584   0.785  -Inf  8.875   <0.001 
+         lsm_ref_visit_1  6.937   0.569  -Inf  7.874   <0.001 
+         lsm_alt_visit_1  14.522  0.577  -Inf  15.472  <0.001 
+           trt_visit_2    8.356   0.778  -Inf  9.636   <0.001 
+         lsm_ref_visit_2  6.583   0.526  -Inf  7.449   <0.001 
+         lsm_alt_visit_2  14.94   0.49   -Inf  15.745  <0.001 
+           trt_visit_3    4.397   0.495  -Inf  5.211   <0.001 
+         lsm_ref_visit_3  6.891   0.397  -Inf  7.544   <0.001 
+         lsm_alt_visit_3  11.287  0.609  -Inf  12.29   <0.001 
         ------------------------------------------------------
       
 
