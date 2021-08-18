@@ -404,7 +404,7 @@ test_that("MMRM returns expected estimates under different model specifications"
 
     dat <- ife(
         is_nightly(),
-        get_sim_data(n = 300, sigma),
+        get_sim_data(n = 150, sigma),
         get_sim_data(n = 50, sigma)
     )
 

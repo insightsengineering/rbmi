@@ -6,9 +6,9 @@ suppressPackageStartupMessages({
     library(tibble)
 })
 
-bign <- 90
+bign <- 800
 sigma <- as_covmat(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
-nsamp <- 10
+nsamp <- 250
 
 
 expect_pool_est <- function(po, expected, param = "trt_visit_3") {
