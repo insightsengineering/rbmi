@@ -7,7 +7,7 @@
 \method{print}{draws}(x, ...)
 }
 \arguments{
-\item{x}{A draws object}
+\item{x}{(\code{draws})\cr input}
 
 \item{...}{not used}
 }

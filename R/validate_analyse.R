@@ -8,7 +8,7 @@
 validate_analyse <- function(results) {
 
     assert_that(
-        class(results) %in% c("jackknife", "bootstrap", "rubin"),
+        any(class(results) %in% c("jackknife", "bootstrap", "rubin")),
         msg = "`results` must be of class 'jackknife', 'bootstrap' or 'rubin'"
     )
 

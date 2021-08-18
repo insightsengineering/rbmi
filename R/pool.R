@@ -7,17 +7,20 @@
 #' @param conf.level TODO
 #' @param alternative TODO
 #' @param type TODO
-#' @param ... TODO
 #'
 #' @export
 pool <- function(
     results,
     conf.level = 0.95,
     alternative = c("two.sided", "less", "greater"),
-    ...
+    type = c("percentile", "normal")
 ) {
 
+    res <- results$results
+    class(res) <- class(results)
+
     alternative <- match.arg(alternative)
+    type <- match.arg(type)
 
     assert_that(
         is.numeric(conf.level),
@@ -26,21 +29,33 @@ pool <- function(
         msg = "`conf.level` must be between 0 and 1"
     )
 
-    validate_analyse(results)
+    validate_analyse(res)
 
-    results_transpose <- transpose_results(results)
+    pool_type <- class(res)[[1]]
+
+    results_transpose <- transpose_results(res)
     pars <- lapply(
         results_transpose,
-        utils::getS3method("pool_", class(results)),
-        conf.level,
-        alternative,
-        ...
+        function(x, ...) {class(x) <- pool_type; pool_(x, ...)},
+        conf.level = conf.level,
+        alternative = alternative,
+        type = type
     )
+
+    if (pool_type == "bootstrap") {
+        method <- sprintf("%s (%s)", pool_type, type)
+    } else {
+        method <- pool_type
+    }
+
     ret <- list(
         pars = pars,
         conf.level = conf.level,
-        alternative = alternative
+        alternative = alternative,
+        N = length(res),
+        method = method
     )
+    class(ret) <- "pool"
     return(ret)
 }
 
@@ -50,7 +65,7 @@ pool <- function(
 
 #' @rdname pool
 #' @export
-pool_ <- function(results, conf.level, alternative, ...) {
+pool_ <- function(results, conf.level, alternative, type) {
     UseMethod("pool_")
 }
 
@@ -58,7 +73,7 @@ pool_ <- function(results, conf.level, alternative, ...) {
 #' @importFrom stats qnorm pnorm
 #' @rdname pool
 #' @export
-pool_.jackknife <- function(results, conf.level, alternative, ...){
+pool_.jackknife <- function(results, conf.level, alternative, type) {
     alpha <- 1 - conf.level
     ests <- results$est
     est_point <- ests[1]
@@ -79,8 +94,7 @@ pool_.bootstrap <- function(
     results,
     conf.level,
     alternative,
-    type = c("percentile", "normal"),
-    ...
+    type = c("percentile", "normal")
 ) {
     type <- match.arg(type)
     bootfun <- switch(
@@ -98,12 +112,12 @@ pool_.bootstrap <- function(
 #' @importFrom stats qt pt var
 #' @rdname pool
 #' @export
-pool_.rubin <- function(results, conf.level, alternative, ...) {
+pool_.rubin <- function(results, conf.level, alternative, type) {
     ests <- results$est
     ses <- results$se
     dfs <- results$df
     alpha <- 1 - conf.level
-    
+
     assert_that(
         all(!is.na(ses)),
         msg = "Standard Errors for Rubin's rules can not be NA"
@@ -149,7 +163,7 @@ pool_.rubin <- function(results, conf.level, alternative, ...) {
 
 
 #' Title
-#' @description 
+#' @description
 #' TODO
 #' @param est TODO
 #' @param conf.level TODO
@@ -262,4 +276,49 @@ transpose_results <- function(results) {
         )
     }
     return(results_transpose)
+}
+
+
+#' Converts a pool object to a data.frame
+#'
+#' @param x (`pool`)\cr input
+#' @param ... not used
+#' @export
+as.data.frame.pool <- function(x, ...) {
+    data.frame(
+        parameter = names(x$pars),
+        est =vapply(x$pars, function(x) x$est, numeric(1)),
+        se = vapply(x$pars, function(x) x$se, numeric(1)),
+        lci = vapply(x$pars, function(x) x$ci[[1]], numeric(1)),
+        uci = vapply(x$pars, function(x) x$ci[[2]], numeric(1)),
+        pval = vapply(x$pars, function(x) x$pvalue, numeric(1)),
+        stringsAsFactors = FALSE,
+        row.names = NULL
+    )
+}
+
+
+#' Print Pool Object
+#'
+#' @param x (`pool`)\cr input
+#' @param ... not used
+#' @export
+print.pool <- function(x, ...) {
+
+    string <- c(
+        "",
+        "Pool Object",
+        "-----------",
+        sprintf("Number of Results Combined: %s", x$N),
+        sprintf("Method: %s", x$method),
+        sprintf("Confidence Level: %s", x$conf.level),
+        sprintf("Alternative: %s", x$alternative),
+        "",
+        "Results:",
+        as_ascii_table(as.data.frame(x), pcol = "pval"),
+        ""
+    )
+
+    cat(string, sep = "\n")
+    return(invisible(x))
 }

@@ -87,7 +87,7 @@ impute.random <- function(draws, references, update_ice = NULL, strategies = get
         update_ice = update_ice,
         references = references,
         strategies = strategies,
-        conditionalMean = FALSE
+        condmean = FALSE
     )
     return(as_class(result, "imputation"))
 }
@@ -103,7 +103,7 @@ impute.condmean <- function(draws, references, update_ice = NULL, strategies = g
         update_ice = update_ice,
         references = references,
         strategies = strategies,
-        conditionalMean = TRUE
+        condmean = TRUE
     )
     return(as_class(result, "imputation"))
 }
@@ -126,9 +126,9 @@ impute.condmean <- function(draws, references, update_ice = NULL, strategies = g
 #' of of the list should mirror the values specified in `method` column of `data_ice`.
 #' Default = `getStrategies()`. See [getStrategies()] for more details.
 #'
-#' @param conditionalMean logical. If TRUE will impute using the conditional mean values, if values
+#' @param condmean logical. If TRUE will impute using the conditional mean values, if values
 #' will impute by taking a random draw from the multivariate normal distribution.
-impute_internal <- function(draws, references, update_ice, strategies, conditionalMean){
+impute_internal <- function(draws, references, update_ice, strategies, condmean){
 
     data <- draws$data$clone(deep = TRUE)
 
@@ -151,7 +151,7 @@ impute_internal <- function(draws, references, update_ice, strategies, condition
             data = data,
             references = references,
             strategies = strategies,
-            conditionalMean = conditionalMean
+            condmean = condmean
         ),
         SIMPLIFY = FALSE
     )
@@ -159,7 +159,8 @@ impute_internal <- function(draws, references, update_ice, strategies, condition
     x <- list(
         imputations = untranspose_samples(imputes, samples_grouped$index),
         data = data,
-        method = draws$method
+        method = draws$method,
+        references = references
     )
     return(x)
 }
@@ -286,7 +287,7 @@ invert_indexes <- function(x){
 #' of of the list should mirror the values specified in `method` column of `data_ice`.
 #' Default = `getStrategies()`. See [getStrategies()] for more details.
 #'
-#' @param conditionalMean logical. If TRUE will impute using the conditional mean values, if values
+#' @param condmean logical. If TRUE will impute using the conditional mean values, if values
 #' will impute by taking a random draw from the multivariate normal distribution.
 impute_data_individual <- function(
     id,
@@ -296,7 +297,7 @@ impute_data_individual <- function(
     data,
     references,
     strategies,
-    conditionalMean
+    condmean
 ){
 
     # Define default return value if nothing needs to be imputed
@@ -307,7 +308,7 @@ impute_data_individual <- function(
 
     id_data <- data$extract_by_id(id)
 
-    if( sum(id_data$is_missing) == 0) return(result)
+    if(sum(id_data$is_missing) == 0) return(result)
 
     vars <- data$vars
     group_pt <- as.character(id_data$group)
@@ -348,7 +349,7 @@ impute_data_individual <- function(
         values = id_data$outcome
     )
 
-    if(conditionalMean){
+    if (condmean) {
         imputed_outcome <- lapply(conditional_parameters, function(x) as.vector(x$mu))
     } else {
         imputed_outcome <- lapply(conditional_parameters, impute_outcome)
@@ -372,7 +373,7 @@ impute_data_individual <- function(
 #' @param beta List of model beta coefficients 1 for each sample i.e. `list( c(1,2,3) , c(4,5,6), c(7,8,9))`
 #' all values of beta must be the same length and must be the same length and order as `dat`
 #' @param sigma List of sigma. Must have the same number of entries as `beta`
-get_visit_distribution_parameters <- function(dat, beta, sigma){
+get_visit_distribution_parameters <- function(dat, beta, sigma) {
 
     assert_that(
         length(unique(vapply(beta, length, numeric(1)))) == 1,
@@ -387,9 +388,9 @@ get_visit_distribution_parameters <- function(dat, beta, sigma){
     )
     mu <- as.matrix(dat) %*% beta_mat
     parameters <- list()
-    for(i in seq_along(beta)){
+    for(i in seq_along(beta)) {
         parameters[[i]] <- list(
-            mu = mu[,i],
+            mu = mu[, i],
             sigma = sigma[[i]]
         )
     }
@@ -552,4 +553,42 @@ validate_strategies <- function(strategies, reference){
     return(invisible(TRUE))
 }
 
+
+
+#' Print Imputation Object
+#'
+#' @param x (`imputation`)\cr input
+#' @param ... not used
+#' @export
+print.imputation <- function(x, ...) {
+
+    ### Reference strings i.e.  A -> B
+    ref_from <- names(x$references)
+    ref_to <- x$references
+    width <- max(nchar(ref_from))
+    sstring <- paste0("%-", width, "s -> %s")
+    ref_strings <- sprintf(sstring, ref_from, ref_to)
+
+    ### % of missing data strings
+    is_miss <- matrix(unlist(x$data$is_missing), ncol = length(x$data$visits), byrow = TRUE)
+    is_miss_perc <- round((apply(is_miss, 2, sum) / nrow(is_miss)) * 100)
+    width <- max(nchar(x$data$visits))
+    sstring <- paste0("%-", width, "s: %3s%%")
+    miss_strings <- sprintf(sstring, x$data$visits, is_miss_perc)
+
+    string <- c(
+        "",
+        "Imputation Object",
+        "-----------------",
+        sprintf("Number of Imputed Datasets: %s", length(x$imputations)),
+        "Fraction of Missing Data (Original Dataset):",
+        sprintf("    %s", miss_strings),
+        "References:",
+        sprintf("    %s", ref_strings),
+        ""
+    )
+
+    cat(string, sep = "\n")
+    return(invisible(x))
+}
 

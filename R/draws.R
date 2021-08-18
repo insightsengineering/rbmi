@@ -382,10 +382,10 @@ get_jackknife_samples <- function(
 
 #' Print Draws Object
 #'
-#' @param x A draws object
+#' @param x (`draws`)\cr input
 #' @param ... not used
 #' @export
-print.draws <- function (x, ...) {
+print.draws <- function(x, ...) {
 
     frm <- as.character(x$formula)
     frm_str <- sprintf("%s ~ %s", frm[[2]], frm[[3]])
@@ -405,6 +405,7 @@ print.draws <- function (x, ...) {
     )
 
     string <- c(
+        "",
         "Draws Object",
         "------------",
         sprintf("Number of Samples: %s", length(x$samples)),
@@ -413,7 +414,8 @@ print.draws <- function (x, ...) {
         sprintf("Imputation Type: %s", class(x)[[1]]),
         "Method:",
         sprintf("    Type: %s", meth),
-        meth_args
+        meth_args,
+        ""
     )
 
     cat(string, sep = "\n")
