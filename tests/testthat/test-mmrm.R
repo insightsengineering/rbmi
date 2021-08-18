@@ -1,80 +1,43 @@
-library(glmmTMB)
+suppressPackageStartupMessages({
+    library(glmmTMB)
+    library(dplyr)
+})
 
-set.seed(123)
+
+
+compute_n_params <- function(cov_struct, nv) {
+    n_params <- switch(cov_struct,
+        "us" = nv * (nv + 1) / 2,
+        "toep" = 2 * nv - 1,
+        "cs" = nv + 1,
+        "ar1" = 2
+    )
+    return(n_params)
+}
+
+
 
 # function for checking whether x is a formula object
 is.formula <- function(x) {
     is.call(x) && x[[1]] == quote(`~`)
 }
 
-set.seed(101)
 
-n <- 30
-nv <- 3
 
-covars <- tibble(
-    subjid = 1:n,
-    age = rnorm(n),
-    group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),
-    sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F")),
-    strata = c(rep("A",n/2), rep("B", n/2))
-)
 
-data <- tibble(
-    subjid = rep.int(1:n, nv)
-) %>%
-    left_join(covars, by = "subjid") %>%
-    mutate( outcome = rnorm(
-        n(),
-        age * 3 + (as.numeric(sex) - 1) * 3 + (as.numeric(group) - 1) * 4,
-        sd = 3
-    )) %>%
-    arrange(subjid) %>%
-    group_by(subjid) %>%
-    mutate( visit = factor(paste0("Visit", 1:n())))  %>%
-    ungroup() %>%
-    mutate(subjid = as.character(subjid))
-
-vars <- list(
-    outcome = "outcome",
-    visit = "visit",
-    subjid = "subjid",
-    group = "group",
-    strata = "strata",
-    covariates = c("sex", "age", "group*visit"),
-    method = "method"
-)
-
-formula <- outcome ~ sex + age + visit*group
-designmat <- model.matrix(formula, data)
-
-data[sample(1:(nv*n), size = 7), "outcome"] <- NA
-
-names_groups <- c("A", "B")
-
-compute_n_params <- function(cov_struct, nv) {
-    if(cov_struct == "us") {
-        n_params <- nv*(nv+1)/2
-    } else if(cov_struct == "toep") {
-        n_params <- 2*nv - 1
-    } else if(cov_struct == "cs") {
-        n_params <- nv + 1
-    } else if(cov_struct == "ar1") {
-        n_params <- 2
-    }
-
-    return(n_params)
-}
-
-test_fit_mmrm <- function(fit, cov_struct, nv, same_cov) {
+expect_valid_fit_object <- function(fit, cov_struct, nv, same_cov) {
 
     n_params <- compute_n_params(cov_struct, nv)
 
-    if(!same_cov) {
-        n_params <- 2*n_params
+    if (!same_cov) {
+        n_params <- 2 * n_params
     }
 
+
     expect_type(fit, "list")
+    expect_length(fit, 4)
+
+    expect_true(all(names(fit) %in% c("beta", "sigma", "converged", "theta")))
 
     expect_vector(fit$beta)
     expect_length(fit$beta, 8)
@@ -90,69 +53,30 @@ test_fit_mmrm <- function(fit, cov_struct, nv, same_cov) {
     expect_length(fit$theta, n_params)
 
     expect_true(fit$converged %in% c(TRUE, FALSE))
-
 }
 
-test_mmrm_numeric <- function(data, vars, formula_expr, same_cov) {
 
-    formula <- as.formula(formula_expr)
-    designmat <- as_model_df(data, formula)
 
-    fit <- fit_mmrm(
-        designmat = designmat[,-1],
-        outcome = data$outcome,
-        subjid = data$subjid,
-        visit = data$visit,
-        group = data$group,
-        vars = vars,
-        cov_struct = "us",
-        REML = TRUE,
-        same_cov = same_cov,
-        initial_values = NULL,
-        optimizer = "BFGS"
-    )
-    names(fit$beta) <- NULL
+extract_test_fit <- function(mod) {
 
-    covariance <- ifelse(
-        same_cov,
-        " + us(0 + visit | subjid)",
-        " + us(0 + A:visit | subjid) + us(0 + B:visit | subjid)"
-    )
-    formula_ext <- as.formula(  paste0(formula_expr, covariance ) )
-
-    if(!same_cov) {
-        names_data <- colnames(data)
-        data <- cbind(data, model.matrix(~ 0 + data$group))
-        colnames(data) <- c(names_data, c("A", "B"))
-    }
-
-    control <- glmmTMBControl(
-        optimizer = optim,
-        optArgs = list(method = "BFGS"),
-        parallel = 1
-    )
-
-    fit_expected <- glmmTMB(
-        formula_ext,
-        dispformula = ~0,
-        data = data,
-        REML = TRUE,
-        control = control)
-
-    beta <- fixef(fit_expected)$cond
+    beta <- fixef(mod)$cond
     names(beta) <- NULL
 
-    sigma <- VarCorr(fit_expected)$cond
-    sigma <- lapply(sigma, function(x) as.matrix(data.frame(x)))
-    if(same_cov) {
-        sigma = list("A" = sigma[[1]], "B" = sigma[[1]])
-    } else {
-        sigma = list("A" = sigma[[1]], "B" = sigma[[2]])
-    }
+    sigma <- VarCorr(mod)$cond
+    sigma <- lapply(sigma, function(x) {
+        x <- as.matrix(data.frame(x))
+        rownames(x) <- NULL
+        colnames(x) <- NULL
+        return(x)
+    })
+    sigma <- ife(
+        length(sigma) == 1,
+        list("A" = sigma[[1]], "B" = sigma[[1]]),
+        list("A" = sigma[[1]], "B" = sigma[[2]])
+    )
+    theta <- getME(mod, name = "theta")
 
-    theta <- getME(fit_expected, name = "theta")
-
-    converged <- ifelse(fit_expected$fit$convergence == 0, TRUE, FALSE)
+    converged <- ifelse(mod$fit$convergence == 0, TRUE, FALSE)
 
     output_expected <- list(
         beta = beta,
@@ -160,513 +84,367 @@ test_mmrm_numeric <- function(data, vars, formula_expr, same_cov) {
         theta = theta,
         converged = converged
     )
-
-    expect_equal(fit, output_expected, ignore_attr = TRUE)
-
+    return(output_expected)
 }
 
-test_that(
-    "black spaces and : are correctly removed",
-    {
-        string_list <- list(
-            "subjid" = "subjid  ",
-            "visit" = "vis it",
-            "group" = "group 12  3",
-            "outcome" = " respons e 4"
-        )
 
-        string_char <- c("c h  ar 1", "char  2 ")
 
-        string_list_nospaces <- lapply(
-            string_list,
-            function(x) remove_character(x, " ")
-        )
 
-        string_char_nospaces <- remove_character(string_char, " ")
+test_mmrm_numeric <- function(dat, formula_expr, same_cov, scale = FALSE) {
 
-        expect_equal(
-            string_list_nospaces,
-            list(
-                "subjid" = "subjid",
-                "visit" = "visit",
-                "group" = "group123",
-                "outcome" = "response4"
-            )
-        )
+    formula <- as.formula(formula_expr)
+    designmat <- as_model_df(dat, formula)
 
-        expect_equal(
-            string_char_nospaces,
-            c("char1", "char2")
-        )
-
-        string_list <- list(
-            "subjid" = "subjid:visit",
-            "visit" = "visit",
-            "group" = "group:visit",
-            "outcome" = "response:visit"
-        )
-        actual_output <- lapply(
-            string_list,
-            function(x) remove_character(x, ":")
-        )
-
-        expect_equal(
-            actual_output,
-            list(
-                "subjid" = "subjidvisit",
-                "visit" = "visit",
-                "group" = "groupvisit",
-                "outcome" = "responsevisit"
-            )
-        )
+    if(scale){
+        dat_limit <- ceiling(nrow(dat) / 2)
+        scaler <- scalerConstructor$new(designmat[seq_len(dat_limit),])
+        dmat <- scaler$scale(designmat)
+    } else {
+        dmat <- designmat
     }
-)
 
-test_that(
-    "designmat_to_formula returns a formula object",
-    {
-        formula_output <- designmat_to_formula(
-            designmat = designmat,
-            outcome_var = vars$outcome
-        )
+    fit_actual <- fit_mmrm(
+        designmat = dmat[, -1, drop = FALSE],
+        outcome = as.data.frame(dmat)[[1]],
+        subjid = dat$id,
+        visit = dat$visit,
+        group = dat$group,
+        cov_struct = "us",
+        REML = TRUE,
+        same_cov = same_cov,
+        initial_values = NULL,
+        optimizer = "BFGS"
+    )
 
-        expect_true(is.formula(formula_output))
+    if(scale){
+        fit_actual$beta <- scaler$unscale_beta(fit_actual$beta)
+        fit_actual$sigma <- lapply(fit_actual$sigma, function(x) scaler$unscale_sigma(x))
+    }
 
-    })
+    covariance <- ife(
+        same_cov,
+        " + us(0 + visit | id)",
+        " + us(0 + GA:visit | id) + us(0 + GB:visit | id)"
+    )
 
-test_that(
-    "random effect expression is built correctly",
-    {
+    if(!same_cov){
+        dat <- dat %>%
+            mutate(GA = if_else(group == "A", 1, 0)) %>% 
+            mutate(GB = if_else(group == "B", 1, 0))
+    }
 
-        ################## same_cov = TRUE
-        same_cov = TRUE
-        expected_output <- " + us(0 + visit | subjid)"
-
-        expect_equal(random_effects_expr(
-            vars,
-            names_groups,
-            cov_struct = "us",
-            same_cov = same_cov
-        ),
-        expected_output)
-
-        expect_error(
-            random_effects_expr(
-                vars,
-                names_groups,
-                cov_struct = "unstructured",
-                same_cov = same_cov
-            )
-        )
-
-        ################## same_cov = FALSE
-        same_cov = FALSE
-        expected_output <- " + us(0 + A:visit | subjid) + us(0 + B:visit | subjid)"
-
-        expect_equal(
-            random_effects_expr(
-                vars,
-                names_groups,
-                cov_struct = "us",
-                same_cov = same_cov
-            ),
-            expected_output
-        )
-
-        expected_output <- " + toep(0 + A:visit | subjid) + toep(0 + B:visit | subjid)"
-        expect_equal(
-            random_effects_expr(
-                vars,
-                names_groups,
-                cov_struct = "toep",
-                same_cov = same_cov
-            ),
-            expected_output
-        )
-
-    })
-
-test_that(
-    "formula is build correctly",
-    {
-        ################## same_cov = TRUE
-        same_cov = TRUE
-        expected_output <- as.formula(outcome ~ sexF + age + visitVisit2 + visitVisit3 + groupB + visitVisit2:groupB +
-                                          visitVisit3:groupB + us(0 + visit | subjid))
-
-        formula <- formula_mmrm(
-            designmat,
-            vars,
-            names_groups,
-            cov_struct = "us",
-            same_cov = same_cov
-        )
-
-        expect_true(is.formula(formula))
-        expect_equal(formula, expected_output, ignore_attr = TRUE)
-
-        ################## same_cov = FALSE
-        same_cov = FALSE
-        expected_output <- as.formula(outcome ~ sexF + age + visitVisit2 + visitVisit3 + groupB + visitVisit2:groupB +
-                                          visitVisit3:groupB + us(0 + A:visit | subjid) + us(0 + B:visit | subjid))
-
-        formula <- formula_mmrm(
-            designmat,
-            vars,
-            names_groups,
-            cov_struct = "us",
-            same_cov = same_cov
-        )
-
-        expect_true(is.formula(formula))
-        expect_equal(formula, expected_output, ignore_attr = TRUE)
-    })
-
-test_that(
-    "MMRM model fit has expected output structure (same_cov = TRUE)",
-    {
-        same_cov <- TRUE
-
-        ############# US
-        fit <- fit_mmrm(
-            designmat = designmat,
-            outcome = data$outcome,
-            subjid = data$subjid,
-            visit = data$visit,
-            group = data$group,
-            vars = vars,
-            cov_struct = "us",
-            REML = TRUE,
-            same_cov = same_cov,
-            initial_values = NULL,
-            optimizer = "L-BFGS-B"
-        )
-
-        expect_length(fit, 4)
-        test_fit_mmrm(fit, "us", nv, same_cov)
-
-        ############# TOEP
-        fit <- fit_mmrm(
-            designmat = designmat,
-            outcome = data$outcome,
-            subjid = data$subjid,
-            visit = data$visit,
-            group = data$group,
-            vars = vars,
-            cov_struct = "toep",
-            REML = TRUE,
-            same_cov = same_cov,
-            initial_values = NULL,
-            optimizer = "BFGS"
-        )
-
-        expect_length(fit, 4)
-        test_fit_mmrm(fit, "toep", nv, same_cov)
-
-        ############# CS
-        fit <- fit_mmrm(
-            designmat = designmat,
-            outcome = data$outcome,
-            subjid = data$subjid,
-            visit = data$visit,
-            group = data$group,
-            vars = vars,
-            cov_struct = "cs",
-            REML = TRUE,
-            same_cov = same_cov,
-            initial_values = NULL,
-            optimizer = "BFGS"
-        )
-
-        expect_length(fit, 4)
-        test_fit_mmrm(fit, "cs", nv, same_cov)
-
-        ############# AR1
-        fit <- fit_mmrm(
-            designmat = designmat,
-            outcome = data$outcome,
-            subjid = data$subjid,
-            visit = data$visit,
-            group = data$group,
-            vars = vars,
-            cov_struct = "ar1",
-            REML = TRUE,
-            same_cov = same_cov,
-            initial_values = NULL,
-            optimizer = "BFGS"
-        )
-
-        expect_length(fit, 4)
-        test_fit_mmrm(fit, "ar1", nv, same_cov)
-
-    })
-
-test_that(
-    "MMRM model fit has expected output structure (same_cov = FALSE)",
-    {
-        same_cov <- FALSE
-
-        fit <- fit_mmrm(
-            designmat = designmat,
-            outcome = data$outcome,
-            subjid = data$subjid,
-            visit = data$visit,
-            group = data$group,
-            vars = vars,
-            cov_struct = "us",
-            REML = TRUE,
-            same_cov = same_cov,
-            initial_values = NULL,
-            optimizer = "L-BFGS-B"
-        )
-
-        expect_length(fit, 4)
-        test_fit_mmrm(fit, "us", nv, same_cov)
-
-    })
-
-test_that(
-    "MMRM model fit has expected output structure (REML = FALSE)",
-    {
-        same_cov <- TRUE
-
-        fit <- fit_mmrm(
-            designmat = designmat,
-            outcome = data$outcome,
-            subjid = data$subjid,
-            visit = data$visit,
-            group = data$group,
-            vars = vars,
-            cov_struct = "us",
-            REML = FALSE,
-            same_cov = same_cov,
-            initial_values = NULL,
-            optimizer = "L-BFGS-B"
-        )
-
-        expect_length(fit, 4)
-        test_fit_mmrm(fit, "us", nv, same_cov)
-
-    })
-
-test_that(
-    "MMRM returns expected estimates (same_cov = TRUE)",
-    {
-        same_cov <- TRUE
-
-        fit <- fit_mmrm(
-            designmat = designmat,
-            outcome = data$outcome,
-            subjid = data$subjid,
-            visit = data$visit,
-            group = data$group,
-            vars = vars,
-            cov_struct = "us",
-            REML = TRUE,
-            same_cov = same_cov,
-            initial_values = NULL,
-            optimizer = "BFGS"
-        )
-
-        formula_ext <- outcome ~ sex + age + visit*group + us(0 + visit | subjid)
-        control <- glmmTMBControl(
+    mod <- glmmTMB(
+        as.formula(paste0(formula_expr, covariance)),
+        dispformula = ~0,
+        data = dat,
+        REML = TRUE,
+        control = glmmTMBControl(
             optimizer = optim,
             optArgs = list(method = "BFGS"),
             parallel = 1
         )
+    )
 
-        fit_expected <- glmmTMB(
-            formula_ext,
-            dispformula = ~0,
-            data = data,
-            REML = TRUE,
-            control = control)
+    fit_expected <- extract_test_fit(mod)
 
-        beta <- fixef(fit_expected)$cond
-        names(beta) <- remove_character(names(beta), ":")
-        sigma <- VarCorr(fit_expected)$cond
-        sigma <- lapply(sigma, function(x) as.matrix(data.frame(x)))
-        theta <- getME(fit_expected, name = "theta")
+    if (scale) {
+        expect_true(all(
+            abs(fit_actual$beta - fit_expected$beta) < 0.001
+        ))
 
-        converged <- ifelse(fit_expected$fit$convergence == 0, TRUE, FALSE)
+        limit_a <- fit_expected$sigma[["A"]] - (fit_expected$sigma[["A"]] * 0.99)
+        limit_b <- fit_expected$sigma[["B"]] - (fit_expected$sigma[["B"]] * 0.99)
 
-        output_expected <- list(
-            beta = beta,
-            sigma = list("A" = sigma[[1]], "B" = sigma[[1]]),
-            theta = theta,
-            converged = converged
-        )
+        expect_true(all(
+            abs(fit_actual$sigma[["A"]] - fit_expected$sigma[["A"]]) < limit_a
+        ))
 
-        expect_equal(fit, output_expected, ignore_attr = TRUE)
+        expect_true(all(
+            abs(fit_actual$sigma[["B"]] - fit_expected$sigma[["B"]]) < limit_b
+        ))
 
+    } else {
+        expect_equal(fit_actual, fit_expected)
     }
+}
+
+
+
+
+set.seed(101)
+
+sigma <- as_covmat(c(5, 3, 8), c(0.4, 0.6, 0.3))
+
+dat <- get_sim_data(n = 30, sigma) %>%
+    mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 1, NA_real_, outcome))
+
+vars <- list(
+    outcome = "outcome",
+    visit = "visit",
+    subjid = "subjid",
+    group = "group",
+    covariates = c("sex", "age", "group*visit"),
+    method = "method"
 )
 
-test_that(
-    "MMRM returns expected estimates (same_cov = FALSE)",
-    {
-        same_cov <- FALSE
+formula <- outcome ~ sex + age + visit*group
+designmat <- as_model_df(dat = dat, formula)
 
-        fit <- fit_mmrm(
-            designmat = designmat,
-            outcome = data$outcome,
-            subjid = data$subjid,
-            visit = data$visit,
-            group = data$group,
-            vars = vars,
-            cov_struct = "us",
-            REML = TRUE,
-            same_cov = same_cov,
-            initial_values = NULL,
-            optimizer = "L-BFGS-B"
-        )
+args_default <- list(
+    designmat = designmat[, -1, drop = FALSE],
+    outcome = dat$outcome,
+    subjid = dat$id,
+    visit = dat$visit,
+    group = dat$group,
+    REML = TRUE,
+    cov_struct = "us",
+    same_cov = TRUE,
+    initial_values = NULL,
+    optimizer = "L-BFGS-B"
+)
 
 
-        levels(data$group) <- remove_character(levels(data$group), " ")
 
-        # create dummy variables for each arm
-        groups_mat <- stats::model.matrix(~ 0 + data$group)
-        colnames(groups_mat) <- levels(data$group)
-        data <- cbind(data,
-                      "A" = groups_mat[,1],
-                      "B" = groups_mat[,2])
-        formula_ext <- outcome ~ sex + age + visit*group + us(0 + A:visit | subjid) + us(0 + B:visit | subjid)
-        control <- glmmTMBControl(
+test_that("as_mmrm_df & as_mmrm_formula", {
+
+    sigma <- as_covmat(c(2, 6, 3), c(0.4,0.7,0.5))
+    dat <- get_sim_data(100, sigma)
+
+
+    #### Without Groupings
+    x <- as_mmrm_df(
+        designmat = dat,
+        outcome = dat$outcome,
+        visit = dat$visit,
+        subjid = dat$id
+    )
+
+    expect_equal(ncol(x), ncol(dat) + 3)
+    expect_equal(
+        colnames(x),
+        c(paste0("V", seq_len(ncol(dat))), "outcome", "visit", "subjid")
+    )
+    expect_equal(nrow(x), nrow(dat))
+
+    frm_actual <- as_mmrm_formula(x, "us")
+    frm_expected <- outcome ~ V1 + V2 + V3 + V4 + V5 + V6 + us(0 + visit | subjid) - 1
+    expect_equal(frm_expected, frm_actual, ignore_attr = TRUE)
+
+
+    #### With Groupings
+    x <- as_mmrm_df(
+        designmat = dat,
+        outcome = dat$outcome,
+        visit = dat$visit,
+        subjid = dat$id,
+        groups = sample(c("A", "B", "C"), size = nrow(x), replace = TRUE)
+    )
+
+    expect_equal(ncol(x), ncol(dat) + 6)
+    expect_equal(
+        colnames(x),
+        c(paste0("V", seq_len(ncol(dat))), "outcome", "visit", "subjid", "G1", "G2", "G3")
+    )
+    expect_equal(nrow(x), nrow(dat))
+
+
+    frm_actual <- as_mmrm_formula(x, "us")
+    frm_expected <- outcome ~ V1 + V2 + V3 + V4 + V5 + V6 +
+        us(0 + G1:visit | subjid) +
+        us(0 + G2:visit | subjid) +
+        us(0 + G3:visit | subjid) - 1
+    expect_equal(frm_expected, frm_actual, ignore_attr = TRUE)
+
+
+    frm_actual <- as_mmrm_formula(x, "toep")
+    frm_expected <- outcome ~ V1 + V2 + V3 + V4 + V5 + V6 +
+        toep(0 + G1:visit | subjid) +
+        toep(0 + G2:visit | subjid) +
+        toep(0 + G3:visit | subjid) - 1
+    expect_equal(frm_expected, frm_actual, ignore_attr = TRUE)
+    expect_error(as_mmrm_formula(x, "toep2"), regexp = "'arg' should be one of")
+})
+
+
+
+
+test_that("MMRM model fit has expected output structure (same_cov = TRUE)",{
+
+    ############# US
+    args <- args_default
+    args$cov_struct <- "us"
+    fit <- do.call(fit_mmrm, args = args)
+    expect_valid_fit_object(fit, "us", 3, TRUE)
+
+
+    ############# TOEP
+    args <- args_default
+    args$cov_struct <- "toep"
+    fit <- do.call(fit_mmrm, args = args)
+    expect_valid_fit_object(fit, "toep", 3, TRUE)
+
+
+    ############# CS
+    args <- args_default
+    args$cov_struct <- "cs"
+    fit <- do.call(fit_mmrm, args = args)
+    expect_valid_fit_object(fit, "cs", 3, TRUE)
+
+
+    ############# AR1
+    args <- args_default
+    args$cov_struct <- "ar1"
+    fit <- do.call(fit_mmrm, args = args)
+    expect_valid_fit_object(fit, "ar1", 3, TRUE)
+})
+
+
+test_that("MMRM model fit has expected output structure (same_cov = FALSE)",{
+    args <- args_default
+    args$same_cov <- FALSE
+    fit <- do.call(fit_mmrm, args = args)
+    expect_valid_fit_object(fit, "us", 3, FALSE)
+})
+
+
+test_that("MMRM model fit has expected output structure (REML = FALSE)", {
+    args <- args_default
+    args$REML <- FALSE
+    fit <- do.call(fit_mmrm, args = args)
+    expect_valid_fit_object(fit, "us", 3, TRUE)
+})
+
+
+
+
+
+test_that("MMRM returns expected estimates (same_cov = TRUE)", {
+    args <- args_default
+    fit <- do.call(fit_mmrm, args = args)
+
+    mod <- glmmTMB(
+        outcome ~ sex + age + visit * group + us(0 + visit | id),
+        dispformula = ~0,
+        data = dat,
+        REML = TRUE,
+        control = glmmTMBControl(
             optimizer = optim,
-            optArgs = list(method = "L-BFGS-B"),
-            parallel = 1
+            optArgs = list(method = "L-BFGS-B")
         )
+    )
+    expect_equal(fit, extract_test_fit(mod))
+})
 
-        fit_expected <- glmmTMB(
-            formula_ext,
-            dispformula = ~0,
-            data = data,
-            REML = TRUE,
-            control = control)
 
-        beta <- fixef(fit_expected)$cond
-        names(beta) <- remove_character(names(beta), ":")
-        sigma <- VarCorr(fit_expected)$cond
-        sigma <- lapply(sigma, function(x) as.matrix(data.frame(x)))
-        names(sigma) <- c("A", "B")
-        theta <- getME(fit_expected, name = "theta")
+test_that("MMRM returns expected estimates (same_cov = FALSE)", {
 
-        converged <- ifelse(fit_expected$fit$convergence == 0, TRUE, FALSE)
+    args <- args_default
+    args$same_cov <- FALSE
+    fit <- do.call(fit_mmrm, args = args)
 
-        output_expected <- list(
-            beta = beta,
-            sigma = sigma,
-            theta = theta,
-            converged = converged
+    dat2 <- dat %>%
+        mutate(GA = if_else(group == "A", 1, 0)) %>% 
+        mutate(GB = if_else(group == "B", 1, 0))
+
+    mod <- glmmTMB(
+        outcome ~ sex + age + visit * group + us(0 + GA:visit | id) + us(0 + GB:visit | id),
+        dispformula = ~0,
+        data = dat2,
+        REML = TRUE,
+        control = glmmTMBControl(
+            optimizer = optim,
+            optArgs = list(method = "L-BFGS-B")
         )
+    )
 
-        expect_equal(fit, output_expected, ignore_attr = TRUE)
+    expect_equal(fit, extract_test_fit(mod))
+})
 
-    }
-)
 
-test_that(
-    "MMRM model with multiple optimizers has expected output",
-    {
-        ########### SINGLE OPTIMIZER
-        same_cov <- TRUE
 
-        fit <- fit_mmrm_multiopt(
-            designmat = designmat,
-            outcome = data$outcome,
-            subjid = data$subjid,
-            visit = data$visit,
-            group = data$group,
-            vars = vars,
-            cov_struct = "us",
-            REML = TRUE,
-            same_cov = same_cov,
-            initial_values = NULL,
-            optimizer = c("BFGS")
-        )
+test_that("MMRM model with multiple optimizers has expected output",{
 
-        expect_length(fit, 5)
-        expect_true(fit$converged)
-        expect_equal(fit$optimizer, "BFGS")
+    ###### Single optimiser
+    args <- args_default
+    args$optimizer <- "BFGS"
 
-        test_fit_mmrm(fit, "us", nv, same_cov)
+    args$same_cov <- FALSE
 
-        ########### TWO OPTIMIZERS
-        fit <- fit_mmrm_multiopt(
-            designmat = designmat,
-            outcome = data$outcome,
-            subjid = data$subjid,
-            visit = data$visit,
-            group = data$group,
-            vars = vars,
-            cov_struct = "us",
-            REML = TRUE,
-            same_cov = same_cov,
-            initial_values = NULL,
-            optimizer = c("Nelder-Mead", "L-BFGS-B")
-        )
+    fit1 <- do.call(fit_mmrm_multiopt, args = args)
+    fit2 <- do.call(fit_mmrm, args = args)
 
-        expect_length(fit, 5)
-        expect_true(fit$converged)
-        expect_equal(fit$optimizer, "L-BFGS-B")
+    expect_equal(fit1$optimizer, "BFGS")
+    fit1$optimizer <- NULL
 
-        test_fit_mmrm(fit, "us", nv, same_cov)
-    })
+    expect_equal(fit1, fit2)
+    expect_valid_fit_object(fit1, "us", 3, FALSE)
 
-test_that(
-    "MMRM returns expected estimates under different model specifications (same_cov = TRUE)",
-    {
-        same_cov = TRUE
+
+    ###### Multiple optimisers
+    args$optimizer <- c("BFGS", "Nelder-Mead", "L-BFGS-B")
+
+    fit3 <- do.call(fit_mmrm_multiopt, args = args)
+
+    expect_equal(fit3$optimizer, "BFGS")
+    fit3$optimizer <- NULL
+
+    expect_valid_fit_object(fit3, "us", 3, FALSE)
+    expect_equal(fit3, fit2)
+})
+
+
+
+
+
+test_that("MMRM returns expected estimates under different model specifications", {
+
+    set.seed(101)
+
+    sigma <- as_covmat(c(5, 3, 8), c(0.4, 0.6, 0.3))
+
+    dat <- ife(
+        is_nightly(),
+        get_sim_data(n = 150, sigma),
+        get_sim_data(n = 50, sigma)
+    )
+
+    dat <- dat %>%
+        mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 1, NA_real_, outcome))
+
+
+    runtests <- function(same_cov, scale) {
 
         formula_expr <- "outcome ~ sex*visit + age*visit + visit*group"
-        test_mmrm_numeric(data, vars, formula_expr, same_cov)
-
-        formula_expr <- "outcome ~ sex*group + age*group + visit*group"
-        test_mmrm_numeric(data, vars, formula_expr, same_cov)
-
-        formula_expr <- "outcome ~ sex*group*visit + age*group*visit + visit*group"
-        test_mmrm_numeric(data, vars, formula_expr, same_cov)
-
-        formula_expr <- "outcome ~ sex + age + sex:age + sex*visit + age:group + visit*group"
-        test_mmrm_numeric(data, vars, formula_expr, same_cov)
-
-        formula_expr <- "outcome ~ visit + age*visit*group + sex + visit*group"
-        test_mmrm_numeric(data, vars, formula_expr, same_cov)
-
-        formula_expr <- "outcome ~ sex^2"
-        test_mmrm_numeric(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(dat, formula_expr, same_cov, scale)
 
         formula_expr <- "outcome ~ age:sex^2 + sex:age*group + visit*group"
-        test_mmrm_numeric(data, vars, formula_expr, same_cov)
+        test_mmrm_numeric(dat, formula_expr, same_cov, scale)
+
+        if (is_nightly()) {
+            formula_expr <- "outcome ~ sex*group + age*group + visit*group"
+            test_mmrm_numeric(dat, formula_expr, same_cov, scale)
+
+            formula_expr <- "outcome ~ sex*group*visit + age*group*visit + visit*group"
+            test_mmrm_numeric(dat, formula_expr, same_cov, scale)
+
+            formula_expr <- "outcome ~ sex + age + sex:age + sex*visit + age:group + visit*group"
+            test_mmrm_numeric(dat, formula_expr, same_cov, scale)
+
+            formula_expr <- "outcome ~ visit + age*visit*group + sex + visit*group"
+            test_mmrm_numeric(dat, formula_expr, same_cov, scale)
+
+            formula_expr <- "outcome ~ sex^2"
+            test_mmrm_numeric(dat, formula_expr, same_cov, scale)
+        }
 
     }
-)
 
-test_that(
-    "MMRM returns expected estimates under different model specifications (same_cov = FALSE)",
-    {
-        same_cov = FALSE
+    runtests(TRUE, FALSE)
+    runtests(TRUE, TRUE)
 
-        formula_expr <- "outcome ~ sex*visit + age*visit + visit*group"
-        test_mmrm_numeric(data, vars, formula_expr, same_cov)
-
-        formula_expr <- "outcome ~ sex*group + age*group + visit*group"
-        test_mmrm_numeric(data, vars, formula_expr, same_cov)
-
-        formula_expr <- "outcome ~ sex*group*visit + age*group*visit + visit*group"
-        test_mmrm_numeric(data, vars, formula_expr, same_cov)
-
-        formula_expr <- "outcome ~ sex + age + sex:age + sex*visit + age:group + visit*group"
-        test_mmrm_numeric(data, vars, formula_expr, same_cov)
-
-        formula_expr <- "outcome ~ visit + age*visit*group + sex + visit*group"
-        test_mmrm_numeric(data, vars, formula_expr, same_cov)
-
-        formula_expr <- "outcome ~ sex^2"
-        test_mmrm_numeric(data, vars, formula_expr, same_cov)
-
-        formula_expr <- "outcome ~ age:sex^2 + sex:age*group + visit*group"
-        test_mmrm_numeric(data, vars, formula_expr, same_cov)
-
+    if (is_nightly()) {
+        runtests(FALSE, FALSE)
+        runtests(FALSE, TRUE)
     }
-)
+
+})

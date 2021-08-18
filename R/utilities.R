@@ -31,6 +31,7 @@ as_simple_formula <- function(vars){
 }
 
 
+
 #' Expand dataframe into a design matrix
 #'
 #' Expands out a dataframe using a formula to create a design matrix.
@@ -42,7 +43,7 @@ as_simple_formula <- function(vars){
 #'
 #' @param dat a data.frame
 #' @param frm a formula
-as_model_df <- function(dat, frm){
+as_model_df <- function(dat, frm) {
 
     outcome <- as.character(attr(stats::terms(frm), "variables")[[2]])
     is_missing <- is.na(dat[[outcome]])
@@ -54,12 +55,14 @@ as_model_df <- function(dat, frm){
         nrow(design_mat) == nrow(dat),
         msg = "Model matrix has less rows than input dataset. You may have missing values."
     )
+
     full_mat <- cbind(dat[[outcome]], design_mat)
-    colnames(full_mat)[[1]] <- outcome
+    colnames(full_mat) <- c("outcome", paste0("V", seq_len(ncol(full_mat) - 1)))
     design <- as.data.frame(full_mat)
     class(design) <- class(dat)
     return(design)
 }
+
 
 
 #' Title - TODO
@@ -77,6 +80,7 @@ char2fct <- function(data) {
 }
 
 
+
 #' Title - TODO
 #'
 #' A wrapper around if() else() to prevent unexpected
@@ -92,8 +96,6 @@ ife <- function(x, a, b) {
         return(b)
     }
 }
-
-
 
 
 
@@ -123,7 +125,6 @@ sample_mvnorm <- function(mu, sigma) {
 
 
 
-
 #' Capture Warnings
 #'
 #' This function silences all warnings and instead returns
@@ -143,6 +144,8 @@ record_warnings <- function(expr) {
     list(results = result, warnings = env$warning)
 }
 
+
+
 #' Is value absent
 #'
 #' Returns true if a value is either NULL, NA or "".
@@ -156,7 +159,6 @@ is_absent <- function(x, na = TRUE, blank = TRUE) {
     if (is.null(x)) {
         return(TRUE)
     }
-
 
     if (na) {
         if (all(is.na(x))) {
@@ -175,7 +177,6 @@ is_absent <- function(x, na = TRUE, blank = TRUE) {
 
 
 
-
 #' Extract Variables from string vector
 #'
 #' Takes a string including potentially model terms like `*` and `:` and
@@ -185,7 +186,7 @@ is_absent <- function(x, na = TRUE, blank = TRUE) {
 #'
 #' @param x string of variable names potentially including interaction terms
 extract_covariates <- function(x) {
-    if(is.null(x)) return(x)
+    if (is.null(x)) return(x)
     x_split <- strsplit(x, ":|\\*")
     x_vec <- unlist(x_split, use.names = FALSE)
     x_nws <- trimws(x_vec)

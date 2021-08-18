@@ -11,21 +11,20 @@ set_col_names <- function(x, nam) {
 
 f2n <- function(x) as.numeric(x) - 1
 
+
+
 as_covmat <- function(sig, corr) {
-    len <- length(sig)
-    cormat <- diag(rep(1, len))
-    index <- 1
-    for (i in 1:len) {
-        for (j in 1:len) {
-            if (i < j) {
-                cormat[i, j] <- corr[index]
-                cormat[j, i] <- corr[index]
-                index <- index + 1
-            }
-        }
-    }
-    return((sig %*% t(sig)) * cormat)
+    x <- diag(rep(1, length(sig)))
+    x[upper.tri(x)] <- corr
+    x <- t(x)
+    x[upper.tri(x)] <- corr
+    res <- diag(sig) %*% x %*% diag(sig)
+    res <- as.matrix(Matrix::nearPD(res)$mat)
+    assert_that(isSymmetric(res))
+    return(res)
 }
+
+
 
 strip_names <- function(x) {
     names(x) <- NULL
@@ -67,4 +66,21 @@ time_it <- function(expr){
     expr
     stop <- Sys.time()
     difftime(stop, start, units = "secs")
+}
+
+
+
+expect_within <- function(x, bounds) {
+    expect_gt(x, bounds[1])
+    expect_lt(x, bounds[2])
+}
+
+
+expect_contains <- function(x, y) {
+    expect_within(y, x)
+}
+
+
+is_nightly <- function(){
+    Sys.getenv("R_TEST_NIGHTLY") == "TRUE"
 }

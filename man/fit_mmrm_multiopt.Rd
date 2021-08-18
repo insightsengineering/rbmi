@@ -4,40 +4,10 @@
 \alias{fit_mmrm_multiopt}
 \title{Title}
 \usage{
-fit_mmrm_multiopt(
-  designmat,
-  outcome,
-  subjid,
-  visit,
-  group,
-  vars,
-  cov_struct = c("us", "toep", "cs", "ar1"),
-  REML = TRUE,
-  same_cov = TRUE,
-  initial_values = NULL,
-  optimizer = "L-BFGS-B"
-)
+fit_mmrm_multiopt(..., optimizer = "L-BFGS-B")
 }
 \arguments{
-\item{designmat}{TODO}
-
-\item{outcome}{TODO}
-
-\item{subjid}{TODO}
-
-\item{visit}{TODO}
-
-\item{group}{TODO}
-
-\item{vars}{TODO}
-
-\item{cov_struct}{TODO}
-
-\item{REML}{TODO}
-
-\item{same_cov}{TODO}
-
-\item{initial_values}{TODO}
+\item{...}{TODO}
 
 \item{optimizer}{TODO}
 }

@@ -1,118 +1,97 @@
 
+
+
 #' Title
 #'
-#' @param strings TODO
-#' @param chr TODO
-remove_character <- function(strings, chr) {
+#' @param cov_struct TODO
+#' @param groups TODO
+random_effects_expr <- function(
+    cov_struct = c("us", "toep", "cs", "ar1"),
+    groups = NULL
+) {
+    match.arg(cov_struct)
+    if (length(groups) == 0) groups <- NULL
+    grp_expr <- ife(is.null(groups), "", paste0(groups, ":"))
+    expr <- paste0(
+        sprintf("%s(0 + %svisit | subjid)", cov_struct, grp_expr),
+        collapse = " + "
+    )
+    return(paste0(expr))
+}
+
+
+#' TODO
+#' 
+#' @param designmat TODO
+#' @param outcome TODO
+#' @param visit TODO
+#' @param subjid TODO
+#' @param groups TODO
+as_mmrm_df <- function(
+    designmat,
+    outcome,
+    visit,
+    subjid,
+    groups = NULL
+) {
+    if (length(groups) == 0) groups <- NULL
+
+    dmat <- as.data.frame(designmat)
+    colnames(dmat) <- paste0("V", seq_len(ncol(dmat)))
 
     assert_that(
-        is.character(chr),
-        msg = "chr must be a character"
+        length(outcome) == nrow(dmat),
+        length(visit) == nrow(dmat),
+        length(subjid) == nrow(dmat),
+        is.numeric(outcome),
+        is.character(visit) | is.factor(visit),
+        is.character(subjid) | is.factor(subjid),
+        is.null(groups) | is.character(groups) | is.factor(groups)
     )
 
-    strings_nospaces <- gsub(
-        chr,
-        '',
-        strings
-    )
+    dmat[["outcome"]] <- outcome
+    dmat[["visit"]] <- visit
+    dmat[["subjid"]] <- subjid
 
-    return(strings_nospaces)
-}
-
-#' Title
-#'
-#' @param designmat TODO
-#' @param outcome_var TODO
-#' @importFrom stats reformulate
-designmat_to_formula <- function(
-    designmat,
-    outcome_var
-) {
-
-    formula <- stats::reformulate(
-        termlabels = colnames(designmat[,-1, drop = FALSE]),
-        response = outcome_var
-    )
-
-    return(formula)
-}
-
-#' Title
-#'
-#' @param vars TODO
-#' @param names_groups TODO
-#' @param cov_struct TODO
-#' @param same_cov TODO
-random_effects_expr <- function(
-    vars,
-    names_groups,
-    cov_struct = c("us", "toep", "cs", "ar1"),
-    same_cov
-) {
-    # check for correct covariance structure specification (as per glmmTMB)
-    match.arg(cov_struct)
-
-    if(same_cov) {
-        expr <- paste0(
-            " + ",
-            cov_struct,
-            "(0 + ", vars$visit, " | ", vars$subjid, ")"
-        )
-
-    } else {
-        expr <- ""
-        for(name_group in names_groups) {
-            expr <- paste(
-                expr,
-                paste0(cov_struct, "(0 + ", name_group, ":",  vars$visit, " | ", vars$subjid, ")"),
-                sep = " + "
-            )
+    if (!is.null(groups)) {
+        # create dummy variables for each arm (needed when same_cov = FALSE)
+        groups_mat <- stats::model.matrix(~ 0 + groups)
+        for (i in 1:ncol(groups_mat)) {
+            dmat[[paste0("G", i)]] <- groups_mat[, i]
         }
     }
-
-    return(expr)
+    return(dmat)
 }
+
 
 #' Title
 #'
-#' @param designmat TODO
-#' @param vars TODO
-#' @param names_groups TODO
+#' @param mmrm_df TODO
 #' @param cov_struct TODO
-#' @param same_cov TODO
 #' @importFrom stats as.formula
-formula_mmrm <- function(
-    designmat,
-    vars,
-    names_groups,
-    cov_struct,
-    same_cov
-) {
+as_mmrm_formula <- function(mmrm_df, cov_struct) {
 
-    # fixed effects formula
-    formula_fixeff <- designmat_to_formula(
-        designmat = designmat,
-        outcome_var = vars$outcome
-    )
+    dfnames <- names(mmrm_df)
+
+    g_names <- grep("^G", dfnames, value = TRUE)
+    v_names <- grep("^V", dfnames, value = TRUE)
+
+    assert_that( all(dfnames %in% c("outcome", "visit", "subjid", g_names, v_names)))
 
     # random effects for covariance structure
     expr_randeff <- random_effects_expr(
-        vars = vars,
-        names_groups = names_groups,
-        cov_struct = cov_struct,
-        same_cov = same_cov
+        groups = g_names,
+        cov_struct = cov_struct
     )
 
     # paste and create formula object
     formula <- as.formula(
-        paste0(
-            deparse(formula_fixeff, width.cutoff = 500),
-            expr_randeff
-        )
+        sprintf( "outcome ~ %s - 1", paste0(c(v_names, expr_randeff), collapse = " + "))
     )
 
     return(formula)
 }
+
 
 #' Title
 #'
@@ -121,8 +100,16 @@ formula_mmrm <- function(
 extract_params <- function(fit) {
 
     beta <- fixef(fit)$cond
+    names(beta) <- NULL
+
     sigma <- VarCorr(fit)$cond
-    sigma <- lapply(sigma, function(x) as.matrix(data.frame(x))) # remove all attributes
+    sigma <- lapply(sigma, function(x) {
+        x <- as.matrix(as.data.frame(x))
+        colnames(x) <- NULL
+        rownames(x) <- NULL
+        return(x)
+    })
+
     theta <- getME(fit, name = "theta") # needed for initialization
 
     params <- list(
@@ -130,18 +117,17 @@ extract_params <- function(fit) {
         sigma = sigma,
         theta = theta
     )
-
     return(params)
 }
+
 
 #' Title
 #'
 #' @param fit TODO
 is_converged <- function(fit) {
-
     return(ifelse(fit$fit$convergence == 0, TRUE, FALSE))
-
 }
+
 
 #' Title
 #'
@@ -150,7 +136,6 @@ is_converged <- function(fit) {
 #' @param subjid TODO
 #' @param visit TODO
 #' @param group TODO
-#' @param vars TODO
 #' @param cov_struct TODO
 #' @param REML TODO
 #' @param same_cov TODO
@@ -164,7 +149,6 @@ fit_mmrm <- function(
     subjid,
     visit,
     group,
-    vars,
     cov_struct = c("us", "toep", "cs", "ar1"),
     REML = TRUE,
     same_cov = TRUE,
@@ -178,46 +162,15 @@ fit_mmrm <- function(
         choices = formals(fun = stats::optim)$method
     )
 
-    designmat <- as.data.frame(designmat)
-
-    # remove blank spaces (otherwise formula cannot be built properly)
-    colnames(designmat) <- remove_character(colnames(designmat), " ")
-    colnames(designmat) <- remove_character(colnames(designmat), ":")
-    vars <- lapply(
-        vars,
-        function(x) remove_character(x, " ")
-    )
-    levels(group) <- remove_character(levels(group), " ")
-
-    # create dummy variables for each arm (needed when same_cov = FALSE)
-    groups_mat <- stats::model.matrix(~ 0 + group)
-    colnames(groups_mat) <- levels(group)
-
-    # build formula
-    formula <- formula_mmrm(
+    dat_mmrm <- as_mmrm_df(
         designmat = designmat,
-        vars = vars,
-        names_groups = colnames(groups_mat),
-        cov_struct = cov_struct,
-        same_cov = same_cov
+        outcome = outcome,
+        visit = visit,
+        subjid = subjid,
+        groups = ife(same_cov, NULL, group)
     )
 
-    # include in design matrix variables needed because included in the formula
-    designmat_extended <- cbind(
-        designmat,
-        groups_mat,
-        subjid,
-        visit,
-        outcome
-    )
-
-    colnames(designmat_extended) <- c(
-        colnames(designmat),
-        colnames(groups_mat),
-        vars$subjid,
-        vars$visit,
-        vars$outcome
-    )
+    frm_mmrm <- as_mmrm_formula(dat_mmrm, cov_struct)
 
     # set optimizer
     control <- glmmTMBControl(
@@ -227,13 +180,10 @@ fit_mmrm <- function(
     )
 
     ###################### fit mmrm
-
-
-
     fit <- record_warnings({
         glmmTMB(
-            formula,
-            data = designmat_extended,
+            formula = frm_mmrm,
+            data = dat_mmrm,
             dispformula = ~0,
             REML = REML,
             start = initial_values,
@@ -241,16 +191,19 @@ fit_mmrm <- function(
         )
     })
 
+
     # check convergence
     converged <- is_converged(fit$results)
 
-    ignorable_warnings <- c(
-        "'giveCsparse' has been deprecated; setting 'repr = \"T\"' for you"
-    )
+
 
     # handle warning: display only warnings if
     # 1) fit does converge
     # 2) the warning is not in ignorable_warnings
+    ignorable_warnings <- c(
+        "OpenMP not supported.",
+        "'giveCsparse' has been deprecated; setting 'repr = \"T\"' for you"
+    )
     if (converged) {
         warnings <- fit$warnings
         warnings_to_ignore <- str_contains(warnings, ignorable_warnings)
@@ -264,7 +217,7 @@ fit_mmrm <- function(
     params <- extract_params(fit)
 
     # adjust covariance matrix
-    if(same_cov) {
+    if (same_cov) {
         params$sigma <- list(params$sigma[[1]], params$sigma[[1]])
     }
     names(params$sigma) <- levels(group)
@@ -279,57 +232,26 @@ fit_mmrm <- function(
     return(return_obj)
 }
 
+
 #' Title
 #'
-#' @param designmat TODO
-#' @param outcome TODO
-#' @param subjid TODO
-#' @param visit TODO
-#' @param group TODO
-#' @param vars TODO
-#' @param cov_struct TODO
-#' @param REML TODO
-#' @param same_cov TODO
-#' @param initial_values TODO
 #' @param optimizer TODO
-fit_mmrm_multiopt <- function(
-    designmat,
-    outcome,
-    subjid,
-    visit,
-    group,
-    vars,
-    cov_struct = c("us", "toep", "cs", "ar1"),
-    REML = TRUE,
-    same_cov = TRUE,
-    initial_values = NULL,
-    optimizer = "L-BFGS-B"
-) {
+#' @param ... TODO
+fit_mmrm_multiopt <- function(..., optimizer = "L-BFGS-B") {
 
     converged <- FALSE
     iter <- 1
     while(!converged & iter <= length(optimizer)) {
-        fit <- fit_mmrm(
-            designmat,
-            outcome,
-            subjid,
-            visit,
-            group,
-            vars,
-            cov_struct,
-            REML,
-            same_cov,
-            initial_values,
-            optimizer = optimizer[iter]
-        )
+        opti <- optimizer[iter]
+        fit <- fit_mmrm(..., optimizer = opti)
         if(fit$converged) {
             converged <- TRUE
-            fit$optimizer <- optimizer[iter]
+            fit$optimizer <- opti
         }
         iter <- iter + 1
     }
 
-    if(!converged) {
+    if (!converged) {
         fit$optimizer <- "None"
     }
 

@@ -26,7 +26,7 @@ Suggests:
     tibble,
     mvtnorm
 Biarch: true
-Config/testthat/edition: 2
+Config/testthat/edition: 3
 Imports: 
     methods,
     Rcpp (>= 0.12.0),

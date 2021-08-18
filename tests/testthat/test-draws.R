@@ -253,29 +253,26 @@ test_that(
     }
 )
 
-test_that(
-    "draws has expected output (bayes)",
-    {
 
-        method <- method_bayes(
-            burn_in = 200,
-            burn_between = 2,
-            same_cov = TRUE,
-            n_samples = 3,
-            verbose = FALSE
-        )
+test_that("draws has expected output (bayes)", {
+    method <- method_bayes(
+        burn_in = 200,
+        burn_between = 2,
+        same_cov = TRUE,
+        n_samples = 3,
+        verbose = FALSE
+    )
 
-        draws_obj <- draws(
-            dat,
-            data_ice = NULL,
-            vars,
-            method = method
-        )
+    draws_obj <- draws(
+        dat,
+        data_ice = NULL,
+        vars,
+        method = method
+    )
 
-        expect_true( all(sapply(draws_obj$samples, length) == 3) )
-        test_draws(draws_obj, method)
-    }
-)
+    expect_true( all(sapply(draws_obj$samples, length) == 3) )
+    test_draws(draws_obj, method)
+})
 
 
 test_that("nmar data is removed as expected",{

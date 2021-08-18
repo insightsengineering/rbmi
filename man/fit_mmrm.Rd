@@ -10,7 +10,6 @@ fit_mmrm(
   subjid,
   visit,
   group,
-  vars,
   cov_struct = c("us", "toep", "cs", "ar1"),
   REML = TRUE,
   same_cov = TRUE,
@@ -28,8 +27,6 @@ fit_mmrm(
 \item{visit}{TODO}
 
 \item{group}{TODO}
-
-\item{vars}{TODO}
 
 \item{cov_struct}{TODO}
 
