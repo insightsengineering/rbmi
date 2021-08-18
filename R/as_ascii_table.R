@@ -19,7 +19,7 @@ string_pad <- function(x , width){
 #' function to a list of elements until only 1 element remains
 #' @param .l list of values to apply a function to
 #' @param .f function to apply to each each element of the list in turn
-#' i.e. .l[[1]] <- .f( .l[[1]] , .l[[2]]) ; .l[[1]] <- .f( .l[[1]] , .l[[3]])
+#' i.e. `.l[[1]] <- .f( .l[[1]] , .l[[2]]) ; .l[[1]] <- .f( .l[[1]] , .l[[3]])`
 recursive_reduce <- function(.l , .f){
     if (length(.l) != 1){
         .l[[2]] <- .f( .l[[1]] , .l[[2]])  
@@ -119,6 +119,7 @@ as_ascii_table <- function(dat, line_prefix = "  ", pcol = NULL){
 #' Reduce down to a x char string with ...
 #' @param inval a single element value
 #' @param crop_at character limit
+#' @param ndp Number of decimal places to display
 as_cropped_char <- function(inval, crop_at = 30, ndp = 3){
 
     if ( is.null(inval) ){

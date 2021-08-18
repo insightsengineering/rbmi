@@ -10,6 +10,8 @@ as_cropped_char(inval, crop_at = 30, ndp = 3)
 \item{inval}{a single element value}
 
 \item{crop_at}{character limit}
+
+\item{ndp}{Number of decimal places to display}
 }
 \description{
 Makes any character string above x chars

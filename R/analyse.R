@@ -152,6 +152,7 @@ extract_imputed_df <- function(imputation, ld, delta = NULL, idmap = FALSE) {
 #'
 #' @param x (`analysis`)\cr input
 #' @param ... not used
+#' @importFrom utils capture.output
 #' @export
 print.analysis <- function(x, ...) {
 

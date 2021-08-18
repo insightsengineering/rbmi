@@ -13,7 +13,7 @@ recursive_reduce(.l, .f)
 \item{.l}{list of values to apply a function to}
 
 \item{.f}{function to apply to each each element of the list in turn
-i.e. .l[\link{1}] <- .f( .l[\link{1}] , .l[\link{2}]) ; .l[\link{1}] <- .f( .l[\link{1}] , .l[\link{3}])}
+i.e. \verb{.l[[1]] <- .f( .l[[1]] , .l[[2]]) ; .l[[1]] <- .f( .l[[1]] , .l[[3]])}}
 }
 \description{
 recursive_reduce

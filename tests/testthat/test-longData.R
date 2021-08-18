@@ -383,6 +383,7 @@ test_that("longdata can handle data that isn't sorted",{
         group = factor(c("A", "A", "A", "B", "B", "B")),
         outcome = c(1, 2, 3, 4, 5, NA)
     )
+    
     vars <- list(
         outcome = "outcome",
         visit = "visit",
@@ -406,6 +407,9 @@ test_that("longdata can handle data that isn't sorted",{
     expect_equal(ld$values, list("1" = c(1,2,3), "2" = c(5,NA,4)))
     expect_equal(ld$is_missing, list("1" = c(F, F, F), "2" = c(F, T, F)))
     expect_equal(ld$is_mar, list("1" = c(T, T, T), "2" = c(T, F, F)))
+
+    dat2 <- dat %>% arrange(id, visit)
+    expect_equal(dat2, ld$get_data())
 })
 
 
