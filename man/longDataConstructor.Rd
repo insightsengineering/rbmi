@@ -28,6 +28,9 @@ to this object should be avoided.
 
 \item{\code{ids}}{A character vector containing the unique ids of each subject in \code{self$data}}
 
+\item{\code{ids_levels}}{A character vector containing the exact levels (and order) of the
+original \code{data[[vars$subjid]]} variable}
+
 \item{\code{strata}}{A numeric vector indicating which strata each corresponding value of \code{self$ids} belongs to.
 If no stratification variable is defined this will default to 1 for all subjects (i.e. same group).
 This field is only used as part of the \code{self$sample_ids()} function to enable stratified bootstrap
@@ -83,7 +86,6 @@ for all observations. This list is populated by a call to \code{self$set_strateg
 \item \href{#method-update_strategies}{\code{longDataConstructor$update_strategies()}}
 \item \href{#method-set_strategies}{\code{longDataConstructor$set_strategies()}}
 \item \href{#method-set_strata}{\code{longDataConstructor$set_strata()}}
-\item \href{#method-process_data}{\code{longDataConstructor$process_data()}}
 \item \href{#method-new}{\code{longDataConstructor$new()}}
 \item \href{#method-clone}{\code{longDataConstructor$clone()}}
 }
@@ -267,19 +269,6 @@ TODO
 TODO
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$set_strata()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-TODO
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-process_data"></a>}}
-\if{latex}{\out{\hypertarget{method-process_data}{}}}
-\subsection{Method \code{process_data()}}{
-TODO
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$process_data()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{

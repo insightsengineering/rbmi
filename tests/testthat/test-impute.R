@@ -13,7 +13,7 @@ suppressPackageStartupMessages({
 test_that("Basic Usage",{
 
     dat <- tibble(
-        subjid = rep(c("Tom", "Harry", "Phil", "Ben"), each = 3),
+        subjid = factor(rep(c("Tom", "Harry", "Phil", "Ben"), each = 3) , levels = c("Tom", "Harry", "Phil", "Ben")),
         age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
         group = factor(rep(c("B", "B", "A", "A"), each = 3), levels = c("A", "B")),
         sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),
@@ -50,18 +50,22 @@ test_that("Basic Usage",{
     )
 
     drawsObj <- list(
-        samples = list(
-            list(
-                ids =  c("Tom", "Harry", "Phil", "Ben"),
+        samples = as_sample_list(list(
+            as_sample_single(
+                ids = c("Tom", "Harry", "Phil", "Ben"),
                 beta = beta,
-                sigma = sigma
+                sigma = sigma,
+                converged = NA,
+                optimizer = NA
             ),
-            list(
+            as_sample_single(
                 ids = c("Ben", "Ben", "Phil"),
                 beta = beta,
-                sigma = sigma
+                sigma = sigma,
+                converged = NA,
+                optimizer = NA
             )
-        ),
+        )),
         data = ld
     )
 
@@ -150,7 +154,7 @@ test_that( "transpose_samples", {
             sigma = list( "A" = 9, "B" = 8, "C" = 7 )
         ),
         list(
-            ids = c("Ben", "Ben", "Phil"),
+            ids = c("Adam", "Ben", "Ben", "Phil"),
             beta = c(4,5,6),
             sigma = list( "A" = iris, "B" = 2, "C" = 3 )
         )
@@ -169,10 +173,11 @@ test_that( "transpose_samples", {
             "C" = list(7,3)
         ),
         index = list(
-            "Ben" = c(1,2,2),
+            "Tom" = c(1),
             "Harry" = c(1),
             "Phil" = c(1,2),
-            "Tom" = c(1)
+            "Ben" = c(1,2,2),
+            "Adam" = c(2)
         )
     )
 
@@ -187,17 +192,18 @@ test_that( "transpose_samples", {
 test_that( "invert_indexes", {
 
     input <- list(
-        c("Tom", "Harry", "Phil", "Ben"),
-        c("Ben", "Ben", "Phil")
+        c("Tom", "Harry", "Phil", "Ben", "Harry"),
+        c("Adam", "Ben", "Ben", "Phil")
     )
 
     output_actual <- invert_indexes(input)
 
     output_expected <- list(
-        "Ben" = c(1,2,2),
-        "Harry" = c(1),
+        "Tom" = c(1),
+        "Harry" = c(1,1),
         "Phil" = c(1,2),
-        "Tom" = c(1)
+        "Ben" = c(1,2,2),
+        "Adam" = c(2)
     )
 
     expect_equal(output_actual, output_expected)
@@ -442,7 +448,7 @@ test_that("get_visit_distribution_parameters",{
 test_that("validate_strategies",{
 
     dat <- tibble(
-        subjid = rep(c("Tom", "Harry", "Phil", "Ben"), each = 3),
+        subjid = factor(rep(c("Tom", "Harry", "Phil", "Ben"), each = 3), levels = c("Tom", "Harry", "Phil", "Ben")),
         age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
         group = factor(rep(c("B", "B", "A", "A"), each = 3), levels = c("A", "B")),
         sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),

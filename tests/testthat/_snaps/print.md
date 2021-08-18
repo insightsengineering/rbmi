@@ -84,9 +84,9 @@
            trt_visit_2    8.015   0.193  <NA>   <NA>  <NA> 
          lsm_ref_visit_2  6.768   0.126  <NA>   <NA>  <NA> 
          lsm_alt_visit_2  14.784  0.145  <NA>   <NA>  <NA> 
-           trt_visit_3    3.497   0.563  2.771  Inf    1   
-         lsm_ref_visit_3  6.818   0.383  6.323  Inf    1   
-         lsm_alt_visit_3  10.316  0.445  9.74   Inf    1   
+           trt_visit_3    3.489   0.568  2.755  Inf    1   
+         lsm_ref_visit_3  6.822   0.376  6.336  Inf    1   
+         lsm_alt_visit_3  10.31   0.456  9.719  Inf    1   
         ---------------------------------------------------
       
 
@@ -163,16 +163,16 @@
       
       Results:
       
-        ========================================================
-            parameter      est     se     lci     uci     pval  
-        --------------------------------------------------------
-           trt_visit_1    7.313   0.418   <NA>    <NA>    <NA>  
-         lsm_ref_visit_1  7.204   0.274   <NA>    <NA>    <NA>  
-         lsm_alt_visit_1  14.516  0.315   <NA>    <NA>    <NA>  
-           trt_visit_3    7.999   0.198  7.591   8.406   <0.001 
-         lsm_ref_visit_3  6.771   0.134  6.494   7.049   <0.001 
-         lsm_alt_visit_3  14.77   0.141  14.483  15.057  <0.001 
-        --------------------------------------------------------
+        =======================================================
+            parameter      est     se     lci    uci     pval  
+        -------------------------------------------------------
+           trt_visit_1    7.313   0.418  <NA>    <NA>    <NA>  
+         lsm_ref_visit_1  7.204   0.274  <NA>    <NA>    <NA>  
+         lsm_alt_visit_1  14.516  0.315  <NA>    <NA>    <NA>  
+           trt_visit_3    8.016   0.239  7.506  8.526   <0.001 
+         lsm_ref_visit_3  6.764   0.153  6.438   7.09   <0.001 
+         lsm_alt_visit_3  14.78   0.15   14.47  15.091  <0.001 
+        -------------------------------------------------------
       
 
 # print - condmean (bootstrap)
@@ -296,98 +296,5 @@
          lsm_ref_visit_3  6.891   0.397  -Inf  7.544   <0.001 
          lsm_alt_visit_3  11.287  0.609  -Inf  12.29   <0.001 
         ------------------------------------------------------
-      
-
-# print - Condmean (jackknife)
-
-    Code
-      print(drawobj_cmj)
-    Output
-      
-      Draws Object
-      ------------
-      Number of Samples: 61
-      Number of Failed Samples: 0
-      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
-      Imputation Type: condmean
-      Method:
-          Type: Conditional Mean
-          covariance: us
-          threshold: 0.5
-          same_cov: FALSE
-          REML: TRUE
-          n_samples: 10
-          type: jackknife
-      
-
----
-
-    Code
-      print(impute_cmj)
-    Output
-      
-      Imputation Object
-      -----------------
-      Number of Imputed Datasets: 61
-      Fraction of Missing Data (Original Dataset):
-          visit_1:   0%
-          visit_2:   0%
-          visit_3:  52%
-      References:
-          TRT     -> Placebo
-          Placebo -> Placebo
-      
-
----
-
-    Code
-      print(analysis_cmj)
-    Output
-      
-      Analysis Object
-      ---------------
-      Number of Results: 61
-      Analysis Function: ancova
-      Delta Applied: FALSE
-      Analysis Parameters:
-          trt_visit_1
-          lsm_ref_visit_1
-          lsm_alt_visit_1
-          trt_visit_2
-          lsm_ref_visit_2
-          lsm_alt_visit_2
-          trt_visit_3
-          lsm_ref_visit_3
-          lsm_alt_visit_3
-      
-
----
-
-    Code
-      print(pool_cmj)
-    Output
-      
-      Pool Object
-      -----------
-      Number of Results Combined: 61
-      Method: jackknife
-      Confidence Level: 0.9
-      Alternative: two.sided
-      
-      Results:
-      
-        ========================================================
-            parameter      est     se     lci     uci     pval  
-        --------------------------------------------------------
-           trt_visit_1    7.403   0.627  6.371   8.435   <0.001 
-         lsm_ref_visit_1  6.688   0.663  5.598   7.778   <0.001 
-         lsm_alt_visit_1  14.091  0.522  13.233  14.95   <0.001 
-           trt_visit_2    7.647   0.307  7.142   8.152   <0.001 
-         lsm_ref_visit_2   6.72   0.444  5.991    7.45   <0.001 
-         lsm_alt_visit_2  14.368  0.377  13.748  14.988  <0.001 
-           trt_visit_3    3.023   0.732  1.819   4.226   <0.001 
-         lsm_ref_visit_3  6.761   0.423  6.065   7.457   <0.001 
-         lsm_alt_visit_3  9.784   0.883  8.332   11.236  <0.001 
-        --------------------------------------------------------
       
 

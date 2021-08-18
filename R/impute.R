@@ -139,6 +139,7 @@ impute_internal <- function(draws, references, update_ice, strategies, condmean)
         data$update_strategies(update_ice)
     }
 
+    validate(draws$samples)
     samples_grouped <- transpose_samples(draws$samples)
 
     imputes <- mapply(
@@ -156,8 +157,18 @@ impute_internal <- function(draws, references, update_ice, strategies, condmean)
         SIMPLIFY = FALSE
     )
 
+    imps <- untranspose_samples(imputes, samples_grouped$index)
+    imps_obj <- lapply(
+        imps, 
+        function(x) {
+            as_imputation_list(
+                lapply(x, function(x) as_imputation_single(x$id, x$values))
+            )
+        }
+    )
+
     x <- list(
-        imputations = untranspose_samples(imputes, samples_grouped$index),
+        imputations = imps_obj,
         data = data,
         method = draws$method,
         references = references
@@ -216,7 +227,7 @@ untranspose_samples <- function(samples, indexes){
 
     for( samp in samples){
         id <- samp$id
-        for( j in seq_along(samp$values)){
+        for (j in seq_along(samp$values)) {
             sample_index <- indexes[[id]][[j]]
             hold_index <- length(HOLD[[sample_index]]) + 1
             HOLD[[sample_index]][[hold_index]] <- list(
@@ -254,7 +265,8 @@ invert_indexes <- function(x){
     lens <- vapply(x, function(x) length(x), numeric(1))
     grp <- rep(seq_along(x), lens)
     vals <- unlist(x, use.names = FALSE)
-    index <- split(grp, vals)
+    uvals <- unique(vals)
+    index <- split(grp, vals)[uvals]
     return(index)
 }
 
@@ -551,6 +563,44 @@ validate_strategies <- function(strategies, reference){
         )
     }
     return(invisible(TRUE))
+}
+
+
+
+#' Create a valid imputation_single object
+#' 
+#' @param id a character string specifying the subject id
+#' @param values a numeric vector indicating the imputed values
+as_imputation_single <- function(id, values){
+    x <- list(id = id, values = values)
+    class(x) <- c("imputation_single", "list")
+    validate(x)
+    return(x)
+}
+
+validate.imputation_single <- function(x, ...){
+    assert_that(
+        length(x$id) == 1,
+        is.character(x$id),
+        is.numeric(x$values) | is.null(x$values)
+    )
+}
+
+
+#' Create a valid imputation list object
+#' 
+#' @param x a list of imputation_singles
+as_imputation_list <- function(x){
+    class(x) <- c("imputation_list", "list")
+    validate(x)
+    return(x)
+}
+
+validate.imputation_list <- function(x, ...){
+    assert_that(
+        is.null(names(x)),
+        all(vapply(x, function(x) class(x)[[1]] == "imputation_single", logical(1)))
+    )
 }
 
 

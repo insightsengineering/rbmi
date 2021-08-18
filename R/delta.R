@@ -24,7 +24,7 @@ delta_template <- function(imputations) {
                 "delta" = 0,
                 stringsAsFactors = FALSE
             )
-            df[[ld$vars$subjid]] <- id
+            df[[ld$vars$subjid]] <- factor(id, levels = ld$ids_levels)
             df[[ld$vars$visit]] <- factor(ld$visits, labels = ld$visits)
             df[[ld$vars$group]] <- ld$group[[id]]
 
@@ -192,7 +192,7 @@ apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL){
     for (var in c(group, "delta")) {
         assert_that(
             var %in% names(delta),
-            msg = sprintf("Variable `%s` is not in `data`", var)
+            msg = sprintf("Variable `%s` is not in `delta`", var)
         )
     }
 
@@ -224,8 +224,8 @@ apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL){
         nrow(data3) == nrow(data),
         all(names(data3) == names(data)),
         msg = paste0(
-            "Data structure has been altered whilst adding delta.",
-            "This can happen if you have multiple rows per `group`"
+            "Data structure has been altered whilst applying delta. ",
+            "This is most likely caused by having duplicate rows per id within the delta dataset"
         )
     )
     class(data3) <- class(data)

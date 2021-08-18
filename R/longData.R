@@ -36,6 +36,10 @@ longDataConstructor <- R6::R6Class(
 
         #' @field ids A character vector containing the unique ids of each subject in `self$data`
         ids = NULL,
+        
+        #' @field ids_levels A character vector containing the exact levels (and order) of the 
+        #' original `data[[vars$subjid]]` variable
+        ids_levels = NULL,
 
         #' @field strata A numeric vector indicating which strata each corresponding value of `self$ids` belongs to.
         #' If no stratification variable is defined this will default to 1 for all subjects (i.e. same group).
@@ -139,19 +143,16 @@ longDataConstructor <- R6::R6Class(
 
             if(is.null(obj)) return(self$data)
 
-            if( ! any(c("list", "character", "factor") %in% class(obj))){
-                stop("Object must be a list, character or factor")
+            if( ! any(c("imputation_list", "character") %in% class(obj))){
+                stop("Object must be an imputation_list or a character vector")
             }
 
-            listFlag <- "list" %in% class(obj)
+            listFlag <- "imputation_list" %in% class(obj)
 
             if(listFlag) {
                 obj_expanded <- transpose_imputations(obj)
                 ids <- obj_expanded$ids
                 values <- obj_expanded$values
-                if( ! any(c("character", "factor") %in% class(ids))){
-                    stop("Ids must be character or factor")
-                }
             } else {
                 ids <- obj
             }
@@ -318,7 +319,7 @@ longDataConstructor <- R6::R6Class(
                 )
 
                 new_strategy <- dat_ice_pt[[self$vars$method]]
-                
+
                 if (!update) {
                     self$visit_ice[[subject]] <- dat_ice_pt[[self$vars$visit]]
                 } else {
@@ -378,26 +379,20 @@ longDataConstructor <- R6::R6Class(
 
         #' @description
         #' TODO
-        #' @return TODO
-        process_data = function(){
-            subjects = unique(self$data[[self$vars$subjid]])
-            for( id in subjects) self$add_subject(id)
-            self$ids = subjects
-            self$visits = levels(self$data[[self$vars$visit]])
-            self$set_strata()
-        },
-
-
-        #' @description
-        #' TODO
         #' @param data TODO
         #' @param vars TODO
         #' @return TODO
         initialize = function(data, vars){
             validate_datalong(data, vars)
-            self$data = data
+            ord <- do.call(base::order, data[, c(vars$subjid, vars$visit)])
+            self$data = data[ord, ]
             self$vars = vars
-            self$process_data()
+            subjects = as.character(unique(self$data[[self$vars$subjid]]))
+            for( id in subjects) self$add_subject(id)
+            self$ids = subjects
+            self$ids_levels = levels(self$data[[self$vars$subjid]])
+            self$visits = levels(self$data[[self$vars$visit]])
+            self$set_strata()
         }
 
     )

@@ -51,7 +51,7 @@ get_ld <- function(){
         group_by(subjid) %>%
         mutate( visit = factor(paste0("Visit ", 1:n())))  %>%
         ungroup() %>%
-        mutate(subjid = as.character(subjid))
+        mutate(subjid = factor(subjid))
 
     dat[c(1,2,3,4,6,7), "outcome"] <- NA
 
@@ -82,7 +82,7 @@ test_that("longData - Basics", {
     ld <- dobj$ld
     dat <- dobj$dat
 
-    subject_names <- unique(dat$subjid)
+    subject_names <- as.character(unique(dat$subjid))
     expect_equal( names(ld$is_mar), subject_names)
     expect_equal( names(ld$is_missing), subject_names)
     expect_equal( ld$ids, subject_names)
@@ -129,7 +129,7 @@ test_that("longData - Sampling",{
     expect_error(ld$get_data("-1231"))
 
     x <- ld$get_data(c("1", "1", "3"))
-    
+
     y <- bind_rows(
         dat %>% filter(subjid == "1"),
         dat %>% filter(subjid == "1"),
@@ -140,13 +140,12 @@ test_that("longData - Sampling",{
 
 
 
-    imputes <- list(
-        list(id = "1", values = c(1,2,3)),
-        list(id = "4", values = c()),
-        list(id = "1", values = c(4,5,6)),
-        list(id = "2", values = c(7,8))
-
-    )
+    imputes <- as_imputation_list(list(
+        as_imputation_single(id = "1", values = c(1, 2, 3)),
+        as_imputation_single(id = "4", values = c()),
+        as_imputation_single(id = "1", values = c(4, 5, 6)),
+        as_imputation_single(id = "2", values = c(7, 8))
+    ))
     x <- ld$get_data(imputes)
     pt2_val <- dat %>%
         filter(subjid == "2") %>%
@@ -167,7 +166,7 @@ test_that("longData - Sampling",{
 
 
     x <- ld$get_data(c("1","1","1","2"), na.rm = TRUE)
-    
+
     pt2_val <- dat %>% filter(subjid == "2") %>% pull(outcome)
     y <- bind_rows(
         dat %>% filter(subjid == "1"),
@@ -363,11 +362,11 @@ test_that("idmap", {
         c("new_pt_1" = "1", "new_pt_2" = "1", "new_pt_3" = "3")
     )
 
-    imps <- list(
-        list(id = "1", values = c(1, 2, 3)),
-        list(id = "3", values = c(4)),
-        list(id = "3", values = 5)
-    )
+    imps <- as_imputation_list(list(
+        as_imputation_single(id = "1", values = c(1, 2, 3)),
+        as_imputation_single(id = "3", values = c(4)),
+        as_imputation_single(id = "3", values = 5)
+    ))
     x <- ld$get_data(imps, idmap = TRUE)
     expect_equal(
         attr(x, "idmap"),
@@ -377,6 +376,36 @@ test_that("idmap", {
 
 
 
+test_that("longdata can handle data that isn't sorted",{
+    dat <- tibble(
+        visit = factor(c("v1", "v2", "v3", "v3", "v1", "v2"), levels = c("v1", "v2", "v3")),
+        id = factor(c("1", "1", "1", "2", "2", "2")),
+        group = factor(c("A", "A", "A", "B", "B", "B")),
+        outcome = c(1, 2, 3, 4, 5, NA)
+    )
+    vars <- list(
+        outcome = "outcome",
+        visit = "visit",
+        subjid = "id",
+        group = "group",
+        method = "method"
+    )
 
+    dat_ice <- tibble(
+        visit = "v2",
+        id = "2",
+        method = "JR"
+    )
+
+    ld <- longDataConstructor$new(
+        data = dat,
+        vars = vars
+    )
+    ld$set_strategies(dat_ice)
+
+    expect_equal(ld$values, list("1" = c(1,2,3), "2" = c(5,NA,4)))
+    expect_equal(ld$is_missing, list("1" = c(F, F, F), "2" = c(F, T, F)))
+    expect_equal(ld$is_mar, list("1" = c(T, T, T), "2" = c(T, F, F)))
+})
 
 

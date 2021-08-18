@@ -66,22 +66,22 @@ validate_datalong_varExists <- function(data, vars){
 
     assert_that(
         vars$outcome %in% names(data),
-        msg = sprintf("Cannot find %s in `data`", vars$outcome )
+        msg = sprintf("Cannot find %s in `data`", vars$outcome)
     )
 
     assert_that(
         vars$group %in% names(data),
-        msg = sprintf("Cannot find %s in `data`", vars$group )
+        msg = sprintf("Cannot find %s in `data`", vars$group)
     )
 
     assert_that(
         vars$visit %in% names(data),
-        msg = sprintf("Cannot find %s in `data`", vars$visit )
+        msg = sprintf("Cannot find %s in `data`", vars$visit)
     )
 
     assert_that(
         vars$subjid %in% names(data),
-        msg = sprintf("Cannot find %s in `data`", vars$subjid )
+        msg = sprintf("Cannot find %s in `data`", vars$subjid)
     )
 
     assert_that(
@@ -103,13 +103,13 @@ validate_datalong_types <- function(data, vars){
     covars <- extract_covariates(vars$covariates)
 
     assert_that(
-        is_char_fact(data[[vars$subjid]]),
-        msg = sprintf("Variable `%s` should be of type character or factor", vars$subjid)
+        is.factor(data[[vars$subjid]]),
+        msg = sprintf("Variable `%s` should be of type factor", vars$subjid)
     )
 
     assert_that(
-        is_char_fact(data[[vars$group]]),
-        msg = sprintf("Variable `%s` should be of type character or factor", vars$group)
+        is.factor(data[[vars$group]]),
+        msg = sprintf("Variable `%s` should be of type factor", vars$group)
     )
 
     assert_that(
@@ -166,7 +166,7 @@ validate_datalong_complete <- function(data, vars){
     )
     is_complete <- unlist(is_complete_list, use.names = FALSE)
     if( ! all(is_complete)){
-        stop("At least one subject has incomplete data")
+        stop("At least one subject has either incomplete or duplicate data")
     }
     return(invisible(TRUE))
 }
@@ -187,23 +187,6 @@ validate_datalong_unifromStrata <- function(data, vars){
         }
     }
     return(invisible(TRUE))
-}
-
-
-
-
-is_char_one <- function(x){
-    is.character(x) & (length(x) == 1)
-}
-
-
-is_char_fact <- function(x){
-    is.character(x) | is.factor(x)
-}
-
-
-is_num_char_fact <- function(x){
-    is.numeric(x) | is.character(x) | is.factor(x)
 }
 
 
@@ -258,3 +241,18 @@ validate_dataice <- function(data, data_ice, vars, update = FALSE){
     return(TRUE)
 }
 
+
+
+is_char_one <- function(x){
+    is.character(x) & (length(x) == 1)
+}
+
+
+is_char_fact <- function(x){
+    is.character(x) | is.factor(x)
+}
+
+
+is_num_char_fact <- function(x){
+    is.numeric(x) | is.character(x) | is.factor(x)
+}

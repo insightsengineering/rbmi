@@ -31,13 +31,13 @@ draws.approxbayes <- function(data, data_ice, vars, method) {
     ### Set ids to be the unique patient values in order
     ### for `impute()` to work as expect for this method (retain
     ### boot_ids for reference)
-    x$samples <- lapply(
+    x$samples <- as_sample_list(lapply(
         x$samples,
-        function(x){
+        function(x) {
             x$ids <- unique(data[[vars$subjid]])
             return(x)
         }
-    )
+    ))
 
     # remove useless elements from output of `method`
     x$method$type <- NULL
@@ -52,6 +52,8 @@ draws.condmean <- function(data, data_ice, vars, method) {
     x <- draws_bootstrap(data, data_ice, vars, method)
     as_class(x, c("condmean", "draws"))
 }
+
+
 
 #' Title - TODO
 #'
@@ -127,21 +129,30 @@ draws_bayes <- function(data, data_ice, vars, method) {
     )
 
     # unscale samples
-    samples <- mapply(function(x,y) list("beta" = x, "sigma" = y),
-                      lapply(fit$samples$beta, scaler$unscale_beta),
-                      lapply(fit$samples$sigma, function(covs) lapply(covs, scaler$unscale_sigma)),
-                      SIMPLIFY = FALSE
+    samples <- mapply(
+        function(x,y) list("beta" = x, "sigma" = y),
+        lapply(fit$samples$beta, scaler$unscale_beta),
+        lapply(fit$samples$sigma, function(covs) lapply(covs, scaler$unscale_sigma)),
+        SIMPLIFY = FALSE
     )
 
     # set ids associated to each sample
     samples <- lapply(
         samples,
-        function(x) {x$ids <- longdata$ids; return(x)}
+        function(x) {
+            as_sample_single(
+                ids = longdata$ids,
+                beta = x$beta,
+                sigma = x$sigma,
+                converged = NA,
+                optimizer = NA
+            )
+        }
     )
 
     result <- list(
         method = method,
-        samples = samples,
+        samples = as_sample_list(samples),
         data = longdata,
         fit = fit$fit,
         formula = frm
@@ -182,12 +193,13 @@ draws_bootstrap <- function(data, data_ice, vars, method) {
         optimizer =  c("L-BFGS-B", "BFGS", "Nelder-Mead")
     )
 
-    initial_sample <- list(
+    initial_sample <- as_sample_single(
         beta = scaler$unscale_beta(mmrm_initial$beta),
         sigma = lapply(mmrm_initial$sigma, scaler$unscale_sigma),
         converged = mmrm_initial$converged,
         optimizer = mmrm_initial$optimizer,
-        ids_boot = longdata$ids
+        ids_samp = longdata$ids,
+        ids = longdata$ids
     )
 
     init_opt <- list(
@@ -222,7 +234,7 @@ draws_bootstrap <- function(data, data_ice, vars, method) {
     result <- list(
         method = method,
         data = longdata,
-        samples = samples,
+        samples = as_sample_list(samples),
         n_failures = n_failures,
         formula = frm
     )
@@ -276,12 +288,13 @@ get_bootstrap_samples <- function(
         )
 
         if(mmrm_fit$converged){
-            sample <- list(
+            sample <- as_sample_single(
                 beta = scaler$unscale_beta(mmrm_fit$beta),
                 sigma = lapply(mmrm_fit$sigma, scaler$unscale_sigma),
                 converged = mmrm_fit$converged,
                 optimizer = mmrm_fit$optimizer,
-                ids_boot = ids_boot
+                ids_samp = ids_boot,
+                ids = ids_boot
             )
 
             samples[[current_sample]] <- sample
@@ -350,12 +363,12 @@ get_jackknife_samples <- function(
             optimizer = c("L-BFGS-B", "BFGS", "Nelder-Mead")
         )
 
-        sample <- list(
+        sample <- as_sample_single(
             beta = scaler$unscale_beta(mmrm_fit$beta),
             sigma = lapply(mmrm_fit$sigma, scaler$unscale_sigma),
             converged = mmrm_fit$converged,
             optimizer = mmrm_fit$optimizer,
-            ids_boot = ids_boot
+            ids = ids_boot
         )
 
         samples[[current_sample]] <- sample
@@ -421,3 +434,51 @@ print.draws <- function(x, ...) {
     cat(string, sep = "\n")
     return(invisible(x))
 }
+
+
+
+as_sample_single <- function(ids, beta, sigma, converged, optimizer, ids_samp = NULL){
+    x <- list(
+        ids = ids,
+        beta = beta,
+        sigma = sigma,
+        converged = converged,
+        optimizer = optimizer,
+        ids_samp = ids_samp
+    )
+    class(x) <- c("sample_single", "list")
+    validate(x)
+    return(x)
+}
+
+validate.sample_single <- function(x, ...) {
+    assert_that(
+        is.character(x$ids),
+        length(x$ids) > 1,
+        is.numeric(x$beta),
+        all(!is.na(x$beta)),
+        is.list(x$sigma),
+        !is.null(names(x$sigma)),
+        length(x$converged) == 1,
+        x$converged %in% c(TRUE, FALSE) | is.na(x$converged),
+        length(x$optimizer) == 1,
+        is.character(x$optimizer) | is.na(x$optimizer),
+        is.character(x$ids_samp) | is.null(x$ids_samp),
+        length(x$ids_samp) > 1 | is.null(x$ids_samp)
+    )
+}
+
+as_sample_list <- function(x){
+    class(x) <- c("sample_list", "list")
+    validate(x)
+    return(x)
+}
+
+validate.sample_list <- function(x, ...) {
+    assert_that(
+        is.null(names(x)),
+        all(vapply(x, function(x) class(x)[[1]] == "sample_single", logical(1)))
+    )
+}
+
+
