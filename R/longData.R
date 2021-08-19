@@ -311,7 +311,7 @@ longDataConstructor <- R6::R6Class(
 
             validate_dataice(self$data, dat_ice, self$vars, update)
 
-            dat_ice <- sort_by(dat_ice, c(self$vars$subjid, self$vars$visit))
+            dat_ice <- sort_by(dat_ice, c(self$vars$subjid))
 
             for( subject in dat_ice[[self$vars$subjid]]){
 
