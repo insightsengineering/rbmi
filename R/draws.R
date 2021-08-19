@@ -410,11 +410,16 @@ print.draws <- function(x, ...) {
          "bayes" = "Bayes"
     )
 
-    meth_args <- mapply(
-        function(x, y) sprintf("    %s: %s", y, x),
-        x$method,
-        names(x$method),
-        USE.NAMES = FALSE
+    meth_args <- vapply(
+        mapply(
+            function(x, y) sprintf("    %s: %s", y, x),
+            x$method,
+            names(x$method),
+            USE.NAMES = FALSE,
+            SIMPLIFY = FALSE
+        ),
+        identity,
+        character(1)
     )
 
     string <- c(

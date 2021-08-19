@@ -298,3 +298,96 @@
         ------------------------------------------------------
       
 
+# print - Condmean (jackknife)
+
+    Code
+      print(drawobj_cmj)
+    Output
+      
+      Draws Object
+      ------------
+      Number of Samples: 61
+      Number of Failed Samples: 0
+      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
+      Imputation Type: condmean
+      Method:
+          Type: Conditional Mean
+          covariance: us
+          threshold: 0.5
+          same_cov: FALSE
+          REML: TRUE
+          n_samples: NA
+          type: jackknife
+      
+
+---
+
+    Code
+      print(impute_cmj)
+    Output
+      
+      Imputation Object
+      -----------------
+      Number of Imputed Datasets: 61
+      Fraction of Missing Data (Original Dataset):
+          visit_1:   0%
+          visit_2:   0%
+          visit_3:  52%
+      References:
+          TRT     -> Placebo
+          Placebo -> Placebo
+      
+
+---
+
+    Code
+      print(analysis_cmj)
+    Output
+      
+      Analysis Object
+      ---------------
+      Number of Results: 61
+      Analysis Function: ancova
+      Delta Applied: FALSE
+      Analysis Parameters:
+          trt_visit_1
+          lsm_ref_visit_1
+          lsm_alt_visit_1
+          trt_visit_2
+          lsm_ref_visit_2
+          lsm_alt_visit_2
+          trt_visit_3
+          lsm_ref_visit_3
+          lsm_alt_visit_3
+      
+
+---
+
+    Code
+      print(pool_cmj)
+    Output
+      
+      Pool Object
+      -----------
+      Number of Results Combined: 61
+      Method: jackknife
+      Confidence Level: 0.9
+      Alternative: two.sided
+      
+      Results:
+      
+        ========================================================
+            parameter      est     se     lci     uci     pval  
+        --------------------------------------------------------
+           trt_visit_1    7.403   0.627  6.371   8.435   <0.001 
+         lsm_ref_visit_1  6.688   0.663  5.598   7.778   <0.001 
+         lsm_alt_visit_1  14.091  0.522  13.233  14.95   <0.001 
+           trt_visit_2    7.647   0.307  7.142   8.152   <0.001 
+         lsm_ref_visit_2   6.72   0.444  5.991    7.45   <0.001 
+         lsm_alt_visit_2  14.368  0.377  13.748  14.988  <0.001 
+           trt_visit_3    3.023   0.732  1.819   4.226   <0.001 
+         lsm_ref_visit_3  6.761   0.423  6.065   7.457   <0.001 
+         lsm_alt_visit_3  9.784   0.883  8.332   11.236  <0.001 
+        --------------------------------------------------------
+      
+
