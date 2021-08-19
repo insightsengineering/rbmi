@@ -305,9 +305,13 @@ longDataConstructor <- R6::R6Class(
         #' @return TODO
         set_strategies = function(dat_ice = NULL, update=FALSE) {
 
-            if(is.null(dat_ice)) return(self)
+            if (is.null(dat_ice)) {
+                return(self)
+            }
 
             validate_dataice(self$data, dat_ice, self$vars, update)
+
+            dat_ice <- sort_by(dat_ice, c(self$vars$subjid, self$vars$visit))
 
             for( subject in dat_ice[[self$vars$subjid]]){
 
@@ -339,7 +343,7 @@ longDataConstructor <- R6::R6Class(
                 self$strategies[[subject]] <- new_strategy
 
                 index <- which(self$visits == visit)
-                
+
                 if (new_strategy != "MAR") {
                     self$is_mar[[subject]] <- seq_along(self$visits) < index
                 } else {
@@ -426,17 +430,9 @@ transpose_imputations = function(imputations){
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+sort_by <- function(df, vars){
+    ord <- do.call(order, df[, vars])
+    df2 <- df[ord, ]
+    assert_that(nrow(df) == nrow(df2), ncol(df) == ncol(df2))
+    return(df2)
+}
