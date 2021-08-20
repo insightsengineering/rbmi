@@ -388,14 +388,13 @@ longDataConstructor <- R6::R6Class(
         #' @return TODO
         initialize = function(data, vars){
             validate_datalong(data, vars)
-            ord <- do.call(base::order, data[, c(vars$subjid, vars$visit)])
-            self$data = data[ord, ]
-            self$vars = vars
-            subjects = as.character(unique(self$data[[self$vars$subjid]]))
-            for( id in subjects) self$add_subject(id)
-            self$ids = subjects
-            self$ids_levels = levels(self$data[[self$vars$subjid]])
-            self$visits = levels(self$data[[self$vars$visit]])
+            self$data <- sort_by(data, c(vars$subjid, vars$visit))
+            self$vars <- vars
+            subjects <- as.character(unique(self$data[[self$vars$subjid]]))
+            for (id in subjects) self$add_subject(id)
+            self$ids <- subjects
+            self$ids_levels <- levels(self$data[[self$vars$subjid]])
+            self$visits <- levels(self$data[[self$vars$visit]])
             self$set_strata()
         }
 
@@ -429,16 +428,4 @@ transpose_imputations = function(imputations) {
 }
 
 
-#' Sort Data Frame
-#'
-#' Sorts a dataframe (ascending only) based upon variables within the dataset
-#' This function is essentially a wrapper around do.call to ease the syntax
-#' @param df data.frame
-#' @param vars character vector of variables
-sort_by <- function(df, vars) {
-    assert_that( is.data.frame(df), all(vars %in% names(df)))
-    ord <- do.call(order, df[, vars, drop = FALSE])
-    df2 <- df[ord, ]
-    assert_that(nrow(df) == nrow(df2), ncol(df) == ncol(df2))
-    return(df2)
-}
+
