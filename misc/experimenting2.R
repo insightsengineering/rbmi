@@ -12,7 +12,7 @@ data$THERAPY <- as.factor(data$THERAPY)
 
 data[is.na(data)] = 1
 
-vars <- list(
+vars <- ivars(
     outcome = "change",
     subjid = "PATIENT",
     visit = "VISIT",
@@ -62,8 +62,9 @@ data_exp <- do.call(rbind,
 
 data_ice <- data_exp %>%
     group_by(PATIENT) %>%
-    summarise("method" = "CR",
-              "visit" = ifelse(any(is.na(change)), VISIT[is.na(change)][1], J+1)
+    summarise(
+        "strategy" = "CR",
+        "visit" = ifelse(any(is.na(change)), VISIT[is.na(change)][1], J+1)
     )
 
 draws_boot <- draws(

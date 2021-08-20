@@ -178,13 +178,13 @@ sigma <- as_covmat(c(5, 3, 8), c(0.4, 0.6, 0.3))
 dat <- get_sim_data(n = 30, sigma) %>%
     mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 1, NA_real_, outcome))
 
-vars <- list(
+vars <- ivars(
     outcome = "outcome",
     visit = "visit",
     subjid = "subjid",
     group = "group",
     covariates = c("sex", "age", "group*visit"),
-    method = "method"
+    strategy = "strategy"
 )
 
 formula <- outcome ~ sex + age + visit*group

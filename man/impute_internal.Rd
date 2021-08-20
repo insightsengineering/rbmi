@@ -4,7 +4,7 @@
 \alias{impute_internal}
 \title{Create Imputed Datasets}
 \usage{
-impute_internal(draws, references, update_ice, strategies, condmean)
+impute_internal(draws, references, update_strategy, strategies, condmean)
 }
 \arguments{
 \item{draws}{A draws object created by \code{\link[=draws]{draws()}}.}
@@ -12,11 +12,11 @@ impute_internal(draws, references, update_ice, strategies, condmean)
 \item{references}{a named vector. Identifies the references to be used when generating the imputed
 values. Should be of the form \code{c("Group" = "Reference", "Group" = "Reference")}.}
 
-\item{update_ice}{an optional dataframe. Updates the imputation method that was originally set via
+\item{update_strategy}{an optional dataframe. Updates the imputation method that was originally set via
 the \code{data_ice} option in \code{draws}. See the details section for more information.}
 
 \item{strategies}{a named list of functions. Defines the imputation functions to be used. The names
-of of the list should mirror the values specified in \code{method} column of \code{data_ice}.
+of of the list should mirror the values specified in \code{strategy} column of \code{data_ice}.
 Default = \code{getStrategies()}. See \code{\link[=getStrategies]{getStrategies()}} for more details.}
 
 \item{condmean}{logical. If TRUE will impute using the conditional mean values, if values

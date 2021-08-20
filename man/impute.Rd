@@ -6,11 +6,11 @@
 \alias{impute.condmean}
 \title{Create Imputed Datasets}
 \usage{
-impute(draws, references, update_ice = NULL, strategies = getStrategies())
+impute(draws, references, update_strategy = NULL, strategies = getStrategies())
 
-\method{impute}{random}(draws, references, update_ice = NULL, strategies = getStrategies())
+\method{impute}{random}(draws, references, update_strategy = NULL, strategies = getStrategies())
 
-\method{impute}{condmean}(draws, references, update_ice = NULL, strategies = getStrategies())
+\method{impute}{condmean}(draws, references, update_strategy = NULL, strategies = getStrategies())
 }
 \arguments{
 \item{draws}{A draws object created by \code{\link[=draws]{draws()}}.}
@@ -18,7 +18,7 @@ impute(draws, references, update_ice = NULL, strategies = getStrategies())
 \item{references}{a named vector. Identifies the references to be used when generating the imputed
 values. Should be of the form \code{c("Group" = "Reference", "Group" = "Reference")}.}
 
-\item{update_ice}{an optional dataframe. Updates the imputation method that was originally set via
+\item{update_strategy}{an optional dataframe. Updates the imputation method that was originally set via
 the \code{data_ice} option in \code{draws}. See the details section for more information.}
 
 \item{strategies}{a named list of functions. Defines the imputation functions to be used. The names
@@ -47,9 +47,9 @@ For conditional mean and approximate Bayes the first imputed dataset will be the
 using the MLE parameter estimates of the
 mmrm model fitted to the original dataset. See TODO (reference paper for methods) for full details.
 
-\code{update_ice} can be used to update the imputation method that was originally set via
+\code{update_strategy} can be used to update the imputation method that was originally set via
 the \code{data_ice} option in \code{draws}.
-The \code{update_ice} dataframe must contain two columns, one for the subject ID and another for the imputation method,
+The \code{update_strategy} dataframe must contain two columns, one for the subject ID and another for the imputation method,
 whose names are the same as
 those defined in \code{vars} argument as specified in the call to \code{draws}.
 You can only update the imputation method, that is to say that specifying
@@ -70,13 +70,13 @@ impute(
 
 new_ice <- data.frame(
   subjid = c("Pt1", "Pt2"),
-  method = c("MAR", "JR")
+  strategy = c("MAR", "JR")
 )
 
 impute(
     draws = drawobj,
     references = c("Trt" = "Placebo", "Placebo" = "Placebo"),
-    update_ice = new_ice
+    update_strategy = new_strategy
 )
 }
 

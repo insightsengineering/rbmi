@@ -257,14 +257,14 @@ test_that("Verbose supression works",{
         arrange(desc(visit)) %>%
         slice(1) %>%
         ungroup() %>%
-        mutate(method = "MAR")
+        mutate(strategy = "MAR")
 
-    vars <- list(
+    vars <- ivars(
         visit = "visit",
         subjid = "id",
         group = "group",
         covariates = "sex",
-        method = "method",
+        strategy = "strategy",
         outcome = "outcome"
     )
 

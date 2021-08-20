@@ -3,7 +3,6 @@
 # TODO - More meaningful error messages
 
 validate_datalong <- function(data, vars) {
-    validate_datalong_varIsChar(vars)
     validate_datalong_varExists(data, vars)
     validate_datalong_types(data, vars)
     validate_datalong_notMissing(data, vars)
@@ -14,51 +13,7 @@ validate_datalong <- function(data, vars) {
 
 
 
-#' Validate inputs for `vars`
-#'
-#' Checks that the required variable names are defined within `vars` and
-#' are of appropriate datatypes
-#'
-#' @param vars named list indicating the names of key variables in the source dataset
-validate_datalong_varIsChar <- function(vars) {
-    covars <- extract_covariates(vars$covariates)
 
-    assert_that(
-        is_char_one(vars$outcome),
-        msg = "`vars$outcome` should be a length 1 character"
-    )
-
-    assert_that(
-        is_char_one(vars$group),
-        msg = "`vars$group` should be a length 1 character"
-    )
-
-    assert_that(
-        is_char_one(vars$visit),
-        msg = "`vars$visit` should be a length 1 character"
-    )
-
-    assert_that(
-        is_char_one(vars$subjid),
-        msg = "`vars$subjid` should be a length 1 character"
-    )
-
-    assert_that(
-        is_char_one(vars$method),
-        msg = "`vars$method` should be a length 1 character"
-    )
-
-    assert_that(
-        is.character(vars$covars) | is.null(vars$covars),
-        msg = "`vars$covars` should be a character vector or NULL"
-    )
-
-    assert_that(
-        is.character(vars$strata) | is.null(vars$strata),
-        msg = "`vars$strata` should be a character vector or NULL"
-    )
-    return(invisible(TRUE))
-}
 
 
 validate_datalong_varExists <- function(data, vars) {
@@ -195,16 +150,16 @@ validate_datalong_unifromStrata <- function(data, vars) {
 
 validate_dataice <- function(data, data_ice, vars, update = FALSE) {
 
-    validate_datalong_varIsChar(vars)
+    validate(vars)
 
-    method <- vars$method
+    strategy <- vars$strategy
     visit <- vars$visit
     subjid <- vars$subjid
 
     assert_that(
-        is.character(data_ice[[method]]),
-        all(!is.na(data_ice[[method]])),
-        msg = "`data_ice[[vars$method]]` must be a non-missing character vector"
+        is.character(data_ice[[strategy]]),
+        all(!is.na(data_ice[[strategy]])),
+        msg = "`data_ice[[vars$strategy]]` must be a non-missing character vector"
     )
 
     assert_that(

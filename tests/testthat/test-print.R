@@ -23,13 +23,13 @@ get_data <- function(n){
         slice(1) %>%
         ungroup() %>%
         select(id, visit) %>%
-        mutate(method = "JR")
+        mutate(strategy = "JR")
 
 
-    vars <- list(
+    vars <- ivars(
         outcome = "outcome",
         group = "group",
-        method = "method",
+        strategy = "strategy",
         subjid = "id",
         visit = "visit",
         covariates = c("age", "sex", "visit * group")
@@ -287,7 +287,7 @@ test_that("print - Condmean (jackknife)", {
 #     mutate(method = "JR")
 
 
-# vars <- list(
+# vars <- ivars(
 #     outcome = "outcome",
 #     group = "group",
 #     method = "method",

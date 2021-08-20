@@ -34,14 +34,14 @@ dat <- tibble(
 
 dat[sample(1:(nv*n), size = 7), "outcome"] <- NA
 
-vars <- list(
+vars <- ivars(
     outcome = "outcome",
     visit = "visit",
     subjid = "subjid",
     group = "group",
     strata = "strata",
     covariates = c("sex", "age", "group*visit"),
-    method = "method"
+    strategy = "strategy"
 )
 
 data_ice <- NULL
@@ -325,17 +325,16 @@ test_that("nmar data is removed as expected",{
 
     dat_ice <- tibble(
         id = nmar_ids,
-        method = "CR",
+        strategy = "CR",
         visit = "visit_2"
     )
 
-    vars <- list(
+    vars <- ivars(
         outcome = "outcome",
         visit = "visit",
-        method = "method",
         subjid = "id",
         group = "group",
-        method = "method",
+        strategy = "strategy",
         covariates = c("age", "sex")
     )
 

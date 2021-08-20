@@ -54,13 +54,13 @@ test_that("Basic Usage - Approx Bayes", {
         slice(1) %>%
         ungroup() %>%
         select(id, visit) %>%
-        mutate(method = "JR")
+        mutate(strategy = "JR")
 
 
-    vars <- list(
+    vars <- ivars(
         outcome = "outcome",
         group = "group",
-        method = "method",
+        strategy = "strategy",
         subjid = "id",
         visit = "visit",
         covariates = c("age", "sex", "visit * group")
@@ -126,13 +126,13 @@ test_that("Basic Usage - Bayesian", {
         slice(1) %>%
         ungroup() %>%
         select(id, visit) %>%
-        mutate(method = "MAR")
+        mutate(strategy = "MAR")
 
 
-    vars <- list(
+    vars <- ivars(
         outcome = "outcome",
         group = "group",
-        method = "method",
+        strategy = "strategy",
         subjid = "id",
         visit = "visit",
         covariates = c("age", "sex", "visit * group")
@@ -147,12 +147,12 @@ test_that("Basic Usage - Bayesian", {
 
     ### Check to see if updating ice works and if it impacts the original values
     updated_ice <- dat_ice %>%
-        mutate(method = "JR")
+        mutate(strategy = "JR")
 
     imputeobj_upd <- impute(
         draws = drawobj,
         references = c("A" = "B", "B" = "B"),
-        update_ice = updated_ice
+        update_strategy = updated_ice
     )
 
     imputeobj <- impute(
@@ -216,13 +216,13 @@ test_that("Basic Usage - Condmean", {
         slice(1) %>%
         ungroup() %>%
         select(id, visit) %>%
-        mutate(method = "JR")
+        mutate(strategy = "JR")
 
 
-    vars <- list(
+    vars <- ivars(
         outcome = "outcome",
         group = "group",
-        method = "method",
+        strategy = "strategy",
         subjid = "id",
         visit = "visit",
         covariates = c("age", "sex", "visit * group")
@@ -237,12 +237,12 @@ test_that("Basic Usage - Condmean", {
 
     ### Check to see if updating ice works and if it impacts the original values
     updated_ice <- dat_ice %>%
-        mutate(method = "MAR")
+        mutate(strategy = "MAR")
 
     imputeobj_upd <- impute(
         draws = drawobj,
         references = c("A" = "B", "B" = "B"),
-        update_ice = updated_ice
+        update_strategy = updated_ice
     )
 
     imputeobj <- impute(
@@ -305,13 +305,13 @@ test_that("Custom Strategies and Custom analysis functions",{
         slice(1) %>%
         ungroup() %>%
         select(id, visit) %>%
-        mutate(method = "XX")
+        mutate(strategy = "XX")
 
 
-    vars <- list(
+    vars <- ivars(
         outcome = "outcome",
         group = "group",
-        method = "method",
+        strategy = "strategy",
         subjid = "id",
         visit = "visit",
         covariates = c("age", "sex", "visit * group")
@@ -431,12 +431,12 @@ test_that("Sorting doesn't change results",{
         slice(1) %>%
         ungroup() %>%
         select(id, visit) %>%
-        mutate(method = "JR")
+        mutate(strategy = "JR")
 
-    vars <- list(
+    vars <- ivars(
         outcome = "outcome",
         group = "group",
-        method = "method",
+        strategy = "strategy",
         subjid = "id",
         visit = "visit",
         covariates = c("age", "sex", "visit * group")
@@ -514,12 +514,12 @@ test_that("Results are Reproducible", {
             slice(1) %>%
             ungroup() %>%
             select(id, visit) %>%
-            mutate(method = "JR")
+            mutate(strategy = "JR")
 
-        vars <- list(
+        vars <- ivars(
             outcome = "outcome",
             group = "group",
-            method = "method",
+            strategy = "strategy",
             subjid = "id",
             visit = "visit",
             covariates = c("age", "sex", "visit * group")

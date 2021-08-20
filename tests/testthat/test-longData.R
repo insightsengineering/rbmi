@@ -56,14 +56,14 @@ get_ld <- function() {
     dat[c(1, 2, 3, 4, 6, 7), "outcome"] <- NA
 
 
-    vars <- list(
+    vars <- ivars(
         outcome = "outcome",
         visit = "visit",
         subjid = "subjid",
         group = "group",
         strata = "strata",
         covariates = c("sex", "age"),
-        method = "method"
+        strategy = "strategy"
     )
 
     ld <- longDataConstructor$new(
@@ -221,7 +221,7 @@ test_that("Strategies", {
     )
 
     dat_ice <- tribble(
-        ~visit, ~subjid, ~method,
+        ~visit, ~subjid, ~strategy,
         "Visit 1", "1",  "ABC",
         "Visit 2",  "2",  "MAR",
         "Visit 3",  "3",  "XYZ"
@@ -248,7 +248,7 @@ test_that("Strategies", {
     pre_update_ice_visit <- ld$visit_ice
 
     dat_ice <- tribble(
-        ~subjid, ~method,
+        ~subjid, ~strategy,
           "1",  "ABC",
           "2",  "MAR",
           "3",  "ABC"
@@ -270,13 +270,13 @@ test_that("Strategies", {
     )
 
     dat_ice <- tribble(
-        ~visit, ~subjid, ~method,
+        ~visit, ~subjid, ~strategy,
         "Visit 1", "2",  "ABC",
     )
     expect_error(ld$update_strategies(dat_ice), "Unable to change from MAR to non-MAR")
 
     dat_ice <- tribble(
-         ~subjid, ~method,
+         ~subjid, ~strategy,
           "3",  "MAR",
     )
     expect_error(ld$update_strategies(dat_ice), "Unable to change from non-MAR to MAR")
@@ -285,7 +285,7 @@ test_that("Strategies", {
 
 test_that("strategies part 2", {
 
-    # Here we check to see that using `update_strategies` only updates the method and not
+    # Here we check to see that using `update_strategies` only updates the strategy and not
     # the visits (or anything else for that matter)
 
     dobj <- get_ld()
@@ -294,7 +294,7 @@ test_that("strategies part 2", {
 
 
     dat_ice <- tribble(
-        ~visit, ~subjid, ~method,
+        ~visit, ~subjid, ~strategy,
         "Visit 1", "1",  "ABC",
         "Visit 2",  "2",  "MAR",
         "Visit 3",  "3",  "XYZ"
@@ -305,7 +305,7 @@ test_that("strategies part 2", {
 
 
     dat_ice <- tribble(
-        ~subjid, ~method, ~visit,
+        ~subjid, ~strategy, ~visit,
         "1", "ABC", "Visit 2",
         "2", "MAR", "Visit 7",
         "3", "XYZ", "Visit 1"
@@ -315,7 +315,7 @@ test_that("strategies part 2", {
 
 
     dat_ice <- tribble(
-        ~subjid, ~method, ~visit,
+        ~subjid, ~strategy, ~visit,
         "1", "LKJ", "Visit 2",
         "2", "MAR", "Visit 7",
         "3", "XYZ", "Visit 1"
@@ -411,18 +411,18 @@ test_that("longdata can handle data that isn't sorted", {
         outcome = c(1, 2, 3, 4, 5, NA)
     )
 
-    vars <- list(
+    vars <- ivars(
         outcome = "outcome",
         visit = "visit",
         subjid = "id",
         group = "group",
-        method = "method"
+        strategy = "strategy"
     )
 
     dat_ice <- tibble(
         visit = "v2",
         id = "2",
-        method = "JR"
+        strategy = "JR"
     )
 
     ld <- longDataConstructor$new(
@@ -444,12 +444,12 @@ test_that("longdata can handle data that isn't sorted", {
 
 test_that("longdata rejects data that has no useable observations for a visit", {
 
-    vars <- list(
+    vars <- ivars(
         outcome = "outcome",
         visit = "visit",
         subjid = "id",
         group = "group",
-        method = "method"
+        strategy = "strategy"
     )
 
     dat <- tibble(
@@ -474,7 +474,7 @@ test_that("longdata rejects data that has no useable observations for a visit", 
     dat_ice <- tibble(
         visit = "v2",
         id = c("2", "1"),
-        method = "JR"
+        strategy = "JR"
     )
 
     ld <- longDataConstructor$new(data = dat, vars = vars)
