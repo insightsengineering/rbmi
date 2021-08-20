@@ -26,7 +26,7 @@ ld_2_list <- function(ld) {
 }
 
 
-get_ld <- function(){
+get_ld <- function() {
     n <- 4
     nv <- 3
 
@@ -35,25 +35,25 @@ get_ld <- function(){
         age = rnorm(n),
         group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),
         sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F")),
-        strata = c("A","A", "A", "B")
+        strata = c("A", "A", "A", "B")
     )
 
     dat <- tibble(
         subjid = rep.int(1:n, nv)
     ) %>%
         left_join(covars, by = "subjid") %>%
-        mutate( outcome = rnorm(
+        mutate(outcome = rnorm(
             n(),
             age * 3 + (as.numeric(sex) - 1) * 3 + (as.numeric(group) - 1) * 4,
             sd = 3
         )) %>%
         arrange(subjid) %>%
         group_by(subjid) %>%
-        mutate( visit = factor(paste0("Visit ", 1:n())))  %>%
+        mutate(visit = factor(paste0("Visit ", 1:n())))  %>%
         ungroup() %>%
         mutate(subjid = factor(subjid))
 
-    dat[c(1,2,3,4,6,7), "outcome"] <- NA
+    dat[c(1, 2, 3, 4, 6, 7), "outcome"] <- NA
 
 
     vars <- list(
@@ -70,8 +70,8 @@ get_ld <- function(){
         data = dat,
         vars = vars
     )
-    
-    return(list(ld = ld, dat = dat, n = n, nv =nv))
+
+    return(list(ld = ld, dat = dat, n = n, nv = nv))
 }
 
 
@@ -83,16 +83,16 @@ test_that("longData - Basics", {
     dat <- dobj$dat
 
     subject_names <- as.character(unique(dat$subjid))
-    expect_equal( names(ld$is_mar), subject_names)
-    expect_equal( names(ld$is_missing), subject_names)
-    expect_equal( ld$ids, subject_names)
+    expect_equal(names(ld$is_mar), subject_names)
+    expect_equal(names(ld$is_missing), subject_names)
+    expect_equal(ld$ids, subject_names)
 
-    expect_equal( ld$visits,  levels(dat$visit))
-    expect_length( ld$strata, length(unique(dat$subjid)))
+    expect_equal(ld$visits,  levels(dat$visit))
+    expect_length(ld$strata, length(unique(dat$subjid)))
 
     expect_equal(
         unlist(ld$is_missing, use.names = FALSE),
-        c(T,T,T,   T,F,T,   T,F,F,   F,F,F)
+        c(T, T, T,     T, F, T,     T, F, F,     F, F, F)
     )
 
     expect_equal(
@@ -104,7 +104,7 @@ test_that("longData - Basics", {
 
 
 
-test_that("longData - Sampling",{
+test_that("longData - Sampling", {
 
     dobj <- get_ld()
     ld <- dobj$ld
@@ -116,17 +116,20 @@ test_that("longData - Sampling",{
         ld$sample_ids()
     )
 
-    expect_true( "1" %in% samps[1,])
-    expect_true( "2" %in% samps[1,])
-    expect_true( "3" %in% samps[1,])
+    expect_true("1" %in% samps[1, ])
+    expect_true("2" %in% samps[1, ])
+    expect_true("3" %in% samps[1, ])
 
     ## Subject "4" is the only subject in their strata so they must be sampled
-    expect_true( all(samps[4,] == "4"))
+    expect_true(all(samps[4, ] == "4"))
 
     ### Looking to see that re-sampling is working i.e. samples contain duplicates
-    expect_true(any( apply(samps, 2, function(x) length(unique(x))) %in% c(1,2)))
+    expect_true(any(apply(samps, 2, function(x) length(unique(x))) %in% c(1, 2)))
 
-    expect_error(ld$get_data("-1231"))
+    expect_error(
+        ld$get_data("-1231"),
+        "subjids are not in self"
+    )
 
     x <- ld$get_data(c("1", "1", "3"))
 
@@ -135,7 +138,7 @@ test_that("longData - Sampling",{
         dat %>% filter(subjid == "1"),
         dat %>% filter(subjid == "3")
     )
-    expect_equal( select(x, -subjid) , select(y,-subjid))
+    expect_equal(select(x, -subjid), select(y, -subjid))
     expect_true(all(x$subjid != y$subjid))
 
 
@@ -165,7 +168,7 @@ test_that("longData - Sampling",{
 
 
 
-    x <- ld$get_data(c("1","1","1","2"), na.rm = TRUE)
+    x <- ld$get_data(c("1", "1", "1", "2"), na.rm = TRUE)
 
     pt2_val <- dat %>% filter(subjid == "2") %>% pull(outcome)
     y <- bind_rows(
@@ -175,15 +178,38 @@ test_that("longData - Sampling",{
         dat %>% filter(subjid == "2"),
     ) %>%
         filter(!is.na(outcome))
-    expect_equal( select(x, -subjid) , select(y,-subjid))
+    expect_equal(select(x, -subjid), select(y, -subjid))
     expect_true(all(x$subjid != y$subjid))
+
+
+
+
+    ilist <- as_imputation_list(
+        as_imputation_single(id = "1", values = c(1, 2)),
+        as_imputation_single(id = "2", values = c(1, 2, 3))
+    )
+
+    expect_error(
+        ld$get_data(ilist),
+        "Number of missing values doesn't equal"
+    )
+
+    expect_error(
+        ld$get_data(as_imputation_list(ilist[1])),
+        "Number of missing values doesn't equal"
+    )
+
+    expect_error(
+        ld$get_data(as_imputation_list(ilist[2])),
+        "Number of missing values doesn't equal"
+    )
 })
 
 
 
 
 
-test_that("Strategies",{
+test_that("Strategies", {
 
     dobj <- get_ld()
     ld <- dobj$ld
@@ -196,7 +222,7 @@ test_that("Strategies",{
 
     dat_ice <- tribble(
         ~visit, ~subjid, ~method,
-        "Visit 1" , "1",  "ABC",
+        "Visit 1", "1",  "ABC",
         "Visit 2",  "2",  "MAR",
         "Visit 3",  "3",  "XYZ"
     )
@@ -216,7 +242,7 @@ test_that("Strategies",{
 
     expect_equal(
         unlist(ld$is_mar, use.names = FALSE),
-        c(F,F,F,  T,T,T,  T,T,F,  T,T,T)
+        c(F, F, F,    T, T, T,    T, T, F,    T, T, T)
     )
 
     pre_update_ice_visit <- ld$visit_ice
@@ -235,7 +261,7 @@ test_that("Strategies",{
 
     expect_equal(
         unlist(ld$is_mar, use.names = FALSE),
-        c(F,F,F,  T,T,T,  T,T,F,  T,T,T)
+        c(F, F, F,    T, T, T,    T, T, F,    T, T, T)
     )
 
     expect_equal(
@@ -245,7 +271,7 @@ test_that("Strategies",{
 
     dat_ice <- tribble(
         ~visit, ~subjid, ~method,
-        "Visit 1" , "2",  "ABC",
+        "Visit 1", "2",  "ABC",
     )
     expect_error(ld$update_strategies(dat_ice), "Unable to change from MAR to non-MAR")
 
@@ -257,7 +283,7 @@ test_that("Strategies",{
 })
 
 
-test_that("strategies part 2",{
+test_that("strategies part 2", {
 
     # Here we check to see that using `update_strategies` only updates the method and not
     # the visits (or anything else for that matter)
@@ -269,7 +295,7 @@ test_that("strategies part 2",{
 
     dat_ice <- tribble(
         ~visit, ~subjid, ~method,
-        "Visit 1" , "1",  "ABC",
+        "Visit 1", "1",  "ABC",
         "Visit 2",  "2",  "MAR",
         "Visit 3",  "3",  "XYZ"
     )
@@ -306,15 +332,15 @@ test_that("strategies part 2",{
 
 test_that("sample_ids", {
     set.seed(101)
-    x <- sample_ids(c(1,2,3))
+    x <- sample_ids(c(1, 2, 3))
     set.seed(101)
-    y <- sample_ids(c(1,2,3))
+    y <- sample_ids(c(1, 2, 3))
     set.seed(7)
-    z <- sample_ids(c(1,2,3))
+    z <- sample_ids(c(1, 2, 3))
 
-    expect_equal(x,y)
-    expect_true(all(x %in% c(1,2,3)))
-    expect_true(all(z %in% c(1,2,3)))
+    expect_equal(x, y)
+    expect_true(all(x %in% c(1, 2, 3)))
+    expect_true(all(z %in% c(1, 2, 3)))
     expect_length(x, 3)
     expect_length(y, 3)
     expect_length(z, 3)
@@ -322,24 +348,24 @@ test_that("sample_ids", {
     set.seed(200)
     samps <- replicate(
         n = 10000,
-        sample_ids(c(1,2,3))
+        sample_ids(c(1, 2, 3))
     )
 
     ### Looking to see that re-sampling is working i.e. samples contain duplicates
-    expect_true(any( apply(samps, 2, function(x) length(unique(x))) %in% c(1,2)))
+    expect_true(any(apply(samps, 2, function(x) length(unique(x))) %in% c(1, 2)))
 
     ### Assuming random sampling the mean should converge to ~2
     samps_mean <- apply(samps, 1, mean)
-    expect_true(all( samps_mean >= 1.95 & samps_mean <= 2.05))
+    expect_true(all(samps_mean >= 1.95 & samps_mean <= 2.05))
 })
 
 
 test_that("as_strata", {
-    expect_equal(as_strata( c(1,2,3), c(1,2,3)), c(1,2,3))
-    expect_equal(as_strata( c(1,1,2), c(5,5,6)), c(1,1,2))
-    expect_equal(as_strata( c(1,1,1), c("a","a","a")), c(1,1,1))
-    expect_equal(as_strata( c("a","b","c"), c("a","a","a")), c(1,2,3))
-    expect_equal(as_strata( c("a","a","c"), c("a","a","a")), c(1,1,2))
+    expect_equal(as_strata(c(1, 2, 3), c(1, 2, 3)), c(1, 2, 3))
+    expect_equal(as_strata(c(1, 1, 2), c(5, 5, 6)), c(1, 1, 2))
+    expect_equal(as_strata(c(1, 1, 1), c("a", "a", "a")), c(1, 1, 1))
+    expect_equal(as_strata(c("a", "b", "c"), c("a", "a", "a")), c(1, 2, 3))
+    expect_equal(as_strata(c("a", "a", "c"), c("a", "a", "a")), c(1, 1, 2))
 })
 
 
@@ -376,7 +402,7 @@ test_that("idmap", {
 
 
 
-test_that("longdata can handle data that isn't sorted",{
+test_that("longdata can handle data that isn't sorted", {
 
     dat <- tibble(
         visit = factor(c("v1", "v2", "v3", "v3", "v1", "v2"), levels = c("v1", "v2", "v3")),
@@ -405,7 +431,7 @@ test_that("longdata can handle data that isn't sorted",{
     )
     ld$set_strategies(dat_ice)
 
-    expect_equal(ld$values, list("1" = c(1,2,3), "2" = c(5,NA,4)))
+    expect_equal(ld$values, list("1" = c(1, 2, 3), "2" = c(5, NA, 4)))
     expect_equal(ld$is_missing, list("1" = c(F, F, F), "2" = c(F, T, F)))
     expect_equal(ld$is_mar, list("1" = c(T, T, T), "2" = c(T, F, F)))
 
@@ -416,7 +442,7 @@ test_that("longdata can handle data that isn't sorted",{
 
 
 
-test_that("longdata rejects data that has no useable observations for a visit",{
+test_that("longdata rejects data that has no useable observations for a visit", {
 
     vars <- list(
         outcome = "outcome",

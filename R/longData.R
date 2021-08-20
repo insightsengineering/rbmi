@@ -37,7 +37,7 @@ longDataConstructor <- R6::R6Class(
         #' @field ids A character vector containing the unique ids of each subject in `self$data`
         ids = NULL,
 
-        #' @field ids_levels A character vector containing the exact levels (and order) of the 
+        #' @field ids_levels A character vector containing the exact levels (and order) of the
         #' original `data[[vars$subjid]]` variable
         ids_levels = NULL,
 
@@ -115,10 +115,11 @@ longDataConstructor <- R6::R6Class(
         #'
         #' @details
         #'
-        #' If `obj` is NULL then the full original dataset is returned. If `obj` is a character vector then a new
-        #' dataset consisting of just those subjects is returned; if the character vector contains duplicate entries
-        #' then that subject will be returned multiple times. If `obj` is a list of lists with elements `id` and `values`
-        #' then a dataset of those subjects will be returned but with missing values filled in by the values in `values`.
+        #' If `obj` is NULL then the full original dataset is returned. If `obj` is a
+        #' character vector then a new dataset consisting of just those subjects is returned; if the
+        #' character vector contains duplicate entries then that subject will be returned multiple times.
+        #' If `obj` is a list of lists with elements `id` and `values` then a dataset of those subjects
+        #' will be returned but with missing values filled in by the values in `values`.
         #' i.e.
         #' ```
         #' obj <- list(
@@ -128,9 +129,10 @@ longDataConstructor <- R6::R6Class(
         #' )
         #' ld$get_data(obj)
         #' ```
-        #' Will return a dataframe consisting of all observations for pt1 twice and all of the observations for "pt3" once.
-        #' The first set of observations for "pt1" will have missing values filled in with `c(1,2,3)` and the second set will
-        #' be filled in by `c(4,5,6)`. The length of the values must be equal to `sum(self$is_missing[[id]])`.
+        #' Will return a dataframe consisting of all observations for pt1 twice and all of the
+        #' observations for "pt3" once. The first set of observations for "pt1" will have missing
+        #' values filled in with `c(1,2,3)` and the second set will be filled in by `c(4,5,6)`. The
+        #' length of the values must be equal to `sum(self$is_missing[[id]])`.
         #'
         #' If `obj` is not NULL then all subject IDs will be scrambled in order to ensure that they are unique
         #' i.e. If the "pt2" is requested twice then this process guarantees that each set of observations
@@ -139,20 +141,27 @@ longDataConstructor <- R6::R6Class(
         #' @return
         #'
         #' A dataframe
-        get_data = function(obj = NULL, nmar.rm = FALSE, na.rm = FALSE, idmap = FALSE){
+        get_data = function(obj = NULL, nmar.rm = FALSE, na.rm = FALSE, idmap = FALSE) {
 
-            if(is.null(obj)) return(self$data)
+            if (is.null(obj)) return(self$data)
 
-            if( ! any(c("imputation_list", "character") %in% class(obj))){
+            if (! any(c("imputation_list", "character") %in% class(obj))) {
                 stop("Object must be an imputation_list or a character vector")
             }
 
             list_flag <- "imputation_list" %in% class(obj)
 
-            if(list_flag) {
+            if (list_flag) {
                 obj_expanded <- transpose_imputations(obj)
                 ids <- obj_expanded$ids
                 values <- obj_expanded$values
+
+                n_miss <- vapply(self$is_missing[ids], function(x) sum(x), numeric(1))
+                n_values <- vapply(obj, function(x) length(x$values), numeric(1))
+                assert_that(
+                    all(n_miss == n_values),
+                    msg = "Number of missing values doesn't equal number of imputed values"
+                )
             } else {
                 ids <- obj
             }
@@ -256,9 +265,9 @@ longDataConstructor <- R6::R6Class(
         #' TODO
         #' @param ids TODO
         #' @return TODO
-        validate_ids = function(ids){
+        validate_ids = function(ids) {
             is_in <- ids %in% self$ids
-            if(! all(is_in)){
+            if (!all(is_in)) {
                 stop("subjids are not in self")
             }
             return(invisible(self))
@@ -268,7 +277,7 @@ longDataConstructor <- R6::R6Class(
         #' @description
         #' TODO
         #' @return TODO
-        sample_ids = function(){
+        sample_ids = function() {
             sample_ids(self$ids, self$strata)
         },
 
@@ -277,7 +286,7 @@ longDataConstructor <- R6::R6Class(
         #' TODO
         #' @param id TODO
         #' @return TODO
-        extract_by_id = function(id){
+        extract_by_id = function(id) {
             list(
                 is_mar = self$is_mar[[id]],
                 is_missing = self$is_missing[[id]],
@@ -379,7 +388,7 @@ longDataConstructor <- R6::R6Class(
                 msg = paste(
                     sprintf(
                         "The data combined with the current ICE strategy has resulted in the %s visit(s)",
-                        paste0("`", paste0(no_data_visits, collapse = "`, `") , "`")
+                        paste0("`", paste0(no_data_visits, collapse = "`, `"), "`")
                     ),
                     "not having any available observations to construct the imputation model on. Please either drop",
                     "these visit(s) or choose a different ICE strategy."
@@ -391,15 +400,15 @@ longDataConstructor <- R6::R6Class(
         #' @description
         #' TODO
         #' @return TODO
-        set_strata = function(){
+        set_strata = function() {
             ## Use first row to determine strata i.e. no time varying strata
             strata_index <- unlist(
                 lapply(self$indexes, function(x) x[[1]]),
                 use.names = FALSE
             )
-            strata_data <- self$data[strata_index,]
-            if(length(self$vars$strata) > 0){
-                self$strata <- as_strata(strata_data[,self$vars$strata])
+            strata_data <- self$data[strata_index, ]
+            if (length(self$vars$strata) > 0) {
+                self$strata <- as_strata(strata_data[, self$vars$strata])
             } else {
                 self$strata <- rep(1, nrow(strata_data))
             }
@@ -411,7 +420,7 @@ longDataConstructor <- R6::R6Class(
         #' @param data TODO
         #' @param vars TODO
         #' @return TODO
-        initialize = function(data, vars){
+        initialize = function(data, vars) {
             validate_datalong(data, vars)
             self$data <- sort_by(data, c(vars$subjid, vars$visit))
             self$vars <- vars
@@ -433,7 +442,7 @@ longDataConstructor <- R6::R6Class(
 #' Title
 #'
 #' @param imputations TODO
-transpose_imputations = function(imputations) {
+transpose_imputations <- function(imputations) {
     len <- length(imputations)
     values <- vector(mode = "list", length = len)
     ids <- vector(mode = "list", length = len)
@@ -452,6 +461,3 @@ transpose_imputations = function(imputations) {
     )
     return(result)
 }
-
-
-

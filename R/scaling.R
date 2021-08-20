@@ -18,17 +18,17 @@ scalerConstructor <- R6::R6Class(
         #' TODO
         #' @param dat TODO
         #' @return TODO
-        initialize = function(dat){
+        initialize = function(dat) {
 
             assert_that(
                 is.data.frame(dat) | is.matrix(dat),
-                all( vapply(dat, is.numeric, logical(1))),
+                all(vapply(dat, is.numeric, logical(1))),
                 msg = "Input must be a numeric dataframe or matrix"
             )
 
             cat_flag <- vapply(
                 X = dat,
-                FUN = function(x) all(x %in% c(0,1)),
+                FUN = function(x) all(x %in% c(0, 1)),
                 FUN.VALUE = logical(1),
                 USE.NAMES = FALSE
             )
@@ -58,11 +58,11 @@ scalerConstructor <- R6::R6Class(
         #' TODO
         #' @param dat TODO
         #' @return TODO
-        scale = function(dat){
+        scale = function(dat) {
 
             assert_that(
                 is.data.frame(dat) | is.matrix(dat),
-                all( vapply(dat, is.numeric, logical(1))),
+                all(vapply(dat, is.numeric, logical(1))),
                 msg = "Input must be a numeric dataframe or matrix"
             )
 
@@ -97,12 +97,12 @@ scalerConstructor <- R6::R6Class(
         #' TODO
         #' @param sigma TODO
         #' @return TODO
-        unscale_sigma = function(sigma){
+        unscale_sigma = function(sigma) {
             assert_that(
                 is.matrix(sigma) | (is.numeric(sigma) & length(sigma) == 1),
                 msg = "Input must be a matrix or a length 1 numeric vector"
             )
-            return( sigma * self$scales[[1]]^2)
+            return(sigma * self$scales[[1]]^2)
         },
 
 
@@ -110,7 +110,7 @@ scalerConstructor <- R6::R6Class(
         #' TODO
         #' @param beta TODO
         #' @return TODO
-        unscale_beta = function(beta){
+        unscale_beta = function(beta) {
 
             len <- length(self$center) - 1
 
@@ -124,10 +124,10 @@ scalerConstructor <- R6::R6Class(
             b_i <- beta[-1]
 
             mu_y <- self$center[1]
-            mu_i <- self$center[-c(1,2)]
+            mu_i <- self$center[-c(1, 2)]
 
             sig_y <- self$scales[1]
-            sig_i <- self$scales[-c(1,2)]
+            sig_i <- self$scales[-c(1, 2)]
 
             unscaled_beta <- c(
                 mu_y + sig_y * b_0 - sum(sig_y * b_i * mu_i / sig_i),
@@ -137,69 +137,3 @@ scalerConstructor <- R6::R6Class(
         }
     )
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ####### Test 1
-#
-#
-# vars <- list(
-#     outcome = "Sepal.Length",
-#     group = "Sepal.Width",
-#     visit = "Petal.Length",
-#     covariates = c("Species", "Species*Petal.Length")
-# )
-#
-# model_df <- as_model_df(iris, as_simple_formula(vars))
-# scaler <- scalerConstructor$new(model_df)
-#
-# model_df_scaled <- scaler$scale(model_df)
-#
-# outcome_scaled <- model_df_scaled[,1]
-# design_scaled <- model_df_scaled[,-1]
-# mod_scaled <- lm(outcome_scaled ~ . - 1, data = design_scaled )
-#
-# outcome <- model_df[,1]
-# design <- model_df[,-1]
-# mod <- lm(outcome ~ . - 1, data = design )
-#
-# mod$coefficients - scaler$unscale_beta(mod_scaled$coefficients)
-#
-#
-# ####### Test 2
-#
-#
-# vars <- list(
-#     outcome = "Sepal.Length",
-#     group = "Sepal.Width",
-#     visit = "Petal.Length",
-#     covariates = c("Species", "Species*Petal.Length", "newvar * Species", "newvar * Sepal.Width")
-# )
-#
-# i2 <- iris
-# i2$newvar <- factor(sample(c("A", "B", "C"), size = 150 , replace = TRUE))
-#
-# model_df <- as_model_df(i2, as_simple_formula(vars))
-# scaler <- scalerConstructor$new(model_df)
-#
-# model_df_scaled <- scaler$scale(model_df)
-#
-# outcome_scaled <- model_df_scaled[,1]
-# design_scaled <- model_df_scaled[,-1]
-# mod_scaled <- lm(outcome_scaled ~ . - 1, data = design_scaled )
-#
-# outcome <- model_df[,1]
-# design <- model_df[,-1]
-# mod <- lm(outcome ~ . - 1, data = design )
-#
-# mod$coefficients - scaler$unscale_beta(mod_scaled$coefficients)
