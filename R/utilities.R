@@ -256,6 +256,7 @@ sort_by <- function(df, vars = NULL, decreasing = NULL) {
 #' @param group TODO
 #' @param covariates TODO
 #' @param strata TODO
+#' @param strategy TODO
 #' @export
 ivars <- function(
     subjid = "subjid",

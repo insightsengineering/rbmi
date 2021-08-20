@@ -26,6 +26,8 @@ ivars(
 \item{covariates}{TODO}
 
 \item{strata}{TODO}
+
+\item{strategy}{TODO}
 }
 \description{
 TODO
