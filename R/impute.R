@@ -171,7 +171,7 @@ impute_internal <- function(draws, references, update_ice, strategies, condmean)
 #' TODO
 #'
 #' @param imputations TODO
-#' @param samples_ids TODO
+#' @param sample_ids TODO
 untranspose_imputations <- function(imputations, sample_ids) {
 
     imp_names <- vapply(imputations, function(x) x$id, character(1))
