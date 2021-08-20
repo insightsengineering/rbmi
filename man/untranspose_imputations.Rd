@@ -9,7 +9,7 @@ untranspose_imputations(imputations, sample_ids)
 \arguments{
 \item{imputations}{TODO}
 
-\item{samples}{TODO}
+\item{samples_ids}{TODO}
 }
 \description{
 TODO

@@ -7,7 +7,7 @@
 as_imputation_list(...)
 }
 \arguments{
-\item{x}{a list of imputation_singles}
+\item{...}{a list of imputation_singles}
 }
 \description{
 Create a valid imputation list object

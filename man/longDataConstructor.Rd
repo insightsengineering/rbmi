@@ -123,10 +123,11 @@ new subject ids to the old subject ids}
 \if{html}{\out{</div>}}
 }
 \subsection{Details}{
-If \code{obj} is NULL then the full original dataset is returned. If \code{obj} is a character vector then a new
-dataset consisting of just those subjects is returned; if the character vector contains duplicate entries
-then that subject will be returned multiple times. If \code{obj} is a list of lists with elements \code{id} and \code{values}
-then a dataset of those subjects will be returned but with missing values filled in by the values in \code{values}.
+If \code{obj} is NULL then the full original dataset is returned. If \code{obj} is a
+character vector then a new dataset consisting of just those subjects is returned; if the
+character vector contains duplicate entries then that subject will be returned multiple times.
+If \code{obj} is a list of lists with elements \code{id} and \code{values} then a dataset of those subjects
+will be returned but with missing values filled in by the values in \code{values}.
 i.e.\preformatted{obj <- list(
   list( id = "pt1", values = c(1,2,3)),
   list( id = "pt1", values = c(4,5,6)),
@@ -135,9 +136,10 @@ i.e.\preformatted{obj <- list(
 ld$get_data(obj)
 }
 
-Will return a dataframe consisting of all observations for pt1 twice and all of the observations for "pt3" once.
-The first set of observations for "pt1" will have missing values filled in with \code{c(1,2,3)} and the second set will
-be filled in by \code{c(4,5,6)}. The length of the values must be equal to \code{sum(self$is_missing[[id]])}.
+Will return a dataframe consisting of all observations for pt1 twice and all of the
+observations for "pt3" once. The first set of observations for "pt1" will have missing
+values filled in with \code{c(1,2,3)} and the second set will be filled in by \code{c(4,5,6)}. The
+length of the values must be equal to \code{sum(self$is_missing[[id]])}.
 
 If \code{obj} is not NULL then all subject IDs will be scrambled in order to ensure that they are unique
 i.e. If the "pt2" is requested twice then this process guarantees that each set of observations

@@ -171,7 +171,7 @@ impute_internal <- function(draws, references, update_ice, strategies, condmean)
 #' TODO
 #'
 #' @param imputations TODO
-#' @param samples TODO
+#' @param samples_ids TODO
 untranspose_imputations <- function(imputations, sample_ids) {
 
     imp_names <- vapply(imputations, function(x) x$id, character(1))
@@ -605,7 +605,7 @@ validate.imputation_single <- function(x, ...) {
 
 #' Create a valid imputation list object
 #'
-#' @param x a list of imputation_singles
+#' @param ... a list of imputation_singles
 as_imputation_list <- function(...) {
     x <- list(...)
     if (length(x) == 1 & class(x[[1]])[[1]] != "imputation_single") {

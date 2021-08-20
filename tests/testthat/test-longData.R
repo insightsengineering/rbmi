@@ -143,12 +143,12 @@ test_that("longData - Sampling", {
 
 
 
-    imputes <- as_imputation_list(list(
+    imputes <- as_imputation_list(
         as_imputation_single(id = "1", values = c(1, 2, 3)),
         as_imputation_single(id = "4", values = c()),
         as_imputation_single(id = "1", values = c(4, 5, 6)),
         as_imputation_single(id = "2", values = c(7, 8))
-    ))
+    )
     x <- ld$get_data(imputes)
     pt2_val <- dat %>%
         filter(subjid == "2") %>%
