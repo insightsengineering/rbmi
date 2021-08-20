@@ -408,13 +408,12 @@ longDataConstructor <- R6::R6Class(
 #' Title
 #'
 #' @param imputations TODO
-transpose_imputations = function(imputations){
-
+transpose_imputations = function(imputations) {
     len <- length(imputations)
     values <- vector(mode = "list", length = len)
     ids <- vector(mode = "list", length = len)
 
-    for( i in seq_len(len)){
+    for (i in seq_len(len)) {
         values[[i]] <- imputations[[i]]$values
         ids[[i]] <- imputations[[i]]$id
     }
@@ -430,8 +429,15 @@ transpose_imputations = function(imputations){
 }
 
 
-sort_by <- function(df, vars){
-    ord <- do.call(order, df[, vars])
+#' Sort Data Frame
+#'
+#' Sorts a dataframe (ascending only) based upon variables within the dataset
+#' This function is essentially a wrapper around do.call to ease the syntax
+#' @param df data.frame
+#' @param vars character vector of variables
+sort_by <- function(df, vars) {
+    assert_that( is.data.frame(df), all(vars %in% names(df)))
+    ord <- do.call(order, df[, vars, drop = FALSE])
     df2 <- df[ord, ]
     assert_that(nrow(df) == nrow(df2), ncol(df) == ncol(df2))
     return(df2)
