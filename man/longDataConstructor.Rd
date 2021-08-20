@@ -28,6 +28,9 @@ to this object should be avoided.
 
 \item{\code{ids}}{A character vector containing the unique ids of each subject in \code{self$data}}
 
+\item{\code{ids_levels}}{A character vector containing the exact levels (and order) of the
+original \code{data[[vars$subjid]]} variable}
+
 \item{\code{strata}}{A numeric vector indicating which strata each corresponding value of \code{self$ids} belongs to.
 If no stratification variable is defined this will default to 1 for all subjects (i.e. same group).
 This field is only used as part of the \code{self$sample_ids()} function to enable stratified bootstrap
@@ -82,8 +85,8 @@ for all observations. This list is populated by a call to \code{self$set_strateg
 \item \href{#method-extract_by_id}{\code{longDataConstructor$extract_by_id()}}
 \item \href{#method-update_strategies}{\code{longDataConstructor$update_strategies()}}
 \item \href{#method-set_strategies}{\code{longDataConstructor$set_strategies()}}
+\item \href{#method-check_has_data_at_each_visit}{\code{longDataConstructor$check_has_data_at_each_visit()}}
 \item \href{#method-set_strata}{\code{longDataConstructor$set_strata()}}
-\item \href{#method-process_data}{\code{longDataConstructor$process_data()}}
 \item \href{#method-new}{\code{longDataConstructor$new()}}
 \item \href{#method-clone}{\code{longDataConstructor$clone()}}
 }
@@ -120,10 +123,11 @@ new subject ids to the old subject ids}
 \if{html}{\out{</div>}}
 }
 \subsection{Details}{
-If \code{obj} is NULL then the full original dataset is returned. If \code{obj} is a character vector then a new
-dataset consisting of just those subjects is returned; if the character vector contains duplicate entries
-then that subject will be returned multiple times. If \code{obj} is a list of lists with elements \code{id} and \code{values}
-then a dataset of those subjects will be returned but with missing values filled in by the values in \code{values}.
+If \code{obj} is NULL then the full original dataset is returned. If \code{obj} is a
+character vector then a new dataset consisting of just those subjects is returned; if the
+character vector contains duplicate entries then that subject will be returned multiple times.
+If \code{obj} is a list of lists with elements \code{id} and \code{values} then a dataset of those subjects
+will be returned but with missing values filled in by the values in \code{values}.
 i.e.\preformatted{obj <- list(
   list( id = "pt1", values = c(1,2,3)),
   list( id = "pt1", values = c(4,5,6)),
@@ -132,9 +136,10 @@ i.e.\preformatted{obj <- list(
 ld$get_data(obj)
 }
 
-Will return a dataframe consisting of all observations for pt1 twice and all of the observations for "pt3" once.
-The first set of observations for "pt1" will have missing values filled in with \code{c(1,2,3)} and the second set will
-be filled in by \code{c(4,5,6)}. The length of the values must be equal to \code{sum(self$is_missing[[id]])}.
+Will return a dataframe consisting of all observations for pt1 twice and all of the
+observations for "pt3" once. The first set of observations for "pt1" will have missing
+values filled in with \code{c(1,2,3)} and the second set will be filled in by \code{c(4,5,6)}. The
+length of the values must be equal to \code{sum(self$is_missing[[id]])}.
 
 If \code{obj} is not NULL then all subject IDs will be scrambled in order to ensure that they are unique
 i.e. If the "pt2" is requested twice then this process guarantees that each set of observations
@@ -261,12 +266,12 @@ TODO
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_strata"></a>}}
-\if{latex}{\out{\hypertarget{method-set_strata}{}}}
-\subsection{Method \code{set_strata()}}{
+\if{html}{\out{<a id="method-check_has_data_at_each_visit"></a>}}
+\if{latex}{\out{\hypertarget{method-check_has_data_at_each_visit}{}}}
+\subsection{Method \code{check_has_data_at_each_visit()}}{
 TODO
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$set_strata()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$check_has_data_at_each_visit()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{
@@ -274,12 +279,12 @@ TODO
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-process_data"></a>}}
-\if{latex}{\out{\hypertarget{method-process_data}{}}}
-\subsection{Method \code{process_data()}}{
+\if{html}{\out{<a id="method-set_strata"></a>}}
+\if{latex}{\out{\hypertarget{method-set_strata}{}}}
+\subsection{Method \code{set_strata()}}{
 TODO
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$process_data()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$set_strata()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{

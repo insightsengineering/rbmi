@@ -1,7 +1,7 @@
 # ------ Simulate datasets for the conditional mean simulation study ----
 
 simul_data <- function(n=100, H0 = TRUE){
-    browser()
+
     # n: number of subjects per group
     # H0: If TRUE, simulate under the null hypothesis
     #     If FALSE, simulate under the alternative hypothesis

@@ -56,7 +56,7 @@ get_sim_data <- function(n, sigma, trt = 4){
         arrange(id, visit) %>%
         left_join(covars, by = "id") %>%
         mutate(outcome = outcome + 5 + 3 * age + 3 * f2n(sex) + trt * f2n(group)) %>%
-        mutate(id = as.character(id))
+        mutate(id = as.factor(id))
 
     return(dat)
 }

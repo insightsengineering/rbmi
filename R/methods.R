@@ -59,16 +59,23 @@ method_condmean <- function(
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
-    n_samples = NULL,
+    n_samples = NA,
     type = c("bootstrap", "jackknife")
 ){
     covariance <- match.arg(covariance)
     type <- match.arg(type)
 
-    if(type == "bootstrap") {
+    if (type == "bootstrap") {
         assert_that(
-            !is.null(n_samples),
-            msg = "n_samples must not be NULL when type is bootstrap"
+            !is.na(n_samples),
+            msg = "n_samples must not be NA when type is `bootstrap`"
+        )
+    }
+
+    if (type == "jackknife") {
+        assert_that(
+            is.na(n_samples),
+            msg = "n_samples must be NA when type is `jackknife`"
         )
     }
 
@@ -80,7 +87,7 @@ method_condmean <- function(
         n_samples = n_samples,
         type = type
     )
-    return( as_class(x, "condmean"))
+    return(as_class(x, "condmean"))
 }
 
 

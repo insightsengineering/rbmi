@@ -5,6 +5,8 @@ suppressPackageStartupMessages({
     library(glmmTMB)
 })
 
+
+
 test_that("transformation from long to wide format works", {
     vec_long = c(c(NA, 1, 2), c(1, NA, 2), c(3, NA, 4))
     vec_wide_true = rbind(c(NA, 1, 2), c(1, NA, 2), c(3, NA, 4))
@@ -22,6 +24,8 @@ test_that("transformation from long to wide format works", {
     expect_equal(vec_wide_oneElem, vec_wide_true[1,, drop = FALSE])
 })
 
+
+
 test_that("Proper missingness patterns are detected", {
     outcome = rbind(c(NA, 1, 2), c(1, NA, 2), c(3, NA, 4))
 
@@ -36,6 +40,9 @@ test_that("Proper missingness patterns are detected", {
     expect_equal(M, c(1,2,2))
 })
 
+
+
+
 test_that("Proper missingness pattern is detected when only one patient", {
     outcome = t(matrix(c(NA, 1, 2)))
 
@@ -49,6 +56,9 @@ test_that("Proper missingness pattern is detected when only one patient", {
     expect_equal(missingness_patterns, t(matrix(c(0,1,1))))
     expect_equal(M, 1)
 })
+
+
+
 
 test_that("Covariance matrices are sort correctly", {
 
@@ -73,8 +83,8 @@ test_that("Covariance matrices are sort correctly", {
 
 })
 
-test_that("QR decomposition is performed correctly", {
 
+test_that("QR decomposition is performed correctly", {
     N <- 6
     J = 2
     designmat <- cbind(rep(1,N*J), rnorm(N*J))
@@ -82,6 +92,9 @@ test_that("QR decomposition is performed correctly", {
 
     expect_equal(QR$Q %*% QR$R, designmat)
 })
+
+
+
 
 test_that("List of matrices is correctly transformed into array", {
 
@@ -98,19 +111,19 @@ test_that("List of matrices is correctly transformed into array", {
 
 })
 
-test_that("split_dim creates a list from an array as expected",
-          {
-              mat <- rbind(c(1, 0.2), c(0.2, 1))
-              a <- array(data = NA, dim = c(3,2,2))
-              for(i in 1:dim(a)[1]) {
-                  a[i,,] <- mat + i-1
-              }
 
-              actual_res <- split_dim(a, 1)
-              expected_res <- list(mat, mat + 1, mat + 2)
-              expect_equal(actual_res, expected_res)
-          }
-)
+
+test_that("split_dim creates a list from an array as expected",{
+    mat <- rbind(c(1, 0.2), c(0.2, 1))
+    a <- array(data = NA, dim = c(3,2,2))
+    for(i in 1:dim(a)[1]) {
+        a[i,,] <- mat + i-1
+    }
+
+    actual_res <- split_dim(a, 1)
+    expected_res <- list(mat, mat + 1, mat + 2)
+    expect_equal(actual_res, expected_res)
+})
 
 
 
@@ -168,6 +181,8 @@ sigma_reml <- list(
 )
 betas_reml <- pars$beta
 
+
+
 test_that("Posterior mean of mcmc equals (restricted) ML estimates", {
 
     set.seed(101)
@@ -205,9 +220,11 @@ test_that("Posterior mean of mcmc equals (restricted) ML estimates", {
     expect_true(all(CI_mean_low < reml_est & CI_mean_high > reml_est))
 })
 
+
+
 test_that("Warnings management works properly", {
 
-    expect_warning( {
+    expect_warning({
         set.seed(101)
         fit <- run_mcmc(
             designmat = designmat,
@@ -224,6 +241,45 @@ test_that("Warnings management works properly", {
             same_cov = TRUE,
             verbose = FALSE
         )
-    }
+    }, regexp = "The largest R-hat is")
+})
+
+
+
+test_that("Verbose supression works",{
+
+    set.seed(301)
+    sigma <- as_covmat(c(6, 4, 4), c(0.5, 0.2, 0.3))
+    dat <- get_sim_data(50, sigma)
+
+    dat_ice <- dat %>%
+        group_by(id) %>%
+        arrange(desc(visit)) %>%
+        slice(1) %>%
+        ungroup() %>%
+        mutate(method = "MAR")
+
+    vars <- list(
+        visit = "visit",
+        subjid = "id",
+        group = "group",
+        covariates = "sex",
+        method = "method",
+        outcome = "outcome"
     )
+
+    suppressWarnings({
+        msg <- capture.output({
+            x <- draws(dat, dat_ice, vars, method_bayes(n_samples = 2, verbose = TRUE))
+        })
+    })
+    expect_true(length(msg) > 0)
+
+
+    suppressWarnings({
+        msg <- capture.output({
+            x <- draws(dat, dat_ice, vars, method_bayes(n_samples = 2, verbose = FALSE))
+        })
+    })
+    expect_true(length(msg) == 0)
 })

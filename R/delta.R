@@ -24,7 +24,7 @@ delta_template <- function(imputations) {
                 "delta" = 0,
                 stringsAsFactors = FALSE
             )
-            df[[ld$vars$subjid]] <- id
+            df[[ld$vars$subjid]] <- factor(id, levels = ld$ids_levels)
             df[[ld$vars$visit]] <- factor(ld$visits, labels = ld$visits)
             df[[ld$vars$group]] <- ld$group[[id]]
 
@@ -97,7 +97,7 @@ delta_lagscale <- function(
     delta,
     dlag =  c(1, rep(0, length(delta) - 1)),
     missing_only = TRUE
-){
+) {
     dat <- delta_template(imputations)
     ld <- imputations$data
 
@@ -113,7 +113,7 @@ delta_lagscale <- function(
     )
 
     assert_that(
-        is.logical(missing_only) ,
+        is.logical(missing_only),
         length(missing_only) == 1,
         msg = "`missing_only` must be TRUE or FALSE"
     )
@@ -132,7 +132,7 @@ delta_lagscale <- function(
     assert_that(length(delta) == length(dat[["delta"]]))
     dat["delta"] <- delta
 
-    if( missing_only){
+    if (missing_only) {
         ## Correction to remove any delta assigned to none missing values
         dat$delta[!dat[["is_missing"]] & dat[["is_post_ice"]]] <- 0
     }
@@ -154,7 +154,7 @@ delta_lagscale <- function(
 #' @param outcome TODO
 #'
 #' @export
-apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL){
+apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL) {
 
     assert_that(
         is.character(group),
@@ -178,7 +178,7 @@ apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL){
     if (is.null(delta)) {
         return(data)
     }
-    if( nrow(delta) == 0 ){
+    if (nrow(delta) == 0) {
         return(data)
     }
 
@@ -192,7 +192,7 @@ apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL){
     for (var in c(group, "delta")) {
         assert_that(
             var %in% names(delta),
-            msg = sprintf("Variable `%s` is not in `data`", var)
+            msg = sprintf("Variable `%s` is not in `delta`", var)
         )
     }
 
@@ -224,8 +224,8 @@ apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL){
         nrow(data3) == nrow(data),
         all(names(data3) == names(data)),
         msg = paste0(
-            "Data structure has been altered whilst adding delta.",
-            "This can happen if you have multiple rows per `group`"
+            "Data structure has been altered whilst applying delta. ",
+            "This is most likely caused by having duplicate rows per id within the delta dataset"
         )
     )
     class(data3) <- class(data)

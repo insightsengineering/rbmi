@@ -211,3 +211,32 @@ str_contains <- function(x, subs) {
     assert_that(length(res) == length(strings))
     return(res)
 }
+
+
+
+
+
+
+#' Sort Data Frame
+#'
+#' Sorts a dataframe (ascending only) based upon variables within the dataset
+#' This function is essentially a wrapper around do.call to ease the syntax
+#' @param df data.frame
+#' @param vars character vector of variables
+#' @param decreasing logical wether sort order should be in descending or ascending (default) order
+sort_by <- function(df, vars = NULL, decreasing = NULL) {
+    if (is.null(vars)) {
+        return(df)
+    }
+    assert_that(
+        is.data.frame(df), 
+        all(vars %in% names(df)),
+        is.null(decreasing) | length(decreasing) == 1 | length(decreasing) == length(vars)
+    )
+    args <- as.list(df[, vars, drop = FALSE])
+    args$decreasing <- decreasing
+    ord <- do.call(order, args)
+    df2 <- df[ord, ]
+    assert_that(nrow(df) == nrow(df2), ncol(df) == ncol(df2))
+    return(df2)
+}

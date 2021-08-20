@@ -111,8 +111,7 @@ expand <- function(data, ...) {
         df_expanded[[var]] <- factor(df_expanded[[var]], levels = vars[[var]])
     }
 
-    ord <- do.call(base::order, df_expanded[, names(vars)])
-    df_return <- df_expanded[ord, names(data)]
+    df_return <- sort_by(df_expanded, names(vars))[, names(data), drop = FALSE]
     class(df_return) <- class(data)
     rownames(df_return) <- NULL
     return(df_return)

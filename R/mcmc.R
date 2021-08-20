@@ -2,16 +2,15 @@
 #'
 #' @param vec_long TODO
 #' @param J TODO
-long2wide <- function(vec_long,
-                      J) {
+long2wide <- function(vec_long, J) {
     len <- length(vec_long)
 
     assert_that(
-        len%%J == 0,
+        len %% J == 0,
         msg = "length(vec_long) must be a multiple of J"
     )
 
-    wide_mat <- matrix(vec_long, nrow = len/J, ncol = J, byrow = TRUE)
+    wide_mat <- matrix(vec_long, nrow = len / J, ncol = J, byrow = TRUE)
     return(wide_mat)
 }
 
@@ -59,9 +58,9 @@ match_groups_sigmas <- function(sigma_reml, levels_group) {
 #' @param N TODO
 #' @param J TODO
 QR_decomp <- function(designmat, N, J) {
-    qr_obj = qr(designmat)
-    Q = qr.Q(qr = qr_obj)* sqrt(N*J - 1)
-    R = qr.R(qr = qr_obj)/ sqrt(N*J - 1)
+    qr_obj <- qr(designmat)
+    Q <- qr.Q(qr = qr_obj) * sqrt(N * J - 1)
+    R <- qr.R(qr = qr_obj) / sqrt(N * J - 1)
 
     ret_obj <- list(
         Q = Q,
@@ -167,8 +166,8 @@ listmat_to_array <- function(listmat) {
     dims <- c(length(listmat), dim(listmat[[1]]))
     res_array <- array(as.numeric(unlist(listmat)), dim = dims)
 
-    for(i in 1:dims[1]) {
-        res_array[i,,] <- listmat[[i]]
+    for (i in 1:dims[1]) {
+        res_array[i, , ] <- listmat[[i]]
     }
 
     return(res_array)
@@ -225,7 +224,7 @@ prepare_data_mcmc <- function(
         y_observed = obs_miss_patterns$missingness_patterns
     )
 
-    if(same_cov) {
+    if (same_cov) {
         data$Sigma_reml <- sigma_reml[[1]]
     } else {
 
@@ -235,7 +234,7 @@ prepare_data_mcmc <- function(
         )
 
         G <- nlevels(group)
-        which_arm <- as.numeric(group)[seq(1, N*J, by = J)]
+        which_arm <- as.numeric(group)[seq(1, N * J, by = J)]
 
         sigma_reml <- match_groups_sigmas(sigma_reml, levels(group))
         sigma_reml <- listmat_to_array(sigma_reml)
@@ -347,7 +346,7 @@ extract_draws <- function(stan_fit) {
     ##################### from array to list
     pars$sigma <- split_dim(pars$sigma, 1)
 
-    if(length(dim(pars$sigma[[1]])) == 3) { # if same_cov == FALSE
+    if (length(dim(pars$sigma[[1]])) == 3) { # if same_cov == FALSE
         pars$sigma <- lapply(
             pars$sigma,
             function(x) split_dim(x, 1)
@@ -355,7 +354,7 @@ extract_draws <- function(stan_fit) {
     } else {
         pars$sigma <- lapply(
             pars$sigma,
-            function(x) list(x,x)
+            function(x) list(x, x)
         )
     }
 
@@ -371,7 +370,7 @@ extract_draws <- function(stan_fit) {
 #' @param stan_fit TODO
 #' @importFrom rstan summary
 get_ESS <- function(stan_fit) {
-    return(rstan::summary(stan_fit, pars = c("beta", "Sigma"))$summary[,"n_eff"])
+    return(rstan::summary(stan_fit, pars = c("beta", "Sigma"))$summary[, "n_eff"])
 }
 
 
@@ -384,11 +383,19 @@ check_ESS <- function(stan_fit, n_draws, threshold = 0.4) {
 
     ESS <- get_ESS(stan_fit)
 
-    n_low_ESS <- sum(ESS/n_draws < threshold)
+    n_low_ESS <- sum((ESS / n_draws) < threshold)
 
-    if(any(ESS/n_draws < threshold)) {
-        warning(paste0("The Effective Sample Size is below ",threshold*100,"% for ", n_low_ESS ," parameters. Please consider increasing burn-in and/or burn-between, or the number of samples"),
-                call. = FALSE)
+    if (any((ESS / n_draws) < threshold)) {
+        warning(
+            paste0(
+                "The Effective Sample Size is below ",
+                threshold * 100,
+                "% for ",
+                n_low_ESS,
+                " parameters. Please consider increasing burn-in and/or burn-between, or the number of samples"
+            ),
+            call. = FALSE
+        )
     }
 
     return(invisible(NULL))
@@ -401,12 +408,15 @@ check_ESS <- function(stan_fit, n_draws, threshold = 0.4) {
 #' @importFrom rstan get_divergent_iterations get_bfmi get_max_treedepth_iterations
 check_hmc_diagn <- function(stan_fit) {
 
-    if(any(get_divergent_iterations(stan_fit)) # draws "out of the distribution"
-       | isTRUE(get_bfmi(stan_fit) < 0.2 ) # exploring well the target distribution
-       | any(get_max_treedepth_iterations(stan_fit))) # efficiency of the algorithm
-    {
-        warning("Lack of efficiency in the HMC sampler: please consider increasing the burn-in period.",
-                call. = FALSE)
+    if (
+        any(get_divergent_iterations(stan_fit)) | # draws "out of the distribution"
+        isTRUE(get_bfmi(stan_fit) < 0.2) | # exploring well the target distribution
+        any(get_max_treedepth_iterations(stan_fit)) # efficiency of the algorithm
+    ) {
+        warning(
+            "Lack of efficiency in the HMC sampler: please consider increasing the burn-in period.",
+            call. = FALSE
+        )
     }
 
     return(invisible(NULL))

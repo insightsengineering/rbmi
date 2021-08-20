@@ -28,7 +28,7 @@ dat <- tibble(
     group_by(subjid) %>%
     mutate( visit = factor(paste0("Visit ", 1:n())))  %>%
     ungroup() %>%
-    mutate(subjid = as.character(subjid))
+    mutate(subjid = factor(subjid))
 
 dat[c(1,2,3,4,5,7), "outcome"] <- NA
 
@@ -152,6 +152,10 @@ test_that("validate_datalong_types",{
 
     dat2 <- dat
     dat2$subjid <- rnorm(nrow(dat))
+    expect_error(validate_datalong_types(dat2, vars))
+
+    dat2 <- dat
+    dat2$subjid <- as.character(dat$subjid)
     expect_error(validate_datalong_types(dat2, vars))
 
     dat2 <- dat
@@ -315,5 +319,6 @@ test_that("validate_data_ice",{
     expect_true(validate_dataice(dat, di, vars, update = TRUE))
 
 })
+
 
 

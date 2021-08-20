@@ -30,7 +30,7 @@ dat <- tibble(
     group_by(subjid) %>%
     mutate( visit = factor(paste0("Visit ", 1:n())))  %>%
     ungroup() %>%
-    mutate(subjid = as.character(subjid))
+    mutate(subjid = as.factor(subjid))
 
 dat[sample(1:(nv*n), size = 7), "outcome"] <- NA
 
@@ -46,6 +46,9 @@ vars <- list(
 
 data_ice <- NULL
 
+
+
+
 # function for checking the samples
 test_samples_condmean <- function(samples, method) {
 
@@ -57,10 +60,18 @@ test_samples_condmean <- function(samples, method) {
 
     # test length of ids equals sample size (in case of jackknife we can check for actual ids)
     if(method$type == "bootstrap") {
-        expect_true( all(sapply(samples, function(x) length(x$ids_boot)) == n) )
+
+        expect_true(all(sapply(samples, function(x) length(x$ids_samp) == n)))
+
     } else if(method$type == "jackknife") {
-        expect_true( all(sapply(1:length(samples),
-                                function(i) identical(samples[[i]]$ids_boot, as.character(covars$subjid[-i]))) ))
+
+        for (i in seq_len(length(samples))) {
+            expect_equal(
+                samples[[i]]$ids,
+                as.character(covars$subjid)[-i]
+            )
+        }
+
     }
 
     # check that converged is logical
@@ -74,6 +85,10 @@ test_samples_condmean <- function(samples, method) {
     expect_true( all(sapply(sigmas, length)  == 2) )
 }
 
+
+
+
+
 test_samples_bayes <- function(samples) {
     # test output type
     expect_type(samples, "list")
@@ -82,14 +97,20 @@ test_samples_bayes <- function(samples) {
     expect_true( all(sapply(samples, typeof) == "list") )
 
     # check that returned ids are the same as original data
-    expect_true( all(sapply(samples,
-                            function(x) identical(x$ids, as.character(covars$subjid))) ))
+    expect_true(all(
+        sapply(
+            samples,
+            function(x) identical(as.character(x$ids), as.character(covars$subjid))
+        )
+    ))
 
     # check that sigma is a list of length 2
     sigmas <- lapply(samples, function(x) x$sigma)
     expect_true( all(sapply(sigmas, typeof)  == "list") )
     expect_true( all(sapply(sigmas, length)  == 2) )
 }
+
+
 
 # function for checking output from draws
 test_draws <- function(draws_obj, method) {
@@ -121,7 +142,7 @@ test_draws <- function(draws_obj, method) {
             mmrm_initial <- draws_obj$samples[[1]]
 
             # check that mmrm fit on original data returns equal ids as original data
-            expect_equal(mmrm_initial$ids_boot, as.character(covars$subjid))
+            expect_equal(mmrm_initial$ids, as.character(covars$subjid))
 
             # check that sigma is a list of length one (since same_cov = TRUE)
             expect_equal( typeof(mmrm_initial$sigma), "list")
@@ -139,119 +160,123 @@ test_draws <- function(draws_obj, method) {
     }
 }
 
-test_that(
-    "get_bootstrap_samples has expected output",
-    {
 
-        method <- list(
-            covariance = "ar1",
-            threshold = 0.01,
-            same_cov = TRUE,
-            REML = TRUE,
-            n_samples = 3,
-            type = "bootstrap"
-        )
 
-        # prepare input arguments
-        longdata <- longDataConstructor$new(dat, vars)
-        model_df <- as_model_df(dat, as_simple_formula(vars))
-        scaler <- scalerConstructor$new(model_df)
+test_that("get_bootstrap_samples has expected output",{
 
-        # call function
-        draws_obj <- get_bootstrap_samples(
-            longdata = longdata,
-            method = method,
-            scaler = scaler
-        )
+    method <- list(
+        covariance = "ar1",
+        threshold = 0.01,
+        same_cov = TRUE,
+        REML = TRUE,
+        n_samples = 3,
+        type = "bootstrap"
+    )
 
-        # check length of object
-        expect_length(draws_obj, 2)
+    # prepare input arguments
+    longdata <- longDataConstructor$new(dat, vars)
+    model_df <- as_model_df(dat, as_simple_formula(vars))
+    scaler <- scalerConstructor$new(model_df)
 
-        # check length of samples object (n_samples - 1)
-        expect_length(draws_obj$samples, 2)
+    # call function
+    draws_obj <- get_bootstrap_samples(
+        longdata = longdata,
+        method = method,
+        scaler = scaler
+    )
 
-        # check that each element has 5 sub-elements
-        expect_true( all(sapply(draws_obj$samples, length) == 5) )
+    # check length of object
+    expect_length(draws_obj, 2)
 
-        # check samples
-        test_samples_condmean(draws_obj$samples, method)
-    }
-)
+    # check length of samples object (n_samples - 1)
+    expect_length(draws_obj$samples, 2)
 
-test_that(
-    "draws has expected output (approxbayes)",
-    {
-        method = method_approxbayes(
-            covariance = "ar1",
-            threshold = 0.01,
-            same_cov = TRUE,
-            REML = TRUE,
-            n_samples = 3
-        )
+    sample_names <- c("beta", "sigma", "converged", "optimizer", "ids_samp", "ids")
+    expect_true(all(sapply(draws_obj$samples, function(x) all(names(x) %in% sample_names))))
 
-        ############## method: approxbayes
-        draws_obj <- draws(
-            dat,
-            data_ice = NULL,
-            vars,
-            method = method
-        )
+    # check samples
+    test_samples_condmean(draws_obj$samples, method)
+})
 
-        expect_true( all(sapply(draws_obj$samples, length) == 6) )
-        test_draws(draws_obj, method)
-    }
-)
 
-test_that(
-    "draws has expected output (bootstrap)",
-    {
 
-        method = method_condmean(
-            covariance = "ar1",
-            threshold = 0.01,
-            same_cov = TRUE,
-            REML = TRUE,
-            n_samples = 3,
-            type = "bootstrap"
-        )
 
-        ############## method: condmean (bootstrap)
-        draws_obj <- draws(
-            dat,
-            data_ice = NULL,
-            vars,
-            method = method
-        )
+test_that("draws has expected output (approxbayes)",{
+    method = method_approxbayes(
+        covariance = "ar1",
+        threshold = 0.01,
+        same_cov = TRUE,
+        REML = TRUE,
+        n_samples = 3
+    )
 
-        expect_true( all(sapply(draws_obj$samples, length) == 5) )
-        test_draws(draws_obj, method)
-    }
-)
+    ############## method: approxbayes
+    draws_obj <- draws(
+        dat,
+        data_ice = NULL,
+        vars,
+        method = method
+    )
 
-test_that(
-    "draws has expected output (jackknife)",
-    {
+    expect_true( all(sapply(draws_obj$samples, length) == 6) )
+    test_draws(draws_obj, method)
+})
 
-        method = method_condmean(
-            covariance = "ar1",
-            threshold = 0.01,
-            same_cov = TRUE,
-            REML = TRUE,
-            type = "jackknife"
-        )
 
-        ############## method: condmean (jackknife)
-        draws_obj <- draws(
-            dat,
-            data_ice = NULL,
-            vars,
-            method = method
-        )
 
-        expect_true( all(sapply(draws_obj$samples, length) == 5) )
-        test_draws(draws_obj, method)
-    }
-)
+
+test_that("draws has expected output (bootstrap)", {
+
+    method <- method_condmean(
+        covariance = "ar1",
+        threshold = 0.01,
+        same_cov = TRUE,
+        REML = TRUE,
+        n_samples = 3,
+        type = "bootstrap"
+    )
+
+    ############## method: condmean (bootstrap)
+    draws_obj <- draws(
+        dat,
+        data_ice = NULL,
+        vars,
+        method = method
+    )
+
+    sample_names <- c("beta", "sigma", "converged", "optimizer", "ids_samp", "ids")
+    expect_true(all(sapply(draws_obj$samples, function(x) all(names(x) %in% sample_names))))
+    
+    test_draws(draws_obj, method)
+})
+
+
+
+test_that("draws has expected output (jackknife)",{
+
+    method = method_condmean(
+        covariance = "ar1",
+        threshold = 0.01,
+        same_cov = TRUE,
+        REML = TRUE,
+        type = "jackknife"
+    )
+
+    ############## method: condmean (jackknife)
+    draws_obj <- draws(
+        dat,
+        data_ice = NULL,
+        vars,
+        method = method
+    )
+
+    sample_names <- c("beta", "sigma", "converged", "optimizer", "ids_samp", "ids")
+    expect_true(all(sapply(draws_obj$samples, function(x) all(names(x) %in% sample_names))))
+
+    test_draws(draws_obj, method)
+})
+
+
 
 
 test_that("draws has expected output (bayes)", {
@@ -270,9 +295,12 @@ test_that("draws has expected output (bayes)", {
         method = method
     )
 
-    expect_true( all(sapply(draws_obj$samples, length) == 3) )
+    sample_names <- c("beta", "sigma", "converged", "optimizer", "ids_samp", "ids")
+    expect_true(all(sapply(draws_obj$samples, function(x) all(names(x) %in% sample_names))))
+
     test_draws(draws_obj, method)
 })
+
 
 
 test_that("nmar data is removed as expected",{
@@ -317,6 +345,7 @@ test_that("nmar data is removed as expected",{
     expect_equal(d1$samples, d2$samples)
 
 
+    # Check for reproducibility 
     method <- method_approxbayes(n_samples = 5)
     set.seed(101)
     d1 <- draws(dat, dat_ice, vars, method)
@@ -339,8 +368,8 @@ test_that("nmar data is removed as expected",{
         d1 <- draws(dat, dat_ice, vars, method)
     })
     set.seed(101)
-    suppressWarnings( { # warnings from stan may arise since only 3 samples are done. Not useful here.
+    suppressWarnings({ # warnings from stan may arise since only 3 samples are done. Not useful here.
         d2 <- draws(dat2, dat_ice, vars, method)
-        expect_equal(d1$samples, d2$samples)
     })
+    expect_equal(d1$samples, d2$samples)
 })

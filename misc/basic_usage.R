@@ -5,7 +5,7 @@ devtools::load_all()
 
 
 
-sigma <- as_covmat(c(3,4,5), c(0.8, 0.6, 0.4))
+sigma <- as_covmat(c(3, 4, 5), c(0.8, 0.6, 0.4))
 
 
 set.seed(21)
@@ -13,7 +13,7 @@ set.seed(21)
 
 dat <- get_sim_data(100, sigma) %>%
     mutate(is_miss = rbinom(n(), 1, 0.2)) %>%
-    mutate(outcome = if_else( is_miss == 1, NA_real_, outcome)) %>%
+    mutate(outcome = if_else(is_miss == 1, NA_real_, outcome)) %>%
     select(-is_miss)
 
 
@@ -99,8 +99,8 @@ method_approxbayes(
 
 
 
-my_strategy <- function(pars_group, pars_ref, index_mar){
-    pars_group$mu[index_mar] <- pars_ref$mu[index_mar]
+my_strategy <- function(pars_group, pars_ref, index_mar) {
+    pars_group[["mu"]][index_mar] <- pars_ref[["mu"]][index_mar]
     return(pars_group)
 }
 
@@ -114,12 +114,12 @@ imputeobj <- impute(
 )
 
 
-myfun <- function(dat){
+myfun <- function(dat) {
     mod <- lm(data = dat, outcome ~ group)
     list(
         "treatment_effect" = list(
             "est" = coef(mod)[[2]],
-            "se" = sqrt(vcov(mod)[2,2]),
+            "se" = sqrt(vcov(mod)[2, 2]),
             "df" = df.residual(mod)
         )
     )
@@ -136,7 +136,7 @@ res <- pool(anaobj)
 imputeobj$longdata <- imputeobj$data
 
 dat_delta <- delta_template(imputeobj) %>%
-    mutate( delta = if_else(is_missing & group == "A", 3, 0)) %>%
+    mutate(delta = if_else(is_missing & group == "A", 3, 0)) %>%
     as_tibble()
 
 
@@ -157,6 +157,3 @@ expand_locf(
     group = "id",
     order = c("id", "visit")
 )
-
-
-

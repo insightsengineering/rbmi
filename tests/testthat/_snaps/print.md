@@ -84,9 +84,9 @@
            trt_visit_2    8.015   0.193  <NA>   <NA>  <NA> 
          lsm_ref_visit_2  6.768   0.126  <NA>   <NA>  <NA> 
          lsm_alt_visit_2  14.784  0.145  <NA>   <NA>  <NA> 
-           trt_visit_3    3.497   0.563  2.771  Inf    1   
-         lsm_ref_visit_3  6.818   0.383  6.323  Inf    1   
-         lsm_alt_visit_3  10.316  0.445  9.74   Inf    1   
+           trt_visit_3    3.489   0.568  2.755  Inf    1   
+         lsm_ref_visit_3  6.822   0.376  6.336  Inf    1   
+         lsm_alt_visit_3  10.31   0.456  9.719  Inf    1   
         ---------------------------------------------------
       
 
@@ -163,16 +163,16 @@
       
       Results:
       
-        ========================================================
-            parameter      est     se     lci     uci     pval  
-        --------------------------------------------------------
-           trt_visit_1    7.313   0.418   <NA>    <NA>    <NA>  
-         lsm_ref_visit_1  7.204   0.274   <NA>    <NA>    <NA>  
-         lsm_alt_visit_1  14.516  0.315   <NA>    <NA>    <NA>  
-           trt_visit_3    7.999   0.198  7.591   8.406   <0.001 
-         lsm_ref_visit_3  6.771   0.134  6.494   7.049   <0.001 
-         lsm_alt_visit_3  14.77   0.141  14.483  15.057  <0.001 
-        --------------------------------------------------------
+        =======================================================
+            parameter      est     se     lci    uci     pval  
+        -------------------------------------------------------
+           trt_visit_1    7.313   0.418  <NA>    <NA>    <NA>  
+         lsm_ref_visit_1  7.204   0.274  <NA>    <NA>    <NA>  
+         lsm_alt_visit_1  14.516  0.315  <NA>    <NA>    <NA>  
+           trt_visit_3    8.016   0.239  7.506  8.526   <0.001 
+         lsm_ref_visit_3  6.764   0.153  6.438   7.09   <0.001 
+         lsm_alt_visit_3  14.78   0.15   14.47  15.091  <0.001 
+        -------------------------------------------------------
       
 
 # print - condmean (bootstrap)
@@ -316,7 +316,7 @@
           threshold: 0.5
           same_cov: FALSE
           REML: TRUE
-          n_samples: 10
+          n_samples: NA
           type: jackknife
       
 

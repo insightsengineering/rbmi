@@ -173,3 +173,25 @@ test_that("str_contains",{
     )
 
 })
+
+
+
+
+test_that("sort_by", {
+    x <- tibble(
+        x = c(1, 1, 2, 2, 3, 3),
+        y = c(1, 2, 1, 2, 1, 2),
+        z = c("A", "B", "C", "D", "E", "F")
+    )
+
+    expect_equal(x, sort_by(x))
+    expect_equal(x, sort_by(x, "z"))
+
+    x2 <- x %>% sample_frac(1)
+
+    expect_equal(x, sort_by(x2, "z"))
+    expect_equal(x, sort_by(x2, c("x", "y")))
+
+    expect_equal(arrange(x, desc(z)), sort_by(x, "z", T))
+    expect_equal(arrange(x, x, desc(y)), sort_by(x, c("x", "y"), c(F, T)))
+})

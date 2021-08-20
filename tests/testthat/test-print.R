@@ -42,7 +42,7 @@ get_data <- function(n){
 
 
 test_that("print - Approx Bayes", {
-    
+
     dobj <- get_data(100)
     set.seed(2513)
 
@@ -87,6 +87,8 @@ test_that("print - Approx Bayes", {
 
 
 test_that("print - Bayes", {
+
+    skip_on_cran()  # CRAN / Stan seed does not appear to be reproducible ....
 
     dobj <- get_data(100)
     set.seed(2513)
@@ -191,7 +193,6 @@ test_that("print - Condmean (jackknife)", {
         data_ice = dobj$dat_ice,
         vars = dobj$vars,
         method = method_condmean(
-            n_samples = 10,
             threshold = 0.5,
             same_cov = FALSE,
             REML = TRUE,
