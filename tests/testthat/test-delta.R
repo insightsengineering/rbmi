@@ -8,15 +8,15 @@ suppressPackageStartupMessages({
 test_that("delta_template & delta_lagscale",{
     set.seed(101)
 
-    n_vis <- 4
+    n_vis <- 5
 
     dat <- tibble(
-        pt = factor(rep(c("Tom", "Harry"), each= 4), levels = c("Tom", "Harry")),
-        out = c(1,NA,3,NA,  NA,5,NA,NA),
+        pt = factor(rep(c("Tom", "Harry"), each = n_vis), levels = c("Tom", "Harry")),
+        out = c(1,NA,3,NA, NA,  NA,5,NA,6, 7),
         vis = factor(rep(paste0("visit_", 1:n_vis), 2)),
-        grp = factor(rep(c("A", "B"), each = 4)),
-        cov1 = rnorm(8),
-        cov2 = rnorm(8)
+        grp = factor(rep(c("A", "B"), each = n_vis)),
+        cov1 = rnorm(n_vis * 2),
+        cov2 = rnorm(n_vis * 2)
     )
 
     vars <- list(
@@ -31,7 +31,7 @@ test_that("delta_template & delta_lagscale",{
 
     ices <- data.frame(
         pt = c("Tom", "Harry"),
-        vis = c("visit_4", "visit_3"),
+        vis = c("visit_4", "visit_2"),
         method = c("JTR", "MAR"),
         stringsAsFactors = FALSE
     )
@@ -45,11 +45,11 @@ test_that("delta_template & delta_lagscale",{
 
     output_expected <- select(dat, pt, vis, grp) %>%
         mutate(
-            is_mar  = c(T,T,T,F,   T,T,T,T),
-            is_missing = c(F,T,F,T, T,F,T,T),
-            is_post_ice = c(F,F,F,T,  F,F,T,T),
-            strategy = c(NA, "MAR", NA, "JTR",    "MAR", NA , "MAR", "MAR" ),
-            delta = rep(0, 8)
+            is_mar  =     c(T,T,T,F,F,   T,T,T,T,T),
+            is_missing =  c(F,T,F,T,T,   T,F,T,F,F),
+            is_post_ice = c(F,F,F,T,T,   F,T,T,T,T),
+            strategy = c(NA, "MAR", NA, "JTR","JTR",    "MAR", NA , "MAR", NA, NA ),
+            delta = rep(0, n_vis*2)
         ) %>%
         as.data.frame()
 
@@ -58,11 +58,11 @@ test_that("delta_template & delta_lagscale",{
         output_expected
     )
 
-    dlag <- c(1, 2, 3, 4)
-    delta <- c(-3, -6, -6, -12)
+    dlag <- c(1, 2, 3, 4, 5)
+    delta <- c(-3, -6, -6, -12, 1)
 
     output_expected2 <- output_expected %>%
-        mutate(delta = c(0, 0, 0, -12, 0, 0, -6, -24 -6))
+        mutate(delta = c(0, 0, 0, -12, -10,     0, 0, -18, 0, 0))
 
     expect_equal(
         delta_lagscale(list(data = longd), delta, dlag),

@@ -377,13 +377,14 @@ test_that("idmap", {
 
 
 test_that("longdata can handle data that isn't sorted",{
+
     dat <- tibble(
         visit = factor(c("v1", "v2", "v3", "v3", "v1", "v2"), levels = c("v1", "v2", "v3")),
         id = factor(c("1", "1", "1", "2", "2", "2")),
         group = factor(c("A", "A", "A", "B", "B", "B")),
         outcome = c(1, 2, 3, 4, 5, NA)
     )
-    
+
     vars <- list(
         outcome = "outcome",
         visit = "visit",
@@ -413,3 +414,47 @@ test_that("longdata can handle data that isn't sorted",{
 })
 
 
+
+
+test_that("longdata rejects data that has no useable observations for a visit",{
+
+    vars <- list(
+        outcome = "outcome",
+        visit = "visit",
+        subjid = "id",
+        group = "group",
+        method = "method"
+    )
+
+    dat <- tibble(
+        visit = factor(c("v1", "v2", "v3", "v1", "v2", "v3"), levels = c("v1", "v2", "v3")),
+        id = factor(c("1", "1", "1", "2", "2", "2")),
+        group = factor(c("A", "A", "A", "B", "B", "B")),
+        outcome = c(1, 2, NA, 4, 5, NA)
+    )
+
+    expect_error(
+        longDataConstructor$new(data = dat, vars = vars),
+        regexp = "resulted in the `v3` visit"
+    )
+
+    dat <- tibble(
+        visit = factor(c("v1", "v2", "v3", "v1", "v2", "v3"), levels = c("v1", "v2", "v3")),
+        id = factor(c("1", "1", "1", "2", "2", "2")),
+        group = factor(c("A", "A", "A", "B", "B", "B")),
+        outcome = c(1, 2, 3, 4, 5, NA)
+    )
+
+    dat_ice <- tibble(
+        visit = "v2",
+        id = c("2", "1"),
+        method = "JR"
+    )
+
+    ld <- longDataConstructor$new(data = dat, vars = vars)
+    expect_error(
+        ld$set_strategies(dat_ice),
+        regexp = "has resulted in the `v2`, `v3` visit"
+    )
+
+})

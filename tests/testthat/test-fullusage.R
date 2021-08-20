@@ -108,9 +108,9 @@ test_that("Basic Usage - Approx Bayes", {
 
 
 test_that("Basic Usage - Bayesian", {
-    
+
     skip_if_not(is_nightly())
-    
+
     set.seed(5123)
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%

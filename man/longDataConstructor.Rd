@@ -85,6 +85,7 @@ for all observations. This list is populated by a call to \code{self$set_strateg
 \item \href{#method-extract_by_id}{\code{longDataConstructor$extract_by_id()}}
 \item \href{#method-update_strategies}{\code{longDataConstructor$update_strategies()}}
 \item \href{#method-set_strategies}{\code{longDataConstructor$set_strategies()}}
+\item \href{#method-check_has_data_at_each_visit}{\code{longDataConstructor$check_has_data_at_each_visit()}}
 \item \href{#method-set_strata}{\code{longDataConstructor$set_strata()}}
 \item \href{#method-new}{\code{longDataConstructor$new()}}
 \item \href{#method-clone}{\code{longDataConstructor$clone()}}
@@ -258,6 +259,19 @@ TODO
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+TODO
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-check_has_data_at_each_visit"></a>}}
+\if{latex}{\out{\hypertarget{method-check_has_data_at_each_visit}{}}}
+\subsection{Method \code{check_has_data_at_each_visit()}}{
+TODO
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$check_has_data_at_each_visit()}\if{html}{\out{</div>}}
+}
+
 \subsection{Returns}{
 TODO
 }

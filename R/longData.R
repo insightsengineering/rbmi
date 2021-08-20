@@ -36,7 +36,7 @@ longDataConstructor <- R6::R6Class(
 
         #' @field ids A character vector containing the unique ids of each subject in `self$data`
         ids = NULL,
-        
+
         #' @field ids_levels A character vector containing the exact levels (and order) of the 
         #' original `data[[vars$subjid]]` variable
         ids_levels = NULL,
@@ -147,9 +147,9 @@ longDataConstructor <- R6::R6Class(
                 stop("Object must be an imputation_list or a character vector")
             }
 
-            listFlag <- "imputation_list" %in% class(obj)
+            list_flag <- "imputation_list" %in% class(obj)
 
-            if(listFlag) {
+            if(list_flag) {
                 obj_expanded <- transpose_imputations(obj)
                 ids <- obj_expanded$ids
                 values <- obj_expanded$values
@@ -160,7 +160,7 @@ longDataConstructor <- R6::R6Class(
             self$validate_ids(ids)
             indexes <- self$indexes[ids]
 
-            if (listFlag | nmar.rm | na.rm) {
+            if (list_flag | nmar.rm | na.rm) {
                 is_miss <- unlist(self$is_missing[ids], use.names = FALSE)
                 is_mar <- unlist(self$is_mar[ids], use.names = FALSE)
             }
@@ -179,8 +179,8 @@ longDataConstructor <- R6::R6Class(
 
             new_data[[self$vars$subjid]] <- new_ids_full
 
-            if(listFlag){
-                new_data[is_miss ,self$vars$outcome] <- values
+            if (list_flag) {
+                new_data[is_miss, self$vars$outcome] <- values
             }
 
             if (nmar.rm | na.rm) {
@@ -188,7 +188,7 @@ longDataConstructor <- R6::R6Class(
                 new_data <- new_data[keep, ]
             }
 
-            if(idmap){
+            if (idmap) {
                 new_ids_single <- vapply(seq_along(indexes), function(x) paste0("new_pt_", x), character(1))
                 id_map <- ids
                 names(id_map) <- new_ids_single
@@ -313,9 +313,9 @@ longDataConstructor <- R6::R6Class(
 
             dat_ice <- sort_by(dat_ice, c(self$vars$subjid))
 
-            for( subject in dat_ice[[self$vars$subjid]]){
+            for (subject in dat_ice[[self$vars$subjid]]) {
 
-                dat_ice_pt <- dat_ice[dat_ice[[self$vars$subjid]] == subject,]
+                dat_ice_pt <- dat_ice[dat_ice[[self$vars$subjid]] == subject, ]
 
                 assert_that(
                     nrow(dat_ice_pt) == 1,
@@ -360,6 +360,31 @@ longDataConstructor <- R6::R6Class(
                     self$is_missing[[subject]][is_post_ice]
                 )
             }
+            self$check_has_data_at_each_visit()
+        },
+
+
+        #' @description
+        #' TODO
+        #' @return TODO
+        check_has_data_at_each_visit = function() {
+            is_mar <- unlist(self$is_mar, use.names = FALSE)
+            is_not_miss <- !unlist(self$is_missing, use.names = FALSE)
+            visits <- rep(self$visits, length(self$ids))
+            is_avail <- is_mar & is_not_miss
+            x <- tapply(is_avail, visits, sum)
+            no_data_visits <- self$visits[x == 0]
+            assert_that(
+                length(no_data_visits) == 0,
+                msg = paste(
+                    sprintf(
+                        "The data combined with the current ICE strategy has resulted in the %s visit(s)",
+                        paste0("`", paste0(no_data_visits, collapse = "`, `") , "`")
+                    ),
+                    "not having any available observations to construct the imputation model on. Please either drop",
+                    "these visit(s) or choose a different ICE strategy."
+                )
+            )
         },
 
 
@@ -374,9 +399,9 @@ longDataConstructor <- R6::R6Class(
             )
             strata_data <- self$data[strata_index,]
             if(length(self$vars$strata) > 0){
-                self$strata = as_strata(strata_data[,self$vars$strata])
+                self$strata <- as_strata(strata_data[,self$vars$strata])
             } else {
-                self$strata = rep(1, nrow(strata_data))
+                self$strata <- rep(1, nrow(strata_data))
             }
         },
 
@@ -396,6 +421,7 @@ longDataConstructor <- R6::R6Class(
             self$ids_levels <- levels(self$data[[self$vars$subjid]])
             self$visits <- levels(self$data[[self$vars$visit]])
             self$set_strata()
+            self$check_has_data_at_each_visit()
         }
 
     )
