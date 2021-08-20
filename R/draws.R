@@ -34,10 +34,11 @@ draws.approxbayes <- function(data, data_ice, vars, method) {
     x$samples <- as_sample_list(lapply(
         x$samples,
         function(x) {
-            x$ids <- unique(data[[vars$subjid]])
+            x$ids <- levels(data[[vars$subjid]])
             return(x)
         }
     ))
+    validate(x$samples)
 
     # remove useless elements from output of `method`
     x$method$type <- NULL
@@ -58,12 +59,12 @@ draws.condmean <- function(data, data_ice, vars, method) {
 #' Title - TODO
 #'
 #' @param longdata TODO
-remove_nmar_as_NA <- function(longdata) {
+extract_data_nmar_as_na <- function(longdata) {
 
     # remove non-MAR data
     data <- longdata$get_data(longdata$ids, nmar.rm = FALSE, na.rm = FALSE)
-    isMAR <- unlist(longdata$is_mar)
-    data[!isMAR, longdata$vars$outcome] <- NA
+    is_mar <- unlist(longdata$is_mar)
+    data[!is_mar, longdata$vars$outcome] <- NA
 
     return(data)
 }
@@ -81,7 +82,7 @@ draws_bayes <- function(data, data_ice, vars, method) {
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
 
-    data2 <- remove_nmar_as_NA(longdata)
+    data2 <- extract_data_nmar_as_na(longdata)
 
     # compute design matrix
     frm <- as_simple_formula(vars)
@@ -130,7 +131,7 @@ draws_bayes <- function(data, data_ice, vars, method) {
 
     # unscale samples
     samples <- mapply(
-        function(x,y) list("beta" = x, "sigma" = y),
+        function(x, y) list("beta" = x, "sigma" = y),
         lapply(fit$samples$beta, scaler$unscale_beta),
         lapply(fit$samples$sigma, function(covs) lapply(covs, scaler$unscale_sigma)),
         SIMPLIFY = FALSE
@@ -207,7 +208,7 @@ draws_bootstrap <- function(data, data_ice, vars, method) {
         theta = mmrm_initial$theta
     )
 
-    if(method$type == "bootstrap") {
+    if (method$type == "bootstrap") {
         samples <- get_bootstrap_samples(
             longdata = longdata,
             method = method,
@@ -215,7 +216,7 @@ draws_bootstrap <- function(data, data_ice, vars, method) {
             initial = init_opt
         )
 
-    } else if(method$type == "jackknife") {
+    } else if (method$type == "jackknife") {
         samples <- get_jackknife_samples(
             longdata = longdata,
             method = method,
@@ -254,7 +255,7 @@ get_bootstrap_samples <- function(
     method,
     scaler,
     initial = NULL
-){
+) {
 
     vars <- longdata$vars
 
@@ -264,7 +265,7 @@ get_bootstrap_samples <- function(
     failed_samples <- 0
     failure_limit <- ceiling(method$threshold * required_samples)
 
-    while(current_sample <= required_samples & failed_samples <= failure_limit){
+    while (current_sample <= required_samples & failed_samples <= failure_limit) {
 
         # create bootstrapped sample
         ids_boot <- longdata$sample_ids()
@@ -287,7 +288,7 @@ get_bootstrap_samples <- function(
             optimizer = c("L-BFGS-B", "BFGS", "Nelder-Mead")
         )
 
-        if(mmrm_fit$converged){
+        if (mmrm_fit$converged) {
             sample <- as_sample_single(
                 beta = scaler$unscale_beta(mmrm_fit$beta),
                 sigma = lapply(mmrm_fit$sigma, scaler$unscale_sigma),
@@ -306,8 +307,14 @@ get_bootstrap_samples <- function(
 
     }
 
-    if(failed_samples > failure_limit) {
-        stop(paste0("More than ", failure_limit, " failed fits. Increase the failures threshold or set a different covariance structure"))
+    if (failed_samples > failure_limit) {
+        stop(
+            paste0(
+                "More than ",
+                failure_limit,
+                " failed fits. Increase the failures threshold or set a different covariance structure"
+            )
+        )
     }
 
     return(
@@ -330,7 +337,7 @@ get_jackknife_samples <- function(
     method,
     scaler,
     initial = NULL
-){
+) {
 
     vars <- longdata$vars
     ids <- longdata$ids
@@ -341,7 +348,7 @@ get_jackknife_samples <- function(
     failed_samples <- 0
     failure_limit <- ceiling(method$threshold * required_samples)
 
-    while(current_sample <= required_samples & failed_samples <= failure_limit){
+    while (current_sample <= required_samples & failed_samples <= failure_limit) {
 
         ids_boot <- ids[-current_sample]
         dat_boot <- longdata$get_data(ids_boot, nmar.rm = TRUE, na.rm = TRUE)
@@ -374,14 +381,20 @@ get_jackknife_samples <- function(
         samples[[current_sample]] <- sample
         current_sample <- current_sample + 1
 
-        if(!mmrm_fit$converged) {
+        if (!mmrm_fit$converged) {
             failed_samples <- failed_samples + 1
         }
 
     }
 
-    if(failed_samples > failure_limit) {
-        stop(paste0("More than ", failure_limit, " failed fits. Increase the failures threshold or set a different covariance structure"))
+    if (failed_samples > failure_limit) {
+        stop(
+            paste0(
+                "More than ",
+                failure_limit,
+                " failed fits. Increase the failures threshold or set a different covariance structure"
+            )
+        )
     }
 
     return(
@@ -442,7 +455,9 @@ print.draws <- function(x, ...) {
 
 
 
-as_sample_single <- function(ids, beta, sigma, converged, optimizer, ids_samp = NULL){
+
+
+as_sample_single <- function(ids, beta, sigma, converged, optimizer, ids_samp = NULL) {
     x <- list(
         ids = ids,
         beta = beta,
@@ -473,7 +488,13 @@ validate.sample_single <- function(x, ...) {
     )
 }
 
-as_sample_list <- function(x){
+
+
+as_sample_list <- function(...) {
+    x <- list(...)
+    if (length(x) == 1 & class(x[[1]])[[1]] != "sample_single") {
+        x <- x[[1]]
+    }
     class(x) <- c("sample_list", "list")
     validate(x)
     return(x)
@@ -482,8 +503,7 @@ as_sample_list <- function(x){
 validate.sample_list <- function(x, ...) {
     assert_that(
         is.null(names(x)),
-        all(vapply(x, function(x) class(x)[[1]] == "sample_single", logical(1)))
+        all(vapply(x, function(x) class(x)[[1]] == "sample_single", logical(1))),
+        all(vapply(x, function(x) validate(x), logical(1)))
     )
 }
-
-

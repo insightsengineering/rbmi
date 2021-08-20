@@ -145,6 +145,8 @@ test_that("Basic Usage",{
 
 
 
+
+
 test_that( "transpose_samples", {
 
     input <- list(
@@ -213,7 +215,9 @@ test_that( "invert_indexes", {
 
 
 
-test_that( "untranspose_samples", {
+
+
+test_that("untranspose_imputations", {
 
     input_imputes <- list(
         list(id = "Ben", values = list(numeric(0), numeric(0), numeric(0))),
@@ -222,32 +226,94 @@ test_that( "untranspose_samples", {
         list(id = "Tom", values = list(c(7, 8, 9)))
     )
 
-    input_index <- list(
-        "Ben" = c(1,2,2),
-        "Harry" = 1,
-        "Phil" = c(1,2),
-        "Tom" = 1
+    sample_ids <- list(
+        c("Ben", "Harry", "Phil", "Tom"),
+        c("Ben", "Ben", "Phil")
     )
 
-    output_actual <- untranspose_samples(input_imputes, input_index)
+    output_actual <- untranspose_imputations(input_imputes, sample_ids)
 
     output_expected <- list(
-        list(
-            list( id = "Ben", values = numeric(0)),
-            list( id = "Harry", values = c(1,2)),
-            list( id = "Phil", values = c(3,4)),
-            list( id = "Tom", values = c(7, 8, 9))
+        as_imputation_list(
+            as_imputation_single( id = "Ben", values = numeric(0)),
+            as_imputation_single( id = "Harry", values = c(1,2)),
+            as_imputation_single( id = "Phil", values = c(3,4)),
+            as_imputation_single( id = "Tom", values = c(7, 8, 9))
         ),
-        list(
-            list( id = "Ben", values = numeric(0)),
-            list( id = "Ben", values = numeric(0)),
-            list( id = "Phil", values = c(5,6))
+        as_imputation_list(
+            as_imputation_single( id = "Ben", values = numeric(0)),
+            as_imputation_single( id = "Ben", values = numeric(0)),
+            as_imputation_single( id = "Phil", values = c(5,6))
         )
     )
-
     expect_equal(output_actual, output_expected)
 
+
+    sample_ids <- list(
+        c("Ben"),
+        c("Ben", "Ben", "Phil"),
+        c("Phil", "Tom"),
+        c("Harry")
+    )
+    output_actual <- untranspose_imputations(input_imputes, sample_ids)
+    output_expected <- list(
+        as_imputation_list(
+            as_imputation_single( id = "Ben", values = numeric(0))
+        ),
+        as_imputation_list(
+            as_imputation_single( id = "Ben", values = numeric(0)),
+            as_imputation_single( id = "Ben", values = numeric(0)),
+            as_imputation_single( id = "Phil", values = c(3,4))
+        ),
+        as_imputation_list(
+            as_imputation_single(id = "Phil", values = c(5, 6)),
+            as_imputation_single(id = "Tom", values = c(7, 8, 9))
+        ),
+        as_imputation_list(
+            as_imputation_single( id = "Harry", values = c(1,2))
+        )
+    )
+    expect_equal(output_actual, output_expected)
+
+
+
+    sample_ids <- list(
+        c("Ben"),
+        c("Ben", "Ben", "Phil", "Phil"),
+        c("Phil", "Tom"),
+        c("Harry")
+    )
+    expect_error(
+        untranspose_imputations(input_imputes, sample_ids), 
+        "subscript out of bounds"
+    )
+
+
+    sample_ids <- list(
+        c("James"),
+        c("Ben", "Ben", "Phil"),
+        c("Phil", "Tom"),
+        c("Harry")
+    )
+    expect_error(
+        untranspose_imputations(input_imputes, sample_ids), 
+        "sample_ids contains an id not available in imputations"
+    )
+
+
+    sample_ids <- list(
+        c("Ben", "Phil"),
+        c("Phil", "Tom"),
+        c("Harry")
+    )
+    expect_error(
+        untranspose_imputations(input_imputes, sample_ids), 
+        "Not all imputations have been used"
+    )
+
 })
+
+
 
 
 
@@ -300,6 +366,8 @@ test_that("get_conditional_parameters", {
     output_expected <- list(mu = numeric(0) , sigma = numeric(0))
     expect_equal(output_actual, output_expected)
 })
+
+
 
 
 
@@ -405,6 +473,8 @@ test_that("impute_outcome", {
 
 
 
+
+
 test_that("get_visit_distribution_parameters",{
 
     beta <- list( c(1,2,3) , c(4,5,6))
@@ -443,6 +513,8 @@ test_that("get_visit_distribution_parameters",{
     sigma <- list(1,5)
     expect_error(get_visit_distribution_parameters( dat, beta, sigma))
 })
+
+
 
 
 test_that("validate_strategies",{
@@ -495,6 +567,8 @@ test_that("validate_strategies",{
 
 
 
+
+
 test_that("validate_references",{
 
     control <- factor( c("A", "B", "C"), levels = c("A", "B", "C", "D"))
@@ -528,4 +602,139 @@ test_that("validate_references",{
 
     ref <- c("A", "B" = "C")
     expect_error(validate_references(ref, control))
+})
+
+
+
+
+
+
+
+
+test_that("impute can recover known values", {
+
+    vars <- list(
+        outcome = "outcome",
+        visit = "visit",
+        subjid = "id",
+        group = "group",
+        method = "method",
+        covariates = c("cov1", "cov1*group")
+    )
+
+    dat <- tibble(
+        visit = factor( rep(c("v1", "v2", "v3"), 4), levels = c("v1", "v2", "v3")),
+        id = factor(rep(c("1", "2", "3", "4"), each = 3)),
+        group = factor(rep(c("A", "B"), each = 6)),
+        cov1 =    c(1,1,1,    2,2,2,   3,3,3,  4,4,4),
+        outcome = c(1,NA,NA,  4,3,6,  1,1,1,   5,NA,6)
+    )
+
+
+    ld <- longDataConstructor$new(dat, vars)
+
+    #           1     2     3  4      5        6
+    # outcome ~ 1 + group + visit + cov1 + cov1*group
+    dobj <- list(
+        samples = as_sample_list(
+            as_sample_single(
+                ids = c("1", "2", "4"),
+                beta = c(1, 2, 3, 4, 5, 6),
+                sigma = list(
+                    "A" = diag(c(1, 1, 1)),
+                    "B" = diag(c(1, 1, 1))
+                ),
+                converged = TRUE,
+                optimizer = NA
+            )
+        ),
+        data = ld
+    ) %>% as_class("condmean")
+
+    x <- impute(dobj, c("A" = "B", "B" = "B"))
+
+    expect_length(x$imputations, 1)
+    expect_length(x$imputations[[1]], 3)
+    expect_equal(x$imputations[[1]][[1]]$values, c(9, 10))
+    expect_equal(x$imputations[[1]][[2]]$values, numeric(0))
+    expect_equal(x$imputations[[1]][[3]]$values, c(50))
+    expect_equal(vapply(x$imputations[[1]], function(x) x$id, character(1)), c("1", "2", "4"))
+
+
+    dobj$samples[[1]]$ids <- c("4", "4", "1", "3")
+    x <- impute(dobj, c("A" = "B", "B" = "B"))
+
+    expect_length(x$imputations, 1)
+    expect_length(x$imputations[[1]], 4)
+    expect_equal(x$imputations[[1]][[1]]$values, 50)
+    expect_equal(x$imputations[[1]][[2]]$values, 50)
+    expect_equal(x$imputations[[1]][[3]]$values, c(9, 10))
+    expect_equal(x$imputations[[1]][[4]]$values, numeric(0))
+    expect_equal(vapply(x$imputations[[1]], function(x) x$id, character(1)), c("4", "4", "1", "3"))
+
+
+
+
+    dobj$samples[[2]] <- as_sample_single(
+        ids = c("2", "1", "4"),
+        beta = c(6, 5, 4, 3, 2, 1),
+        sigma = list(
+            "A" = diag(c(1, 1, 1)),
+            "B" = diag(c(1, 1, 1))
+        ),
+        converged = TRUE,
+        optimizer = NA
+    )
+    x <- impute(dobj, c("A" = "B", "B" = "B"))
+    expect_length(x$imputations, 2)
+
+    expect_length(x$imputations[[1]], 4)
+    expect_equal(x$imputations[[1]][[1]]$values, 50)
+    expect_equal(x$imputations[[1]][[2]]$values, 50)
+    expect_equal(x$imputations[[1]][[3]]$values, c(9, 10))
+    expect_equal(x$imputations[[1]][[4]]$values, numeric(0))
+    expect_equal(vapply(x$imputations[[1]], function(x) x$id, character(1)), c("4", "4", "1", "3"))
+
+    expect_length(x$imputations[[2]], 3)
+    expect_equal(x$imputations[[2]][[1]]$values, numeric(0))
+    expect_equal(x$imputations[[2]][[2]]$values, c(12,11))
+    expect_equal(x$imputations[[2]][[3]]$values, c(27))
+    expect_equal(vapply(x$imputations[[2]], function(x) x$id, character(1)), c("2", "1", "4"))
+
+
+
+
+    dat_ice <- tibble(
+        visit = "v3",
+        method = "JR",
+        id = "1"
+    )
+
+    ld <- longDataConstructor$new(dat, vars)
+    ld$set_strategies(dat_ice)
+
+    dobj <- list(
+        samples = as_sample_list(
+            as_sample_single(
+                ids = c("1", "2", "4"),
+                beta = c(1, 2, 3, 4, 5, 6),
+                sigma = list(
+                    "A" = diag(c(1, 1, 1)),
+                    "B" = diag(c(1, 1, 1))
+                ),
+                converged = TRUE,
+                optimizer = NA
+            )
+        ),
+        data = ld
+    ) %>% as_class("condmean")
+
+    x <- impute(dobj, c("A" = "B", "B" = "B"))
+
+    expect_length(x$imputations, 1)
+    expect_length(x$imputations[[1]], 3)
+    expect_equal(x$imputations[[1]][[1]]$values, c(9, 18))
+    expect_equal(x$imputations[[1]][[2]]$values, numeric(0))
+    expect_equal(x$imputations[[1]][[3]]$values, c(50))
+    expect_equal(vapply(x$imputations[[1]], function(x) x$id, character(1)), c("1", "2", "4"))
 })

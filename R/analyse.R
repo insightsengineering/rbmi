@@ -31,7 +31,7 @@ analyse <- function(imputations, fun, delta = NULL, ...) {
 
     devnull <- lapply(imputations$imputations, function(x) validate(x))
 
-    if( !is.null(delta)){
+    if (!is.null(delta)) {
         expected_vars <- c(
             vars$subjid,
             vars$visit,
@@ -89,14 +89,14 @@ analyse <- function(imputations, fun, delta = NULL, ...) {
 #' @param index TODO
 #' @param delta TODO
 #' @param idmap TODO
-#' 
+#'
 #' @export
 extract_imputed_dfs <- function(
     imputations,
     index = seq_along(imputations$imputations),
     delta = NULL,
     idmap = FALSE
-){
+) {
     x <- imputations$imputations[index]
     lapply(
         x,
@@ -171,4 +171,3 @@ print.analysis <- function(x, ...) {
     cat(string, sep = "\n")
     return(invisible(x))
 }
-

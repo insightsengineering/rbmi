@@ -5,9 +5,9 @@
 #' as well as the least squared means of each group.
 #'
 #' @param data A dataframe containing the variables to be used in the model
-#' @param vars A named list containing the names of the variables for `group`, `visit`, `outcome` and any `covariates`. 
+#' @param vars A named list containing the names of the variables for `group`, `visit`, `outcome` and any `covariates`.
 #' See details.
-#' @param visits an optional character vector specifying which visits to perform ancova at. If `NULL` all all available 
+#' @param visits an optional character vector specifying which visits to perform ancova at. If `NULL` all all available
 #' visits (as determined by `unique(data[[vars$visit]])`) will be looped over.
 #'
 #' @details
@@ -25,7 +25,10 @@ ancova <- function(data, vars, visits = NULL) {
 
     assert_that(
         ! any(visit %in% expected_vars),
-        msg = "The `vars$visit` variable cannot be a covariate in an ANCOVA model. Please adjust `vars$covariates` accordingly"
+        msg = paste0(
+            "The `vars$visit` variable cannot be a covariate in an ANCOVA model. ",
+            "Please adjust `vars$covariates` accordingly"
+        )
     )
 
     for (var in c(visit, expected_vars)) {

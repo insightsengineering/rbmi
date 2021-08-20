@@ -4,7 +4,7 @@
 \alias{as_imputation_list}
 \title{Create a valid imputation list object}
 \usage{
-as_imputation_list(x)
+as_imputation_list(...)
 }
 \arguments{
 \item{x}{a list of imputation_singles}
