@@ -28,8 +28,9 @@ run_simul <- function(H0) {
 
         data_ice <- data_hasICE %>%
             group_by(patnum) %>%
-            summarise("method" = ifelse(group[1] == "Intervention", imp_drug, imp_placebo),
-                      "visit" = levels_visit[which(trt_stop_visit[1] == levels_visit) + 1])
+            summarise(
+                "strategy" = ifelse(group[1] == "Intervention", imp_drug, imp_placebo),
+                "visit" = levels_visit[which(trt_stop_visit[1] == levels_visit) + 1])
 
         return(data_ice)
     }
@@ -89,13 +90,13 @@ run_simul <- function(H0) {
     data[,c("y_noICE", "y_noDropout", "y")] <- data[,c("y_noICE", "y_noDropout", "y")] - data$y_bl
     data <- as.data.frame(data)
 
-    vars <- list(
+    vars <- ivars(
         outcome = "y",
         subjid = "patnum",
         visit = "visit",
         group = "group",
         covariates = c("y_bl*visit", "group*visit"),
-        method = "method"
+        strategy = "strategy"
     )
 
     covariance <- "us"

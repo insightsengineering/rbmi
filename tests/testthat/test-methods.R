@@ -2,11 +2,11 @@
 
 
 
-test_that("methods",{
+test_that("methods", {
 
     expect_error(
         method_condmean(type = "bootstrap"),
-        regexp = "n_samples must not be NA"
+        regexp = "n_samples must be numeric"
     )
 
     expect_error(

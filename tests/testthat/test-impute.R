@@ -25,14 +25,14 @@ test_that("Basic Usage", {
         )
     )
 
-    vars <- list(
+    vars <- ivars(
         outcome = "outcome",
         visit = "visit",
         subjid = "subjid",
         group = "group",
         strata = "strata",
         covariates = c("sex", "age"),
-        method = "method"
+        strategy = "strategy"
     )
 
     ld <- longDataConstructor$new(
@@ -532,14 +532,14 @@ test_that("validate_strategies", {
         )
     )
 
-    vars <- list(
+    vars <- ivars(
         outcome = "outcome",
         visit = "visit",
         subjid = "subjid",
         group = "group",
         strata = "strata",
         covariates = c("sex", "age"),
-        method = "method"
+        strategy = "strategy"
     )
 
     ld <- longDataConstructor$new(
@@ -611,12 +611,12 @@ test_that("validate_references", {
 
 test_that("impute can recover known values", {
 
-    vars <- list(
+    vars <- ivars(
         outcome = "outcome",
         visit = "visit",
         subjid = "id",
         group = "group",
-        method = "method",
+        strategy = "strategy",
         covariates = c("cov1", "cov1*group")
     )
 
@@ -704,7 +704,7 @@ test_that("impute can recover known values", {
 
     dat_ice <- tibble(
         visit = "v3",
-        method = "JR",
+        strategy = "JR",
         id = "1"
     )
 

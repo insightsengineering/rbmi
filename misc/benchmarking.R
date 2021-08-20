@@ -43,7 +43,7 @@ vrs <- list(
     subjid = "id",
     visit = "visit",
     outcome = "outcome",
-    method = "method",
+    strategy = "strategy",
     covariates = c("age", "sex", "age*sex", "visit*group"),
     group = "group"
 )
@@ -54,7 +54,7 @@ dat_ice <- dat3 %>%
     filter(row_number() == 1, is.na(outcome)) %>%
     ungroup() %>%
     select(id, visit) %>%
-    mutate(method = "JR") %>%
+    mutate(strategy = "JR") %>%
     mutate(as.character(visit))
 
 

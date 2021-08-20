@@ -34,7 +34,7 @@ runme <- function(x){
         subjid = "id",
         visit = "visit",
         outcome = "outcome",
-        method = "method",
+        strategy = "strategy",
         covariates = c("age", "sex", "age*sex", "visit*group"),
         group = "group"
     )
@@ -46,7 +46,7 @@ runme <- function(x){
         filter(row_number() == 1) %>%
         ungroup() %>%
         select(id, visit) %>%
-        mutate(method = "MAR") %>%
+        mutate(strategy = "MAR") %>%
         mutate(as.character(visit))
 
 

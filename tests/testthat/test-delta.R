@@ -12,27 +12,27 @@ test_that("delta_template & delta_lagscale",{
 
     dat <- tibble(
         pt = factor(rep(c("Tom", "Harry"), each = n_vis), levels = c("Tom", "Harry")),
-        out = c(1,NA,3,NA, NA,  NA,5,NA,6, 7),
+        out = c(1, NA, 3, NA, NA, NA, 5, NA, 6, 7),
         vis = factor(rep(paste0("visit_", 1:n_vis), 2)),
         grp = factor(rep(c("A", "B"), each = n_vis)),
         cov1 = rnorm(n_vis * 2),
         cov2 = rnorm(n_vis * 2)
     )
 
-    vars <- list(
+    vars <- ivars(
         outcome = "out",
         visit = "vis",
         subjid = "pt",
         group = "grp",
         strata = NULL,
         covariates = c("cov1", "cov2", "cov1*cov2"),
-        method = "method"
+        strategy = "strategy"
     )
 
     ices <- data.frame(
         pt = c("Tom", "Harry"),
         vis = c("visit_4", "visit_2"),
-        method = c("JTR", "MAR"),
+        strategy = c("JTR", "MAR"),
         stringsAsFactors = FALSE
     )
 
@@ -45,11 +45,11 @@ test_that("delta_template & delta_lagscale",{
 
     output_expected <- select(dat, pt, vis, grp) %>%
         mutate(
-            is_mar  =     c(T,T,T,F,F,   T,T,T,T,T),
-            is_missing =  c(F,T,F,T,T,   T,F,T,F,F),
-            is_post_ice = c(F,F,F,T,T,   F,T,T,T,T),
-            strategy = c(NA, "MAR", NA, "JTR","JTR",    "MAR", NA , "MAR", NA, NA ),
-            delta = rep(0, n_vis*2)
+            is_mar  =     c(T, T, T, F, F,    T, T, T, T, T),
+            is_missing =  c(F, T, F, T, T,    T, F, T, F, F),
+            is_post_ice = c(F, F, F, T, T,    F, T, T, T, T),
+            strategy = c(NA, "MAR", NA, "JTR", "JTR",    "MAR", NA, "MAR", NA, NA),
+            delta = rep(0, n_vis * 2)
         ) %>%
         as.data.frame()
 
@@ -73,8 +73,8 @@ test_that("delta_template & delta_lagscale",{
 
 test_that( "d_lagscale",{
 
-    dlag = c(1, 1, 1, 1)
-    delta = c(-3, -6, -6, -12)
+    dlag <- c(1, 1, 1, 1)
+    delta <- c(-3, -6, -6, -12)
 
     expect_equal(
         d_lagscale(delta, dlag, c(TRUE, TRUE, TRUE, TRUE)),
@@ -93,8 +93,8 @@ test_that( "d_lagscale",{
         c(0, 0, 0, -12)
     )
 
-    dlag = c(0, 1, 1, 1)
-    delta = c(-3, -6, -6, -12)
+    dlag <- c(0, 1, 1, 1)
+    delta <- c(-3, -6, -6, -12)
 
     expect_equal(
         d_lagscale(delta, dlag, c(TRUE, TRUE, TRUE, TRUE)),
@@ -114,8 +114,8 @@ test_that( "d_lagscale",{
     )
 
 
-    dlag = c(1, 0, 0, 0)
-    delta = c(10, 10, 10, 10)
+    dlag <- c(1, 0, 0, 0)
+    delta <- c(10, 10, 10, 10)
 
     expect_equal(
         d_lagscale(delta, dlag, c(TRUE, TRUE, TRUE, TRUE)),
@@ -141,7 +141,7 @@ test_that( "d_lagscale",{
 
 
 
-test_that("apply_delta",{
+test_that("apply_delta", {
 
     ### Using delta = NULL results in no changes
     d1 <- tibble(
@@ -246,14 +246,14 @@ test_that("extract_imputed_dfs + delta",{
         arrange(desc(visit)) %>%
         slice(1) %>%
         ungroup() %>%
-        mutate(method = "MAR")
+        mutate(strategy = "MAR")
 
-    vars <- list(
+    vars <- ivars(
         visit = "visit",
         subjid = "id",
         group = "group",
         covariates = "sex",
-        method = "method",
+        strategy = "strategy",
         outcome = "outcome"
     )
 
@@ -269,7 +269,7 @@ test_that("extract_imputed_dfs + delta",{
     d1 <- extract_imputed_dfs(iobj, 1)[[1]]
     d2 <- extract_imputed_dfs(iobj, 1, delta = delta)[[1]]
 
-    d1$outcome[c(4, 6)] <- d1$outcome[c(4, 6)]  + c(7,4)
+    d1$outcome[c(4, 6)] <- d1$outcome[c(4, 6)]  + c(7, 4)
     expect_equal(d1, d2)
 
     ### check that extraction / imputation hasn't changed sort order

@@ -24,13 +24,13 @@ dat_ice <- dat %>%
     slice(1) %>%
     ungroup() %>%
     select(id, visit) %>%
-    mutate(method = "JR")
+    mutate(strategy = "JR")
 
 
-vars <- list(
+vars <- ivars(
     outcome = "outcome",
     group = "group",
-    method = "method",
+    strategy = "strategy",
     subjid = "id",
     visit = "visit",
     covariates = c("age", "sex", "visit*group")
@@ -56,7 +56,7 @@ anaobj <- analyse(
     imputeobj,
     fun = rbmi::ancova,
     vars = vars2,
-    visit_level = ""
+    visits = "visit_1"
 )
 
 poolobj <- pool(
@@ -107,7 +107,7 @@ my_strategy <- function(pars_group, pars_ref, index_mar) {
 imputeobj <- impute(
     draws = drawobj,
     references = c("A" = "B", "B" = "B"),
-    update_ice = update_dat_ice,
+    update_strategy = update_dat_ice,
     strategies = getStrategies(
         "MS" = my_strategy
     )

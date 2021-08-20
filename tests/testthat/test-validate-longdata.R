@@ -33,13 +33,13 @@ dat <- tibble(
 dat[c(1,2,3,4,5,7), "outcome"] <- NA
 
 
-vars <- list(
+vars <- ivars(
     outcome = "outcome",
     visit = "visit",
     subjid = "subjid",
     group = "group",
     strata = "strata",
-    method = "method",
+    strategy = "strategy",
     covariates = c("sex", "age")
 )
 
@@ -62,46 +62,46 @@ test_that("extract_covariates",{
 
 
 
-test_that("validate_datalong_varIsChar",{
+test_that("validate.ivars",{
 
-    expect_true(validate_datalong_varIsChar(vars))
+    expect_true(validate(vars))
 
     vars2 <- vars
     vars2$subjid <- NULL
-    expect_error(validate_datalong_varIsChar(vars2))
+    expect_error(validate(vars2))
 
     vars2 <- vars
     vars2$outcome <- NULL
-    expect_error(validate_datalong_varIsChar(vars2))
+    expect_error(validate(vars2))
 
     vars2 <- vars
     vars2$group <- NULL
-    expect_error(validate_datalong_varIsChar(vars2))
+    expect_error(validate(vars2))
 
 
     vars2 <- vars
     vars2$visit <- NULL
-    expect_error(validate_datalong_varIsChar(vars2))
+    expect_error(validate(vars2))
 
     vars2 <- vars
     vars2$strata <- 1
-    expect_error(validate_datalong_varIsChar(vars2))
+    expect_error(validate(vars2))
 
     vars2 <- vars
     vars2$strata <- NULL
-    expect_true(validate_datalong_varIsChar(vars2))
+    expect_true(validate(vars2))
 
     vars2 <- vars
     vars2$covariates <- 1
-    expect_error(validate_datalong_varIsChar(vars2))
+    expect_error(validate(vars2))
 
     vars2 <- vars
     vars2$covariates <- NULL
-    expect_true(validate_datalong_varIsChar(vars2))
+    expect_true(validate(vars2))
 
     vars2 <- vars
     vars2$subjid <- c("v1", "v2")
-    expect_error(validate_datalong_varIsChar(vars2))
+    expect_error(validate(vars2))
 })
 
 
@@ -266,7 +266,7 @@ test_that("validate_data_ice",{
 
     di <- data.frame(
         subjid = c("1", "1"),
-        method = c("MAR", "MAR"),
+        strategy = c("MAR", "MAR"),
         visit = c("Visit 1"),
         stringsAsFactors = FALSE
     )
@@ -275,7 +275,7 @@ test_that("validate_data_ice",{
 
     di <- data.frame(
         subjid = c("1", "2"),
-        method = c("MAR", "MAR"),
+        strategy = c("MAR", "MAR"),
         visit = c("Visit 20"),
         stringsAsFactors = FALSE
     )
@@ -284,16 +284,16 @@ test_that("validate_data_ice",{
 
     di <- data.frame(
         subjid = c("1", "2"),
-        method = c("MAR", NA),
+        strategy = c("MAR", NA),
         visit = c("Visit 1"),
         stringsAsFactors = FALSE
     )
 
-    expect_error(validate_dataice(dat, di, vars),  regexp = "vars\\$method.* must be a non")
+    expect_error(validate_dataice(dat, di, vars),  regexp = "vars\\$strategy.* must be a non")
 
     di <- data.frame(
         subjid = c("1", "abc"),
-        method = c("MAR", "CR"),
+        strategy = c("MAR", "CR"),
         visit = c("Visit 1"),
         stringsAsFactors = FALSE
     )
@@ -302,7 +302,7 @@ test_that("validate_data_ice",{
 
     di <- data.frame(
         subjid = c("1", "2"),
-        method = c("MAR", "CR"),
+        strategy = c("MAR", "CR"),
         visit = c("Visit 1"),
         stringsAsFactors = FALSE
     )
@@ -311,7 +311,7 @@ test_that("validate_data_ice",{
 
     di <- data.frame(
         subjid = c("1", "2"),
-        method = c("MAR", "CR"),
+        strategy = c("MAR", "CR"),
         visit = c("Visit 122"),
         stringsAsFactors = FALSE
     )

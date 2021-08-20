@@ -331,7 +331,7 @@ longDataConstructor <- R6::R6Class(
                     msg = sprintf("Subject %s has more than 1 row in the ice dataset", subject)
                 )
 
-                new_strategy <- dat_ice_pt[[self$vars$method]]
+                new_strategy <- dat_ice_pt[[self$vars$strategy]]
 
                 if (!update) {
                     self$visit_ice[[subject]] <- dat_ice_pt[[self$vars$visit]]
@@ -421,6 +421,7 @@ longDataConstructor <- R6::R6Class(
         #' @param vars TODO
         #' @return TODO
         initialize = function(data, vars) {
+            validate(vars)
             validate_datalong(data, vars)
             self$data <- sort_by(data, c(vars$subjid, vars$visit))
             self$vars <- vars

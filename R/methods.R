@@ -67,8 +67,8 @@ method_condmean <- function(
 
     if (type == "bootstrap") {
         assert_that(
-            !is.na(n_samples),
-            msg = "n_samples must not be NA when type is `bootstrap`"
+            is.numeric(n_samples),
+            msg = "n_samples must be numeric when type is `bootstrap`"
         )
     }
 

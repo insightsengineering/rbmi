@@ -240,3 +240,92 @@ sort_by <- function(df, vars = NULL, decreasing = NULL) {
     assert_that(nrow(df) == nrow(df2), ncol(df) == ncol(df2))
     return(df2)
 }
+
+
+
+
+
+#' TODO
+#' 
+#' @description
+#' TODO
+#' 
+#' @param subjid TODO
+#' @param visit TODO
+#' @param outcome TODO
+#' @param group TODO
+#' @param covariates TODO
+#' @param strata TODO
+#' @param strategy TODO
+#' @export
+ivars <- function(
+    subjid = "subjid",
+    visit = "visit",
+    outcome = "outcome",
+    group = "group",
+    covariates = character(0),
+    strata = character(0),
+    strategy = "strategy"
+) {
+    x <- list(
+        subjid = subjid,
+        visit = visit,
+        outcome = outcome,
+        group = group,
+        covariates = covariates,
+        strata = strata,
+        strategy = strategy
+    )
+    class(x) <- c("ivars", "list")
+    validate(x)
+    return(x)
+}
+
+
+
+#' Validate inputs for `vars`
+#'
+#' Checks that the required variable names are defined within `vars` and
+#' are of appropriate datatypes
+#'
+#' @param vars named list indicating the names of key variables in the source dataset
+#' @export
+validate.ivars <- function(vars) {
+    covars <- extract_covariates(vars$covariates)
+
+    assert_that(
+        is_char_one(vars$outcome),
+        msg = "`vars$outcome` should be a length 1 character"
+    )
+
+    assert_that(
+        is_char_one(vars$group),
+        msg = "`vars$group` should be a length 1 character"
+    )
+
+    assert_that(
+        is_char_one(vars$visit),
+        msg = "`vars$visit` should be a length 1 character"
+    )
+
+    assert_that(
+        is_char_one(vars$subjid),
+        msg = "`vars$subjid` should be a length 1 character"
+    )
+
+    assert_that(
+        is_char_one(vars$strategy),
+        msg = "`vars$strategy` should be a length 1 character"
+    )
+
+    assert_that(
+        is.character(vars$covars) | is.null(vars$covars),
+        msg = "`vars$covars` should be a character vector or NULL"
+    )
+
+    assert_that(
+        is.character(vars$strata) | is.null(vars$strata),
+        msg = "`vars$strata` should be a character vector or NULL"
+    )
+    return(invisible(TRUE))
+}

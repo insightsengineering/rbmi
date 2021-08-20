@@ -12,7 +12,7 @@
 #' @param references a named vector. Identifies the references to be used when generating the imputed
 #' values. Should be of the form `c("Group" = "Reference", "Group" = "Reference")`.
 #'
-#' @param update_ice an optional dataframe. Updates the imputation method that was originally set via
+#' @param update_strategy an optional dataframe. Updates the imputation method that was originally set via
 #' the `data_ice` option in `draws`. See the details section for more information.
 #'
 #' @param strategies a named list of functions. Defines the imputation functions to be used. The names
@@ -39,9 +39,9 @@
 #' mmrm model fitted to the original dataset. See TODO (reference paper for methods) for full details.
 #'
 #'
-#' `update_ice` can be used to update the imputation method that was originally set via
+#' `update_strategy` can be used to update the imputation method that was originally set via
 #' the `data_ice` option in `draws`.
-#' The `update_ice` dataframe must contain two columns, one for the subject ID and another for the imputation method,
+#' The `update_strategy` dataframe must contain two columns, one for the subject ID and another for the imputation method,
 #' whose names are the same as
 #' those defined in `vars` argument as specified in the call to `draws`.
 #' You can only update the imputation method, that is to say that specifying
@@ -62,18 +62,18 @@
 #'
 #' new_ice <- data.frame(
 #'   subjid = c("Pt1", "Pt2"),
-#'   method = c("MAR", "JR")
+#'   strategy = c("MAR", "JR")
 #' )
 #'
 #' impute(
 #'     draws = drawobj,
 #'     references = c("Trt" = "Placebo", "Placebo" = "Placebo"),
-#'     update_ice = new_ice
+#'     update_strategy = new_strategy
 #' )
 #' }
 #'
 #' @export
-impute <- function(draws, references, update_ice = NULL, strategies = getStrategies()) {
+impute <- function(draws, references, update_strategy = NULL, strategies = getStrategies()) {
     UseMethod("impute")
 }
 
@@ -81,10 +81,10 @@ impute <- function(draws, references, update_ice = NULL, strategies = getStrateg
 
 #' @rdname impute
 #' @export
-impute.random <- function(draws, references, update_ice = NULL, strategies = getStrategies()) {
+impute.random <- function(draws, references, update_strategy = NULL, strategies = getStrategies()) {
     result <- impute_internal(
         draws = draws,
-        update_ice = update_ice,
+        update_strategy = update_strategy,
         references = references,
         strategies = strategies,
         condmean = FALSE
@@ -97,10 +97,10 @@ impute.random <- function(draws, references, update_ice = NULL, strategies = get
 
 #' @rdname impute
 #' @export
-impute.condmean <- function(draws, references, update_ice = NULL, strategies = getStrategies()) {
+impute.condmean <- function(draws, references, update_strategy = NULL, strategies = getStrategies()) {
     result <- impute_internal(
         draws = draws,
-        update_ice = update_ice,
+        update_strategy = update_strategy,
         references = references,
         strategies = strategies,
         condmean = TRUE
@@ -119,24 +119,24 @@ impute.condmean <- function(draws, references, update_ice = NULL, strategies = g
 #' @param references a named vector. Identifies the references to be used when generating the imputed
 #' values. Should be of the form `c("Group" = "Reference", "Group" = "Reference")`.
 #'
-#' @param update_ice an optional dataframe. Updates the imputation method that was originally set via
+#' @param update_strategy an optional dataframe. Updates the imputation method that was originally set via
 #' the `data_ice` option in `draws`. See the details section for more information.
 #'
 #' @param strategies a named list of functions. Defines the imputation functions to be used. The names
-#' of of the list should mirror the values specified in `method` column of `data_ice`.
+#' of of the list should mirror the values specified in `strategy` column of `data_ice`.
 #' Default = `getStrategies()`. See [getStrategies()] for more details.
 #'
 #' @param condmean logical. If TRUE will impute using the conditional mean values, if values
 #' will impute by taking a random draw from the multivariate normal distribution.
-impute_internal <- function(draws, references, update_ice, strategies, condmean) {
+impute_internal <- function(draws, references, update_strategy, strategies, condmean) {
 
     data <- draws$data$clone(deep = TRUE)
 
     validate_references(references, data$data[[data$vars$group]])
     validate_strategies(strategies, data$strategies)
 
-    if (!is.null(update_ice)) {
-        data$update_strategies(update_ice)
+    if (!is.null(update_strategy)) {
+        data$update_strategies(update_strategy)
     }
 
     validate(draws$samples)
