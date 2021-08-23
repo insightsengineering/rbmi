@@ -52,16 +52,12 @@ test_that("Basic Usage", {
             as_sample_single(
                 ids = c("Tom", "Harry", "Phil", "Ben"),
                 beta = beta,
-                sigma = sigma,
-                converged = NA,
-                optimizer = NA
+                sigma = sigma
             ),
             as_sample_single(
                 ids = c("Ben", "Ben", "Phil"),
                 beta = beta,
-                sigma = sigma,
-                converged = NA,
-                optimizer = NA
+                sigma = sigma
             )
         )),
         data = ld
@@ -641,9 +637,7 @@ test_that("impute can recover known values", {
                 sigma = list(
                     "A" = diag(c(1, 1, 1)),
                     "B" = diag(c(1, 1, 1))
-                ),
-                converged = TRUE,
-                optimizer = NA
+                )
             )
         ),
         data = ld
@@ -679,9 +673,7 @@ test_that("impute can recover known values", {
         sigma = list(
             "A" = diag(c(1, 1, 1)),
             "B" = diag(c(1, 1, 1))
-        ),
-        converged = TRUE,
-        optimizer = NA
+        )
     )
     x <- impute(dobj, c("A" = "B", "B" = "B"))
     expect_length(x$imputations, 2)
@@ -719,9 +711,7 @@ test_that("impute can recover known values", {
                 sigma = list(
                     "A" = diag(c(1, 1, 1)),
                     "B" = diag(c(1, 1, 1))
-                ),
-                converged = TRUE,
-                optimizer = NA
+                )
             )
         ),
         data = ld

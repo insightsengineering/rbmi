@@ -26,6 +26,7 @@ ld_2_list <- function(ld) {
 }
 
 
+
 get_ld <- function() {
     n <- 4
     nv <- 3
@@ -72,6 +73,40 @@ get_ld <- function() {
     )
 
     return(list(ld = ld, dat = dat, n = n, nv = nv))
+}
+
+
+get_data <- function(n){
+    sigma <- as_covmat(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
+
+    set.seed(1518)
+
+    dat <- get_sim_data(n, sigma, trt = 8) %>%
+        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
+        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        select(-is_miss) %>%
+        mutate(group = factor(group, labels = c("Placebo", "TRT")))
+
+
+    dat_ice <- dat %>%
+        group_by(id) %>%
+        arrange(id, visit) %>%
+        filter(is.na(outcome)) %>%
+        slice(1) %>%
+        ungroup() %>%
+        select(id, visit) %>%
+        mutate(strategy = "JR")
+
+
+    vars <- ivars(
+        outcome = "outcome",
+        group = "group",
+        strategy = "strategy",
+        subjid = "id",
+        visit = "visit",
+        covariates = c("age", "sex", "visit * group")
+    )
+    list(dat = dat, dat_ice = dat_ice, vars = vars)
 }
 
 
@@ -207,6 +242,39 @@ test_that("longData - Sampling", {
 
 
 
+test_that("Stratification works as expected", {
+    set.seed(102)
+    dobj <- get_data(50)
+    dat <- dobj$dat
+    dat_ice <- dobj$dat_ice
+    vars <- dobj$vars
+
+    vars$strata <- "group"
+
+    ld <- longDataConstructor$new(dat, vars)
+
+    real <- dat %>% group_by(group) %>% tally()
+
+    for (i in 1:20) {
+        sampled <- ld$get_data(ld$sample_ids()) %>%
+            group_by(group) %>%
+            tally()
+        expect_equal(real, sampled)
+    }
+
+    vars$strata <- c("group", "sex")
+
+    ld <- longDataConstructor$new(dat, vars)
+
+    real <- dat %>% group_by(group, sex) %>% tally()
+
+    for (i in 1:20){
+        sampled <- ld$get_data(ld$sample_ids()) %>%
+            group_by(group, sex) %>%
+            tally()
+        expect_equal(real, sampled)
+    }
+})
 
 
 test_that("Strategies", {

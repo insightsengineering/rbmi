@@ -93,13 +93,13 @@ test_that("sample_mvnorm", {
 
 
 
-test_that("record_warnings", {
+test_that("record", {
 
     fun <- function(x) {
         return(x)
     }
-    result_actual <- record_warnings(fun(iris))
-    result_expected <- list(results = iris, warnings = NULL)
+    result_actual <- record(fun(iris))
+    result_expected <- list(results = iris, warnings = NULL, errors = NULL, messages = NULL)
     expect_equal(result_actual, result_expected)
 
 
@@ -108,18 +108,23 @@ test_that("record_warnings", {
         warning("w2")
         return(x)
     }
-    result_actual <- record_warnings(fun(2))
-    result_expected <- list(results = 2, warnings = c("w1", "w2"))
+    result_actual <- record(fun(2))
+    result_expected <- list(results = 2, warnings = c("w1", "w2"), errors = NULL, messages = NULL)
     expect_equal(result_actual, result_expected)
 
 
     fun <- function(x) {
         warning("w1")
+        message("hi1")
         warning("w2")
         stop("an error")
+        message("hi2")
         return(x)
     }
-    expect_error(record_warnings(fun(2)), "an error")
+    expect_equal(
+        record(fun(3)),
+        list(results = list(), warnings = c("w1", "w2"), errors = c("an error"), messages = "hi1\n")
+    )
 })
 
 

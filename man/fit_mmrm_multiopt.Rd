@@ -4,7 +4,7 @@
 \alias{fit_mmrm_multiopt}
 \title{Title}
 \usage{
-fit_mmrm_multiopt(..., optimizer = "L-BFGS-B")
+fit_mmrm_multiopt(..., optimizer)
 }
 \arguments{
 \item{...}{TODO}

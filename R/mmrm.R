@@ -76,7 +76,8 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
     g_names <- grep("^G", dfnames, value = TRUE)
     v_names <- grep("^V", dfnames, value = TRUE)
 
-    assert_that( all(dfnames %in% c("outcome", "visit", "subjid", g_names, v_names)))
+    assert_that(all(dfnames %in% c("outcome", "visit", "subjid", g_names, v_names)))
+    assert_that(all(c("outcome", "visit", "subjid", g_names, v_names) %in% dfnames))
 
     # random effects for covariance structure
     expr_randeff <- random_effects_expr(
@@ -98,7 +99,6 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
 #' @param fit TODO
 #' @importFrom glmmTMB fixef VarCorr getME
 extract_params <- function(fit) {
-
     beta <- fixef(fit)$cond
     names(beta) <- NULL
 
@@ -121,12 +121,6 @@ extract_params <- function(fit) {
 }
 
 
-#' Title
-#'
-#' @param fit TODO
-is_converged <- function(fit) {
-    return(ifelse(fit$fit$convergence == 0, TRUE, FALSE))
-}
 
 
 #' Title
@@ -172,64 +166,41 @@ fit_mmrm <- function(
 
     frm_mmrm <- as_mmrm_formula(dat_mmrm, cov_struct)
 
-    # set optimizer
-    control <- glmmTMBControl(
-        optimizer = optim,
-        optArgs = list(method = optimizer),
-        parallel = 1
-    )
-
-    ###################### fit mmrm
-    fit <- record_warnings({
+    fit <- eval_glmmtmb({
         glmmTMB(
             formula = frm_mmrm,
             data = dat_mmrm,
             dispformula = ~0,
             REML = REML,
             start = initial_values,
-            control = control
+            control = glmmTMBControl(
+                optimizer = optim,
+                optArgs = list(method = optimizer),
+                parallel = 1
+            )
         )
     })
 
-
-    # check convergence
-    converged <- is_converged(fit$results)
-
-
-
-    # handle warning: display only warnings if
-    # 1) fit does converge
-    # 2) the warning is not in ignorable_warnings
-    ignorable_warnings <- c(
-        "OpenMP not supported.",
-        "'giveCsparse' has been deprecated; setting 'repr = \"T\"' for you"
-    )
-    if (converged) {
-        warnings <- fit$warnings
-        warnings_to_ignore <- str_contains(warnings, ignorable_warnings)
-        warnings_to_raise <- warnings[!warnings_to_ignore]
-        for (i in warnings_to_raise) warning(i)
+    if (fit$failed) {
+        return(fit)
     }
-
-    fit <- fit$results
 
     # extract regression coefficients and covariance matrices
     params <- extract_params(fit)
+    params$failed <- fit$failed
 
     # adjust covariance matrix
     if (same_cov) {
-        params$sigma <- list(params$sigma[[1]], params$sigma[[1]])
+        assert_that(length(params$sigma) == 1)
+        params$sigma <- replicate(
+            length(levels(group)),
+            params$sigma[[1]],
+            simplify = FALSE
+        )
     }
     names(params$sigma) <- levels(group)
 
-    return_obj <- list(
-        "beta" = params$beta,
-        "sigma" = params$sigma,
-        "theta" = params$theta,
-        "converged" = converged
-    )
-
-    return(return_obj)
+    return(params)
 }
 
 
@@ -237,28 +208,46 @@ fit_mmrm <- function(
 #'
 #' @param optimizer TODO
 #' @param ... TODO
-fit_mmrm_multiopt <- function(..., optimizer = "L-BFGS-B") {
+fit_mmrm_multiopt <- function(..., optimizer) {
 
-    converged <- FALSE
-    iter <- 1
-    while(!converged & iter <= length(optimizer)) {
-        opti <- optimizer[iter]
-        fit <- fit_mmrm(..., optimizer = opti)
-        if(fit$converged) {
-            converged <- TRUE
-            fit$optimizer <- opti
-        }
-        iter <- iter + 1
-    }
+    assert_that(
+        is.character(optimizer),
+        length(optimizer) >= 1
+    )
 
-    if (!converged) {
-        fit$optimizer <- "None"
+    for (opt in optimizer) {
+        fit <- fit_mmrm(..., optimizer = opt)
+        if (!fit$failed) break
     }
 
     return(fit)
 }
 
 
+eval_glmmtmb <- function(expr) {
+
+    default <- list(failed = TRUE)
+
+       ###################### fit mmrm
+    fit_record <- record(expr)
+
+    ignorable_warnings <- c(
+        "OpenMP not supported.",
+        "'giveCsparse' has been deprecated; setting 'repr = \"T\"' for you"
+    )
+    warnings <- fit_record$warnings
+    warnings_to_ignore <- str_contains(warnings, ignorable_warnings)
+    fit_record$warnings <- warnings[!warnings_to_ignore]
 
 
+    if (length(fit_record$warnings) > 0  | length(fit_record$errors) > 0) {
+        return(default)
+    }
 
+    if (fit_record$results$fit$convergence != 0) {
+        return(default)
+    }
+
+    fit_record$results$failed <- FALSE
+    return(fit_record$results)
+}

@@ -292,7 +292,7 @@ fit_mcmc <- function(
         stanmodels$MMRM_diff_cov
     )
 
-    stan_fit <- record_warnings({
+    stan_fit <- record({
         sampling(
             object = stan_model,
             data = data,
@@ -305,6 +305,10 @@ fit_mcmc <- function(
             refresh = refresh
         )
     })
+
+    if (!is.null(stan_fit$errors)){
+        stop(stan_fit$errors)
+    }
 
     ignorable_warnings <- c(
         "Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.\nRunning the chains for more iterations may help. See\nhttp://mc-stan.org/misc/warnings.html#bulk-ess",
