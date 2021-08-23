@@ -125,25 +125,40 @@ sample_mvnorm <- function(mu, sigma) {
 
 
 
-#' Capture Warnings
+#' record
 #'
-#' This function silences all warnings and instead returns
-#' a list with elements `result` containing the output of the function
-#' and `warning` a vector containing all warnings that were raised
+#' This function silences all warnings, errors & messages and instead returns a list
+#' containing the results (if it didn't error) + the warning and error messages as
+#' character vectors.
 #'
 #' @param expr An expression to be executed
-record_warnings <- function(expr) {
+record <- function(expr) {
     env <- new.env()
-    env$warning <- NULL
-
-    result <- withCallingHandlers(expr, warning = function(w) {
-        env$warning <- c(env$warning, w$message)
-        invokeRestart("muffleWarning")
-    })
-
-    list(results = result, warnings = env$warning)
+    result <- withCallingHandlers(
+        withRestarts(
+            expr,
+            muffleStop = function() list()
+        ),
+        message = function(m) {
+            env$message <- c(env$message, m$message)
+            invokeRestart("muffleMessage")
+        },
+        warning = function(w) {
+            env$warning <- c(env$warning, w$message)
+            invokeRestart("muffleWarning")
+        },
+        error = function(e) {
+            env$error <- c(env$error, e$message)
+            invokeRestart("muffleStop")
+        }
+    )
+    list(
+        results = result,
+        warnings = env$warning,
+        errors = env$error,
+        messages = env$message
+    )
 }
-
 
 
 #' Is value absent

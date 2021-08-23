@@ -12,72 +12,185 @@ draws <- function(data, data_ice, vars, method) {
 }
 
 
-#' @rdname draws
-#' @export
-draws.bayes <- function(data, data_ice, vars, method) {
-    x <- draws_bayes(data, data_ice, vars, method)
-    as_class(x, c("random", "draws"))
-}
 
 
 #' @rdname draws
 #' @export
 draws.approxbayes <- function(data, data_ice, vars, method) {
-
-    method$type <- "bootstrap" # just for internal use
-
-    x <- draws_bootstrap(data, data_ice, vars, method)
-
-    ### Set ids to be the unique patient values in order
-    ### for `impute()` to work as expect for this method (retain
-    ### boot_ids for reference)
-    x$samples <- as_sample_list(lapply(
-        x$samples,
-        function(x) {
-            x$ids <- levels(data[[vars$subjid]])
-            return(x)
-        }
-    ))
-    validate(x$samples)
-
-    # remove useless elements from output of `method`
-    x$method$type <- NULL
-
-    as_class(x, c("random", "draws"))
+    longdata <- longDataConstructor$new(data, vars)
+    longdata$set_strategies(data_ice)
+    x <- get_bootstrap_draws(longdata, method, use_samp_ids = FALSE, first_sample_orig = FALSE)
+    return(x)
 }
 
 
 #' @rdname draws
 #' @export
 draws.condmean <- function(data, data_ice, vars, method) {
-    x <- draws_bootstrap(data, data_ice, vars, method)
-    as_class(x, c("condmean", "draws"))
+    longdata <- longDataConstructor$new(data, vars)
+    longdata$set_strategies(data_ice)
+    if (method$type == "bootstrap") {
+        x <- get_bootstrap_draws(longdata, method, use_samp_ids = TRUE, first_sample_orig = TRUE)
+    } else if (method$type == "jackknife") {
+        x <- get_jackknife_draws(longdata, method)
+    } else {
+        stop("Unknown method type")
+    }
+    return(x)
 }
 
+
+#' TODO
+#'
+#' @description 
+#' TODO
+#'
+#' @param longdata TODO
+#' @param method TODO
+#' @param use_samp_ids TODO
+#' @param first_sample_orig TODO
+get_bootstrap_draws <- function(
+    longdata, 
+    method, 
+    use_samp_ids = FALSE, 
+    first_sample_orig = FALSE
+) {
+
+    samples <- vector("list", length = method$n_samples)
+    current_sample <- 1
+    failed_samples <- 0
+    failure_limit <- ceiling(method$threshold * method$n_samples)
+
+    if (first_sample_orig) {
+        samples[[1]] <- get_mmrm_sample(longdata$ids, longdata, method)
+        if (samples[[1]]$failed) {
+            stop("Fitting MMRM to full dataset failed")
+        }
+        current_sample <- current_sample + 1
+    }
+
+    while (current_sample <= method$n_samples & failed_samples <= failure_limit) {
+
+        ids_boot <- longdata$sample_ids()
+        sample_boot <- get_mmrm_sample(ids_boot, longdata, method)
+
+        if (sample_boot$failed) {
+            failed_samples <- failed_samples + 1
+            if (failed_samples > failure_limit) {
+                msg <- "More than %s failed fits. Try using a simpler covariance structure"
+                stop(sprintf(msg, failure_limit))
+            }
+        } else {
+            if (!use_samp_ids) {
+                sample_boot$ids <- longdata$ids
+            }
+            samples[[current_sample]] <- sample_boot
+            current_sample <- current_sample + 1
+        }
+    }
+    ret <- as_draws(
+        method = method,
+        samples = as_sample_list(samples),
+        data = longdata,
+        formula = as_simple_formula(longdata$vars),
+        n_failures = failed_samples
+    )
+    return(ret)
+}
+
+
+#' Title
+#'
+#' @param longdata TODO
+#' @param method TODO
+get_jackknife_draws <- function(longdata, method) {
+
+    ids <- longdata$ids
+    samples <- vector("list", length = length(ids) + 1)
+
+    samples[[1]] <- get_mmrm_sample(ids, longdata, method)
+
+    ids_jack <- lapply(seq_along(ids), function(i) ids[-i])
+
+    for (i in seq_along(ids)) {
+        ids_jack <- ids[-i]
+        sample <- get_mmrm_sample(ids_jack, longdata, method)
+        if (sample$failed) {
+            stop("Jackknife sample failed")
+        }
+        samples[[i + 1]] <- sample
+    }
+    ret <- as_draws(
+        method = method,
+        samples = as_sample_list(samples),
+        data = longdata,
+        formula = as_simple_formula(longdata$vars),
+        n_failures = 0
+    )
+    return(ret)
+}
+
+
+#' TODO
+#'
+#' @description
+#' TODO
+#'
+#' @param ids TODO
+#' @param longdata TODO
+#' @param method TODO
+get_mmrm_sample <- function(ids, longdata, method) {
+
+    vars <- longdata$vars
+    dat <- longdata$get_data(ids, nmar.rm = TRUE, na.rm = TRUE)
+    model_df <- as_model_df(dat, as_simple_formula(vars))
+
+    sample <- fit_mmrm_multiopt(
+        designmat = model_df[, -1, drop = FALSE],
+        outcome = as.data.frame(model_df)[, 1],
+        subjid = dat[[vars$subjid]],
+        visit = dat[[vars$visit]],
+        group = dat[[vars$group]],
+        cov_struct = method$covariance,
+        REML = method$REML,
+        same_cov = method$same_cov,
+        initial_values = NULL,
+        optimizer = c("L-BFGS-B", "BFGS") # TODO - "Nelder-Mead"
+    )
+
+    if (sample$failed) {
+        ret <- as_sample_single(
+            ids = ids,
+            failed = TRUE
+        )
+    } else {
+        ret <- as_sample_single(
+            ids = ids,
+            failed = FALSE,
+            beta = sample$beta,
+            sigma = sample$sigma,
+            theta = sample$theta
+        )
+    }
+    return(ret)
+}
 
 
 #' Title - TODO
 #'
 #' @param longdata TODO
 extract_data_nmar_as_na <- function(longdata) {
-
     # remove non-MAR data
     data <- longdata$get_data(longdata$ids, nmar.rm = FALSE, na.rm = FALSE)
     is_mar <- unlist(longdata$is_mar)
     data[!is_mar, longdata$vars$outcome] <- NA
-
     return(data)
 }
 
 
-#' Title - TODO
-#'
-#' @param data TODO
-#' @param data_ice TODO
-#' @param vars TODO
-#' @param method TODO
-#' @importFrom stats setNames
-draws_bayes <- function(data, data_ice, vars, method) {
+#' @rdname draws
+#' @export
+draws.bayes <- function(data, data_ice, vars, method) {
 
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
@@ -103,7 +216,7 @@ draws_bayes <- function(data, data_ice, vars, method) {
         REML = TRUE,
         same_cov = method$same_cov,
         initial_values = NULL,
-        optimizer =  c("L-BFGS-B", "BFGS", "Nelder-Mead")
+        optimizer = c("L-BFGS-B", "BFGS", "Nelder-Mead")
     )
 
     # run MCMC
@@ -140,270 +253,22 @@ draws_bayes <- function(data, data_ice, vars, method) {
     # set ids associated to each sample
     samples <- lapply(
         samples,
-        function(x) {
-            as_sample_single(
-                ids = longdata$ids,
-                beta = x$beta,
-                sigma = x$sigma,
-                converged = NA,
-                optimizer = NA
-            )
-        }
+        function(x) as_sample_single(ids = longdata$ids, beta = x$beta, sigma = x$sigma, failed = FALSE)
     )
 
-    result <- list(
+    result <- as_draws(
         method = method,
         samples = as_sample_list(samples),
         data = longdata,
         fit = fit$fit,
-        formula = frm
+        formula = frm,
+        n_failures = 0
     )
 
     return(result)
 }
 
 
-#' Title
-#'
-#' @param data TODO
-#' @param data_ice TODO
-#' @param vars TODO
-#' @param method TODO
-draws_bootstrap <- function(data, data_ice, vars, method) {
-
-    longdata <- longDataConstructor$new(data, vars)
-    longdata$set_strategies(data_ice)
-
-    data2 <- longdata$get_data(longdata$ids, nmar.rm = TRUE, na.rm = TRUE)
-    frm <- as_simple_formula(vars)
-    model_df <- as_model_df(data2, frm)
-
-    scaler <- scalerConstructor$new(model_df)
-    model_df_scaled <- scaler$scale(model_df)
-
-    mmrm_initial <- fit_mmrm_multiopt(
-        designmat = model_df_scaled[, -1, drop = FALSE],
-        outcome = as.data.frame(model_df_scaled)[, 1],
-        subjid = data2[[vars$subjid]],
-        visit = data2[[vars$visit]],
-        group = data2[[vars$group]],
-        cov_struct = method$covariance,
-        REML = method$REML,
-        same_cov = method$same_cov,
-        initial_values = NULL,
-        optimizer =  c("L-BFGS-B", "BFGS", "Nelder-Mead")
-    )
-
-    initial_sample <- as_sample_single(
-        beta = scaler$unscale_beta(mmrm_initial$beta),
-        sigma = lapply(mmrm_initial$sigma, scaler$unscale_sigma),
-        converged = mmrm_initial$converged,
-        optimizer = mmrm_initial$optimizer,
-        ids_samp = longdata$ids,
-        ids = longdata$ids
-    )
-
-    init_opt <- list(
-        beta = mmrm_initial$beta,
-        theta = mmrm_initial$theta
-    )
-
-    if (method$type == "bootstrap") {
-        samples <- get_bootstrap_samples(
-            longdata = longdata,
-            method = method,
-            scaler = scaler,
-            initial = init_opt
-        )
-
-    } else if (method$type == "jackknife") {
-        samples <- get_jackknife_samples(
-            longdata = longdata,
-            method = method,
-            scaler = scaler,
-            initial = init_opt
-        )
-    }
-
-    n_failures <- samples$n_failures
-
-    samples <- append(
-        list(initial_sample),
-        samples$samples
-    )
-
-    result <- list(
-        method = method,
-        data = longdata,
-        samples = as_sample_list(samples),
-        n_failures = n_failures,
-        formula = frm
-    )
-
-    return(result)
-}
-
-
-#' Title - TODO
-#'
-#' @param longdata TODO
-#' @param method TODO
-#' @param scaler TODO
-#' @param initial TODO
-get_bootstrap_samples <- function(
-    longdata,
-    method,
-    scaler,
-    initial = NULL
-) {
-
-    vars <- longdata$vars
-
-    required_samples <- method$n_samples - 1 # -1 as the first sample is done in advance on the full dataset
-    samples <- vector("list", length = required_samples)
-    current_sample <- 1
-    failed_samples <- 0
-    failure_limit <- ceiling(method$threshold * required_samples)
-
-    while (current_sample <= required_samples & failed_samples <= failure_limit) {
-
-        # create bootstrapped sample
-        ids_boot <- longdata$sample_ids()
-        dat_boot <- longdata$get_data(ids_boot, nmar.rm = TRUE, na.rm = TRUE)
-
-        model_df <- as_model_df(dat_boot, as_simple_formula(vars))
-        model_df_scaled <- scaler$scale(model_df)
-
-        # fit mmrm
-        mmrm_fit <- fit_mmrm_multiopt(
-            designmat = model_df_scaled[, -1, drop = FALSE],
-            outcome = as.data.frame(model_df_scaled)[, 1],
-            subjid = dat_boot[[vars$subjid]],
-            visit = dat_boot[[vars$visit]],
-            group = dat_boot[[vars$group]],
-            cov_struct = method$covariance,
-            REML = method$REML,
-            same_cov = method$same_cov,
-            initial_values = initial,
-            optimizer = c("L-BFGS-B", "BFGS", "Nelder-Mead")
-        )
-
-        if (mmrm_fit$converged) {
-            sample <- as_sample_single(
-                beta = scaler$unscale_beta(mmrm_fit$beta),
-                sigma = lapply(mmrm_fit$sigma, scaler$unscale_sigma),
-                converged = mmrm_fit$converged,
-                optimizer = mmrm_fit$optimizer,
-                ids_samp = ids_boot,
-                ids = ids_boot
-            )
-
-            samples[[current_sample]] <- sample
-            current_sample <- current_sample + 1
-
-        } else {
-            failed_samples <- failed_samples + 1
-        }
-
-    }
-
-    if (failed_samples > failure_limit) {
-        stop(
-            paste0(
-                "More than ",
-                failure_limit,
-                " failed fits. Increase the failures threshold or set a different covariance structure"
-            )
-        )
-    }
-
-    return(
-        list(
-            samples = samples,
-            n_failures = failed_samples
-        )
-    )
-}
-
-
-#' Title
-#'
-#' @param longdata TODO
-#' @param method TODO
-#' @param scaler TODO
-#' @param initial TODO
-get_jackknife_samples <- function(
-    longdata,
-    method,
-    scaler,
-    initial = NULL
-) {
-
-    vars <- longdata$vars
-    ids <- longdata$ids
-
-    required_samples <- length(ids)
-    samples <- vector("list", length = required_samples)
-    current_sample <- 1
-    failed_samples <- 0
-    failure_limit <- ceiling(method$threshold * required_samples)
-
-    while (current_sample <= required_samples & failed_samples <= failure_limit) {
-
-        ids_boot <- ids[-current_sample]
-        dat_boot <- longdata$get_data(ids_boot, nmar.rm = TRUE, na.rm = TRUE)
-
-        model_df <- as_model_df(dat_boot, as_simple_formula(vars))
-        model_df_scaled <- scaler$scale(model_df)
-
-        # fit mmrm
-        mmrm_fit <- fit_mmrm_multiopt(
-            designmat = model_df_scaled[, -1, drop = FALSE],
-            outcome = as.data.frame(model_df_scaled)[, 1],
-            subjid = dat_boot[[vars$subjid]],
-            visit = dat_boot[[vars$visit]],
-            group = dat_boot[[vars$group]],
-            cov_struct = method$covariance,
-            REML = method$REML,
-            same_cov = method$same_cov,
-            initial_values = initial,
-            optimizer = c("L-BFGS-B", "BFGS", "Nelder-Mead")
-        )
-
-        sample <- as_sample_single(
-            beta = scaler$unscale_beta(mmrm_fit$beta),
-            sigma = lapply(mmrm_fit$sigma, scaler$unscale_sigma),
-            converged = mmrm_fit$converged,
-            optimizer = mmrm_fit$optimizer,
-            ids = ids_boot
-        )
-
-        samples[[current_sample]] <- sample
-        current_sample <- current_sample + 1
-
-        if (!mmrm_fit$converged) {
-            failed_samples <- failed_samples + 1
-        }
-
-    }
-
-    if (failed_samples > failure_limit) {
-        stop(
-            paste0(
-                "More than ",
-                failure_limit,
-                " failed fits. Increase the failures threshold or set a different covariance structure"
-            )
-        )
-    }
-
-    return(
-        list(
-            samples = samples,
-            n_failures = failed_samples
-        )
-    )
-}
 
 
 #' Print Draws Object
@@ -442,7 +307,7 @@ print.draws <- function(x, ...) {
         sprintf("Number of Samples: %s", length(x$samples)),
         sprintf("Number of Failed Samples: %s", x$n_failures),
         sprintf("Model Formula: %s", frm_str),
-        sprintf("Imputation Type: %s", class(x)[[1]]),
+        sprintf("Imputation Type: %s", class(x)[[2]]),
         "Method:",
         sprintf("    Type: %s", meth),
         meth_args,
@@ -456,14 +321,31 @@ print.draws <- function(x, ...) {
 
 
 
-
-as_sample_single <- function(ids, beta, sigma, converged, optimizer, ids_samp = NULL) {
+#' TODO
+#'
+#' @description
+#' TODO
+#'
+#' @param ids TODO
+#' @param beta TODO
+#' @param sigma TODO
+#' @param theta TODO
+#' @param failed TODO
+#' @param ids_samp TODO
+as_sample_single <- function(
+    ids,
+    beta = NA,
+    sigma = NA,
+    theta = NA,
+    failed = any(is.na(beta)),
+    ids_samp = ids
+) {
     x <- list(
         ids = ids,
+        failed = failed,
         beta = beta,
         sigma = sigma,
-        converged = converged,
-        optimizer = optimizer,
+        theta = theta,
         ids_samp = ids_samp
     )
     class(x) <- c("sample_single", "list")
@@ -471,25 +353,42 @@ as_sample_single <- function(ids, beta, sigma, converged, optimizer, ids_samp = 
     return(x)
 }
 
+
+#' @export
 validate.sample_single <- function(x, ...) {
+
     assert_that(
+        x$failed %in% c(TRUE, FALSE),
         is.character(x$ids),
         length(x$ids) > 1,
-        is.numeric(x$beta),
-        all(!is.na(x$beta)),
-        is.list(x$sigma),
-        !is.null(names(x$sigma)),
-        length(x$converged) == 1,
-        x$converged %in% c(TRUE, FALSE) | is.na(x$converged),
-        length(x$optimizer) == 1,
-        is.character(x$optimizer) | is.na(x$optimizer),
-        is.character(x$ids_samp) | is.null(x$ids_samp),
-        length(x$ids_samp) > 1 | is.null(x$ids_samp)
+        is.character(x$ids_samp),
+        length(x$ids_samp) > 1
     )
+
+    if (x$failed == TRUE) {
+        assert_that(
+            is.na(x$beta),
+            is.na(x$sigma),
+            is.na(x$theta)
+        )
+    } else {
+        assert_that(
+            is.numeric(x$beta),
+            all(!is.na(x$beta)),
+            is.list(x$sigma),
+            !is.null(names(x$sigma)),
+            all(vapply(x$sigma, is.matrix, logical(1)))
+        )
+    }
 }
 
 
-
+#' TODO
+#'
+#' @description
+#' TODO
+#'
+#' @param ... TODO
 as_sample_list <- function(...) {
     x <- list(...)
     if (length(x) == 1 & class(x[[1]])[[1]] != "sample_single") {
@@ -500,10 +399,43 @@ as_sample_list <- function(...) {
     return(x)
 }
 
+
+#' @export
 validate.sample_list <- function(x, ...) {
     assert_that(
         is.null(names(x)),
         all(vapply(x, function(x) class(x)[[1]] == "sample_single", logical(1))),
         all(vapply(x, function(x) validate(x), logical(1)))
     )
+}
+
+
+#' TODO
+#'
+#' @description
+#' TODO
+#'
+#' @param method TODO
+#' @param samples TODO
+#' @param data TODO
+#' @param formula TODO
+#' @param n_failures TODO
+#' @param fit TODO
+as_draws <- function(method, samples, data, formula, n_failures = NA, fit = NA) {
+    x <- list(
+        data = data,
+        method = method,
+        samples = samples,
+        fit = fit,
+        n_failures = n_failures,
+        formula = formula
+    )
+
+    next_class <- switch(class(x$method),
+        "approxbayes" = "random",
+        "condmean" = "condmean",
+        "bayes" = "random"
+    )
+
+    return(as_class(x, c("draws", next_class, "list")))
 }

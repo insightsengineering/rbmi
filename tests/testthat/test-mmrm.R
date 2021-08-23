@@ -37,7 +37,7 @@ expect_valid_fit_object <- function(fit, cov_struct, nv, same_cov) {
     expect_type(fit, "list")
     expect_length(fit, 4)
 
-    expect_true(all(names(fit) %in% c("beta", "sigma", "converged", "theta")))
+    expect_true(all(names(fit) %in% c("beta", "sigma", "failed", "theta")))
 
     expect_vector(fit$beta)
     expect_length(fit$beta, 8)
@@ -52,7 +52,7 @@ expect_valid_fit_object <- function(fit, cov_struct, nv, same_cov) {
     expect_vector(fit$theta)
     expect_length(fit$theta, n_params)
 
-    expect_true(fit$converged %in% c(TRUE, FALSE))
+    expect_true(fit$failed %in% c(TRUE, FALSE))
 }
 
 
@@ -82,7 +82,7 @@ extract_test_fit <- function(mod) {
         beta = beta,
         sigma = sigma,
         theta = theta,
-        converged = converged
+        failed = !converged
     )
     return(output_expected)
 }
@@ -175,7 +175,7 @@ set.seed(101)
 
 sigma <- as_covmat(c(5, 3, 8), c(0.4, 0.6, 0.3))
 
-dat <- get_sim_data(n = 30, sigma) %>%
+dat <- get_sim_data(n = 40, sigma) %>%
     mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 1, NA_real_, outcome))
 
 vars <- ivars(
@@ -362,7 +362,7 @@ test_that("MMRM returns expected estimates (same_cov = FALSE)", {
 
 
 
-test_that("MMRM model with multiple optimizers has expected output",{
+test_that("MMRM model with multiple optimizers has expected output", {
 
     ###### Single optimiser
     args <- args_default
@@ -373,9 +373,6 @@ test_that("MMRM model with multiple optimizers has expected output",{
     fit1 <- do.call(fit_mmrm_multiopt, args = args)
     fit2 <- do.call(fit_mmrm, args = args)
 
-    expect_equal(fit1$optimizer, "BFGS")
-    fit1$optimizer <- NULL
-
     expect_equal(fit1, fit2)
     expect_valid_fit_object(fit1, "us", 3, FALSE)
 
@@ -384,9 +381,6 @@ test_that("MMRM model with multiple optimizers has expected output",{
     args$optimizer <- c("BFGS", "Nelder-Mead", "L-BFGS-B")
 
     fit3 <- do.call(fit_mmrm_multiopt, args = args)
-
-    expect_equal(fit3$optimizer, "BFGS")
-    fit3$optimizer <- NULL
 
     expect_valid_fit_object(fit3, "us", 3, FALSE)
     expect_equal(fit3, fit2)
