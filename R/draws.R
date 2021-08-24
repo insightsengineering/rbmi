@@ -42,7 +42,7 @@ draws.condmean <- function(data, data_ice, vars, method) {
 
 #' TODO
 #'
-#' @description 
+#' @description
 #' TODO
 #'
 #' @param longdata TODO
@@ -50,9 +50,9 @@ draws.condmean <- function(data, data_ice, vars, method) {
 #' @param use_samp_ids TODO
 #' @param first_sample_orig TODO
 get_bootstrap_draws <- function(
-    longdata, 
-    method, 
-    use_samp_ids = FALSE, 
+    longdata,
+    method,
+    use_samp_ids = FALSE,
     first_sample_orig = FALSE
 ) {
 
@@ -64,7 +64,7 @@ get_bootstrap_draws <- function(
     if (first_sample_orig) {
         samples[[1]] <- get_mmrm_sample(longdata$ids, longdata, method)
         if (samples[[1]]$failed) {
-            stop("Fitting MMRM to full dataset failed")
+            stop("Fitting MMRM to original dataset failed")
         }
         current_sample <- current_sample + 1
     }
@@ -155,7 +155,7 @@ get_mmrm_sample <- function(ids, longdata, method) {
         REML = method$REML,
         same_cov = method$same_cov,
         initial_values = NULL,
-        optimizer = c("L-BFGS-B", "BFGS") # TODO - "Nelder-Mead"
+        optimizer = c("L-BFGS-B", "BFGS")
     )
 
     if (sample$failed) {
@@ -216,7 +216,7 @@ draws.bayes <- function(data, data_ice, vars, method) {
         REML = TRUE,
         same_cov = method$same_cov,
         initial_values = NULL,
-        optimizer = c("L-BFGS-B", "BFGS", "Nelder-Mead")
+        optimizer = c("L-BFGS-B", "BFGS")
     )
 
     # run MCMC
