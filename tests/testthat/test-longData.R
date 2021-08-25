@@ -277,6 +277,54 @@ test_that("Stratification works as expected", {
 })
 
 
+
+test_that("Group is a stratification variable by default", {
+
+    set.seed(5176)
+    dobj <- get_data(60)
+    dat <- dobj$dat
+    dat_ice <- dobj$dat_ice
+    
+    vars <- ivars(
+        subjid = "id",
+        visit = "visit",
+        outcome = "outcome",
+        group = "group",
+        strategy = "strategy"
+    )
+
+    ld <- longDataConstructor$new(dat, vars)
+    expect_equal(ld$vars$strata, "group")
+    real <- dat %>% group_by(group) %>% tally()
+    for (i in 1:20) {
+        sampled <- ld$get_data(ld$sample_ids()) %>%
+            group_by(group) %>%
+            tally()
+        expect_equal(real, sampled)
+    }
+
+
+
+    vars <- ivars(
+        subjid = "id",
+        visit = "visit",
+        outcome = "outcome",
+        group = "sex",
+        strategy = "strategy"
+    )
+    ld <- longDataConstructor$new(dat, vars)
+    expect_equal(ld$vars$strata, "sex")
+    real <- dat %>% group_by(sex) %>% tally()
+    for (i in 1:20) {
+        sampled <- ld$get_data(ld$sample_ids()) %>%
+            group_by(sex) %>%
+            tally()
+        expect_equal(real, sampled)
+    }
+})
+
+
+
 test_that("Strategies", {
 
     dobj <- get_ld()
