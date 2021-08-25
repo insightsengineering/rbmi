@@ -4,7 +4,7 @@
 \alias{transpose_results}
 \title{Transpose Results Object}
 \usage{
-transpose_results(results)
+transpose_results(results, components)
 }
 \arguments{
 \item{results}{TODO}

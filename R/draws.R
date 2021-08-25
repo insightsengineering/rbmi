@@ -55,11 +55,12 @@ get_bootstrap_draws <- function(
     use_samp_ids = FALSE,
     first_sample_orig = FALSE
 ) {
+    n_samples <- ife(first_sample_orig, method$n_samples + 1, method$n_samples)
 
-    samples <- vector("list", length = method$n_samples)
+    samples <- vector("list", length = n_samples)
     current_sample <- 1
     failed_samples <- 0
-    failure_limit <- ceiling(method$threshold * method$n_samples)
+    failure_limit <- ceiling(method$threshold * n_samples)
 
     if (first_sample_orig) {
         samples[[1]] <- get_mmrm_sample(longdata$ids, longdata, method)
@@ -69,7 +70,7 @@ get_bootstrap_draws <- function(
         current_sample <- current_sample + 1
     }
 
-    while (current_sample <= method$n_samples & failed_samples <= failure_limit) {
+    while (current_sample <= n_samples & failed_samples <= failure_limit) {
 
         ids_boot <- longdata$sample_ids()
         sample_boot <- get_mmrm_sample(ids_boot, longdata, method)
@@ -300,11 +301,18 @@ print.draws <- function(x, ...) {
         character(1)
     )
 
+    n_samp <- length(x$samples)
+    n_samp_string <- ife(
+        class(x$method)[[1]] == "condmean",
+        sprintf("1 + %s", n_samp - 1),
+        as.character(n_samp)
+    )
+
     string <- c(
         "",
         "Draws Object",
         "------------",
-        sprintf("Number of Samples: %s", length(x$samples)),
+        sprintf("Number of Samples: %s", n_samp_string),
         sprintf("Number of Failed Samples: %s", x$n_failures),
         sprintf("Model Formula: %s", frm_str),
         sprintf("Imputation Type: %s", class(x)[[2]]),

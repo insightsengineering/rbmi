@@ -651,11 +651,19 @@ print.imputation <- function(x, ...) {
     sstring <- paste0("%-", width, "s: %3s%%")
     miss_strings <- sprintf(sstring, x$data$visits, is_miss_perc)
 
+
+    n_imp <- length(x$imputations)
+    n_imp_string <- ife(
+        class(x$method)[[1]] == "condmean",
+        sprintf("1 + %s", n_imp - 1),
+        as.character(n_imp)
+    )
+
     string <- c(
         "",
         "Imputation Object",
         "-----------------",
-        sprintf("Number of Imputed Datasets: %s", length(x$imputations)),
+        sprintf("Number of Imputed Datasets: %s", n_imp_string),
         "Fraction of Missing Data (Original Dataset):",
         sprintf("    %s", miss_strings),
         "References:",
