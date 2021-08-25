@@ -11,6 +11,7 @@ fit_mcmc(
   burn_between,
   initial_values,
   same_cov,
+  seed = NA,
   verbose = TRUE
 )
 }
@@ -26,6 +27,8 @@ fit_mcmc(
 \item{initial_values}{TODO}
 
 \item{same_cov}{TODO}
+
+\item{seed}{TODO}
 
 \item{verbose}{TODO}
 }
