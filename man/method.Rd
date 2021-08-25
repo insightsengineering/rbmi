@@ -12,7 +12,8 @@ method_bayes(
   burn_between = 50,
   same_cov = TRUE,
   n_samples = 20,
-  verbose = TRUE
+  verbose = TRUE,
+  seed = NA
 )
 
 method_approxbayes(
@@ -42,6 +43,8 @@ method_condmean(
 \item{n_samples}{TODO}
 
 \item{verbose}{TODO}
+
+\item{seed}{TODO}
 
 \item{covariance}{TODO}
 

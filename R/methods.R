@@ -10,6 +10,7 @@
 #' @param REML TODO
 #' @param type TODO
 #' @param verbose TODO
+#' @param seed TODO
 #' @return TODO
 #' @export
 method_bayes <- function(
@@ -17,14 +18,16 @@ method_bayes <- function(
     burn_between = 50,
     same_cov = TRUE,
     n_samples = 20,
-    verbose = TRUE
+    verbose = TRUE,
+    seed = NA
 ){
     x <- list(
         burn_in = burn_in,
         burn_between = burn_between,
         same_cov = same_cov,
         n_samples = n_samples,
-        verbose = verbose
+        verbose = verbose,
+        seed = seed
     )
     return( as_class(x, "bayes"))
 }
