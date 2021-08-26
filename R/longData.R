@@ -303,7 +303,7 @@ longDataConstructor <- R6::R6Class(
         #' @param dat_ice TODO
         #' @return TODO
         update_strategies = function(dat_ice) {
-            self$set_strategies(dat_ice, update = TRUE)
+            self$set_strategies(dat_ice, update = FALSE)
         },
 
 
