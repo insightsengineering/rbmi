@@ -264,6 +264,10 @@ validate.rubin <- function(x, ...) {
 }
 
 
+#' TODO
+#' 
+#' @param results TODO
+#' @param pars TODO
 #' @export
 validate_analyse_pars <- function(results, pars) {
 
