@@ -1,6 +1,6 @@
 Package: rbmi
 Title: Reference Based Multiple Imputation
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: 
     c(person(given = "Craig",
              family = "Gower-Page",
