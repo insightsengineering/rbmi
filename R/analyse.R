@@ -139,10 +139,10 @@ extract_imputed_df <- function(imputation, ld, delta = NULL, idmap = FALSE) {
 #' TODO
 #' 
 #' @param results TODO
-#' @param call TODO
+#' @param method TODO
 #' @param delta TODO
 #' @param fun TODO
-#' @param next_class TODO
+#' @param fun_name TODO
 as_analysis <- function(results, method, delta = NULL, fun = NULL, fun_name = NULL) {
 
     next_class <- switch(class(method),

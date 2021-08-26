@@ -8,6 +8,8 @@ transpose_results(results, components)
 }
 \arguments{
 \item{results}{TODO}
+
+\item{components}{TODO}
 }
 \description{
 Transposes a Results object (as created by analyse()) inorder to group

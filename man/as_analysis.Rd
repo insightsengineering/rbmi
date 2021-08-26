@@ -9,13 +9,13 @@ as_analysis(results, method, delta = NULL, fun = NULL, fun_name = NULL)
 \arguments{
 \item{results}{TODO}
 
+\item{method}{TODO}
+
 \item{delta}{TODO}
 
 \item{fun}{TODO}
 
-\item{call}{TODO}
-
-\item{next_class}{TODO}
+\item{fun_name}{TODO}
 }
 \description{
 TODO

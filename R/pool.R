@@ -277,6 +277,7 @@ normal_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
 #' the same estimates together into vectors.
 #'
 #' @param results TODO
+#' @param components TODO
 transpose_results <- function(results, components) {
     elements <- names(results[[1]])
     results_transpose <- list()
