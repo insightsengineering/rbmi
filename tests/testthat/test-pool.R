@@ -1,4 +1,6 @@
-library(mice)
+suppressPackageStartupMessages({
+    library(mice)
+})
 
 
 test_that("Rubin's rules", {

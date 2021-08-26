@@ -25,7 +25,8 @@ Suggests:
     emmeans,
     tibble,
     mvtnorm,
-    Matrix
+    Matrix,
+    mice
 Biarch: true
 Config/testthat/edition: 3
 Imports: 
