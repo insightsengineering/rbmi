@@ -16,8 +16,10 @@ pool <- function(
     type = c("percentile", "normal")
 ) {
 
-    res <- results$results
-    class(res) <- class(results)
+    assert_that(
+        class(results)[[1]] == "analysis"
+    )
+    validate(results)
 
     alternative <- match.arg(alternative)
     type <- match.arg(type)
@@ -29,14 +31,13 @@ pool <- function(
         msg = "`conf.level` must be between 0 and 1"
     )
 
-    validate_analyse(res)
+    pool_type <- class(results$results)[[1]]
 
-    pool_type <- class(res)[[1]]
+    results_transpose <- transpose_results(results$results, get_pool_components(pool_type))
 
-    results_transpose <- transpose_results(res)
     pars <- lapply(
         results_transpose,
-        function(x, ...) {class(x) <- pool_type; pool_(x, ...)},
+        function(x, ...) pool_(as_class(x, pool_type), ...),
         conf.level = conf.level,
         alternative = alternative,
         type = type
@@ -52,7 +53,7 @@ pool <- function(
         pars = pars,
         conf.level = conf.level,
         alternative = alternative,
-        N = length(res),
+        N = length(results$results),
         method = method
     )
     class(ret) <- "pool"
@@ -60,7 +61,16 @@ pool <- function(
 }
 
 
-
+#' TODO
+#' 
+#' @param x TODO
+get_pool_components <- function(x) {
+    switch(x,
+        "rubin" = c("est", "df", "se"),
+        "jackknife" = c("est"),
+        "bootstrap" = c("est")
+    )
+}
 
 
 #' @rdname pool
@@ -169,6 +179,8 @@ pool_.rubin <- function(results, conf.level, alternative, type) {
 #' @param conf.level TODO
 #' @param alternative TODO
 pool_bootstrap_percentile <- function(est, conf.level, alternative) {
+    est_orig <- est[1]
+    est <- est[-1]
     alpha <- 1 - conf.level
     pvals <- (c(sum(est < 0), sum(est > 0)) + 1) / (length(est) + 1)
 
@@ -188,7 +200,7 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
     )
 
     ret <- list(
-        est = est[1],  # First estimate should be original dataset
+        est = est_orig,  # First estimate should be original dataset
         ci = ci,
         se = NA,
         pvalue = min(pvals[index]) * length(pvals[index])
@@ -205,10 +217,11 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
 #' @param alternative TODO
 #' @importFrom stats sd qnorm pnorm quantile
 pool_bootstrap_normal <- function(est, conf.level, alternative) {
+    est_orig <- est[1] # First estimate should be original dataset
+    est <- est[-1]
     alpha <- 1 - conf.level
-    est_point <- est[1] # First estimate should be original dataset
     se <- sd(est)
-    ret <- normal_ci(est_point, se, alpha, alternative, qnorm, pnorm)
+    ret <- normal_ci(est_orig, se, alpha, alternative, qnorm, pnorm)
     return(ret)
 }
 
@@ -264,16 +277,19 @@ normal_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
 #' the same estimates together into vectors.
 #'
 #' @param results TODO
-transpose_results <- function(results) {
+#' @param components TODO
+transpose_results <- function(results, components) {
     elements <- names(results[[1]])
     results_transpose <- list()
-
     for (element in elements) {
-        results_transpose[[element]] <- list(
-            est = vapply(results, function(x) x[[element]][["est"]], numeric(1)),
-            se = vapply(results, function(x) x[[element]][["se"]], numeric(1)),
-            df = vapply(results, function(x) x[[element]][["df"]], numeric(1))
-        )
+        results_transpose[[element]] <- list()
+        for (comp in components) {
+            results_transpose[[element]][[comp]] <- vapply(
+                results,
+                function(x) x[[element]][[comp]],
+                numeric(1)
+            )
+        }
     }
     return(results_transpose)
 }
@@ -305,11 +321,17 @@ as.data.frame.pool <- function(x, ...) {
 #' @export
 print.pool <- function(x, ...) {
 
+    n_string <- ife(
+        x$method == "rubin",
+        as.character(x$N),
+        sprintf("1 + %s", x$N - 1)
+    )
+
     string <- c(
         "",
         "Pool Object",
         "-----------",
-        sprintf("Number of Results Combined: %s", x$N),
+        sprintf("Number of Results Combined: %s", n_string),
         sprintf("Method: %s", x$method),
         sprintf("Confidence Level: %s", x$conf.level),
         sprintf("Alternative: %s", x$alternative),

@@ -184,7 +184,7 @@
       
       Draws Object
       ------------
-      Number of Samples: 6
+      Number of Samples: 1 + 6
       Number of Failed Samples: 0
       Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
       Imputation Type: condmean
@@ -206,7 +206,7 @@
       
       Imputation Object
       -----------------
-      Number of Imputed Datasets: 6
+      Number of Imputed Datasets: 1 + 6
       Fraction of Missing Data (Original Dataset):
           visit_1:   0%
           visit_2:   0%
@@ -224,7 +224,7 @@
       
       Analysis Object
       ---------------
-      Number of Results: 6
+      Number of Results: 1 + 6
       Analysis Function: ancova
       Delta Applied: FALSE
       Analysis Parameters:
@@ -247,7 +247,7 @@
       
       Pool Object
       -----------
-      Number of Results Combined: 6
+      Number of Results Combined: 1 + 6
       Method: bootstrap (percentile)
       Confidence Level: 0.95
       Alternative: greater
@@ -277,7 +277,7 @@
       
       Pool Object
       -----------
-      Number of Results Combined: 6
+      Number of Results Combined: 1 + 6
       Method: bootstrap (normal)
       Confidence Level: 0.95
       Alternative: greater
@@ -287,15 +287,15 @@
         ======================================================
             parameter      est     se    lci    uci     pval  
         ------------------------------------------------------
-           trt_visit_1    7.584   0.785  -Inf  8.875   <0.001 
-         lsm_ref_visit_1  6.937   0.569  -Inf  7.874   <0.001 
-         lsm_alt_visit_1  14.522  0.577  -Inf  15.472  <0.001 
-           trt_visit_2    8.356   0.778  -Inf  9.636   <0.001 
-         lsm_ref_visit_2  6.583   0.526  -Inf  7.449   <0.001 
-         lsm_alt_visit_2  14.94   0.49   -Inf  15.745  <0.001 
-           trt_visit_3    4.397   0.495  -Inf  5.211   <0.001 
-         lsm_ref_visit_3  6.891   0.397  -Inf  7.544   <0.001 
-         lsm_alt_visit_3  11.287  0.61   -Inf  12.29   <0.001 
+           trt_visit_1    7.584   0.891  -Inf  9.051   <0.001 
+         lsm_ref_visit_1  6.937   0.568  -Inf  7.871   <0.001 
+         lsm_alt_visit_1  14.522  0.706  -Inf  15.684  <0.001 
+           trt_visit_2    8.356   0.833  -Inf  9.726   <0.001 
+         lsm_ref_visit_2  6.583   0.529  -Inf  7.454   <0.001 
+         lsm_alt_visit_2  14.94   0.616  -Inf  15.953  <0.001 
+           trt_visit_3    4.397   0.561  -Inf   5.32   <0.001 
+         lsm_ref_visit_3  6.891   0.419  -Inf   7.58   <0.001 
+         lsm_alt_visit_3  11.287  0.74   -Inf  12.504  <0.001 
         ------------------------------------------------------
       
 
@@ -307,7 +307,7 @@
       
       Draws Object
       ------------
-      Number of Samples: 36
+      Number of Samples: 1 + 35
       Number of Failed Samples: 0
       Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
       Imputation Type: condmean
@@ -329,7 +329,7 @@
       
       Imputation Object
       -----------------
-      Number of Imputed Datasets: 36
+      Number of Imputed Datasets: 1 + 35
       Fraction of Missing Data (Original Dataset):
           visit_1:   0%
           visit_2:   0%
@@ -347,7 +347,7 @@
       
       Analysis Object
       ---------------
-      Number of Results: 36
+      Number of Results: 1 + 35
       Analysis Function: ancova
       Delta Applied: FALSE
       Analysis Parameters:
@@ -370,7 +370,7 @@
       
       Pool Object
       -----------
-      Number of Results Combined: 36
+      Number of Results Combined: 1 + 35
       Method: jackknife
       Confidence Level: 0.9
       Alternative: two.sided

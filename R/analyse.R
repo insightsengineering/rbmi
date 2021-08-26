@@ -55,26 +55,14 @@ analyse <- function(imputations, fun, delta = NULL, ...) {
         ...
     )
 
-    ret <- list(
+    ret <- as_analysis(
         results = results,
-        call = analysis_call,
+        fun_name = capture.output(analysis_call[["fun"]]),
         delta = delta,
-        fun = fun
+        fun = fun,
+        method = imputations$method
     )
-
-    new_class <- switch(class(imputations$method),
-        bayes = "rubin",
-        approxbayes = "rubin",
-        condmean = ifelse(
-            imputations$method$type == "jackknife",
-            "jackknife",
-            "bootstrap"
-        )
-    )
-
-    class(ret$results) <- new_class
-    class(ret) <- c(new_class, "analysis")
-    validate_analyse(ret$results)
+    validate(ret)
     return(ret)
 }
 
@@ -148,6 +136,46 @@ extract_imputed_df <- function(imputation, ld, delta = NULL, idmap = FALSE) {
 
 
 
+#' TODO
+#' 
+#' @param results TODO
+#' @param method TODO
+#' @param delta TODO
+#' @param fun TODO
+#' @param fun_name TODO
+as_analysis <- function(results, method, delta = NULL, fun = NULL, fun_name = NULL) {
+
+    next_class <- switch(class(method),
+        bayes = "rubin",
+        approxbayes = "rubin",
+        condmean = ifelse(
+            method$type == "jackknife",
+            "jackknife",
+            "bootstrap"
+        )
+    )
+
+    assert_that(
+        is.list(results),
+        length(next_class) == 1,
+        is.character(next_class),
+        next_class %in% c("jackknife", "bootstrap", "rubin")
+    )
+
+    x <- list(
+        results = as_class(results, c(next_class, "list")),
+        delta = delta,
+        fun = fun,
+        fun_name = fun_name,
+        method = method
+    )
+    class(x) <- c("analysis", "list")
+    validate(x)
+    return(x)
+}
+
+
+
 #' Print Analysis Object
 #'
 #' @param x (`analysis`)\cr input
@@ -156,12 +184,19 @@ extract_imputed_df <- function(imputation, ld, delta = NULL, idmap = FALSE) {
 #' @export
 print.analysis <- function(x, ...) {
 
+    n_samp <- length(x$results)
+    n_samp_string <- ife(
+        class(x$results)[[1]] %in% c("bootstrap", "jackknife"),
+        sprintf("1 + %s", n_samp - 1),
+        n_samp
+    )
+
     string <- c(
         "",
         "Analysis Object",
         "---------------",
-        sprintf("Number of Results: %s", length(x$results)),
-        sprintf("Analysis Function: %s", capture.output(x$call[["fun"]])),
+        sprintf("Number of Results: %s", n_samp_string),
+        sprintf("Analysis Function: %s", x$fun_name),
         sprintf("Delta Applied: %s", !is.null(x$delta)),
         "Analysis Parameters:",
         sprintf("    %s", names(x$results[[1]])),
@@ -171,3 +206,115 @@ print.analysis <- function(x, ...) {
     cat(string, sep = "\n")
     return(invisible(x))
 }
+
+
+
+#' Validate Analysis Objects
+#' 
+#' Validates the return object of the analyse() function
+#' 
+#' @param x A Analysis results object (of class "jackknife", "bootstrap", "rubin")
+#' @param ... Not Used
+#' @export
+validate.analysis <- function(x, ...) {
+
+    next_class <- class(x$results)[[1]]
+
+    assert_that(
+        next_class %in% c("jackknife", "bootstrap", "rubin"),
+        msg = "`results` must be of class 'jackknife', 'bootstrap' or 'rubin'"
+    )
+
+    if (next_class %in% c("bootstrap", "rubin")) {
+        nsamp <- ife(
+            next_class %in% c("bootstrap"),
+            x$method$n_sample + 1,
+            x$method$n_sample
+        )
+        assert_that(
+            length(x$results) == nsamp
+        )
+    }
+
+    assert_that(
+        is.list(x$results),
+        is.null(x$delta) | is.data.frame(x$delta),
+        is.null(x$fun) | is.function(x$fun),
+        is.null(x$fun_name) | is.character(x$fun_name)
+    )
+
+    validate(x$results)
+}
+
+
+#' @export
+validate.jackknife <- function(x, ...) {
+    validate_analyse_pars(x, get_pool_components("jackknife"))
+}
+
+
+#' @export
+validate.bootstrap <- function(x, ...) {
+    validate_analyse_pars(x, get_pool_components("bootstrap"))
+}
+
+#' @export
+validate.rubin <- function(x, ...) {
+    validate_analyse_pars(x, get_pool_components("rubin"))
+}
+
+
+#' @export
+validate_analyse_pars <- function(results, pars) {
+
+    assert_that(
+        length(results) != 0,
+        is.list(results),
+        all(vapply(results, is.list, logical(1))),
+        msg = "Analysis results must be a list of lists"
+    )
+
+    assert_that(
+        length(names(results[[1]])) != 0,
+        all(vapply(results, function(x) !is.null(names(x)) & all(names(x) != ""), logical(1))),
+        msg = "Individual analysis results must be named lists"
+    )
+
+    results_names <- lapply(results, function(x) unique(names(x)))
+    results_names_flat <- unlist(results_names, use.names = FALSE)
+    results_names_count <- table(results_names_flat)
+
+    assert_that(
+        all(results_names_count == length(results)),
+        msg = "Each individual analysis result must contain identically named elements"
+    )
+
+    results_unnested <- unlist(results, recursive = FALSE, use.names = FALSE)
+
+    devnull <- lapply(
+        results_unnested,
+        function(x){
+            assert_that(
+                is.list(x),
+                all(pars %in% names(x)),
+                msg = sprintf(
+                    "Each individual analysis result element must be a list with elements `%s`",
+                    paste0(pars, collapse = "`, `")
+                )
+            )
+        }
+    )
+
+    for (par in pars) {
+        if (par != "df") {
+            assert_that(
+                all(!is.na(vapply(results_unnested, function(x) x[[par]], numeric(1)))),
+                msg = sprintf("Parameter `%s` contains missing values", par)
+            )
+        }
+    }
+
+    return(invisible(TRUE))
+}
+
+

@@ -78,7 +78,7 @@ test_that("condmean - bootstrap", {
     dobj <- draws(d$dat, d$dat_ice, d$vars, meth)
     standard_checks(dobj, d, meth)
 
-    expect_length(dobj$samples, 5)
+    expect_length(dobj$samples, 6)
     expect_equal(dobj$samples[[1]]$ids, levels(d$dat$id))
     expect_true(all(vapply(dobj$samples[-1], function(x) any(x$ids != levels(d$dat$id)), logical(1))))
 
@@ -87,7 +87,7 @@ test_that("condmean - bootstrap", {
     dobj2 <- draws(d$dat, d$dat_ice, d$vars, meth)
     standard_checks(dobj2, d, meth)
 
-    expect_length(dobj2$samples, 5)
+    expect_length(dobj2$samples, 6)
     expect_equal(dobj2$samples[[1]], dobj$samples[[1]])
     expect_true(!identical(dobj$samples[[2]], dobj2$samples[[2]]))
 })
