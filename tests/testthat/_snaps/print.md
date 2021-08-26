@@ -76,17 +76,17 @@
       Results:
       
         ===================================================
-            parameter      est     se     lci   uci   pval 
+            parameter      est     se     lci    uci  pval 
         ---------------------------------------------------
-           trt_visit_1    7.313   0.418  <NA>   <NA>  <NA> 
-         lsm_ref_visit_1  7.204   0.274  <NA>   <NA>  <NA> 
-         lsm_alt_visit_1  14.516  0.315  <NA>   <NA>  <NA> 
-           trt_visit_2    8.015   0.193  <NA>   <NA>  <NA> 
-         lsm_ref_visit_2  6.768   0.126  <NA>   <NA>  <NA> 
-         lsm_alt_visit_2  14.784  0.145  <NA>   <NA>  <NA> 
-           trt_visit_3    3.595   0.559  2.873  Inf    1   
-         lsm_ref_visit_3   6.82   0.375  6.335  Inf    1   
-         lsm_alt_visit_3  10.415  0.424  9.867  Inf    1   
+           trt_visit_1    7.313   0.418  6.773   Inf   1   
+         lsm_ref_visit_1  7.204   0.274   6.85   Inf   1   
+         lsm_alt_visit_1  14.516  0.315  14.109  Inf   1   
+           trt_visit_2    8.015   0.193  7.767   Inf   1   
+         lsm_ref_visit_2  6.768   0.126  6.606   Inf   1   
+         lsm_alt_visit_2  14.784  0.145  14.596  Inf   1   
+           trt_visit_3    3.595   0.559  2.873   Inf   1   
+         lsm_ref_visit_3   6.82   0.375  6.335   Inf   1   
+         lsm_alt_visit_3  10.415  0.424  9.867   Inf   1   
         ---------------------------------------------------
       
 
@@ -168,12 +168,12 @@
         =======================================================
             parameter      est     se     lci    uci     pval  
         -------------------------------------------------------
-           trt_visit_1    7.313   0.418  <NA>    <NA>    <NA>  
-         lsm_ref_visit_1  7.204   0.274  <NA>    <NA>    <NA>  
-         lsm_alt_visit_1  14.516  0.315  <NA>    <NA>    <NA>  
-           trt_visit_3     7.96   0.225  7.485  8.434   <0.001 
-         lsm_ref_visit_3  6.812   0.115  6.581  7.044   <0.001 
-         lsm_alt_visit_3  14.772  0.183  14.38  15.165  <0.001 
+           trt_visit_1    7.313   0.418  6.482  8.143   <0.001 
+         lsm_ref_visit_1  7.204   0.274  6.66   7.748   <0.001 
+         lsm_alt_visit_1  14.516  0.315  13.89  15.143  <0.001 
+           trt_visit_3    7.964   0.185  7.587  8.341   <0.001 
+         lsm_ref_visit_3  6.797   0.156  6.465  7.128   <0.001 
+         lsm_alt_visit_3  14.761  0.154  14.44  15.081  <0.001 
         -------------------------------------------------------
       
 
