@@ -82,6 +82,7 @@ QR_decomp <- function(designmat, N, J) {
 #' @param burn_between TODO
 #' @param initial_values TODO
 #' @param same_cov TODO
+#' @param seed TODO
 #' @param verbose TODO
 run_mcmc <- function(
     designmat,
@@ -93,6 +94,7 @@ run_mcmc <- function(
     burn_between,
     initial_values,
     same_cov,
+    seed = NA,
     verbose = TRUE
 ) {
 
@@ -137,6 +139,7 @@ run_mcmc <- function(
         burn_between,
         data$initial_values,
         same_cov,
+        seed,
         verbose
     )
 
@@ -263,6 +266,7 @@ prepare_data_mcmc <- function(
 #' @param initial_values TODO
 #' @param same_cov TODO
 #' @param verbose TODO
+#' @param seed TODO
 #' @import Rcpp
 #' @import methods
 #' @useDynLib rbmi, .registration = TRUE
@@ -274,6 +278,7 @@ fit_mcmc <- function(
     burn_between,
     initial_values,
     same_cov,
+    seed = NA,
     verbose = TRUE
 ) {
 
@@ -292,21 +297,27 @@ fit_mcmc <- function(
         stanmodels$MMRM_diff_cov
     )
 
+    sampling_args <- list(
+        object = stan_model,
+        data = data,
+        pars = c("beta", "Sigma"),
+        chains = 1,
+        warmup = burn_in,
+        thin = burn_between,
+        iter = burn_in + burn_between * n_imputations,
+        init = initial_values,
+        refresh = refresh
+    )
+
+    if (!is.na(seed)) {
+        sampling_args$seed <- seed
+    }
+
     stan_fit <- record({
-        sampling(
-            object = stan_model,
-            data = data,
-            pars = c("beta", "Sigma"),
-            chains = 1,
-            warmup = burn_in,
-            thin = burn_between,
-            iter = burn_in + burn_between * n_imputations,
-            init = initial_values,
-            refresh = refresh
-        )
+        do.call(sampling, sampling_args)
     })
 
-    if (!is.null(stan_fit$errors)){
+    if (!is.null(stan_fit$errors)) {
         stop(stan_fit$errors)
     }
 

@@ -193,6 +193,10 @@ extract_data_nmar_as_na <- function(longdata) {
 #' @export
 draws.bayes <- function(data, data_ice, vars, method) {
 
+    if (!is.na(method$seed)) {
+        set.seed(method$seed)
+    }
+
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
 
@@ -228,6 +232,7 @@ draws.bayes <- function(data, data_ice, vars, method) {
         sigma_reml = mmrm_initial$sigma,
         n_imputations = method$n_samples,
         burn_in = method$burn_in,
+        seed = method$seed,
         burn_between = method$burn_between,
         initial_values = list(
             beta = mmrm_initial$beta,

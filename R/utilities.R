@@ -279,7 +279,7 @@ ivars <- function(
     outcome = "outcome",
     group = "group",
     covariates = character(0),
-    strata = character(0),
+    strata = group,
     strategy = "strategy"
 ) {
     x <- list(

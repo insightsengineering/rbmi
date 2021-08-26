@@ -4,7 +4,7 @@ suppressPackageStartupMessages({
 })
 
 
-get_data <- function(n){
+get_data <- function(n) {
     sigma <- as_covmat(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
 
     set.seed(1518)
@@ -44,7 +44,7 @@ get_data <- function(n){
 test_that("print - Approx Bayes", {
 
     dobj <- get_data(100)
-    set.seed(2513)
+    set.seed(3123)
 
     drawobj_ab <- draws(
         data = dobj$dat,
@@ -91,7 +91,7 @@ test_that("print - Bayes", {
     skip_on_cran()  # CRAN / Stan seed does not appear to be reproducible ....
 
     dobj <- get_data(100)
-    set.seed(2513)
+    set.seed(413)
 
     suppressWarnings({
         drawobj_b <- draws(
@@ -101,7 +101,8 @@ test_that("print - Bayes", {
             method = method_bayes(
                 n_samples = 11,
                 burn_between = 2,
-                verbose = FALSE
+                verbose = FALSE,
+                seed = 859
             )
         )
     })
@@ -136,7 +137,7 @@ test_that("print - Bayes", {
 
 test_that("print - condmean (bootstrap)", {
     dobj <- get_data(89)
-    set.seed(2513)
+    set.seed(313)
 
     drawobj_cmb <- draws(
         data = dobj$dat,
@@ -184,7 +185,7 @@ test_that("print - condmean (bootstrap)", {
 test_that("print - Condmean (jackknife)", {
 
     dobj <- get_data(35)
-    set.seed(2513)
+    set.seed(89513)
 
     drawobj_cmj <- draws(
         data = dobj$dat,

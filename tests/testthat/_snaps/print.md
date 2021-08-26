@@ -84,9 +84,9 @@
            trt_visit_2    8.015   0.193  <NA>   <NA>  <NA> 
          lsm_ref_visit_2  6.768   0.126  <NA>   <NA>  <NA> 
          lsm_alt_visit_2  14.784  0.145  <NA>   <NA>  <NA> 
-           trt_visit_3    3.533   0.573  2.794  Inf    1   
-         lsm_ref_visit_3  6.772   0.387  6.272  Inf    1   
-         lsm_alt_visit_3  10.306  0.427  9.755  Inf    1   
+           trt_visit_3    3.595   0.559  2.873  Inf    1   
+         lsm_ref_visit_3   6.82   0.375  6.335  Inf    1   
+         lsm_alt_visit_3  10.415  0.424  9.867  Inf    1   
         ---------------------------------------------------
       
 
@@ -109,6 +109,7 @@
           same_cov: TRUE
           n_samples: 11
           verbose: FALSE
+          seed: 859
       
 
 ---
@@ -170,9 +171,9 @@
            trt_visit_1    7.313   0.418  <NA>    <NA>    <NA>  
          lsm_ref_visit_1  7.204   0.274  <NA>    <NA>    <NA>  
          lsm_alt_visit_1  14.516  0.315  <NA>    <NA>    <NA>  
-           trt_visit_3    8.016   0.239  7.506  8.526   <0.001 
-         lsm_ref_visit_3  6.764   0.153  6.438   7.09   <0.001 
-         lsm_alt_visit_3  14.78   0.15   14.47  15.091  <0.001 
+           trt_visit_3     7.96   0.225  7.485  8.434   <0.001 
+         lsm_ref_visit_3  6.812   0.115  6.581  7.044   <0.001 
+         lsm_alt_visit_3  14.772  0.183  14.38  15.165  <0.001 
         -------------------------------------------------------
       
 
@@ -257,15 +258,15 @@
         ====================================================
             parameter      est     se   lci    uci    pval  
         ----------------------------------------------------
-           trt_visit_1    7.584   <NA>  -Inf  9.055   0.143 
-         lsm_ref_visit_1  6.937   <NA>  -Inf  7.737   0.143 
-         lsm_alt_visit_1  14.522  <NA>  -Inf  15.297  0.143 
-           trt_visit_2    8.356   <NA>  -Inf   9.31   0.143 
-         lsm_ref_visit_2  6.583   <NA>  -Inf  7.426   0.143 
-         lsm_alt_visit_2  14.94   <NA>  -Inf  15.62   0.143 
-           trt_visit_3    4.397   <NA>  -Inf  4.603   0.143 
-         lsm_ref_visit_3  6.891   <NA>  -Inf  7.486   0.143 
-         lsm_alt_visit_3  11.287  <NA>  -Inf  12.09   0.143 
+           trt_visit_1    7.584   <NA>  -Inf  8.645   0.143 
+         lsm_ref_visit_1  6.937   <NA>  -Inf  7.599   0.143 
+         lsm_alt_visit_1  14.522  <NA>  -Inf  16.244  0.143 
+           trt_visit_2    8.356   <NA>  -Inf  9.087   0.143 
+         lsm_ref_visit_2  6.583   <NA>  -Inf  6.937   0.143 
+         lsm_alt_visit_2  14.94   <NA>  -Inf  16.025  0.143 
+           trt_visit_3    4.397   <NA>  -Inf  6.073   0.143 
+         lsm_ref_visit_3  6.891   <NA>  -Inf   7.39   0.143 
+         lsm_alt_visit_3  11.287  <NA>  -Inf  13.464  0.143 
         ----------------------------------------------------
       
 
@@ -287,15 +288,15 @@
         ======================================================
             parameter      est     se    lci    uci     pval  
         ------------------------------------------------------
-           trt_visit_1    7.584   0.891  -Inf  9.051   <0.001 
-         lsm_ref_visit_1  6.937   0.568  -Inf  7.871   <0.001 
-         lsm_alt_visit_1  14.522  0.706  -Inf  15.684  <0.001 
-           trt_visit_2    8.356   0.833  -Inf  9.726   <0.001 
-         lsm_ref_visit_2  6.583   0.529  -Inf  7.454   <0.001 
-         lsm_alt_visit_2  14.94   0.616  -Inf  15.953  <0.001 
-           trt_visit_3    4.397   0.561  -Inf   5.32   <0.001 
-         lsm_ref_visit_3  6.891   0.419  -Inf   7.58   <0.001 
-         lsm_alt_visit_3  11.287  0.74   -Inf  12.504  <0.001 
+           trt_visit_1    7.584   0.477  -Inf  8.369   <0.001 
+         lsm_ref_visit_1  6.937   0.447  -Inf  7.672   <0.001 
+         lsm_alt_visit_1  14.522  0.634  -Inf  15.565  <0.001 
+           trt_visit_2    8.356   0.392  -Inf    9     <0.001 
+         lsm_ref_visit_2  6.583   0.227  -Inf  6.956   <0.001 
+         lsm_alt_visit_2  14.94   0.381  -Inf  15.566  <0.001 
+           trt_visit_3    4.397   0.693  -Inf  5.536   <0.001 
+         lsm_ref_visit_3  6.891   0.273  -Inf   7.34   <0.001 
+         lsm_alt_visit_3  11.287  0.937  -Inf  12.828  <0.001 
         ------------------------------------------------------
       
 
