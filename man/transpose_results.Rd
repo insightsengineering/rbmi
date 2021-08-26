@@ -4,10 +4,12 @@
 \alias{transpose_results}
 \title{Transpose Results Object}
 \usage{
-transpose_results(results)
+transpose_results(results, components)
 }
 \arguments{
 \item{results}{TODO}
+
+\item{components}{TODO}
 }
 \description{
 Transposes a Results object (as created by analyse()) inorder to group
