@@ -339,10 +339,18 @@ longDataConstructor <- R6::R6Class(
                     if (self$strategy_lock[[subject]]) {
                         current_strategy <- self$strategies[[subject]]
                         if (current_strategy == "MAR" & new_strategy != "MAR") {
-                            stop("Unable to change from MAR to non-MAR")
+                            stop(paste(
+                                "Updating strategies from MAR to non-MAR is invalid for subjects with post-ICE data",
+                                "as these points have already been used in defining the imputation model"
+                            ))
                         }
                         if (current_strategy != "MAR" & new_strategy == "MAR") {
-                            stop("Unable to change from non-MAR to MAR")
+                            warning(paste(
+                                "Updating strategies from non-MAR to MAR for subjects who have post-ICE data may",
+                                "result in an over-estimation of the standard errors as this data has not been",
+                                "used in the imputation model. You are advised to re-run `draws()` and apply",
+                                "this update there instead"
+                            ))
                         }
                     }
                 }
