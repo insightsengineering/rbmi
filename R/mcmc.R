@@ -278,9 +278,7 @@ validate.stan_data <- function(x, same_cov) {
         all(unlist(lapply(x, function(e) !is.null(e)))),
         all(!is.na(x$y)),
         is.matrix(x$y),
-        all(x$y_observed %in% c(0,1)),
-        msg = "validation failed"
-
+        all(x$y_observed %in% c(0,1))
     )
 
     if(!same_cov) {
