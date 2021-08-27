@@ -260,7 +260,7 @@ prepare_data_mcmc <- function(
 
 
 #' @export
-validate.stan_data <- function(x, ...) {
+validate.stan_data <- function(x, same_cov) {
 
     assert_that(
         all(names(x) %in% c("J",
@@ -288,6 +288,8 @@ validate.stan_data <- function(x, ...) {
             all(x$which_arm %in% 1:x$G)
         )
     }
+
+    return(invisible(TRUE))
 }
 
 #' Title - TODO

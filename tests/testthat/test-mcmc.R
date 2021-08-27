@@ -178,17 +178,14 @@ sigma_reml <- list(
 )
 betas_reml <- pars$beta
 
-list(
+reml_est <- c(as.numeric(betas_reml), as.numeric(sigma_reml[[1]]))
+
+initial_values <- list(
     "beta" = betas_reml,
     "Sigma" = sigma_reml
 )
 
-expect_postmean_equals_reml <- function(reml_est, stan_fit) {
-
-    s <- rstan::summary(stan_fit, pars = c("beta", "Sigma"))$summary
-    post_means <- s[, "mean"]
-    CI_mean_high = post_means + qnorm(0.99)*s[,"se_mean"]
-    CI_mean_low = post_means - qnorm(0.99)*s[,"se_mean"]
+expect_mcmc_structure <- function(fit) {
 
     expect_true(is.list(fit))
     expect_true(is.list(fit$samples))
@@ -197,6 +194,15 @@ expect_postmean_equals_reml <- function(reml_est, stan_fit) {
     expect_true(all(sapply(fit$samples$sigma, is.list)))
     expect_length(fit$samples$sigma, 1000)
     expect_true(all(sapply(fit$samples$sigma, function(x) length(x) == 2)))
+
+}
+
+expect_postmean_equals_reml <- function(reml_est, stan_fit) {
+
+    s <- rstan::summary(stan_fit, pars = c("beta", "Sigma"))$summary
+    post_means <- s[, "mean"]
+    CI_mean_high = post_means + qnorm(0.99)*s[,"se_mean"]
+    CI_mean_low = post_means - qnorm(0.99)*s[,"se_mean"]
 
     expect_true(all(CI_mean_low < reml_est & CI_mean_high > reml_est))
 }
@@ -225,7 +231,6 @@ test_that("prepare_data_mcmc (same_cov = TRUE)",
           {
 
               same_cov <- TRUE
-
               expected_output <- prepare_data_mcmc(
                   designmat = designmat,
                   outcome = dat$outcome,
@@ -236,9 +241,9 @@ test_that("prepare_data_mcmc (same_cov = TRUE)",
               )
 
               expect_prepare_stan_data(expected_output, same_cov)
-              expect_null(validate(expected_output$data, same_cov))
-          })
-
+              expect_true(validate(expected_output$data, same_cov))
+          }
+)
 
 
 test_that("Posterior mean of mcmc equals (restricted) ML estimates (same_cov = TRUE)", {
@@ -257,8 +262,7 @@ test_that("Posterior mean of mcmc equals (restricted) ML estimates (same_cov = T
         verbose = FALSE
     )
 
-    reml_est <- c(as.numeric(betas_reml), as.numeric(sigma_reml[[1]]))
-
+    expect_mcmc_structure(fit)
     expect_postmean_equals_reml(reml_est, fit$fit)
 
 })
@@ -312,7 +316,12 @@ sigma_reml <- list(
 )
 betas_reml <- pars$beta
 
+reml_est <- c(as.numeric(betas_reml), unlist(lapply(sigma_reml, as.numeric)))
 
+initial_values <- list(
+    "beta" = betas_reml,
+    "Sigma" = sigma_reml
+)
 
 test_that("prepare_data_mcmc (same_cov = FALSE)",
           {
@@ -327,7 +336,7 @@ test_that("prepare_data_mcmc (same_cov = FALSE)",
               )
 
               expect_prepare_stan_data(expected_output, same_cov)
-              expect_null(validate(expected_output$data, same_cov))
+              expect_true(validate(expected_output$data, same_cov))
           })
 
 
@@ -351,8 +360,7 @@ test_that("Posterior mean of mcmc equals (restricted) ML estimates (same_cov = F
         verbose = FALSE
     )
 
-    reml_est <- c(as.numeric(betas_reml), unlist(lapply(sigma_reml, as.numeric)))
-
+    expect_mcmc_structure(fit)
     expect_postmean_equals_reml(reml_est, fit$fit)
 
 })
