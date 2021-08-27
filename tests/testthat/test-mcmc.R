@@ -343,7 +343,7 @@ test_that("prepare_data_mcmc (same_cov = FALSE)",
 
 test_that("Posterior mean of mcmc equals (restricted) ML estimates (same_cov = FALSE)", {
 
-    set.seed(101)
+    set.seed(123)
     fit <- run_mcmc(
         designmat = designmat,
         outcome = dat$outcome,
