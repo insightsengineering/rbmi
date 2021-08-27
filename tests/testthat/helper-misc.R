@@ -20,7 +20,7 @@ as_covmat <- function(sig, corr) {
     x[upper.tri(x)] <- corr
     res <- diag(sig) %*% x %*% diag(sig)
     res <- as.matrix(Matrix::nearPD(res)$mat)
-    assert_that(isSymmetric(res))
+    assertthat::assert_that(isSymmetric(res))
     return(res)
 }
 
@@ -49,14 +49,14 @@ get_sim_data <- function(n, sigma, trt = 4){
 
     dat <- mvtnorm::rmvnorm(n, sigma = sigma) %>%
         set_col_names(paste0("visit_", 1:nv)) %>%
-        as_tibble() %>%
-        mutate(id = 1:n()) %>%
+        dplyr::as_tibble() %>%
+        dplyr::mutate(id = 1:n()) %>%
         tidyr::gather("visit", "outcome", -id) %>%
-        mutate(visit = factor(visit)) %>%
-        arrange(id, visit) %>%
-        left_join(covars, by = "id") %>%
-        mutate(outcome = outcome + 5 + 3 * age + 3 * f2n(sex) + trt * f2n(group)) %>%
-        mutate(id = as.factor(id))
+        dplyr::mutate(visit = factor(visit)) %>%
+        dplyr::arrange(id, visit) %>%
+        dplyr::left_join(covars, by = "id") %>%
+        dplyr::mutate(outcome = outcome + 5 + 3 * age + 3 * f2n(sex) + trt * f2n(group)) %>%
+        dplyr::mutate(id = as.factor(id))
 
     return(dat)
 }
