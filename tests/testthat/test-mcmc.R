@@ -185,14 +185,14 @@ initial_values <- list(
     "Sigma" = sigma_reml
 )
 
-expect_mcmc_structure <- function(fit) {
+expect_mcmc_structure <- function(fit, n_samples) {
 
     expect_true(is.list(fit))
     expect_true(is.list(fit$samples))
-    expect_length(fit$samples$beta, 1000)
+    expect_length(fit$samples$beta, n_samples)
 
     expect_true(all(sapply(fit$samples$sigma, is.list)))
-    expect_length(fit$samples$sigma, 1000)
+    expect_length(fit$samples$sigma, n_samples)
     expect_true(all(sapply(fit$samples$sigma, function(x) length(x) == 2)))
 
 }
@@ -201,8 +201,8 @@ expect_postmean_equals_reml <- function(reml_est, stan_fit) {
 
     s <- rstan::summary(stan_fit, pars = c("beta", "Sigma"))$summary
     post_means <- s[, "mean"]
-    CI_mean_high = post_means + qnorm(0.99)*s[,"se_mean"]
-    CI_mean_low = post_means - qnorm(0.99)*s[,"se_mean"]
+    CI_mean_high = post_means + qnorm(0.999)*s[,"se_mean"]
+    CI_mean_low = post_means - qnorm(0.999)*s[,"se_mean"]
 
     expect_true(all(CI_mean_low < reml_est & CI_mean_high > reml_est))
 }
@@ -262,7 +262,7 @@ test_that("Posterior mean of mcmc equals (restricted) ML estimates (same_cov = T
         verbose = FALSE
     )
 
-    expect_mcmc_structure(fit)
+    expect_mcmc_structure(fit, n_samples = 1000)
     expect_postmean_equals_reml(reml_est, fit$fit)
 
 })
@@ -360,7 +360,7 @@ test_that("Posterior mean of mcmc equals (restricted) ML estimates (same_cov = F
         verbose = FALSE
     )
 
-    expect_mcmc_structure(fit)
+    expect_mcmc_structure(fit, n_samples = 1000)
     expect_postmean_equals_reml(reml_est, fit$fit)
 
 })
