@@ -29,7 +29,7 @@ method_bayes <- function(
         verbose = verbose,
         seed = seed
     )
-    return( as_class(x, "bayes"))
+    return(as_class(x, c("method", "bayes")))
 }
 
 
@@ -51,7 +51,7 @@ method_approxbayes <- function(
         REML = REML,
         n_samples = n_samples
     )
-    return( as_class(x, "approxbayes"))
+    return(as_class(x, c("method", "approxbayes")))
 }
 
 
@@ -90,7 +90,7 @@ method_condmean <- function(
         n_samples = n_samples,
         type = type
     )
-    return(as_class(x, "condmean"))
+    return(as_class(x, c("method", "condmean")))
 }
 
 

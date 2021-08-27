@@ -20,7 +20,7 @@
 #' @import R6
 #' @export
 longDataConstructor <- R6::R6Class(
-    classname = "longData",
+    classname = "longdata",
 
     public = list(
 
