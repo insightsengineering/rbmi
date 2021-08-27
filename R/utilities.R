@@ -303,43 +303,44 @@ ivars <- function(
 #' Checks that the required variable names are defined within `vars` and
 #' are of appropriate datatypes
 #'
-#' @param vars named list indicating the names of key variables in the source dataset
+#' @param x named list indicating the names of key variables in the source dataset
+#' @param ... not used
 #' @export
-validate.ivars <- function(vars) {
-    covars <- extract_covariates(vars$covariates)
+validate.ivars <- function(x, ...) {
+    covars <- extract_covariates(x$covariates)
 
     assert_that(
-        is_char_one(vars$outcome),
+        is_char_one(x$outcome),
         msg = "`vars$outcome` should be a length 1 character"
     )
 
     assert_that(
-        is_char_one(vars$group),
+        is_char_one(x$group),
         msg = "`vars$group` should be a length 1 character"
     )
 
     assert_that(
-        is_char_one(vars$visit),
+        is_char_one(x$visit),
         msg = "`vars$visit` should be a length 1 character"
     )
 
     assert_that(
-        is_char_one(vars$subjid),
+        is_char_one(x$subjid),
         msg = "`vars$subjid` should be a length 1 character"
     )
 
     assert_that(
-        is_char_one(vars$strategy),
+        is_char_one(x$strategy),
         msg = "`vars$strategy` should be a length 1 character"
     )
 
     assert_that(
-        is.character(vars$covars) | is.null(vars$covars),
+        is.character(x$covars) | is.null(x$covars),
         msg = "`vars$covars` should be a character vector or NULL"
     )
 
     assert_that(
-        is.character(vars$strata) | is.null(vars$strata),
+        is.character(x$strata) | is.null(x$strata),
         msg = "`vars$strata` should be a character vector or NULL"
     )
     return(invisible(TRUE))

@@ -4,10 +4,12 @@
 \alias{validate.ivars}
 \title{Validate inputs for \code{vars}}
 \usage{
-\method{validate}{ivars}(vars)
+\method{validate}{ivars}(x, ...)
 }
 \arguments{
-\item{vars}{named list indicating the names of key variables in the source dataset}
+\item{x}{named list indicating the names of key variables in the source dataset}
+
+\item{...}{not used}
 }
 \description{
 Checks that the required variable names are defined within \code{vars} and
