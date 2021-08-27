@@ -228,6 +228,7 @@ prepare_data_mcmc <- function(
     )
 
     if (same_cov) {
+        initial_values$Sigma <- initial_values$Sigma[[1]]
         data$Sigma_reml <- sigma_reml[[1]]
     } else {
 
@@ -249,12 +250,44 @@ prepare_data_mcmc <- function(
     }
 
     ret_obj <- list(
-        data = data,
+        data = as_class(data, "stan_data"),
         initial_values = initial_values
     )
 
     return(ret_obj)
 
+}
+
+
+#' @export
+validate.stan_data <- function(x, ...) {
+
+    assert_that(
+        all(names(x) %in% c("J",
+                            "N",
+                            "P",
+                            "n_missingness_patterns",
+                            "M",
+                            "Q",
+                            "R",
+                            "y",
+                            "y_observed",
+                            "Sigma_reml",
+                            "G",
+                            "which_arm")),
+        all(unlist(lapply(x, function(e) !is.null(e)))),
+        all(!is.na(x$y)),
+        is.matrix(x$y),
+        all(x$y_observed %in% c(0,1)),
+        msg = "validation failed"
+
+    )
+
+    if(!same_cov) {
+        assert_that(
+            all(x$which_arm %in% 1:x$G)
+        )
+    }
 }
 
 #' Title - TODO
@@ -281,6 +314,8 @@ fit_mcmc <- function(
     seed = NA,
     verbose = TRUE
 ) {
+
+    validate(data, same_cov)
 
     initial_values <- list(initial_values)
 

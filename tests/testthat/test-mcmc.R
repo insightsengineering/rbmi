@@ -42,7 +42,6 @@ test_that("Proper missingness patterns are detected", {
 
 
 
-
 test_that("Proper missingness pattern is detected when only one patient", {
     outcome = t(matrix(c(NA, 1, 2)))
 
@@ -56,7 +55,6 @@ test_that("Proper missingness pattern is detected when only one patient", {
     expect_equal(missingness_patterns, t(matrix(c(0,1,1))))
     expect_equal(M, 1)
 })
-
 
 
 
@@ -84,6 +82,7 @@ test_that("Covariance matrices are sort correctly", {
 })
 
 
+
 test_that("QR decomposition is performed correctly", {
     N <- 6
     J = 2
@@ -92,7 +91,6 @@ test_that("QR decomposition is performed correctly", {
 
     expect_equal(QR$Q %*% QR$R, designmat)
 })
-
 
 
 
@@ -124,7 +122,6 @@ test_that("split_dim creates a list from an array as expected",{
     expected_res <- list(mat, mat + 1, mat + 2)
     expect_equal(actual_res, expected_res)
 })
-
 
 
 
@@ -181,33 +178,17 @@ sigma_reml <- list(
 )
 betas_reml <- pars$beta
 
+list(
+    "beta" = betas_reml,
+    "Sigma" = sigma_reml
+)
 
+expect_postmean_equals_reml <- function(reml_est, stan_fit) {
 
-test_that("Posterior mean of mcmc equals (restricted) ML estimates", {
-
-    set.seed(101)
-    fit <- run_mcmc(
-        designmat = designmat,
-        outcome = dat$outcome,
-        group = dat$group,
-        sigma_reml = sigma_reml,
-        n_imputations = 1000,
-        burn_in = 200,
-        burn_between = 1,
-        initial_values = list(
-            "beta" = betas_reml,
-            "Sigma" = sigma_reml
-        ),
-        same_cov = TRUE,
-        verbose = FALSE
-    )
-
-    s <- rstan::summary(fit$fit, pars = c("beta", "Sigma"))$summary
+    s <- rstan::summary(stan_fit, pars = c("beta", "Sigma"))$summary
     post_means <- s[, "mean"]
     CI_mean_high = post_means + qnorm(0.99)*s[,"se_mean"]
     CI_mean_low = post_means - qnorm(0.99)*s[,"se_mean"]
-
-    reml_est <- c(as.numeric(betas_reml), as.numeric(sigma_reml[[1]]))
 
     expect_true(is.list(fit))
     expect_true(is.list(fit$samples))
@@ -218,6 +199,68 @@ test_that("Posterior mean of mcmc equals (restricted) ML estimates", {
     expect_true(all(sapply(fit$samples$sigma, function(x) length(x) == 2)))
 
     expect_true(all(CI_mean_low < reml_est & CI_mean_high > reml_est))
+}
+
+expect_prepare_stan_data <- function(prepare_data_output, same_cov) {
+
+    expect_s3_class(prepare_data_output$data, "stan_data")
+    expect_length(prepare_data_output, 2)
+    expect_type(prepare_data_output, "list")
+    expect_true(all(names(prepare_data_output) %in% c("data", "initial_values")))
+    expect_true(all(sapply(prepare_data_output, function(e) !is.null(e))))
+    expect_true(all(names(prepare_data_output$initial_values) %in% c("Sigma", "theta")))
+    expect_true(is.array(prepare_data_output$initial_values$Sigma))
+    expect_true(
+        ife(
+            same_cov,
+            all.equal(dim(prepare_data_output$initial_values$Sigma), c(2,2)),
+            all.equal(dim(prepare_data_output$initial_values$Sigma), c(2,2,2))
+        )
+    )
+}
+
+
+
+test_that("prepare_data_mcmc (same_cov = TRUE)",
+          {
+
+              same_cov <- TRUE
+
+              expected_output <- prepare_data_mcmc(
+                  designmat = designmat,
+                  outcome = dat$outcome,
+                  group = dat$group,
+                  same_cov = same_cov,
+                  sigma_reml = sigma_reml,
+                  initial_values = initial_values
+              )
+
+              expect_prepare_stan_data(expected_output, same_cov)
+              expect_null(validate(expected_output$data, same_cov))
+          })
+
+
+
+test_that("Posterior mean of mcmc equals (restricted) ML estimates (same_cov = TRUE)", {
+
+    set.seed(101)
+    fit <- run_mcmc(
+        designmat = designmat,
+        outcome = dat$outcome,
+        group = dat$group,
+        sigma_reml = sigma_reml,
+        n_imputations = 1000,
+        burn_in = 200,
+        burn_between = 1,
+        initial_values = initial_values,
+        same_cov = TRUE,
+        verbose = FALSE
+    )
+
+    reml_est <- c(as.numeric(betas_reml), as.numeric(sigma_reml[[1]]))
+
+    expect_postmean_equals_reml(reml_est, fit$fit)
+
 })
 
 
@@ -242,6 +285,76 @@ test_that("Warnings management works properly", {
             verbose = FALSE
         )
     }, regexp = "The largest R-hat is")
+})
+
+
+
+dat <- cbind(dat, model.matrix(~ -1 + dat$group))
+colnames(dat)[(length(colnames(dat))-1):length(colnames(dat))] <- c("group_A", "group_B")
+
+fit_glm <- glmmTMB::glmmTMB(
+    outcome ~ sex + group*visit + (0 + visit:group_A | subjid) + (0 + visit:group_B | subjid),
+    data = dat,
+    dispformula = ~0,
+    control = glmmTMBControl(
+        optimizer = optim,
+        optArgs = list(method = "BFGS"),
+        parallel = 1
+    ),
+    REML = TRUE
+)
+
+pars <- extract_params(fit_glm)
+
+sigma_reml <- list(
+    "A" = pars$sigma[[1]],
+    "B" = pars$sigma[[2]]
+)
+betas_reml <- pars$beta
+
+
+
+test_that("prepare_data_mcmc (same_cov = FALSE)",
+          {
+              same_cov <- FALSE
+              expected_output <- prepare_data_mcmc(
+                  designmat = designmat,
+                  outcome = dat$outcome,
+                  group = dat$group,
+                  same_cov = same_cov,
+                  sigma_reml = sigma_reml,
+                  initial_values = initial_values
+              )
+
+              expect_prepare_stan_data(expected_output, same_cov)
+              expect_null(validate(expected_output$data, same_cov))
+          })
+
+
+
+test_that("Posterior mean of mcmc equals (restricted) ML estimates (same_cov = FALSE)", {
+
+    set.seed(101)
+    fit <- run_mcmc(
+        designmat = designmat,
+        outcome = dat$outcome,
+        group = dat$group,
+        sigma_reml = sigma_reml,
+        n_imputations = 1000,
+        burn_in = 200,
+        burn_between = 1,
+        initial_values = list(
+            "beta" = betas_reml,
+            "Sigma" = sigma_reml
+        ),
+        same_cov = FALSE,
+        verbose = FALSE
+    )
+
+    reml_est <- c(as.numeric(betas_reml), unlist(lapply(sigma_reml, as.numeric)))
+
+    expect_postmean_equals_reml(reml_est, fit$fit)
+
 })
 
 
