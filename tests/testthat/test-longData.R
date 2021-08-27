@@ -400,7 +400,7 @@ test_that("Strategies", {
     )
     expect_warning(
         ld$update_strategies(dat_ice),
-        "from non-MAR to MAR for subjects who have post-ICE data"
+        "from non-MAR to MAR"
     )
 })
 
