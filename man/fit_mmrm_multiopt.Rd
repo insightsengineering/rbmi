@@ -4,12 +4,14 @@
 \alias{fit_mmrm_multiopt}
 \title{Title}
 \usage{
-fit_mmrm_multiopt(..., optimizer)
+fit_mmrm_multiopt(..., optimizer, initial_values = NULL)
 }
 \arguments{
 \item{...}{TODO}
 
 \item{optimizer}{TODO}
+
+\item{initial_values}{TODO}
 }
 \description{
 Title
