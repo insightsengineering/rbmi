@@ -5,18 +5,31 @@
 \title{Title - TODO}
 \usage{
 fit_mcmc(
-  data,
+  designmat,
+  outcome,
+  group,
+  subjid,
+  visit,
+  same_cov,
   n_imputations,
   burn_in,
   burn_between,
-  initial_values,
-  same_cov,
-  seed = NA,
-  verbose = TRUE
+  verbose,
+  seed
 )
 }
 \arguments{
-\item{data}{TODO}
+\item{designmat}{TODO}
+
+\item{outcome}{TODO}
+
+\item{group}{TODO}
+
+\item{subjid}{TODO}
+
+\item{visit}{TODO}
+
+\item{same_cov}{TODO}
 
 \item{n_imputations}{TODO}
 
@@ -24,13 +37,11 @@ fit_mcmc(
 
 \item{burn_between}{TODO}
 
-\item{initial_values}{TODO}
-
-\item{same_cov}{TODO}
+\item{verbose}{TODO}
 
 \item{seed}{TODO}
 
-\item{verbose}{TODO}
+\item{initial_values}{TODO}
 }
 \description{
 Title - TODO
