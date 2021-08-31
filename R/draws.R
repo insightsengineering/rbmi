@@ -227,7 +227,15 @@ draws.bayes <- function(data, data_ice, vars, method) {
     # set names of covariance matrices
     fit$samples$sigma <- lapply(
         fit$samples$sigma,
-        function(sample_cov) setNames(sample_cov, levels(data2[[vars$group]]))
+        function(sample_cov) {
+            lvls <- levels(data2[[vars$group]])
+            sample_cov <- ife(
+                method$same_cov == TRUE,
+                rep(sample_cov, length(lvls)),
+                sample_cov
+            )
+            setNames(sample_cov, lvls)
+        }
     )
 
     # unscale samples

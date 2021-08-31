@@ -48,18 +48,16 @@ fit_mcmc <- function(
 
     stan_data <- prepare_stan_data(
         ddat = designmat,
-        id = id,
+        subjid = subjid,
         visit = visit,
         outcome = outcome,
         group = ife(same_cov == TRUE, rep(1, length(group)), group)
     )
-    stan_data$Sigma_init <- mmrm_initial$sigma
 
-    # set verbose (if verbose = TRUE then refresh is set to default value)
-    refresh <- ife(
-        verbose,
-        (burn_in + burn_between * n_imputations) / 10,
-        0
+    stan_data$Sigma_init <- ife(
+        same_cov == TRUE,
+        list(mmrm_initial$sigma[[1]]),
+        mmrm_initial$sigma
     )
 
     sampling_args <- list(
@@ -74,7 +72,11 @@ fit_mcmc <- function(
             beta = mmrm_initial$beta,
             sigma = mmrm_initial$sigma
         )),
-        refresh = refresh
+        refresh = ife(
+            verbose,
+            (burn_in + burn_between * n_imputations) / 10,
+            0
+        )
     )
 
     if (!is.na(seed)) {
@@ -250,28 +252,28 @@ check_mcmc <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
 #' Title - TODO
 #'
 #' @param ddat TODO
-#' @param id TODO
+#' @param subjid TODO
 #' @param visit TODO
 #' @param outcome TODO
 #' @param group TODO
-prepare_stan_data <- function(ddat, id, visit, outcome, group) {
+prepare_stan_data <- function(ddat, subjid, visit, outcome, group) {
 
     assert_that(
         is.factor(group) | is.numeric(group),
         is.factor(visit) | is.numeric(visit),
-        is.character(id),
+        is.character(subjid),
         is.numeric(outcome),
         is.data.frame(ddat),
         length(group) == length(visit),
-        length(id) == length(visit),
+        length(subjid) == length(visit),
         length(outcome) == length(group),
         length(outcome) == nrow(ddat),
-        length(unique(id)) * length(unique(visit)) == nrow(ddat)
+        length(unique(subjid)) * length(unique(visit)) == nrow(ddat)
     )
 
     design_variables <- paste0("V", seq_len(ncol(ddat)))
     names(ddat) <- design_variables
-    ddat$id <- id
+    ddat$subjid <- subjid
     ddat$visit <- visit
     ddat$outcome <- outcome
     ddat$group <- group
@@ -279,8 +281,8 @@ prepare_stan_data <- function(ddat, id, visit, outcome, group) {
 
     dat_pgroups <- get_pattern_groups(ddat)
 
-    ddat2 <- merge(ddat, dat_pgroups, by = "id", all = TRUE)
-    ddat2 <- sort_by(ddat2, c("pgroup", "id", "visit"))
+    ddat2 <- merge(ddat, dat_pgroups, by = "subjid", all = TRUE)
+    ddat2 <- sort_by(ddat2, c("pgroup", "subjid", "visit"))
     assert_that(nrow(ddat2) == nrow(ddat))
 
     ddat3 <- ddat2[!is.na(ddat2$outcome), ]
@@ -299,9 +301,9 @@ prepare_stan_data <- function(ddat, id, visit, outcome, group) {
         G = length(unique(group)),
         n_visit = length(levels(visit)),
         n_pat = nrow(dat_pgroups_u),
-        pat_G = dat_pgroups_u$group_n,
-        pat_n_pt = dat_pgroups_u$n,
-        pat_n_visit = dat_pgroups_u$n_avail,
+        pat_G = as_stan_array(dat_pgroups_u$group_n),
+        pat_n_pt = as_stan_array(dat_pgroups_u$n),
+        pat_n_visit = as_stan_array(dat_pgroups_u$n_avail),
         pat_sigma_index = as_indices(dat_pgroups_u$pattern),
         y = ddat3$outcome,
         X = dmat
@@ -319,12 +321,13 @@ get_pattern_groups_unique <- function(patterns) {
     u_pats <- unique(patterns[, c("pgroup", "pattern", "group")])
     u_pats <- sort_by(u_pats, "pgroup")
     u_pats$group_n <- as.numeric(u_pats$group)
-    u_pats$n <- tapply(patterns$pgroup, patterns$pgroup, length)
+    u_pats$n <- as.numeric(tapply(patterns$pgroup, patterns$pgroup, length))
     u_pats$n_avail <- vapply(
         strsplit(u_pats$pattern, ""),
         function(x) sum(as.numeric(x)),
         numeric(1)
     )
+    u_pats$group <- NULL
     return(u_pats)
 }
 
@@ -337,26 +340,27 @@ get_pattern_groups_unique <- function(patterns) {
 #'
 #' @param ddat TODO
 get_pattern_groups <- function(ddat) {
-    ddat <- sort_by(ddat, c("id", "visit"))
+    ddat <- sort_by(ddat, c("subjid", "visit"))[, c("subjid", "group", "is_avail")]
 
-    pt_pattern <- tapply(ddat$is_avail, ddat$id, paste0, collapse = "")
+    pt_pattern <- tapply(ddat$is_avail, ddat$subjid, paste0, collapse = "")
     dat_pattern <- data.frame(
-        id = names(pt_pattern),
+        subjid = names(pt_pattern),
         pattern = pt_pattern,
         stringsAsFactors = FALSE,
         row.names = NULL
     )
 
-    dat_group <- unique(ddat[, c("id", "group")])
+    dat_group <- unique(ddat[, c("subjid", "group")])
 
     assert_that(
-        nrow(dat_group) == length(unique(ddat$id)),
+        nrow(dat_group) == length(unique(ddat$subjid)),
         nrow(dat_group) == nrow(dat_pattern),
-        all(metadat$id %in% dat_group$id)
+        all(ddat$subjid %in% dat_group$subjid)
     )
 
-    dat_pgroups <- merge(dat_group, dat_pattern, all = TRUE, by = "id")
+    dat_pgroups <- merge(dat_group, dat_pattern, all = TRUE, by = "subjid")
     dat_pgroups$pgroup <- as_strata(dat_pgroups$pattern, dat_pgroups$group)
+    return(dat_pgroups)
 }
 
 
@@ -369,14 +373,35 @@ get_pattern_groups <- function(ddat) {
 #'
 #' @param x TODO
 as_indices <- function(x) {
+
+    assert_that(
+        length(unique(nchar(x))) == 1,
+        msg = "all values of x must be the same length"
+    )
+
     len <- max(nchar(x))
     lapply(
         strsplit(x, ""),
         function(x) {
+            assert_that(
+                all(x %in% c("0", "1")),
+                msg = "All values of x must be 0 or 1"
+            )
             temp <- rep(0, len)
             y <- which(x == "1")
             temp[seq_along(y)] <- y
             return(temp)
         }
+    )
+}
+
+#' Title - TODO
+#'
+#' @param x TODO
+as_stan_array <- function(x) {
+    ife(
+        length(x) == 1,
+        array(x, dim = 1),
+        x
     )
 }
