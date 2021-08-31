@@ -28,8 +28,8 @@ fit_mcmc <- function(
     n_imputations,
     burn_in,
     burn_between,
-    verbose,
-    seed
+    verbose = TRUE,
+    seed = NULL
 ) {
 
     # fit MMRM (needed for initial values)
@@ -79,9 +79,7 @@ fit_mcmc <- function(
         )
     )
 
-    if (!is.na(seed)) {
-        sampling_args$seed <- seed
-    }
+    sampling_args$seed <- seed
 
     stan_fit <- record({
         do.call(sampling, sampling_args)
@@ -261,9 +259,9 @@ prepare_stan_data <- function(ddat, subjid, visit, outcome, group) {
     assert_that(
         is.factor(group) | is.numeric(group),
         is.factor(visit) | is.numeric(visit),
-        is.character(subjid),
+        is.character(subjid) | is.factor(subjid),
         is.numeric(outcome),
-        is.data.frame(ddat),
+        is.data.frame(ddat) | is.matrix(ddat),
         length(group) == length(visit),
         length(subjid) == length(visit),
         length(outcome) == length(group),
@@ -272,12 +270,15 @@ prepare_stan_data <- function(ddat, subjid, visit, outcome, group) {
     )
 
     design_variables <- paste0("V", seq_len(ncol(ddat)))
+    ddat <- as.data.frame(ddat)
     names(ddat) <- design_variables
-    ddat$subjid <- subjid
+    ddat$subjid <- as.character(subjid)
     ddat$visit <- visit
     ddat$outcome <- outcome
     ddat$group <- group
     ddat$is_avail <- (!is.na(ddat$outcome)) * 1
+
+    ddat <- remove_if_all_missing(ddat)
 
     dat_pgroups <- get_pattern_groups(ddat)
 
@@ -404,4 +405,16 @@ as_stan_array <- function(x) {
         array(x, dim = 1),
         x
     )
+}
+
+
+#' Title TODO
+#'
+#' @param dat TODO
+remove_if_all_missing <- function(dat) {
+    n_visit <- length(unique(dat$visit))
+    n_miss <- tapply(dat$outcome, dat$subjid, function(x) sum(is.na(x)))
+    remove_me <- Filter(function(x) x == n_visit, n_miss)
+    remove_me_pt <- names(remove_me)
+    dat[!dat$subjid %in% remove_me_pt, ]
 }

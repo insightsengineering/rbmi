@@ -4,12 +4,12 @@
 \alias{prepare_stan_data}
 \title{Title - TODO}
 \usage{
-prepare_stan_data(ddat, id, visit, outcome, group)
+prepare_stan_data(ddat, subjid, visit, outcome, group)
 }
 \arguments{
 \item{ddat}{TODO}
 
-\item{id}{TODO}
+\item{subjid}{TODO}
 
 \item{visit}{TODO}
 

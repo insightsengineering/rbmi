@@ -14,8 +14,8 @@ fit_mcmc(
   n_imputations,
   burn_in,
   burn_between,
-  verbose,
-  seed
+  verbose = TRUE,
+  seed = NULL
 )
 }
 \arguments{

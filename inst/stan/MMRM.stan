@@ -44,22 +44,22 @@ data {
 
 
 transformed data{
-    // QR decomposition to greatly improve performance
+    // QR decomposition to improve performance
     matrix[N, P] Q_ast = qr_thin_Q(X) * sqrt(N - 1);
     matrix[P, P] R_ast = qr_thin_R(X) / sqrt(N - 1);
-    matrix[P, P] R_ast_inverse = inverse(R_ast);
 }
 
 
 parameters {
-    vector[P] theta;              // coefficients of linear model on covariates from Q_ast
+    vector[P] beta;               // coefficients of linear model on covariates
     cov_matrix[n_visit] Sigma[G]; // covariance matrix(s)
 }
 
 
 model {
     int start_index = 1;
-    vector[N] mu = Q_ast * theta;
+    
+    vector[N] mu =  Q_ast * (R_ast * beta);
     
     for(g in 1:G){
         Sigma[g] ~ inv_wishart(n_visit+2, Sigma_init[g]);
@@ -87,9 +87,4 @@ model {
         // Update data index for next pat group
         start_index = stop_index + 1;
     }
-}
-
-
-generated quantities {
-    vector[P] beta = R_ast_inverse * theta;
 }

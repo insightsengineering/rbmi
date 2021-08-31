@@ -6,6 +6,51 @@ suppressPackageStartupMessages({
 })
 
 
+get_mcmc_sim_dat <- function(n, mcoefs, sigma) {
+    nv <- ncol(sigma)
+    covars <- tibble::tibble(
+        id = paste0("P",1:n),
+        age = rnorm(n),
+        group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),
+        sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F"))
+    )
+
+    dat <- mvtnorm::rmvnorm(n, sigma = sigma) %>%
+        set_col_names(paste0("visit_", 1:nv)) %>%
+        dplyr::as_tibble() %>%
+        dplyr::mutate(id = paste0("P",1:n)) %>%
+        tidyr::gather("visit", "outcome", -id) %>%
+        dplyr::mutate(visit = factor(visit)) %>%
+        dplyr::arrange(id, visit) %>%
+        dplyr::left_join(covars, by = "id") %>%
+        dplyr::mutate(
+            outcome = outcome +
+                mcoefs[["int"]] +
+                mcoefs[["age"]] * age +
+                mcoefs[["sex"]] * f2n(sex) +
+                mcoefs[["trtslope"]] * f2n(group) * as.numeric(visit)
+        ) %>%
+        dplyr::mutate(id = as.factor(id))
+
+    return(dat)
+}
+
+get_within <- function(x, real){
+    x2 <- matrix(unlist(as.list(x)), nrow = length(x), byrow = TRUE)
+    colnames(x2) <- paste0("B", 1:ncol(x2))
+
+    as_tibble(x2) %>%
+        tidyr::gather(var, val) %>%
+        group_by(var) %>%
+        summarise(
+            lci = quantile(val, 0.005),
+            uci = quantile(val, 0.995)
+        ) %>% 
+        mutate(real = real) %>%
+        mutate(inside = real >= lci &  real <= uci)
+}
+
+
 test_that("split_dim creates a list from an array as expected", {
     mat <- rbind(c(1, 0.2), c(0.2, 1))
     a <- array(data = NA, dim = c(3, 2, 2))
@@ -18,9 +63,6 @@ test_that("split_dim creates a list from an array as expected", {
     expect_equal(actual_res, expected_res)
 })
 
-
-# Warnings management
-# Posterior == MMRM
 
 
 
@@ -265,5 +307,179 @@ test_that("get_pattern_groups_unique", {
 
 
 
+test_that("fit_mcmc can recover known values with same_cov = TRUE", {
 
-prepare_stan_data <- function(ddat, subjid, visit, outcome, group)
+    skip_if_not(is_nightly())
+
+    set.seed(3151)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    sigma <- as_covmat(c(3, 5, 7), c(0.1, 0.4, 0.7))
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
+
+    ### No missingness
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat$outcome,
+        group = dat$group,
+        subjid = dat$id,
+        visit = dat$visit,
+        same_cov = TRUE,
+        n_imputations = 200,
+        burn_in = 100,
+        burn_between = 3,
+        verbose = FALSE
+    )
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    assert_that(all(sigma_within$inside))
+
+
+
+
+    ### Random missingness patterns
+    dat2 <- dat %>%
+        mutate(outcome = if_else(rbinom(n(), 1, 0.3) == 1, NA_real_, outcome))
+
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat2$outcome,
+        group = dat2$group,
+        subjid = dat2$id,
+        visit = dat2$visit,
+        same_cov = TRUE,
+        n_imputations = 200,
+        burn_in = 100,
+        burn_between = 3,
+        verbose = FALSE
+    )
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    assert_that(all(sigma_within$inside))
+
+
+
+    ### Missingness affecting specific groups
+    dat2 <- dat %>%
+        mutate(outcome = if_else(
+            rbinom(n(), 1, 0.5) == 1 & visit != "visit_1" & group == "B" & age > 0.3,
+            NA_real_,
+            outcome
+        ))
+
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat2$outcome,
+        group = dat2$group,
+        subjid = dat2$id,
+        visit = dat2$visit,
+        same_cov = TRUE,
+        n_imputations = 200,
+        burn_in = 100,
+        burn_between = 3,
+        verbose = FALSE
+    )
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    assert_that(all(sigma_within$inside))
+})
+
+
+
+
+
+test_that("fit_mcmc can recover known values with same_cov = FALSE", {
+
+    skip_if_not(is_nightly())
+
+    set.seed(151)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    sigma_a <- as_covmat(c(3, 5, 7), c(0.1, 0.4, 0.7))
+    sigma_b <- as_covmat(c(6, 9, 3), c(0.8, 0.2, 0.5))
+
+    dat <- bind_rows(
+        get_mcmc_sim_dat(1200, mcoefs, sigma_a) %>% filter(group == "A") %>% mutate(id = paste0(id, "A")),
+        get_mcmc_sim_dat(1200, mcoefs, sigma_b) %>% filter(group == "B") %>% mutate(id = paste0(id, "B"))
+    )
+
+    mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
+
+    ### No missingness
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat$outcome,
+        group = dat$group,
+        subjid = dat$id,
+        visit = dat$visit,
+        same_cov = FALSE,
+        n_imputations = 250,
+        burn_in = 100,
+        burn_between = 3,
+        verbose = FALSE
+    )
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    sig_a <- lapply(fit$samples$sigma, function(x) x[[1]])
+    sigma_a_within <- get_within(sig_a, unlist(as.list(sigma_a)))
+    assert_that(all(sigma_a_within$inside))
+
+    sig_b <- lapply(fit$samples$sigma, function(x) x[[2]])
+    sigma_b_within <- get_within(sig_b, unlist(as.list(sigma_b)))
+    assert_that(all(sigma_b_within$inside))
+
+
+
+
+
+    ### Random missingness patterns
+    dat2 <- dat %>%
+        mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 1, NA_real_, outcome))
+
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat2$outcome,
+        group = dat2$group,
+        subjid = dat2$id,
+        visit = dat2$visit,
+        same_cov = FALSE,
+        n_imputations = 250,
+        burn_in = 100,
+        burn_between = 3,
+        verbose = FALSE
+    )
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    sig_a <- lapply(fit$samples$sigma, function(x) x[[1]])
+    sigma_a_within <- get_within(sig_a, unlist(as.list(sigma_a)))
+    assert_that(all(sigma_a_within$inside))
+
+    sig_b <- lapply(fit$samples$sigma, function(x) x[[2]])
+    sigma_b_within <- get_within(sig_b, unlist(as.list(sigma_b)))
+    assert_that(all(sigma_b_within$inside))
+})
