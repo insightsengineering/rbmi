@@ -45,6 +45,8 @@ docs/
 po/*~
 
 # C++ code from Stan
-src/
+src/*
 
 .DS_store
+
+!.gitkeep
