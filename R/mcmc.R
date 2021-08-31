@@ -10,7 +10,6 @@
 #' @param n_imputations TODO
 #' @param burn_in TODO
 #' @param burn_between TODO
-#' @param initial_values TODO
 #' @param verbose TODO
 #' @param seed TODO
 #'

@@ -40,8 +40,6 @@ fit_mcmc(
 \item{verbose}{TODO}
 
 \item{seed}{TODO}
-
-\item{initial_values}{TODO}
 }
 \description{
 Title - TODO
