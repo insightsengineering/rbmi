@@ -207,29 +207,35 @@ fit_mmrm <- function(
 #' Title
 #'
 #' @param optimizer TODO
-#' @param initial_values TODO
 #' @param ... TODO
-fit_mmrm_multiopt <- function(..., optimizer, initial_values = NULL) {
+fit_mmrm_multiopt <- function(..., optimizer) {
 
     assert_that(
-        is.character(optimizer),
+        is.character(optimizer) | is.list(optimizer),
         length(optimizer) >= 1
     )
 
-    if(is.null(initial_values)) {
-        initial_values <- vector(mode = "list", length = length(optimizer))
-        names(initial_values) <- optimizer
+    if (is.list(optimizer)) {
+        for (i in seq_len(length(optimizer))) {
+            if (!is.null(optimizer[[i]])) {
+                assert_that(
+                    all(c("beta", "theta") %in% names(optimizer[[i]]))
+                )
+                optimizer[[i]] <- optimizer[[i]][c("beta", "theta")]
+            }
+        }
     }
 
-    assert_that(
-        is.list(initial_values),
-        length(initial_values) == length(optimizer),
-        all(names(initial_values) == optimizer)
-    )
+    if (is.character(optimizer)) {
+        initial_values <- lapply(optimizer, function(x) NULL)
+        names(initial_values) <- optimizer
+    } else {
+        initial_values <- optimizer
+    }
 
-    for (i in seq.int(1, length(optimizer))) {
-        opt <- optimizer[i]
-        init_vals <- initial_values[[opt]]
+    for (i in seq_len(length(initial_values))) {
+        opt <- names(initial_values)[[i]]
+        init_vals <- initial_values[[i]]
         fit <- fit_mmrm(..., initial_values = init_vals, optimizer = opt)
         if (!fit$failed) break
     }
