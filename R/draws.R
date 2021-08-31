@@ -210,34 +210,16 @@ draws.bayes <- function(data, data_ice, vars, method) {
     scaler <- scalerConstructor$new(model_df)
     model_df_scaled <- scaler$scale(model_df)
 
-    # fit MMRM (needed for initial values)
-    mmrm_initial <- fit_mmrm_multiopt(
+    fit <- fit_mcmc(
         designmat = model_df_scaled[, -1, drop = FALSE],
-        outcome = as.data.frame(model_df_scaled)[, 1],
-        subjid = data2[[vars$subjid]],
-        visit = data2[[vars$visit]],
-        group = data2[[vars$group]],
-        cov_struct = "us",
-        REML = TRUE,
-        same_cov = method$same_cov,
-        initial_values = NULL,
-        optimizer = c("L-BFGS-B", "BFGS")
-    )
-
-    # run MCMC
-    fit <- run_mcmc(
-        designmat = model_df_scaled[, -1],
         outcome = model_df_scaled[, 1, drop = TRUE],
         group = data2[[vars$group]],
-        sigma_reml = mmrm_initial$sigma,
+        visit = data2[[vars$visit]],
+        subjid = data2[[vars$subjid]],
         n_imputations = method$n_samples,
         burn_in = method$burn_in,
         seed = method$seed,
         burn_between = method$burn_between,
-        initial_values = list(
-            beta = mmrm_initial$beta,
-            sigma = mmrm_initial$sigma
-        ),
         same_cov = method$same_cov,
         verbose = method$verbose
     )
@@ -259,7 +241,14 @@ draws.bayes <- function(data, data_ice, vars, method) {
     # set ids associated to each sample
     samples <- lapply(
         samples,
-        function(x) as_sample_single(ids = longdata$ids, beta = x$beta, sigma = x$sigma, failed = FALSE)
+        function(x) {
+            as_sample_single(
+                ids = longdata$ids,
+                beta = x$beta,
+                sigma = x$sigma,
+                failed = FALSE
+            )
+        }
     )
 
     result <- as_draws(
