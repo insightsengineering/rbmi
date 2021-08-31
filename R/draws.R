@@ -62,18 +62,39 @@ get_bootstrap_draws <- function(
     failed_samples <- 0
     failure_limit <- ceiling(method$threshold * n_samples)
 
+    optimizer <- c("L-BFGS-B", "BFGS")
+    initial_values <- list(
+        "L-BFGS-B" = NULL,
+        "BFGS" = NULL
+    )
     if (first_sample_orig) {
-        samples[[1]] <- get_mmrm_sample(longdata$ids, longdata, method)
+        samples[[1]] <- get_mmrm_sample(
+            longdata$ids,
+            longdata,
+            method,
+            optimizer,
+            initial_values
+        )
         if (samples[[1]]$failed) {
             stop("Fitting MMRM to original dataset failed")
         }
+        initial_values <- list(
+            "L-BFGS-B" = NULL,
+            "BFGS" = list(beta = samples[[1]]$beta, theta = samples[[1]]$theta)
+        )
         current_sample <- current_sample + 1
     }
 
     while (current_sample <= n_samples & failed_samples <= failure_limit) {
 
         ids_boot <- longdata$sample_ids()
-        sample_boot <- get_mmrm_sample(ids_boot, longdata, method)
+        sample_boot <- get_mmrm_sample(
+            ids_boot,
+            longdata,
+            method,
+            optimizer,
+            initial_values
+        )
 
         if (sample_boot$failed) {
             failed_samples <- failed_samples + 1
@@ -109,13 +130,31 @@ get_jackknife_draws <- function(longdata, method) {
     ids <- longdata$ids
     samples <- vector("list", length = length(ids) + 1)
 
-    samples[[1]] <- get_mmrm_sample(ids, longdata, method)
+    optimizer <- c("L-BFGS-B", "BFGS")
+    samples[[1]] <- get_mmrm_sample(
+        ids,
+        longdata,
+        method,
+        optimizer,
+        initial_values = NULL
+    )
+
+    initial_values <- list(
+        "L-BFGS-B" = NULL,
+        "BFGS" = list(beta = samples[[1]]$beta, theta = samples[[1]]$theta)
+    )
 
     ids_jack <- lapply(seq_along(ids), function(i) ids[-i])
 
     for (i in seq_along(ids)) {
         ids_jack <- ids[-i]
-        sample <- get_mmrm_sample(ids_jack, longdata, method)
+        sample <- get_mmrm_sample(
+            ids_jack,
+            longdata,
+            method,
+            optimizer,
+            initial_values
+        )
         if (sample$failed) {
             stop("Jackknife sample failed")
         }
@@ -140,7 +179,9 @@ get_jackknife_draws <- function(longdata, method) {
 #' @param ids TODO
 #' @param longdata TODO
 #' @param method TODO
-get_mmrm_sample <- function(ids, longdata, method) {
+#' @param optimizer TODO
+#' @param initial_values TODO
+get_mmrm_sample <- function(ids, longdata, method, optimizer, initial_values = NULL) {
 
     vars <- longdata$vars
     dat <- longdata$get_data(ids, nmar.rm = TRUE, na.rm = TRUE)
@@ -155,8 +196,8 @@ get_mmrm_sample <- function(ids, longdata, method) {
         cov_struct = method$covariance,
         REML = method$REML,
         same_cov = method$same_cov,
-        initial_values = NULL,
-        optimizer = c("L-BFGS-B", "BFGS")
+        initial_values = initial_values,
+        optimizer = optimizer
     )
 
     if (sample$failed) {
@@ -220,8 +261,8 @@ draws.bayes <- function(data, data_ice, vars, method) {
         cov_struct = "us",
         REML = TRUE,
         same_cov = method$same_cov,
-        initial_values = NULL,
-        optimizer = c("L-BFGS-B", "BFGS")
+        optimizer = c("L-BFGS-B", "BFGS"),
+        initial_values = NULL
     )
 
     # run MCMC

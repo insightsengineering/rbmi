@@ -21,7 +21,7 @@ random_effects_expr <- function(
 
 
 #' TODO
-#' 
+#'
 #' @param designmat TODO
 #' @param outcome TODO
 #' @param visit TODO
@@ -207,16 +207,30 @@ fit_mmrm <- function(
 #' Title
 #'
 #' @param optimizer TODO
+#' @param initial_values TODO
 #' @param ... TODO
-fit_mmrm_multiopt <- function(..., optimizer) {
+fit_mmrm_multiopt <- function(..., optimizer, initial_values = NULL) {
 
     assert_that(
         is.character(optimizer),
         length(optimizer) >= 1
     )
 
-    for (opt in optimizer) {
-        fit <- fit_mmrm(..., optimizer = opt)
+    if(is.null(initial_values)) {
+        initial_values <- vector(mode = "list", length = length(optimizer))
+        names(initial_values) <- optimizer
+    }
+
+    assert_that(
+        is.list(initial_values),
+        length(initial_values) == length(optimizer),
+        all(names(initial_values) == optimizer)
+    )
+
+    for (i in seq.int(1, length(optimizer))) {
+        opt <- optimizer[i]
+        init_vals <- initial_values[[opt]]
+        fit <- fit_mmrm(..., initial_values = init_vals, optimizer = opt)
         if (!fit$failed) break
     }
 

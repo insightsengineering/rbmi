@@ -129,7 +129,7 @@ test_mmrm_numeric <- function(dat, formula_expr, same_cov, scale = FALSE) {
 
     if(!same_cov){
         dat <- dat %>%
-            mutate(GA = if_else(group == "A", 1, 0)) %>% 
+            mutate(GA = if_else(group == "A", 1, 0)) %>%
             mutate(GB = if_else(group == "B", 1, 0))
     }
 
@@ -343,7 +343,7 @@ test_that("MMRM returns expected estimates (same_cov = FALSE)", {
     fit <- do.call(fit_mmrm, args = args)
 
     dat2 <- dat %>%
-        mutate(GA = if_else(group == "A", 1, 0)) %>% 
+        mutate(GA = if_else(group == "A", 1, 0)) %>%
         mutate(GB = if_else(group == "B", 1, 0))
 
     mod <- glmmTMB(
