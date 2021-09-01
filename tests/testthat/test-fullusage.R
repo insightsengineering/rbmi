@@ -500,6 +500,9 @@ test_that("Sorting doesn't change results", {
 
 
 test_that("Multiple imputation references / groups work as expected", {
+
+    skip_if_not(is_nightly())
+
     set.seed(151)
 
     s1 <- 6
