@@ -499,9 +499,20 @@ test_that("Sorting doesn't change results", {
 
 
 
-test_that("Multiple imputation references / groups work as expected", {
+
+test_that("Multiple imputation references / groups work as expected (end to end checks)", {
 
     skip_if_not(is_nightly())
+
+    extract_ci <- function(x, ref) {
+        x_imp <- impute(x, ref)
+        vars2 <- x$data$vars
+        vars2$covariates <- c("age", "sex")
+        vars2$group <- "group"
+        x_ana <- analyse(x_imp, ancova, vars = vars2)
+        x_pl <- pool(x_ana, conf.level = 0.98)
+        x_pl$pars$trt_visit_3$ci
+    }
 
     set.seed(151)
 
@@ -563,32 +574,58 @@ test_that("Multiple imputation references / groups work as expected", {
         )
     )
 
-    expect_result_with_ref <- function(x, ref, expct) {
-        x_imp <- impute(x, ref)
-        vars2 <- x$data$vars
-        vars2$covariates <- c("age", "sex")
-        vars2$group <- "group"
-        x_ana <- analyse(x_imp, ancova, vars = vars2)
-        x_pl <- pool(x_ana, conf.level = 0.98)
-        expect_within(expct, x_pl$pars$trt_visit_3$ci)
-    }
-
-    expect_result_with_ref(
-        x,
-        c("A" = "A", "B" = "A", "C" = "A", "D" = "A"),
-        ((s1 + 0) / 2) + ((s2 + 0) / 2) + ((s3 + 0) / 2)
+    expect_within(
+        ((s1 + 0) / 2) + ((s2 + 0) / 2) + ((s3 + 0) / 2),
+        extract_ci(x, c("A" = "A", "B" = "A", "C" = "A", "D" = "A"))
     )
 
-    expect_result_with_ref(
-        x,
-        c("A" = "A", "B" = "B", "C" = "C", "D" = "D"),
-        ((s1 + s1) / 2) + ((s2 + s2) / 2) + ((s3 + s3) / 2)
+    expect_within(
+        ((s1 + s1) / 2) + ((s2 + s2) / 2) + ((s3 + s3) / 2),
+        extract_ci(x, c("A" = "A", "B" = "B", "C" = "C", "D" = "D"))
     )
 
-    expect_result_with_ref(
-        x,
-        c("A" = "A", "B" = "C", "C" = "C", "D" = "C"),
-        ((s1 + s2) / 2) + ((s2 + s2) / 2) + ((s3 + s2) / 2)
+    expect_within(
+        ((s1 + s2) / 2) + ((s2 + s2) / 2) + ((s3 + s2) / 2),
+        extract_ci(x, c("A" = "A", "B" = "C", "C" = "C", "D" = "C"))
+    )
+
+
+    x <- draws(
+        data = dat,
+        data_ice = dat_ice,
+        vars = vars,
+        method = method_condmean(
+            same_cov = TRUE,
+            n_samples = 60
+        )
+    )
+
+    expect_true(
+        length(x$samples[[1]]$sigma) == 4
+    )
+
+    expect_equal(
+        x$samples[[1]]$sigma[["A"]],
+        x$samples[[1]]$sigma[["D"]]
+    )
+
+    expect_true(
+        !identical(x$samples[[1]]$sigma[["A"]], x$samples[[2]]$sigma[["A"]])
+    )
+
+    expect_within(
+        ((s1 + 0) / 2) + ((s2 + 0) / 2) + ((s3 + 0) / 2),
+        extract_ci(x, c("A" = "A", "B" = "A", "C" = "A", "D" = "A"))
+    )
+
+    expect_within(
+        ((s1 + s1) / 2) + ((s2 + s2) / 2) + ((s3 + s3) / 2),
+        extract_ci(x, c("A" = "A", "B" = "B", "C" = "C", "D" = "D"))
+    )
+
+    expect_within(
+        ((s1 + s2) / 2) + ((s2 + s2) / 2) + ((s3 + s2) / 2),
+        extract_ci(x, c("A" = "A", "B" = "C", "C" = "C", "D" = "C"))
     )
 })
 
