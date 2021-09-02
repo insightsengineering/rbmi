@@ -320,7 +320,7 @@ print.draws <- function(x, ...) {
     frm_str <- sprintf("%s ~ %s", frm[[2]], frm[[3]])
 
     meth <- switch(
-         class(x$method),
+         class(x$method)[[2]],
          "approxbayes" = "Approximate Bayes",
          "condmean" = "Conditional Mean",
          "bayes" = "Bayes"
@@ -340,7 +340,7 @@ print.draws <- function(x, ...) {
 
     n_samp <- length(x$samples)
     n_samp_string <- ife(
-        class(x$method)[[1]] == "condmean",
+        has_class(x$method, "condmean"),
         sprintf("1 + %s", n_samp - 1),
         as.character(n_samp)
     )
@@ -466,7 +466,14 @@ validate.sample_list <- function(x, ...) {
 #' @param formula TODO
 #' @param n_failures TODO
 #' @param fit TODO
-as_draws <- function(method, samples, data, formula, n_failures = NA, fit = NA) {
+as_draws <- function(
+    method,
+    samples,
+    data,
+    formula,
+    n_failures = NULL,
+    fit = NULL
+) {
     x <- list(
         data = data,
         method = method,
@@ -476,11 +483,26 @@ as_draws <- function(method, samples, data, formula, n_failures = NA, fit = NA) 
         formula = formula
     )
 
-    next_class <- switch(class(x$method),
+    next_class <- switch(class(x$method)[[2]],
         "approxbayes" = "random",
         "condmean" = "condmean",
         "bayes" = "random"
     )
 
-    return(as_class(x, c("draws", next_class, "list")))
+    class(x) <- c("draws", next_class, "list")
+    return(x)
+}
+
+
+#' @export
+validate.draws <- function(x, ...) {
+    assert_that(
+        has_class(x$data, "longdata"),
+        has_class(x$method, "method"),
+        has_class(x$samples, "sample_list"),
+        validate(x$samples),
+        is.null(x$n_failures) | is.numeric(x$n_failures),
+        is.null(x$fit) | has_class(x$fit, "stanfit"),
+        has_class(x$formula, "formula")
+    )
 }

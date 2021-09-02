@@ -4,12 +4,31 @@
 #' @param x TODO
 #' @param cls TODO
 #' @export
-as_class <- function(x, cls){
+as_class <- function(x, cls) {
     class(x) <- cls
     return(x)
 }
 
 
+#' Title
+#'
+#' @param x TODO
+#' @param cls TODO
+#' @export
+add_class <- function(x, cls) {
+    class(x) <- c(class(x), cls)
+    return(x)
+}
+
+
+#' TODO
+#'
+#' @param x TODO
+#' @param cls TODO
+#' @export
+has_class <- function(x, cls) {
+    cls %in% class(x)
+}
 
 #' Title
 #'
@@ -24,7 +43,7 @@ as_simple_formula <- function(vars){
         paste0(
             vars$outcome,
             "~ 1 + ",
-            paste0( variables, collapse = " + " )
+            paste0(variables, collapse = " + ")
         )
     )
     return(frm)
