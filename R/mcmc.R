@@ -260,7 +260,7 @@ prepare_data_mcmc <- function(
 
 
 #' @export
-validate.stan_data <- function(x, same_cov) {
+validate.stan_data <- function(x, same_cov, ...) {
 
     assert_that(
         all(names(x) %in% c("J",
