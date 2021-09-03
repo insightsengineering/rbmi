@@ -1,74 +1,38 @@
-suppressPackageStartupMessages({
-    library(mice)
-})
-
-
 test_that("Rubin's rules", {
 
-              set.seed(101)
-              ests <- rnorm(100)
-              ses <- rnorm(100, mean = 10, sd = 1)
-              v_com <- seq(1, 1000, by = 100)
-              n <- seq(16, 1015, by = 100)
-              k <- 15
+    set.seed(101)
+    ests <- rnorm(100)
+    ses <- rnorm(100, mean = 10, sd = 1)
+    v_com <- seq(1, 1000, by = 100)
+    n <- seq(16, 1015, by = 100)
+    k <- 15
+
+    actual_res <- sapply(v_com, function(i) rubin_rules(ests, ses, i), simplify = FALSE)
+
+    expect_equal(actual_res, mice_res1)
 
 
-              actual_res <- sapply(v_com, function(i) rubin_rules(ests, ses, i), simplify = FALSE)
-              mice_res <- sapply(n, function(i) mice::pool.scalar(ests, ses^2, n = i, k = k), simplify = FALSE)
+    # check when no variability in estimates (i.e. when no missing values)
+    ests_allequal <- rep(0, 100)
 
-              mice_res <- lapply(
-                  mice_res,
-                  function(x) {
-                      x <- x[names(x) %in% c("qbar", "t", "df")]
-                      names(x) <- names(actual_res[[1]])
-                      return(x)
-                  }
-              )
-
-              expect_equal(actual_res, mice_res)
+    actual_res <- sapply(v_com, function(i) rubin_rules(ests_allequal, ses, i), simplify = FALSE)
+    expect_equal(actual_res, mice_res2, tolerance = 10e-4)
 
 
-
-              # check when no variability in estimates (i.e. when no missing values)
-              ests_allequal <- rep(0, 100)
-
-              actual_res <- sapply(v_com, function(i) rubin_rules(ests_allequal, ses, i), simplify = FALSE)
-              mice_res <- sapply(n, function(i) mice::pool.scalar(ests_allequal, ses^2, n = i, k = k), simplify = FALSE)
-
-              mice_res <- lapply(
-                  mice_res,
-                  function(x) {
-                      x <- x[names(x) %in% c("qbar", "t", "df")]
-                      names(x) <- names(actual_res[[1]])
-                      return(x)
-                  }
-              )
-
-              expect_equal(actual_res, mice_res, tolerance = 10e-4)
+    # check when v_com <- Inf
+    v_com <- Inf
+    actual_res <- rubin_rules(ests, ses, v_com)
+    expect_equal(actual_res, mice_res3)
 
 
+    # when v_com = NA or v_com = Inf and there are no missing values, df = Inf
+    v_com <- c(Inf, NA)
+    actual_res <- sapply(v_com, function(i) rubin_rules(ests_allequal, ses, i)$df)
 
-              # check when v_com <- Inf
-              v_com <- Inf
-
-              actual_res <- rubin_rules(ests, ses, v_com)
-              mice_res <- mice::pool.scalar(ests, ses^2, n = 1e20, k = 1)
-
-              mice_res <- mice_res[names(mice_res) %in% c("qbar", "t", "df")]
-              names(mice_res) <- names(actual_res)
-
-              expect_equal(actual_res, mice_res)
+    expect_true(all(actual_res == Inf))
 
 
-
-              # when v_com = NA or v_com = Inf and there are no missing values, df = Inf
-              v_com <- c(Inf, NA)
-              actual_res <- sapply(v_com, function(i) rubin_rules(ests_allequal, ses, i)$df)
-
-              expect_true(all(actual_res == Inf))
-
-
-          })
+})
 
 
 
