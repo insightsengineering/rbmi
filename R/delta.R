@@ -24,7 +24,7 @@ delta_template <- function(imputations) {
                 "delta" = 0,
                 stringsAsFactors = FALSE
             )
-            df[[ld$vars$subjid]] <- factor(id, levels = ld$ids_levels)
+            df[[ld$vars$subjid]] <- factor(id, levels = ld$ids)
             df[[ld$vars$visit]] <- factor(ld$visits, labels = ld$visits)
             df[[ld$vars$group]] <- ld$group[[id]]
 

@@ -4,8 +4,8 @@
 #' @description
 #'
 #' A longdata object allows for efficient storage and recall of longitudinal datasets for use in
-#' bootstrap sampling. The object works by de-constructing data into lists based upon subject id
-#' enabling efficient lookup.
+#' bootstrap sampling. The object works by de-constructing the data into lists based upon subject id
+#' thus enabling efficient lookup.
 #'
 #' @details
 #'
@@ -15,7 +15,7 @@
 #'
 #' It is recognised that this objects functionality is fairly overloaded and is hoped that this can
 #' be split out into more area specific objects / functions in the future. Further additions of functionality
-#' to this object should be avoided.
+#' to this object should be avoided if possible.
 #'
 #' @import R6
 #' @export
@@ -24,11 +24,14 @@ longDataConstructor <- R6::R6Class(
 
     public = list(
 
-        #' @field data The original dataset passed to the constructor
+
+        #' @field data The original dataset passed to the constructor (sorted by id and visit)
         data = NULL,
+
 
         #' @field vars The vars object (list of key variables) passed to the constructor
         vars = NULL,
+
 
         #' @field visits A character vector containing the distinct visit levels
         visits = NULL,
@@ -37,48 +40,71 @@ longDataConstructor <- R6::R6Class(
         #' @field ids A character vector containing the unique ids of each subject in `self$data`
         ids = NULL,
 
-        #' @field ids_levels A character vector containing the exact levels (and order) of the
-        #' original `data[[vars$subjid]]` variable
-        ids_levels = NULL,
 
-        #' @field strata A numeric vector indicating which strata each corresponding value of `self$ids` belongs to.
-        #' If no stratification variable is defined this will default to 1 for all subjects (i.e. same group).
-        #' This field is only used as part of the `self$sample_ids()` function to enable stratified bootstrap
+        #' @field strata A numeric vector indicating which strata each corresponding value of
+        #' `self$ids` belongs to.
+        #' If no stratification variable is defined this will default to 1 for all subjects
+        #' (i.e. same group).
+        #' This field is only used as part of the `self$sample_ids()` function to enable
+        #' stratified bootstrap
         #' sampling
         strata = NULL,
 
 
-        #' @field visit_ice A list indexed by subject storing the visit which the patient had their ICE on
+        #' @field visit_ice A list indexed by subject storing the visit level which
+        #' the patient had their ICE on
         visit_ice = list(),
 
 
-        #' @field values A list indexed by subject storing the original outcome values
+        #' @field values A list indexed by subject storing a numeric vector of the
+        #' original (unimputed) outcome values
         values = list(),
 
-        #' @field group A list indexed by subject storing the a single character indicating which imputation
-        #' group the subject belongs to. This is typically the subjects treatment group but can vary. It is used
+
+        #' @field group A list indexed by subject storing a single character
+        #' indicating which imputation group the subject belongs to as defined
+        #' by `self$data[id, self$ivars$group]`
+        #' It is used
         #' to determine what reference group should be used when imputing the subjects data.
         group = list(),
 
-        #' @field is_mar A list indexed by subject storing logical values indicating if the subjects outcome values
-        #' are MAR or not. This list is defaulted to TRUE for all subjects & outcomes and is then
+
+        #' @field is_mar A list indexed by subject storing logical values indicating
+        #' if the subjects outcome values are MAR or not.
+        #' This list is defaulted to TRUE for all subjects & outcomes and is then
         #' modified by calls to `self$set_strategies()`.
+        #' Note that this does not indicate which values are missing, this variable
+        #' is True for outcome values that either occoured before the ICE visit
+        #' or are post the ICE visit and have an imputation strategy of MAR
         is_mar = list(),
 
-        #' @field strategies A list indexed by subject storing a single character value indicating the imputation
-        #' strategy assigned to a specific subject. This list is defaulted to "MAR" for all subjects and is then
-        #' modified by calls to either `self$set_strategies()` or `self$update_strategies()`.
+
+        #' @field strategies A list indexed by subject storing a single character
+        #' value indicating the imputation
+        #' strategy assigned to that subject. This list is defaulted to "MAR"
+        #' for all subjects and is then
+        #' modified by calls to either `self$set_strategies()` or `self$update_strategies()`
         strategies = list(),
 
-        #' @field strategy_lock A list indexed by subject storing a single logical value indicating whether a
-        #' patients imputation strategy is locked or not. If a strategy is locked it means that it can't change
-        #' from MAR to non-MAR or non-MAR to MAR. Strategies are locked if the patient has non-missing after
-        #' their ICE. This list is populated by a call to `self$set_strategies()`.
+
+        #' @field strategy_lock A list indexed by subject storing a single
+        #' logical value indicating whether a
+        #' patients imputation strategy is locked or not. If a strategy is
+        #' locked it means that it can't change
+        #' from MAR to non-MAR. Strategies can be changed from non-MAR to MAR though
+        #' this will trigger a warning.
+        #' Strategies are locked if the patient is assigned a MAR strategy and
+        #' has non-missing after their ICE date. This list is populated by a call to
+        #' `self$set_strategies()`.
         strategy_lock = list(),
 
-        #' @field indexes A list indexed by subject storing a numeric vector of indexes which specify which rows in the
-        #' original dataset below to this subject i.e. to recover the full data for subject "pt3" you can use
-        #' `self$data[self$indexes[["pt3"]],]`. This may seem redundant over filtering the data directly
+
+        #' @field indexes A list indexed by subject storing a numeric vector of
+        #' indexes which specify which rows in the
+        #' original dataset belong to this subject i.e. to recover the full data
+        #' for subject "pt3" you can use
+        #' `self$data[self$indexes[["pt3"]],]`. This may seem redundant over filtering
+        #' the data directly
         #' however it enables efficient bootstrap sampling of the data i.e.
         #' ```
         #' indexes <- unlist(self$indexes[c("pt3", "pt3")])
@@ -87,38 +113,48 @@ longDataConstructor <- R6::R6Class(
         #' This list is populated during the object initialisation.
         indexes = list(),
 
-        #' @field is_missing A list indexed by subject storing a logical vector indicating whether the corresponding
-        #' outcome of a subject is missing. This list is populated during the object initialisation.
+
+        #' @field is_missing A list indexed by subject storing a logical vector
+        #' indicating whether the corresponding
+        #' outcome of a subject is missing. This list is populated during the
+        #' object initialisation.
         is_missing = list(),
 
-        #' @field is_post_ice A list indexed by subject storing a logical vector indicating whether the corresponding
-        #' outcome of a subject is post the date of their ICE. If no ICE data has been provided this defaults to False
+
+        #' @field is_post_ice A list indexed by subject storing a logical vector
+        #' indicating whether the corresponding
+        #' outcome of a subject is post the date of their ICE. If no ICE data has
+        #' been provided this defaults to False
         #' for all observations. This list is populated by a call to `self$set_strategies()`.
         is_post_ice = list(),
 
 
         #' @description
         #'
-        #' Returns a dataframe based upon required subject IDs. Replaces missing values if new values are provided.
+        #' Returns a dataframe based upon required subject IDs. Replaces missing
+        #' values if new values are provided.
         #'
-        #' @param obj Either NULL, a character vector of subjects IDs or a list of lists
-        #' with elements "id" and "values". See details.
+        #' @param obj Either NULL, a character vector of subjects IDs or a
+        #' imputation list object. See details.
         #'
-        #' @param nmar.rm logical value. If TRUE will remove observations that are not regarded as MAR (as
-        #' determined from `self$is_mar`)
+        #' @param nmar.rm logical value. If TRUE will remove observations that are
+        #' not regarded as MAR (as determined from `self$is_mar`)
         #'
-        #' @param na.rm logical value. If TRUE will remove outcome values that are missing (as
-        #' determined from `self$is_missing`)
+        #' @param na.rm logical value. If TRUE will remove outcome values that are
+        #' missing (as determined from `self$is_missing`)
         #'
-        #' @param idmap logical value. If TRUE will add an attribute `idmap` which contains a mapping from the
-        #' new subject ids to the old subject ids
+        #' @param idmap logical value. If TRUE will add an attribute `idmap` which
+        #' contains a mapping from the new subject ids to the old subject ids
         #'
         #' @details
         #'
         #' If `obj` is NULL then the full original dataset is returned. If `obj` is a
-        #' character vector then a new dataset consisting of just those subjects is returned; if the
-        #' character vector contains duplicate entries then that subject will be returned multiple times.
-        #' If `obj` is a list of lists with elements `id` and `values` then a dataset of those subjects
+        #' character vector then a new dataset consisting of just those subjects is
+        #' returned; if the
+        #' character vector contains duplicate entries then that subject will be
+        #' returned multiple times.
+        #' If `obj` is a list of lists with elements `id` and `values` then a dataset
+        #' of those subjects
         #' will be returned but with missing values filled in by the values in `values`.
         #' i.e.
         #' ```
@@ -298,6 +334,7 @@ longDataConstructor <- R6::R6Class(
             )
         },
 
+
         #' @description
         #' TODO
         #' @param dat_ice TODO
@@ -409,15 +446,17 @@ longDataConstructor <- R6::R6Class(
         #' @return TODO
         set_strata = function() {
             ## Use first row to determine strata i.e. no time varying strata
-            strata_index <- unlist(
-                lapply(self$indexes, function(x) x[[1]]),
-                use.names = FALSE
-            )
-            strata_data <- self$data[strata_index, ]
             if (length(self$vars$strata) > 0) {
-                self$strata <- as_strata(strata_data[, self$vars$strata])
+                strata_index <- vapply(
+                    self$ids,
+                    function(x) self$indexes[[x]][[1]],
+                    numeric(1),
+                    use.names = FALSE
+                )
+                strata_data <- self$data[strata_index, self$vars$strata]
+                self$strata <- as_strata(strata_data)
             } else {
-                self$strata <- rep(1, nrow(strata_data))
+                self$strata <- rep(1, length(self$ids))
             }
         },
 
@@ -432,10 +471,9 @@ longDataConstructor <- R6::R6Class(
             validate_datalong(data, vars)
             self$data <- sort_by(data, c(vars$subjid, vars$visit))
             self$vars <- vars
-            subjects <- as.character(unique(self$data[[self$vars$subjid]]))
+            subjects <- levels(self$data[[self$vars$subjid]])
             for (id in subjects) self$add_subject(id)
             self$ids <- subjects
-            self$ids_levels <- levels(self$data[[self$vars$subjid]])
             self$visits <- levels(self$data[[self$vars$visit]])
             self$set_strata()
             self$check_has_data_at_each_visit()
