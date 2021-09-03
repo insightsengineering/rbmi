@@ -283,7 +283,7 @@ validate.stan_data <- function(x, same_cov) {
 
     if(!same_cov) {
         assert_that(
-            all(x$which_arm %in% 1:x$G)
+            all(x$which_arm %in% seq_len(x$G))
         )
     }
 
