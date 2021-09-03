@@ -112,7 +112,6 @@ test_mmrm_numeric <- function(dat, formula_expr, same_cov, scale = FALSE) {
         cov_struct = "us",
         REML = TRUE,
         same_cov = same_cov,
-        initial_values = NULL,
         optimizer = "BFGS"
     )
 
@@ -129,7 +128,7 @@ test_mmrm_numeric <- function(dat, formula_expr, same_cov, scale = FALSE) {
 
     if(!same_cov){
         dat <- dat %>%
-            mutate(GA = if_else(group == "A", 1, 0)) %>% 
+            mutate(GA = if_else(group == "A", 1, 0)) %>%
             mutate(GB = if_else(group == "B", 1, 0))
     }
 
@@ -187,7 +186,7 @@ vars <- ivars(
     strategy = "strategy"
 )
 
-formula <- outcome ~ sex + age + visit*group
+formula <- outcome ~ sex + age + visit * group
 designmat <- as_model_df(dat = dat, formula)
 
 args_default <- list(
@@ -343,7 +342,7 @@ test_that("MMRM returns expected estimates (same_cov = FALSE)", {
     fit <- do.call(fit_mmrm, args = args)
 
     dat2 <- dat %>%
-        mutate(GA = if_else(group == "A", 1, 0)) %>% 
+        mutate(GA = if_else(group == "A", 1, 0)) %>%
         mutate(GB = if_else(group == "B", 1, 0))
 
     mod <- glmmTMB(
@@ -367,6 +366,7 @@ test_that("MMRM model with multiple optimizers has expected output", {
     ###### Single optimiser
     args <- args_default
     args$optimizer <- "BFGS"
+    args$initial_values <- NULL
 
     args$same_cov <- FALSE
 
@@ -442,3 +442,62 @@ test_that("MMRM returns expected estimates under different model specifications"
     }
 
 })
+
+
+
+
+
+
+
+test_that("initial values speed up BFGS", {
+
+    set.seed(315)
+    sigma <- as_covmat(c(5, 3, 8), c(0.4, 0.6, 0.3))
+
+    dat <- get_sim_data(n = 200, sigma)
+
+    vars <- ivars(
+        subjid = "id",
+        covariates = c("group", "sex", "visit * group")
+    )
+
+    frm <- as_simple_formula(vars)
+    model_df <- as_model_df(dat = dat, frm = frm)
+
+    x <- time_it({
+        fit <- fit_mmrm_multiopt(
+            designmat = model_df[, -1, drop = FALSE],
+            outcome = as.data.frame(model_df)[, 1],
+            subjid = dat[[vars$subjid]],
+            visit = dat[[vars$visit]],
+            group = dat[[vars$group]],
+            cov_struct = "us",
+            REML = TRUE,
+            same_cov = TRUE,
+            optimizer = "BFGS"
+        )
+    })
+
+    y <- time_it({
+        fit2 <- fit_mmrm_multiopt(
+            designmat = model_df[, -1, drop = FALSE],
+            outcome = as.data.frame(model_df)[, 1],
+            subjid = dat[[vars$subjid]],
+            visit = dat[[vars$visit]],
+            group = dat[[vars$group]],
+            cov_struct = "us",
+            REML = TRUE,
+            same_cov = TRUE,
+            optimizer = list(
+                BFGS = fit[c("beta", "theta")]
+            )
+        )
+    })
+
+    expect_true(
+        (as.numeric(x) * 0.5) > as.numeric(y)
+    )
+})
+
+
+

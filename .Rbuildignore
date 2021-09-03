@@ -6,3 +6,4 @@
 ^misc$
 ^\.lintr$
 ^.gitignore$
+^src/\.gitkeep$

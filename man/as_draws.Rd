@@ -4,7 +4,7 @@
 \alias{as_draws}
 \title{TODO}
 \usage{
-as_draws(method, samples, data, formula, n_failures = NA, fit = NA)
+as_draws(method, samples, data, formula, n_failures = NULL, fit = NULL)
 }
 \arguments{
 \item{method}{TODO}
