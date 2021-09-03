@@ -17,7 +17,7 @@ pool <- function(
 ) {
 
     assert_that(
-        class(results)[[1]] == "analysis"
+        has_class(results, "analysis")
     )
     validate(results)
 

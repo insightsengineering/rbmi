@@ -17,6 +17,8 @@ analyse <- function(imputations, fun, delta = NULL, ...) {
 
     analysis_call <- match.call()
 
+    validate(imputations)
+
     assert_that(
         is.function(fun),
         msg = "`fun` must be a function"
@@ -145,7 +147,7 @@ extract_imputed_df <- function(imputation, ld, delta = NULL, idmap = FALSE) {
 #' @param fun_name TODO
 as_analysis <- function(results, method, delta = NULL, fun = NULL, fun_name = NULL) {
 
-    next_class <- switch(class(method),
+    next_class <- switch(class(method)[[2]],
         bayes = "rubin",
         approxbayes = "rubin",
         condmean = ifelse(
@@ -186,7 +188,7 @@ print.analysis <- function(x, ...) {
 
     n_samp <- length(x$results)
     n_samp_string <- ife(
-        class(x$results)[[1]] %in% c("bootstrap", "jackknife"),
+        has_class(x$results, "bootstrap") | has_class(x$results, "jackknife"),
         sprintf("1 + %s", n_samp - 1),
         n_samp
     )

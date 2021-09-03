@@ -235,7 +235,7 @@ test_that("apply_delta", {
 
 
 
-test_that("extract_imputed_dfs + delta",{
+test_that("extract_imputed_dfs + delta", {
 
     set.seed(301)
     sigma <- as_covmat(c(6, 4, 4), c(0.5, 0.2, 0.3))

@@ -47,8 +47,8 @@ test_that("Basic Usage", {
         "B" = structure(c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9), .Dim = c(3L, 3L))
     )
 
-    drawsObj <- list(
-        samples = as_sample_list(list(
+    draws_args <- list(
+        samples = as_sample_list(
             as_sample_single(
                 ids = c("Tom", "Harry", "Phil", "Ben"),
                 beta = beta,
@@ -59,18 +59,23 @@ test_that("Basic Usage", {
                 beta = beta,
                 sigma = sigma
             )
-        )),
-        data = ld
+        ),
+        data = ld,
+        formula = x ~ y
     )
 
-    set.seed(101)
-    class(drawsObj) <- "random"
-    x1 <- impute(draws = drawsObj, references = c("A" = "A", "B" = "B"))
-    x2 <- impute(draws = drawsObj, references = c("A" = "A", "B" = "B"))
+    draws_args$method <- method_approxbayes(n_samples = 2)
+    drawsObj1 <- do.call(as_draws, draws_args)
 
-    class(drawsObj) <- "condmean"
-    x3 <- impute(draws = drawsObj, references = c("A" = "A", "B" = "B"))
-    x4 <- impute(draws = drawsObj, references = c("A" = "A", "B" = "B"))
+    draws_args$method <- method_condmean(n_samples = 1)
+    drawsObj2 <- do.call(as_draws, draws_args)
+
+    set.seed(101)
+    x1 <- impute(draws = drawsObj1, references = c("A" = "A", "B" = "B"))
+    x2 <- impute(draws = drawsObj1, references = c("A" = "A", "B" = "B"))
+
+    x3 <- impute(draws = drawsObj2, references = c("A" = "A", "B" = "B"))
+    x4 <- impute(draws = drawsObj2, references = c("A" = "A", "B" = "B"))
 
     expect_valid_structure <- function(x) {
         for (i in x$imputations) {
@@ -567,35 +572,38 @@ test_that("validate_references", {
 
     control <- factor(c("A", "B", "C"), levels = c("A", "B", "C", "D"))
 
-    ref <- c("A" = "B")
-    expect_true(validate_references(ref, control))
+    ref <- c("A" = "B") %>% as_class("references")
+    expect_true(validate(ref, control))
 
-    ref <- c("A" = "B", "C" = "A")
-    expect_true(validate_references(ref, control))
+    ref <- c("A" = "B", "C" = "A")  %>% as_class("references")
+    expect_true(validate(ref, control))
 
-    ref <- c("A" = "B", "B" = "B", "C" = "C")
-    expect_true(validate_references(ref, control))
+    ref <- c("A" = "B", "B" = "B", "C" = "C")  %>% as_class("references")
+    expect_true(validate(ref, control))
 
-    ref <- c("X" = "A")
-    expect_error(validate_references(ref, control))
+    ref <- c("X" = "A") %>% as_class("references")
+    expect_error(validate(ref, control))
 
-    ref <- c("A" = "X")
-    expect_error(validate_references(ref, control))
+    ref <- c("A" = "X") %>% as_class("references")
+    expect_error(validate(ref, control))
 
-    ref <- c("A")
-    expect_error(validate_references(ref, control))
+    ref <- c("A") %>% as_class("references")
+    expect_error(validate(ref, control))
 
-    ref <- c(1, 2, 3)
-    expect_error(validate_references(ref, control))
+    ref <- c(1, 2, 3) %>% as_class("references")
+    expect_error(validate(ref, control))
 
-    ref <- factor("A")
-    expect_error(validate_references(ref, control))
+    ref <- factor("A") %>% as_class("references")
+    expect_error(validate(ref, control))
 
-    ref <- c("A" = NA,  "B" = "C")
-    expect_error(validate_references(ref, control))
+    ref <- c("A" = NA,  "B" = "C") %>% as_class("references")
+    expect_error(validate(ref, control))
 
-    ref <- c("A", "B" = "C")
-    expect_error(validate_references(ref, control))
+    ref <- c("A", "B" = "C") %>% as_class("references")
+    expect_error(validate(ref, control))
+
+    ref <- list() %>% as_class("references")
+    expect_error(validate(ref, control))
 })
 
 
@@ -629,7 +637,7 @@ test_that("impute can recover known values", {
 
     #           1     2     3  4      5        6
     # outcome ~ 1 + group + visit + cov1 + cov1*group
-    dobj <- list(
+    dobj <- as_draws(
         samples = as_sample_list(
             as_sample_single(
                 ids = c("1", "2", "4"),
@@ -640,8 +648,10 @@ test_that("impute can recover known values", {
                 )
             )
         ),
-        data = ld
-    ) %>% as_class("condmean")
+        data = ld,
+        method = method_condmean(n_samples = 4),
+        formula = x ~ y
+    )
 
     x <- impute(dobj, c("A" = "B", "B" = "B"))
 
@@ -703,7 +713,7 @@ test_that("impute can recover known values", {
     ld <- longDataConstructor$new(dat, vars)
     ld$set_strategies(dat_ice)
 
-    dobj <- list(
+    dobj <- as_draws(
         samples = as_sample_list(
             as_sample_single(
                 ids = c("1", "2", "4"),
@@ -714,8 +724,10 @@ test_that("impute can recover known values", {
                 )
             )
         ),
-        data = ld
-    ) %>% as_class("condmean")
+        data = ld,
+        method = method_condmean(n_samples = 1),
+        formula = x~y
+    )
 
     x <- impute(dobj, c("A" = "B", "B" = "B"))
 

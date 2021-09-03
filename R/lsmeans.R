@@ -48,7 +48,15 @@ lsmeans <- function(model, ...) {
 
     data <- char2fct(model$model)
 
-    var_list <- lscombinations(data, extract_covariates(model_vars), fix)
+    covars <- extract_covariates(model_vars)
+    for (var in names(fix)) {
+        assert_that(
+            var %in% covars,
+            msg = sprintf("Variable `%s` was not used in the model", var)
+        )
+    }
+
+    var_list <- lscombinations(data, covars, fix)
 
     design <- matrix(
         apply(model.matrix(frm, expand.grid(var_list)), 2, mean),

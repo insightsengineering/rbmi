@@ -130,10 +130,13 @@ impute.condmean <- function(draws, references, update_strategy = NULL, strategie
 #' will impute by taking a random draw from the multivariate normal distribution.
 impute_internal <- function(draws, references, update_strategy, strategies, condmean) {
 
+    references <- add_class(references, "references")
+    validate(draws)
     data <- draws$data$clone(deep = TRUE)
-
-    validate_references(references, data$data[[data$vars$group]])
+    validate(references, data$data[[data$vars$group]])
     validate_strategies(strategies, data$strategies)
+
+    
 
     if (!is.null(update_strategy)) {
         data$update_strategies(update_strategy)
@@ -157,7 +160,7 @@ impute_internal <- function(draws, references, update_strategy, strategies, cond
         SIMPLIFY = FALSE
     )
 
-    x <- list(
+    x <- as_imputation(
         imputations = untranspose_imputations(imputes, lapply(draws$samples, function(x) x$ids)),
         data = data,
         method = draws$method,
@@ -496,13 +499,15 @@ get_conditional_parameters <- function(pars, values) {
 #' Checks to ensure that the user specified references are
 #' expect values (i.e. those found within the source data)
 #'
-#' @param references named character vector
+#' @param x named character vector
 #' @param control factor variable (should be the `group` variable from the source dataset)
+#' @param ... Not Used
 #'
 #' @return
 #' Will error if there is an issue otherwise will return `TRUE`
-validate_references <- function(references, control) {
-
+#' @export 
+validate.references <- function(x, control, ...) {
+    references <- x
     ref_names <- names(references)
 
     assert_that(
@@ -654,7 +659,7 @@ print.imputation <- function(x, ...) {
 
     n_imp <- length(x$imputations)
     n_imp_string <- ife(
-        class(x$method)[[1]] == "condmean",
+        has_class(x$method, "condmean"),
         sprintf("1 + %s", n_imp - 1),
         as.character(n_imp)
     )
@@ -674,3 +679,37 @@ print.imputation <- function(x, ...) {
     cat(string, sep = "\n")
     return(invisible(x))
 }
+
+
+
+#' TODO
+#'
+#' @param imputations TODO
+#' @param data TODO
+#' @param method TODO
+#' @param references TODO
+as_imputation <- function(imputations, data, method, references) {
+    x <- list(
+        imputations = imputations,
+        data = data,
+        method = method,
+        references = references
+    )
+    class(x) <- c("imputation", "list")
+    validate(x)
+    return(x)
+}
+
+
+#' @export
+validate.imputation <- function(x, ...) {
+    assert_that(
+        is.list(x$imputations),
+        all(vapply(x$imputations, validate, logical(1))),
+        has_class(x$data, "longdata"),
+        has_class(x$method, "method"),
+        has_class(x$references, "references"),
+        validate(x$references, x$data$data[[x$data$vars$group]])
+    )
+}
+
