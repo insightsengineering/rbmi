@@ -132,7 +132,7 @@ longDataConstructor <- R6::R6Class(
         #' @description
         #'
         #' Returns a dataframe based upon required subject IDs. Replaces missing
-        #' values if new values are provided.
+        #' values with new ones if provided.
         #'
         #' @param obj Either NULL, a character vector of subjects IDs or a
         #' imputation list object. See details.
@@ -144,35 +144,36 @@ longDataConstructor <- R6::R6Class(
         #' missing (as determined from `self$is_missing`)
         #'
         #' @param idmap logical value. If TRUE will add an attribute `idmap` which
-        #' contains a mapping from the new subject ids to the old subject ids
+        #' contains a mapping from the new subject ids to the old subject ids. See details.
         #'
         #' @details
         #'
-        #' If `obj` is NULL then the full original dataset is returned. If `obj` is a
-        #' character vector then a new dataset consisting of just those subjects is
-        #' returned; if the
-        #' character vector contains duplicate entries then that subject will be
+        #' If `obj` is NULL then the full original dataset is returned. 
+        #'
+        #' If `obj` is a character vector then a new dataset consisting of just those subjects is
+        #' returned; if the character vector contains duplicate entries then that subject will be
         #' returned multiple times.
-        #' If `obj` is a list of lists with elements `id` and `values` then a dataset
-        #' of those subjects
-        #' will be returned but with missing values filled in by the values in `values`.
-        #' i.e.
+        #'
+        #' If `obj` is an imputation list object (as created by [as_imputation_list()]) then the
+        #' subject ids specified in the object will be returned and missing values will be filled
+        #' in by those specified in the imputation list object.  i.e.
         #' ```
-        #' obj <- list(
-        #'   list( id = "pt1", values = c(1,2,3)),
-        #'   list( id = "pt1", values = c(4,5,6)),
-        #'   list( id = "pt3", values = c(7,8))
+        #' obj <- as_imputation_list(
+        #'   as_imputation_single( id = "pt1", values = c(1,2,3)),
+        #'   as_imputation_single( id = "pt1", values = c(4,5,6)),
+        #'   as_imputation_single( id = "pt3", values = c(7,8))
         #' )
-        #' ld$get_data(obj)
+        #' longdata$get_data(obj)
         #' ```
-        #' Will return a dataframe consisting of all observations for pt1 twice and all of the
-        #' observations for "pt3" once. The first set of observations for "pt1" will have missing
+        #' Will return a dataframe consisting of all observations for `pt1` twice and all of the
+        #' observations for `pt3` once. The first set of observations for `pt1` will have missing
         #' values filled in with `c(1,2,3)` and the second set will be filled in by `c(4,5,6)`. The
         #' length of the values must be equal to `sum(self$is_missing[[id]])`.
         #'
         #' If `obj` is not NULL then all subject IDs will be scrambled in order to ensure that they are unique
-        #' i.e. If the "pt2" is requested twice then this process guarantees that each set of observations
-        #' be have a unique subject ID number.
+        #' i.e. If the `pt2` is requested twice then this process guarantees that each set of observations
+        #' be have a unique subject ID number. The `idmap` attribute (if requested) can be used
+        #' to map from the new ids back to the old ids. 
         #'
         #' @return
         #'
@@ -245,9 +246,10 @@ longDataConstructor <- R6::R6Class(
 
 
         #' @description
-        #' TODO
-        #' @param id TODO
-        #' @return TODO
+        #' This function decomposes a patients data from `self$data` and populates
+        #' all the corresponding lists i.e. `self$is_missing`, `self$values`, `self$group`, etc.
+        #' This function is only called upon the objects initalisation
+        #' @param id Character subject id that exists within `self$data`
         add_subject = function(id) {
 
             ids <- self$data[[self$vars$subjid]]
@@ -298,9 +300,9 @@ longDataConstructor <- R6::R6Class(
 
 
         #' @description
-        #' TODO
-        #' @param ids TODO
-        #' @return TODO
+        #' Throws an error if any element of `ids` is not within the source data `self$data`
+        #' @param ids A character vector of ids
+        #' @return TRUE
         validate_ids = function(ids) {
             is_in <- ids %in% self$ids
             if (!all(is_in)) {
@@ -311,17 +313,19 @@ longDataConstructor <- R6::R6Class(
 
 
         #' @description
-        #' TODO
-        #' @return TODO
+        #' Performs random stratified sampling of patient ids (with replacement)
+        #' Each patient has an equal weight of being picked within their strata (i.e is not dependent on
+        #' how many non-missing visits they had)
+        #' @return Character vector of ids
         sample_ids = function() {
             sample_ids(self$ids, self$strata)
         },
 
 
         #' @description
-        #' TODO
-        #' @param id TODO
-        #' @return TODO
+        #' Returns a list of key information for a given subject. Is a conveinance wrapper
+        #' to save having to manually grab each element
+        #' @param id Character subject id that exists within `self$data`
         extract_by_id = function(id) {
             list(
                 is_mar = self$is_mar[[id]],
@@ -336,19 +340,24 @@ longDataConstructor <- R6::R6Class(
 
 
         #' @description
-        #' TODO
-        #' @param dat_ice TODO
-        #' @return TODO
+        #' Convieance function to run self$set_strategies(dat_ice, update=TRUE)
+        #' kept for legacy reasons
+        #' @param dat_ice Dataframe containing ICE information see [impute()] for the format of this dataframe
         update_strategies = function(dat_ice) {
             self$set_strategies(dat_ice, update = TRUE)
         },
 
 
         #' @description
-        #' TODO
-        #' @param dat_ice TODO
-        #' @param update TODO
-        #' @return TODO
+        #' Updates the `self$strategies`, `self$is_mar`, `self$is_post_ice` variables based upon the provided ICE
+        #' information.
+        #' @details
+        #' See [draws()] for the specification of `dat_ice` if `update=FALSE`
+        #' See [impute()] for the format of `dat_ice` if `update=TRUE`
+        #' If `update=TRUE` this function ensures that MAR strategies cannot be changed to Non-MAR in the presence
+        #' of post-ICE obserevations.
+        #' @param dat_ice Dataframe containing ICE information. See details.
+        #' @param update Logical, indicates that the ICE data should be used as an update. See details.
         set_strategies = function(dat_ice = NULL, update=FALSE) {
 
             if (is.null(dat_ice)) {
@@ -418,8 +427,9 @@ longDataConstructor <- R6::R6Class(
 
 
         #' @description
-        #' TODO
-        #' @return TODO
+        #' Ensures that all visits have at least 1 observared "MAR" observation. Throws
+        #' an error if this criteria is not met. This is to ensure that the initial
+        #' MMRM can be resolved
         check_has_data_at_each_visit = function() {
             is_mar <- unlist(self$is_mar, use.names = FALSE)
             is_not_miss <- !unlist(self$is_missing, use.names = FALSE)
@@ -442,7 +452,9 @@ longDataConstructor <- R6::R6Class(
 
 
         #' @description
-        #' TODO
+        #' Populates the `self$strata` variable. If the user has specified stratification variables
+        #' The first visit is used to determine the value of those variables. If no stratification variables
+        #' have been specified then everyone is defined as being in strata 1. 
         #' @return TODO
         set_strata = function() {
             ## Use first row to determine strata i.e. no time varying strata
@@ -462,10 +474,9 @@ longDataConstructor <- R6::R6Class(
 
 
         #' @description
-        #' TODO
-        #' @param data TODO
-        #' @param vars TODO
-        #' @return TODO
+        #' Constructor function.
+        #' @param data longditudinal dataset
+        #' @param vars an `ivars` object created by [set_vars()]
         initialize = function(data, vars) {
             validate(vars)
             validate_datalong(data, vars)
@@ -485,9 +496,31 @@ longDataConstructor <- R6::R6Class(
 
 
 
-#' Title
+#' Transpose Imputations
 #'
-#' @param imputations TODO
+#' Takes a imputations object and transposes it i.e.
+#' ```
+#' list(
+#'     list(
+#'         id = "a",
+#'         values = c(1,2,3)
+#'     ),
+#'     list(
+#'         id = "b",
+#'         values = c(4,5,6)
+#'     )
+#' )
+#' ```
+#'
+#' becomes
+#'
+#' ```
+#' list(
+#'     ids = c("a", "b"),
+#'     values = c(1,2,3,4,5,6)
+#' )
+#' ```
+#' @param imputations An imputation list object created by [as_imputation_list()]
 transpose_imputations <- function(imputations) {
     len <- length(imputations)
     values <- vector(mode = "list", length = len)
