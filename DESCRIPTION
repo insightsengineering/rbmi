@@ -41,4 +41,6 @@ LinkingTo:
     rstan (>= 2.18.1),
     StanHeaders (>= 2.18.0)
 SystemRequirements: GNU make
+Depends: 
+    R (>= 3.4.0)
 License: Apache License (>= 2)
