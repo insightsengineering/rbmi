@@ -389,13 +389,19 @@ test_that("Strategies", {
         ~visit, ~subjid, ~strategy,
         "Visit 1", "2",  "ABC",
     )
-    expect_error(ld$update_strategies(dat_ice), "Unable to change from MAR to non-MAR")
+    expect_error(
+        ld$update_strategies(dat_ice),
+        "MAR to non-MAR is invalid"
+    )
 
     dat_ice <- tribble(
          ~subjid, ~strategy,
           "3",  "MAR",
     )
-    expect_error(ld$update_strategies(dat_ice), "Unable to change from non-MAR to MAR")
+    expect_warning(
+        ld$update_strategies(dat_ice),
+        "from non-MAR to MAR"
+    )
 })
 
 

@@ -4,7 +4,7 @@
 \alias{get_mmrm_sample}
 \title{TODO}
 \usage{
-get_mmrm_sample(ids, longdata, method)
+get_mmrm_sample(ids, longdata, method, optimizer)
 }
 \arguments{
 \item{ids}{TODO}
@@ -12,6 +12,8 @@ get_mmrm_sample(ids, longdata, method)
 \item{longdata}{TODO}
 
 \item{method}{TODO}
+
+\item{optimizer}{TODO}
 }
 \description{
 TODO

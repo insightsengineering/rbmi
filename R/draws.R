@@ -62,18 +62,36 @@ get_bootstrap_draws <- function(
     failed_samples <- 0
     failure_limit <- ceiling(method$threshold * n_samples)
 
+    initial_sample <- get_mmrm_sample(
+        ids = longdata$ids,
+        longdata = longdata,
+        method = method,
+        optimizer = c("L-BFGS-B", "BFGS")
+    )
+
+    if (initial_sample$failed) {
+        stop("Fitting MMRM to original dataset failed")
+    }
+
+    optimizer <- list(
+        "L-BFGS-B" = NULL,
+        "BFGS" = initial_sample[c("beta", "theta")]
+    )
+
     if (first_sample_orig) {
-        samples[[1]] <- get_mmrm_sample(longdata$ids, longdata, method)
-        if (samples[[1]]$failed) {
-            stop("Fitting MMRM to original dataset failed")
-        }
+        samples[[1]] <- initial_sample
         current_sample <- current_sample + 1
     }
 
     while (current_sample <= n_samples & failed_samples <= failure_limit) {
 
         ids_boot <- longdata$sample_ids()
-        sample_boot <- get_mmrm_sample(ids_boot, longdata, method)
+        sample_boot <- get_mmrm_sample(
+            ids = ids_boot,
+            longdata = longdata,
+            method = method,
+            optimizer = optimizer
+        )
 
         if (sample_boot$failed) {
             failed_samples <- failed_samples + 1
@@ -109,13 +127,28 @@ get_jackknife_draws <- function(longdata, method) {
     ids <- longdata$ids
     samples <- vector("list", length = length(ids) + 1)
 
-    samples[[1]] <- get_mmrm_sample(ids, longdata, method)
+    samples[[1]] <- get_mmrm_sample(
+        ids = ids,
+        longdata = longdata,
+        method = method,
+        optimizer = c("L-BFGS-B", "BFGS")
+    )
+
+    optimizer <- list(
+        "L-BFGS-B" = NULL,
+        "BFGS" = samples[[1]][c("beta", "theta")]
+    )
 
     ids_jack <- lapply(seq_along(ids), function(i) ids[-i])
 
     for (i in seq_along(ids)) {
         ids_jack <- ids[-i]
-        sample <- get_mmrm_sample(ids_jack, longdata, method)
+        sample <- get_mmrm_sample(
+            ids = ids_jack,
+            longdata = longdata,
+            method = method,
+            optimizer = optimizer
+        )
         if (sample$failed) {
             stop("Jackknife sample failed")
         }
@@ -140,7 +173,8 @@ get_jackknife_draws <- function(longdata, method) {
 #' @param ids TODO
 #' @param longdata TODO
 #' @param method TODO
-get_mmrm_sample <- function(ids, longdata, method) {
+#' @param optimizer TODO
+get_mmrm_sample <- function(ids, longdata, method, optimizer) {
 
     vars <- longdata$vars
     dat <- longdata$get_data(ids, nmar.rm = TRUE, na.rm = TRUE)
@@ -155,8 +189,7 @@ get_mmrm_sample <- function(ids, longdata, method) {
         cov_struct = method$covariance,
         REML = method$REML,
         same_cov = method$same_cov,
-        initial_values = NULL,
-        optimizer = c("L-BFGS-B", "BFGS")
+        optimizer = optimizer
     )
 
     if (sample$failed) {
@@ -285,7 +318,7 @@ print.draws <- function(x, ...) {
     frm_str <- sprintf("%s ~ %s", frm[[2]], frm[[3]])
 
     meth <- switch(
-         class(x$method),
+         class(x$method)[[2]],
          "approxbayes" = "Approximate Bayes",
          "condmean" = "Conditional Mean",
          "bayes" = "Bayes"
@@ -305,7 +338,7 @@ print.draws <- function(x, ...) {
 
     n_samp <- length(x$samples)
     n_samp_string <- ife(
-        class(x$method)[[1]] == "condmean",
+        has_class(x$method, "condmean"),
         sprintf("1 + %s", n_samp - 1),
         as.character(n_samp)
     )
@@ -431,7 +464,14 @@ validate.sample_list <- function(x, ...) {
 #' @param formula TODO
 #' @param n_failures TODO
 #' @param fit TODO
-as_draws <- function(method, samples, data, formula, n_failures = NA, fit = NA) {
+as_draws <- function(
+    method,
+    samples,
+    data,
+    formula,
+    n_failures = NULL,
+    fit = NULL
+) {
     x <- list(
         data = data,
         method = method,
@@ -441,11 +481,26 @@ as_draws <- function(method, samples, data, formula, n_failures = NA, fit = NA) 
         formula = formula
     )
 
-    next_class <- switch(class(x$method),
+    next_class <- switch(class(x$method)[[2]],
         "approxbayes" = "random",
         "condmean" = "condmean",
         "bayes" = "random"
     )
 
-    return(as_class(x, c("draws", next_class, "list")))
+    class(x) <- c("draws", next_class, "list")
+    return(x)
+}
+
+
+#' @export
+validate.draws <- function(x, ...) {
+    assert_that(
+        has_class(x$data, "longdata"),
+        has_class(x$method, "method"),
+        has_class(x$samples, "sample_list"),
+        validate(x$samples),
+        is.null(x$n_failures) | is.numeric(x$n_failures),
+        is.null(x$fit) | has_class(x$fit, "stanfit"),
+        has_class(x$formula, "formula")
+    )
 }

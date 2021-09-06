@@ -41,7 +41,6 @@ fit_mcmc <- function(
         cov_struct = "us",
         REML = TRUE,
         same_cov = same_cov,
-        initial_values = NULL,
         optimizer = c("L-BFGS-B", "BFGS")
     )
 
@@ -68,7 +67,7 @@ fit_mcmc <- function(
         thin = burn_between,
         iter = burn_in + burn_between * n_imputations,
         init = list(list(
-            beta = mmrm_initial$beta,
+            theta = as.vector(stan_data$R %*% mmrm_initial$beta),
             sigma = mmrm_initial$sigma
         )),
         refresh = ife(
@@ -245,6 +244,24 @@ check_mcmc <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
 
 
 
+#' QR decomposition
+#'
+#' @param mat A Matrix to perform the QR decomposition on
+QR_decomp <- function(mat) {
+    qr_obj <- qr(mat)
+    N <- nrow(mat)
+    Q <- qr.Q(qr = qr_obj) * sqrt(N - 1)
+    R <- qr.R(qr = qr_obj) / sqrt(N - 1)
+
+    ret_obj <- list(
+        Q = Q,
+        R = R
+    )
+
+    return(ret_obj)
+}
+
+
 
 #' Title - TODO
 #'
@@ -289,6 +306,8 @@ prepare_stan_data <- function(ddat, subjid, visit, outcome, group) {
 
     dmat <- as.matrix(ddat3[, design_variables])
 
+    qr <- QR_decomp(dmat)
+
     dat_pgroups_u <- get_pattern_groups_unique(dat_pgroups)
 
     assert_that(
@@ -306,7 +325,8 @@ prepare_stan_data <- function(ddat, subjid, visit, outcome, group) {
         pat_n_visit = as_stan_array(dat_pgroups_u$n_avail),
         pat_sigma_index = as_indices(dat_pgroups_u$pattern),
         y = ddat3$outcome,
-        X = dmat
+        Q = qr$Q,
+        R = qr$R
     )
 }
 

@@ -38,28 +38,28 @@ data {
     int pat_sigma_index[n_pat, n_visit];    // rows/cols from sigma to subset on for the pat group
     
     vector[N] y;                            // outcome variable
-    matrix[N,P] X;                          // design matrix
+    matrix[N,P] Q;                          // design matrix (After QR decomp)
+    matrix[P,P] R;                          // R matrix (from QR decomp)
     matrix[n_visit, n_visit] Sigma_init[G]; // covariance matrix estimated from MMRM
 }
 
 
-transformed data{
-    // QR decomposition to improve performance
-    matrix[N, P] Q_ast = qr_thin_Q(X) * sqrt(N - 1);
-    matrix[P, P] R_ast = qr_thin_R(X) / sqrt(N - 1);
+transformed data {
+   matrix[P, P] R_inverse = inverse(R);
 }
 
 
+
 parameters {
-    vector[P] beta;               // coefficients of linear model on covariates
+    vector[P] theta;              // coefficients of linear model on covariates
     cov_matrix[n_visit] Sigma[G]; // covariance matrix(s)
 }
 
 
 model {
-    int start_index = 1;
+    int data_start_row = 1;
     
-    vector[N] mu =  Q_ast * (R_ast * beta);
+    vector[N] mu =  Q * theta;
     
     for(g in 1:G){
         Sigma[g] ~ inv_wishart(n_visit+2, Sigma_init[g]);
@@ -76,15 +76,20 @@ model {
         matrix[nvis,nvis] sig = Sigma[g][sig_index, sig_index];
         
         // Derive data indcies for current pat group
-        int stop_index = start_index + ((nvis * npt)  -1);
+        int data_stop_row = data_start_row + ((nvis * npt)  -1);
         
         // Extract required data for the current pat group
-        vector[nvis] y_obs[npt] = to_vector_of_arrays(y[start_index:stop_index], nvis);
-        vector[nvis] mu_obs[npt] = to_vector_of_arrays(mu[start_index:stop_index], nvis);
+        vector[nvis] y_obs[npt] = to_vector_of_arrays(y[data_start_row:data_stop_row], nvis);
+        vector[nvis] mu_obs[npt] = to_vector_of_arrays(mu[data_start_row:data_stop_row], nvis);
         
         y_obs ~ multi_normal(mu_obs, sig);
         
         // Update data index for next pat group
-        start_index = stop_index + 1;
+        data_start_row = data_stop_row + 1;
     }
+}
+
+
+generated quantities {
+   vector[P] beta = R_inverse * theta; 
 }
