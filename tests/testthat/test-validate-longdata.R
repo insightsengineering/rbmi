@@ -33,7 +33,7 @@ dat <- tibble(
 dat[c(1,2,3,4,5,7), "outcome"] <- NA
 
 
-vars <- ivars(
+vars <- set_vars(
     outcome = "outcome",
     visit = "visit",
     subjid = "subjid",
@@ -62,7 +62,7 @@ test_that("extract_covariates",{
 
 
 
-test_that("validate.ivars",{
+test_that("validate.ivars", {
 
     expect_true(validate(vars))
 

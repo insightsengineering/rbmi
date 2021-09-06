@@ -57,7 +57,7 @@ test_that("Basic Usage - Approx Bayes", {
         mutate(strategy = "JR")
 
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         group = "group",
         strategy = "strategy",
@@ -129,7 +129,7 @@ test_that("Basic Usage - Bayesian", {
         mutate(strategy = "MAR")
 
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         group = "group",
         strategy = "strategy",
@@ -219,7 +219,7 @@ test_that("Basic Usage - Condmean", {
         mutate(strategy = "JR")
 
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         group = "group",
         strategy = "strategy",
@@ -308,7 +308,7 @@ test_that("Custom Strategies and Custom analysis functions", {
         mutate(strategy = "XX")
 
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         group = "group",
         strategy = "strategy",
@@ -433,7 +433,7 @@ test_that("Sorting doesn't change results", {
         select(id, visit) %>%
         mutate(strategy = "JR")
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         group = "group",
         strategy = "strategy",
@@ -545,7 +545,7 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         mutate(id = factor(id)) %>%
         mutate(group2 = factor(group2, levels = c("A", "B", "C", "D")))
 
-    vars <- ivars(
+    vars <- set_vars(
         subjid = "id",
         outcome = "outcome",
         visit = "visit",

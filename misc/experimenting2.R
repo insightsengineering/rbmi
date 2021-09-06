@@ -12,7 +12,7 @@ data$THERAPY <- as.factor(data$THERAPY)
 
 data[is.na(data)] = 1
 
-vars <- ivars(
+vars <- set_vars(
     outcome = "change",
     subjid = "PATIENT",
     visit = "VISIT",

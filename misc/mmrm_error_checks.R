@@ -23,7 +23,7 @@ dat_ice <- dat %>%
     mutate(strategy = "JR")
 
 
-vars <- ivars(
+vars <- set_vars(
     outcome = "outcome",
     group = "group",
     strategy = "strategy",

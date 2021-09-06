@@ -292,7 +292,7 @@ sort_by <- function(df, vars = NULL, decreasing = NULL) {
 #' @param strata TODO
 #' @param strategy TODO
 #' @export
-ivars <- function(
+set_vars <- function(
     subjid = "subjid",
     visit = "visit",
     outcome = "outcome",
