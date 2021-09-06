@@ -51,7 +51,7 @@ fit_mcmc <- function(
         outcome = outcome,
         group = ife(same_cov == TRUE, rep(1, length(group)), group)
     )
-
+browser()
     stan_data$Sigma_init <- ife(
         same_cov == TRUE,
         list(mmrm_initial$sigma[[1]]),
@@ -310,10 +310,6 @@ prepare_stan_data <- function(ddat, subjid, visit, outcome, group) {
 
     dat_pgroups_u <- get_pattern_groups_unique(dat_pgroups)
 
-    assert_that(
-        sum(dat_pgroups_u$n_avail * dat_pgroups_u$n) == nrow(dmat)
-    )
-
     stan_dat <- list(
         N = nrow(dmat),
         P = ncol(dmat),
@@ -328,6 +324,10 @@ prepare_stan_data <- function(ddat, subjid, visit, outcome, group) {
         Q = qr$Q,
         R = qr$R
     )
+
+    class(stan_dat) <- c("list", "stan_data")
+    validate(stan_dat)
+    return(stan_dat)
 }
 
 
@@ -436,4 +436,23 @@ remove_if_all_missing <- function(dat) {
     remove_me <- Filter(function(x) x == n_visit, n_miss)
     remove_me_pt <- names(remove_me)
     dat[!dat$subjid %in% remove_me_pt, ]
+}
+
+
+#' @export
+validate.stan_data <- function(x, ...) {
+    assert_that(
+        x$N == nrow(x$Q),
+        x$P == ncol(x$Q),
+        sum(x$pat_n_visit * x$pat_n_pt) == nrow(x$Q),
+        ncol(x$Q) == ncol(x$R),
+        ncol(x$R) == nrow(x$R),
+        length(x$y) == nrow(x$Q),
+        length(x$pat_G) == length(x$pat_n_pt),
+        length(x$pat_G) == length(x$pat_n_visit),
+        length(x$pat_G) == length(x$pat_sigma_index),
+        length(unique(lapply(x$pat_sigma_index, length))) == 1,
+        length(x$pat_sigma_index[[1]]) == x$n_visit,
+        all(vapply(x$pat_sigma_index, function(z) all(z %in% c(seq_len(x$n_visit), 0)), logical(1)))
+    )
 }
