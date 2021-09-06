@@ -25,7 +25,7 @@ test_that("Basic Usage", {
         )
     )
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         visit = "visit",
         subjid = "subjid",
@@ -533,7 +533,7 @@ test_that("validate_strategies", {
         )
     )
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         visit = "visit",
         subjid = "subjid",
@@ -615,7 +615,7 @@ test_that("validate_references", {
 
 test_that("impute can recover known values", {
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         visit = "visit",
         subjid = "id",

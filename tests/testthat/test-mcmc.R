@@ -79,7 +79,7 @@ test_that("Verbose supression works", {
         ungroup() %>%
         mutate(strategy = "MAR")
 
-    vars <- ivars(
+    vars <- set_vars(
         visit = "visit",
         subjid = "id",
         group = "group",

@@ -90,7 +90,7 @@ run_simul <- function(H0) {
     data[,c("y_noICE", "y_noDropout", "y")] <- data[,c("y_noICE", "y_noDropout", "y")] - data$y_bl
     data <- as.data.frame(data)
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "y",
         subjid = "patnum",
         visit = "visit",
