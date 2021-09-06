@@ -1,3 +1,38 @@
+test_that("Rubin's rules", {
+
+    set.seed(101)
+    ests <- rnorm(100)
+    ses <- rnorm(100, mean = 10, sd = 1)
+    v_com <- seq(1, 1000, by = 100)
+    n <- seq(16, 1015, by = 100)
+    k <- 15
+
+    actual_res <- sapply(v_com, function(i) rubin_rules(ests, ses, i), simplify = FALSE)
+
+    expect_equal(actual_res, mice_res1)
+
+
+    # check when no variability in estimates (i.e. when no missing values)
+    ests_allequal <- rep(0, 100)
+
+    actual_res <- sapply(v_com, function(i) rubin_rules(ests_allequal, ses, i), simplify = FALSE)
+    expect_equal(actual_res, mice_res2, tolerance = 10e-4)
+
+
+    # check when v_com <- Inf
+    v_com <- Inf
+    actual_res <- rubin_rules(ests, ses, v_com)
+    expect_equal(actual_res, mice_res3)
+
+
+    # when v_com = NA or v_com = Inf and there are no missing values, df = Inf
+    v_com <- c(Inf, NA)
+    actual_res <- sapply(v_com, function(i) rubin_rules(ests_allequal, ses, i)$df)
+
+    expect_true(all(actual_res == Inf))
+
+
+})
 
 
 

@@ -51,7 +51,7 @@ fit_mcmc <- function(
         outcome = outcome,
         group = ife(same_cov == TRUE, rep(1, length(group)), group)
     )
-browser()
+
     stan_data$Sigma_init <- ife(
         same_cov == TRUE,
         list(mmrm_initial$sigma[[1]]),

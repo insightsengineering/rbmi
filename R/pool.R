@@ -62,13 +62,13 @@ pool <- function(
 
 
 #' TODO
-#' 
+#'
 #' @param x TODO
 get_pool_components <- function(x) {
     switch(x,
-        "rubin" = c("est", "df", "se"),
-        "jackknife" = c("est"),
-        "bootstrap" = c("est")
+           "rubin" = c("est", "df", "se"),
+           "jackknife" = c("est"),
+           "bootstrap" = c("est")
     )
 }
 
@@ -117,7 +117,75 @@ pool_.bootstrap <- function(
     return(ret)
 }
 
+#' @title TODO
+#'
+#' @description TODO
+#'
+#' @param v_com TODO
+#' @param var_b TODO
+#' @param var_t TODO
+#' @param M TODO
+#'
+#' @return TODO
+rubin_df <- function(v_com, var_b, var_t, M) {
 
+    if (is.na(v_com) || (is.infinite(v_com) & var_b == 0)) {
+        df <- Inf
+    } else {
+        lambda <- (1 + 1 / M) * var_b / var_t
+
+        if(!is.infinite(v_com)) {
+            v_obs <- ((v_com + 1) / (v_com + 3)) * v_com * (1 - lambda)
+        }
+
+        if(lambda != 0) {
+            v_old <- (M - 1)  / lambda^2
+            if(is.infinite(v_com))
+                df <- v_old
+            else {
+                df <- (v_old * v_obs) / (v_old + v_obs)
+            }
+        } else {
+            df <- v_obs
+        }
+    }
+
+    return(df)
+}
+
+#' @title TODO
+#'
+#' @description TODO
+#'
+#' @param ests TODO
+#' @param ses TODO
+#' @param v_com TODO
+#'
+#' @return TODO
+rubin_rules <- function(ests, ses, v_com) {
+
+    M <- length(ests)
+    est_point <- mean(ests)
+
+    var_w <- mean(ses^2)
+    var_b <- var(ests)
+    var_t <- var_w + var_b + var_b / M
+
+    df <- rubin_df(
+        v_com = v_com,
+        var_b = var_b,
+        var_t = var_t,
+        M = M
+    )
+
+    ret_obj <- list(
+        est_point = est_point,
+        var_t = var_t,
+        df = df
+    )
+
+    return(ret_obj)
+}
 
 #' @importFrom stats qt pt var
 #' @rdname pool
@@ -128,42 +196,32 @@ pool_.rubin <- function(results, conf.level, alternative, type) {
     dfs <- results$df
     alpha <- 1 - conf.level
 
+    v_com <- unique(dfs)
+
     assert_that(
         all(!is.na(ses)),
         msg = "Standard Errors for Rubin's rules can not be NA"
     )
-
-    M <- length(ests)
-    est_point <- mean(ests)
-
-    var_w <- mean(ses^2)
-    var_b <- var(ests)
-    var_t <- var_w + var_b + var_b / M
-
-    v_com <- unique(dfs)
 
     assert_that(
         length(v_com) == 1,
         msg = "Degrees of freedom should be consistent across all samples"
     )
 
-    if (is.na(v_com) | is.infinite(v_com)) {
-        df <- Inf
-    } else {
-        lambda <- (1 + 1 / M) * var_b / var_t
-        v_obs <- ((v_com + 1) / (v_com + 3)) * v_com * (1 - lambda)
-        v_old <- (M - 1)  / lambda^2
-        df <- (v_old * v_obs) / (v_old + v_obs)
-    }
+    res_rubin <- rubin_rules(
+        ests = ests,
+        ses = ses,
+        v_com = v_com
+    )
 
     ret <- normal_ci(
-        point = est_point,
-        se = sqrt(var_t),
+        point = res_rubin$est_point,
+        se = sqrt(res_rubin$var_t),
         alpha = alpha,
         alternative = alternative,
         qfun = qt,
         pfun = pt,
-        df = df
+        df = res_rubin$df
     )
 
     return(ret)
@@ -185,18 +243,18 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
     pvals <- (c(sum(est < 0), sum(est > 0)) + 1) / (length(est) + 1)
 
     index <- switch(alternative,
-        two.sided = c(1, 2),
-        greater = 1,
-        less = 2
+                    two.sided = c(1, 2),
+                    greater = 1,
+                    less = 2
     )
 
     quant_2_side <- quantile(est, probs = c(alpha / 2, 1 - alpha / 2), type = 6, names = FALSE)
     quant_1_side <- quantile(est, probs = c(alpha, 1 - alpha), type = 6, names = FALSE)
 
     ci <- switch(alternative,
-        two.sided = quant_2_side,
-        greater = c(-Inf, quant_1_side[2]),
-        less = c(quant_1_side[1], Inf)
+                 two.sided = quant_2_side,
+                 greater = c(-Inf, quant_1_side[2]),
+                 less = c(quant_1_side[1], Inf)
     )
 
     ret <- list(
