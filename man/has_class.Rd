@@ -2,15 +2,21 @@
 % Please edit documentation in R/utilities.R
 \name{has_class}
 \alias{has_class}
-\title{TODO}
+\title{Does object have a class ?}
 \usage{
 has_class(x, cls)
 }
 \arguments{
-\item{x}{TODO}
+\item{x}{The object we want to check the class of}
 
-\item{cls}{TODO}
+\item{cls}{The class we want to know if it has or not}
+}
+\value{
+True if the object has the class
+False if the object does not have the class
 }
 \description{
-TODO
+Utility function to see if an object has a particular class.
+Useful when we don't know how many other classes the object may
+have
 }

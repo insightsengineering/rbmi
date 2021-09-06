@@ -1,8 +1,10 @@
 
-#' Title
+#' Set Class
 #'
-#' @param x TODO
-#' @param cls TODO
+#' Utility function to set an objects class.
+#'
+#' @param x Object to set the class of
+#' @param cls The class to be set
 #' @export
 as_class <- function(x, cls) {
     class(x) <- cls
@@ -10,10 +12,13 @@ as_class <- function(x, cls) {
 }
 
 
-#' Title
+#' Add a class
 #'
-#' @param x TODO
-#' @param cls TODO
+#' Utility function to add a class to an object. Adds the new class
+#' after any existing classes.
+#'
+#' @param x Object to add a class to
+#' @param cls the class to be added
 #' @export
 add_class <- function(x, cls) {
     class(x) <- c(class(x), cls)
@@ -21,18 +26,35 @@ add_class <- function(x, cls) {
 }
 
 
-#' TODO
+#' Does object have a class ?
 #'
-#' @param x TODO
-#' @param cls TODO
+#' Utility function to see if an object has a particular class.
+#' Useful when we don't know how many other classes the object may
+#' have
+#'
+#' @return
+#' True if the object has the class
+#' False if the object does not have the class
+#'
+#' @param x The object we want to check the class of
+#' @param cls The class we want to know if it has or not
 #' @export
 has_class <- function(x, cls) {
     cls %in% class(x)
 }
 
-#' Title
+
+#' Convert an `ivars` object into a formula
 #'
-#' @param vars TODO
+#' Takes an `ivars` object (as created by [set_vars()]) and converts
+#' it into a formula roughly of the form:
+#' ```
+#' outcome ~ group + visit + covariate1 + covariate2 + ...
+#' ```
+#'
+#' @param vars an `ivars` object as created by [set_vars()]
+#' @return
+#' A formula
 as_simple_formula <- function(vars){
     variables <- c(
         vars$group,
@@ -263,7 +285,7 @@ sort_by <- function(df, vars = NULL, decreasing = NULL) {
         return(df)
     }
     assert_that(
-        is.data.frame(df), 
+        is.data.frame(df),
         all(vars %in% names(df)),
         is.null(decreasing) | length(decreasing) == 1 | length(decreasing) == length(vars)
     )
@@ -280,10 +302,10 @@ sort_by <- function(df, vars = NULL, decreasing = NULL) {
 
 
 #' TODO
-#' 
+#'
 #' @description
 #' TODO
-#' 
+#'
 #' @param subjid TODO
 #' @param visit TODO
 #' @param outcome TODO

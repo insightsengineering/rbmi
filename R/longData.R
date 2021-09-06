@@ -148,7 +148,7 @@ longDataConstructor <- R6::R6Class(
         #'
         #' @details
         #'
-        #' If `obj` is NULL then the full original dataset is returned. 
+        #' If `obj` is NULL then the full original dataset is returned.
         #'
         #' If `obj` is a character vector then a new dataset consisting of just those subjects is
         #' returned; if the character vector contains duplicate entries then that subject will be
@@ -173,7 +173,7 @@ longDataConstructor <- R6::R6Class(
         #' If `obj` is not NULL then all subject IDs will be scrambled in order to ensure that they are unique
         #' i.e. If the `pt2` is requested twice then this process guarantees that each set of observations
         #' be have a unique subject ID number. The `idmap` attribute (if requested) can be used
-        #' to map from the new ids back to the old ids. 
+        #' to map from the new ids back to the old ids.
         #'
         #' @return
         #'
@@ -248,7 +248,7 @@ longDataConstructor <- R6::R6Class(
         #' @description
         #' This function decomposes a patients data from `self$data` and populates
         #' all the corresponding lists i.e. `self$is_missing`, `self$values`, `self$group`, etc.
-        #' This function is only called upon the objects initalisation
+        #' This function is only called upon the objects initialisation
         #' @param id Character subject id that exists within `self$data`
         add_subject = function(id) {
 
@@ -323,7 +323,7 @@ longDataConstructor <- R6::R6Class(
 
 
         #' @description
-        #' Returns a list of key information for a given subject. Is a conveinance wrapper
+        #' Returns a list of key information for a given subject. Is a convenience wrapper
         #' to save having to manually grab each element
         #' @param id Character subject id that exists within `self$data`
         extract_by_id = function(id) {
@@ -340,9 +340,9 @@ longDataConstructor <- R6::R6Class(
 
 
         #' @description
-        #' Convieance function to run self$set_strategies(dat_ice, update=TRUE)
+        #' Convenience function to run self$set_strategies(dat_ice, update=TRUE)
         #' kept for legacy reasons
-        #' @param dat_ice Dataframe containing ICE information see [impute()] for the format of this dataframe
+        #' @param dat_ice A data.frame containing ICE information see [impute()] for the format of this dataframe
         update_strategies = function(dat_ice) {
             self$set_strategies(dat_ice, update = TRUE)
         },
@@ -355,7 +355,7 @@ longDataConstructor <- R6::R6Class(
         #' See [draws()] for the specification of `dat_ice` if `update=FALSE`
         #' See [impute()] for the format of `dat_ice` if `update=TRUE`
         #' If `update=TRUE` this function ensures that MAR strategies cannot be changed to Non-MAR in the presence
-        #' of post-ICE obserevations.
+        #' of post-ICE observations.
         #' @param dat_ice Dataframe containing ICE information. See details.
         #' @param update Logical, indicates that the ICE data should be used as an update. See details.
         set_strategies = function(dat_ice = NULL, update=FALSE) {
@@ -454,8 +454,7 @@ longDataConstructor <- R6::R6Class(
         #' @description
         #' Populates the `self$strata` variable. If the user has specified stratification variables
         #' The first visit is used to determine the value of those variables. If no stratification variables
-        #' have been specified then everyone is defined as being in strata 1. 
-        #' @return TODO
+        #' have been specified then everyone is defined as being in strata 1.
         set_strata = function() {
             ## Use first row to determine strata i.e. no time varying strata
             if (length(self$vars$strata) > 0) {
