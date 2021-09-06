@@ -57,7 +57,7 @@ test_that("Basic Usage - Approx Bayes", {
         mutate(strategy = "JR")
 
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         group = "group",
         strategy = "strategy",
@@ -129,7 +129,7 @@ test_that("Basic Usage - Bayesian", {
         mutate(strategy = "MAR")
 
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         group = "group",
         strategy = "strategy",
@@ -219,7 +219,7 @@ test_that("Basic Usage - Condmean", {
         mutate(strategy = "JR")
 
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         group = "group",
         strategy = "strategy",
@@ -286,7 +286,7 @@ test_that("Basic Usage - Condmean", {
 
 
 
-test_that("Custom Strategies and Custom analysis functions",{
+test_that("Custom Strategies and Custom analysis functions", {
 
     skip_if_not(is_nightly())
 
@@ -308,7 +308,7 @@ test_that("Custom Strategies and Custom analysis functions",{
         mutate(strategy = "XX")
 
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         group = "group",
         strategy = "strategy",
@@ -415,7 +415,7 @@ test_that("Custom Strategies and Custom analysis functions",{
 
 
 
-test_that("Sorting doesn't change results",{
+test_that("Sorting doesn't change results", {
 
     skip_if_not(is_nightly())
 
@@ -433,7 +433,7 @@ test_that("Sorting doesn't change results",{
         select(id, visit) %>%
         mutate(strategy = "JR")
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         group = "group",
         strategy = "strategy",
@@ -493,3 +493,140 @@ test_that("Sorting doesn't change results",{
     expect_equal(anaobj, anaobj2)
     expect_equal(poolobj, poolobj2)
 })
+
+
+
+
+
+
+
+test_that("Multiple imputation references / groups work as expected (end to end checks)", {
+
+    skip_if_not(is_nightly())
+
+    extract_ci <- function(x, ref) {
+        x_imp <- impute(x, ref)
+        vars2 <- x$data$vars
+        vars2$covariates <- c("age", "sex")
+        vars2$group <- "group"
+        x_ana <- analyse(x_imp, ancova, vars = vars2)
+        x_pl <- pool(x_ana, conf.level = 0.98)
+        x_pl$pars$trt_visit_3$ci
+    }
+
+    set.seed(151)
+
+    s1 <- 6
+    s2 <- 9
+    s3 <- 28
+
+    mcoefs_b <- list("int" = 10, "age" = 3, "sex" = 6, "trt_slope" = s1, "visit_slope" = 2)
+    mcoefs_c <- list("int" = 10, "age" = 3, "sex" = 6, "trt_slope" = s2, "visit_slope" = 2)
+    mcoefs_d <- list("int" = 10, "age" = 3, "sex" = 6, "trt_slope" = s3, "visit_slope" = 2)
+
+    sigma <- as_covmat(c(2, 2, 2), c(0.1, 0.5, 0.3))
+
+    n <- 100
+
+    dat <- bind_rows(
+        get_sim_dat2(n, mcoefs_b, sigma) %>%
+            mutate(group2 = if_else(group == "A", "A", "B")) %>%
+            mutate(id = paste0(id, "A")),
+
+        get_sim_dat2(n, mcoefs_c, sigma) %>%
+            mutate(group2 = if_else(group == "A", "A", "C")) %>%
+            mutate(id = paste0(id, "B")),
+
+        get_sim_dat2(n, mcoefs_d, sigma) %>%
+            mutate(group2 = if_else(group == "A", "A", "D")) %>%
+            mutate(id = paste0(id, "C"))
+    ) %>%
+        mutate(outcome = if_else(rbinom(n(), 1, 0.5) == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(id = factor(id)) %>%
+        mutate(group2 = factor(group2, levels = c("A", "B", "C", "D")))
+
+    vars <- set_vars(
+        subjid = "id",
+        outcome = "outcome",
+        visit = "visit",
+        group = "group2",
+        covariates = c("age", "sex", "group2 * visit")
+    )
+
+    dat_ice <- dat %>%
+        filter(is.na(outcome)) %>%
+        group_by(id) %>%
+        arrange(id, visit) %>%
+        slice(1) %>%
+        select(id, visit) %>%
+        mutate(strategy = "JR")
+
+    x <- draws(
+        data = dat,
+        data_ice = dat_ice,
+        vars = vars,
+        method = method_bayes(
+            same_cov = FALSE,
+            burn_between = 4,
+            n_samples = 150,
+            burn_in = 25,
+            verbose = FALSE
+        )
+    )
+
+    expect_within(
+        ((s1 + 0) / 2) + ((s2 + 0) / 2) + ((s3 + 0) / 2),
+        extract_ci(x, c("A" = "A", "B" = "A", "C" = "A", "D" = "A"))
+    )
+
+    expect_within(
+        ((s1 + s1) / 2) + ((s2 + s2) / 2) + ((s3 + s3) / 2),
+        extract_ci(x, c("A" = "A", "B" = "B", "C" = "C", "D" = "D"))
+    )
+
+    expect_within(
+        ((s1 + s2) / 2) + ((s2 + s2) / 2) + ((s3 + s2) / 2),
+        extract_ci(x, c("A" = "A", "B" = "C", "C" = "C", "D" = "C"))
+    )
+
+
+    x <- draws(
+        data = dat,
+        data_ice = dat_ice,
+        vars = vars,
+        method = method_condmean(
+            same_cov = TRUE,
+            n_samples = 60
+        )
+    )
+
+    expect_true(
+        length(x$samples[[1]]$sigma) == 4
+    )
+
+    expect_equal(
+        x$samples[[1]]$sigma[["A"]],
+        x$samples[[1]]$sigma[["D"]]
+    )
+
+    expect_true(
+        !identical(x$samples[[1]]$sigma[["A"]], x$samples[[2]]$sigma[["A"]])
+    )
+
+    expect_within(
+        ((s1 + 0) / 2) + ((s2 + 0) / 2) + ((s3 + 0) / 2),
+        extract_ci(x, c("A" = "A", "B" = "A", "C" = "A", "D" = "A"))
+    )
+
+    expect_within(
+        ((s1 + s1) / 2) + ((s2 + s2) / 2) + ((s3 + s3) / 2),
+        extract_ci(x, c("A" = "A", "B" = "B", "C" = "C", "D" = "D"))
+    )
+
+    expect_within(
+        ((s1 + s2) / 2) + ((s2 + s2) / 2) + ((s3 + s2) / 2),
+        extract_ci(x, c("A" = "A", "B" = "C", "C" = "C", "D" = "C"))
+    )
+})
+
+

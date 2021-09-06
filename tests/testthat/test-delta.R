@@ -19,7 +19,7 @@ test_that("delta_template & delta_lagscale",{
         cov2 = rnorm(n_vis * 2)
     )
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "out",
         visit = "vis",
         subjid = "pt",
@@ -248,7 +248,7 @@ test_that("extract_imputed_dfs + delta", {
         ungroup() %>%
         mutate(strategy = "MAR")
 
-    vars <- ivars(
+    vars <- set_vars(
         visit = "visit",
         subjid = "id",
         group = "group",

@@ -211,7 +211,7 @@ test_that("ancova", {
         out = rnorm(n, mean = 50 + 3 * f2n(grp) + 4 * age1 + 8 * age2,  sd = 20)
     )
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "out",
         group = "grp",
         covariates = c("age1", "age2")

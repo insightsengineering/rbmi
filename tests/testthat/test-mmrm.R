@@ -177,7 +177,7 @@ sigma <- as_covmat(c(5, 3, 8), c(0.4, 0.6, 0.3))
 dat <- get_sim_data(n = 40, sigma) %>%
     mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 1, NA_real_, outcome))
 
-vars <- ivars(
+vars <- set_vars(
     outcome = "outcome",
     visit = "visit",
     subjid = "subjid",
@@ -456,7 +456,7 @@ test_that("initial values speed up BFGS", {
 
     dat <- get_sim_data(n = 200, sigma)
 
-    vars <- ivars(
+    vars <- set_vars(
         subjid = "id",
         covariates = c("group", "sex", "visit * group")
     )

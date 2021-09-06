@@ -57,7 +57,7 @@ get_ld <- function() {
     dat[c(1, 2, 3, 4, 6, 7), "outcome"] <- NA
 
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         visit = "visit",
         subjid = "subjid",
@@ -98,7 +98,7 @@ get_data <- function(n){
         mutate(strategy = "JR")
 
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         group = "group",
         strategy = "strategy",
@@ -285,7 +285,7 @@ test_that("Group is a stratification variable by default", {
     dat <- dobj$dat
     dat_ice <- dobj$dat_ice
     
-    vars <- ivars(
+    vars <- set_vars(
         subjid = "id",
         visit = "visit",
         outcome = "outcome",
@@ -305,7 +305,7 @@ test_that("Group is a stratification variable by default", {
 
 
 
-    vars <- ivars(
+    vars <- set_vars(
         subjid = "id",
         visit = "visit",
         outcome = "outcome",
@@ -533,7 +533,7 @@ test_that("longdata can handle data that isn't sorted", {
         outcome = c(1, 2, 3, 4, 5, NA)
     )
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         visit = "visit",
         subjid = "id",
@@ -566,7 +566,7 @@ test_that("longdata can handle data that isn't sorted", {
 
 test_that("longdata rejects data that has no useable observations for a visit", {
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         visit = "visit",
         subjid = "id",

@@ -23,7 +23,7 @@ test_that("Results are Reproducible", {
             select(id, visit) %>%
             mutate(strategy = "JR")
 
-        vars <- ivars(
+        vars <- set_vars(
             outcome = "outcome",
             group = "group",
             strategy = "strategy",
@@ -98,7 +98,7 @@ test_that("bayes - seed argument works without set.seed",{
         select(id, visit) %>%
         mutate(strategy = "JR")
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         group = "group",
         strategy = "strategy",

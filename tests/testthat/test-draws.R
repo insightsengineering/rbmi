@@ -26,7 +26,7 @@ get_data <- function(n) {
         mutate(strategy = "JR")
 
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         group = "group",
         strategy = "strategy",
@@ -201,7 +201,7 @@ test_that("nmar data is removed as expected", {
         visit = "visit_2"
     )
 
-    vars <- ivars(
+    vars <- set_vars(
         outcome = "outcome",
         visit = "visit",
         subjid = "id",

@@ -2,17 +2,13 @@
 % Please edit documentation in R/mcmc.R
 \name{QR_decomp}
 \alias{QR_decomp}
-\title{Title - TODO}
+\title{QR decomposition}
 \usage{
-QR_decomp(designmat, N, J)
+QR_decomp(mat)
 }
 \arguments{
-\item{designmat}{TODO}
-
-\item{N}{TODO}
-
-\item{J}{TODO}
+\item{mat}{A Matrix to perform the QR decomposition on}
 }
 \description{
-Title - TODO
+QR decomposition
 }
