@@ -45,7 +45,7 @@ get_within <- function(x, real){
         summarise(
             lci = quantile(val, 0.005),
             uci = quantile(val, 0.995)
-        ) %>% 
+        ) %>%
         mutate(real = real) %>%
         mutate(inside = real >= lci &  real <= uci)
 }
@@ -311,7 +311,7 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
 
     skip_if_not(is_nightly())
 
-    set.seed(3151)
+    set.seed(2151)
 
     mcoefs <- list(
         "int" = 10,
@@ -326,6 +326,7 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
 
     ### No missingness
     fit <- fit_mcmc(
+        seed = 8931,
         designmat = mat,
         outcome = dat$outcome,
         group = dat$group,
@@ -348,10 +349,12 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
 
 
     ### Random missingness patterns
+    set.seed(3190)
     dat2 <- dat %>%
         mutate(outcome = if_else(rbinom(n(), 1, 0.3) == 1, NA_real_, outcome))
 
     fit <- fit_mcmc(
+        seed = 8931,
         designmat = mat,
         outcome = dat2$outcome,
         group = dat2$group,
@@ -371,8 +374,8 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
     assert_that(all(sigma_within$inside))
 
 
-
     ### Missingness affecting specific groups
+    set.seed(3190)
     dat2 <- dat %>%
         mutate(outcome = if_else(
             rbinom(n(), 1, 0.5) == 1 & visit != "visit_1" & group == "B" & age > 0.3,
@@ -381,6 +384,7 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         ))
 
     fit <- fit_mcmc(
+        seed = 8931,
         designmat = mat,
         outcome = dat2$outcome,
         group = dat2$group,
@@ -420,14 +424,20 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
     sigma_b <- as_covmat(c(6, 9, 3), c(0.8, 0.2, 0.5))
 
     dat <- bind_rows(
-        get_mcmc_sim_dat(1200, mcoefs, sigma_a) %>% filter(group == "A") %>% mutate(id = paste0(id, "A")),
-        get_mcmc_sim_dat(1200, mcoefs, sigma_b) %>% filter(group == "B") %>% mutate(id = paste0(id, "B"))
+        get_mcmc_sim_dat(1200, mcoefs, sigma_a) %>%
+            filter(group == "A") %>%
+            mutate(id = paste0(id, "A")),
+
+        get_mcmc_sim_dat(1200, mcoefs, sigma_b) %>%
+            filter(group == "B") %>%
+            mutate(id = paste0(id, "B"))
     )
 
     mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
 
     ### No missingness
     fit <- fit_mcmc(
+        seed = 8931,
         designmat = mat,
         outcome = dat$outcome,
         group = dat$group,
@@ -456,10 +466,12 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
 
 
     ### Random missingness patterns
+    set.seed(4812)
     dat2 <- dat %>%
         mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 1, NA_real_, outcome))
 
     fit <- fit_mcmc(
+        seed = 8931,
         designmat = mat,
         outcome = dat2$outcome,
         group = dat2$group,
