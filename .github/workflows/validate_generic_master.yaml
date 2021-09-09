@@ -1,0 +1,25 @@
+---
+name: Generic Validation Action
+
+on:
+  push:
+    branches:
+      - generic-validation
+
+jobs:
+  r-pkg-validation:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build report
+        uses: insightsengineering/r-pkg-validation@dev/add_deps
+          
+      - name: Upload visR validation report
+        uses: actions/upload-artifact@v2
+        if: success()
+        with:
+          name: visR-report.pdf
+          path: ./validation_report.pdf
+          if-no-files-found: error
