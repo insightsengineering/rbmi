@@ -738,3 +738,4 @@ test_that("impute can recover known values", {
     expect_equal(x$imputations[[1]][[3]]$values, c(50))
     expect_equal(vapply(x$imputations[[1]], function(x) x$id, character(1)), c("1", "2", "4"))
 })
+

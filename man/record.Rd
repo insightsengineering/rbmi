@@ -2,15 +2,33 @@
 % Please edit documentation in R/utilities.R
 \name{record}
 \alias{record}
-\title{record}
+\title{Capture all Output}
 \usage{
 record(expr)
 }
 \arguments{
 \item{expr}{An expression to be executed}
 }
+\value{
+A list containing
+\itemize{
+\item \strong{results} - The object returned by \code{expr} or \code{list()} if an error was thrown
+\item \strong{warnings} - NULL or a character vector if warnings were thrown
+\item \strong{errors} - NULL or a string if an error was thrown
+\item \strong{messages} - NULL or a character vector if messages were produced
+}
+}
 \description{
 This function silences all warnings, errors & messages and instead returns a list
 containing the results (if it didn't error) + the warning and error messages as
 character vectors.
+}
+\examples{
+record({
+  x <- 1
+  y <- 2
+  warning("something went wrong")
+  message("O nearly done")
+  x + y
+})
 }

@@ -462,7 +462,7 @@ longDataConstructor <- R6::R6Class(
                     self$ids,
                     function(x) self$indexes[[x]][[1]],
                     numeric(1),
-                    use.names = FALSE
+                    USE.NAMES = FALSE
                 )
                 strata_data <- self$data[strata_index, self$vars$strata]
                 self$strata <- as_strata(strata_data)

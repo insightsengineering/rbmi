@@ -1,11 +1,23 @@
 
 
-#' Title
+#' Create vector of Stratas
 #'
-#' @param ...  TODO
+#' Collapse multiple categorical variables into distinct unique categories.
+#' i.e.
+#' ```
 #'
+#' ```
+#' would return
+#' ```
+#' c(1,2,3,3,4,1)
+#' ```
+#'
+#' @param ... numeric/character/fator vectors of the same length
+#' @examples
+#' as_strata(c(1,1,2,2,2,1), c(5,6,5,5,6,5))
 as_strata <- function(...){
     x <- list(...)
+    assert_that(length(unique(vapply(x, length, numeric(1)))) == 1 )
     df <- as.data.frame(x)
     colnames(df) <- paste0("var", 1:length(x))
     df_unique <- unique(df)
@@ -16,11 +28,17 @@ as_strata <- function(...){
 }
 
 
-#' Title
+#' Sample Patient Ids
 #'
-#' @param ids  TODO
-#' @param strata  TODO
+#' Performs stratified random sampling with replacement of patient IDs
+#' ensuring the return vector is the same length as the input vector
 #'
+#' @param ids  vector to sample from
+#' @param strata  strata indicator, ids are sampled within each strata
+#' ensuring the that the numbers of each strata are maintained
+#'
+#' @examples
+#' sample_ids( c("a", "b", "c", "d"), strata = c(1,1,2,2))
 sample_ids <- function(ids, strata = rep(1, length(ids))){
     res <- tapply(
         X = ids,

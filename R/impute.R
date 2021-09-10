@@ -60,7 +60,7 @@
 #'     references = c("Trt" = "Placebo", "Placebo" = "Placebo")
 #' )
 #'
-#' new_ice <- data.frame(
+#' new_strategy <- data.frame(
 #'   subjid = c("Pt1", "Pt2"),
 #'   strategy = c("MAR", "JR")
 #' )
@@ -136,7 +136,7 @@ impute_internal <- function(draws, references, update_strategy, strategies, cond
     validate(references, data$data[[data$vars$group]])
     validate_strategies(strategies, data$strategies)
 
-    
+
 
     if (!is.null(update_strategy)) {
         data$update_strategies(update_strategy)
@@ -505,7 +505,7 @@ get_conditional_parameters <- function(pars, values) {
 #'
 #' @return
 #' Will error if there is an issue otherwise will return `TRUE`
-#' @export 
+#' @export
 validate.references <- function(x, control, ...) {
     references <- x
     ref_names <- names(references)
