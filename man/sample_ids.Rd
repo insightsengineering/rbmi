@@ -17,5 +17,7 @@ Performs stratified random sampling with replacement of patient IDs
 ensuring the return vector is the same length as the input vector
 }
 \examples{
+\dontrun{
 sample_ids( c("a", "b", "c", "d"), strata = c(1,1,2,2))
+}
 }

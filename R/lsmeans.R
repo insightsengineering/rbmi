@@ -63,11 +63,13 @@ lscombinations <- function(data, mterms, fix) {
 #' @references \url{https://cran.r-project.org/web/packages/emmeans/index.html}
 #' @references \url{https://documentation.sas.com/doc/en/pgmsascdc/9.4_3.3/statug/statug_glm_details41.htm}
 #' @examples
+#' \dontrun{
 #' mod <- lm( Sepal.Length ~ Species + Petal.Length, data = iris)
 #' lsmeans(mod)
 #' lsmeans(mod, Species = "virginica")
 #' lsmeans(mod, Species = "versicolor")
 #' lsmeans(mod, Species = "versicolor", Petal.Length = 1)
+#' }
 #' @importFrom stats model.matrix terms reformulate
 lsmeans <- function(model, ...) {
 

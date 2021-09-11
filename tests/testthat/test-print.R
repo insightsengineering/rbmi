@@ -5,7 +5,7 @@ suppressPackageStartupMessages({
 
 
 get_data <- function(n) {
-    sigma <- as_covmat(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
+    sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
 
     set.seed(1518)
 

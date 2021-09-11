@@ -24,6 +24,7 @@ containing the results (if it didn't error) + the warning and error messages as
 character vectors.
 }
 \examples{
+\dontrun{
 record({
   x <- 1
   y <- 2
@@ -31,4 +32,5 @@ record({
   message("O nearly done")
   x + y
 })
+}
 }

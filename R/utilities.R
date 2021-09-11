@@ -189,6 +189,7 @@ sample_mvnorm <- function(mu, sigma) {
 #' - **messages** - NULL or a character vector if messages were produced
 #'
 #' @examples
+#' \dontrun{
 #' record({
 #'   x <- 1
 #'   y <- 2
@@ -196,6 +197,7 @@ sample_mvnorm <- function(mu, sigma) {
 #'   message("O nearly done")
 #'   x + y
 #' })
+#' }
 record <- function(expr) {
     env <- new.env()
     result <- withCallingHandlers(
@@ -311,7 +313,9 @@ str_contains <- function(x, subs) {
 #' @param decreasing logical whether sort order should be in descending or ascending (default) order. Can be either a single logical value (in which case it is applied to
 #' all variables) or a vector which is the same length as `vars`
 #' @examples
+#' \dontrun{
 #' sort_by(iris, c("Sepal.Length", "Sepal.Width"), decreasing = c(TRUE, FALSE))
+#' }
 sort_by <- function(df, vars = NULL, decreasing = FALSE) {
     if (is.null(vars)) {
         return(df)

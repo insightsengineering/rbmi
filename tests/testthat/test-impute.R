@@ -389,7 +389,7 @@ test_that("impute_outcome", {
 
     ##### Multivariate
 
-    # as_covmat( c(2, 4, 6), c(0.3, 0.5, 0.7)) %>% dput
+    # as_vcov( c(2, 4, 6), c(0.3, 0.5, 0.7)) %>% dput
     pars <- list(
         mu = c(8, 10, 12),
         sigma = structure(c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36), .Dim = c(3L, 3L))

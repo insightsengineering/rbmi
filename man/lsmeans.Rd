@@ -34,11 +34,13 @@ emmeans derivation for standard lm's but without having to include
 all of their dependencies
 }
 \examples{
+\dontrun{
 mod <- lm( Sepal.Length ~ Species + Petal.Length, data = iris)
 lsmeans(mod)
 lsmeans(mod, Species = "virginica")
 lsmeans(mod, Species = "versicolor")
 lsmeans(mod, Species = "versicolor", Petal.Length = 1)
+}
 }
 \references{
 \url{https://cran.r-project.org/web/packages/emmeans/index.html}

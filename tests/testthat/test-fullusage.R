@@ -7,7 +7,7 @@ suppressPackageStartupMessages({
 })
 
 bign <- 700
-sigma <- as_covmat(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
+sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
 nsamp <- 200
 
 
@@ -524,7 +524,7 @@ test_that("Multiple imputation references / groups work as expected (end to end 
     mcoefs_c <- list("int" = 10, "age" = 3, "sex" = 6, "trt_slope" = s2, "visit_slope" = 2)
     mcoefs_d <- list("int" = 10, "age" = 3, "sex" = 6, "trt_slope" = s3, "visit_slope" = 2)
 
-    sigma <- as_covmat(c(2, 2, 2), c(0.1, 0.5, 0.3))
+    sigma <- as_vcov(c(2, 2, 2), c(0.1, 0.5, 0.3))
 
     n <- 100
 

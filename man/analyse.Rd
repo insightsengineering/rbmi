@@ -96,9 +96,9 @@ analyse(
 )
 
 deltadf <- data.frame(
-  subjid = c("Pt1", "Pt1", "Pt2"),
-  visit = c("Visit_1", "Visit_2", "Visit_2"),
-  delta = c( 5, 9, -10)
+    subjid = c("Pt1", "Pt1", "Pt2"),
+    visit = c("Visit_1", "Visit_2", "Visit_2"),
+    delta = c( 5, 9, -10)
 )
 
 analyse(

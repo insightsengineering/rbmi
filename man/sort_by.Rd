@@ -18,5 +18,7 @@ all variables) or a vector which is the same length as \code{vars}}
 Sorts a dataframe (ascending by default) based upon variables within the dataset
 }
 \examples{
+\dontrun{
 sort_by(iris, c("Sepal.Length", "Sepal.Width"), decreasing = c(TRUE, FALSE))
+}
 }

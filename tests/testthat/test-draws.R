@@ -5,7 +5,7 @@ suppressPackageStartupMessages({
 })
 
 get_data <- function(n) {
-    sigma <- as_covmat(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
+    sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
 
     set.seed(1518)
 
@@ -183,9 +183,9 @@ test_that("nmar data is removed as expected", {
 
     set.seed(101)
 
-    mysig <- as_covmat(
-        sig = c(1, 3, 5),
-        corr = c(0.3, 0.5, 0.8)
+    mysig <- as_vcov(
+        sd = c(1, 3, 5),
+        cor = c(0.3, 0.5, 0.8)
     )
 
     dat <- get_sim_data(20, mysig)

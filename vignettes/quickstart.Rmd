@@ -1,0 +1,237 @@
+---
+title: "rbmi Quickstart"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{quickstart}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>"
+)
+```
+
+## Introduction
+
+The purpose of this vignette is to provide a 15 minute quickstart guide to the rbmi package showcasing it's primary functions and usage. Please note that this vignette will not cover any of the underlying theory. 
+
+The rbmi package consists of 4 core functions as well as a several key helper functions. In particular the core functions are:
+
+- `draws()` - Creates the imputation models
+- `impute()` - Creates multiple imputed datasets
+- `analyse()` - Analyses the multiple imputed datasets
+- `pool()` - Combines the multiple analysis results into a single statistic
+
+## The Data
+
+In order to demonstrate the package we will use a simulated dataset consisting of 120 patients with 3 visits per patient. The patients will be split into two treatment groups A and B. Group A will be our control group and group B our active group. The data is simulated such that the treatment effect has a linear slope of 4, i.e. the true treatment affect across our 3 visits is 0, 4 and 8. 
+
+```{r setup}
+library(rbmi)
+library(dplyr)
+set.seed(6569)
+dat_full <- simulate_data(n = 120) %>% as_tibble()
+dat_full
+```
+
+We now introduce some missingness to our dataset. For the purpose of this vignette we will set
+visit 2 to missing completely at random with a 30% probability and visit 3 to missing completely at random with a 40% probability.  
+
+```{r}
+dat <- dat_full
+missing_index_vis2 <- rbinom(nrow(dat), 1, 0.3) == 1 & dat$visit == "visit_2"
+missing_index_vis3 <- rbinom(nrow(dat), 1, 0.4) == 1 & dat$visit == "visit_3"
+dat[missing_index_vis2, "outcome"] <- NA_real_
+dat[missing_index_vis3, "outcome"] <- NA_real_
+dat
+```
+
+Note that we have left the rows containing missing outcomes inside the dataset still. This is because rbmi expects its input dataset to be complete; that is that there must be 1 row per patient per visit even if the outcome value is missing. If your dataset is incomplete then the `expand_locf()` helper function can be used to add in any missing rows, using LOCF imputation to impute the covariate values i.e:
+
+```{r}
+## Remove rows containing a missing value to create an "incomplete" dataset
+dat_incomplete <- dat %>% filter(!is.na(outcome))
+dat_incomplete
+
+## Use expand_locf to add those dropped observations back into the dataset
+dat_complete <- expand_locf(
+    dat_incomplete,
+    id = levels(dat_incomplete$id),
+    visit = levels(dat_incomplete$visit),
+    vars = c("sex", "age", "group"),
+    group = c("id"),
+    order = c("id", "visit")
+)
+dat_complete
+```
+
+
+## Draws
+
+The draws function is used to create our imputation models. The 3 main inputs to the `draws()` function include:
+
+- `data` the primary longitudinal data.frame containing the outcome variable and all covariates
+- `data_ice` a data.frame specifying which visit (if any) the patient's intercurrent event  occurred on. If the patient had multiple intercurrent events (ICE) this should specify the date on which the first non-MAR intercurrent event occurred on. It also specifies which reference based imputation strategy we want to use.
+- `method` specifies what method we want to use to fit our imputation models as well as what method we want to use to generate our imputed values. 
+
+For the purpose of this vignette we shall say that the patients ICE visit is the first visit in which a missing value has occurred and that all patients will be imputed under the "MAR" strategy. We will create 150 imputation models using bayesian methods to sample the model coefficients from their posterior distributions for a model of `outcome ~ 1 + age + sex + group * visit`.
+
+```{r}
+dat_ice <- dat %>% 
+    arrange(id, visit) %>% 
+    filter(is.na(outcome)) %>% 
+    group_by(id) %>% 
+    slice(1) %>%
+    ungroup() %>% 
+    select(id, visit) %>% 
+    mutate(strategy = "MAR")
+
+dat_ice
+
+vars <- set_vars(
+    outcome = "outcome",
+    visit = "visit",
+    subjid = "id",
+    group = "group",
+    covariates = c("age", "sex", "group*visit")
+)
+
+method <- method_bayes(
+    burn_in = 200,
+    burn_between = 5,
+    n_samples = 150,
+    verbose = FALSE
+)
+
+
+drawObj <- draws(
+    data = dat,
+    data_ice = dat_ice,
+    vars = vars,
+    method = method
+)
+drawObj
+```
+
+
+Note the use of `set_vars()` which specifies what the names of the key variables within the dataset. Additionally please note that whilst `vars$group` and `vars$visit` are added as terms to the imputation model by default that their interaction is not, thus the inclusion of `group * visit` in the list of covariates. 
+
+Available methods include:
+
+- Bayes - `method_bayes()`
+- Approximate Bayes - `method_approxbayes()`
+- Conditional Mean (Bootstrap) - `method_condmean(type = "bootstrap")`
+- Conditional Mean (Jackknife) - `method_condmean(type = "jackknife")`
+
+Available imputation strategies include:
+
+- Missing Completely at Random - "MAR"
+- Jump to Reference - "JR"
+- Copy Reference - "CR"
+- Copy increments from Reference - "CIR"
+- Last Mean Carried Forward - "LMCF"
+
+
+## Impute
+
+The next step is to use our imputation models to generate our imputed datasets. This is done via the `impute()` function. The function only has 2 key inputs; the imputation models and the references to use when imputing the missing values. It's usage is thus:
+
+```{r}
+imputeObj <- impute(
+    drawObj,
+    c("A" = "A", "B" = "A")
+)
+imputeObj
+```
+
+In this instance we are specifying that group `A` should use itself as its reference group (this is commonly done in the case of a placebo or control arm) and that group `B` should use group `A` as its reference group. 
+
+Generally speaking, there is no need to see or directly interact with any of the imputed datasets, however if you do wish to inspect them they can be exctract from the imputation object using the `extract_imputed_dfs()` helper function i.e.
+
+```{r}
+## Show the original dataset so that we can see where the missing values were
+dat
+
+imputed_dfs <- extract_imputed_dfs(imputeObj)
+imputed_dfs[[1]]
+imputed_dfs[[2]]
+```
+
+Note that in the case of `method_condmean()` the first imputed dataset will always be the "full" dataset containing all the original patients. In the case of `type=jackknife` the other datasets will all contain n-1 patients, whilst in the case of `type=bootstrap` each dataset will contain a bootstrap sample of patients.
+
+
+## Analyse
+
+The next step is to run our analysis on each of our imputed datasets. This is done by defining an analysis function and then getting `analyse()` to map this function across each of our imputed datasets. For this vignette will we use the `ancova()` function provided by the rbmi package which fits an ancova model independently for each visit returning the treatment effect and least square means for each visit. 
+
+```{r}
+anaObj <- analyse(
+    imputeObj,
+    ancova,
+    vars = set_vars(
+        subjid = "id",
+        outcome = "outcome",
+        visit = "visit",
+        group = "group",
+        covariates = c("age", "sex")
+    )
+)
+anaObj
+```
+
+Note that, similar to draws, the ancova function needs use to use the `set_vars()` function to tell it the names of the key variables within the data as well as which covariates we want to include in our analysis model.
+
+Additionally we can use the `delta` argument of `analyse()` to perform a tipping point analysis. Essentially this works by us specifying a data.frame that contains the amount of bias to add to the outcome variable. This must be specified separately for each patient at each visit. This data.frame must contain the columns `vars$visit`, `vars$subjid` and `delta`.
+
+It is appreciated that this is potentially tedious to specify and as such two helper functions, `delta_template()` and `delta_lagscale()` have been provided to simplify this process. In particular `delta_template()` provides a shell data.frame where the bias is set to 0 for all patients but where many additional meta-variables are provided in order to support us defining our own logic.  
+
+For example lets say we want to have a rule that we add a bias of 5 to all observations missing
+observations in the control arm. That could then be implemented as follows:
+
+```{r}
+## For reference show the additional meta variables provided
+delta_template(imputeObj) %>% as_tibble()
+
+delta_df <- delta_template(imputeObj) %>%
+    as_tibble() %>% 
+    mutate(delta = if_else(group == "A" & is_missing , 5, 0)) %>% 
+    select(id, visit, delta)
+    
+delta_df
+
+anaObj_delta <- analyse(
+    imputeObj,
+    ancova,
+    delta = delta_df,
+    vars = set_vars(
+        subjid = "id",
+        outcome = "outcome",
+        visit = "visit",
+        group = "group",
+        covariates = c("age", "sex")
+    )
+)
+```
+
+## Pool
+
+Finally, the `pool()` function can be used to summarise all of our analysis results down into a single statistic including standard error, confidence intervals and a p-value for the hypothesis test that $H_0 = 0$.
+
+
+```{r}
+poolObj <- pool(
+    anaObj, 
+    conf.level = 0.95, 
+    alternative = "two.sided"
+)
+poolObj
+```
+
+The table of values shown in the print message can be extracted using the `as.data.frame()` function on the pool object i.e.
+
+```{r}
+as.data.frame(poolObj)
+```

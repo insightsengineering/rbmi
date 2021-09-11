@@ -10,7 +10,7 @@ test_that("Results are Reproducible", {
 
     run_test <- function(method) {
         set.seed(4642)
-        sigma <- as_covmat(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
+        sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
         dat <- get_sim_data(40, sigma, trt = 8) %>%
             mutate(outcome = if_else(rbinom(n(), 1, 0.3) == 1, NA_real_, outcome))
 
@@ -85,7 +85,7 @@ test_that("Results are Reproducible", {
 
 
 test_that("bayes - seed argument works without set.seed",{
-    sigma <- as_covmat(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
+    sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
     dat <- get_sim_data(40, sigma, trt = 8) %>%
         mutate(outcome = if_else(rbinom(n(), 1, 0.3) == 1, NA_real_, outcome))
 

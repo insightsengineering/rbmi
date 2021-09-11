@@ -81,7 +81,7 @@ runme <- function(x){
 
 }
 
-sigma <- as_covmat(
+sigma <- as_vcov(
     c(3, 4, 5, 6),
     c(0.3, 0.4, 0.45, 0.4, 0.3, 0.2)
 )

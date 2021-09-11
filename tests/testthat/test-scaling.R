@@ -5,9 +5,9 @@ suppressPackageStartupMessages({
 test_that("scaler", {
 
     set.seed(101)
-    mysig <- as_covmat(
-        sig = c(1, 3, 5),
-        corr = c(0.3, 0.5, 0.8)
+    mysig <- as_vcov(
+        sd = c(1, 3, 5),
+        cor = c(0.3, 0.5, 0.8)
     )
 
     dat_1 <- get_sim_data(1000, mysig)

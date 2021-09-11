@@ -20,5 +20,7 @@ i.e.\preformatted{}
 c(1,2,3,3,4,1)\preformatted{}
 }
 \examples{
+\dontrun{
 as_strata(c(1,1,2,2,2,1), c(5,6,5,5,6,5))
+}
 }

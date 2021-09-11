@@ -7,7 +7,7 @@ library(purrr)
 library(mvtnorm)
 devtools::load_all()
 #
-as_covmat <- function(sig, corr){
+as_vcov <- function(sig, corr){
     len <- length(sig)
     cormat <- diag(rep(1, len))
     index <- 1
@@ -50,19 +50,19 @@ as_covmat <- function(sig, corr){
 #     return(dat)
 # }
 #
-# sigma <- as_covmat( sig = c(1,2,3) , c(0.5, 0.7, 0.8))
+# sigma <- as_vcov( sig = c(1,2,3) , c(0.5, 0.7, 0.8))
 # dat <- get_dat(sigma) %>%
 #     mutate(pt = factor(pt))
 #
 
-as_covmat( c(1,2,3,4), c(0.2, 0.4, 0.6, 0.8 ,0.4, 0.5)) %>% dput
+as_vcov( c(1,2,3,4), c(0.2, 0.4, 0.6, 0.8 ,0.4, 0.5)) %>% dput
 
-as_covmat( c(1,2,3), c(0.2, 0.4, 0.6, 0.8 )) %>% dput
+as_vcov( c(1,2,3), c(0.2, 0.4, 0.6, 0.8 )) %>% dput
 
 n <- 10
 nv <- 3
 
-as_covmat <- function(sig, corr){
+as_vcov <- function(sig, corr){
     len <- length(sig)
     cormat <- diag(rep(1, len))
     index <- 1
@@ -193,7 +193,7 @@ set_col_names <- function(x, nam) {
 
 f2n <- function(x) as.numeric(x) - 1
 
-as_covmat <- function(sig, corr){
+as_vcov <- function(sig, corr){
     len <- length(sig)
     cormat <- diag(rep(1, len))
     index <- 1
@@ -228,9 +228,9 @@ covars <- tibble(
     sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F"))
 )
 
-mysig <- as_covmat(
-    sig = c(1, 3, 5, 7),
-    corr = c(0.1,0.2,0.3,0.4,0.5,0.6)
+mysig <- as_vcov(
+    sd = c(1, 3, 5, 7),
+    cor = c(0.1,0.2,0.3,0.4,0.5,0.6)
 )
 
 dat <- rmvnorm(n, sigma = mysig) %>%
@@ -238,10 +238,10 @@ dat <- rmvnorm(n, sigma = mysig) %>%
     as_tibble() %>%
     mutate(id = 1:n()) %>%
     gather("visit", "outcome", -id) %>%
-    mutate(visit = factor(visit)) %>% 
+    mutate(visit = factor(visit)) %>%
     arrange(id, visit) %>%
-    left_join(covars, by = "id") %>% 
-    mutate(outcome = outcome + 5 +  3 * age + 3 * f2n(sex) + 4 * f2n(group)) %>% 
+    left_join(covars, by = "id") %>%
+    mutate(outcome = outcome + 5 +  3 * age + 3 * f2n(sex) + 4 * f2n(group)) %>%
     mutate(id = as.character(id))
 
 
@@ -264,7 +264,7 @@ boot_ids <- boot_ids[order(boot_ids)]
 
 boot_ids_unique <- unique(boot_ids)
 
-dat0 <- rmd$get_data(rmd$ids) 
+dat0 <- rmd$get_data(rmd$ids)
 dat1 <- rmd$get_data(boot_ids)
 dat2 <- rmd$get_data(boot_ids_unique)
 
@@ -272,9 +272,9 @@ dat2 <- rmd$get_data(boot_ids_unique)
 time_it({
     mod <- glmmTMB(
         outcome ~ sex + group + age + us(0 + visit | id),
-        data = dat, 
+        data = dat,
         dispformula = ~0,
-        REML = TRUE, 
+        REML = TRUE,
         control = glmmTMBControl(optimizer = optim, optArgs = list(method = "L-BFGS-B"))
     )
 })
@@ -285,7 +285,7 @@ time_it({
         outcome ~ sex + group + age + us(0 + visit | id),
         data = dat0,
         dispformula = ~0,
-        REML = TRUE, 
+        REML = TRUE,
         control = glmmTMBControl(optimizer = optim, optArgs = list(method = "L-BFGS-B"))
     )
 })
@@ -298,8 +298,8 @@ time_it({
     mod1 <- glmmTMB(
         outcome ~ sex + group + age + us( 0 + visit|id),
         data = dat1,
-        REML = TRUE, 
-        start = params, 
+        REML = TRUE,
+        start = params,
         dispformula = ~0,
         control = glmmTMBControl(optimizer = optim, optArgs = list(method = "L-BFGS-B"))
     )
@@ -312,9 +312,9 @@ time_it({
     mod2 <- glmmTMB(
         outcome ~ sex + group  + age + us( 0 + visit|id),
         data = dat2,
-        REML = TRUE, 
+        REML = TRUE,
         weights = weight_vec / length(weight_vec) ,
-        start = params, 
+        start = params,
         dispformula = ~0,
         control = glmmTMBControl(optimizer = optim, optArgs = list(method = "L-BFGS-B"))
     )
@@ -324,8 +324,8 @@ time_it({
 tmp <- glmmTMB(
     outcome ~ sex + group  + age + us( 0 + visit|id),
     data = dat2,
-    REML = TRUE, 
-    start = params, 
+    REML = TRUE,
+    start = params,
     dispformula = ~0,
     control = glmmTMBControl(optimizer = optim, optArgs = list(method = "L-BFGS-B")),
     doFit=FALSE
@@ -350,7 +350,7 @@ dat <- haven::read_sas("~/Downloads/chapter15_example.sas7bdat")
 
 dat2 <- dat %>%
     mutate(VISIT = factor(VISIT)) %>%
-    mutate(PATIENT = factor(PATIENT)) 
+    mutate(PATIENT = factor(PATIENT))
 
 dat_exp <- expand(
     dat2,

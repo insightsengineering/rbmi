@@ -69,7 +69,7 @@ test_that("split_dim creates a list from an array as expected", {
 test_that("Verbose supression works", {
 
     set.seed(301)
-    sigma <- as_covmat(c(6, 4, 4), c(0.5, 0.2, 0.3))
+    sigma <- as_vcov(c(6, 4, 4), c(0.5, 0.2, 0.3))
     dat <- get_sim_data(50, sigma)
 
     dat_ice <- dat %>%
@@ -319,7 +319,7 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         "sex" = 6,
         "trtslope" = 7
     )
-    sigma <- as_covmat(c(3, 5, 7), c(0.1, 0.4, 0.7))
+    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
 
     dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
     mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
@@ -420,8 +420,8 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
         "sex" = 6,
         "trtslope" = 7
     )
-    sigma_a <- as_covmat(c(3, 5, 7), c(0.1, 0.4, 0.7))
-    sigma_b <- as_covmat(c(6, 9, 3), c(0.8, 0.2, 0.5))
+    sigma_a <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+    sigma_b <- as_vcov(c(6, 9, 3), c(0.8, 0.2, 0.5))
 
     dat <- bind_rows(
         get_mcmc_sim_dat(1200, mcoefs, sigma_a) %>%
