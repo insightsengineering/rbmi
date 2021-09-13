@@ -63,12 +63,19 @@
 #' perform a "tipping point" analysis. The
 #' delta dataset must contain columns `vars$subjid`, `vars$visit` (as specified
 #' in the original call to [draws()]) and `delta`. Essentially this data.frame
-#' is merged onto the imputed dataset by `vars$subjid` & `vars$visit` and then
+#' is merged onto the imputed dataset by `vars$subjid` and `vars$visit` and then
 #' the outcome variable is modified by:
+#'
 #' ```
 #' imputed_data[[vars$outcome]] <- imputed_data[[vars$outcome]] + imputed_dat[["delta"]]
 #' ```
-#' The helper function [delta_template()] can be used to create delta datasets.
+#'
+#' Please note that in order to provide maximum flexibility, the `delta` argument
+#' can be used to modify any/all outcome values including those that were not
+#' imputed. Care must be taken when defining offsets. It is recommend that you
+#' use the helper function [delta_template()] to define the delta datasets as
+#' this provides utility variables such as `is_missing` which can be used to identify
+#' exactly which visits have been imputed.
 #'
 #' @seealso [extract_imputed_dfs()] for manually extracting imputed
 #' datasets.
