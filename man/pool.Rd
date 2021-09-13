@@ -56,8 +56,8 @@ See Efron & Tibshirani (1994)
 }
 \references{
 Bradley Efron and Robert J Tibshirani. An introduction to the bootstrap. CRC
-press, 1994. \link{Section 11}
+press, 1994. [Section 11]
 
 Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing
-Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. \link{Section 5.4}
+Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. [Section 5.4]
 }

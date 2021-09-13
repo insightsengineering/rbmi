@@ -2,17 +2,26 @@
 % Please edit documentation in R/lsmeans.R
 \name{lscombinations}
 \alias{lscombinations}
-\title{Title - TODO}
+\title{Extract ls values / levels}
 \usage{
 lscombinations(data, mterms, fix)
 }
 \arguments{
-\item{data}{TODO}
+\item{data}{A data.frame}
 
-\item{mterms}{TODO}
+\item{mterms}{a character vector of variables names that exist in
+\code{data} which should be extracted}
 
-\item{fix}{TODO}
+\item{fix}{A named list of variables with fixed values}
 }
 \description{
-Title - TODO
+Takes a data.frame and a list of variable and returns a list
+of values / levels for use in expand.grid.
+}
+\details{
+For numeric values just the mean is returned whilst for
+factor variables a vector of each level is returned.
+
+In either case the default return value can be overwritten by
+values provided to \code{fix}
 }

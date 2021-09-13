@@ -35,9 +35,9 @@ object
 The analysis function \code{fun} must take a data.frame as its first
 argument. All other options to \code{\link[=analyse]{analyse()}} are passed onto \code{fun}
 via \code{...}.
-\code{fun} must return a named list with each element being itself a
+\code{fun} must return a named list with each element itself being a
 list containing a single
-numeric element called \code{est} (or additionally \code{se} and \code{df} if using
+numeric element called \code{est} (or additionally \code{se} and \code{df} if
 you had originally specified \code{\link[=method_bayes]{method_bayes()}} or \code{\link[=method_approxbayes]{method_approxbayes()}})
 i.e.\preformatted{myfun <- function(dat, ...) \{
     mod_1 <- lm(data = dat, outcome ~ group)
@@ -74,11 +74,16 @@ to the outcome variable in the imputed datasets in order to
 perform a "tipping point" analysis. The
 delta dataset must contain columns \code{vars$subjid}, \code{vars$visit} (as specified
 in the original call to \code{\link[=draws]{draws()}}) and \code{delta}. Essentially this data.frame
-is merged onto the imputed dataset by \code{vars$subjid} & \code{vars$visit} and then
+is merged onto the imputed dataset by \code{vars$subjid} and \code{vars$visit} and then
 the outcome variable is modified by:\preformatted{imputed_data[[vars$outcome]] <- imputed_data[[vars$outcome]] + imputed_dat[["delta"]]
 }
 
-The helper function \code{\link[=delta_template]{delta_template()}} can be used to create delta datasets.
+Please note that in order to provide maximum flexibility, the \code{delta} argument
+can be used to modify any/all outcome values including those that were not
+imputed. Care must be taken when defining offsets. It is recommend that you
+use the helper function \code{\link[=delta_template]{delta_template()}} to define the delta datasets as
+this provides utility variables such as \code{is_missing} which can be used to identify
+exactly which visits have been imputed.
 }
 \examples{
 \dontrun{

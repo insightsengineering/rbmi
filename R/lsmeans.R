@@ -1,11 +1,21 @@
 
 
 
-#' Title - TODO
+#' Extract ls values / levels
 #'
-#' @param data TODO
-#' @param mterms TODO
-#' @param fix TODO
+#' Takes a data.frame and a list of variable and returns a list
+#' of values / levels for use in expand.grid.
+#'
+#' For numeric values just the mean is returned whilst for
+#' factor variables a vector of each level is returned.
+#'
+#' In either case the default return value can be overwritten by
+#' values provided to `fix`
+#'
+#' @param data A data.frame
+#' @param mterms a character vector of variables names that exist in
+#' `data` which should be extracted
+#' @param fix A named list of variables with fixed values
 #'
 lscombinations <- function(data, mterms, fix) {
     x <- lapply(
