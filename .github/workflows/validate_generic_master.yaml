@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build report
-        uses: insightsengineering/r-pkg-validation@dev/add_deps
+        uses: insightsengineering/r-pkg-validation@add/generator
           
       - name: Upload visR validation report
         uses: actions/upload-artifact@v2
