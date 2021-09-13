@@ -6,7 +6,7 @@
 \alias{pool_.jackknife}
 \alias{pool_.bootstrap}
 \alias{pool_.rubin}
-\title{TODO}
+\title{Pool Analysis Results}
 \usage{
 pool(
   results,
@@ -24,14 +24,41 @@ pool_(results, conf.level, alternative, type)
 \method{pool_}{rubin}(results, conf.level, alternative, type)
 }
 \arguments{
-\item{results}{TODO}
+\item{results}{results object created by \code{\link[=analyse]{analyse()}}}
 
-\item{conf.level}{TODO}
+\item{conf.level}{confidence level of the returned confidence interval.
+Must be a single number between 0 and 1. Default is 0.95}
 
-\item{alternative}{TODO}
+\item{alternative}{a character string specifying the alternative hypothesis,
+must be one of "two.sided" (default), "greater" or "less".}
 
-\item{type}{TODO}
+\item{type}{a character string of either \code{"percentile"} (default) or
+\code{"normal"}. Determines what method should be used to calculate the confidence
+intervals. See details.
+Only used if \code{method_condmean(type = "bootstrap")} was specified
+in the original call to \code{\link[=draws]{draws()}}}
 }
 \description{
-TODO
+Pool Analysis Results
+}
+\details{
+The calculation used to generate the point estimate, standard errors and
+confidence interval depends upon the method specified in the original
+call to \code{\link[=draws]{draws()}}; In particular:
+\itemize{
+\item \code{method_approxbayes()} & \code{method_bayes()} both use Rubin's rule to pool estimates
+and variances across multiple imputed data, and the Barnard-Rubin rule to pool
+degree's of freedom; see Little & Rubin (2002).
+\item \code{method_condmean(type = "bootstrap")} Uses percentile or normal approximation;
+See Efron & Tibshirani (1994)
+\item \code{method_condmean(type = "jackknife")} Uses the standard jackknife formulas;
+See Efron & Tibshirani (1994)
+}
+}
+\references{
+Bradley Efron and Robert J Tibshirani. An introduction to the bootstrap. CRC
+press, 1994. \link{Section 11}
+
+Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing
+Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. \link{Section 5.4}
 }

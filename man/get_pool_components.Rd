@@ -2,13 +2,15 @@
 % Please edit documentation in R/pool.R
 \name{get_pool_components}
 \alias{get_pool_components}
-\title{TODO}
+\title{Expected Pool Components}
 \usage{
 get_pool_components(x)
 }
 \arguments{
-\item{x}{TODO}
+\item{x}{Character name of the analysis method, must one of either \code{"rubin"}, \code{"jackknife"} or
+"\verb{bootstrap"}}
 }
 \description{
-TODO
+Returns the elements expected to be contained in the analyse object
+depending on what analysis method was specified
 }

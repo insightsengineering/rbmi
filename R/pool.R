@@ -1,12 +1,43 @@
 
 
-#' TODO
+#' Pool Analysis Results
 #'
 #' @name pool
-#' @param results TODO
-#' @param conf.level TODO
-#' @param alternative TODO
-#' @param type TODO
+#'
+#' @param results results object created by [analyse()]
+#'
+#' @param conf.level confidence level of the returned confidence interval.
+#' Must be a single number between 0 and 1. Default is 0.95
+#'
+#' @param alternative a character string specifying the alternative hypothesis,
+#' must be one of "two.sided" (default), "greater" or "less".
+#'
+#' @param type a character string of either `"percentile"` (default) or
+#' `"normal"`. Determines what method should be used to calculate the confidence
+#' intervals. See details.
+#' Only used if `method_condmean(type = "bootstrap")` was specified
+#' in the original call to [draws()]
+#'
+#' @details
+#'
+#' The calculation used to generate the point estimate, standard errors and
+#' confidence interval depends upon the method specified in the original
+#' call to [draws()]; In particular:
+#'
+#' - `method_approxbayes()` & `method_bayes()` both use Rubin's rule to pool estimates
+#'  and variances across multiple imputed data, and the Barnard-Rubin rule to pool
+#'  degree's of freedom; see Little & Rubin (2002).
+#' - `method_condmean(type = "bootstrap")` Uses percentile or normal approximation;
+#' See Efron & Tibshirani (1994)
+#' - `method_condmean(type = "jackknife")` Uses the standard jackknife formulas;
+#' See Efron & Tibshirani (1994)
+#'
+#' @references
+#' Bradley Efron and Robert J Tibshirani. An introduction to the bootstrap. CRC
+#' press, 1994. [Section 11]
+#'
+#' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing
+#' Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. [Section 5.4]
 #'
 #' @export
 pool <- function(
@@ -61,9 +92,13 @@ pool <- function(
 }
 
 
-#' TODO
+#' Expected Pool Components
 #'
-#' @param x TODO
+#' Returns the elements expected to be contained in the analyse object
+#' depending on what analysis method was specified
+#'
+#' @param x Character name of the analysis method, must one of either `"rubin"`, `"jackknife"` or
+#' "`bootstrap"`
 get_pool_components <- function(x) {
     switch(x,
            "rubin" = c("est", "df", "se"),
@@ -91,7 +126,7 @@ pool_.jackknife <- function(results, conf.level, alternative, type) {
     mean_jack <- mean(ests_jack)
     N_jack <- length(ests_jack)
     se_jack <- sqrt(((N_jack - 1) / N_jack) * sum((ests_jack - mean_jack)^2))
-    ret <- normal_ci(est_point, se_jack, alpha, alternative, qnorm, pnorm)
+    ret <- parametric_ci(est_point, se_jack, alpha, alternative, qnorm, pnorm)
     return(ret)
 }
 
@@ -116,6 +151,7 @@ pool_.bootstrap <- function(
     ret <- bootfun(results$est, conf.level, alternative)
     return(ret)
 }
+
 
 #' @title TODO
 #'
@@ -153,6 +189,7 @@ rubin_df <- function(v_com, var_b, var_t, M) {
     return(df)
 }
 
+
 #' @title TODO
 #'
 #' @description TODO
@@ -187,6 +224,7 @@ rubin_rules <- function(ests, ses, v_com) {
     return(ret_obj)
 }
 
+
 #' @importFrom stats qt pt var
 #' @rdname pool
 #' @export
@@ -214,7 +252,7 @@ pool_.rubin <- function(results, conf.level, alternative, type) {
         v_com = v_com
     )
 
-    ret <- normal_ci(
+    ret <- parametric_ci(
         point = res_rubin$est_point,
         se = sqrt(res_rubin$var_t),
         alpha = alpha,
@@ -279,24 +317,35 @@ pool_bootstrap_normal <- function(est, conf.level, alternative) {
     est <- est[-1]
     alpha <- 1 - conf.level
     se <- sd(est)
-    ret <- normal_ci(est_orig, se, alpha, alternative, qnorm, pnorm)
+    ret <- parametric_ci(est_orig, se, alpha, alternative, qnorm, pnorm)
     return(ret)
 }
 
 
 
-#' Title
+#' Calculate parametric confidence intervals
 #'
 #' @description
-#' TODO
-#' @param point TODO
-#' @param se TODO
-#' @param alpha TODO
-#' @param alternative TODO
-#' @param qfun TODO
-#' @param pfun TODO
-#' @param ... TODO
-normal_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
+#' Calculates confidence intervals based upon a parametric
+#' distribution
+#'
+#' @param point The point estimate
+#'
+#' @param se The standard error of the point estimate. If using a non-"normal"
+#' distribution this should be set to 1
+#'
+#' @param alpha The type 1 error rate, should be a value between 0 and 1
+#'
+#' @param alternative a character string specifying the alternative hypothesis,
+#' must be one of "two.sided" (default), "greater" or "less".#' @param qfun TODO
+#'
+#' @param qfun The quantile function for the assumed distribution i.e. `qnorm`
+#'
+#' @param pfun The CDF function for the assumed distribution i.e. `pnorm`
+#'
+#' @param ... additional arguments passed on `qfun` and `pfun` i.e. `df = 102`
+#'
+parametric_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
     ci <- switch(
         alternative,
         two.sided = c(-1, 1) * qfun(1 - alpha / 2, ...),
@@ -334,8 +383,53 @@ normal_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
 #' Transposes a Results object (as created by analyse()) inorder to group
 #' the same estimates together into vectors.
 #'
-#' @param results TODO
-#' @param components TODO
+#' @param results A list of results
+#' @param components a character vector of components to extract
+#' (i.e. `"est", "se"`)
+#'
+#' @details
+#'
+#' Essentially this function takes an object of the format
+#'
+#' ```
+#' x <- list(
+#'     list(
+#'         "trt1" = list(
+#'             est = 1,
+#'             se  = 2
+#'         ),
+#'         "trt2" = list(
+#'             est = 3,
+#'             se  = 4
+#'         )
+#'     ),
+#'     list(
+#'         "trt1" = list(
+#'             est = 5,
+#'             se  = 6
+#'         ),
+#'         "trt2" = list(
+#'             est = 7,
+#'             se  = 8
+#'         )
+#'     )
+#' )
+#' ```
+#'
+#' and produces:
+#'
+#' ```
+#' list(
+#'     trt1 = list(
+#'         est = c(1,5),
+#'         se = c(2,6)
+#'     ),
+#'     trt2 = list(
+#'         est = c(3,7),
+#'         se = c(4,8)
+#'     )
+#' )
+#' ```
 transpose_results <- function(results, components) {
     elements <- names(results[[1]])
     results_transpose <- list()
