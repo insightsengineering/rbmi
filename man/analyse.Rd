@@ -11,7 +11,8 @@ analyse(imputations, fun = ancova, delta = NULL, ...)
 
 \item{fun}{An analysis function to be applied to each imputed datset. See details.}
 
-\item{delta}{A data.frame containing the delta transformation to be applied to the imputed dataset prior to running \code{fun}. See details.}
+\item{delta}{A data.frame containing the delta transformation to be applied to the imputed
+dataset prior to running \code{fun}. See details.}
 
 \item{...}{Additional arguments passed onto \code{fun}}
 }
@@ -77,8 +78,7 @@ is merged onto the imputed dataset by \code{vars$subjid} & \code{vars$visit} and
 the outcome variable is modified by:\preformatted{imputed_data[[vars$outcome]] <- imputed_data[[vars$outcome]] + imputed_dat[["delta"]]
 }
 
-The helper functions \code{\link[=delta_template]{delta_template()}} & \code{\link[=delta_lagscale]{delta_lagscale()}} can be used
-to create delta datasets.
+The helper function \code{\link[=delta_template]{delta_template()}} can be used to create delta datasets.
 }
 \examples{
 \dontrun{
@@ -112,7 +112,7 @@ analyse(
 \code{\link[=extract_imputed_dfs]{extract_imputed_dfs()}} for manually extracting imputed
 datasets.
 
-\code{\link[=delta_template]{delta_template()}} & \code{\link[=delta_lagscale]{delta_lagscale()}} for creating delta data.frames
+\code{\link[=delta_template]{delta_template()}} for creating delta data.frames
 
 \code{\link[=ancova]{ancova()}} for the default analysis function
 }

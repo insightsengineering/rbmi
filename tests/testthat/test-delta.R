@@ -65,7 +65,7 @@ test_that("delta_template & delta_lagscale",{
         mutate(delta = c(0, 0, 0, -12, -10,     0, 0, -18, 0, 0))
 
     expect_equal(
-        delta_lagscale(list(data = longd), delta, dlag),
+        delta_template(list(data = longd), delta, dlag),
         output_expected2
     )
 })

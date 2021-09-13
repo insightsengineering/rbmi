@@ -41,7 +41,7 @@ extract_imputed_dfs(imputeObj, c(1:3))
 }
 }
 \seealso{
-\code{\link[=delta_template]{delta_template()}} & \code{\link[=delta_lagscale]{delta_lagscale()}} for creating delta data.frames
+\code{\link[=delta_template]{delta_template()}} for creating delta data.frames
 
 \code{\link[=analyse]{analyse()}}
 }

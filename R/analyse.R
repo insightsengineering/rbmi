@@ -68,17 +68,17 @@
 #' ```
 #' imputed_data[[vars$outcome]] <- imputed_data[[vars$outcome]] + imputed_dat[["delta"]]
 #' ```
-#' The helper functions [delta_template()] & [delta_lagscale()] can be used
-#' to create delta datasets.
+#' The helper function [delta_template()] can be used to create delta datasets.
 #'
 #' @seealso [extract_imputed_dfs()] for manually extracting imputed
 #' datasets.
-#' @seealso [delta_template()] & [delta_lagscale()] for creating delta data.frames
+#' @seealso [delta_template()] for creating delta data.frames
 #' @seealso [ancova()] for the default analysis function
 #'
 #' @param imputations An imputations object as created by [impute()]
 #' @param fun An analysis function to be applied to each imputed datset. See details.
-#' @param delta A data.frame containing the delta transformation to be applied to the imputed dataset prior to running `fun`. See details.
+#' @param delta A data.frame containing the delta transformation to be applied to the imputed
+#' dataset prior to running `fun`. See details.
 #' @param ... Additional arguments passed onto `fun`
 #' @examples
 #' \dontrun{
@@ -190,7 +190,7 @@ analyse <- function(imputations, fun = ancova, delta = NULL, ...) {
 #' }
 #' @returns
 #' A list of data.frames equal in length to the `index` argument
-#' @seealso [delta_template()] & [delta_lagscale()] for creating delta data.frames
+#' @seealso [delta_template()] for creating delta data.frames
 #' @seealso [analyse()]
 #' @export
 extract_imputed_dfs <- function(

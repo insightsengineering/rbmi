@@ -2,19 +2,21 @@
 % Please edit documentation in R/delta.R
 \name{apply_delta}
 \alias{apply_delta}
-\title{Title}
+\title{Applies Delta Adjustment}
 \usage{
 apply_delta(data, delta = NULL, group = NULL, outcome = NULL)
 }
 \arguments{
-\item{data}{TODO}
+\item{data}{data.frame which will have its \code{outcome} column adjusted}
 
-\item{delta}{TODO}
+\item{delta}{data.frame (must contain a column called \code{delta})}
 
-\item{group}{TODO}
+\item{group}{character vector of variables in both \code{data} and \code{delta} that will be used
+to merge the 2 data.frames together by}
 
-\item{outcome}{TODO}
+\item{outcome}{character, name of the outcome variable in \code{data}}
 }
 \description{
-TODO
+Takes a delta dataset and adjusts the outcome variable by adding the
+corresponding delta.
 }
