@@ -22,9 +22,9 @@
 #' The analysis function `fun` must take a data.frame as its first
 #' argument. All other options to [analyse()] are passed onto `fun`
 #' via `...`.
-#' `fun` must return a named list with each element being itself a
+#' `fun` must return a named list with each element itself being a
 #' list containing a single
-#' numeric element called `est` (or additionally `se` and `df` if using
+#' numeric element called `est` (or additionally `se` and `df` if
 #' you had originally specified [method_bayes()] or [method_approxbayes()])
 #' i.e.
 #' ```
