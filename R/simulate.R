@@ -126,13 +126,15 @@ simulate_data <- function(
         ncol(dat2) == ncol(dat) + 3
     )
 
+    f2n <- function(x) as.numeric(x) - 1
+
     dat2$id <- factor(dat2$id, levels = pt_ids)
     dat2$outcome <- dat2$outcome +
         mu[["int"]] +
         mu[["age"]] * dat2$age +
         mu[["sex"]] * f2n(dat2$sex) +
         rep(mu[["visit"]], length.out = nrow(dat2)) +
-        rep(mu[["trt"]], length.out = nrow(dat2)) * (as.numeric(dat2$group) - 1)
+        rep(mu[["trt"]], length.out = nrow(dat2)) * f2n(dat2$group)
 
     return(dat2)
 }
