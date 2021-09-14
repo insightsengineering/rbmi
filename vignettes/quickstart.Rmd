@@ -88,7 +88,7 @@ function include:
 
 - `data` the primary longitudinal data.frame containing the outcome variable and all covariates
 - `data_ice` a data.frame specifying which visit (if any) the patient's intercurrent 
-event  occurred on. If the patient had multiple intercurrent events (ICE) this should 
+event occurred on. If the patient had multiple intercurrent events (ICE) this should 
 specify the date on which the first non-MAR intercurrent event occurred on. It also 
 specifies which reference based imputation strategy we want to use.
 - `method` specifies what method we want to use to fit our imputation models as well as what
