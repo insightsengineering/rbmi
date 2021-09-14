@@ -101,6 +101,8 @@ methods to sample the model coefficients from their posterior distributions for 
 of `outcome ~ 1 + age + sex + group * visit`.
 
 ```{r}
+# create data_ice setting the imputation method to MAR for
+# each patient with at least one missing value
 dat_ice <- dat %>% 
     arrange(id, visit) %>% 
     filter(is.na(outcome)) %>% 
@@ -112,6 +114,8 @@ dat_ice <- dat %>%
 
 dat_ice
 
+# Define the names of key variables in our dataset using `set_vars()`
+# Note that covariates argument can contain interactions
 vars <- set_vars(
     outcome = "outcome",
     visit = "visit",
@@ -120,6 +124,8 @@ vars <- set_vars(
     covariates = c("age", "sex", "group*visit")
 )
 
+# Define what method we want to use e.g. here we specify we 
+# want to use Baysian methods to create 150 samples
 method <- method_bayes(
     burn_in = 200,
     burn_between = 5,
@@ -128,6 +134,8 @@ method <- method_bayes(
 )
 
 
+# Create samples for the parameters of interest by running the 
+# draws() function
 drawObj <- draws(
     data = dat,
     data_ice = dat_ice,
