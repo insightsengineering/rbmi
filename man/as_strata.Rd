@@ -7,11 +7,11 @@
 as_strata(...)
 }
 \arguments{
-\item{...}{numeric/character/fator vectors of the same length}
+\item{...}{numeric/character/factor vectors of the same length}
 }
 \description{
 Collapse multiple categorical variables into distinct unique categories.
-i.e.\preformatted{}
+e.g.\preformatted{}
 }
 \details{
 \preformatted{would return

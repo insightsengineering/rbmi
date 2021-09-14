@@ -13,11 +13,12 @@
 #' as created by the [set_vars()] function).
 #'
 #' These functions will return a data.frame with the aforementioned variables with 1
-#' row per subject per visit. If the `delta` argument to this function is null
+#' row per subject per visit. If the `delta` argument to this function is `NULL`
 #' then the `delta` column in the returned data.frame will be 0 for all observations.
 #' If the `delta` argument is not NULL then `delta` will be calculated separately
 #' for each subject as the accumulative sum of `delta` multiplied by the scaling
-#' coefficient `dlag` based upon how many days after the subject's ICE the visit is.
+#' coefficient `dlag` based upon how many visits after the subject's intercurrent
+#' event (ICE) the visit in question is.
 #' This is best illustrated with an example:
 #'
 #' Let `delta = c(5,6,7,8)` and `dlag=c(1,2,3,4)` (i.e. assuming there are 4 visits)

@@ -16,7 +16,7 @@ Must be a single number between 0 and 1. Default is 0.95}
 must be one of "two.sided" (default), "greater" or "less".}
 }
 \description{
-Creates a point estimate, confidence interval and p-values using
+Get point estimate, confidence interval and p-value using
 the normal approximation.
 }
 \details{

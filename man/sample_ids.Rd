@@ -13,7 +13,7 @@ sample_ids(ids, strata = rep(1, length(ids)))
 ensuring the that the numbers of each strata are maintained}
 }
 \description{
-Performs stratified random sampling with replacement of patient IDs
+Performs a stratified bootstrap sample of IDS
 ensuring the return vector is the same length as the input vector
 }
 \examples{

@@ -50,7 +50,7 @@ degree's of freedom; see Little & Rubin (2002).
 \item \code{method_condmean(type = "bootstrap")} Uses percentile or normal approximation;
 See Efron & Tibshirani (1994). Note that under this method no standard error is
 calculated and as such will be \code{NA} in the returned object / data.frame
-\item \code{method_condmean(type = "jackknife")} Uses the standard jackknife formulas;
+\item \code{method_condmean(type = "jackknife")} Uses the standard jackknife formula;
 See Efron & Tibshirani (1994)
 }
 }

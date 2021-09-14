@@ -21,7 +21,7 @@ Performance analysis of covariance. See \code{\link[=ancova]{ancova()}} for full
 }
 \details{
 group must be a factor variable with only 2 levels
-outcome must be a conintious numeric variable
+outcome must be a continuous numeric variable
 }
 \examples{
 \dontrun{

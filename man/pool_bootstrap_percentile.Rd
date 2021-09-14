@@ -16,11 +16,11 @@ Must be a single number between 0 and 1. Default is 0.95}
 must be one of "two.sided" (default), "greater" or "less".}
 }
 \description{
-Creates a point estimate, confidence interval and p-values using
+Get point estimate, confidence interval and p-value using
 percentiles. Note that quantile "type=6" is used,
 see \code{\link[stats:quantile]{stats::quantile()}} for details.
 }
 \details{
-The point estimate is taken to be the first element of est. The remaining
-n-1 values of est are then used to generate the confidence intervals
+The point estimate is taken to be the first element of \code{est}. The remaining
+n-1 values of \code{est} are then used to generate the confidence intervals
 }

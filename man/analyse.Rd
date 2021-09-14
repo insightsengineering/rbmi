@@ -66,7 +66,7 @@ any hard coding of subject ids is strictly to be avoided.
 By default \code{fun} is the \code{\link[=ancova]{ancova()}} function.
 Please note that this function
 requires that a vars object, as created by \code{\link[=set_vars]{set_vars()}}, is provided via
-the \code{vars} arguement. i.e. \code{analyse(imputeObj, vars = set_vars(...))} Please
+the \code{vars} argument e.g. \code{analyse(imputeObj, vars = set_vars(...))}. Please
 see the documentation for \code{\link[=ancova]{ancova()}} for full details.
 
 The \code{delta} argument can be used to specify offsets to be applied

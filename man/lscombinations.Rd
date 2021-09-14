@@ -15,7 +15,7 @@ lscombinations(data, mterms, fix)
 \item{fix}{A named list of variables with fixed values}
 }
 \description{
-Takes a data.frame and a list of variable and returns a list
+Takes a data.frame and a list of variables and returns a list
 of values / levels for use in expand.grid.
 }
 \details{

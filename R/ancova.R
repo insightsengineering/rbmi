@@ -16,7 +16,7 @@
 #' The function works as follows
 #'
 #' 1. Select the first value from `visits`
-#' 2. Subset the data to only the observations that succoured on this visit
+#' 2. Subset the data to only the observations that occurred on this visit
 #' 3. Fit a linear model as  `vars$outcome ~ vars$group + vars$covariates`
 #' 4. Extract the "treatment effect" & least square means for each treatment group
 #' 5. Repeat points 2-3 for all other values in `visits`
@@ -25,7 +25,7 @@
 #' `unique(data[[vars$visit]])`
 #'
 #' In order to meet the formatting standards set by [analyse()] the results
-#' will be collapsed into a single list prefixed by the visit name i.e.
+#' will be collapsed into a single list prefixed by the visit name e.g.
 #' ```
 #' list(
 #'     visit_1_trt = list(est = ...),
@@ -38,9 +38,9 @@
 #' )
 #' ```
 #'
-#' The value of covariates provided to [set_vars()] can contain interaction terms
-#' if you want to include interaction terms in your model
-#' i.e. `set_vars(covariates = c("sex*age"))`
+#' If you want to include interaction terms in your model this can be done
+#' by providing them to the `covariates` argument of [set_vars()]
+#' e.g. `set_vars(covariates = c("sex*age"))`
 #' @seealso [analyse()]
 #' @seealso [stats::lm()]
 #' @seealso [set_vars()]
@@ -135,7 +135,7 @@ ancova <- function(data, vars, visits = NULL) {
 #'
 #' @details
 #' group must be a factor variable with only 2 levels
-#' outcome must be a conintious numeric variable
+#' outcome must be a continuous numeric variable
 #'
 #' @examples
 #' \dontrun{

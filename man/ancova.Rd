@@ -25,7 +25,7 @@ Performs an analysis of covariance between two groups returning the estimated
 The function works as follows
 \enumerate{
 \item Select the first value from \code{visits}
-\item Subset the data to only the observations that succoured on this visit
+\item Subset the data to only the observations that occurred on this visit
 \item Fit a linear model as  \code{vars$outcome ~ vars$group + vars$covariates}
 \item Extract the "treatment effect" & least square means for each treatment group
 \item Repeat points 2-3 for all other values in \code{visits}
@@ -35,7 +35,7 @@ If no value for \code{visits} are provided then it will be set to
 \code{unique(data[[vars$visit]])}
 
 In order to meet the formatting standards set by \code{\link[=analyse]{analyse()}} the results
-will be collapsed into a single list prefixed by the visit name i.e.\preformatted{list(
+will be collapsed into a single list prefixed by the visit name e.g.\preformatted{list(
     visit_1_trt = list(est = ...),
     visit_1_lsm_ref = list(est = ...),
     visit_1_lsm_alt = list(est = ...),
@@ -46,9 +46,9 @@ will be collapsed into a single list prefixed by the visit name i.e.\preformatte
 )
 }
 
-The value of covariates provided to \code{\link[=set_vars]{set_vars()}} can contain interaction terms
-if you want to include interaction terms in your model
-i.e. \code{set_vars(covariates = c("sex*age"))}
+If you want to include interaction terms in your model this can be done
+by providing them to the \code{covariates} argument of \code{\link[=set_vars]{set_vars()}}
+e.g. \code{set_vars(covariates = c("sex*age"))}
 }
 \seealso{
 \code{\link[=analyse]{analyse()}}

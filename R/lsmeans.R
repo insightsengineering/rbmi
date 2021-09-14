@@ -3,7 +3,7 @@
 
 #' Extract ls values / levels
 #'
-#' Takes a data.frame and a list of variable and returns a list
+#' Takes a data.frame and a list of variables and returns a list
 #' of values / levels for use in expand.grid.
 #'
 #' For numeric values just the mean is returned whilst for
@@ -46,10 +46,10 @@ lscombinations <- function(data, mterms, fix) {
 
 #' Least Square Means
 #'
-#' Estimates the least square means from a linear model. This is
-#' essentially where we generate a prediction from the model
-#' by fitting it to some hypothetical observation that is constructed
-#' by averaging the data. See details for more information.
+#'
+#' Estimates the least square means from a linear model. This is done by
+#' generating a prediction from the model using an hypothetical observation
+#' that is constructed by averaging the data. See details for more information.
 #'
 #' @details
 #' Numeric variables are evaluated at the mean across the entire dataset

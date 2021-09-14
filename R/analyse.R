@@ -55,7 +55,7 @@
 #' By default `fun` is the [ancova()] function.
 #' Please note that this function
 #' requires that a vars object, as created by [set_vars()], is provided via
-#' the `vars` arguement. i.e. `analyse(imputeObj, vars = set_vars(...))` Please
+#' the `vars` argument e.g. `analyse(imputeObj, vars = set_vars(...))`. Please
 #' see the documentation for [ancova()] for full details.
 #'
 #' The `delta` argument can be used to specify offsets to be applied

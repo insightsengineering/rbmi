@@ -32,7 +32,7 @@
 #' - `method_condmean(type = "bootstrap")` Uses percentile or normal approximation;
 #' See Efron & Tibshirani (1994). Note that under this method no standard error is
 #' calculated and as such will be `NA` in the returned object / data.frame
-#' - `method_condmean(type = "jackknife")` Uses the standard jackknife formulas;
+#' - `method_condmean(type = "jackknife")` Uses the standard jackknife formula;
 #' See Efron & Tibshirani (1994)
 #'
 #'
@@ -288,14 +288,14 @@ rubin_rules <- function(ests, ses, v_com) {
 
 #' Bootstrap Pooling via Percentiles
 #' @description
-#' Creates a point estimate, confidence interval and p-values using
+#' Get point estimate, confidence interval and p-value using
 #' percentiles. Note that quantile "type=6" is used,
 #' see [stats::quantile()] for details.
 #' @param est a numeric vector of point estimates from each bootstrap sample
 #' @inheritParams pool
 #' @details
-#' The point estimate is taken to be the first element of est. The remaining
-#' n-1 values of est are then used to generate the confidence intervals
+#' The point estimate is taken to be the first element of `est`. The remaining
+#' n-1 values of `est` are then used to generate the confidence intervals
 pool_bootstrap_percentile <- function(est, conf.level, alternative) {
     est_orig <- est[1]
     est <- est[-1]
@@ -340,7 +340,7 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
 
 #' Bootstrap Pooling via normal approximation
 #' @description
-#' Creates a point estimate, confidence interval and p-values using
+#' Get point estimate, confidence interval and p-value using
 #' the normal approximation.
 #' @param est a numeric vector of point estimates from each bootstrap sample
 #' @inheritParams pool

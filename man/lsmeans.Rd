@@ -14,10 +14,9 @@ lsmeans(model, ...)
 of the variable within the dataset}
 }
 \description{
-Estimates the least square means from a linear model. This is
-essentially where we generate a prediction from the model
-by fitting it to some hypothetical observation that is constructed
-by averaging the data. See details for more information.
+Estimates the least square means from a linear model. This is done by
+generating a prediction from the model using an hypothetical observation
+that is constructed by averaging the data. See details for more information.
 }
 \details{
 Numeric variables are evaluated at the mean across the entire dataset
