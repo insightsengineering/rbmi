@@ -23,11 +23,11 @@
 #'
 #' @param n_samples a numeric that determines how many imputed datasets are generated.
 #' In the case of `method_condmean(type = "jackknife")` this argument
-#' must be set to NULL. See details.
+#' must be set to `NULL`. See details.
 #'
-#' @param covariance a character string that specifies the structure of the covariance matrix
-#' to be used in the imputation model. Must be one of `"us"` (default), `"toep"`, `"cs"` or `"ar1"`.
-#' See details.
+#' @param covariance a character string that specifies the structure of the covariance
+#' matrix to be used in the imputation model. Must be one of `"us"` (default), `"toep"`,
+#' `"cs"` or `"ar1"`. See details.
 #'
 #' @param threshold a numeric between 0 and 1, specifies the proportion of bootstrap
 #' datasets that can fail to produce valid samples before an error is thrown.
@@ -73,10 +73,10 @@
 #' be generated. In these instances rbmi is designed to throw out that bootstrapped data
 #' and try again with another. However to ensure that these errors are due to chance and
 #' not due to some underlying misspecification in the data and/or model a tolerance limit
-#' is set on how many samples can be discarded. Once the tolerance limit has been breached
+#' is set on how many samples can be discarded. Once the tolerance limit has been reached
 #' an error will be thrown and the process aborted. The tolerance limit is defined as
-#' `ceiling(threshold * n_samples)`. Note that for jackknife methods estimates need to be
-#' generated for all permutations of dataset and as such an error will be thrown if
+#' `ceiling(threshold * n_samples)`. Note that for the jackknife method estimates need to be
+#' generated for all leave-one-out datasets and as such an error will be thrown if
 #' any of them fail to fit.
 #'
 #' @export
