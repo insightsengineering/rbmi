@@ -7,7 +7,10 @@ test_that("Rubin's rules", {
     n <- seq(16, 1015, by = 100)
     k <- 15
 
-    actual_res <- sapply(v_com, function(i) rubin_rules(ests, ses, i), simplify = FALSE)
+    actual_res <- sapply(
+        v_com, function(i) rubin_rules(ests, ses, i),
+        simplify = FALSE
+    )
 
     expect_equal(actual_res, mice_res1)
 
@@ -15,7 +18,11 @@ test_that("Rubin's rules", {
     # check when no variability in estimates (i.e. when no missing values)
     ests_allequal <- rep(0, 100)
 
-    actual_res <- sapply(v_com, function(i) rubin_rules(ests_allequal, ses, i), simplify = FALSE)
+    actual_res <- sapply(
+        v_com,
+        function(i) rubin_rules(ests_allequal, ses, i),
+        simplify = FALSE
+    )
     expect_equal(actual_res, mice_res2, tolerance = 10e-4)
 
 
@@ -27,7 +34,10 @@ test_that("Rubin's rules", {
 
     # when v_com = NA or v_com = Inf and there are no missing values, df = Inf
     v_com <- c(Inf, NA)
-    actual_res <- sapply(v_com, function(i) rubin_rules(ests_allequal, ses, i)$df)
+    actual_res <- sapply(
+        v_com,
+        function(i) rubin_rules(ests_allequal, ses, i)$df
+    )
 
     expect_true(all(actual_res == Inf))
 
@@ -56,7 +66,10 @@ test_that("pool", {
         method = method_condmean(n_samples = 5000),
         results = append(
             list(results = runanalysis(vals)),
-            lapply(seq_len(n_boot), function(x) runanalysis(sample(vals, size = n, replace = TRUE)))
+            lapply(
+                seq_len(n_boot),
+                function(x) runanalysis(sample(vals, size = n, replace = TRUE))
+            )
         )
     )
 
@@ -100,16 +113,186 @@ test_that("pool", {
 
 
 
-    ### TODO - Need to implement actual tests + rubin
 
     pool(results_boot, type = "normal", alternative = "less")
-    pool(results_boot, type = "percentile", alternative = "less")
-    pool(results_jack, alternative = "less")
 
     pool(results_boot, type = "normal", alternative = "greater")
-    pool(results_boot, type = "percentile", alternative = "greater")
-    pool(results_jack, alternative = "greater")
 
+})
+
+
+
+
+
+test_that("Can recover known jackknife with  H0 < 0 & H0 > 0", {
+    jest <- c( 7, 3, 4 , 5 , 3 ,3 , 9)
+
+    jest_r <- jest[-1]
+    jest_m <- mean(jest_r)
+
+    n <- length(jest_r)
+    jest_se <- sqrt((sum((jest_r - jest_m)^2) * ((n-1) / n)) )
+
+    expected <- list(
+        est = 7,
+        ci = 7 + c(-1,Inf) * qnorm(0.9) * jest_se,
+        se = jest_se,
+        pvalue = pnorm(7, sd = jest_se, lower.tail = TRUE)
+    )
+    observed <- pool_internal.jackknife(
+        list(est = jest),
+        conf.level = 0.90,
+        alternative = "less"
+    )
+    expect_equal(expected, observed)
+
+
+
+    observed <- pool_internal.jackknife(
+        list(est = jest),
+        conf.level = 0.90,
+        alternative = "greater"
+    )
+    expected <- list(
+        est = 7,
+        ci = 7 + c(-Inf,1) * qnorm(0.9) * jest_se,
+        se = jest_se,
+        pvalue = pnorm(7, sd = jest_se, lower.tail = FALSE)
+    )
+    expect_equal(expected, observed)
+
+
+
+    observed <- pool_internal.jackknife(
+        list(est = jest),
+        conf.level = 0.90,
+        alternative = "two.sided"
+    )
+    expected <- list(
+        est = 7,
+        ci = 7 + c(-1,1) * qnorm(0.95) * jest_se,
+        se = jest_se,
+        pvalue = pnorm(7, sd = jest_se, lower.tail = FALSE) * 2
+    )
+    expect_equal(expected, observed)
+
+})
+
+
+
+
+
+
+test_that("Can recover known values using bootstrap percentiles", {
+    best <- c(1,-1,-2,3,2,1,-4,3,2)
+
+    x <- quantile(best[-1], 0.9, type = 6)[[1]]
+    pval <- (sum(best[-1] < 0) + 1 ) / length(best)
+    expected <- list(
+        est = best[1],
+        ci = c(-Inf, x),
+        se = NA,
+        pvalue = pval
+    )
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.90,
+        alternative = "greater",
+        type =  "percentile"
+    )
+    expect_equal(expected, observed)
+
+
+
+    x <- quantile(best[-1], 0.1, type = 6)[[1]]
+    pval <- (sum(best[-1] > 0) + 1 ) / length(best)
+    expected <- list(
+        est = best[1],
+        ci = c(x, Inf),
+        se = NA,
+        pvalue = pval
+    )
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.90,
+        alternative = "less",
+        type =  "percentile"
+    )
+    expect_equal(expected, observed)
+
+
+
+    x1 <- quantile(best[-1], 0.10, type = 6)[[1]]
+    x2 <- quantile(best[-1], 0.90, type = 6)[[1]]
+    pval <- (sum(best[-1] < 0) + 1 ) / length(best)
+    expected <- list(
+        est = best[1],
+        ci = c(x1, x2),
+        se = NA,
+        pvalue = pval * 2
+    )
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.80,
+        alternative = "two.sided",
+        type =  "percentile"
+    )
+    expect_equal(expected, observed)
+})
+
+
+
+
+test_that("Can recover known values using bootstrap Normal", {
+
+    best <- c(1,-1,-2,3,2,1,-4,3,2)
+    se <- sd(best[-1])
+
+    expected <- list(
+        est = best[1],
+        ci = best[1] + c(-1,1) * qnorm(0.96) * se,
+        se = se,
+        pvalue = pnorm(best[1], sd=se, lower.tail = FALSE) * 2
+    )
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.92,
+        alternative = "two.sided",
+        type =  "normal"
+    )
+    expect_equal(expected, observed)
+
+
+
+    expected <- list(
+        est = best[1],
+        ci = best[1] + c(-1,Inf) * qnorm(0.92) * se,
+        se = se,
+        pvalue = pnorm(best[1], sd=se, lower.tail = TRUE)
+    )
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.92,
+        alternative = "less",
+        type =  "normal"
+    )
+    expect_equal(expected, observed)
+
+
+
+    expected <- list(
+        est = best[1],
+        ci = best[1] + c(-Inf,1) * qnorm(0.92) * se,
+        se = se,
+        pvalue = pnorm(best[1], sd=se, lower.tail = FALSE)
+    )
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.92,
+        alternative = "greater",
+        type =  "normal"
+    )
+    expect_equal(expected, observed)
 })
 
 
@@ -128,7 +311,11 @@ test_that("condmean doesn't use first element in CI", {
     set.seed(2040)
     x <- as_analysis(
         method = method_condmean(n_samples = 50),
-        results = replicate(n = 51, runanalysis(rnorm(n, mu, sd)), simplify = FALSE)
+        results = replicate(
+            n = 51,
+            runanalysis(rnorm(n, mu, sd)),
+            simplify = FALSE
+        )
     )
 
 
