@@ -3,27 +3,26 @@
 #' @description
 #'
 #' These functions determine what methods rbmi should use when creating
-#' the imputation models, generating imputed values and  pooling the results.
+#' the imputation models, generating imputed values and pooling the results.
 #'
 #' @name method
 #'
 #' @param burn_in a numeric that specifies how many observations should be discarded
 #' prior to extracting actual samples. Note that the sampler
-#' is initialised at the maximum likelihood estimates and an uninformative
+#' is initialised at the maximum likelihood estimates and a weakly informative
 #' prior is used thus in theory this value should not need to be that high.
 #'
 #' @param burn_between a numeric that specifies the "thinning" rate i.e. how many
 #' observations should be discarded between each sample. This is used to prevent
 #' issues associated with autocorrelation between samples.
 #'
-#' @param same_cov a logical, if true the MMRM model will be fitted using a single
-#' shared covariance matrix for all observations. If false a separate covariance
+#' @param same_cov a logical, if `TRUE` the MMRM model will be fitted using a single
+#' shared covariance matrix for all observations. If `FALSE` a separate covariance
 #' matrix will be fit for each group as determined by the `group` argument of
 #' `set_vars()`.
 #'
-#' @param n_samples a numeric that specifies the number of samples to be generated.
-#' This determines both how many imputation models are calculated and how many imputed
-#' datasets are generated. In the case of `method_condmean(type = "jackknife")` this argument
+#' @param n_samples a numeric that determines how many imputed datasets are generated.
+#' In the case of `method_condmean(type = "jackknife")` this argument
 #' must be set to NULL. See details.
 #'
 #' @param covariance a character string that specifies the structure of the covariance matrix
@@ -40,8 +39,8 @@
 #' @param type a character string that specifies the method to use when calculating
 #' confidence intervals. Must be one of `"bootstrap"` (default) or `"percentile"`
 #'
-#' @param verbose a logical, if true (default) Stan's sampling log information will
-#' be printed to the console, if false this information will be suppressed.
+#' @param verbose a logical, if `TRUE` (default) Stan's sampling log information will
+#' be printed to the console, if `FALSE` this information will be suppressed.
 #'
 #' @param seed a numeric that specifies a seed to be used in the call to Stan. This
 #' argument is forward on the the `seed` argument of [rstan::sampling()]. Note that
@@ -55,7 +54,7 @@
 #' the original dataset whilst the other `n_samples` samples will be
 #' bootstrapped datasets. Likewise, for `method_condmean(type = "jackknife")` there will
 #' be `nrow(data) + 1` imputation models and datasets generated. In both cases this is
-#' represented by `x + 1` being displayed in the print message.
+#' represented by `n + 1` being displayed in the print message.
 #'
 #' The user is able to specify different covariance structures using the the `covariance`
 #' argument. Currently supported structures include:

@@ -11,7 +11,7 @@ test_that("methods", {
 
     expect_error(
         method_condmean(type = "jackknife", n_samples = 20),
-        regexp = "n_samples must be NA"
+        regexp = "n_samples must be NULL"
     )
 
     expect_equal(
@@ -21,7 +21,7 @@ test_that("methods", {
 
     expect_equal(
         method_condmean(type = "jackknife")$n_samples,
-        NA
+        NULL
     )
 
 })
