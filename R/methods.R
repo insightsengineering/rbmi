@@ -1,17 +1,85 @@
-#' Title
+#' Imputation & analysis Methods
+#'
+#' @description
+#'
+#' These functions determine what methods rbmi should use when creating
+#' the imputation models, generating imputed values and  pooling the results.
 #'
 #' @name method
-#' @param burn_in TODO
-#' @param burn_between TODO
-#' @param same_cov TODO
-#' @param n_samples TODO
-#' @param covariance TODO
-#' @param threshold TODO
-#' @param REML TODO
-#' @param type TODO
-#' @param verbose TODO
-#' @param seed TODO
-#' @return TODO
+#'
+#' @param burn_in a numeric that specifies how many observations should be discarded
+#' prior to extracting actual samples. Note that the sampler
+#' is initialised at the maximum likelihood estimates and an uninformative
+#' prior is used thus in theory this value should not need to be that high.
+#'
+#' @param burn_between a numeric that specifies the "thinning" rate i.e. how many
+#' observations should be discarded between each sample. This is used to prevent
+#' issues associated with autocorrelation between samples.
+#'
+#' @param same_cov a logical, if true the MMRM model will be fitted using a single
+#' shared covariance matrix for all observations. If false a separate covariance
+#' matrix will be fit for each group as determined by the `group` argument of
+#' `set_vars()`.
+#'
+#' @param n_samples a numeric that specifies the number of samples to be generated.
+#' This determines both how many imputation models are calculated and how many imputed
+#' datasets are generated. In the case of `method_condmean(type = "jackknife")` this argument
+#' must be set to NULL. See details.
+#'
+#' @param covariance a character string that specifies the structure of the covariance matrix
+#' to be used in the imputation model. Must be one of `"us"` (default), `"toep"`, `"cs"` or `"ar1"`.
+#' See details.
+#'
+#' @param threshold a numeric between 0 and 1, specifies the proportion of bootstrap
+#' datasets that can fail to produce valid samples before an error is thrown.
+#' See details.
+#'
+#' @param REML a logical indicating whether to use REML estimation rather than maximum
+#' likelihood.
+#'
+#' @param type a character string that specifies the method to use when calculating
+#' confidence intervals. Must be one of `"bootstrap"` (default) or `"percentile"`
+#'
+#' @param verbose a logical, if true (default) Stan's sampling log information will
+#' be printed to the console, if false this information will be suppressed.
+#'
+#' @param seed a numeric that specifies a seed to be used in the call to Stan. This
+#' argument is forward on the the `seed` argument of [rstan::sampling()]. Note that
+#' this is only required for `method_bayes()`, for all other methods you can achieve
+#' reproducible results by setting the seed via `set.seed()`
+#'
+#' @details
+#'
+#' In the case of `method_condmean(type = "bootstrap")` there will be `n_samples + 1`
+#' imputation models and datasets generated as the first sample will be based on
+#' the original dataset whilst the other `n_samples` samples will be
+#' bootstrapped datasets. Likewise, for `method_condmean(type = "jackknife")` there will
+#' be `nrow(data) + 1` imputation models and datasets generated. In both cases this is
+#' represented by `x + 1` being displayed in the print message.
+#'
+#' The user is able to specify different covariance structures using the the `covariance`
+#' argument. Currently supported structures include:
+#'
+#' - Unstructured (`"us"`)
+#' - Toeplitz (`"toep"`)
+#' - Compound Symmetry (`"cs"`)
+#' - Autoregression-1 (`"ar1"`)
+#'
+#' Note that at present Bayesian methods only support unstructured.
+#'
+#' In the case of `method_condmean(type = "bootstrap")` and `method_approxbayes()`, repeated
+#' bootstrap samples of the original dataset are taken with an MMRM fitted to each sample.
+#' Due to the randomness of these sampled datasets, as well as limitations in the optimisers
+#' used to fit the models, it is not uncommon that estimates for a particular dataset can't
+#' be generated. In these instances rbmi is designed to throw out that bootstrapped data
+#' and try again with another. However to ensure that these errors are due to chance and
+#' not due to some underlying misspecification in the data and/or model a tolerance limit
+#' is set on how many samples can be discarded. Once the tolerance limit has been breached
+#' an error will be thrown and the process aborted. The tolerance limit is defined as
+#' `ceiling(threshold * n_samples)`. Note that for jackknife methods estimates need to be
+#' generated for all permutations of dataset and as such an error will be thrown if
+#' any of them fail to fit.
+#'
 #' @export
 method_bayes <- function(
     burn_in = 200,
@@ -62,7 +130,7 @@ method_condmean <- function(
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
-    n_samples = NA,
+    n_samples = NULL,
     type = c("bootstrap", "jackknife")
 ){
     covariance <- match.arg(covariance)
@@ -77,8 +145,8 @@ method_condmean <- function(
 
     if (type == "jackknife") {
         assert_that(
-            is.na(n_samples),
-            msg = "n_samples must be NA when type is `jackknife`"
+            is.null(n_samples),
+            msg = "n_samples must be NULL when type is `jackknife`"
         )
     }
 
