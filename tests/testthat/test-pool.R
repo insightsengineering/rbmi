@@ -113,10 +113,10 @@ test_that("pool", {
 
 
 
+    x1 <- pool(results_boot, type = "normal", alternative = "less")
+    x2 <- pool(results_boot, type = "percentile", alternative = "less")
+    expect_false(identical(x1,x2))
 
-    pool(results_boot, type = "normal", alternative = "less")
-
-    pool(results_boot, type = "normal", alternative = "greater")
 
 })
 
