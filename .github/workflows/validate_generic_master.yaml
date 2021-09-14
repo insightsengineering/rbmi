@@ -21,5 +21,5 @@ jobs:
         if: success()
         with:
           name: visR-report.pdf
-          path: ./validation_report.pdf
+          path: ./validation-report.pdf
           if-no-files-found: error
