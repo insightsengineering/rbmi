@@ -59,8 +59,8 @@
 #' see the documentation for [ancova()] for full details.
 #'
 #' The `delta` argument can be used to specify offsets to be applied
-#' to the outcome variable in the imputed datasets in order to
-#' perform a "tipping point" analysis. The
+#' to the outcome variable in the imputed datasets which can be used
+#' as part of a sensitivity or tipping point analysis. The
 #' delta dataset must contain columns `vars$subjid`, `vars$visit` (as specified
 #' in the original call to [draws()]) and `delta`. Essentially this data.frame
 #' is merged onto the imputed dataset by `vars$subjid` and `vars$visit` and then

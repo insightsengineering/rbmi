@@ -4,10 +4,10 @@
 #'
 #' @description
 #' Creates a data.frame in the format required by [analyse()] for the use
-#' of applying delta to perform a tipping point analysis.
+#' of applying a delta adjustment.
 #'
 #' @details
-#' To perform a tipping point analysis the [analyse()] function expects
+#' To apply a delta adjustment the [analyse()] function expects
 #' a delta data.frame with 3 variables; `vars$subjid`, `vars$visit` and `delta`
 #' (where `vars` is the object supplied in the original call to [draws()]
 #' as created by the [set_vars()] function).

@@ -25,10 +25,10 @@ post-ice visits will stay the same regardless of this option)}
 }
 \description{
 Creates a data.frame in the format required by \code{\link[=analyse]{analyse()}} for the use
-of applying delta to perform a tipping point analysis.
+of applying a delta adjustment.
 }
 \details{
-To perform a tipping point analysis the \code{\link[=analyse]{analyse()}} function expects
+To apply a delta adjustment the \code{\link[=analyse]{analyse()}} function expects
 a delta data.frame with 3 variables; \code{vars$subjid}, \code{vars$visit} and \code{delta}
 (where \code{vars} is the object supplied in the original call to \code{\link[=draws]{draws()}}
 as created by the \code{\link[=set_vars]{set_vars()}} function).

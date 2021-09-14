@@ -223,8 +223,8 @@ Note that, similar to draws, the ancova function needs use to use the `set_vars(
 function to tell it the names of the key variables within the data as well as which
 covariates we want to include in our analysis model.
 
-Additionally we can use the `delta` argument of `analyse()` to perform a tipping point
-analysis. Essentially this works by us specifying a data.frame that contains the amount
+Additionally we can use the `delta` argument of `analyse()` to perform a delta adjustment. 
+Essentially this works by us specifying a data.frame that contains the amount
 of bias to add to the outcome variable. This must be specified separately for each patient
 at each visit. This data.frame must contain the columns `vars$visit`, `vars$subjid` and `delta`.
 

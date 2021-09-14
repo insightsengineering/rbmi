@@ -70,8 +70,8 @@ the \code{vars} argument e.g. \code{analyse(imputeObj, vars = set_vars(...))}. P
 see the documentation for \code{\link[=ancova]{ancova()}} for full details.
 
 The \code{delta} argument can be used to specify offsets to be applied
-to the outcome variable in the imputed datasets in order to
-perform a "tipping point" analysis. The
+to the outcome variable in the imputed datasets which can be used
+as part of a sensitivity or tipping point analysis. The
 delta dataset must contain columns \code{vars$subjid}, \code{vars$visit} (as specified
 in the original call to \code{\link[=draws]{draws()}}) and \code{delta}. Essentially this data.frame
 is merged onto the imputed dataset by \code{vars$subjid} and \code{vars$visit} and then
