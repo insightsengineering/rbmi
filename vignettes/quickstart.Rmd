@@ -276,6 +276,15 @@ Finally, the `pool()` function can be used to summarise all of our analysis resu
 into a single statistic including standard error, confidence intervals and a p-value for
 the hypothesis test that $H_0 = 0$.
 
+Note that the pooling method is automatically derived based on the method that was specified
+in the original call to `draws()`:
+
+- If `method_bayes()` or `method_approxbayes()` was used then pooling and inference are based on Rubin's rules
+- If `method_condmean(type = "bootstrap") ` was used then inference is based on either normal approximation of the treatment effect distribution (`pool(..., type = "normal")`) or on percentiles (`pool(..., type = "percentile")`)
+- If `method_condmean(type = "jackknife")` was used then inference is based on normal approximation
+
+Since we have used Bayesian methods in this vignette the `pool()` function will automatically use Rubin's rules.
+
 
 ```{r}
 poolObj <- pool(
