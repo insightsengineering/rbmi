@@ -65,7 +65,7 @@ test_that("delta_template & delta_lagscale",{
         mutate(delta = c(0, 0, 0, -12, -10,     0, 0, -18, 0, 0))
 
     expect_equal(
-        delta_lagscale(list(data = longd), delta, dlag),
+        delta_template(list(data = longd), delta, dlag),
         output_expected2
     )
 })
@@ -238,7 +238,7 @@ test_that("apply_delta", {
 test_that("extract_imputed_dfs + delta", {
 
     set.seed(301)
-    sigma <- as_covmat(c(6, 4, 4), c(0.5, 0.2, 0.3))
+    sigma <- as_vcov(c(6, 4, 4), c(0.5, 0.2, 0.3))
     dat <- get_sim_data(50, sigma)
 
     dat_ice <- dat %>%

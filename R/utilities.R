@@ -1,8 +1,10 @@
 
-#' Title
+#' Set Class
 #'
-#' @param x TODO
-#' @param cls TODO
+#' Utility function to set an objects class.
+#'
+#' @param x Object to set the class of
+#' @param cls The class to be set
 #' @export
 as_class <- function(x, cls) {
     class(x) <- cls
@@ -10,10 +12,13 @@ as_class <- function(x, cls) {
 }
 
 
-#' Title
+#' Add a class
 #'
-#' @param x TODO
-#' @param cls TODO
+#' Utility function to add a class to an object. Adds the new class
+#' after any existing classes.
+#'
+#' @param x Object to add a class to
+#' @param cls the class to be added
 #' @export
 add_class <- function(x, cls) {
     class(x) <- c(class(x), cls)
@@ -21,18 +26,35 @@ add_class <- function(x, cls) {
 }
 
 
-#' TODO
+#' Does object have a class ?
 #'
-#' @param x TODO
-#' @param cls TODO
+#' Utility function to see if an object has a particular class.
+#' Useful when we don't know how many other classes the object may
+#' have
+#'
+#' @return
+#' True if the object has the class
+#' False if the object does not have the class
+#'
+#' @param x The object we want to check the class of
+#' @param cls The class we want to know if it has or not
 #' @export
 has_class <- function(x, cls) {
     cls %in% class(x)
 }
 
-#' Title
+
+#' Convert an `ivars` object into a formula
 #'
-#' @param vars TODO
+#' Takes an `ivars` object (as created by [set_vars()]) and converts
+#' it into a formula roughly of the form:
+#' ```
+#' outcome ~ group + visit + covariate1 + covariate2 + ...
+#' ```
+#'
+#' @param vars an `ivars` object as created by [set_vars()]
+#' @return
+#' A formula
 as_simple_formula <- function(vars){
     variables <- c(
         vars$group,
@@ -84,9 +106,10 @@ as_model_df <- function(dat, frm) {
 
 
 
-#' Title - TODO
+#' Character 2 Factor
 #'
-#' Converts all character variables within a dataframe to factor
+#' Converts all character variables within a dataframe to factor.
+#' Deterimines character variables by `is.character()`
 #'
 #' @param data A dataframe
 char2fct <- function(data) {
@@ -100,10 +123,15 @@ char2fct <- function(data) {
 
 
 
-#' Title - TODO
+#' if else
 #'
-#' A wrapper around if() else() to prevent unexpected
-#' interactions between ifelse() and factor variables
+#' A wrapper around `if() else()` to prevent unexpected
+#' interactions between `ifelse()` and factor variables
+#'
+#' @details
+#' By default `ifelse()` will convert factor variables to their
+#' numeric values which is often undesirable. This connivance
+#' function avoids that problem
 #'
 #' @param x True / False
 #' @param a value to return if True
@@ -144,13 +172,32 @@ sample_mvnorm <- function(mu, sigma) {
 
 
 
-#' record
+#' Capture all Output
 #'
 #' This function silences all warnings, errors & messages and instead returns a list
 #' containing the results (if it didn't error) + the warning and error messages as
 #' character vectors.
 #'
 #' @param expr An expression to be executed
+#'
+#' @return
+#' A list containing
+#'
+#' - **results** - The object returned by `expr` or `list()` if an error was thrown
+#' - **warnings** - NULL or a character vector if warnings were thrown
+#' - **errors** - NULL or a string if an error was thrown
+#' - **messages** - NULL or a character vector if messages were produced
+#'
+#' @examples
+#' \dontrun{
+#' record({
+#'   x <- 1
+#'   y <- 2
+#'   warning("something went wrong")
+#'   message("O nearly done")
+#'   x + y
+#' })
+#' }
 record <- function(expr) {
     env <- new.env()
     result <- withCallingHandlers(
@@ -236,7 +283,14 @@ extract_covariates <- function(x) {
 #' @param subs a character vector of substrings to look for
 #'
 #' @description
-#' Loops over `x` returning `TRUE`/`FALSE` if any element of `subs` occours as a substring within it
+#' Returns a vector of `TRUE`/`FALSE` for each element of x
+#' if it contains any element in `subs`
+#'
+#' i.e.
+#' ```
+#' str_contains( c("ben", "tom", "harry"), c("e", "y"))
+#' [1] TRUE FALSE TRUE
+#' ```
 str_contains <- function(x, subs) {
     strings <- x
     res_list <- lapply(subs, function(x) grepl(x, strings, fixed = T))
@@ -253,19 +307,24 @@ str_contains <- function(x, subs) {
 
 #' Sort Data Frame
 #'
-#' Sorts a dataframe (ascending only) based upon variables within the dataset
-#' This function is essentially a wrapper around do.call to ease the syntax
+#' Sorts a dataframe (ascending by default) based upon variables within the dataset
 #' @param df data.frame
 #' @param vars character vector of variables
-#' @param decreasing logical wether sort order should be in descending or ascending (default) order
-sort_by <- function(df, vars = NULL, decreasing = NULL) {
+#' @param decreasing logical whether sort order should be in descending or ascending (default) order. Can be either a single logical value (in which case it is applied to
+#' all variables) or a vector which is the same length as `vars`
+#' @examples
+#' \dontrun{
+#' sort_by(iris, c("Sepal.Length", "Sepal.Width"), decreasing = c(TRUE, FALSE))
+#' }
+sort_by <- function(df, vars = NULL, decreasing = FALSE) {
     if (is.null(vars)) {
         return(df)
     }
     assert_that(
-        is.data.frame(df), 
+        is.data.frame(df),
         all(vars %in% names(df)),
-        is.null(decreasing) | length(decreasing) == 1 | length(decreasing) == length(vars)
+        is.logical(decreasing),
+        length(decreasing) == 1 | length(decreasing) == length(vars)
     )
     args <- as.list(df[, vars, drop = FALSE])
     args$decreasing <- decreasing
@@ -280,10 +339,10 @@ sort_by <- function(df, vars = NULL, decreasing = NULL) {
 
 
 #' TODO
-#' 
+#'
 #' @description
 #' TODO
-#' 
+#'
 #' @param subjid TODO
 #' @param visit TODO
 #' @param outcome TODO

@@ -50,3 +50,4 @@ src/*
 .DS_store
 
 !.gitkeep
+inst/doc

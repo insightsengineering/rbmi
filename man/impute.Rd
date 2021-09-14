@@ -68,7 +68,7 @@ impute(
     references = c("Trt" = "Placebo", "Placebo" = "Placebo")
 )
 
-new_ice <- data.frame(
+new_strategy <- data.frame(
   subjid = c("Pt1", "Pt2"),
   strategy = c("MAR", "JR")
 )

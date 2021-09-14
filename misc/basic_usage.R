@@ -5,7 +5,7 @@ devtools::load_all()
 
 
 
-sigma <- as_covmat(c(3, 4, 5), c(0.8, 0.6, 0.4))
+sigma <- as_vcov(c(3, 4, 5), c(0.8, 0.6, 0.4))
 
 
 set.seed(21)

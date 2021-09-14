@@ -2,15 +2,16 @@
 % Please edit documentation in R/utilities.R
 \name{add_class}
 \alias{add_class}
-\title{Title}
+\title{Add a class}
 \usage{
 add_class(x, cls)
 }
 \arguments{
-\item{x}{TODO}
+\item{x}{Object to add a class to}
 
-\item{cls}{TODO}
+\item{cls}{the class to be added}
 }
 \description{
-Title
+Utility function to add a class to an object. Adds the new class
+after any existing classes.
 }

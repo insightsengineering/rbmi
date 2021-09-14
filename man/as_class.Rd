@@ -2,15 +2,15 @@
 % Please edit documentation in R/utilities.R
 \name{as_class}
 \alias{as_class}
-\title{Title}
+\title{Set Class}
 \usage{
 as_class(x, cls)
 }
 \arguments{
-\item{x}{TODO}
+\item{x}{Object to set the class of}
 
-\item{cls}{TODO}
+\item{cls}{The class to be set}
 }
 \description{
-Title
+Utility function to set an objects class.
 }

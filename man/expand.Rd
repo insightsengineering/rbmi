@@ -48,7 +48,6 @@ will be returned in the original sort order however.
 }
 \examples{
 \dontrun{
-
 dat_expanded <- expand(
     data = dat,
     subject = c("pt1", "pt2", "pt3", "pt4"),

@@ -54,7 +54,6 @@ locf <- function(x) {
 #'
 #' @examples
 #' \dontrun{
-#'
 #' dat_expanded <- expand(
 #'     data = dat,
 #'     subject = c("pt1", "pt2", "pt3", "pt4"),

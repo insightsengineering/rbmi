@@ -4,16 +4,21 @@
 \alias{sort_by}
 \title{Sort Data Frame}
 \usage{
-sort_by(df, vars = NULL, decreasing = NULL)
+sort_by(df, vars = NULL, decreasing = FALSE)
 }
 \arguments{
 \item{df}{data.frame}
 
 \item{vars}{character vector of variables}
 
-\item{decreasing}{logical wether sort order should be in descending or ascending (default) order}
+\item{decreasing}{logical whether sort order should be in descending or ascending (default) order. Can be either a single logical value (in which case it is applied to
+all variables) or a vector which is the same length as \code{vars}}
 }
 \description{
-Sorts a dataframe (ascending only) based upon variables within the dataset
-This function is essentially a wrapper around do.call to ease the syntax
+Sorts a dataframe (ascending by default) based upon variables within the dataset
+}
+\examples{
+\dontrun{
+sort_by(iris, c("Sepal.Length", "Sepal.Width"), decreasing = c(TRUE, FALSE))
+}
 }

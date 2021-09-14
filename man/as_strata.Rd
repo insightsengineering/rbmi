@@ -2,13 +2,25 @@
 % Please edit documentation in R/bootstrap.R
 \name{as_strata}
 \alias{as_strata}
-\title{Title}
+\title{Create vector of Stratas}
 \usage{
 as_strata(...)
 }
 \arguments{
-\item{...}{TODO}
+\item{...}{numeric/character/factor vectors of the same length}
 }
 \description{
-Title
+Collapse multiple categorical variables into distinct unique categories.
+e.g.\preformatted{}
+}
+\details{
+\preformatted{would return
+}
+
+c(1,2,3,3,4,1)\preformatted{}
+}
+\examples{
+\dontrun{
+as_strata(c(1,1,2,2,2,1), c(5,6,5,5,6,5))
+}
 }
