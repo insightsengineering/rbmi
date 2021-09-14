@@ -209,16 +209,24 @@ pool_internal.rubin <- function(results, conf.level, alternative, type) {
 }
 
 
-#' @title TODO
+#' @title Barnard and Rubin degrees of freedom adjustment
 #'
-#' @description TODO
+#' @description Compute degrees of freedom according to Barnard-Rubin formula
 #'
-#' @param v_com TODO
-#' @param var_b TODO
-#' @param var_t TODO
-#' @param M TODO
+#' @param v_com Positive number representing the degrees of freedom in the complete-data analysis.
+#' @param var_b Between-variance of point estimate across multiply imputed datasets.
+#' @param var_t Total-variance of point estimate according to Rubin's rules.
+#' @param M Number of imputations.
 #'
-#' @return TODO
+#' @return Degrees of freedom according to Barnard-Rubin formula. See Barnard-Rubin (1999).
+#'
+#' @details The computation takes into account limit cases where there is no missing data
+#'   (i.e. the between-variance `var_b` is zero) and the complete-data degrees of freedom is
+#'   set to `Inf`. Moreover, if `v_com` is given as `NA`, the function returns `Inf`.
+#'
+#' @references
+#'   Barnard, J. and Rubin, D.B. (1999).
+#'   Small sample degrees of freedom with multiple imputation. Biometrika, 86, 948-955.
 rubin_df <- function(v_com, var_b, var_t, M) {
 
     if (is.na(v_com) || (is.infinite(v_com) & var_b == 0)) {
@@ -246,15 +254,37 @@ rubin_df <- function(v_com, var_b, var_t, M) {
 }
 
 
-#' @title TODO
+#' @title Combine estimates using Rubin's rules
 #'
-#' @description TODO
+#' @description Pool together the results from `M` complete-data analyses according to Rubin's rules. See details.
 #'
-#' @param ests TODO
-#' @param ses TODO
-#' @param v_com TODO
+#' @param ests Numeric vector containing the point estimates from the complete-data analyses.
+#' @param ses Numeric vector containing the standard errors from the complete-data analyses.
+#' @param v_com Positive number representing the degrees of freedom in the complete-data analysis.
 #'
-#' @return TODO
+#' @return
+#' A list containing:
+#'
+#' - `est_point`: the pooled point estimate according to Little-Rubin (2002).
+#' - `var_t`: total variance according to Little-Rubin (2002).
+#' - `df`: degrees of freedom according to Barnard-Rubin (1999).
+#'
+#' @details `rubin_rules` applies Rubin's rules (Rubin, 1987) for pooling together
+#' the results from a multiple imputation procedure. The pooled point estimate `est_point` is
+#' is the average across the point estimates from the complete-data analyses (given by the input argument `ests`).
+#' The total variance `var_t` is the sum of two terms representing the within-variance
+#' and the between-variance (see Little-Rubin (2002)). The function
+#' also returns `df`, the estimation of the pooled degrees of freedom according to Barnard-Rubin (1999)
+#' that can be used for inference based on t-distribution.
+#'
+#' @seealso [rubin_df()] for the degrees of freedom estimation.
+#'
+#' @references
+#' Barnard, J. and Rubin, D.B. (1999).
+#' Small sample degrees of freedom with multiple imputation. Biometrika, 86, 948-955.
+#'
+#' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing
+#' Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. \[Section 5.4\]
 rubin_rules <- function(ests, ses, v_com) {
 
     M <- length(ests)
