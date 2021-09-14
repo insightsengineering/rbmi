@@ -66,7 +66,7 @@
 #'
 #' Note that at present Bayesian methods only support unstructured.
 #'
-#' In the case of `method_condmean(type = "bootstrap")` and `method_approxbayes()`, repeated
+#' In the case of `method_condmean(type = "bootstrap")` and `method_approxbayes()` repeated
 #' bootstrap samples of the original dataset are taken with an MMRM fitted to each sample.
 #' Due to the randomness of these sampled datasets, as well as limitations in the optimisers
 #' used to fit the models, it is not uncommon that estimates for a particular dataset can't

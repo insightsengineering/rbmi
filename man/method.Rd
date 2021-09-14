@@ -36,34 +36,33 @@ method_condmean(
 \arguments{
 \item{burn_in}{a numeric that specifies how many observations should be discarded
 prior to extracting actual samples. Note that the sampler
-is initialised at the maximum likelihood estimates and an uninformative
+is initialised at the maximum likelihood estimates and a weakly informative
 prior is used thus in theory this value should not need to be that high.}
 
 \item{burn_between}{a numeric that specifies the "thinning" rate i.e. how many
 observations should be discarded between each sample. This is used to prevent
 issues associated with autocorrelation between samples.}
 
-\item{same_cov}{a logical, if true the MMRM model will be fitted using a single
-shared covariance matrix for all observations. If false a separate covariance
+\item{same_cov}{a logical, if \code{TRUE} the MMRM model will be fitted using a single
+shared covariance matrix for all observations. If \code{FALSE} a separate covariance
 matrix will be fit for each group as determined by the \code{group} argument of
 \code{set_vars()}.}
 
-\item{n_samples}{a numeric that specifies the number of samples to be generated.
-This determines both how many imputation models are calculated and how many imputed
-datasets are generated. In the case of \code{method_condmean(type = "jackknife")} this argument
-must be set to NULL. See details.}
+\item{n_samples}{a numeric that determines how many imputed datasets are generated.
+In the case of \code{method_condmean(type = "jackknife")} this argument
+must be set to \code{NULL}. See details.}
 
-\item{verbose}{a logical, if true (default) Stan's sampling log information will
-be printed to the console, if false this information will be suppressed.}
+\item{verbose}{a logical, if \code{TRUE} (default) Stan's sampling log information will
+be printed to the console, if \code{FALSE} this information will be suppressed.}
 
 \item{seed}{a numeric that specifies a seed to be used in the call to Stan. This
 argument is forward on the the \code{seed} argument of \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}. Note that
 this is only required for \code{method_bayes()}, for all other methods you can achieve
 reproducible results by setting the seed via \code{set.seed()}}
 
-\item{covariance}{a character string that specifies the structure of the covariance matrix
-to be used in the imputation model. Must be one of \code{"us"} (default), \code{"toep"}, \code{"cs"} or \code{"ar1"}.
-See details.}
+\item{covariance}{a character string that specifies the structure of the covariance
+matrix to be used in the imputation model. Must be one of \code{"us"} (default), \code{"toep"},
+\code{"cs"} or \code{"ar1"}. See details.}
 
 \item{threshold}{a numeric between 0 and 1, specifies the proportion of bootstrap
 datasets that can fail to produce valid samples before an error is thrown.
@@ -85,7 +84,7 @@ imputation models and datasets generated as the first sample will be based on
 the original dataset whilst the other \code{n_samples} samples will be
 bootstrapped datasets. Likewise, for \code{method_condmean(type = "jackknife")} there will
 be \code{nrow(data) + 1} imputation models and datasets generated. In both cases this is
-represented by \code{x + 1} being displayed in the print message.
+represented by \code{n + 1} being displayed in the print message.
 
 The user is able to specify different covariance structures using the the \code{covariance}
 argument. Currently supported structures include:
@@ -98,16 +97,16 @@ argument. Currently supported structures include:
 
 Note that at present Bayesian methods only support unstructured.
 
-In the case of \code{method_condmean(type = "bootstrap")} and \code{method_approxbayes()}, repeated
+In the case of \code{method_condmean(type = "bootstrap")} and \code{method_approxbayes()} repeated
 bootstrap samples of the original dataset are taken with an MMRM fitted to each sample.
 Due to the randomness of these sampled datasets, as well as limitations in the optimisers
 used to fit the models, it is not uncommon that estimates for a particular dataset can't
 be generated. In these instances rbmi is designed to throw out that bootstrapped data
 and try again with another. However to ensure that these errors are due to chance and
 not due to some underlying misspecification in the data and/or model a tolerance limit
-is set on how many samples can be discarded. Once the tolerance limit has been breached
+is set on how many samples can be discarded. Once the tolerance limit has been reached
 an error will be thrown and the process aborted. The tolerance limit is defined as
-\code{ceiling(threshold * n_samples)}. Note that for jackknife methods estimates need to be
-generated for all permutations of dataset and as such an error will be thrown if
+\code{ceiling(threshold * n_samples)}. Note that for the jackknife method estimates need to be
+generated for all leave-one-out datasets and as such an error will be thrown if
 any of them fail to fit.
 }
