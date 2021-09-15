@@ -318,7 +318,7 @@
           threshold: 0.5
           same_cov: FALSE
           REML: TRUE
-          n_samples: NA
+          n_samples: NULL
           type: jackknife
       
 

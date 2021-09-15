@@ -425,11 +425,18 @@ print.draws <- function(x, ...) {
          "bayes" = "Bayes"
     )
 
+    method <- x$method
+    method$n_samples <- ife(
+        is.null(method$n_samples),
+        "NULL",
+        method$n_samples
+    )
+
     meth_args <- vapply(
         mapply(
             function(x, y) sprintf("    %s: %s", y, x),
-            x$method,
-            names(x$method),
+            method,
+            names(method),
             USE.NAMES = FALSE,
             SIMPLIFY = FALSE
         ),
