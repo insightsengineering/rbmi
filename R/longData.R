@@ -421,6 +421,8 @@ longDataConstructor <- R6::R6Class(
                 self$strategy_lock[[subject]] <- !all(
                     self$is_missing[[subject]][is_post_ice]
                 )
+
+                self$validate_index_mar(self$is_mar[[subject]])
             }
             self$check_has_data_at_each_visit()
         },
@@ -470,6 +472,37 @@ longDataConstructor <- R6::R6Class(
                 self$strata <- rep(1, length(self$ids))
             }
         },
+
+
+        #' Validate index_mar for a given subject
+        #'
+        #' Checks that the longitudinal data for a patient is divided in MAR
+        #' followed by non-MAR data; non-MAR observation followed by a MAR
+        #' observation is not allowed
+        #'
+        #' @param id Character subject id that exists within `self$data`
+        #'
+        #' @return
+        #' Will error if there is an issue otherwise will return `TRUE`
+        validate_index_mar = function(is_mar) {
+
+            if(all(is_mar) || all(!is_mar)) {
+                return(invisible(TRUE))
+            }
+
+            ind <- which(is_mar == FALSE)[1]
+            true_index <- seq_len(ind-1)
+            false_index <- seq(ind, length(is_mar))
+
+            assert_that(
+                all(is_mar[true_index]),
+                all(!is_mar[false_index]),
+                msg = "non-MAR observation followed by a MAR observation is not allowed"
+            )
+
+            return(invisible(TRUE))
+        },
+
 
 
         #' @description
