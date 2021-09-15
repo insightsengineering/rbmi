@@ -167,3 +167,45 @@ test_that("fill_locf", {
 
 })
 
+
+
+
+test_that("expand_locf",{
+    input_df <- dplyr::tibble(
+        c1 = c("A", "B", "A", "C"),
+        c2 = c("A", "A", "B", "B"),
+        v1 = c(1,2,3,4),
+        v2 = c("X", "Y", "Z", "W")
+    )
+
+    df_expected <- dplyr::tibble(
+        c1 = factor(c("A", "B","C", "A", "B", "C")),
+        c2 = factor(c("A", "A", "A", "B", "B", "B")),
+        v1 = c(1,2,NA, 3,NA, 4),
+        v2 = c("X", "Y", "Y", "Z", "Z", "W")
+    ) %>%
+        arrange(c1, c2)
+
+    df_actual_1 <- input_df %>%
+        expand(c1 = c("A", "B", "C"), c2 = c("A", "B")) %>%
+        fill_locf(
+            vars = "v2",
+            group = c("c2"),
+            order = c("c1", "c2")
+        )
+
+    df_actual_2 <- expand_locf(
+        input_df,
+        c1 = c("A", "B", "C"),
+        c2 = c("A", "B"),
+        vars =  "v2",
+        group = "c2",
+        order = c("c1", "c2")
+    )
+
+
+    expect_equal(df_actual_1, df_expected)
+    expect_equal(df_actual_2, df_expected)
+})
+
+

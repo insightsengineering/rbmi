@@ -352,10 +352,11 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
         names = FALSE
     )
 
-    ci <- switch(alternative,
-                 two.sided = quant_2_side,
-                 greater = c(-Inf, quant_1_side[2]),
-                 less = c(quant_1_side[1], Inf)
+    ci <- switch(
+        alternative,
+        two.sided = quant_2_side,
+        greater = c(-Inf, quant_1_side[2]),
+        less = c(quant_1_side[1], Inf)
     )
 
     ret <- list(
@@ -403,7 +404,7 @@ pool_bootstrap_normal <- function(est, conf.level, alternative) {
 #' @param alpha The type 1 error rate, should be a value between 0 and 1
 #'
 #' @param alternative a character string specifying the alternative hypothesis,
-#' must be one of "two.sided" (default), "greater" or "less".#' @param qfun TODO
+#' must be one of "two.sided" (default), "greater" or "less".
 #'
 #' @param qfun The quantile function for the assumed distribution i.e. `qnorm`
 #'
