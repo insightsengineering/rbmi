@@ -139,5 +139,5 @@ Needed only for \code{method_condmean(type = "bootstrap")} and \code{method_appr
 
 \code{\link[=set_vars]{set_vars()}} for setting \code{vars}.
 
-\link{expand_locf} for expanding \code{data} in case of missing rows.
+\code{\link[=expand_locf]{expand_locf()}} for expanding \code{data} in case of missing rows.
 }
