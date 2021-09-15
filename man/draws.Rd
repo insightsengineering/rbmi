@@ -39,7 +39,7 @@ Each element of \code{samples} is a named list containing the following:
 \item \code{ids}: vector of characters containing the ids of the subjects included in the original dataset.
 \item \code{beta}: numeric vector of estimated regression coefficients.
 \item \code{sigma}: list of estimated covariance matrices (one for each level of \code{vars$group}).
-\item \code{theta}: numberic vector of transformed covariances.
+\item \code{theta}: numeric vector of transformed covariances.
 \item \code{failed}: Logical. \code{TRUE} if the model fit failed.
 \item \code{ids_samp}: vector of characters containing the ids of the subjects included in the given sample.
 }
@@ -105,16 +105,17 @@ Possible imputation strategies are:
 \item \code{"CR"}: Copy Reference.
 \item \code{"JR"}: Jump to Reference.
 \item \code{"LMCF"}: Last Mean Carried Forward.
-\item Customized imputation strategies can also be set.
+\item User-defined imputation strategies can also be set.
 }
 }
 
 This argument is necessary at this stage since the model will be fit only on those observed data
-that, if missing, would be characterized as MAR. Thus, any non-MAR observed data, i.e.
+that, if missing, would have been characterized as MAR. Thus, any non-MAR observed data, i.e.
 any observed data after \code{data_ice[[vars$visit]]} that is addressed with an imputation
-strategy different from MAR will be discarded for the model fit. Such observed data
-however will not be discarded from the data in the imputation phase
-(performed with the function (\code{\link[=impute]{impute()}}).
+strategy different from MAR will be discarded for the model fit. However such observed data
+will not be discarded from the data in the imputation phase
+(performed with the function (\code{\link[=impute]{impute()}}). To summarize, \strong{at this stage all pre-ICE data
+and MAR post-ICE data are used}.
 
 The argument \code{vars} is a named list of key variable names to specify
 the imputation model. Can be set using \code{\link[=set_vars]{set_vars()}} providing the following arguments:

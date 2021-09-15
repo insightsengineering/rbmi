@@ -59,14 +59,15 @@
 #'   - `"CR"`: Copy Reference.
 #'   - `"JR"`: Jump to Reference.
 #'   - `"LMCF"`: Last Mean Carried Forward.
-#'   - Customized imputation strategies can also be set.
+#'   - User-defined imputation strategies can also be set.
 #'
 #' This argument is necessary at this stage since the model will be fit only on those observed data
-#' that, if missing, would be characterized as MAR. Thus, any non-MAR observed data, i.e.
+#' that, if missing, would have been characterized as MAR. Thus, any non-MAR observed data, i.e.
 #' any observed data after `data_ice[[vars$visit]]` that is addressed with an imputation
-#' strategy different from MAR will be discarded for the model fit. Such observed data
-#' however will not be discarded from the data in the imputation phase
-#' (performed with the function ([impute()]).
+#' strategy different from MAR will be discarded for the model fit. However such observed data
+#' will not be discarded from the data in the imputation phase
+#' (performed with the function ([impute()]). To summarize, **at this stage all pre-ICE data
+#' and MAR post-ICE data are used**.
 #'
 #' The argument `vars` is a named list of key variable names to specify
 #' the imputation model. Can be set using [set_vars()] providing the following arguments:
@@ -92,7 +93,7 @@
 #'   - `ids`: vector of characters containing the ids of the subjects included in the original dataset.
 #'   - `beta`: numeric vector of estimated regression coefficients.
 #'   - `sigma`: list of estimated covariance matrices (one for each level of `vars$group`).
-#'   - `theta`: numberic vector of transformed covariances.
+#'   - `theta`: numeric vector of transformed covariances.
 #'   - `failed`: Logical. `TRUE` if the model fit failed.
 #'   - `ids_samp`: vector of characters containing the ids of the subjects included in the given sample.
 #' - `fit`: if `method_bayes()` is chosen, returns the MCMC Stan fit object. Otherwise `NULL`.
