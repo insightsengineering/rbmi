@@ -66,7 +66,7 @@
 #' any observed data after `data_ice[[vars$visit]]` that is addressed with an imputation
 #' strategy different from MAR will be discarded for the model fit. However such observed data
 #' will not be discarded from the data in the imputation phase
-#' (performed with the function ([impute()]). To summarize, **at this stage all pre-ICE data
+#' (performed with the function ([impute()]). To summarize, **at this stage only pre-ICE data
 #' and MAR post-ICE data are used**.
 #'
 #' The argument `vars` is a named list of key variable names to specify
