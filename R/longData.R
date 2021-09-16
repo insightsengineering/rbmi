@@ -421,6 +421,8 @@ longDataConstructor <- R6::R6Class(
                 self$strategy_lock[[subject]] <- !all(
                     self$is_missing[[subject]][is_post_ice]
                 )
+
+                validate( as_class(self$is_mar[[subject]], "is_mar") )
             }
             self$check_has_data_at_each_visit()
         },
@@ -470,6 +472,7 @@ longDataConstructor <- R6::R6Class(
                 self$strata <- rep(1, length(self$ids))
             }
         },
+
 
 
         #' @description
@@ -539,3 +542,37 @@ transpose_imputations <- function(imputations) {
     )
     return(result)
 }
+
+
+
+#' Validate `is_mar` for a given subject
+#'
+#' Checks that the longitudinal data for a patient is divided in MAR
+#' followed by non-MAR data; a non-MAR observation followed by a MAR
+#' observation is not allowed.
+#'
+#' @param x Object of class `is_mar`. Logical vector indicating whether observations are MAR.
+#' @param ... Not used.
+#'
+#' @return
+#' Will error if there is an issue otherwise will return `TRUE`.
+#' @export
+validate.is_mar <- function(x, ...) {
+
+    if(all(x) || all(!x)) {
+        return(invisible(TRUE))
+    }
+
+    ind <- which(x == FALSE)[1]
+    true_index <- seq_len(ind-1)
+    false_index <- seq(ind, length(x))
+
+    assert_that(
+        all(x[true_index]),
+        all(!x[false_index]),
+        msg = "non-MAR observation followed by a MAR observation is not allowed"
+    )
+
+    return(invisible(TRUE))
+}
+

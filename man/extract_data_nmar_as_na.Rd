@@ -2,13 +2,17 @@
 % Please edit documentation in R/draws.R
 \name{extract_data_nmar_as_na}
 \alias{extract_data_nmar_as_na}
-\title{Title - TODO}
+\title{Set to NA outcome values that are MNAR}
 \usage{
 extract_data_nmar_as_na(longdata)
 }
 \arguments{
-\item{longdata}{TODO}
+\item{longdata}{R6 \code{longdata} object containing all relevant input data information.}
+}
+\value{
+A \code{data.frame} containing \code{longdata$get_data(longdata$ids)}, but MNAR outcome
+values are set to \code{NA}.
 }
 \description{
-Title - TODO
+Set to NA outcome values that are MNAR
 }

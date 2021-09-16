@@ -2,7 +2,7 @@
 % Please edit documentation in R/draws.R
 \name{as_sample_single}
 \alias{as_sample_single}
-\title{TODO}
+\title{Create object of \code{sample_single} class}
 \usage{
 as_sample_single(
   ids,
@@ -14,18 +14,30 @@ as_sample_single(
 )
 }
 \arguments{
-\item{ids}{TODO}
+\item{ids}{Vector of characters containing the ids of the subjects included in the original dataset.}
 
-\item{beta}{TODO}
+\item{beta}{Numeric vector of estimated regression coefficients.}
 
-\item{sigma}{TODO}
+\item{sigma}{List of estimated covariance matrices (one for each level of \code{vars$group}).}
 
-\item{theta}{TODO}
+\item{theta}{Numeric vector of transformed covariances.}
 
-\item{failed}{TODO}
+\item{failed}{Logical. \code{TRUE} if the model fit failed.}
 
-\item{ids_samp}{TODO}
+\item{ids_samp}{Vector of characters containing the ids of the subjects included in the given sample.}
+}
+\value{
+A named list of class \code{sample_single}. It contains the following:
+\itemize{
+\item \code{ids} vector of characters containing the ids of the subjects included in the original dataset.
+\item \code{beta} numeric vector of estimated regression coefficients.
+\item \code{sigma} list of estimated covariance matrices (one for each level of \code{vars$group}).
+\item \code{theta} numeric vector of transformed covariances.
+\item \code{failed} logical. \code{TRUE} if the model fit failed.
+\item \code{ids_samp} vector of characters containing the ids of the subjects included in the given sample.
+}
 }
 \description{
-TODO
+Creates an object of class \code{sample_single} which is a named list
+containing the input parameters and validate them.
 }

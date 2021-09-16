@@ -38,24 +38,21 @@ compute_sigma <- function(sigma_group, sigma_ref, index_mar){
         return(sigma_ref)
     }
 
-    first_nonMAR <- which(!index_mar)[1]
-    last_MAR <- first_nonMAR -1
-
-    T_11 <- sigma_group[1:last_MAR, 1:last_MAR]
-    inv_R_11 <- solve(sigma_ref[1:last_MAR, 1:last_MAR])
+    T_11 <- sigma_group[index_mar, index_mar]
+    inv_R_11 <- solve(sigma_ref[index_mar, index_mar])
 
     sigma_11 <- T_11
 
-    sigma_21 <- sigma_ref[first_nonMAR:size, 1:last_MAR]%*%inv_R_11%*%T_11
+    sigma_21 <- sigma_ref[!index_mar, index_mar]%*%inv_R_11%*%T_11
 
     sigma_12 <- t(sigma_21)
 
-    sigma_22 <- sigma_ref[first_nonMAR:size,first_nonMAR:size] -
-        sigma_ref[first_nonMAR:size, 1:last_MAR] %*%
+    sigma_22 <- sigma_ref[!index_mar,!index_mar] -
+        sigma_ref[!index_mar, index_mar] %*%
         inv_R_11 %*%
-        (sigma_ref[1:last_MAR, 1:last_MAR]-T_11) %*%
+        (sigma_ref[index_mar, index_mar]-T_11) %*%
         inv_R_11 %*%
-        sigma_ref[1:last_MAR, first_nonMAR:size]
+        sigma_ref[index_mar, !index_mar]
 
     sigma <- rbind(
         cbind(sigma_11,sigma_12),
@@ -185,8 +182,7 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar){
     if(sum(index_mar) == length(pars_group$mu)) {
         return(pars_group)
     } else if(sum(index_mar) == 0) {
-        # TODO
-        return()
+        stop("LMCF cannot be adopted since all outcome values are missing")
     }
 
     mu <- pars_group$mu

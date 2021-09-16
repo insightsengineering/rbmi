@@ -284,7 +284,7 @@ test_that("Group is a stratification variable by default", {
     dobj <- get_data(60)
     dat <- dobj$dat
     dat_ice <- dobj$dat_ice
-    
+
     vars <- set_vars(
         subjid = "id",
         visit = "visit",
@@ -606,3 +606,26 @@ test_that("longdata rejects data that has no useable observations for a visit", 
     )
 
 })
+
+
+
+test_that(
+    "Validate `is_mar` object", {
+
+        index_mar <- as_class(c(T,T,F,F), "is_mar")
+        expect_true(validate(index_mar))
+
+        index_mar <- as_class(c(T,T,T,T), "is_mar")
+        expect_true(validate(index_mar))
+
+        index_mar <- as_class(c(F,F,F,F), "is_mar")
+        expect_true(validate(index_mar))
+
+        index_mar <- as_class(c(T,T,F,T), "is_mar")
+        expect_error(validate(index_mar))
+
+        index_mar <- as_class(c(F,F,T,T), "is_mar")
+        expect_error(validate(index_mar))
+
+    }
+)
