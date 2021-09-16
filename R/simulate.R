@@ -151,5 +151,6 @@ as_vcov <- function(sd, cor) {
     res <- diag(sd) %*% x %*% diag(sd)
     res <- as.matrix(Matrix::nearPD(res)$mat)
     assertthat::assert_that(isSymmetric(res))
+    dimnames(res) <- NULL
     return(res)
 }

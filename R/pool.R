@@ -352,10 +352,11 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
         names = FALSE
     )
 
-    ci <- switch(alternative,
-                 two.sided = quant_2_side,
-                 greater = c(-Inf, quant_1_side[2]),
-                 less = c(quant_1_side[1], Inf)
+    ci <- switch(
+        alternative,
+        two.sided = quant_2_side,
+        greater = c(-Inf, quant_1_side[2]),
+        less = c(quant_1_side[1], Inf)
     )
 
     ret <- list(

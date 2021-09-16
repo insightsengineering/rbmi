@@ -58,7 +58,7 @@ be printed to the console, if \code{FALSE} this information will be suppressed.}
 \item{seed}{a numeric that specifies a seed to be used in the call to Stan. This
 argument is forward on the the \code{seed} argument of \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}. Note that
 this is only required for \code{method_bayes()}, for all other methods you can achieve
-reproducible results by setting the seed via \code{set.seed()}.}
+reproducible results by setting the seed via \code{set.seed()}. See details.}
 
 \item{covariance}{a character string that specifies the structure of the covariance
 matrix to be used in the imputation model. Must be one of \code{"us"} (default), \code{"toep"},
@@ -109,4 +109,9 @@ an error will be thrown and the process aborted. The tolerance limit is defined 
 \code{ceiling(threshold * n_samples)}. Note that for the jackknife method estimates need to be
 generated for all leave-one-out datasets and as such an error will be thrown if
 any of them fail to fit.
+
+Please note that at the time of writing (September 2021) Stan is unable to produce
+reproducible samples across different operating systems even when the same seed is used.
+As such care must be taken when using Stan across different machines. For more information
+on this limitation please consult the Stan documentation \url{https://mc-stan.org/docs/2_27/reference-manual/reproducibility-chapter.html}
 }
