@@ -1,8 +1,12 @@
 #' @title Fit the base imputation model and get parameter estimates
 #'
-#' @description fits the base imputation model to the observed data assuming MAR
+#' @description `draws` fits the base imputation model to the observed data assuming MAR
 #' according to the given multiple imputation methodology and returns the parameter
-#' estimates from the fit.
+#' estimates from the fit. The model is a MMRM model that can be fit either using a ML/REML
+#' approach or a Bayesian approach, according to the user's method specification. The ML/REML
+#' approaches support a wide range of possible covariance structures, while the Bayesian
+#' approach based on MCMC sampling supports only an unstructured covariance. In both cases
+#' the covariance matrix can be assumed to be the same or different across each group.
 #'
 #' @name draws
 #' @param data A `data.frame` containing the data to be used in the model. See details.
@@ -78,7 +82,7 @@
 #' - `group`: name of the column in `data` which contains the group variable.
 #' - `covariates`: vector of characters which contains the covariates to be included
 #'   in the model (including interactions).
-#'   By default the model specification is `outcome ~ 1 + visit + group`.
+#'   If no covariates are provided the default model specification of `outcome ~ 1 + visit + group` will be used.
 #'   Please note that the `group*visit` interaction
 #'   is **not** included in the model by default.
 #' - `strata`: covariates used as stratification variables in the bootstrap sampling.

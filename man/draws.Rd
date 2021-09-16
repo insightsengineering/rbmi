@@ -50,9 +50,13 @@ Relevant only for \code{method_condmean(type = "bootstrap")} and \code{method_ap
 }
 }
 \description{
-fits the base imputation model to the observed data assuming MAR
+\code{draws} fits the base imputation model to the observed data assuming MAR
 according to the given multiple imputation methodology and returns the parameter
-estimates from the fit.
+estimates from the fit. The model is a MMRM model that can be fit either using a ML/REML
+approach or a Bayesian approach, according to the user's method specification. The ML/REML
+approaches support a wide range of possible covariance structures, while the Bayesian
+approach based on MCMC sampling supports only an unstructured covariance. In both cases
+the covariance matrix can be assumed to be the same or different across each group.
 }
 \details{
 \code{draws} performs the first step of the multiple imputation (MI) procedure: fitting the
@@ -125,7 +129,7 @@ The vars argument is a named list that specifies the names of key variables with
 \item \code{group}: name of the column in \code{data} which contains the group variable.
 \item \code{covariates}: vector of characters which contains the covariates to be included
 in the model (including interactions).
-By default the model specification is \code{outcome ~ 1 + visit + group}.
+If no covariates are provided the default model specification of \code{outcome ~ 1 + visit + group} will be used.
 Please note that the \code{group*visit} interaction
 is \strong{not} included in the model by default.
 \item \code{strata}: covariates used as stratification variables in the bootstrap sampling.

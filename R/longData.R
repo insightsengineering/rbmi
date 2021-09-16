@@ -551,7 +551,7 @@ transpose_imputations <- function(imputations) {
 #' followed by non-MAR data; a non-MAR observation followed by a MAR
 #' observation is not allowed.
 #'
-#' @param is_mar Object of class `is_mar`. Logical vector indicating whether observations are MAR.
+#' @param x Object of class `is_mar`. Logical vector indicating whether observations are MAR.
 #' @param ... Not used.
 #'
 #' @return

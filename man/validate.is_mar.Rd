@@ -7,9 +7,9 @@
 \method{validate}{is_mar}(x, ...)
 }
 \arguments{
-\item{...}{Not used.}
+\item{x}{Object of class \code{is_mar}. Logical vector indicating whether observations are MAR.}
 
-\item{is_mar}{Object of class \code{is_mar}. Logical vector indicating whether observations are MAR.}
+\item{...}{Not used.}
 }
 \value{
 Will error if there is an issue otherwise will return \code{TRUE}.
