@@ -40,7 +40,7 @@
 #' The argument `data` must have one row per visit per subject. This means that incomplete
 #' outcome data must be set as `NA` instead of having the related row missing. Missing values
 #' in the covariates are not allowed. If `data` is incomplete
-#' then the [expand_locf()] helper function can be used to add in any missing rows, using
+#' then the [expand_locf()] helper function can be used to add in any missing rows, which uses
 #' Last Observation Carried Forward (LOCF) imputation to impute the covariates values.
 #'
 #' The argument `data_ice` contains information about the occurrence of ICEs. It is a

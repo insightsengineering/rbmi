@@ -82,7 +82,7 @@ argument \code{type = "jackknife"}.
 The argument \code{data} must have one row per visit per subject. This means that incomplete
 outcome data must be set as \code{NA} instead of having the related row missing. Missing values
 in the covariates are not allowed. If \code{data} is incomplete
-then the \code{\link[=expand_locf]{expand_locf()}} helper function can be used to add in any missing rows, using
+then the \code{\link[=expand_locf]{expand_locf()}} helper function can be used to add in any missing rows, which uses
 Last Observation Carried Forward (LOCF) imputation to impute the covariates values.
 
 The argument \code{data_ice} contains information about the occurrence of ICEs. It is a
