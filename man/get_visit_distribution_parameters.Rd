@@ -11,14 +11,14 @@ get_visit_distribution_parameters(dat, beta, sigma)
 be in the same order as beta. The number of columns must match the length of beta}
 
 \item{beta}{List of model beta coefficients 1 for each sample i.e. \code{list( c(1,2,3) , c(4,5,6), c(7,8,9))}
-all values of beta must be the same length and must be the same length and order as \code{dat}}
+all values of beta must be the same length and must be the same length and order as \code{dat}.}
 
-\item{sigma}{List of sigma. Must have the same number of entries as \code{beta}}
+\item{sigma}{List of sigma. Must have the same number of entries as \code{beta}.}
 }
 \description{
 Takes patient level data and beta coefficients and expands them
-to get an patient specific estimate for the visit distribution parameters
+to get a patient specific estimate for the visit distribution parameters
 \code{mu} and \code{sigma}. Returns the values in a specific format
 which is expected by downstream functions in the imputation process
-(namely  \code{list(list(mu = ..., sigma = ...), list(mu = ..., sigma = ...))})
+(namely  \code{list(list(mu = ..., sigma = ...), list(mu = ..., sigma = ...))}).
 }

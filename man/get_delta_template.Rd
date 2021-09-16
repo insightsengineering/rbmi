@@ -7,7 +7,7 @@
 get_delta_template(imputations)
 }
 \arguments{
-\item{imputations}{an imputations object created by \code{\link[=impute]{impute()}}}
+\item{imputations}{an imputations object created by \code{\link[=impute]{impute()}}.}
 }
 \description{
 This function creates the default delta template (1 row per subject per visit)

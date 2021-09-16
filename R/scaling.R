@@ -14,7 +14,7 @@
 #' Un-scaling is done on linear model Beta and Sigma coefficients. For this purpose
 #' the first column on the dataset to be scaled is assumed to be the outcome variable
 #' with all other variables assumed to be post-transformation predictor variables (i.e.
-#' all dummy variables have already been expanded)
+#' all dummy variables have already been expanded).
 scalerConstructor <- R6::R6Class(
     classname = "scaler",
     public = list(
@@ -76,10 +76,10 @@ scalerConstructor <- R6::R6Class(
 
         #' @description
         #' Scales a dataset so that all continuous variables have a mean of 0 and a
-        #' standard deviation of 1
+        #' standard deviation of 1.
         #' @param dat A dataframe or matrix whose columns are all numeric (i.e. dummy
         #' variables have all been expanded out) and whose columns are in the same
-        #' order as the dataset used in the initialisation function
+        #' order as the dataset used in the initialization function.
         scale = function(dat) {
 
             assert_that(
@@ -120,7 +120,7 @@ scalerConstructor <- R6::R6Class(
         #' using a design matrix scaled by this object. This function only
         #' works if the first column of the initialisation dataframe was the outcome
         #' variable.
-        #' @param sigma A numeric value or matrix
+        #' @param sigma A numeric value or matrix.
         #' @return A numeric value or matrix
         unscale_sigma = function(sigma) {
             assert_that(
@@ -134,10 +134,10 @@ scalerConstructor <- R6::R6Class(
         #' @description
         #' Unscales a beta value (or vector) as estimated by a linear model
         #' using a design matrix scaled by this object. This function only
-        #' works if the first column of the initialisation dataframe was the outcome
+        #' works if the first column of the initialization dataframe was the outcome
         #' variable.
-        #' @param beta A numeric vector of beta coefficients as estiamted from a linear model
-        #' @return A numeric vector
+        #' @param beta A numeric vector of beta coefficients as estiamted from a linear model.
+        #' @return A numeric vector.
         unscale_beta = function(beta) {
 
             len <- length(self$centre) - 1

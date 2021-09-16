@@ -15,7 +15,7 @@
 #' These functions will return a data.frame with the aforementioned variables with 1
 #' row per subject per visit. If the `delta` argument to this function is `NULL`
 #' then the `delta` column in the returned data.frame will be 0 for all observations.
-#' If the `delta` argument is not NULL then `delta` will be calculated separately
+#' If the `delta` argument is not `NULL` then `delta` will be calculated separately
 #' for each subject as the accumulative sum of `delta` multiplied by the scaling
 #' coefficient `dlag` based upon how many visits after the subject's intercurrent
 #' event (ICE) the visit in question is.
@@ -87,44 +87,44 @@
 #' ```
 #'
 #' i.e. on week-6 (1 week after the ICE) they have a delta of 3 and on week-9 (4 weeks after the ICE)
-#' they have a delta of 12
+#' they have a delta of 12.
 #'
 #'
 #' Please note that this function also returns several utility variables so that
 #' the user can create their own custom logic for defining what `delta`
 #' should be set to. These additional variables include:
 #'
-#' - is_mar - If the observation was missing would it be regarded as MAR ? This variable
-#' is set to False if it occurred after a non-MAR ICE, otherwise it is set to True
-#' - is_missing - Is the outcome variable for this observation missing
-#' - is_post_ice - Does the observation occur after the patients ICE as defined by the
-#' `data_ice` dataset supplied to [draws()]
-#' - strategy - What imputation strategy was assigned to for this subject
+#' - `is_mar` - If the observation was missing would it be regarded as MAR ? This variable
+#' is set to `FALSE` if it occurred after a non-MAR ICE, otherwise it is set to `TRUE`.
+#' - `is_missing` - Is the outcome variable for this observation missing.
+#' - `is_post_ice` - Does the observation occur after the patients ICE as defined by the
+#' `data_ice` dataset supplied to [draws()].
+#' - `strategy` - What imputation strategy was assigned to for this subject.
 #'
 #'
 #' The design and implementation of this function is largely based upon the same functionality
-#' as implemented in the so called "five marcos" by James Roger. See Roger (2021)
+#' as implemented in the so called "five marcos" by James Roger. See Roger (2021).
 #'
 #' @references
 #' Roger, James. Reference-based mi via multivariate normal rm (the “five macros” and miwithd), 2021. URL
 #' https://www.lshtm.ac.uk/research/centres-projects-groups/missing-data#dia-missing-data.
 #'
 #'
-#' @param imputations an imputations object as created by [impute()]
+#' @param imputations an `imputation` object as created by [impute()].
 #'
-#' @param delta Null or a numeric vector. Determines the baseline amount of delta
+#' @param delta `NULL` or a numeric vector. Determines the baseline amount of delta
 #' to be applied to each visit. See details. If a numeric vector it must have
-#' the same length as the number of unique visits in the original dataset
+#' the same length as the number of unique visits in the original dataset.
 #'
-#' @param dlag Null or a numeric vector. Determines the scaling to be applied
+#' @param dlag `NULL` or a numeric vector. Determines the scaling to be applied
 #' to `delta` based upon with visit the ICE occurred on. See details. If a
 #' numeric vector it must have the same length as the number of unique visits in
-#' the original dataset
+#' the original dataset.
 #'
-#' @param missing_only logical, if true then non-missing post-ice data will have a delta value
+#' @param missing_only Logical, if `TRUE` then non-missing post-ICE data will have a delta value
 #' of 0 assigned. Note that the calculation (as described in the details section) is performed
 #' first and then overwritten with 0's at the end (i.e. the delta values for missing
-#' post-ice visits will stay the same regardless of this option)
+#' post-ICE visits will stay the same regardless of this option).
 #'
 #' @examples
 #' \dontrun{
@@ -192,7 +192,7 @@ delta_template <- function(
 #' and extracts all the utility information that users need to define their own logic
 #' for defining delta. See [delta_template()] for full details.
 #'
-#' @param imputations an imputations object created by [impute()]
+#' @param imputations an imputations object created by [impute()].
 get_delta_template <- function(imputations){
     ld <- imputations$data
     x <- lapply(
@@ -231,7 +231,7 @@ get_delta_template <- function(imputations){
 }
 
 
-#' Calculate Delta from a Lagged Scale Coefficient
+#' Calculate delta from a lagged Sscale coefficient
 #'
 #' @description
 #' Calculates a delta value based upon a baseline delta value and a
@@ -242,14 +242,14 @@ get_delta_template <- function(imputations){
 #'
 #' @param dlag a numeric vector. Determines the scaling to be applied
 #' to `delta` based upon with visit the ICE occurred on. Must be the same
-#' length as delta
+#' length as delta.
 #'
-#' @param is_post_ice logical vector. Indicates whether a visit is "post ICE" or
-#' not
+#' @param is_post_ice logical vector. Indicates whether a visit is "post-ICE" or
+#' not.
 #'
 #'
 #' @details
-#' See [delta_template()] for full details on how this calculation is performed
+#' See [delta_template()] for full details on how this calculation is performed.
 d_lagscale <- function(delta, dlag, is_post_ice) {
 
     assert_that(
@@ -278,17 +278,17 @@ d_lagscale <- function(delta, dlag, is_post_ice) {
 
 
 
-#' Applies Delta Adjustment
+#' Applies delta adjustment
 #'
 #' @description
 #' Takes a delta dataset and adjusts the outcome variable by adding the
 #' corresponding delta.
 #'
-#' @param data data.frame which will have its `outcome` column adjusted
-#' @param delta data.frame (must contain a column called `delta`)
+#' @param data data.frame which will have its `outcome` column adjusted.
+#' @param delta data.frame (must contain a column called `delta`).
 #' @param group character vector of variables in both `data` and `delta` that will be used
-#' to merge the 2 data.frames together by
-#' @param outcome character, name of the outcome variable in `data`
+#' to merge the 2 data.frames together by.
+#' @param outcome character, name of the outcome variable in `data`.
 apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL) {
 
     assert_that(

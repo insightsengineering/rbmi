@@ -35,7 +35,7 @@ that can be used for inference based on t-distribution.
 }
 \references{
 Barnard, J. and Rubin, D.B. (1999).
-Small sample degrees of freedom with multiple imputation. Biometrika, 86, 948-955.
+Small sample degrees of freedom with multiple imputation. Biometrika, 86, 948-955
 
 Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing
 Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. [Section 5.4]

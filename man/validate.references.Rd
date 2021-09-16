@@ -7,16 +7,16 @@
 \method{validate}{references}(x, control, ...)
 }
 \arguments{
-\item{x}{named character vector}
+\item{x}{named character vector.}
 
-\item{control}{factor variable (should be the \code{group} variable from the source dataset)}
+\item{control}{factor variable (should be the \code{group} variable from the source dataset).}
 
-\item{...}{Not Used}
+\item{...}{Not used.}
 }
 \value{
-Will error if there is an issue otherwise will return \code{TRUE}
+Will error if there is an issue otherwise will return \code{TRUE}.
 }
 \description{
 Checks to ensure that the user specified references are
-expect values (i.e. those found within the source data)
+expect values (i.e. those found within the source data).
 }

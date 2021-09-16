@@ -8,19 +8,19 @@ get_conditional_parameters(pars, values)
 }
 \arguments{
 \item{pars}{a list with values "mu" and "sigma" defining the mean vector and
-covariance matrix respectively}
+covariance matrix respectively.}
 
-\item{values}{a vector of known values to condition on, must be same length as pars$mu.
-Missing values must be represented by an NA}
+\item{values}{a vector of observed values to condition on, must be same length as \code{pars$mu}.
+Missing values must be represented by an \code{NA}.}
 }
 \value{
-A list with the conditional distribution parameters
+A list with the conditional distribution parameters:
 \itemize{
-\item mu - The conditional mean vector
-\item sigma - The conditional covariance matrix
+\item \code{mu} - The conditional mean vector.
+\item \code{sigma} - The conditional covariance matrix.
 }
 }
 \description{
-Takes parameters for a multivariate normal distribution + known values
-to calculate the conditional distribution for the unknown values
+Takes parameters for a multivariate normal distribution and observed values
+to calculate the conditional distribution for the unobserved values.
 }

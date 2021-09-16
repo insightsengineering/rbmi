@@ -5,7 +5,7 @@
 \alias{method_bayes}
 \alias{method_approxbayes}
 \alias{method_condmean}
-\title{Imputation & analysis Methods}
+\title{Set the multiple imputation methodology}
 \usage{
 method_bayes(
   burn_in = 200,
@@ -36,7 +36,7 @@ method_condmean(
 \arguments{
 \item{burn_in}{a numeric that specifies how many observations should be discarded
 prior to extracting actual samples. Note that the sampler
-is initialised at the maximum likelihood estimates and a weakly informative
+is initialized at the maximum likelihood estimates and a weakly informative
 prior is used thus in theory this value should not need to be that high.}
 
 \item{burn_between}{a numeric that specifies the "thinning" rate i.e. how many
