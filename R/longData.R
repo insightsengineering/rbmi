@@ -478,12 +478,12 @@ longDataConstructor <- R6::R6Class(
         #'
         #' Checks that the longitudinal data for a patient is divided in MAR
         #' followed by non-MAR data; non-MAR observation followed by a MAR
-        #' observation is not allowed
+        #' observation is not allowed.
         #'
-        #' @param id Character subject id that exists within `self$data`
+        #' @param is_mar logical vector indicating whether observations are MAR.
         #'
         #' @return
-        #' Will error if there is an issue otherwise will return `TRUE`
+        #' Will error if there is an issue otherwise will return `TRUE`.
         validate_index_mar = function(is_mar) {
 
             if(all(is_mar) || all(!is_mar)) {

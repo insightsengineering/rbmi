@@ -109,6 +109,7 @@ for all observations. This list is populated by a call to \code{self$set_strateg
 \item \href{#method-set_strategies}{\code{longDataConstructor$set_strategies()}}
 \item \href{#method-check_has_data_at_each_visit}{\code{longDataConstructor$check_has_data_at_each_visit()}}
 \item \href{#method-set_strata}{\code{longDataConstructor$set_strata()}}
+\item \href{#method-validate_index_mar}{\code{longDataConstructor$validate_index_mar()}}
 \item \href{#method-new}{\code{longDataConstructor$new()}}
 \item \href{#method-clone}{\code{longDataConstructor$clone()}}
 }
@@ -313,10 +314,34 @@ MMRM can be resolved
 Populates the \code{self$strata} variable. If the user has specified stratification variables
 The first visit is used to determine the value of those variables. If no stratification variables
 have been specified then everyone is defined as being in strata 1.
+Validate index_mar for a given subject
+
+Checks that the longitudinal data for a patient is divided in MAR
+followed by non-MAR data; non-MAR observation followed by a MAR
+observation is not allowed.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$set_strata()}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-validate_index_mar"></a>}}
+\if{latex}{\out{\hypertarget{method-validate_index_mar}{}}}
+\subsection{Method \code{validate_index_mar()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$validate_index_mar(is_mar)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{is_mar}}{logical vector indicating whether observations are MAR.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Will error if there is an issue otherwise will return \code{TRUE}.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
