@@ -168,7 +168,7 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar){
     if(sum(index_mar) == length(pars_group$mu)) {
         return(pars_group)
     } else if(sum(index_mar) == 0) {
-        stop("LMCF cannot be adopted since at least one MAR outcome value is needed")
+        stop("LMCF cannot be adopted since all outcome values are missing")
     }
 
     mu <- pars_group$mu
