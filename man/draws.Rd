@@ -109,10 +109,10 @@ Possible imputation strategies are:
 This argument is necessary at this stage since the model is fitted
 after removing the observations whose underlying assumption is different from MAR.
 Thus, any observed data after \code{data_ice[[vars$visit]]} that is addressed with an imputation
-strategy different from MAR is discarded for the model fit. However such observations
+strategy different from MAR is excluded for the model fit. However such observations
 will not be discarded from the data in the imputation phase
 (performed with the function (\code{\link[=impute]{impute()}}). To summarize, \strong{at this stage only pre-ICE data
-and MAR post-ICE data are used}.
+and post-ICE data that is MAR are used}.
 
 The vars argument is a named list that specifies the names of key variables within
 \code{data} and \code{data_ice}. Please use \code{\link[=set_vars]{set_vars()}}. In particular the following named elements are used:

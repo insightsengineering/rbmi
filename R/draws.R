@@ -63,10 +63,10 @@
 #' This argument is necessary at this stage since the model is fitted
 #' after removing the observations whose underlying assumption is different from MAR.
 #' Thus, any observed data after `data_ice[[vars$visit]]` that is addressed with an imputation
-#' strategy different from MAR is discarded for the model fit. However such observations
+#' strategy different from MAR is excluded for the model fit. However such observations
 #' will not be discarded from the data in the imputation phase
 #' (performed with the function ([impute()]). To summarize, **at this stage only pre-ICE data
-#' and MAR post-ICE data are used**.
+#' and post-ICE data that is MAR are used**.
 #'
 #' The vars argument is a named list that specifies the names of key variables within
 #' `data` and `data_ice`. Please use [set_vars()]. In particular the following named elements are used:
