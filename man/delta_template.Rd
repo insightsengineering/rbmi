@@ -7,21 +7,21 @@
 delta_template(imputations, delta = NULL, dlag = NULL, missing_only = TRUE)
 }
 \arguments{
-\item{imputations}{an imputations object as created by \code{\link[=impute]{impute()}}}
+\item{imputations}{an \code{imputation} object as created by \code{\link[=impute]{impute()}}.}
 
-\item{delta}{Null or a numeric vector. Determines the baseline amount of delta
+\item{delta}{\code{NULL} or a numeric vector. Determines the baseline amount of delta
 to be applied to each visit. See details. If a numeric vector it must have
-the same length as the number of unique visits in the original dataset}
+the same length as the number of unique visits in the original dataset.}
 
-\item{dlag}{Null or a numeric vector. Determines the scaling to be applied
+\item{dlag}{\code{NULL} or a numeric vector. Determines the scaling to be applied
 to \code{delta} based upon with visit the ICE occurred on. See details. If a
 numeric vector it must have the same length as the number of unique visits in
-the original dataset}
+the original dataset.}
 
-\item{missing_only}{logical, if true then non-missing post-ice data will have a delta value
+\item{missing_only}{Logical, if \code{TRUE} then non-missing post-ICE data will have a delta value
 of 0 assigned. Note that the calculation (as described in the details section) is performed
 first and then overwritten with 0's at the end (i.e. the delta values for missing
-post-ice visits will stay the same regardless of this option)}
+post-ICE visits will stay the same regardless of this option).}
 }
 \description{
 Creates a data.frame in the format required by \code{\link[=analyse]{analyse()}} for the use
@@ -36,7 +36,7 @@ as created by the \code{\link[=set_vars]{set_vars()}} function).
 These functions will return a data.frame with the aforementioned variables with 1
 row per subject per visit. If the \code{delta} argument to this function is \code{NULL}
 then the \code{delta} column in the returned data.frame will be 0 for all observations.
-If the \code{delta} argument is not NULL then \code{delta} will be calculated separately
+If the \code{delta} argument is not \code{NULL} then \code{delta} will be calculated separately
 for each subject as the accumulative sum of \code{delta} multiplied by the scaling
 coefficient \code{dlag} based upon how many visits after the subject's intercurrent
 event (ICE) the visit in question is.
@@ -96,22 +96,22 @@ and \code{dlag = c(3, 3, 3, 3)}. For example lets say we have a subject who had 
 }
 
 i.e. on week-6 (1 week after the ICE) they have a delta of 3 and on week-9 (4 weeks after the ICE)
-they have a delta of 12
+they have a delta of 12.
 
 Please note that this function also returns several utility variables so that
 the user can create their own custom logic for defining what \code{delta}
 should be set to. These additional variables include:
 \itemize{
-\item is_mar - If the observation was missing would it be regarded as MAR ? This variable
-is set to False if it occurred after a non-MAR ICE, otherwise it is set to True
-\item is_missing - Is the outcome variable for this observation missing
-\item is_post_ice - Does the observation occur after the patients ICE as defined by the
-\code{data_ice} dataset supplied to \code{\link[=draws]{draws()}}
-\item strategy - What imputation strategy was assigned to for this subject
+\item \code{is_mar} - If the observation was missing would it be regarded as MAR ? This variable
+is set to \code{FALSE} if it occurred after a non-MAR ICE, otherwise it is set to \code{TRUE}.
+\item \code{is_missing} - Is the outcome variable for this observation missing.
+\item \code{is_post_ice} - Does the observation occur after the patients ICE as defined by the
+\code{data_ice} dataset supplied to \code{\link[=draws]{draws()}}.
+\item \code{strategy} - What imputation strategy was assigned to for this subject.
 }
 
 The design and implementation of this function is largely based upon the same functionality
-as implemented in the so called "five marcos" by James Roger. See Roger (2021)
+as implemented in the so called "five marcos" by James Roger. See Roger (2021).
 }
 \examples{
 \dontrun{

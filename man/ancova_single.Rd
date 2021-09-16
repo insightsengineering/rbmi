@@ -7,21 +7,21 @@
 ancova_single(data, outcome, group, covariates)
 }
 \arguments{
-\item{data}{The data.frame containing all of the data required for the model}
+\item{data}{The data.frame containing all of the data required for the model.}
 
-\item{outcome}{Character, the name of the outcome variable in \code{data}}
+\item{outcome}{Character, the name of the outcome variable in \code{data}.}
 
-\item{group}{Character, the name of the group variable in \code{data}}
+\item{group}{Character, the name of the group variable in \code{data}.}
 
 \item{covariates}{Character vector containing the name of any covariates
-to be used in the model as well as any interaction terms required}
+to be used in the model as well as any interaction terms required.}
 }
 \description{
 Performance analysis of covariance. See \code{\link[=ancova]{ancova()}} for full details.
 }
 \details{
-group must be a factor variable with only 2 levels
-outcome must be a continuous numeric variable
+\code{group} must be a factor variable with only 2 levels.
+\code{outcome} must be a continuous numeric variable.
 }
 \examples{
 \dontrun{

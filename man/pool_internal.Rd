@@ -22,10 +22,10 @@ pool_internal(results, conf.level, alternative, type)
 }
 \arguments{
 \item{results}{A list of results i.e. the x$results element of an
-analyse object created by \code{\link[=analyse]{analyse()}})}
+analyse object created by \code{\link[=analyse]{analyse()}}).}
 
 \item{conf.level}{confidence level of the returned confidence interval.
-Must be a single number between 0 and 1. Default is 0.95}
+Must be a single number between 0 and 1. Default is 0.95.}
 
 \item{alternative}{a character string specifying the alternative hypothesis,
 must be one of "two.sided" (default), "greater" or "less".}
@@ -34,9 +34,9 @@ must be one of "two.sided" (default), "greater" or "less".}
 \code{"normal"}. Determines what method should be used to calculate the confidence
 intervals. See details.
 Only used if \code{method_condmean(type = "bootstrap")} was specified
-in the original call to \code{\link[=draws]{draws()}}}
+in the original call to \code{\link[=draws]{draws()}}.}
 }
 \description{
 Dispatches pool methods based upon results object class. See
-\code{\link[=pool]{pool()}} for details
+\code{\link[=pool]{pool()}} for details.
 }

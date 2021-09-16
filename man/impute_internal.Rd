@@ -2,7 +2,7 @@
 % Please edit documentation in R/impute.R
 \name{impute_internal}
 \alias{impute_internal}
-\title{Create Imputed Datasets}
+\title{Create imputed datasets}
 \usage{
 impute_internal(draws, references, update_strategy, strategies, condmean)
 }

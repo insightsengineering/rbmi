@@ -4,14 +4,14 @@
 \alias{longDataConstructor}
 \title{R6 Class for Storing / Accessing & Sampling Longitudinal Data}
 \description{
-A longdata object allows for efficient storage and recall of longitudinal datasets for use in
+A \code{longdata} object allows for efficient storage and recall of longitudinal datasets for use in
 bootstrap sampling. The object works by de-constructing the data into lists based upon subject id
 thus enabling efficient lookup.
 }
 \details{
 The object also handles multiple other operations specific to rbmi such as defining whether an
 outcome value is MAR / Missing or not as well as tracking which imputation strategy is assigned
-to each subject
+to each subject.
 
 It is recognised that this objects functionality is fairly overloaded and is hoped that this can
 be split out into more area specific objects / functions in the future. Further additions of functionality
@@ -131,28 +131,28 @@ values with new ones if provided.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{obj}}{Either NULL, a character vector of subjects IDs or a
+\item{\code{obj}}{Either \code{NULL}, a character vector of subjects IDs or a
 imputation list object. See details.}
 
-\item{\code{nmar.rm}}{logical value. If TRUE will remove observations that are
-not regarded as MAR (as determined from \code{self$is_mar})}
+\item{\code{nmar.rm}}{Logical value. If \code{TRUE} will remove observations that are
+not regarded as MAR (as determined from \code{self$is_mar}).}
 
-\item{\code{na.rm}}{logical value. If TRUE will remove outcome values that are
-missing (as determined from \code{self$is_missing})}
+\item{\code{na.rm}}{Logical value. If \code{TRUE} will remove outcome values that are
+missing (as determined from \code{self$is_missing}).}
 
-\item{\code{idmap}}{logical value. If TRUE will add an attribute \code{idmap} which
+\item{\code{idmap}}{Logical value. If \code{TRUE} will add an attribute \code{idmap} which
 contains a mapping from the new subject ids to the old subject ids. See details.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Details}{
-If \code{obj} is NULL then the full original dataset is returned.
+If \code{obj} is \code{NULL} then the full original dataset is returned.
 
 If \code{obj} is a character vector then a new dataset consisting of just those subjects is
 returned; if the character vector contains duplicate entries then that subject will be
 returned multiple times.
 
-If \code{obj} is an imputation list object (as created by \code{\link[=as_imputation_list]{as_imputation_list()}}) then the
+If \code{obj} is an \code{imputation_list} object (as created by \code{\link[=as_imputation_list]{as_imputation_list()}}) then the
 subject ids specified in the object will be returned and missing values will be filled
 in by those specified in the imputation list object.  i.e.\preformatted{obj <- as_imputation_list(
   as_imputation_single( id = "pt1", values = c(1,2,3)),
@@ -167,23 +167,23 @@ observations for \code{pt3} once. The first set of observations for \code{pt1} w
 values filled in with \code{c(1,2,3)} and the second set will be filled in by \code{c(4,5,6)}. The
 length of the values must be equal to \code{sum(self$is_missing[[id]])}.
 
-If \code{obj} is not NULL then all subject IDs will be scrambled in order to ensure that they are unique
+If \code{obj} is not \code{NULL} then all subject IDs will be scrambled in order to ensure that they are unique
 i.e. If the \code{pt2} is requested twice then this process guarantees that each set of observations
 be have a unique subject ID number. The \code{idmap} attribute (if requested) can be used
 to map from the new ids back to the old ids.
 }
 
 \subsection{Returns}{
-A dataframe
+A dataframe.
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-add_subject"></a>}}
 \if{latex}{\out{\hypertarget{method-add_subject}{}}}
 \subsection{Method \code{add_subject()}}{
-This function decomposes a patients data from \code{self$data} and populates
+This function decomposes a patient data from \code{self$data} and populates
 all the corresponding lists i.e. \code{self$is_missing}, \code{self$values}, \code{self$group}, etc.
-This function is only called upon the objects initialisation
+This function is only called upon the objects initialization.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$add_subject(id)}\if{html}{\out{</div>}}
 }
@@ -191,7 +191,7 @@ This function is only called upon the objects initialisation
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{id}}{Character subject id that exists within \code{self$data}}
+\item{\code{id}}{Character subject id that exists within \code{self$data}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -200,7 +200,7 @@ This function is only called upon the objects initialisation
 \if{html}{\out{<a id="method-validate_ids"></a>}}
 \if{latex}{\out{\hypertarget{method-validate_ids}{}}}
 \subsection{Method \code{validate_ids()}}{
-Throws an error if any element of \code{ids} is not within the source data \code{self$data}
+Throws an error if any element of \code{ids} is not within the source data \code{self$data}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$validate_ids(ids)}\if{html}{\out{</div>}}
 }
@@ -208,7 +208,7 @@ Throws an error if any element of \code{ids} is not within the source data \code
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{ids}}{A character vector of ids}
+\item{\code{ids}}{A character vector of ids.}
 }
 \if{html}{\out{</div>}}
 }
@@ -222,13 +222,13 @@ TRUE
 \subsection{Method \code{sample_ids()}}{
 Performs random stratified sampling of patient ids (with replacement)
 Each patient has an equal weight of being picked within their strata (i.e is not dependent on
-how many non-missing visits they had)
+how many non-missing visits they had).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$sample_ids()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{
-Character vector of ids
+Character vector of ids.
 }
 }
 \if{html}{\out{<hr>}}
@@ -236,7 +236,7 @@ Character vector of ids
 \if{latex}{\out{\hypertarget{method-extract_by_id}{}}}
 \subsection{Method \code{extract_by_id()}}{
 Returns a list of key information for a given subject. Is a convenience wrapper
-to save having to manually grab each element
+to save having to manually grab each element.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$extract_by_id(id)}\if{html}{\out{</div>}}
 }
@@ -244,7 +244,7 @@ to save having to manually grab each element
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{id}}{Character subject id that exists within \code{self$data}}
+\item{\code{id}}{Character subject id that exists within \code{self$data}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -254,7 +254,7 @@ to save having to manually grab each element
 \if{latex}{\out{\hypertarget{method-update_strategies}{}}}
 \subsection{Method \code{update_strategies()}}{
 Convenience function to run self$set_strategies(dat_ice, update=TRUE)
-kept for legacy reasons
+kept for legacy reasons.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$update_strategies(dat_ice)}\if{html}{\out{</div>}}
 }
@@ -262,7 +262,7 @@ kept for legacy reasons
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat_ice}}{A data.frame containing ICE information see \code{\link[=impute]{impute()}} for the format of this dataframe}
+\item{\code{dat_ice}}{A data.frame containing ICE information see \code{\link[=impute]{impute()}} for the format of this dataframe.}
 }
 \if{html}{\out{</div>}}
 }
@@ -287,9 +287,9 @@ information.
 \if{html}{\out{</div>}}
 }
 \subsection{Details}{
-See \code{\link[=draws]{draws()}} for the specification of \code{dat_ice} if \code{update=FALSE}
-See \code{\link[=impute]{impute()}} for the format of \code{dat_ice} if \code{update=TRUE}
-If \code{update=TRUE} this function ensures that MAR strategies cannot be changed to Non-MAR in the presence
+See \code{\link[=draws]{draws()}} for the specification of \code{dat_ice} if \code{update=FALSE}.
+See \code{\link[=impute]{impute()}} for the format of \code{dat_ice} if \code{update=TRUE}.
+If \code{update=TRUE} this function ensures that MAR strategies cannot be changed to non-MAR in the presence
 of post-ICE observations.
 }
 
@@ -298,9 +298,9 @@ of post-ICE observations.
 \if{html}{\out{<a id="method-check_has_data_at_each_visit"></a>}}
 \if{latex}{\out{\hypertarget{method-check_has_data_at_each_visit}{}}}
 \subsection{Method \code{check_has_data_at_each_visit()}}{
-Ensures that all visits have at least 1 observared "MAR" observation. Throws
+Ensures that all visits have at least 1 observed "MAR" observation. Throws
 an error if this criteria is not met. This is to ensure that the initial
-MMRM can be resolved
+MMRM can be resolved.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$check_has_data_at_each_visit()}\if{html}{\out{</div>}}
 }
@@ -330,9 +330,9 @@ Constructor function.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{data}}{longditudinal dataset}
+\item{\code{data}}{longditudinal dataset.}
 
-\item{\code{vars}}{an \code{ivars} object created by \code{\link[=set_vars]{set_vars()}}}
+\item{\code{vars}}{an \code{ivars} object created by \code{\link[=set_vars]{set_vars()}}.}
 }
 \if{html}{\out{</div>}}
 }

@@ -8,8 +8,8 @@ impute_outcome(conditional_parameters)
 }
 \arguments{
 \item{conditional_parameters}{a list with elements \code{mu} and \code{sigma} which
-contain the mean vector and covariance matrix to sample from}
+contain the mean vector and covariance matrix to sample from.}
 }
 \description{
-Draws a random sample from a multivariate normal distribution
+Draws a random sample from a multivariate normal distribution.
 }

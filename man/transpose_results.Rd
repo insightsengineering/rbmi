@@ -2,22 +2,22 @@
 % Please edit documentation in R/pool.R
 \name{transpose_results}
 \alias{transpose_results}
-\title{Transpose Results Object}
+\title{Transpose results object}
 \usage{
 transpose_results(results, components)
 }
 \arguments{
-\item{results}{A list of results}
+\item{results}{A list of results.}
 
 \item{components}{a character vector of components to extract
-(i.e. \verb{"est", "se"})}
+(i.e. \verb{"est", "se"}).}
 }
 \description{
-Transposes a Results object (as created by analyse()) inorder to group
+Transposes a Results object (as created by \code{\link[=analyse]{analyse()}}) in order to group
 the same estimates together into vectors.
 }
 \details{
-Essentially this function takes an object of the format\preformatted{x <- list(
+Essentially this function takes an object of the format:\preformatted{x <- list(
     list(
         "trt1" = list(
             est = 1,

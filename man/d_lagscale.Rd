@@ -2,7 +2,7 @@
 % Please edit documentation in R/delta.R
 \name{d_lagscale}
 \alias{d_lagscale}
-\title{Calculate Delta from a Lagged Scale Coefficient}
+\title{Calculate delta from a lagged Sscale coefficient}
 \usage{
 d_lagscale(delta, dlag, is_post_ice)
 }
@@ -12,15 +12,15 @@ to be applied to each visit.}
 
 \item{dlag}{a numeric vector. Determines the scaling to be applied
 to \code{delta} based upon with visit the ICE occurred on. Must be the same
-length as delta}
+length as delta.}
 
-\item{is_post_ice}{logical vector. Indicates whether a visit is "post ICE" or
-not}
+\item{is_post_ice}{logical vector. Indicates whether a visit is "post-ICE" or
+not.}
 }
 \description{
 Calculates a delta value based upon a baseline delta value and a
 post ICE scaling coefficient.
 }
 \details{
-See \code{\link[=delta_template]{delta_template()}} for full details on how this calculation is performed
+See \code{\link[=delta_template]{delta_template()}} for full details on how this calculation is performed.
 }

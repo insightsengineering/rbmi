@@ -197,15 +197,15 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar){
 #'
 #' The user can define their own strategy functions (or overwrite the pre-defined ones)
 #' by specifying a named input to the function i.e. `NEW = function(...) ...`.
-#' Only exception is MAR which cannot be overwritten
+#' Only exception is MAR which cannot be overwritten.
 #'
-#' All user defined functions must take 3 inputs `pars_group`, `pars_ref` & `index_mar`.
+#' All user defined functions must take 3 inputs `pars_group`, `pars_ref` and `index_mar`.
 #' `pars_group` and `pars_ref` are both lists with elements `mu` and `sigma` representing
 #' the multivariate normal distribution parameters for the subjects current and reference group
-#' respectively.  `index_mar` will be a logical vector specifying which visits the subject met
+#' respectively. `index_mar` will be a logical vector specifying which visits the subject met
 #' the MAR assumption at. The function must return a list with elements `mu` and `sigma`.
 #'
-#' @param ... User defined methods to be added to the return list. Input must be a function
+#' @param ... User defined methods to be added to the return list. Input must be a function.
 #'
 #' @examples
 #' \dontrun{

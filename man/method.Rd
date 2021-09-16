@@ -5,7 +5,7 @@
 \alias{method_bayes}
 \alias{method_approxbayes}
 \alias{method_condmean}
-\title{Imputation & analysis Methods}
+\title{Set the multiple imputation methodology}
 \usage{
 method_bayes(
   burn_in = 200,
@@ -36,7 +36,7 @@ method_condmean(
 \arguments{
 \item{burn_in}{a numeric that specifies how many observations should be discarded
 prior to extracting actual samples. Note that the sampler
-is initialised at the maximum likelihood estimates and a weakly informative
+is initialized at the maximum likelihood estimates and a weakly informative
 prior is used thus in theory this value should not need to be that high.}
 
 \item{burn_between}{a numeric that specifies the "thinning" rate i.e. how many
@@ -58,7 +58,7 @@ be printed to the console, if \code{FALSE} this information will be suppressed.}
 \item{seed}{a numeric that specifies a seed to be used in the call to Stan. This
 argument is forward on the the \code{seed} argument of \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}. Note that
 this is only required for \code{method_bayes()}, for all other methods you can achieve
-reproducible results by setting the seed via \code{set.seed()}}
+reproducible results by setting the seed via \code{set.seed()}.}
 
 \item{covariance}{a character string that specifies the structure of the covariance
 matrix to be used in the imputation model. Must be one of \code{"us"} (default), \code{"toep"},
@@ -72,7 +72,7 @@ See details.}
 likelihood.}
 
 \item{type}{a character string that specifies the method to use when calculating
-confidence intervals. Must be one of \code{"bootstrap"} (default) or \code{"percentile"}}
+confidence intervals. Must be one of \code{"bootstrap"} (default) or \code{"percentile"}.}
 }
 \description{
 These functions determine what methods rbmi should use when creating
