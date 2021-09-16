@@ -557,19 +557,19 @@ transpose_imputations <- function(imputations) {
 #' @return
 #' Will error if there is an issue otherwise will return `TRUE`.
 #' @export
-validate.is_mar <- function(is_mar, ...) {
+validate.is_mar <- function(x, ...) {
 
-    if(all(is_mar) || all(!is_mar)) {
+    if(all(x) || all(!x)) {
         return(invisible(TRUE))
     }
 
-    ind <- which(is_mar == FALSE)[1]
+    ind <- which(x == FALSE)[1]
     true_index <- seq_len(ind-1)
-    false_index <- seq(ind, length(is_mar))
+    false_index <- seq(ind, length(x))
 
     assert_that(
-        all(is_mar[true_index]),
-        all(!is_mar[false_index]),
+        all(x[true_index]),
+        all(!x[false_index]),
         msg = "non-MAR observation followed by a MAR observation is not allowed"
     )
 

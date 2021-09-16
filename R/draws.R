@@ -25,7 +25,7 @@
 #' from the posterior distribution of the parameters using a Bayesian approach based on
 #' MCMC sampling. This method can be specified by using `method = method_bayes()`.
 #' - Approximate Bayesian MI based on bootstrap: `draws` returns
-#' the draws from the posterior distribution of the parameters using a Bayesian approach,
+#' the draws from the posterior distribution of the parameters using an approximate Bayesian approach,
 #' where the sampling from the posterior distribution is simulated by fitting the MMRM model
 #' on bootstrap samples of the original dataset. This method can be specified by using `method = method_approxbayes()]`.
 #' - Conditional mean imputation with bootstrap re-sampling: `draws` returns the
@@ -45,12 +45,14 @@
 #'
 #' The argument `data_ice` contains information about the occurrence of ICEs. It is a
 #' `data.frame` with 3 columns:
-#' - A vector of characters related to the ids of the subjects that experienced
-#'   the ICE (must be named as `vars$subjid`).
-#' - A vector containing the first visit after the occurrence of the ICE (must be named as `vars$visit`).
-#'   This value must be equal to one of the levels of `data[[vars$visit]]`.
+#' - Subject ID: a character vector containing the ids of the subjects that experienced
+#'   the ICE. This column must be named as specified in `vars$subjid`.
+#' - Visit: a character vector containing the first visit after the occurrence of the ICE.
+#'   The visits must be equal to one of the levels of `data[[vars$visit]]`.
 #'   If multiple ICEs happen for the same subject, then only the first non-MAR visit should be used.
-#' - A vector of characters related to the imputation strategy to address the ICE (must be named as `vars$strategy`).
+#'   This column must be named as specified in `vars$visit`.
+#' - Strategy: a character vector specifying the imputation strategy to address the ICE for this subject.
+#'   This column must be named as specified in `vars$strategy`.
 #'   Possible imputation strategies are:
 #'   - `"MAR"`: Missing At Random.
 #'   - `"JTR"`: Jump To Reference.
@@ -58,18 +60,18 @@
 #'   - `"CR"`: Copy Reference.
 #'   - `"JR"`: Jump to Reference.
 #'   - `"LMCF"`: Last Mean Carried Forward.
-#'   - User-defined imputation strategies can also be set.
+#' Please note that user-defined imputation strategies can also be set.
 #'
-#' This argument is necessary at this stage since the model is fitted
+#' The `data_ice` argument is necessary at this stage since the model is fitted
 #' after removing the observations whose underlying assumption is different from MAR.
-#' Thus, any observed data after `data_ice[[vars$visit]]` that is addressed with an imputation
+#' Thus, any observed data on or after `data_ice[[vars$visit]]` that is addressed with an imputation
 #' strategy different from MAR is excluded for the model fit. However such observations
 #' will not be discarded from the data in the imputation phase
 #' (performed with the function ([impute()]). To summarize, **at this stage only pre-ICE data
 #' and post-ICE data that is MAR are used**.
 #'
 #' The vars argument is a named list that specifies the names of key variables within
-#' `data` and `data_ice`. Please use [set_vars()]. In particular the following named elements are used:
+#' `data` and `data_ice`. This list is created by [set_vars()] and contains the following named elements:
 #' - `subjid`: name of the column in `data` and `data_ice` which contains the subject ids variable.
 #' - `visit`: name of the column in `data` and `data_ice` which contains the visit variable.
 #' - `outcome`: name of the column in `data` which contains the outcome variable.
@@ -79,7 +81,7 @@
 #'   By default the model specification is `outcome ~ 1 + visit + group`.
 #'   Please note that the `group*visit` interaction
 #'   is **not** included in the model by default.
-#' - `strata`: covariates used as stratification variables in the bootstrap.
+#' - `strata`: covariates used as stratification variables in the bootstrap sampling.
 #'   By default only the `vars$group` is set as stratification variable.
 #'   Needed only for `method_condmean(type = "bootstrap")` and `method_approxbayes()`.
 #' - `strategy`: name of the column in `data_ice` which contains the subject-specific imputation strategy.

@@ -4,12 +4,12 @@
 \alias{validate.is_mar}
 \title{Validate \code{is_mar} for a given subject}
 \usage{
-\method{validate}{is_mar}(is_mar, ...)
+\method{validate}{is_mar}(x, ...)
 }
 \arguments{
-\item{is_mar}{Object of class \code{is_mar}. Logical vector indicating whether observations are MAR.}
-
 \item{...}{Not used.}
+
+\item{is_mar}{Object of class \code{is_mar}. Logical vector indicating whether observations are MAR.}
 }
 \value{
 Will error if there is an issue otherwise will return \code{TRUE}.
