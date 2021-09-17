@@ -7,8 +7,9 @@
 QR_decomp(mat)
 }
 \arguments{
-\item{mat}{A Matrix to perform the QR decomposition on}
+\item{mat}{A matrix to perform the QR decomposition on.}
 }
 \description{
-QR decomposition
+QR decomposition as defined in the
+\href{https://mc-stan.org/docs/2_27/stan-users-guide/QR-reparameterization-section.html}{Stan user's guide (section 1.2)}.
 }

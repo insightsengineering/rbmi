@@ -2,21 +2,25 @@
 % Please edit documentation in R/mcmc.R
 \name{prepare_stan_data}
 \alias{prepare_stan_data}
-\title{Title - TODO}
+\title{Prepare input data to run the Stan model}
 \usage{
 prepare_stan_data(ddat, subjid, visit, outcome, group)
 }
 \arguments{
-\item{ddat}{TODO}
+\item{ddat}{A design matrix}
 
-\item{subjid}{TODO}
+\item{subjid}{Character vector containing the subjects IDs.}
 
-\item{visit}{TODO}
+\item{visit}{Vector containing the visits.}
 
-\item{outcome}{TODO}
+\item{outcome}{Numeric vector containing the outcome variable.}
 
-\item{group}{TODO}
+\item{group}{Vector containing the group variable.}
+}
+\value{
+A \code{stan_data} object. A named list as per \verb{data\{\}} block of the related Stan file.
 }
 \description{
-Title - TODO
+Prepare input data to run the Stan model as per the \verb{data\{\}} block of the related Stan file
+where the model is implemented.
 }
