@@ -25,11 +25,13 @@ a list of matrices) where each element of the list is \code{a[i, , ]}, where
 \code{i} takes values from 1 to the length of the first dimension of the array.
 }
 \examples{
+\dontrun{
 set.seed(101)
 a <- array(data = stats::rnorm(12), dim = c(3,2,2))
 n <- 1
 # creates a list of length 3 containing 2x2 matrices
 split_a <- split_dim(a,n)
+}
 
 
 }
