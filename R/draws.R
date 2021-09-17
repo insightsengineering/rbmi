@@ -100,7 +100,7 @@
 #' \code{vignette("quickstart", package = "rbmi")}.
 #'
 #' @export
-draws <- function(data, data_ice, vars, method) {
+draws <- function(data, data_ice = NULL, vars, method) {
     UseMethod("draws", method)
 }
 
@@ -109,7 +109,7 @@ draws <- function(data, data_ice, vars, method) {
 
 #' @rdname draws
 #' @export
-draws.approxbayes <- function(data, data_ice, vars, method) {
+draws.approxbayes <- function(data, data_ice = NULL, vars, method) {
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
     x <- get_bootstrap_draws(longdata, method, use_samp_ids = FALSE, first_sample_orig = FALSE)
@@ -119,7 +119,7 @@ draws.approxbayes <- function(data, data_ice, vars, method) {
 
 #' @rdname draws
 #' @export
-draws.condmean <- function(data, data_ice, vars, method) {
+draws.condmean <- function(data, data_ice = NULL, vars, method) {
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
     if (method$type == "bootstrap") {
@@ -354,7 +354,7 @@ extract_data_nmar_as_na <- function(longdata) {
 
 #' @rdname draws
 #' @export
-draws.bayes <- function(data, data_ice, vars, method) {
+draws.bayes <- function(data, data_ice = NULL, vars, method) {
 
     if (!is.na(method$seed)) {
         set.seed(method$seed)
