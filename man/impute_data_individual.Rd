@@ -20,30 +20,31 @@ impute_data_individual(
 
 \item{index}{The sample indexes which the subject belongs to i.e \code{c(1,1,1,2,2,4)}.}
 
-\item{beta}{A list of beta coefficients for each sample, i.e. \code{beta[[1]]} is the set of beta coefficients
-for the first sample.}
+\item{beta}{A list of beta coefficients for each sample, i.e. \code{beta[[1]]} is the set of
+beta coefficients for the first sample.}
 
-\item{sigma}{A list of the sigma coefficients for each sample split by group i.e. \code{sigma[[1]][["A"]]}
-would give the sigma coefficients for group A for the first sample.}
+\item{sigma}{A list of the sigma coefficients for each sample split by group i.e.
+\code{sigma[[1]][["A"]]} would give the sigma coefficients for group A for the first sample.}
 
 \item{data}{A \code{longdata} object created by \code{\link[=longDataConstructor]{longDataConstructor()}}}
 
-\item{references}{A named vector. Identifies the references to be used when generating the imputed
-values. Should be of the form \code{c("Group" = "Reference", "Group" = "Reference")}.}
+\item{references}{A named vector. Identifies the references to be used when generating the
+imputed values. Should be of the form \code{c("Group" = "Reference", "Group" = "Reference")}.}
 
-\item{strategies}{A named list of functions. Defines the imputation functions to be used. The names
-of of the list should mirror the values specified in \code{method} column of \code{data_ice}.
+\item{strategies}{A named list of functions. Defines the imputation functions to be used.
+The names of of the list should mirror the values specified in \code{method} column of \code{data_ice}.
 Default = \code{getStrategies()}. See \code{\link[=getStrategies]{getStrategies()}} for more details.}
 
 \item{condmean}{Logical. If \code{TRUE} will impute using the conditional mean values, if \code{FALSE}
 will impute by taking a random draw from the multivariate normal distribution.}
 }
 \description{
-This function performs the imputation for a single subject at a time implementing the process as detailed
-in \code{\link[=impute]{impute()}}.
+This function performs the imputation for a single subject at a time implementing the
+process as detailed in \code{\link[=impute]{impute()}}.
 }
 \details{
-Note that this function performs all of the required imputations for a subject at the same time. I.e.
-if a subject is used in samples  1,3,5,9 then these are all performed at once. The function supports patients
-belonging to the same sample multiple times i.e. 1,1,2,3,5,5.
+Note that this function performs all of the required imputations for a subject at the
+same time. I.e. if a subject is used in samples  1,3,5,9 then these are all performed at
+once. The function supports patients belonging to the same sample multiple times
+i.e. 1,1,2,3,5,5.
 }
