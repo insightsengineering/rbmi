@@ -129,8 +129,35 @@ fit_mcmc <- function(
 #' a list of matrices) where each element of the list is `a[i, , ]`, where
 #' `i` takes values from 1 to the length of the first dimension of the array.
 #'
+#' Example:
+#'
+#' inputs:
+#' `a <- array( c(1,2,3,4,5,6,7,8,9,10,11,12), dim = c(3,2,2))`,
+#' which means that:
+#' ```
+#' a[1,,]     a[2,,]     a[3,,]
+#'
+#' [,1] [,2]  [,1] [,2]  [,1] [,2]
+#' ---------  ---------  ---------
+#'  1    7     2    8     3    9
+#'  4    10    5    11    6    12
+#' ```
+#'
+#' `n <- 1`
+#'
+#' output of `res <- split_dim(a,n)` is a list of 3 elements:
+#' ```
+#' res[[1]]   res[[2]]   res[[3]]
+#'
+#' [,1] [,2]  [,1] [,2]  [,1] [,2]
+#' ---------  ---------  ---------
+#'  1    7     2    8     3    9
+#'  4    10    5    11    6    12
+#' ```
+#'
 #' @return
-#' A list of `n-1` dimensional arrays.
+#' A list of length `n` of arrays with number of dimensions equal to the
+#' number of dimensions of `a` minus 1.
 #'
 #' @examples
 #' \dontrun{
@@ -163,8 +190,11 @@ split_dim <- function(a, n) {
 #' Extract draws from a `stanfit` object
 #'
 #' @description
-#' Extract draws from a `stanfit` object, manipulate it
-#' and combine them together into a list.
+#' Extract draws from a `stanfit` object and convert them into lists.
+#'
+#' The function \link[rstan]{extract} returns the draws for a given parameter as an array. This function
+#' calls \link[rstan]{extract} to extract the draws from a `stanfit` object
+#' and then convert the arrays into lists.
 #'
 #' @param stan_fit A `stanfit` object.
 #'
@@ -316,7 +346,7 @@ check_mcmc <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
 #'
 #' @description
 #' QR decomposition as defined in the
-#' \href{https://mc-stan.org/docs/2_27/stan-users-guide/QR-reparameterization-section.html}{Stan user's guide (section 1.2)}.
+#' [Stan user's guide (section 1.2)](https://mc-stan.org/docs/2_27/stan-users-guide/QR-reparameterization-section.html).
 #'
 #' @param mat A matrix to perform the QR decomposition on.
 QR_decomp <- function(mat) {
