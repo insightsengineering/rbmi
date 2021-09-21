@@ -74,8 +74,8 @@ change each subjects imputation strategy without having to re-run the `draws()`
 function.
 
 Please note though that this functionality comes with a few key limitations:
-- The visit on which the ICE occured can not be updated
-- The imputation strategy cannot be changed from MAR to a non-MAR strategy if 
+- The visit on which the ICE occured can not be updated.
+- The imputation strategy cannot be changed from MAR to a non-MAR strategy if .
 there is any observed data after the ICE visit
 
 Both of these restrictions exist to protect the validity of the imputation model.
@@ -142,9 +142,9 @@ Out of the box rbmi has support for the following imputation strategies:
 However, rbmi also supports the ability for users to define their own imputation 
 strategies. To do this their are 3 things the user needs to do:
 
-1. Define their own imputation strategy function
-2. Specify patients use this strategy in the `data_ice` dataset provided to `draws()`
-3. Provide the imputation strategy function to `impute()`
+1. Define their own imputation strategy function.
+2. Specify patients use this strategy in the `data_ice` dataset provided to `draws()`.
+3. Provide the imputation strategy function to `impute()`.
 
 This is perhaps better demonstrated by an example. For this example we will implement a strategy
 in which all post-ice missing values are be imputed by the average outcome between 
