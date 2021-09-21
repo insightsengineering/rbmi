@@ -192,8 +192,8 @@ split_dim <- function(a, n) {
 #' @description
 #' Extract draws from a `stanfit` object and convert them into lists.
 #'
-#' The function \link[rstan]{extract} returns the draws for a given parameter as an array. This function
-#' calls \link[rstan]{extract} to extract the draws from a `stanfit` object
+#' The function [rstan::extract()] returns the draws for a given parameter as an array. This function
+#' calls [rstan::extract()] to extract the draws from a `stanfit` object
 #' and then convert the arrays into lists.
 #'
 #' @param stan_fit A `stanfit` object.
@@ -290,7 +290,7 @@ check_ESS <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
 #' 2. The Bayesian Fraction of Missing Information (BFMI) is sufficiently low.
 #' 3. The number of iterations that saturated the max treedepth is zero.
 #'
-#' Please see \link[rstan]{check_hmc_diagnostics} for details.
+#' Please see [rstan::check_hmc_diagnostics()] for details.
 #'
 #' @param stan_fit A `stanfit` object.
 #'
