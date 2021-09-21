@@ -2,7 +2,7 @@
 % Please edit documentation in R/mcmc.R
 \name{fit_mcmc}
 \alias{fit_mcmc}
-\title{Title - TODO}
+\title{Fit the base imputation model using a Bayesian approach}
 \usage{
 fit_mcmc(
   designmat,
@@ -19,28 +19,63 @@ fit_mcmc(
 )
 }
 \arguments{
-\item{designmat}{TODO}
+\item{designmat}{The design matrix of the fixed effects.}
 
-\item{outcome}{TODO}
+\item{outcome}{The response variable. Must be numeric.}
 
-\item{group}{TODO}
+\item{group}{The group variable.}
 
-\item{subjid}{TODO}
+\item{subjid}{Character vector containing the subjects IDs.}
 
-\item{visit}{TODO}
+\item{visit}{The visit variable.}
 
-\item{same_cov}{TODO}
+\item{same_cov}{Logical. If \code{TRUE} the model assumes the same covariance matrix for each group.
+If \code{FALSE} a different covariance matrix for each group is assumed.}
 
-\item{n_imputations}{TODO}
+\item{n_imputations}{Integer number corresponding to the draws from the posterior distribution needed.
+It corresponds to the number of imputations to be done in the multiple imputation procedure.}
 
-\item{burn_in}{TODO}
+\item{burn_in}{Integer number corresponding to the number of initial MCMC iterations to be discarded. See details.}
 
-\item{burn_between}{TODO}
+\item{burn_between}{Integer number corresponding to the thinning of the chain. It is the number
+of iterations that are discarded between two consecutive draws. See details.}
 
-\item{verbose}{TODO}
+\item{verbose}{Logical. If \code{TRUE} the chain flow of information is displayed in the console.}
 
-\item{seed}{TODO}
+\item{seed}{Integer number to set the seed for reproducibility of the MCMC draws.}
+}
+\value{
+A named list composed by the following:
+\itemize{
+\item \code{samples}: a named list containing the draws for each parameter. It corresponds to the output of \code{\link[=extract_draws]{extract_draws()}}.
+\item \code{fit}: a \code{stanfit} object.
+}
 }
 \description{
-Title - TODO
+\code{fit_mcmc()} fits the base imputation model using a Bayesian approach. This is done through a MCMC method that is implemented in \code{stan}
+and is run by using the function \code{\link[rstan:sampling]{rstan::sampling()}}.
+The function returns the draws from the posterior distribution of the model parameters
+and the \code{stanfit} object. Additionally it performs multiple diagnostics checks of the chain
+and returns warnings in case of any detected issues.
+}
+\details{
+The Bayesian model assumes a multivariate normal likelihood function and weakly-informative
+priors for the model parameters: in particular, uniform priors are assumed for the regression
+coefficients and inverse-Wishart priors for the covariance matrices.
+The chain is initialized using the REML parameter estimates from MMRM as starting values.
+
+The function performs the following steps:
+\enumerate{
+\item Fit MMRM using a REML approach.
+\item Prepare the input data for the MCMC fit as described in the \verb{data\{\}} block of the Stan file. See \code{\link[=prepare_stan_data]{prepare_stan_data()}} for details.
+\item Run the MCMC according the input arguments and using as starting values the REML parameter estimates
+estimated at point 1.
+\item Performs diagnostics checks of the MCMC. See \code{\link[=check_mcmc]{check_mcmc()}} for details.
+\item Extract the draws from the model fit.
+}
+
+The chains perform \code{n_imputations} draws by keeping one every \code{burn_between} iterations. Additionally
+the first \code{burn_in} iterations are discarded. The total number of iterations will then be \code{burn_in + burn_between*n_imputations}.
+The \code{burn_in} aims to perform draws from the stationary distribution of the Markov Chain.
+The \code{burn_between} aims to keep the draws uncorrelated each other.
 }
