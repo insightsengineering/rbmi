@@ -2,19 +2,23 @@
 % Please edit documentation in R/impute.R
 \name{as_imputation}
 \alias{as_imputation}
-\title{TODO}
+\title{Create an imputation object}
 \usage{
 as_imputation(imputations, data, method, references)
 }
 \arguments{
-\item{imputations}{TODO}
+\item{imputations}{A list of \code{imputations_list}'s as created by \code{\link[=as_imputation_list]{as_imputation_list()}}}
 
-\item{data}{TODO}
+\item{data}{A \code{longdata} object as created by \code{\link[=longDataConstructor]{longDataConstructor()}}}
 
-\item{method}{TODO}
+\item{method}{A \code{method} object as created by \code{\link[=method_condmean]{method_condmean()}}, \code{\link[=method_bayes]{method_bayes()}} or
+\code{\link[=method_approxbayes]{method_approxbayes()}}}
 
-\item{references}{TODO}
+\item{references}{A named vector. Identifies the references to be used when generating the
+imputed values. Should be of the form \code{c("Group" = "Reference", "Group" = "Reference")}.}
 }
 \description{
-TODO
+This function creates the the object that is returned from \code{\link[=impute]{impute()}}. Essentially
+it is a glorified wrapper around \code{\link[=list]{list()}} ensuring that the required elements have been
+set and that the class is added as expected.
 }

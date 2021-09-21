@@ -1,7 +1,38 @@
 
 
-# TODO - More meaningful error messages
-
+#' Validate a longdata object
+#'
+#' @name validate_datalong
+#'
+#' @param data a `data.frame` containing the longitudinal outcome data + covariates
+#' for multiple subjects
+#'
+#' @param vars a `vars` object as created by [set_vars()]
+#'
+#' @param data_ice a `data.frame` containing the subjects ICE data. See [draws()] for details.
+#'
+#' @param update logical, indicates if the ICE data is being set for the first time or if an update
+#' is being applied
+#'
+#' @details
+#' These functions are used to validate various different parts of the longdata object
+#' to be used in [draws()], [impute()], [analyse()] and [pool()]. In particular:
+#'
+#' - validate_datalong_varExists - Checks that each variable listed in `vars` actually exists
+#' in the `data`
+#'
+#' - validate_datalong_types - Checks that the types of each key variable is as expected
+#' i.e. that visit is a factor variable
+#'
+#' - validate_datalong_notMissing - Checks that none of the key variables (except the outcome variable)
+#' contain any missing values
+#'
+#' - validate_datalong_complete - Checks that `data` is complete i.e. there is 1 row for each subject *
+#' visit combination. e.g. that `nrow(data) == length(unique(subjects)) * length(unique(visits))`
+#'
+#' - validate_datalong_unifromStrata - Checks to make sure that any variables listed as stratification
+#' variables do not vary over time. e.g. that subjects don't switch between stratification groups.
+#'
 validate_datalong <- function(data, vars) {
     validate_datalong_varExists(data, vars)
     validate_datalong_types(data, vars)
@@ -15,7 +46,7 @@ validate_datalong <- function(data, vars) {
 
 
 
-
+#' @rdname validate_datalong
 validate_datalong_varExists <- function(data, vars) {
 
 
@@ -53,7 +84,7 @@ validate_datalong_varExists <- function(data, vars) {
     return(invisible(TRUE))
 }
 
-
+#' @rdname validate_datalong
 validate_datalong_types <- function(data, vars) {
     covars <- extract_covariates(vars$covariates)
 
@@ -90,7 +121,7 @@ validate_datalong_types <- function(data, vars) {
     return(invisible(TRUE))
 }
 
-
+#' @rdname validate_datalong
 validate_datalong_notMissing <- function(data, vars) {
     non_missing_variables <- c(
         vars$group,
@@ -107,7 +138,7 @@ validate_datalong_notMissing <- function(data, vars) {
     return(invisible(TRUE))
 }
 
-
+#' @rdname validate_datalong
 validate_datalong_complete <- function(data, vars) {
     unique_subjects <- unique(data[[vars$subjid]])
     unique_visits <- levels(data[[vars$visit]])
@@ -126,7 +157,7 @@ validate_datalong_complete <- function(data, vars) {
     return(invisible(TRUE))
 }
 
-
+#' @rdname validate_datalong
 validate_datalong_unifromStrata <- function(data, vars) {
     for (var in vars$strata) {
         x <- tapply(
@@ -147,7 +178,7 @@ validate_datalong_unifromStrata <- function(data, vars) {
 
 
 
-
+#' @rdname validate_datalong
 validate_dataice <- function(data, data_ice, vars, update = FALSE) {
 
     validate(vars)
@@ -200,17 +231,3 @@ validate_dataice <- function(data, data_ice, vars, update = FALSE) {
 }
 
 
-
-is_char_one <- function(x) {
-    is.character(x) & (length(x) == 1)
-}
-
-
-is_char_fact <- function(x) {
-    is.character(x) | is.factor(x)
-}
-
-
-is_num_char_fact <- function(x) {
-    is.numeric(x) | is.character(x) | is.factor(x)
-}

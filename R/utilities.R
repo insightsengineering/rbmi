@@ -338,18 +338,62 @@ sort_by <- function(df, vars = NULL, decreasing = FALSE) {
 
 
 
-#' TODO
+#' Set Key Variables
 #'
 #' @description
-#' TODO
+#' This function is used to define the names of key variables within the `data.frame`'s
+#' that are provided as input arguments to [draws()] and [ancova()].
 #'
-#' @param subjid TODO
-#' @param visit TODO
-#' @param outcome TODO
-#' @param group TODO
-#' @param covariates TODO
-#' @param strata TODO
-#' @param strategy TODO
+#' @param subjid The name of the "subject ID" variable. A length 1 character vector.
+#'
+#' @param visit The name of the "Visit" variable. A length 1 character vector.
+#'
+#' @param outcome The name of the "Outcome" variable. A length 1 character vector.
+#'
+#' @param group The name of the "group" variable. A length 1 character vector.
+#'
+#' @param covariates The name of any covariates to be used in the context of modelling.
+#' See details.
+#'
+#' @param strata The name of the any stratification models to be used in the context of bootstrap
+#' sampling. See details.
+#'
+#' @param strategy The name of the "strategy" variable. A length 1 character vector.
+#'
+#' @details
+#'
+#' In both [draws()] and [ancova()] the `covariates` argument can be specified to indicate
+#' which variables should be included in the imputation and analysis models respectively. If you wish
+#' to include interaction terms these need to be manually specified i.e.
+#' `covariates = c("group*visit", "age*sex")`. Please note that the use of the [I()] function to
+#' inhibit the interpretation/conversion of objects is not supported.
+#'
+#' Currently `strata` is only used by [draws()] in combination with `method_condmean(type = "bootstrap")`
+#' and `method_approxbayes()` in order to allow for the specification of stratified bootstrap sampling.
+#' By default `strata` is set equal to the value of `group` as it is assumed most users will want to
+#' preserver the group size between samples. See [draws()] for more details.
+#'
+#' Likewise, currently the `strategy` argument is only used by [draws()] to specify the name of the
+#' strategy variable within the `data_ice` data.frame. See [draws()] for more details.
+#'
+#' @seealso [draws()]
+#' @seealso [ancova()]
+#'
+#' @examples
+#' \dontrun{
+#'
+#' # Using CDISC variable names as an example
+#' set_vars(
+#'     subjid = "usubjid",
+#'     visit = "avisit",
+#'     outcome = "aval",
+#'     group = "arm",
+#'     covariates = c("bwt", "bht", "arm * avisit"),
+#'     strategy = "strat"
+#' )
+#'
+#' }
+#'
 #' @export
 set_vars <- function(
     subjid = "subjid",
@@ -422,4 +466,33 @@ validate.ivars <- function(x, ...) {
         msg = "`vars$strata` should be a character vector or NULL"
     )
     return(invisible(TRUE))
+}
+
+
+#' Is single character
+#'
+#' returns true if x is a length 1 character vector
+#'
+#' @param x a character vector
+is_char_one <- function(x) {
+    is.character(x) & (length(x) == 1)
+}
+
+
+#' Is character or factor
+#'
+#' returns true if x is character or factor vector
+#'
+#' @param x a character or factor vector
+is_char_fact <- function(x) {
+    is.character(x) | is.factor(x)
+}
+
+#' Is character, factor or numeric
+#'
+#' returns true if x is a character, numeric or factor vector
+#'
+#' @param x a character, numeric or factor vector
+is_num_char_fact <- function(x) {
+    is.numeric(x) | is.character(x) | is.factor(x)
 }
