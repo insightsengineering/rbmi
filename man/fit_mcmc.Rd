@@ -53,7 +53,7 @@ A named list composed by the following:
 }
 \description{
 \code{fit_mcmc()} fits the base imputation model using a Bayesian approach. This is done through a MCMC method that is implemented in \code{stan}
-and is run by using the function \code{\link[rstan:sampling]{rstan::sampling()}}.
+and is run by using the function \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}.
 The function returns the draws from the posterior distribution of the model parameters
 and the \code{stanfit} object. Additionally it performs multiple diagnostics checks of the chain
 and returns warnings in case of any detected issues.

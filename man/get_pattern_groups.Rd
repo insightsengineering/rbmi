@@ -2,15 +2,20 @@
 % Please edit documentation in R/mcmc.R
 \name{get_pattern_groups}
 \alias{get_pattern_groups}
-\title{Title - TODO}
+\title{Determine patients missingness group}
 \usage{
 get_pattern_groups(ddat)
 }
 \arguments{
-\item{ddat}{TODO}
+\item{ddat}{a \code{data.frame} with columns \code{subjid}, \code{visit}, \code{group}, \code{is_avail}}
 }
 \description{
 Takes a design matrix with multiple rows per subject and returns a dataset
 with 1 row per subject with a new column \code{pgroup} indicating which group
 the patient belongs to (based upon their missingness pattern and treatment group)
+}
+\details{
+\itemize{
+\item The column \code{is_avail} must be a character or numeric \code{0} or \code{1}
+}
 }

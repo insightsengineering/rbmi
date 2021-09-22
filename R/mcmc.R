@@ -393,8 +393,8 @@ QR_decomp <- function(mat) {
 #' Prepare input data to run the Stan model
 #'
 #' @description
-#' Prepare input data to run the Stan model as per the `data{}` block of the related Stan file
-#' where the model is implemented.
+#' Prepare input data to run the Stan model.
+#' Creates / calculates all the required inputs as required by the `data{}` block of the MMRM Stan program.
 #'
 #' @param ddat A design matrix
 #' @param subjid Character vector containing the subjects IDs.
@@ -402,9 +402,26 @@ QR_decomp <- function(mat) {
 #' @param outcome Numeric vector containing the outcome variable.
 #' @param group Vector containing the group variable.
 #'
-#' @returns
-#' A `stan_data` object. A named list as per `data{}` block of the related Stan file.
+#' @details
+#' - The `group` argument determines which covariance matrix group the subject belongs to. If you
+#' want all subjects to use a shared covariance matrix then set group to "1" for everyone.
 #'
+#'
+#' @returns
+#' A `stan_data` object. A named list as per `data{}` block of the related Stan file. In particular it returns:
+#'
+#' - N - The number of rows in the design matrix
+#' - P - The number of columns in the design matrix
+#' - G - The number of distinct covariance matrix groups (i.e. `length(unique(group))`)
+#' - n_visit - The number of unique outcome visits
+#' - n_pat - The total number of pattern groups (as defined by missingness patterns & covariance group)
+#' - pat_G - Index for which Sigma each pattern group should use
+#' - pat_n_pt - number of patients within each pattern group
+#' - pat_n_visit - number of non-missing visits in each pattern group
+#' - pat_sigma_index - rows/cols from Sigma to subset on for the pattern group (padded by 0's)
+#' - y - The outcome variable
+#' - Q - design matrix (after QR decomposition)
+#' - R - R matrix from the QR decomposition of the design matrix
 prepare_stan_data <- function(ddat, subjid, visit, outcome, group) {
 
     assert_that(
@@ -466,12 +483,18 @@ prepare_stan_data <- function(ddat, subjid, visit, outcome, group) {
 }
 
 
-#' Title TODO
+#' Get Pattern Summary
 #'
 #' Takes a dataset of pattern information and creates a summary dataset of it
 #' with just 1 row per pattern
 #'
-#' @param patterns TODO
+#' @param patterns A `data.frame` with the columns `pgroup`, `pattern` and `group`
+#' @details
+#' - The column `pgroup` must be a numeric vector indicating which pattern group the patient belongs to
+#' - The column `pattern` must be a character string of `0`'s or `1`'s. It must be identical for all
+#' rows within the same `pgroup`
+#' - The column `group` must be a character / numeric vector indicating which covariance group the observation
+#' belongs to. It must be identical within the same `pgroup`
 get_pattern_groups_unique <- function(patterns) {
     u_pats <- unique(patterns[, c("pgroup", "pattern", "group")])
     u_pats <- sort_by(u_pats, "pgroup")
@@ -487,13 +510,15 @@ get_pattern_groups_unique <- function(patterns) {
 }
 
 
-#' Title - TODO
+#' Determine patients missingness group
 #'
 #' Takes a design matrix with multiple rows per subject and returns a dataset
 #' with 1 row per subject with a new column `pgroup` indicating which group
 #' the patient belongs to (based upon their missingness pattern and treatment group)
 #'
-#' @param ddat TODO
+#' @param ddat a `data.frame` with columns `subjid`, `visit`, `group`, `is_avail`
+#' @details
+#' - The column `is_avail` must be a character or numeric `0` or `1`
 get_pattern_groups <- function(ddat) {
     ddat <- sort_by(ddat, c("subjid", "visit"))[, c("subjid", "group", "is_avail")]
 
@@ -519,14 +544,15 @@ get_pattern_groups <- function(ddat) {
 }
 
 
-#' TODO
+#' Convert indicator to index
 #'
 #' Converts a string of 0's and 1's into index positions of the 1's
 #' padding the results by 0's so they are all the same length
 #'
 #' i.e. patmap(c("1101", "0001"))  ->   list(c(1,2,4,0), c(4,0,0,0))
 #'
-#' @param x TODO
+#' @param x a character vector whose values are all either "0" or "1". All elements of
+#' the vector must be the same length
 as_indices <- function(x) {
 
     assert_that(
@@ -550,9 +576,13 @@ as_indices <- function(x) {
     )
 }
 
-#' Title - TODO
+#' As array
 #'
-#' @param x TODO
+#' Converts a numeric value of length 1 into a 1 dimension array.
+#' This is to avoid type errors that are thrown by stan when length 1 numeric vectors
+#' are provided by R for stan::vector inputs
+#'
+#' @param x a numeric vector
 as_stan_array <- function(x) {
     ife(
         length(x) == 1,
@@ -562,9 +592,13 @@ as_stan_array <- function(x) {
 }
 
 
-#' Title TODO
+#' Remove subjects from dataset if they have no observed values
 #'
-#' @param dat TODO
+#' This function takes a `data.frame` with variables `visit`, `outcome` & `subjid`.
+#' It then removes all rows for a given `subjid` if they don't have any non-missing
+#' values for `outcome`.
+#'
+#' @param dat a `data.frame`
 remove_if_all_missing <- function(dat) {
     n_visit <- length(unique(dat$visit))
     n_miss <- tapply(dat$outcome, dat$subjid, function(x) sum(is.na(x)))

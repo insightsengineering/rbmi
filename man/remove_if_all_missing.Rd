@@ -2,13 +2,15 @@
 % Please edit documentation in R/mcmc.R
 \name{remove_if_all_missing}
 \alias{remove_if_all_missing}
-\title{Title TODO}
+\title{Remove subjects from dataset if they have no observed values}
 \usage{
 remove_if_all_missing(dat)
 }
 \arguments{
-\item{dat}{TODO}
+\item{dat}{a \code{data.frame}}
 }
 \description{
-Title TODO
+This function takes a \code{data.frame} with variables \code{visit}, \code{outcome} & \code{subjid}.
+It then removes all rows for a given \code{subjid} if they don't have any non-missing
+values for \code{outcome}.
 }
