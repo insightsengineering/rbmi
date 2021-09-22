@@ -56,7 +56,7 @@ must be set to \code{NULL}. See details.}
 be printed to the console, if \code{FALSE} this information will be suppressed.}
 
 \item{seed}{a numeric that specifies a seed to be used in the call to Stan. This
-argument is forward on the the \code{seed} argument of \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}. Note that
+argument is forward on the the \code{seed} argument of \code{\link[rstan:sampling]{rstan::sampling()}}. Note that
 this is only required for \code{method_bayes()}, for all other methods you can achieve
 reproducible results by setting the seed via \code{set.seed()}. See details.}
 

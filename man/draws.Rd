@@ -7,13 +7,13 @@
 \alias{draws.bayes}
 \title{Fit the base imputation model and get parameter estimates}
 \usage{
-draws(data, data_ice, vars, method)
+draws(data, data_ice = NULL, vars, method)
 
-\method{draws}{approxbayes}(data, data_ice, vars, method)
+\method{draws}{approxbayes}(data, data_ice = NULL, vars, method)
 
-\method{draws}{condmean}(data, data_ice, vars, method)
+\method{draws}{condmean}(data, data_ice = NULL, vars, method)
 
-\method{draws}{bayes}(data, data_ice, vars, method)
+\method{draws}{bayes}(data, data_ice = NULL, vars, method)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing the data to be used in the model. See details.}
