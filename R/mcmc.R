@@ -194,16 +194,6 @@ fit_mcmc <- function(
 #' A list of length `n` of arrays with number of dimensions equal to the
 #' number of dimensions of `a` minus 1.
 #'
-#' @examples
-#' \dontrun{
-#' set.seed(101)
-#' a <- array(data = stats::rnorm(12), dim = c(3,2,2))
-#' n <- 1
-#' # creates a list of length 3 containing 2x2 matrices
-#' split_a <- split_dim(a,n)
-#' }
-#'
-#'
 #' @importFrom stats setNames
 split_dim <- function(a, n) {
     x <- split(

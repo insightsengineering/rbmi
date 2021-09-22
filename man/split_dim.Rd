@@ -47,14 +47,3 @@ output of \code{res <- split_dim(a,n)} is a list of 3 elements:\preformatted{res
  4    10    5    11    6    12
 }
 }
-\examples{
-\dontrun{
-set.seed(101)
-a <- array(data = stats::rnorm(12), dim = c(3,2,2))
-n <- 1
-# creates a list of length 3 containing 2x2 matrices
-split_a <- split_dim(a,n)
-}
-
-
-}
