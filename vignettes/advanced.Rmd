@@ -80,46 +80,48 @@ there is any observed data after the ICE visit
 
 Both of these restrictions exist to protect the validity of the imputation model.
 It is worth noting that whilst a strategy of MAR cannot be changed to non-MAR, a
-non-MAR strategy can be changed to MAR. The only potential issue with such a change
-is that this means that the imputation model hasn't used all of the available data
-and as such a warning is issued to the user to inform them of this. 
+non-MAR strategy can be changed to MAR. However, please bear in mind that a potential 
+issue with this
+is that it means that the imputation model hasn't used all of the available data;
+as such the package will issue a warning if the user attempts to do this. 
 
-As an example, lets say in our first analysis we want to use the jump
-to reference imputation strategy but then as a sensitivity we wanted to use
-the copy increments from reference strategy, this could be done as follows:
+As an example, lets say in our first analysis we want to use the copy 
+increments from reference strategy but then as a sensitivity we wanted to use the
+jump to reference imputation strategy, this could be done as follows:
 
 ```{r}
-
-# create data_ice setting the imputation method to MAR for
-# each patient with at least one missing value
-dat_ice$strategy <- "JR"
-dat_ice
+dat_ice_CIR <- dat_ice
+dat_ice_CIR$strategy <- "CIR"
+dat_ice_CIR
 
 draw_obj <- draws(
     data = dat,
-    data_ice = dat_ice,
+    data_ice = dat_ice_CIR,
     vars = vars,
     method = method_condmean(n_samples = 15)
 )
 
-impute_obj_JR <- impute(
+impute_obj_CIR <- impute(
     draw_obj,
     references = c("A" = "B", "B" = "B")
 )
-ana_obj_JR <- analyse(
-    impute_obj_JR,
+ana_obj_CIR <- analyse(
+    impute_obj_CIR,
     vars = set_vars()
 )
-pool(ana_obj_JR)
+pool(ana_obj_CIR)
 
+## Now we re-use our draws samples but using the Jump to Reference 
+## Imputation strategy
 
-dat_ice_CIR <- dat_ice
-dat_ice_CIR$strategy <- "CIR"
+dat_ice_JR <- dat_ice
+dat_ice_JR$strategy <- "JR"
+dat_ice_JR
 
 impute_obj_JR <- impute(
     draw_obj,
     references = c("A" = "B", "B" = "B"),
-    update_strategy = dat_ice_CIR
+    update_strategy = dat_ice_JR
 )
 ana_obj_JR <- analyse(
     impute_obj_JR,
@@ -140,26 +142,27 @@ Out of the box rbmi has support for the following imputation strategies:
 - Last Mean Carried Forward (LMCF)
 
 However, rbmi also supports the ability for users to define their own imputation 
-strategies. To do this their are 3 things the user needs to do:
+strategies. To do this there are 3 things the user needs to do:
 
 1. Define their own imputation strategy function.
-2. Specify patients use this strategy in the `data_ice` dataset provided to `draws()`.
+2. Specify which patients use this strategy in the `data_ice` dataset provided to `draws()`.
 3. Provide the imputation strategy function to `impute()`.
 
-This is perhaps better demonstrated by an example. For this example we will implement a strategy
+This is perhaps better demonstrated by an example. We will implement a strategy
 in which all post-ice missing values are be imputed by the average outcome between 
 the subject's group and reference group.
 
 To do this we first need to define our imputation function. This function must take
 3 arguments: `pars_group`, `pars_ref` and `index_mar`.  Both `pars_group` and `pars_ref`
 will be a list with elements `mu` (a numeric vector) and `sigma` (a covariance matrix)
-which represent the distributions that patients conditional distribution assuming they 
-below to their group and reference group respectively.  The `index_mar` argument
-is then a logical vector indicating which visits for the subject meet the MAR assumption . 
-I.e. this cam be used to identify the observations that occur after a non-MAR 
-intercurrent event (ICE).
+which are the parameters for the patient's outcome distribution
+assuming that they belong to their own group and the reference group respectively.
+The `index_mar` argument
+is then a logical vector indicating which visits for the subject meet the MAR assumption.
+This can be used to identify the observations that occur after an ICE that are addressed
+with a non-MAR imputation strategy. 
 
-As such out example imputation function could be coded as:
+As such our example imputation function could be coded as:
 
 
 ```{r}
@@ -220,15 +223,24 @@ impute_obj <- impute(
 
 ## Custom Analysis Functions
 
-By default rbmi will analyses the data by performing an ancova at each visit independently,
+By default rbmi will analyse the data by performing ancova at each visit independently,
 returning the "treatment effect" estimate as well as the corresponding least square means
 for each group. If the user wants to perform a different analysis, or return different
 statistics from the analysis, then this can be done by using a custom analysis function.
 
 The rules for this custom analysis function are that it must take a `data.frame` as its 
-first argument and must return a named `list` with each element itself being a `list` containing 
-a single numeric element called `est` (or additionally `se` and `df` if you had originally specified
-`method_bayes()` or `method_approxbayes()`).  As an example lets say that for your analysis
+first argument and that it must return a named `list` with each element itself being a `list`
+containing a single numeric element called `est`. If you had originally specified `method_bayes()` 
+or `method_approxbayes()` then the analysis function must also return a standard error estimate 
+for the given statistics and the degrees of freedom of the complete-data analysis model. These
+should be included in the named `list` using names `se` and `df` respectively.
+
+The reason for this is that if `method_bayes()` or `method_approxbayes()` are specified
+then `pool()` will perform its inference based upon Rubin's rules which require the estimate (`est`),
+the standard error of the estimate (`se`) as well as the degrees of freedom (`df`).
+
+
+As an example lets say that for your analysis
 you are also interested in calculating the overall mean at each visit (i.e. not the treatment
 effect), this could then be done as follows:
 
@@ -237,18 +249,11 @@ mean_fun <- function(dat, ...) {
 
     mod <- dat %>%
         group_by(visit) %>%
-        summarise(
-            m = mean(outcome),
-            se = sqrt(var(outcome) / n()),
-            df = n() - 1
-        )
+        summarise(m = mean(outcome))
 
-    results <- mapply(
-        function(x, y, z) list(est = x, se = y, df = z),
+    results <- lapply(
         mod$m,
-        mod$se,
-        mod$df,
-        SIMPLIFY = FALSE
+        function(x) list(est = x)
     )
 
     names(results) <- paste0("mean_", mod$visit)
@@ -260,7 +265,7 @@ This analysis function can then be used in combination with `analyse()` as follo
 
 ```{r}
 anl_obj <- analyse(
-    imputations = impute_obj,
+    imputations = impute_obj_CIR,
     fun = mean_fun
 )
 
@@ -272,7 +277,7 @@ pool(anl_obj)
 ## Delta Adjustment
 
 The `delta` argument of `analyse()` allows users to modify the outcome variable
-which can be utalised as part of a tipping point or sensitivity analysis. To do 
+which can be utilised as part of a tipping point or sensitivity analysis. To do 
 this the user needs to provide a `data.frame` containing a column for the subject
 and visit which identifies the observation to be adjusted, and then a 3rd column
 called `delta` which specifies how much to offset the outcome by.
@@ -357,5 +362,48 @@ i.e. on week-6 (1 week after the ICE) they have a delta of 3 and on week-9 (4 we
 after the ICE) they have a delta of 12
 
 
+To show this in action, lets say that we want a constant delta of 5 to be applied (regardless of
+the lag) to all unobserved post-ICE visits in the treatment arm only. This can be achieved as follows:
+
+First use the `delta` and `dlag` arguments of `delta_template()` to setup a template `data.frame`
+in which every unobserved post-ICE visit has a delta of 5:
+```{r}
+delta_df <- delta_template(
+    impute_obj_CIR, 
+    delta = c(5, 5, 5), 
+    dlag = c(1, 0, 0)
+)
+
+as_tibble(delta_df)
+```
+
+Next we can use the additional metadata variables provided by `delta_template()` to  manually 
+reset the delta values for the control group back to 0:
+```{r}
+delta_df2 <- delta_df %>% 
+    mutate(delta = if_else(group == "B", 0, delta))
+
+as_tibble(delta_df2)
+```
+
+Finally we can now use our delta `data.frame` to apply our desired delta offset to our analysis:
+```{r}
+anl_delta <- analyse(impute_obj_CIR, delta = delta_df2, vars = set_vars())
+pool(anl_delta)  
+```
 
 
+Please note that in the case of observed post-ICE data, `delta_template()` will calculate the delta for all
+observations assuming that all post-ICE data are missing; it will then set the value of `delta` to
+0 for those observations that were actually observed. If you wish to retain the value of `delta`
+for the observed post-ICE visits then you can use the `missing_only = FALSE` argument to do so I.e.:
+
+```{r}
+delta_template(
+    impute_obj_CIR, 
+    delta = c(5, 5, 5), 
+    dlag = c(1, 0, 0),
+    missing_only = FALSE
+) %>% 
+    as_tibble()
+```
