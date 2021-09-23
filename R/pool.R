@@ -1,6 +1,6 @@
 
 
-#' Pool analysis results across imputed datasets
+#' Pool analysis results
 #'
 #' @param results an analysis object created by [analyse()].
 #'
