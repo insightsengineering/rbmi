@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyse.R
 \name{as_analysis}
 \alias{as_analysis}
-\title{Construct an Analysis object}
+\title{Construct an \code{analysis} object}
 \usage{
 as_analysis(results, method, delta = NULL, fun = NULL, fun_name = NULL)
 }
@@ -10,15 +10,15 @@ as_analysis(results, method, delta = NULL, fun = NULL, fun_name = NULL)
 \item{results}{A list of lists contain the analysis results for each imputation
 See \code{\link[=analyse]{analyse()}} for details on what this object should look like.}
 
-\item{method}{The method object as specified in \code{\link[=draws]{draws()}}}
+\item{method}{The method object as specified in \code{\link[=draws]{draws()}}.}
 
 \item{delta}{The delta dataset used. See \code{\link[=analyse]{analyse()}} for details on how this
-should be specified}
+should be specified.}
 
-\item{fun}{The analysis function that was used}
+\item{fun}{The analysis function that was used.}
 
 \item{fun_name}{The character name of the analysis function (used for printing)
-purposes}
+purposes.}
 }
 \description{
 Creates an analysis object ensuring that all components are

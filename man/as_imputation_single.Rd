@@ -2,15 +2,15 @@
 % Please edit documentation in R/impute.R
 \name{as_imputation_single}
 \alias{as_imputation_single}
-\title{Create a valid imputation_single object}
+\title{Create a valid \code{imputation_single} object}
 \usage{
 as_imputation_single(id, values)
 }
 \arguments{
-\item{id}{a character string specifying the subject id}
+\item{id}{a character string specifying the subject id.}
 
-\item{values}{a numeric vector indicating the imputed values}
+\item{values}{a numeric vector indicating the imputed values.}
 }
 \description{
-Create a valid imputation_single object
+Create a valid \code{imputation_single} object
 }

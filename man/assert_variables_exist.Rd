@@ -12,5 +12,5 @@ assert_variables_exist(data, vars)
 \item{vars}{a character vector of variable names}
 }
 \description{
-Performs an assertion check to ensure that a vector of variable exists within a data.frame as expected
+Performs an assertion check to ensure that a vector of variable exists within a data.frame as expected.
 }

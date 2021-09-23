@@ -1,0 +1,23 @@
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+name: test-coverage
+
+jobs:
+  R-CMD-check:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    container:
+      image: gowerc/rbmi:r410
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Test coverage
+        run: covr::codecov()
+        shell: Rscript {0}

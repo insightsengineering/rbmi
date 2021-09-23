@@ -8,7 +8,7 @@ getStrategies(...)
 }
 \arguments{
 \item{...}{User defined methods to be added to the return list. Input must
-be a function}
+be a function.}
 }
 \description{
 Returns a list defining the imputation strategies to be used to create the
@@ -22,9 +22,9 @@ are defined.
 
 The user can define their own strategy functions (or overwrite the pre-defined ones)
 by specifying a named input to the function i.e. \code{NEW = function(...) ...}.
-Only exception is MAR which cannot be overwritten
+Only exception is MAR which cannot be overwritten.
 
-All user defined functions must take 3 inputs \code{pars_group}, \code{pars_ref} &
+All user defined functions must take 3 inputs: \code{pars_group}, \code{pars_ref} and
 \code{index_mar}. \code{pars_group} and \code{pars_ref} are both lists with elements \code{mu}
 and \code{sigma} representing the multivariate normal distribution parameters for
 the subjects current and reference group respectively.  \code{index_mar} will be

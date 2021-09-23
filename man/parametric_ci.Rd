@@ -7,23 +7,23 @@
 parametric_ci(point, se, alpha, alternative, qfun, pfun, ...)
 }
 \arguments{
-\item{point}{The point estimate}
+\item{point}{The point estimate.}
 
 \item{se}{The standard error of the point estimate. If using a non-"normal"
-distribution this should be set to 1}
+distribution this should be set to 1.}
 
-\item{alpha}{The type 1 error rate, should be a value between 0 and 1}
+\item{alpha}{The type 1 error rate, should be a value between 0 and 1.}
 
 \item{alternative}{a character string specifying the alternative hypothesis,
-must be one of "two.sided" (default), "greater" or "less".#' @param qfun TODO}
+must be one of "two.sided" (default), "greater" or "less".}
 
-\item{qfun}{The quantile function for the assumed distribution i.e. \code{qnorm}}
+\item{qfun}{The quantile function for the assumed distribution i.e. \code{qnorm}.}
 
-\item{pfun}{The CDF function for the assumed distribution i.e. \code{pnorm}}
+\item{pfun}{The CDF function for the assumed distribution i.e. \code{pnorm}.}
 
-\item{...}{additional arguments passed on \code{qfun} and \code{pfun} i.e. \code{df = 102}}
+\item{...}{additional arguments passed on \code{qfun} and \code{pfun} i.e. \code{df = 102}.}
 }
 \description{
 Calculates confidence intervals based upon a parametric
-distribution
+distribution.
 }

@@ -2,13 +2,13 @@
 % Please edit documentation in R/impute.R
 \name{as_imputation_list}
 \alias{as_imputation_list}
-\title{Create a valid imputation list object}
+\title{Create a valid \code{imputation_list} object}
 \usage{
 as_imputation_list(...)
 }
 \arguments{
-\item{...}{a list of imputation_singles}
+\item{...}{a list of \code{imputation_single}.}
 }
 \description{
-Create a valid imputation list object
+Create a valid \code{imputation_list} object
 }

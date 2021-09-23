@@ -12,26 +12,26 @@ extract_imputed_dfs(
 )
 }
 \arguments{
-\item{imputations}{An imputations object as created by \code{\link[=impute]{impute()}}}
+\item{imputations}{An imputations object as created by \code{\link[=impute]{impute()}}.}
 
-\item{index}{The indexes of the imputed data.frames to return. By default will
-return all data.frames within the imputations object.
-(i.e. use this argument if you just want the "1st" data.frame)}
+\item{index}{The indexes of the imputed data.frames to return. By default,
+all data.frames within the imputations object will be returned
+(i.e. use this argument if you just want e.g. the first data.frame only).}
 
 \item{delta}{A data.frame containing the delta transformation to be
 applied to the imputed dataset. See \code{\link[=analyse]{analyse()}} for details on the
-format and specification of this data.frame}
+format and specification of this data.frame.}
 
 \item{idmap}{Logical. The subject IDs in the imputed data.frame will be scrambled
-setting this argument to True will add an attribute called "idmap" to the
-imputed data.frame which will provide a map from the new subect IDs to the old
-subject IDs}
+setting this argument to \code{TRUE} will add an attribute called "idmap" to the
+imputed data.frame which will provide a map from the new subject IDs to the old
+subject IDs.}
 }
 \value{
-A list of data.frames equal in length to the \code{index} argument
+A list of data.frames equal in length to the \code{index} argument.
 }
 \description{
-Extracts the imputed datasets contained with an imputations object generated
+Extracts the imputed datasets contained within an imputations object generated
 by \code{\link[=impute]{impute()}}.
 }
 \examples{
@@ -41,7 +41,7 @@ extract_imputed_dfs(imputeObj, c(1:3))
 }
 }
 \seealso{
-\code{\link[=delta_template]{delta_template()}} for creating delta data.frames
+\code{\link[=delta_template]{delta_template()}} for creating delta data.frames.
 
-\code{\link[=analyse]{analyse()}}
+\code{\link[=analyse]{analyse()}}.
 }

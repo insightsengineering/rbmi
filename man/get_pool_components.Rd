@@ -8,9 +8,9 @@ get_pool_components(x)
 }
 \arguments{
 \item{x}{Character name of the analysis method, must one of
-either \code{"rubin"}, \code{"jackknife"} or "\verb{bootstrap"}}
+either \code{"rubin"}, \code{"jackknife"} or "\verb{bootstrap"}.}
 }
 \description{
 Returns the elements expected to be contained in the analyse object
-depending on what analysis method was specified
+depending on what analysis method was specified.
 }

@@ -2,15 +2,15 @@
 % Please edit documentation in R/analyse.R
 \name{validate.analysis}
 \alias{validate.analysis}
-\title{Validate Analysis Objects}
+\title{Validate \code{analysis} objects}
 \usage{
 \method{validate}{analysis}(x, ...)
 }
 \arguments{
-\item{x}{A Analysis results object (of class "jackknife", "bootstrap", "rubin")}
+\item{x}{A \code{analysis} results object (of class \code{"jackknife"}, \code{"bootstrap"}, \code{"rubin"}).}
 
-\item{...}{Not Used}
+\item{...}{Not used.}
 }
 \description{
-Validates the return object of the analyse() function
+Validates the return object of the \code{\link[=analyse]{analyse()}} function.
 }

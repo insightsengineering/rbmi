@@ -19,7 +19,7 @@ rubin_df(v_com, var_b, var_t, M)
 Degrees of freedom according to Barnard-Rubin formula. See Barnard-Rubin (1999).
 }
 \description{
-Compute degrees of freedom according to Barnard-Rubin formula
+Compute degrees of freedom according to Barnard-Rubin formula.
 }
 \details{
 The computation takes into account limit cases where there is no missing data

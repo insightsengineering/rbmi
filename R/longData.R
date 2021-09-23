@@ -3,7 +3,7 @@
 #'
 #' @description
 #'
-#' A longdata object allows for efficient storage and recall of longitudinal datasets for use in
+#' A `longdata` object allows for efficient storage and recall of longitudinal datasets for use in
 #' bootstrap sampling. The object works by de-constructing the data into lists based upon subject id
 #' thus enabling efficient lookup.
 #'
@@ -11,7 +11,7 @@
 #'
 #' The object also handles multiple other operations specific to rbmi such as defining whether an
 #' outcome value is MAR / Missing or not as well as tracking which imputation strategy is assigned
-#' to each subject
+#' to each subject.
 #'
 #' It is recognised that this objects functionality is fairly overloaded and is hoped that this can
 #' be split out into more area specific objects / functions in the future. Further additions of functionality
@@ -134,27 +134,27 @@ longDataConstructor <- R6::R6Class(
         #' Returns a dataframe based upon required subject IDs. Replaces missing
         #' values with new ones if provided.
         #'
-        #' @param obj Either NULL, a character vector of subjects IDs or a
+        #' @param obj Either `NULL`, a character vector of subjects IDs or a
         #' imputation list object. See details.
         #'
-        #' @param nmar.rm logical value. If TRUE will remove observations that are
-        #' not regarded as MAR (as determined from `self$is_mar`)
+        #' @param nmar.rm Logical value. If `TRUE` will remove observations that are
+        #' not regarded as MAR (as determined from `self$is_mar`).
         #'
-        #' @param na.rm logical value. If TRUE will remove outcome values that are
-        #' missing (as determined from `self$is_missing`)
+        #' @param na.rm Logical value. If `TRUE` will remove outcome values that are
+        #' missing (as determined from `self$is_missing`).
         #'
-        #' @param idmap logical value. If TRUE will add an attribute `idmap` which
+        #' @param idmap Logical value. If `TRUE` will add an attribute `idmap` which
         #' contains a mapping from the new subject ids to the old subject ids. See details.
         #'
         #' @details
         #'
-        #' If `obj` is NULL then the full original dataset is returned.
+        #' If `obj` is `NULL` then the full original dataset is returned.
         #'
         #' If `obj` is a character vector then a new dataset consisting of just those subjects is
         #' returned; if the character vector contains duplicate entries then that subject will be
         #' returned multiple times.
         #'
-        #' If `obj` is an imputation list object (as created by [as_imputation_list()]) then the
+        #' If `obj` is an `imputation_list` object (as created by [as_imputation_list()]) then the
         #' subject ids specified in the object will be returned and missing values will be filled
         #' in by those specified in the imputation list object.  i.e.
         #' ```
@@ -170,14 +170,14 @@ longDataConstructor <- R6::R6Class(
         #' values filled in with `c(1,2,3)` and the second set will be filled in by `c(4,5,6)`. The
         #' length of the values must be equal to `sum(self$is_missing[[id]])`.
         #'
-        #' If `obj` is not NULL then all subject IDs will be scrambled in order to ensure that they are unique
+        #' If `obj` is not `NULL` then all subject IDs will be scrambled in order to ensure that they are unique
         #' i.e. If the `pt2` is requested twice then this process guarantees that each set of observations
         #' be have a unique subject ID number. The `idmap` attribute (if requested) can be used
         #' to map from the new ids back to the old ids.
         #'
         #' @return
         #'
-        #' A dataframe
+        #' A dataframe.
         get_data = function(obj = NULL, nmar.rm = FALSE, na.rm = FALSE, idmap = FALSE) {
 
             if (is.null(obj)) return(self$data)
@@ -246,10 +246,10 @@ longDataConstructor <- R6::R6Class(
 
 
         #' @description
-        #' This function decomposes a patients data from `self$data` and populates
+        #' This function decomposes a patient data from `self$data` and populates
         #' all the corresponding lists i.e. `self$is_missing`, `self$values`, `self$group`, etc.
-        #' This function is only called upon the objects initialisation
-        #' @param id Character subject id that exists within `self$data`
+        #' This function is only called upon the objects initialization.
+        #' @param id Character subject id that exists within `self$data`.
         add_subject = function(id) {
 
             ids <- self$data[[self$vars$subjid]]
@@ -300,8 +300,8 @@ longDataConstructor <- R6::R6Class(
 
 
         #' @description
-        #' Throws an error if any element of `ids` is not within the source data `self$data`
-        #' @param ids A character vector of ids
+        #' Throws an error if any element of `ids` is not within the source data `self$data`.
+        #' @param ids A character vector of ids.
         #' @return TRUE
         validate_ids = function(ids) {
             is_in <- ids %in% self$ids
@@ -315,8 +315,8 @@ longDataConstructor <- R6::R6Class(
         #' @description
         #' Performs random stratified sampling of patient ids (with replacement)
         #' Each patient has an equal weight of being picked within their strata (i.e is not dependent on
-        #' how many non-missing visits they had)
-        #' @return Character vector of ids
+        #' how many non-missing visits they had).
+        #' @return Character vector of ids.
         sample_ids = function() {
             sample_ids(self$ids, self$strata)
         },
@@ -324,8 +324,8 @@ longDataConstructor <- R6::R6Class(
 
         #' @description
         #' Returns a list of key information for a given subject. Is a convenience wrapper
-        #' to save having to manually grab each element
-        #' @param id Character subject id that exists within `self$data`
+        #' to save having to manually grab each element.
+        #' @param id Character subject id that exists within `self$data`.
         extract_by_id = function(id) {
             list(
                 is_mar = self$is_mar[[id]],
@@ -341,8 +341,8 @@ longDataConstructor <- R6::R6Class(
 
         #' @description
         #' Convenience function to run self$set_strategies(dat_ice, update=TRUE)
-        #' kept for legacy reasons
-        #' @param dat_ice A data.frame containing ICE information see [impute()] for the format of this dataframe
+        #' kept for legacy reasons.
+        #' @param dat_ice A data.frame containing ICE information see [impute()] for the format of this dataframe.
         update_strategies = function(dat_ice) {
             self$set_strategies(dat_ice, update = TRUE)
         },
@@ -352,9 +352,9 @@ longDataConstructor <- R6::R6Class(
         #' Updates the `self$strategies`, `self$is_mar`, `self$is_post_ice` variables based upon the provided ICE
         #' information.
         #' @details
-        #' See [draws()] for the specification of `dat_ice` if `update=FALSE`
-        #' See [impute()] for the format of `dat_ice` if `update=TRUE`
-        #' If `update=TRUE` this function ensures that MAR strategies cannot be changed to Non-MAR in the presence
+        #' See [draws()] for the specification of `dat_ice` if `update=FALSE`.
+        #' See [impute()] for the format of `dat_ice` if `update=TRUE`.
+        #' If `update=TRUE` this function ensures that MAR strategies cannot be changed to non-MAR in the presence
         #' of post-ICE observations.
         #' @param dat_ice Dataframe containing ICE information. See details.
         #' @param update Logical, indicates that the ICE data should be used as an update. See details.
@@ -421,15 +421,17 @@ longDataConstructor <- R6::R6Class(
                 self$strategy_lock[[subject]] <- !all(
                     self$is_missing[[subject]][is_post_ice]
                 )
+
+                validate( as_class(self$is_mar[[subject]], "is_mar") )
             }
             self$check_has_data_at_each_visit()
         },
 
 
         #' @description
-        #' Ensures that all visits have at least 1 observared "MAR" observation. Throws
+        #' Ensures that all visits have at least 1 observed "MAR" observation. Throws
         #' an error if this criteria is not met. This is to ensure that the initial
-        #' MMRM can be resolved
+        #' MMRM can be resolved.
         check_has_data_at_each_visit = function() {
             is_mar <- unlist(self$is_mar, use.names = FALSE)
             is_not_miss <- !unlist(self$is_missing, use.names = FALSE)
@@ -472,10 +474,11 @@ longDataConstructor <- R6::R6Class(
         },
 
 
+
         #' @description
         #' Constructor function.
-        #' @param data longditudinal dataset
-        #' @param vars an `ivars` object created by [set_vars()]
+        #' @param data longditudinal dataset.
+        #' @param vars an `ivars` object created by [set_vars()].
         initialize = function(data, vars) {
             validate(vars)
             validate_datalong(data, vars)
@@ -495,9 +498,9 @@ longDataConstructor <- R6::R6Class(
 
 
 
-#' Transpose Imputations
+#' Transpose imputations
 #'
-#' Takes a imputations object and transposes it i.e.
+#' Takes a `imputation_list` object and transposes it i.e.
 #' ```
 #' list(
 #'     list(
@@ -519,7 +522,7 @@ longDataConstructor <- R6::R6Class(
 #'     values = c(1,2,3,4,5,6)
 #' )
 #' ```
-#' @param imputations An imputation list object created by [as_imputation_list()]
+#' @param imputations An `imputation_list` object created by [as_imputation_list()]
 transpose_imputations <- function(imputations) {
     len <- length(imputations)
     values <- vector(mode = "list", length = len)
@@ -539,3 +542,37 @@ transpose_imputations <- function(imputations) {
     )
     return(result)
 }
+
+
+
+#' Validate `is_mar` for a given subject
+#'
+#' Checks that the longitudinal data for a patient is divided in MAR
+#' followed by non-MAR data; a non-MAR observation followed by a MAR
+#' observation is not allowed.
+#'
+#' @param x Object of class `is_mar`. Logical vector indicating whether observations are MAR.
+#' @param ... Not used.
+#'
+#' @return
+#' Will error if there is an issue otherwise will return `TRUE`.
+#' @export
+validate.is_mar <- function(x, ...) {
+
+    if(all(x) || all(!x)) {
+        return(invisible(TRUE))
+    }
+
+    ind <- which(x == FALSE)[1]
+    true_index <- seq_len(ind-1)
+    false_index <- seq(ind, length(x))
+
+    assert_that(
+        all(x[true_index]),
+        all(!x[false_index]),
+        msg = "non-MAR observation followed by a MAR observation is not allowed"
+    )
+
+    return(invisible(TRUE))
+}
+

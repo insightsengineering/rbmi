@@ -10,13 +10,13 @@
 #' each of them.
 #'
 #' @details
-#' This function works by performing the following steps
+#' This function works by performing the following steps:
 #'
-#' 1. Extract a dataset from the `imputations` object
-#' 2. Apply any delta adjustments as specified by the `delta` argument
-#' 3. Run the analysis function `fun` on the dataset
+#' 1. Extract a dataset from the `imputations` object.
+#' 2. Apply any delta adjustments as specified by the `delta` argument.
+#' 3. Run the analysis function `fun` on the dataset.
 #' 4. Repeat steps 1-3 across all of the datasets inside the `imputations`
-#' object
+#' object.
 #' 5. Collect and return all of the analysis results.
 #'
 #' The analysis function `fun` must take a data.frame as its first
@@ -26,7 +26,7 @@
 #' list containing a single
 #' numeric element called `est` (or additionally `se` and `df` if
 #' you had originally specified [method_bayes()] or [method_approxbayes()])
-#' i.e.
+#' i.e.:
 #' ```
 #' myfun <- function(dat, ...) {
 #'     mod_1 <- lm(data = dat, outcome ~ group)
@@ -57,10 +57,14 @@
 #' requires that a vars object, as created by [set_vars()], is provided via
 #' the `vars` argument e.g. `analyse(imputeObj, vars = set_vars(...))`. Please
 #' see the documentation for [ancova()] for full details.
+#' Please also note that the theoretical justification for the conditional mean imputation
+#' method (`method = method_condmean()` in [draws()]) relies on the fact that ANCOVA is 
+#' a linear transformation of the outcomes. 
+#' Thus care is required when applying alternative analysis functions in this setting.
 #'
 #' The `delta` argument can be used to specify offsets to be applied
-#' to the outcome variable in the imputed datasets which can be used
-#' as part of a sensitivity or tipping point analysis. The
+#' to the outcome variable in the imputed datasets prior to the analysis.
+#' This is typically used for sensitivity or tipping point analysis. The
 #' delta dataset must contain columns `vars$subjid`, `vars$visit` (as specified
 #' in the original call to [draws()]) and `delta`. Essentially this data.frame
 #' is merged onto the imputed dataset by `vars$subjid` and `vars$visit` and then
@@ -79,14 +83,14 @@
 #'
 #' @seealso [extract_imputed_dfs()] for manually extracting imputed
 #' datasets.
-#' @seealso [delta_template()] for creating delta data.frames
-#' @seealso [ancova()] for the default analysis function
+#' @seealso [delta_template()] for creating delta data.frames.
+#' @seealso [ancova()] for the default analysis function.
 #'
-#' @param imputations An imputations object as created by [impute()]
+#' @param imputations An imputations object as created by [impute()].
 #' @param fun An analysis function to be applied to each imputed datset. See details.
 #' @param delta A data.frame containing the delta transformation to be applied to the imputed
 #' dataset prior to running `fun`. See details.
-#' @param ... Additional arguments passed onto `fun`
+#' @param ... Additional arguments passed onto `fun`.
 #' @examples
 #' \dontrun{
 #' vars <- set_vars(
@@ -175,20 +179,20 @@ analyse <- function(imputations, fun = ancova, delta = NULL, ...) {
 #' Extract imputed datasets
 #'
 #' @description
-#' Extracts the imputed datasets contained with an imputations object generated
+#' Extracts the imputed datasets contained within an imputations object generated
 #' by [impute()].
 #'
-#' @param imputations An imputations object as created by [impute()]
-#' @param index The indexes of the imputed data.frames to return. By default will
-#' return all data.frames within the imputations object.
-#' (i.e. use this argument if you just want the "1st" data.frame)
+#' @param imputations An imputations object as created by [impute()].
+#' @param index The indexes of the imputed data.frames to return. By default,
+#' all data.frames within the imputations object will be returned
+#' (i.e. use this argument if you just want e.g. the first data.frame only).
 #' @param delta A data.frame containing the delta transformation to be
 #' applied to the imputed dataset. See [analyse()] for details on the
-#' format and specification of this data.frame
+#' format and specification of this data.frame.
 #' @param idmap Logical. The subject IDs in the imputed data.frame will be scrambled
-#' setting this argument to True will add an attribute called "idmap" to the
-#' imputed data.frame which will provide a map from the new subect IDs to the old
-#' subject IDs
+#' setting this argument to `TRUE` will add an attribute called "idmap" to the
+#' imputed data.frame which will provide a map from the new subject IDs to the old
+#' subject IDs.
 #'
 #' @examples
 #' \dontrun{
@@ -196,9 +200,10 @@ analyse <- function(imputations, fun = ancova, delta = NULL, ...) {
 #' extract_imputed_dfs(imputeObj, c(1:3))
 #' }
 #' @returns
-#' A list of data.frames equal in length to the `index` argument
-#' @seealso [delta_template()] for creating delta data.frames
-#' @seealso [analyse()]
+#' A list of data.frames equal in length to the `index` argument.
+#'
+#' @seealso [delta_template()] for creating delta data.frames.
+#' @seealso [analyse()].
 #' @export
 extract_imputed_dfs <- function(
     imputations,
@@ -218,7 +223,7 @@ extract_imputed_dfs <- function(
 #'
 #' @description
 #' Takes an imputation object as generated by [as_imputation_list()] and uses
-#' this to extract a completed dataset from a longdata object as created
+#' this to extract a completed dataset from a `longdata` object as created
 #' by [longDataConstructor()]. Also applies a delta transformation
 #' if a data.frame is provided to the `delta` argument. See [analyse()] for
 #' details on the structure of this data.frame.
@@ -226,12 +231,12 @@ extract_imputed_dfs <- function(
 #' Subject IDs in the returned dataframe are scrambled i.e. are not the original
 #' values.
 #'
-#' @param imputation An imputation object as generated by [as_imputation_list()]
-#' @param ld A Longdata object as generated by [longDataConstructor()]
-#' @param delta Either Null or a data.frame. Is used to offset outcome values in the imputed dataset
-#' @param idmap Logical, If true attaches an attribute called "idmap" which
+#' @param imputation An imputation object as generated by [as_imputation_list()].
+#' @param ld A `longdata` object as generated by [longDataConstructor()].
+#' @param delta Either `NULL` or a data.frame. Is used to offset outcome values in the imputed dataset.
+#' @param idmap Logical, If `TRUE` attaches an attribute called "idmap" which
 #' contains a mapping from the old subject ids to the new subject ids.
-#' @returns A data.frame
+#' @returns A data.frame.
 extract_imputed_df <- function(imputation, ld, delta = NULL, idmap = FALSE) {
 
     vars <- ld$vars
@@ -266,7 +271,7 @@ extract_imputed_df <- function(imputation, ld, delta = NULL, idmap = FALSE) {
 
 
 
-#' Construct an Analysis object
+#' Construct an `analysis` object
 #'
 #' @description
 #' Creates an analysis object ensuring that all components are
@@ -274,12 +279,12 @@ extract_imputed_df <- function(imputation, ld, delta = NULL, idmap = FALSE) {
 #'
 #' @param results A list of lists contain the analysis results for each imputation
 #' See [analyse()] for details on what this object should look like.
-#' @param method The method object as specified in [draws()]
+#' @param method The method object as specified in [draws()].
 #' @param delta The delta dataset used. See [analyse()] for details on how this
-#' should be specified
-#' @param fun The analysis function that was used
+#' should be specified.
+#' @param fun The analysis function that was used.
 #' @param fun_name The character name of the analysis function (used for printing)
-#' purposes
+#' purposes.
 as_analysis <- function(results, method, delta = NULL, fun = NULL, fun_name = NULL) {
 
     next_class <- switch(class(method)[[2]],
@@ -313,10 +318,10 @@ as_analysis <- function(results, method, delta = NULL, fun = NULL, fun_name = NU
 
 
 
-#' Print Analysis Object
+#' Print `analysis` object
 #'
-#' @param x An analysis object generated by [analyse()]
-#' @param ... not used
+#' @param x An `analysis` object generated by [analyse()].
+#' @param ... Not used.
 #' @importFrom utils capture.output
 #' @export
 print.analysis <- function(x, ...) {
@@ -335,7 +340,7 @@ print.analysis <- function(x, ...) {
         sprintf("Number of Results: %s", n_samp_string),
         sprintf("Analysis Function: %s", x$fun_name),
         sprintf("Delta Applied: %s", !is.null(x$delta)),
-        "Analysis Parameters:",
+        "Analysis Estimates:",
         sprintf("    %s", names(x$results[[1]])),
         ""
     )
@@ -346,12 +351,12 @@ print.analysis <- function(x, ...) {
 
 
 
-#' Validate Analysis Objects
+#' Validate `analysis` objects
 #'
-#' Validates the return object of the analyse() function
+#' Validates the return object of the [analyse()] function.
 #'
-#' @param x A Analysis results object (of class "jackknife", "bootstrap", "rubin")
-#' @param ... Not Used
+#' @param x A `analysis` results object (of class `"jackknife"`, `"bootstrap"`, `"rubin"`).
+#' @param ... Not used.
 #' @export
 validate.analysis <- function(x, ...) {
 
@@ -401,15 +406,15 @@ validate.rubin <- function(x, ...) {
 }
 
 
-#' Validate Analysis Results
+#' Validate analysis results
 #'
-#' Validates analysis results generated by [analyse()]
+#' Validates analysis results generated by [analyse()].
 #'
 #'
 #' @param results A list of results generated by the analysis `fun`
-#' used in [analyse()]
-#' @param pars A list of expected parameters in each of the analysis
-#' lists i.e. `c("est", "se", "df")`
+#' used in [analyse()].
+#' @param pars A list of expected parameters in each of the analysis.
+#' lists i.e. `c("est", "se", "df")`.
 #'
 #' @export
 validate_analyse_pars <- function(results, pars) {

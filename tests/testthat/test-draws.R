@@ -159,20 +159,6 @@ test_that("failure limits", {
 })
 
 
-#### TODO - Draw functions to test
-# get_bootstrap_draws <- function(longdata, method, use_samp_ids = FALSE, first_sample_orig = FALSE)
-# get_jackknife_draws <- function(longdata, method)
-# get_mmrm_sample <- function(ids, longdata, method)
-# extract_data_nmar_as_na <- function(longdata)
-# as_sample_single <- function(...)
-# validate.sample_single <- function(...)
-# as_sample_list  <- function(...)
-# validate.sample_list <- function(x, ...)
-# as_draws <- function(method, samples, data, formula, n_failures = NA, fit = NA)
-
-
-
-
 
 
 test_that("nmar data is removed as expected", {
@@ -218,6 +204,30 @@ test_that("nmar data is removed as expected", {
 })
 
 
+test_that("NULL data_ice works uses MAR by default", {
+
+    set.seed(314)
+    dat <- simulate_data(n = 100)
+
+    dat2 <- dat %>%
+        mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 0, outcome, NA_real_))
+
+    dobj <- draws(
+        dat2,
+        method = method_condmean(n_samples = 5),
+        vars = set_vars(
+            outcome = "outcome",
+            visit = "visit",
+            subjid = "id",
+            group = "group",
+            strategy = "strategy",
+            covariates = c("age", "sex")
+        )
+    )
+
+    expect_true(all(unlist(dobj$data$is_mar)))
+    expect_true(all(!unlist(dobj$data$is_post_ice)))
+})
 
 
 

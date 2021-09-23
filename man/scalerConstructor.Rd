@@ -16,7 +16,7 @@ methods.
 Un-scaling is done on linear model Beta and Sigma coefficients. For this purpose
 the first column on the dataset to be scaled is assumed to be the outcome variable
 with all other variables assumed to be post-transformation predictor variables (i.e.
-all dummy variables have already been expanded)
+all dummy variables have already been expanded).
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
@@ -70,7 +70,7 @@ to \code{0} and scale to \code{1}.
 \if{latex}{\out{\hypertarget{method-scale}{}}}
 \subsection{Method \code{scale()}}{
 Scales a dataset so that all continuous variables have a mean of 0 and a
-standard deviation of 1
+standard deviation of 1.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{scalerConstructor$scale(dat)}\if{html}{\out{</div>}}
 }
@@ -80,7 +80,7 @@ standard deviation of 1
 \describe{
 \item{\code{dat}}{A dataframe or matrix whose columns are all numeric (i.e. dummy
 variables have all been expanded out) and whose columns are in the same
-order as the dataset used in the initialisation function}
+order as the dataset used in the initialization function.}
 }
 \if{html}{\out{</div>}}
 }
@@ -100,7 +100,7 @@ variable.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{sigma}}{A numeric value or matrix}
+\item{\code{sigma}}{A numeric value or matrix.}
 }
 \if{html}{\out{</div>}}
 }
@@ -114,7 +114,7 @@ A numeric value or matrix
 \subsection{Method \code{unscale_beta()}}{
 Unscales a beta value (or vector) as estimated by a linear model
 using a design matrix scaled by this object. This function only
-works if the first column of the initialisation dataframe was the outcome
+works if the first column of the initialization dataframe was the outcome
 variable.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{scalerConstructor$unscale_beta(beta)}\if{html}{\out{</div>}}
@@ -123,12 +123,12 @@ variable.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{beta}}{A numeric vector of beta coefficients as estiamted from a linear model}
+\item{\code{beta}}{A numeric vector of beta coefficients as estiamted from a linear model.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A numeric vector
+A numeric vector.
 }
 }
 \if{html}{\out{<hr>}}
