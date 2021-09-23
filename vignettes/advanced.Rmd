@@ -40,13 +40,13 @@ dat[missing_index_vis3, "outcome"] <- NA_real_
 
 # create data_ice setting the imputation method to MAR for
 # each patient with at least one missing value
-dat_ice <- dat %>% 
-    arrange(id, visit) %>% 
-    filter(is.na(outcome)) %>% 
-    group_by(id) %>% 
+dat_ice <- dat %>%
+    arrange(id, visit) %>%
+    filter(is.na(outcome)) %>%
+    group_by(id) %>%
     slice(1) %>%
-    ungroup() %>% 
-    select(id, visit) %>% 
+    ungroup() %>%
+    select(id, visit) %>%
     mutate(strategy = "MAR")
 
 
@@ -95,37 +95,37 @@ the copy increments from reference strategy, this could be done as follows:
 dat_ice$strategy <- "JR"
 dat_ice
 
-drawObj <- draws(
-    data = dat, 
-    data_ice = dat_ice, 
-    vars = vars, 
+draw_obj <- draws(
+    data = dat,
+    data_ice = dat_ice,
+    vars = vars,
     method = method_condmean(n_samples = 15)
 )
 
-imputeObj_JR <- impute(
-    drawObj,
+impute_obj_JR <- impute(
+    draw_obj,
     references = c("A" = "B", "B" = "B")
 )
-anaObj_JR <- analyse(
-    imputeObj_JR, 
+ana_obj_JR <- analyse(
+    impute_obj_JR,
     vars = set_vars()
 )
-pool(anaObj_JR)
+pool(ana_obj_JR)
 
 
 dat_ice_CIR <- dat_ice
 dat_ice_CIR$strategy <- "CIR"
 
-imputeObj_JR <- impute(
-    drawObj, 
-    references = c("A" = "B", "B" = "B"), 
+impute_obj_JR <- impute(
+    draw_obj,
+    references = c("A" = "B", "B" = "B"),
     update_strategy = dat_ice_CIR
 )
-anaObj_JR <- analyse(
-    imputeObj_JR, 
+ana_obj_JR <- analyse(
+    impute_obj_JR,
     vars = set_vars()
 )
-pool(anaObj_JR)
+pool(ana_obj_JR)
 ```
 
 
@@ -164,7 +164,7 @@ As such out example imputation function could be coded as:
 
 ```{r}
 strategy_AVG <- function(pars_group, pars_ref, index_mar) {
-    mean_xy <- function(x,y) mean(c(x,y))
+    mean_xy <- function(x, y) mean(c(x, y))
     mu_mean <- mapply(
         mean_xy,
         pars_group$mu,
@@ -180,13 +180,13 @@ strategy_AVG <- function(pars_group, pars_ref, index_mar) {
 And an example showing its use:
 ```{r}
 pars_group <- list(
-    mu = c(1,2,3),
-    sigma = as_vcov(c(1,3,2) , c(0.4, 0.5, 0.45))
+    mu = c(1, 2, 3),
+    sigma = as_vcov(c(1, 3, 2), c(0.4, 0.5, 0.45))
 )
 
 pars_ref <- list(
-    mu = c(5,6,7),
-    sigma = as_vcov(c(2,1,1) , c(0.7, 0.8, 0.5))
+    mu = c(5, 6, 7),
+    sigma = as_vcov(c(2, 1, 1), c(0.7, 0.8, 0.5))
 )
 
 index_mar <- c(TRUE, TRUE, FALSE)
@@ -202,16 +202,16 @@ to be provided to `impute()` via the `getStrategies()` function as shown below:
 dat_ice$strategy <- "AVG"
 dat_ice
 
-drawObj <- draws(
-    data = dat, 
-    data_ice = dat_ice, 
-    vars = vars, 
+draw_obj <- draws(
+    data = dat,
+    data_ice = dat_ice,
+    vars = vars,
     method = method_condmean(n_samples = 10)
 )
 
-imputeObj <- impute(
-    drawObj, 
-    references = c("A" = "B", "B" = "B"), 
+impute_obj <- impute(
+    draw_obj,
+    references = c("A" = "B", "B" = "B"),
     strategies = getStrategies(AVG = strategy_AVG)
 )
 ```
@@ -235,14 +235,14 @@ effect), this could then be done as follows:
 ```{r}
 mean_fun <- function(dat, ...) {
 
-    mod <- dat %>% 
-        group_by(visit) %>% 
+    mod <- dat %>%
+        group_by(visit) %>%
         summarise(
             m = mean(outcome),
             se = sqrt(var(outcome) / n()),
             df = n() - 1
         )
-    
+
     results <- mapply(
         function(x, y, z) list(est = x, se = y, df = z),
         mod$m,
@@ -250,7 +250,7 @@ mean_fun <- function(dat, ...) {
         mod$df,
         SIMPLIFY = FALSE
     )
-    
+
     names(results) <- paste0("mean_", mod$visit)
     return(results)
 }
@@ -259,12 +259,12 @@ mean_fun <- function(dat, ...) {
 This analysis function can then be used in combination with `analyse()` as follows:
 
 ```{r}
-anlObj <- analyse(
-    imputations = imputeObj,
+anl_obj <- analyse(
+    imputations = impute_obj,
     fun = mean_fun
 )
 
-pool(anlObj)
+pool(anl_obj)
 ```
 
 
