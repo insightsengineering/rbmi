@@ -13,13 +13,14 @@ ancova(data, vars, visits = NULL)
 \code{visit}, \code{outcome} and \code{covariates} elements are required. See details.}
 
 \item{visits}{an optional character vector specifying which visits to
-fit the ancova model at. If \code{NULL} all available
-visits (as determined by \code{unique(data[[vars$visit]])}) will be used.
+fit the ancova model at. If \code{NULL}, a separate ancova model will be fit to the
+outcomes from each visits (as determined by \code{unique(data[[vars$visit]])}).
 See details.}
 }
 \description{
 Performs an analysis of covariance between two groups returning the estimated
-"treatment effect" and least squared means estimates of each group.
+"treatment effect" (i.e. the contrast between the two treatment groups) and
+the least square means estimates in each group.
 }
 \details{
 The function works as follows:
@@ -31,7 +32,7 @@ The function works as follows:
 \item Repeat points 2-3 for all other values in \code{visits}.
 }
 
-If no value for \code{visits} are provided then it will be set to
+If no value for \code{visits} is provided then it will be set to
 \code{unique(data[[vars$visit]])}.
 
 In order to meet the formatting standards set by \code{\link[=analyse]{analyse()}} the results

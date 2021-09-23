@@ -2,7 +2,7 @@
 % Please edit documentation in R/draws.R
 \name{get_jackknife_draws}
 \alias{get_jackknife_draws}
-\title{Fit the base imputation model in Jackknife procedure}
+\title{Fit the base imputation model for the jackknife procedure}
 \usage{
 get_jackknife_draws(longdata, method)
 }
@@ -35,7 +35,7 @@ Relevant only for \code{method_condmean(type = "bootstrap")} and \code{method_ap
 }
 \description{
 Fit the base imputation model using a ML/REML approach on the original dataset
-and on each leave-one-out sample as per the Jackknife procedure. Returns the
+and on each leave-one-subject-out sample as per the jackknife procedure. Returns the
 parameter estimates from all the fits.
 }
 \details{
