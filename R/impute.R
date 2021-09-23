@@ -12,7 +12,7 @@
 #'
 #' @param draws A `draws` object created by [draws()].
 #'
-#' @param references a named vector. Identifies the references to be used when for reference-based 
+#' @param references a named vector. Identifies the references to be used for reference-based 
 #' imputation methods. Should be of the form `c("Group1" = "Reference1", "Group2" = "Reference2")`.
 #'
 #' @param update_strategy an optional dataframe. Updates the imputation method that was
@@ -30,7 +30,7 @@
 #' depending on their covariate values.
 #' For subjects with intercurrent events (ICEs) handled using non-MAR methods, this marginal distribution
 #' is then updated depending on the time of the first visit affected by the ICE, 
-#' the chosen imputation strategy; and the chosen reference group. 
+#' the chosen imputation strategy and the chosen reference group. 
 #' The subject's imputation distribution used for imputing missing values is then defined as 
 #' their marginal distribution conditional on their observed outcome values.
 #' One dataset is being generated per set of parameter estimates provided by [draws()].
@@ -333,9 +333,12 @@ invert_indexes <- function(x) {
 #' process as detailed in [impute()].
 #'
 #' Note that this function performs all of the required imputations for a subject at the
-#' same time. I.e. if a subject is used in samples  1,3,5,9 then these are all performed at
-#' once. The function supports patients belonging to the same sample multiple times,
-#' i.e. 1,1,2,3,5,5, as will typical occur for bootstrapped datasets.
+#' same time. I.e. if a subject is included in samples  1,3,5,9 then all imputations (using 
+#' sample-dependent imputation model parameters) are performed in one step in order to avoid
+#' having to look up a subjects's covariates and expanding them to a design matrix multiple times 
+#' (which would be more computationally expensive). 
+#' The function also supports subject belonging to the same sample multiple times,
+#' i.e. 1,1,2,3,5,5, as will typically occur for bootstrapped datasets.
 #'
 #' @param id Character string identifying the subject.
 #'
