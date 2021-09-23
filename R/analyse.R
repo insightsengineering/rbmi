@@ -340,7 +340,7 @@ print.analysis <- function(x, ...) {
         sprintf("Number of Results: %s", n_samp_string),
         sprintf("Analysis Function: %s", x$fun_name),
         sprintf("Delta Applied: %s", !is.null(x$delta)),
-        "Analysis Parameters:",
+        "Analysis Estimates:",
         sprintf("    %s", names(x$results[[1]])),
         ""
     )
