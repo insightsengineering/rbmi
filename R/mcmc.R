@@ -39,7 +39,7 @@
 #'
 #' The chains perform `n_imputations` draws by keeping one every `burn_between` iterations. Additionally
 #' the first `burn_in` iterations are discarded. The total number of iterations will then be `burn_in + burn_between*n_imputations`.
-#' The `burn_in` aims to perform draws from the stationary distribution of the Markov Chain.
+#' The purpose of `burn_in` is to ensure that the samples are drawn from the stationary distribution of the Markov Chain.
 #' The `burn_between` aims to keep the draws uncorrelated each other.
 #'
 #' @return
