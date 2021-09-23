@@ -82,10 +82,10 @@
 #' and Wolbers et al (2021).
 #' Please note that user-defined imputation strategies can also be set.
 #'
-#' The `data_ice` argument is necessary at this stage since the model is fitted
+#' The `data_ice` argument is necessary at this stage since (as explained in Wolbers et al (2021)), the model is fitted
 #' after removing the observations which are incompatible with the imputation model, i.e. 
-#' any observed data on or after `data_ice[[vars$visit]]` that is addressed with an imputation
-#' strategy different from MAR is excluded for the model fit. However such observations
+#' any observed data on or after `data_ice[[vars$visit]]` that are addressed with an imputation
+#' strategy different from MAR are excluded for the model fit. However such observations
 #' will not be discarded from the data in the imputation phase
 #' (performed with the function ([impute()]). To summarize, **at this stage only pre-ICE data
 #' and post-ICE data that is after ICEs for which MAR imputation is specified are used**.
