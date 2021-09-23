@@ -49,6 +49,10 @@
 #' This method can be specified by using `method = method_condmean()` with
 #' argument `type = "jackknife"`.
 #'
+#' Bayesian MI based on MCMC sampling has been proposed in Carpenter, Roger, and Kenward (2013) who first introduced 
+#' reference-based imputation methods. Approximate Bayesian MI is discussed in Little and Rubin (2002). 
+#' Conditional mean imputation methods are discussed in Wolbers et al (2021).
+#'
 #' The argument `data` must have one row per visit per subject. This means that incomplete
 #' outcome data must be set as `NA` instead of having the related row missing. Missing values
 #' in the covariates are not allowed. If `data` is incomplete
@@ -70,17 +74,18 @@
 #'   This column must be named as specified in `vars$strategy`.
 #'   Possible imputation strategies are:
 #'   - `"MAR"`: Missing At Random.
-#'   - `"JTR"`: Jump To Reference.
 #'   - `"CIR"`: Copy Increments in Reference.
 #'   - `"CR"`: Copy Reference.
 #'   - `"JR"`: Jump to Reference.
 #'   - `"LMCF"`: Last Mean Carried Forward.
+#' For explanations of these imputation strategies, see Carpenter, Roger, and Kenward (2013), Cro et al (2021),
+#' and Wolbers et al (2021).
 #' Please note that user-defined imputation strategies can also be set.
 #'
-#' The `data_ice` argument is necessary at this stage since the model is fitted
+#' The `data_ice` argument is necessary at this stage since (as explained in Wolbers et al (2021)), the model is fitted
 #' after removing the observations which are incompatible with the imputation model, i.e. 
-#' any observed data on or after `data_ice[[vars$visit]]` that is addressed with an imputation
-#' strategy different from MAR is excluded for the model fit. However such observations
+#' any observed data on or after `data_ice[[vars$visit]]` that are addressed with an imputation
+#' strategy different from MAR are excluded for the model fit. However such observations
 #' will not be discarded from the data in the imputation phase
 #' (performed with the function ([impute()]). To summarize, **at this stage only pre-ICE data
 #' and post-ICE data that is after ICEs for which MAR imputation is specified are used**.
@@ -110,6 +115,19 @@
 #' For more details see the quickstart vignette:
 #' \code{vignette("quickstart", package = "rbmi")}.
 #'
+#' @references
+#' 
+#' James R Carpenter, James H Roger, and Michael G Kenward. Analysis of longitudinal trials with protocol deviation: a framework for relevant, 
+#' accessible assumptions, and inference via multiple imputation. Journal of Biopharmaceutical Statistics, 23(6):1352–1371, 2013.
+#' 
+#' Suzie Cro, Tim P Morris, Michael G Kenward, and James R Carpenter. Sensitivity analysis for clinical trials with missing continuous outcome 
+#' data using controlled multiple imputation: a practical guide. Statistics in Medicine, 39(21):2815–2842, 2020.
+#' 
+#' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. \[Section 10.2.3\]
+#'
+#' Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Reference-based imputation methods based on conditional mean 
+#' imputation. Preprint, 2021.
+#' 
 #' @export
 draws <- function(data, data_ice = NULL, vars, method) {
     UseMethod("draws", method)
