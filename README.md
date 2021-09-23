@@ -11,7 +11,7 @@
 
 rbmi is an R package for performing reference based multiple imputation. The package
 provides implementations for common imputation strategies whilst allowing the user to 
-select between various standard Bayesian and Frequentest approaches.
+select between various standard Bayesian and frequentist approaches.
 
 ## Installation
 
