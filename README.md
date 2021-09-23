@@ -30,7 +30,7 @@ The package is designed around its 4 core functions:
 - `analyse()` - Analyses multiple datasets
 - `pool()` - Pools multiple results into a single statistic
 
-Full details include a walkthrough can be found in the quickstart vignette:
+Full details including a walkthrough can be found in the quickstart vignette:
 
 ```
 vignette(topic= "quickstart", package = "rbmi")
