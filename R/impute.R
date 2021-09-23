@@ -30,7 +30,7 @@
 #' depending on their covariate values.
 #' For subjects with intercurrent events (ICEs) handled using non-MAR methods, this marginal distribution
 #' is then updated depending on the time of the first visit affected by the ICE, 
-#' the chosen imputation strategy and the chosen reference group. 
+#' the chosen imputation strategy and the chosen reference group as described in Carpenter, Roger, and Kenward (2013) . 
 #' The subject's imputation distribution used for imputing missing values is then defined as 
 #' their marginal distribution conditional on their observed outcome values.
 #' One dataset is being generated per set of parameter estimates provided by [draws()].
@@ -67,6 +67,11 @@
 #' a non-MAR to a MAR strategy, whilst valid, will raise a warning as not all usable data
 #' will have been utilised in the imputation model.
 #'
+#' @references
+#' 
+#' James R Carpenter, James H Roger, and Michael G Kenward. Analysis of longitudinal trials with protocol deviation: a framework for relevant, 
+#' accessible assumptions, and inference via multiple imputation. Journal of Biopharmaceutical Statistics, 23(6):1352–1371, 2013. \[Section 4.2 and 4.3\]
+#' 
 #' @examples
 #' \dontrun{
 #'
