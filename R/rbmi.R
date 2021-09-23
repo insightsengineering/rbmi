@@ -5,7 +5,7 @@
 #' provides implementations for common, patient-specific imputation strategies whilst allowing the user to
 #' select between various standard Bayesian and frequentist approaches.
 #'
-#' The package is designed around its 4 core functions:
+#' The package is designed around 4 core functions:
 #' - [draws()] - Fits multiple imputation models
 #' - [impute()] - Imputes multiple datasets
 #' - [analyse()] - Analyses multiple datasets
