@@ -3,7 +3,7 @@
 #'
 #' The rbmi package is used to perform reference based multiple imputation. The package
 #' provides implementations for common imputation strategies whilst allowing the user to
-#' select between various standard Bayesian and Frequentest approaches.
+#' select between various standard Bayesian and frequentist approaches.
 #'
 #' The package is designed around its 4 core functions:
 #' - [draws()] - Fits multiple imputation models
