@@ -55,7 +55,7 @@
 #'
 #' The argument `data` contains the longitudinal data. It must have at least the following variables:
 #' - `subjid`: a factor vector containing the subject ids.
-#' - `visit`: a factor vector containing the visit the the outcome was observed on.
+#' - `visit`: a factor vector containing the visit the outcome was observed on.
 #' - `group`: a factor vector containing the group that the subject belongs to.
 #' - `outcome`: a numeric vector containing the outcome that was (or wasn't) observed.
 #' Additional baseline or time-varying covariates must be included in `data`.
