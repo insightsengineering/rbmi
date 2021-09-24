@@ -115,6 +115,8 @@ test_that("condmean - jackknife", {
 })
 
 
+
+
 test_that("bayes", {
     set.seed(40123)
     d <- get_data(40)
