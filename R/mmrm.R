@@ -1,17 +1,33 @@
 
 
 
-#' Title
+#' Construct random effects formula
 #'
-#' @param cov_struct TODO
-#' @param groups TODO
+#' Constructs a character representation of the random effects formula
+#' for fitting a MMRM for subject by visit in the format required for glmmTMB.
+#'
+#' assuming the user specified a covariance structure of "us" and that no groups
+#' were provided this will return
+#'
+#' ```
+#' us(0 + visit | subjid)
+#' ```
+#'
+#' If groups is provided then this indicates that separate covariance matrices
+#' are required per group and as such the following will be returned:
+#'
+#' ```
+#' us( 0 + group1:visit | subjid) + us(0 + group2:visit | subjid) + ...
+#' ```
+#' @inheritParams fit_mmrm
 random_effects_expr <- function(
     cov_struct = c("us", "toep", "cs", "ar1"),
-    groups = NULL
+    group = NULL
 ) {
     match.arg(cov_struct)
-    if (length(groups) == 0) groups <- NULL
-    grp_expr <- ife(is.null(groups), "", paste0(groups, ":"))
+    if (length(group) == 0) group <- NULL
+    ugroup <- unique(group)
+    grp_expr <- ife(is.null(ugroup), "", paste0(ugroup, ":"))
     expr <- paste0(
         sprintf("%s(0 + %svisit | subjid)", cov_struct, grp_expr),
         collapse = " + "
@@ -20,21 +36,26 @@ random_effects_expr <- function(
 }
 
 
-#' TODO
+#' Creates a "MMRM" ready dataset
 #'
-#' @param designmat TODO
-#' @param outcome TODO
-#' @param visit TODO
-#' @param subjid TODO
-#' @param groups TODO
+#' Converts a design matrix + key variables into a command format
+#' In particular this function does the following:
+#' - Renames all covariates as `V1`, `V2`, etc to avoid issues of special characters in variable names
+#' - Ensures all key variables are of the right type
+#' - inserts the outcome, visit and subjid variables into the `data.frame`
+#' naming them as `outcome`, `visit` and `subjid`
+#' - Splits a grouping variable out into separate columns, i.e. if `group` has 3 levels then the
+#' output `data.frame` will have dummy indicator variables `G1`, `G2` & `G3`
+#'
+#' @inheritParams fit_mmrm
 as_mmrm_df <- function(
     designmat,
     outcome,
     visit,
     subjid,
-    groups = NULL
+    group = NULL
 ) {
-    if (length(groups) == 0) groups <- NULL
+    if (length(group) == 0) group <- NULL
 
     dmat <- as.data.frame(designmat)
     colnames(dmat) <- paste0("V", seq_len(ncol(dmat)))
@@ -46,28 +67,35 @@ as_mmrm_df <- function(
         is.numeric(outcome),
         is.character(visit) | is.factor(visit),
         is.character(subjid) | is.factor(subjid),
-        is.null(groups) | is.character(groups) | is.factor(groups)
+        is.null(group) | is.character(group) | is.factor(group)
     )
 
     dmat[["outcome"]] <- outcome
     dmat[["visit"]] <- visit
     dmat[["subjid"]] <- subjid
 
-    if (!is.null(groups)) {
+    if (!is.null(group)) {
         # create dummy variables for each arm (needed when same_cov = FALSE)
-        groups_mat <- stats::model.matrix(~ 0 + groups)
-        for (i in 1:ncol(groups_mat)) {
-            dmat[[paste0("G", i)]] <- groups_mat[, i]
+        group_mat <- stats::model.matrix(~ 0 + group)
+        for (i in 1:ncol(group_mat)) {
+            dmat[[paste0("G", i)]] <- group_mat[, i]
         }
     }
     return(dmat)
 }
 
 
-#' Title
+#' Create MMRM formula
 #'
-#' @param mmrm_df TODO
-#' @param cov_struct TODO
+#'
+#' Derives the MMRM model formula from the structure of mmrm_df.
+#' returns a formula object of the form:
+#'
+#' ```
+#' outcome ~ 0 + V1 + V2 + V4 + ... + us(0 + group1:visit | subjid) + us(0 + group2:visit | subjid) + ...
+#' ```
+#' @param mmrm_df an mmrm `data.frame` as created by [as_mmrm_df()]
+#' @inheritParams fit_mmrm
 #' @importFrom stats as.formula
 as_mmrm_formula <- function(mmrm_df, cov_struct) {
 
@@ -81,7 +109,7 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
 
     # random effects for covariance structure
     expr_randeff <- random_effects_expr(
-        groups = g_names,
+        group = g_names,
         cov_struct = cov_struct
     )
 
@@ -94,10 +122,15 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
 }
 
 
-#' Title
+#' Extract glmmTMB model parameters
 #'
-#' @param fit TODO
+#' Extracts the beta and sigma coefficients from an MMRM model created
+#' by [glmmTMB::glmmTMB()].
+#' Also returns theta for use in providing initial values to subsequent calls.
+#'
+#' @param fit an object created by [glmmTMB::glmmTMB()]
 #' @importFrom glmmTMB fixef VarCorr getME
+#'
 extract_params <- function(fit) {
     beta <- fixef(fit)$cond
     names(beta) <- NULL
@@ -123,20 +156,36 @@ extract_params <- function(fit) {
 
 
 
-#' Title
+#' Fit a mmrm Model
 #'
-#' @param designmat TODO
-#' @param outcome TODO
-#' @param subjid TODO
-#' @param visit TODO
-#' @param group TODO
-#' @param cov_struct TODO
-#' @param REML TODO
-#' @param same_cov TODO
-#' @param initial_values TODO
-#' @param optimizer TODO
+#' @description
+#' Fits a mmrm model allowing for different covariance structures using [glmmTMB::glmmTMB()].
+#' Returns a glmmTMB fit object with an additional element `failed` indicating whether or not
+#' the fit failed to converge.
+#'
+#'
+#' @param designmat a `data.frame` or `matrix` containing the covariates to use in the mmrm model.
+#' dummy variables must already be expanded out I.e. via [stats::model.matrix()]. Cannot contain
+#' any missing values
+#' @param outcome a numeric vector. The outcome value to be reggressed on in the mmrm model.
+#' @param subjid a character / factor vector. The subject identify use to link separate visits that belong to
+#' the same subject.
+#' @param visit a character / factor vector. Indicates which visit the outcome value occoured on.
+#' @param group a character / factor vector. Used to indicate which treatment group the patient belongs to.
+#' @param cov_struct a character value. Specifies which covariance structure to use. Must be one of
+#' `"us"`, `"toep"`, `"cs"` or  `"ar1"`
+#' @param REML local. Specifies whether restricted maximium likelihood should be used
+#' @param same_cov logical. Used to specify if a shared or individual covariance matrix should be used
+#' per `group`
+#' @param initial_values a list with names `beta` and `theta`. Specifies the initial values to start
+#' the optimizer for [glmmTMB::glmmTMB()] at.
+#' @param optimizer a character value. Specifies the optimizer to be used in [glmmTMB::glmmTMB()]. See
+#' [stats::optim()] for the available options
 #' @importFrom glmmTMB glmmTMB glmmTMBControl
 #' @importFrom stats optim model.matrix
+#' @name fit_mmrm
+#'
+#'
 fit_mmrm <- function(
     designmat,
     outcome,
@@ -161,7 +210,7 @@ fit_mmrm <- function(
         outcome = outcome,
         visit = visit,
         subjid = subjid,
-        groups = ife(same_cov, NULL, group)
+        group = ife(same_cov, NULL, group)
     )
 
     frm_mmrm <- as_mmrm_formula(dat_mmrm, cov_struct)
@@ -204,10 +253,34 @@ fit_mmrm <- function(
 }
 
 
-#' Title
+
+#' Fit an mmrm model via multiple optimizers
 #'
-#' @param optimizer TODO
-#' @param ... TODO
+#'
+#' The function attempts to fit a mmrm model using the optimizer as specified in `optimizer`
+#' If `optimizer` is of length > 1 then it will loop through all the values until one of them is able
+#' to converge. That is to say if a fit fails to converge it will move onto the next value of `optimizer` and
+#' try again.
+#'
+#' If `optimizer` is a list then the names of the list with taken to be the required `optimizer`
+#' with the contents of that element being used as the initial values.  This functionality
+#' can be used to try and fit the model using the same optimizer at multiple different starting
+#' values e.g.:
+#'
+#' ```
+#' fit_mmrm_multiopt(
+#'     ...,
+#'     optimizer = list(
+#'         "L-BFGS-B" = list(beta = c(1,2,3), theta = c(9,8,7)),
+#'         "L-BFGS-B" = list(beta = c(5,6,7), theta = c(10,11,12)),
+#'     )
+#' )
+#' ```
+#'
+#' See [stats::optim()] for a list of the available optimizers that can be used
+#' @param optimizer A character vector or a named list. See details.
+#' @param ... Additional arguments passed onto [fit_mmrm()]
+#' @seealso [fit_mmrm()]
 fit_mmrm_multiopt <- function(..., optimizer) {
 
     assert_that(
@@ -244,6 +317,26 @@ fit_mmrm_multiopt <- function(..., optimizer) {
 }
 
 
+#' Evaluate a call to glmmTMB
+#'
+#' This is a utility function that attempts to evaluate a call to glmmTMB
+#' managing any warnings or errors that are thrown. In particular
+#' this function attempts to catch any warnings or errors and instead
+#' of surfacing them it will simply add an additional element `failed`
+#' with a value of TRUE.  This allows for multiple calls to be made
+#' without the program exiting. Additionally this function will suppress
+#' known spurious warnings associated with glmmTMB, namely:
+#'
+#' - https://stackoverflow.com/questions/67040472/warning-in-every-model-of-glmmtmb-givecsparse
+#'
+#' @examples
+#' \dontrun{
+#'     eval_glmmtmb({glmmTMB::glmmTMB(formula, data)})
+#' }
+#' @param expr An expression to be evaluated. Should be a call to [glmmTMB::glmmTMB()].
+#' @seealso [glmmTMB::glmmTMB()]
+#' @seealso [record()]
+#'
 eval_glmmtmb <- function(expr) {
 
     default <- list(failed = TRUE)

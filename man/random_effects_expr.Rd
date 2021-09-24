@@ -2,15 +2,26 @@
 % Please edit documentation in R/mmrm.R
 \name{random_effects_expr}
 \alias{random_effects_expr}
-\title{Title}
+\title{Construct random effects formula}
 \usage{
-random_effects_expr(cov_struct = c("us", "toep", "cs", "ar1"), groups = NULL)
+random_effects_expr(cov_struct = c("us", "toep", "cs", "ar1"), group = NULL)
 }
 \arguments{
-\item{cov_struct}{TODO}
+\item{cov_struct}{a character value. Specifies which covariance structure to use. Must be one of
+\code{"us"}, \code{"toep"}, \code{"cs"} or  \code{"ar1"}}
 
-\item{groups}{TODO}
+\item{group}{a character / factor vector. Used to indicate which treatment group the patient belongs to.}
 }
 \description{
-Title
+Constructs a character representation of the random effects formula
+for fitting a MMRM for subject by visit in the format required for glmmTMB.
+}
+\details{
+assuming the user specified a covariance structure of "us" and that no groups
+were provided this will return\preformatted{us(0 + visit | subjid)
+}
+
+If groups is provided then this indicates that separate covariance matrices
+are required per group and as such the following will be returned:\preformatted{us( 0 + group1:visit | subjid) + us(0 + group2:visit | subjid) + ...
+}
 }
