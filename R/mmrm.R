@@ -254,15 +254,15 @@ fit_mmrm <- function(
 
 
 
-#' Fit an mmrm model via multiple optimizers
+#' Fit an MMRM model via multiple optimizers
 #'
 #'
-#' The function attempts to fit a mmrm model using the optimizer as specified in `optimizer`
+#' The function attempts to fit a MMRM model using the optimizer as specified in `optimizer`
 #' If `optimizer` is of length > 1 then it will loop through all the values until one of them is able
 #' to converge. That is to say if a fit fails to converge it will move onto the next value of `optimizer` and
 #' try again.
 #'
-#' If `optimizer` is a list then the names of the list with taken to be the required `optimizer`
+#' If `optimizer` is a list then the names of the list will be taken to be the required `optimizer`
 #' with the contents of that element being used as the initial values.  This functionality
 #' can be used to try and fit the model using the same optimizer at multiple different starting
 #' values e.g.:
