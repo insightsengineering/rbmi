@@ -167,7 +167,7 @@ extract_params <- function(fit) {
 #' @param designmat a `data.frame` or `matrix` containing the covariates to use in the MMRM model.
 #' Dummy variables must already be expanded out, i.e. via [stats::model.matrix()]. Cannot contain
 #' any missing values
-#' @param outcome a numeric vector. The outcome value to be reggressed on in the mmrm model.
+#' @param outcome a numeric vector. The outcome value to be regressed on in the MMRM model.
 #' @param subjid a character / factor vector. The subject identify use to link separate visits that belong to
 #' the same subject.
 #' @param visit a character / factor vector. Indicates which visit the outcome value occoured on.
