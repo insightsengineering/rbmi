@@ -171,7 +171,7 @@ extract_params <- function(fit) {
 #' @param subjid a character / factor vector. The subject identify use to link separate visits that belong to
 #' the same subject.
 #' @param visit a character / factor vector. Indicates which visit the outcome value occoured on.
-#' @param group a character / factor vector. Used to indicate which treatment group the patient belongs to.
+#' @param group a character / factor vector. Indicates which treatment group the patient belongs to.
 #' @param cov_struct a character value. Specifies which covariance structure to use. Must be one of
 #' `"us"`, `"toep"`, `"cs"` or  `"ar1"`
 #' @param REML local. Specifies whether restricted maximium likelihood should be used
