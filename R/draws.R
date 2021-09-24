@@ -53,7 +53,14 @@
 #' reference-based imputation methods. Approximate Bayesian MI is discussed in Little and Rubin (2002). 
 #' Conditional mean imputation methods are discussed in Wolbers et al (2021).
 #'
-#' The argument `data` must have one row per visit per subject. This means that incomplete
+#' The argument `data` contains the longitudinal data. It must have at least the following variables:
+#' - `subjid`: a factor containing the subject ids variable.
+#' - `visit`: a factor containing the visit variable.
+#' - `group`: a factor containing the group variable.
+#' - `outcome`: the outcome variable. Must be numeric.
+#' Additional baseline or time-varying covariates must be included in `data`.
+#'
+#' `data` must have one row per visit per subject. This means that incomplete
 #' outcome data must be set as `NA` instead of having the related row missing. Missing values
 #' in the covariates are not allowed. If `data` is incomplete
 #' then the [expand_locf()] helper function can be used to add in any missing rows, which uses
@@ -94,8 +101,8 @@
 #' `data` and `data_ice`. This list is created by [set_vars()] and contains the following named elements:
 #' - `subjid`: name of the column in `data` and `data_ice` which contains the subject ids variable.
 #' - `visit`: name of the column in `data` and `data_ice` which contains the visit variable.
-#' - `outcome`: name of the column in `data` which contains the outcome variable.
 #' - `group`: name of the column in `data` which contains the group variable.
+#' - `outcome`: name of the column in `data` which contains the outcome variable.
 #' - `covariates`: vector of characters which contains the covariates to be included
 #'   in the model (including interactions which are specified as "covariateName1*covariateName2").
 #'   If no covariates are provided the default model specification of `outcome ~ 1 + visit + group` will be used.
