@@ -174,7 +174,7 @@ extract_params <- function(fit) {
 #' @param group a character / factor vector. Indicates which treatment group the patient belongs to.
 #' @param cov_struct a character value. Specifies which covariance structure to use. Must be one of
 #' `"us"`, `"toep"`, `"cs"` or  `"ar1"`
-#' @param REML local. Specifies whether restricted maximium likelihood should be used
+#' @param REML logical. Specifies whether restricted maximium likelihood should be used
 #' @param same_cov logical. Used to specify if a shared or individual covariance matrix should be used
 #' per `group`
 #' @param initial_values a list with names `beta` and `theta`. Specifies the initial values to start
