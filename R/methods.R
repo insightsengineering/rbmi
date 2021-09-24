@@ -82,7 +82,8 @@
 #' Please note that at the time of writing (September 2021) Stan is unable to produce
 #' reproducible samples across different operating systems even when the same seed is used.
 #' As such care must be taken when using Stan across different machines. For more information
-#' on this limitation please consult the Stan documentation <https://mc-stan.org/docs/2_27/reference-manual/reproducibility-chapter.html>
+#' on this limitation please consult the Stan documentation
+#' <https://mc-stan.org/docs/2_27/reference-manual/reproducibility-chapter.html>
 #'
 #' @export
 method_bayes <- function(
@@ -92,7 +93,7 @@ method_bayes <- function(
     n_samples = 20,
     verbose = TRUE,
     seed = NA
-){
+) {
     x <- list(
         burn_in = burn_in,
         burn_between = burn_between,
@@ -113,7 +114,7 @@ method_approxbayes <- function(
     same_cov = TRUE,
     REML = TRUE,
     n_samples = 20
-){
+) {
     covariance <- match.arg(covariance)
 
     x <- list(
@@ -136,7 +137,7 @@ method_condmean <- function(
     REML = TRUE,
     n_samples = NULL,
     type = c("bootstrap", "jackknife")
-){
+) {
     covariance <- match.arg(covariance)
     type <- match.arg(type)
 
@@ -164,5 +165,3 @@ method_condmean <- function(
     )
     return(as_class(x, c("method", "condmean")))
 }
-
-

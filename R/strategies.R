@@ -22,18 +22,18 @@
 #' trials with protocol deviation: a framework for relevant, accessible assumptions, and
 #' inference via multiple imputation." Journal of biopharmaceutical statistics 23.6 (2013):
 #' 1352-1371.
-compute_sigma <- function(sigma_group, sigma_ref, index_mar){
+compute_sigma <- function(sigma_group, sigma_ref, index_mar) {
 
-    if(identical(sigma_group, sigma_ref)) {
+    if (identical(sigma_group, sigma_ref)) {
         return(sigma_ref)
     }
 
     size <- nrow(sigma_group)
 
     # i.e. if MAR assumption holds throughout the study
-    if(sum(index_mar) == size) {
+    if (sum(index_mar) == size) {
         return(sigma_group)
-    } else if(sum(index_mar) == 0) {
+    } else if (sum(index_mar) == 0) {
         # i.e. if MAR assumption does not hold since the beginning of the study
         return(sigma_ref)
     }
@@ -43,20 +43,20 @@ compute_sigma <- function(sigma_group, sigma_ref, index_mar){
 
     sigma_11 <- T_11
 
-    sigma_21 <- sigma_ref[!index_mar, index_mar]%*%inv_R_11%*%T_11
+    sigma_21 <- sigma_ref[!index_mar, index_mar] %*% inv_R_11 %*% T_11
 
     sigma_12 <- t(sigma_21)
 
-    sigma_22 <- sigma_ref[!index_mar,!index_mar] -
+    sigma_22 <- sigma_ref[!index_mar, !index_mar] -
         sigma_ref[!index_mar, index_mar] %*%
         inv_R_11 %*%
-        (sigma_ref[index_mar, index_mar]-T_11) %*%
+        (sigma_ref[index_mar, index_mar] - T_11) %*%
         inv_R_11 %*%
         sigma_ref[index_mar, !index_mar]
 
     sigma <- rbind(
-        cbind(sigma_11,sigma_12),
-        cbind(sigma_21,sigma_22)
+        cbind(sigma_11, sigma_12),
+        cbind(sigma_21, sigma_22)
     )
 
     return(sigma)
@@ -103,7 +103,7 @@ compute_sigma <- function(sigma_group, sigma_ref, index_mar){
 #'
 #' @name stratgies
 #' @export
-strategy_MAR <- function(pars_group, pars_ref, index_mar){
+strategy_MAR <- function(pars_group, pars_ref, index_mar) {
     return(pars_group)
 }
 
@@ -111,11 +111,11 @@ strategy_MAR <- function(pars_group, pars_ref, index_mar){
 
 #' @rdname stratgies
 #' @export
-strategy_JR <- function(pars_group, pars_ref, index_mar){
+strategy_JR <- function(pars_group, pars_ref, index_mar) {
 
-    if(sum(index_mar) == length(pars_group$mu)) {
+    if (sum(index_mar) == length(pars_group$mu)) {
         return(pars_group)
-    } else if(sum(index_mar) == 0) {
+    } else if (sum(index_mar) == 0) {
         return(pars_ref)
     }
 
@@ -139,7 +139,7 @@ strategy_JR <- function(pars_group, pars_ref, index_mar){
 
 #' @rdname stratgies
 #' @export
-strategy_CR <- function(pars_group, pars_ref, index_mar){
+strategy_CR <- function(pars_group, pars_ref, index_mar) {
     return(pars_ref)
 }
 
@@ -147,11 +147,11 @@ strategy_CR <- function(pars_group, pars_ref, index_mar){
 
 #' @rdname stratgies
 #' @export
-strategy_CIR <- function(pars_group, pars_ref, index_mar){
+strategy_CIR <- function(pars_group, pars_ref, index_mar) {
 
-    if(sum(index_mar) == length(pars_group$mu)) {
+    if (sum(index_mar) == length(pars_group$mu)) {
         return(pars_group)
-    } else if(sum(index_mar) == 0) {
+    } else if (sum(index_mar) == 0) {
         return(pars_ref)
     }
 
@@ -177,11 +177,11 @@ strategy_CIR <- function(pars_group, pars_ref, index_mar){
 
 #' @rdname stratgies
 #' @export
-strategy_LMCF <- function(pars_group, pars_ref, index_mar){
+strategy_LMCF <- function(pars_group, pars_ref, index_mar) {
 
-    if(sum(index_mar) == length(pars_group$mu)) {
+    if (sum(index_mar) == length(pars_group$mu)) {
         return(pars_group)
-    } else if(sum(index_mar) == 0) {
+    } else if (sum(index_mar) == 0) {
         stop("LMCF cannot be adopted since all outcome values are missing")
     }
 
@@ -233,7 +233,7 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar){
 #' )
 #' }
 #' @export
-getStrategies <- function(...){
+getStrategies <- function(...) {
     user_strats <- list(...)
     pkg_strats <- list(
         "JR" = strategy_JR,
@@ -241,7 +241,7 @@ getStrategies <- function(...){
         "CIR" = strategy_CIR,
         "LMCF" = strategy_LMCF
     )
-    for(i in names(user_strats)) {
+    for (i in names(user_strats)) {
         assert_that(
             is.function(user_strats[[i]]),
             msg = sprintf("Input %s must be a function", i)

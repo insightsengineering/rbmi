@@ -18,4 +18,3 @@
 #' @keywords internal
 #' @importFrom assertthat  assert_that
 "_PACKAGE"
-

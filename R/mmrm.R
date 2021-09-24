@@ -77,7 +77,7 @@ as_mmrm_df <- function(
     if (!is.null(group)) {
         # create dummy variables for each arm (needed when same_cov = FALSE)
         group_mat <- stats::model.matrix(~ 0 + group)
-        for (i in 1:ncol(group_mat)) {
+        for (i in seq_len(ncol(group_mat))) {
             dmat[[paste0("G", i)]] <- group_mat[, i]
         }
     }
@@ -115,7 +115,7 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
 
     # paste and create formula object
     formula <- as.formula(
-        sprintf( "outcome ~ %s - 1", paste0(c(v_names, expr_randeff), collapse = " + "))
+        sprintf("outcome ~ %s - 1", paste0(c(v_names, expr_randeff), collapse = " + "))
     )
 
     return(formula)
