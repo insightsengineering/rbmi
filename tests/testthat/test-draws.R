@@ -116,17 +116,6 @@ test_that("condmean - jackknife", {
 
 
 
-test_that("condmean - wrong type", {
-
-    set.seed(40123)
-    d <- get_data(20)
-    meth <- method_condmean(type = "wrong_type")
-    expect_error(draws(d$dat, d$dat_ice, d$vars, meth))
-
-})
-
-
-
 
 test_that("bayes", {
     set.seed(40123)
