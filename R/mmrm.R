@@ -6,7 +6,7 @@
 #' Constructs a character representation of the random effects formula
 #' for fitting a MMRM for subject by visit in the format required for glmmTMB.
 #'
-#' assuming the user specified a covariance structure of "us" and that no groups
+#' For example assuming the user specified a covariance structure of "us" and that no groups
 #' were provided this will return
 #'
 #' ```
