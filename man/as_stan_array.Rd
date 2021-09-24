@@ -2,13 +2,15 @@
 % Please edit documentation in R/mcmc.R
 \name{as_stan_array}
 \alias{as_stan_array}
-\title{Title - TODO}
+\title{As array}
 \usage{
 as_stan_array(x)
 }
 \arguments{
-\item{x}{TODO}
+\item{x}{a numeric vector}
 }
 \description{
-Title - TODO
+Converts a numeric value of length 1 into a 1 dimension array.
+This is to avoid type errors that are thrown by stan when length 1 numeric vectors
+are provided by R for stan::vector inputs
 }

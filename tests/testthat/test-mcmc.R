@@ -50,6 +50,22 @@ get_within <- function(x, real){
         mutate(inside = real >= lci &  real <= uci)
 }
 
+test_extract_draws <- function(extract_draws_obj, same_cov, n_groups, n_visits) {
+
+    expect_type(draws_extracted, "list")
+    expect_length(draws_extracted, 2)
+    expect_true(all(names(draws_extracted) %in% c("beta", "sigma")))
+
+    if(same_cov) {
+        expect_true(all(sapply(draws_extracted$sigma, function(x) length(x) == 1)))
+    } else {
+        expect_true(all(sapply(draws_extracted$sigma, function(x) length(x) == n_groups)))
+    }
+
+    expect_true(all(sapply(draws_extracted$sigma, function(x) sapply(x, function(y) dim(y) == c(n_visits, n_visits)))))
+
+}
+
 
 test_that("split_dim creates a list from an array as expected", {
     mat <- rbind(c(1, 0.2), c(0.2, 1))
@@ -345,6 +361,14 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
     sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
     assert_that(all(sigma_within$inside))
 
+    # check extract_draws() worked properly
+    test_extract_draws(
+        extract_draws(fit$fit),
+        same_cov = TRUE,
+        n_groups = 2,
+        n_visits = 3
+    )
+
 
 
 
@@ -372,6 +396,14 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
 
     sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
     assert_that(all(sigma_within$inside))
+
+    # check extract_draws() worked properly
+    test_extract_draws(
+        extract_draws(fit$fit),
+        same_cov = FALSE,
+        n_groups = 2,
+        n_visits = 3
+    )
 
 
     ### Missingness affecting specific groups
@@ -402,6 +434,14 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
 
     sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
     assert_that(all(sigma_within$inside))
+
+    # check extract_draws() worked properly
+    test_extract_draws(
+        extract_draws(fit$fit),
+        same_cov = FALSE,
+        n_groups = 2,
+        n_visits = 3
+    )
 })
 
 
@@ -461,7 +501,13 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
     sigma_b_within <- get_within(sig_b, unlist(as.list(sigma_b)))
     assert_that(all(sigma_b_within$inside))
 
-
+    # check extract_draws() worked properly
+    test_extract_draws(
+        extract_draws(fit$fit),
+        same_cov = FALSE,
+        n_groups = 2,
+        n_visits = 3
+    )
 
 
 
@@ -494,4 +540,12 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
     sig_b <- lapply(fit$samples$sigma, function(x) x[[2]])
     sigma_b_within <- get_within(sig_b, unlist(as.list(sigma_b)))
     assert_that(all(sigma_b_within$inside))
+
+    # check extract_draws() worked properly
+    test_extract_draws(
+        extract_draws(fit$fit),
+        same_cov = FALSE,
+        n_groups = 2,
+        n_visits = 3
+    )
 })
