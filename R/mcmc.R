@@ -10,9 +10,9 @@
 #'
 #' @param designmat The design matrix of the fixed effects.
 #' @param outcome The response variable. Must be numeric.
-#' @param group The group variable.
+#' @param group Character vector containing the group variable.
 #' @param subjid Character vector containing the subjects IDs.
-#' @param visit The visit variable.
+#' @param visit Character vector containing the visit variable.
 #' @param same_cov Logical. If `TRUE` the model assumes the same covariance matrix for each group.
 #' If `FALSE` a different covariance matrix for each group is assumed.
 #' @param n_imputations Integer number corresponding to the draws from the posterior distribution needed.

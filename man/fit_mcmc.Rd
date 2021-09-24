@@ -23,11 +23,11 @@ fit_mcmc(
 
 \item{outcome}{The response variable. Must be numeric.}
 
-\item{group}{The group variable.}
+\item{group}{Character vector containing the group variable.}
 
 \item{subjid}{Character vector containing the subjects IDs.}
 
-\item{visit}{The visit variable.}
+\item{visit}{Character vector containing the visit variable.}
 
 \item{same_cov}{Logical. If \code{TRUE} the model assumes the same covariance matrix for each group.
 If \code{FALSE} a different covariance matrix for each group is assumed.}
@@ -76,6 +76,6 @@ estimated at point 1.
 
 The chains perform \code{n_imputations} draws by keeping one every \code{burn_between} iterations. Additionally
 the first \code{burn_in} iterations are discarded. The total number of iterations will then be \code{burn_in + burn_between*n_imputations}.
-The \code{burn_in} aims to perform draws from the stationary distribution of the Markov Chain.
-The \code{burn_between} aims to keep the draws uncorrelated each other.
+The purpose of \code{burn_in} is to ensure that the samples are drawn from the stationary distribution of the Markov Chain.
+The \code{burn_between} aims to keep the draws uncorrelated each from other.
 }
