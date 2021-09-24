@@ -19,7 +19,6 @@ jobs:
       fail-fast: false
       matrix:
        config:
-         # - { image: "gowerc/rbmi:r363"}
          - { image: "gowerc/rbmi:r404"}
          - { image: "gowerc/rbmi:r410"}
 
