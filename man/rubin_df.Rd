@@ -19,11 +19,11 @@ rubin_df(v_com, var_b, var_t, M)
 Degrees of freedom according to Barnard-Rubin formula. See Barnard-Rubin (1999).
 }
 \description{
-Compute degrees of freedom according to Barnard-Rubin formula.
+Compute degrees of freedom according to the Barnard-Rubin formula.
 }
 \details{
 The computation takes into account limit cases where there is no missing data
-(i.e. the between-variance \code{var_b} is zero) and the complete-data degrees of freedom is
+(i.e. the between-variance \code{var_b} is zero) or where the complete-data degrees of freedom is
 set to \code{Inf}. Moreover, if \code{v_com} is given as \code{NA}, the function returns \code{Inf}.
 }
 \references{

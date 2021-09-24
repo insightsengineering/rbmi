@@ -18,7 +18,7 @@ as_imputation(imputations, data, method, references)
 imputed values. Should be of the form \code{c("Group" = "Reference", "Group" = "Reference")}.}
 }
 \description{
-This function creates the the object that is returned from \code{\link[=impute]{impute()}}. Essentially
+This function creates the object that is returned from \code{\link[=impute]{impute()}}. Essentially
 it is a glorified wrapper around \code{\link[=list]{list()}} ensuring that the required elements have been
 set and that the class is added as expected.
 }

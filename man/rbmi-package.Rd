@@ -7,10 +7,10 @@
 \title{rbmi: Reference Based Multiple Imputation}
 \description{
 The rbmi package is used to perform reference based multiple imputation. The package
-provides implementations for common imputation strategies whilst allowing the user to
-select between various standard Bayesian and Frequentest approaches.
+provides implementations for common, patient-specific imputation strategies whilst allowing the user to
+select between various standard Bayesian and frequentist approaches.
 
-The package is designed around its 4 core functions:
+The package is designed around 4 core functions:
 \itemize{
 \item \code{\link[=draws]{draws()}} - Fits multiple imputation models
 \item \code{\link[=impute]{impute()}} - Imputes multiple datasets
