@@ -69,7 +69,7 @@
 #' for the specific covariate.
 #'
 #' Please note that there is no special provisioning for the baseline outcome values. If you do not want baseline
-#' observations to be included in the model as part of the response variable then these should be removed in advance from the outcome variable in `data`. At the same time if the you want to include the baseline outcome as covariate in the model, then the baseline outcome should be included as a separate column of `data` (as any other covariate).
+#' observations to be included in the model as part of the response variable then these should be removed in advance from the outcome variable in `data`. At the same time if you want to include the baseline outcome as covariate in the model, then this should be included as a separate column of `data` (as any other covariate).
 #'
 #' The argument `data_ice` contains information about the occurrence of ICEs. It is a
 #' `data.frame` with 3 columns:
