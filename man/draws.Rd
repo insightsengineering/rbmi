@@ -97,10 +97,10 @@ Conditional mean imputation methods are discussed in Wolbers et al (2021).
 
 The argument \code{data} contains the longitudinal data. It must have at least the following variables:
 \itemize{
-\item \code{subjid}: a factor containing the subject ids variable.
-\item \code{visit}: a factor containing the visit variable.
-\item \code{group}: a factor containing the group variable.
-\item \code{outcome}: the outcome variable. Must be numeric.
+\item \code{subjid}: a factor vector containing the subject ids.
+\item \code{visit}: a factor vector containing the visit the outcome was observed on.
+\item \code{group}: a factor vector containing the group that the subject belongs to.
+\item \code{outcome}: a numeric vector containing the outcome variable. It might contain missing values.
 Additional baseline or time-varying covariates must be included in \code{data}.
 }
 
@@ -111,6 +111,9 @@ then the \code{\link[=expand_locf]{expand_locf()}} helper function can be used t
 Last Observation Carried Forward (LOCF) imputation to impute the covariates values.
 Note that LOCF is generally not a principled imputation method and should only be used when appropriate
 for the specific covariate.
+
+Please note that there is no special provisioning for the baseline outcome values. If you do not want baseline
+observations to be included in the model as part of the response variable then these should be removed in advance from the outcome variable in \code{data}. At the same time if you want to include the baseline outcome as covariate in the model, then this should be included as a separate column of \code{data} (as any other covariate).
 
 The argument \code{data_ice} contains information about the occurrence of ICEs. It is a
 \code{data.frame} with 3 columns:
