@@ -1,17 +1,17 @@
 #' @title Fit the base imputation model and get parameter estimates
 #'
-#' @description `draws` fits the base imputation model to the observed outcome data 
+#' @description `draws` fits the base imputation model to the observed outcome data
 #' according to the given multiple imputation methodology.
-#' According to the user's method specification, it returns either draws from the posterior distribution of the  model parameters 
-#' as required for Bayesian multiple imputation or frequentist parameter estimates from the original data and 
-#' bootstrapped or leave-one-out datasets as required for conditional mean imputation. 
+#' According to the user's method specification, it returns either draws from the posterior distribution of the  model parameters
+#' as required for Bayesian multiple imputation or frequentist parameter estimates from the original data and
+#' bootstrapped or leave-one-out datasets as required for conditional mean imputation.
 #' The purpose of the imputation model is to estimate model parameters
 #' in the absence of intercurrent events (ICEs) handled using reference-based imputation methods.
-#' For this reason, any observed outcome data after ICEs, for which reference-based imputation methods are 
+#' For this reason, any observed outcome data after ICEs, for which reference-based imputation methods are
 #' specified, are removed and considered as missing for the purpose of estimating the imputation model, and for this purpose only.
-#' The imputation model is a mixed effects model repeated measures (MMRM) model that is valid under a missing-at-random (MAR) assumption. 
-#' It can be fit using frequentist maximum likelihood (ML) or restricted ML (REML) estimation, 
-#' a Bayesian approach, or an approximate Bayesian approach according to the user's method specification. 
+#' The imputation model is a mixed effects model repeated measures (MMRM) model that is valid under a missing-at-random (MAR) assumption.
+#' It can be fit using frequentist maximum likelihood (ML) or restricted ML (REML) estimation,
+#' a Bayesian approach, or an approximate Bayesian approach according to the user's method specification.
 #' The ML/REML approaches and the approximate Bayesian approach support several possible covariance structures, while the Bayesian
 #' approach based on MCMC sampling supports only an unstructured covariance structure. In any case
 #' the covariance matrix can be assumed to be the same or different across each group.
@@ -49,8 +49,8 @@
 #' This method can be specified by using `method = method_condmean()` with
 #' argument `type = "jackknife"`.
 #'
-#' Bayesian MI based on MCMC sampling has been proposed in Carpenter, Roger, and Kenward (2013) who first introduced 
-#' reference-based imputation methods. Approximate Bayesian MI is discussed in Little and Rubin (2002). 
+#' Bayesian MI based on MCMC sampling has been proposed in Carpenter, Roger, and Kenward (2013) who first introduced
+#' reference-based imputation methods. Approximate Bayesian MI is discussed in Little and Rubin (2002).
 #' Conditional mean imputation methods are discussed in Wolbers et al (2021).
 #'
 #' The argument `data` contains the longitudinal data. It must have at least the following variables:
@@ -64,8 +64,8 @@
 #' outcome data must be set as `NA` instead of having the related row missing. Missing values
 #' in the covariates are not allowed. If `data` is incomplete
 #' then the [expand_locf()] helper function can be used to add in any missing rows, which uses
-#' Last Observation Carried Forward (LOCF) imputation to impute the covariates values. 
-#' Note that LOCF is generally not a principled imputation method and should only be used when appropriate 
+#' Last Observation Carried Forward (LOCF) imputation to impute the covariates values.
+#' Note that LOCF is generally not a principled imputation method and should only be used when appropriate
 #' for the specific covariate.
 #'
 #' Please note that there is no special provisioning for the baseline outcome values. If you do not want baseline
@@ -93,7 +93,7 @@
 #' Please note that user-defined imputation strategies can also be set.
 #'
 #' The `data_ice` argument is necessary at this stage since (as explained in Wolbers et al (2021)), the model is fitted
-#' after removing the observations which are incompatible with the imputation model, i.e. 
+#' after removing the observations which are incompatible with the imputation model, i.e.
 #' any observed data on or after `data_ice[[vars$visit]]` that are addressed with an imputation
 #' strategy different from MAR are excluded for the model fit. However such observations
 #' will not be discarded from the data in the imputation phase
@@ -126,18 +126,18 @@
 #' \code{vignette("quickstart", package = "rbmi")}.
 #'
 #' @references
-#' 
-#' James R Carpenter, James H Roger, and Michael G Kenward. Analysis of longitudinal trials with protocol deviation: a framework for relevant, 
+#'
+#' James R Carpenter, James H Roger, and Michael G Kenward. Analysis of longitudinal trials with protocol deviation: a framework for relevant,
 #' accessible assumptions, and inference via multiple imputation. Journal of Biopharmaceutical Statistics, 23(6):1352–1371, 2013.
-#' 
-#' Suzie Cro, Tim P Morris, Michael G Kenward, and James R Carpenter. Sensitivity analysis for clinical trials with missing continuous outcome 
+#'
+#' Suzie Cro, Tim P Morris, Michael G Kenward, and James R Carpenter. Sensitivity analysis for clinical trials with missing continuous outcome
 #' data using controlled multiple imputation: a practical guide. Statistics in Medicine, 39(21):2815–2842, 2020.
-#' 
+#'
 #' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. \[Section 10.2.3\]
 #'
-#' Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Reference-based imputation methods based on conditional mean 
+#' Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Reference-based imputation methods based on conditional mean
 #' imputation. \url{http://arxiv.org/abs/2109.11162}, 2021.
-#' 
+#'
 #' @export
 draws <- function(data, data_ice = NULL, vars, method) {
     UseMethod("draws", method)
@@ -190,7 +190,7 @@ draws.condmean <- function(data, data_ice = NULL, vars, method) {
 #' bootstrap samples.
 #'
 #' @details
-#' Bootstrapping refers to resampling of subjects (and their full longitudinal data) from `data` with 
+#' Bootstrapping refers to resampling of subjects (and their full longitudinal data) from `data` with
 #' replacement and and not to resampling of individual rows from `data`.
 #' If the model fit fails in the original dataset, an error message is thrown. If
 #' the model fit fails in a bootstrap sample, then that bootstrap sample is not considered
@@ -337,7 +337,7 @@ get_jackknife_draws <- function(longdata, method) {
 #' @param method A `method` object as generated by either
 #' [method_approxbayes()] or [method_condmean()].
 #' @param optimizer vector of characters defining the optimizer to be used.
-#' Every optimizer must be one of the \link[optim]{optim} function. The list of possible
+#' Every optimizer must be one of the [stats::optim()] function. The list of possible
 #' optimizers are `r sapply(formals(fun = stats::optim)$method, function(x) paste0(x, ","))[-1]`.
 #'
 #' @inherit as_sample_single return
@@ -377,7 +377,7 @@ get_mmrm_sample <- function(ids, longdata, method, optimizer) {
 }
 
 
-#' Set to NA outcome values that would be MNAR if they were missing 
+#' Set to NA outcome values that would be MNAR if they were missing
 #' (i.e. which occur after an ICE handled using a reference-based imputation strategy)
 #'
 #' @param longdata R6 `longdata` object containing all relevant input data information.
