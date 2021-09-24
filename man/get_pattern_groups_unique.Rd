@@ -2,14 +2,23 @@
 % Please edit documentation in R/mcmc.R
 \name{get_pattern_groups_unique}
 \alias{get_pattern_groups_unique}
-\title{Title TODO}
+\title{Get Pattern Summary}
 \usage{
 get_pattern_groups_unique(patterns)
 }
 \arguments{
-\item{patterns}{TODO}
+\item{patterns}{A \code{data.frame} with the columns \code{pgroup}, \code{pattern} and \code{group}}
 }
 \description{
 Takes a dataset of pattern information and creates a summary dataset of it
 with just 1 row per pattern
+}
+\details{
+\itemize{
+\item The column \code{pgroup} must be a numeric vector indicating which pattern group the patient belongs to
+\item The column \code{pattern} must be a character string of \code{0}'s or \code{1}'s. It must be identical for all
+rows within the same \code{pgroup}
+\item The column \code{group} must be a character / numeric vector indicating which covariance group the observation
+belongs to. It must be identical within the same \code{pgroup}
+}
 }

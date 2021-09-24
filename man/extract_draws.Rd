@@ -2,13 +2,28 @@
 % Please edit documentation in R/mcmc.R
 \name{extract_draws}
 \alias{extract_draws}
-\title{Title - TODO}
+\title{Extract draws from a \code{stanfit} object}
 \usage{
 extract_draws(stan_fit)
 }
 \arguments{
-\item{stan_fit}{TODO}
+\item{stan_fit}{A \code{stanfit} object.}
+}
+\value{
+A named list of length 2 containing:
+\itemize{
+\item \code{beta}: a list of length equal to the number of draws containing
+the draws from the posterior distribution of the regression coefficients.
+\item \code{sigma}: a list of length equal to the number of draws containing
+the draws from the posterior distribution of the covariance matrices. Each element
+of the list is a list with length equal to 1 if \code{same_cov = TRUE} or equal to the
+number of groups if \code{same_cov = FALSE}.
+}
 }
 \description{
-Title - TODO
+Extract draws from a \code{stanfit} object and convert them into lists.
+
+The function \code{\link[rstan:stanfit-method-extract]{rstan::extract()}} returns the draws for a given parameter as an array. This function
+calls \code{\link[rstan:stanfit-method-extract]{rstan::extract()}} to extract the draws from a \code{stanfit} object
+and then convert the arrays into lists.
 }

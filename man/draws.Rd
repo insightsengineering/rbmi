@@ -95,7 +95,16 @@ Bayesian MI based on MCMC sampling has been proposed in Carpenter, Roger, and Ke
 reference-based imputation methods. Approximate Bayesian MI is discussed in Little and Rubin (2002).
 Conditional mean imputation methods are discussed in Wolbers et al (2021).
 
-The argument \code{data} must have one row per visit per subject. This means that incomplete
+The argument \code{data} contains the longitudinal data. It must have at least the following variables:
+\itemize{
+\item \code{subjid}: a factor containing the subject ids variable.
+\item \code{visit}: a factor containing the visit variable.
+\item \code{group}: a factor containing the group variable.
+\item \code{outcome}: the outcome variable. Must be numeric.
+Additional baseline or time-varying covariates must be included in \code{data}.
+}
+
+\code{data} must have one row per visit per subject. This means that incomplete
 outcome data must be set as \code{NA} instead of having the related row missing. Missing values
 in the covariates are not allowed. If \code{data} is incomplete
 then the \code{\link[=expand_locf]{expand_locf()}} helper function can be used to add in any missing rows, which uses
@@ -141,8 +150,8 @@ The vars argument is a named list that specifies the names of key variables with
 \itemize{
 \item \code{subjid}: name of the column in \code{data} and \code{data_ice} which contains the subject ids variable.
 \item \code{visit}: name of the column in \code{data} and \code{data_ice} which contains the visit variable.
-\item \code{outcome}: name of the column in \code{data} which contains the outcome variable.
 \item \code{group}: name of the column in \code{data} which contains the group variable.
+\item \code{outcome}: name of the column in \code{data} which contains the outcome variable.
 \item \code{covariates}: vector of characters which contains the covariates to be included
 in the model (including interactions which are specified as "covariateName1*covariateName2").
 If no covariates are provided the default model specification of \code{outcome ~ 1 + visit + group} will be used.
