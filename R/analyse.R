@@ -58,8 +58,8 @@
 #' the `vars` argument e.g. `analyse(imputeObj, vars = set_vars(...))`. Please
 #' see the documentation for [ancova()] for full details.
 #' Please also note that the theoretical justification for the conditional mean imputation
-#' method (`method = method_condmean()` in [draws()]) relies on the fact that ANCOVA is 
-#' a linear transformation of the outcomes. 
+#' method (`method = method_condmean()` in [draws()]) relies on the fact that ANCOVA is
+#' a linear transformation of the outcomes.
 #' Thus care is required when applying alternative analysis functions in this setting.
 #'
 #' The `delta` argument can be used to specify offsets to be applied
@@ -445,7 +445,7 @@ validate_analyse_pars <- function(results, pars) {
 
     devnull <- lapply(
         results_unnested,
-        function(x){
+        function(x) {
             assert_that(
                 is.list(x),
                 all(pars %in% names(x)),
@@ -468,5 +468,3 @@ validate_analyse_pars <- function(results, pars) {
 
     return(invisible(TRUE))
 }
-
-

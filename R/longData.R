@@ -422,7 +422,7 @@ longDataConstructor <- R6::R6Class(
                     self$is_missing[[subject]][is_post_ice]
                 )
 
-                validate( as_class(self$is_mar[[subject]], "is_mar") )
+                validate(as_class(self$is_mar[[subject]], "is_mar"))
             }
             self$check_has_data_at_each_visit()
         },
@@ -559,12 +559,12 @@ transpose_imputations <- function(imputations) {
 #' @export
 validate.is_mar <- function(x, ...) {
 
-    if(all(x) || all(!x)) {
+    if (all(x) || all(!x)) {
         return(invisible(TRUE))
     }
 
     ind <- which(x == FALSE)[1]
-    true_index <- seq_len(ind-1)
+    true_index <- seq_len(ind - 1)
     false_index <- seq(ind, length(x))
 
     assert_that(
@@ -575,4 +575,3 @@ validate.is_mar <- function(x, ...) {
 
     return(invisible(TRUE))
 }
-

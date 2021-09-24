@@ -113,5 +113,6 @@ any of them fail to fit.
 Please note that at the time of writing (September 2021) Stan is unable to produce
 reproducible samples across different operating systems even when the same seed is used.
 As such care must be taken when using Stan across different machines. For more information
-on this limitation please consult the Stan documentation \url{https://mc-stan.org/docs/2_27/reference-manual/reproducibility-chapter.html}
+on this limitation please consult the Stan documentation
+\url{https://mc-stan.org/docs/2_27/reference-manual/reproducibility-chapter.html}
 }

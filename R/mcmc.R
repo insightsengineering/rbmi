@@ -2,7 +2,8 @@
 #' Fit the base imputation model using a Bayesian approach
 #'
 #' @description
-#' `fit_mcmc()` fits the base imputation model using a Bayesian approach. This is done through a MCMC method that is implemented in `stan`
+#' `fit_mcmc()` fits the base imputation model using a Bayesian approach.
+#' This is done through a MCMC method that is implemented in `stan`
 #' and is run by using the function [rstan::sampling()].
 #' The function returns the draws from the posterior distribution of the model parameters
 #' and the `stanfit` object. Additionally it performs multiple diagnostics checks of the chain
@@ -31,15 +32,18 @@
 #'
 #' The function performs the following steps:
 #' 1. Fit MMRM using a REML approach.
-#' 2. Prepare the input data for the MCMC fit as described in the `data{}` block of the Stan file. See [prepare_stan_data()] for details.
+#' 2. Prepare the input data for the MCMC fit as described in the `data{}`
+#' block of the Stan file. See [prepare_stan_data()] for details.
 #' 3. Run the MCMC according the input arguments and using as starting values the REML parameter estimates
 #' estimated at point 1.
 #' 4. Performs diagnostics checks of the MCMC. See [check_mcmc()] for details.
 #' 5. Extract the draws from the model fit.
 #'
 #' The chains perform `n_imputations` draws by keeping one every `burn_between` iterations. Additionally
-#' the first `burn_in` iterations are discarded. The total number of iterations will then be `burn_in + burn_between*n_imputations`.
-#' The purpose of `burn_in` is to ensure that the samples are drawn from the stationary distribution of the Markov Chain.
+#' the first `burn_in` iterations are discarded. The total number of iterations will
+#' then be `burn_in + burn_between*n_imputations`.
+#' The purpose of `burn_in` is to ensure that the samples are drawn from the stationary
+#' distribution of the Markov Chain.
 #' The `burn_between` aims to keep the draws uncorrelated each from other.
 #'
 #' @return

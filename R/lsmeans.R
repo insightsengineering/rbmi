@@ -113,4 +113,3 @@ lsmeans <- function(model, ...) {
         df = df.residual(model)
     )
 }
-

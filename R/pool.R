@@ -234,13 +234,13 @@ rubin_df <- function(v_com, var_b, var_t, M) {
     } else {
         lambda <- (1 + 1 / M) * var_b / var_t
 
-        if(!is.infinite(v_com)) {
+        if (!is.infinite(v_com)) {
             v_obs <- ((v_com + 1) / (v_com + 3)) * v_com * (1 - lambda)
         }
 
-        if(lambda != 0) {
+        if (lambda != 0) {
             v_old <- (M - 1)  / lambda^2
-            if(is.infinite(v_com))
+            if (is.infinite(v_com))
                 df <- v_old
             else {
                 df <- (v_old * v_obs) / (v_old + v_obs)
@@ -519,7 +519,7 @@ transpose_results <- function(results, components) {
 as.data.frame.pool <- function(x, ...) {
     data.frame(
         parameter = names(x$pars),
-        est =vapply(x$pars, function(x) x$est, numeric(1)),
+        est = vapply(x$pars, function(x) x$est, numeric(1)),
         se = vapply(x$pars, function(x) x$se, numeric(1)),
         lci = vapply(x$pars, function(x) x$ci[[1]], numeric(1)),
         uci = vapply(x$pars, function(x) x$ci[[2]], numeric(1)),
