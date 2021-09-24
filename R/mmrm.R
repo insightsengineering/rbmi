@@ -168,7 +168,7 @@ extract_params <- function(fit) {
 #' Dummy variables must already be expanded out, i.e. via [stats::model.matrix()]. Cannot contain
 #' any missing values
 #' @param outcome a numeric vector. The outcome value to be regressed on in the MMRM model.
-#' @param subjid a character / factor vector. The subject identify use to link separate visits that belong to
+#' @param subjid a character / factor vector. The subject identifier used to link separate visits that belong to
 #' the same subject.
 #' @param visit a character / factor vector. Indicates which visit the outcome value occoured on.
 #' @param group a character / factor vector. Indicates which treatment group the patient belongs to.
