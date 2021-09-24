@@ -178,6 +178,7 @@ strategy_CIR <- function(pars_group, pars_ref, index_mar) {
 #' @rdname stratgies
 #' @export
 strategy_LMCF <- function(pars_group, pars_ref, index_mar) {
+
     if(all(index_mar)) {
         return(pars_group)
     } else if(all(!index_mar)) {
