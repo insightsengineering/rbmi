@@ -13,7 +13,7 @@
 #' us(0 + visit | subjid)
 #' ```
 #'
-#' If groups is provided then this indicates that separate covariance matrices
+#' If `group` is provided then this indicates that separate covariance matrices
 #' are required per group and as such the following will be returned:
 #'
 #' ```
