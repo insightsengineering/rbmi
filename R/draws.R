@@ -126,7 +126,7 @@
 #' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. \[Section 10.2.3\]
 #'
 #' Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Reference-based imputation methods based on conditional mean 
-#' imputation. Preprint, 2021.
+#' imputation. \url{http://arxiv.org/abs/2109.11162}, 2021.
 #' 
 #' @export
 draws <- function(data, data_ice = NULL, vars, method) {
