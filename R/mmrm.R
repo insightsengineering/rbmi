@@ -156,7 +156,7 @@ extract_params <- function(fit) {
 
 
 
-#' Fit a mmrm Model
+#' Fit a MMRM model
 #'
 #' @description
 #' Fits a mmrm model allowing for different covariance structures using [glmmTMB::glmmTMB()].
