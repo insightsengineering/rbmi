@@ -113,9 +113,9 @@ strategy_MAR <- function(pars_group, pars_ref, index_mar){
 #' @export
 strategy_JR <- function(pars_group, pars_ref, index_mar){
 
-    if(sum(index_mar) == length(pars_group$mu)) {
+    if(all(index_mar)) {
         return(pars_group)
-    } else if(sum(index_mar) == 0) {
+    } else if(all(!index_mar)) {
         return(pars_ref)
     }
 
@@ -149,9 +149,9 @@ strategy_CR <- function(pars_group, pars_ref, index_mar){
 #' @export
 strategy_CIR <- function(pars_group, pars_ref, index_mar){
 
-    if(sum(index_mar) == length(pars_group$mu)) {
+    if(all(index_mar)) {
         return(pars_group)
-    } else if(sum(index_mar) == 0) {
+    } else if(all(!index_mar)) {
         return(pars_ref)
     }
 
@@ -179,9 +179,9 @@ strategy_CIR <- function(pars_group, pars_ref, index_mar){
 #' @export
 strategy_LMCF <- function(pars_group, pars_ref, index_mar){
 
-    if(sum(index_mar) == length(pars_group$mu)) {
+    if(all(index_mar)) {
         return(pars_group)
-    } else if(sum(index_mar) == 0) {
+    } else if(all(!index_mar)) {
         stop("LMCF cannot be adopted since all outcome values are missing")
     }
 

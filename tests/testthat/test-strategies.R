@@ -78,6 +78,21 @@ test_that("mean and covariance under CIR are as expected", {
         )
     )
 
+    expect_equal(
+        strategy_CIR(pars_group, pars_group, index_mar),
+        pars_group
+    )
+
+    expect_equal(
+        strategy_CIR(pars_group, pars_ref, index_mar = rep(FALSE, 3)),
+        pars_ref
+    )
+
+    expect_equal(
+        strategy_CIR(pars_group, pars_ref, index_mar = rep(TRUE, 3)),
+        pars_group
+    )
+
 })
 
 
@@ -101,6 +116,15 @@ test_that("mean and covariance under LMCF are as expected", {
             mu = c(1, 1, 1),
             sigma = diag(rep(1,3))
         )
+    )
+
+    expect_error(
+        strategy_LMCF(pars_group, pars_ref, index_mar = rep(FALSE, 3))
+    )
+
+    expect_equal(
+        strategy_LMCF(pars_group, pars_ref, index_mar = rep(TRUE, 3)),
+        pars_group
     )
 
 })
@@ -128,7 +152,46 @@ test_that("mean and covariance under JR are as expected", {
         )
     )
 
+    expect_equal(
+        strategy_JR(pars_group, pars_group, index_mar),
+        pars_group
+    )
+
+    expect_equal(
+        strategy_JR(pars_group, pars_ref, index_mar = rep(FALSE, 3)),
+        pars_ref
+    )
+
+    expect_equal(
+        strategy_JR(pars_group, pars_ref, index_mar = rep(TRUE, 3)),
+        pars_group
+    )
+
 })
+
+
+
+test_that("mean and covariance under CR are as expected", {
+
+    pars_group <- list(
+        mu = c(1, 3, 5),
+        sigma = diag(rep(1,3))
+    )
+    pars_ref <- list(
+        mu = c(2, 6, 10),
+        sigma = diag(rep(1,3))
+    )
+
+    index_mar <- c(TRUE, FALSE, FALSE)
+
+    expect_equal(
+        strategy_CR(pars_group, pars_ref, index_mar),
+        pars_ref
+    )
+
+})
+
+
 
 
 
