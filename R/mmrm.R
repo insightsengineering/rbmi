@@ -164,7 +164,7 @@ extract_params <- function(fit) {
 #' the fit failed to converge.
 #'
 #'
-#' @param designmat a `data.frame` or `matrix` containing the covariates to use in the mmrm model.
+#' @param designmat a `data.frame` or `matrix` containing the covariates to use in the MMRM model.
 #' dummy variables must already be expanded out I.e. via [stats::model.matrix()]. Cannot contain
 #' any missing values
 #' @param outcome a numeric vector. The outcome value to be reggressed on in the mmrm model.
