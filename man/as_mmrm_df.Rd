@@ -2,21 +2,33 @@
 % Please edit documentation in R/mmrm.R
 \name{as_mmrm_df}
 \alias{as_mmrm_df}
-\title{TODO}
+\title{Creates a "MMRM" ready dataset}
 \usage{
-as_mmrm_df(designmat, outcome, visit, subjid, groups = NULL)
+as_mmrm_df(designmat, outcome, visit, subjid, group = NULL)
 }
 \arguments{
-\item{designmat}{TODO}
+\item{designmat}{a \code{data.frame} or \code{matrix} containing the covariates to use in the mmrm model.
+dummy variables must already be expanded out I.e. via \code{\link[stats:model.matrix]{stats::model.matrix()}}. Cannot contain
+any missing values}
 
-\item{outcome}{TODO}
+\item{outcome}{a numeric vector. The outcome value to be reggressed on in the mmrm model.}
 
-\item{visit}{TODO}
+\item{visit}{a character / factor vector. Indicates which visit the outcome value occoured on.}
 
-\item{subjid}{TODO}
+\item{subjid}{a character / factor vector. The subject identify use to link separate visits that belong to
+the same subject.}
 
-\item{groups}{TODO}
+\item{group}{a character / factor vector. Used to indicate which treatment group the patient belongs to.}
 }
 \description{
-TODO
+Converts a design matrix + key variables into a command format
+In particular this function does the following:
+\itemize{
+\item Renames all covariates as \code{V1}, \code{V2}, etc to avoid issues of special characters in variable names
+\item Ensures all key variables are of the right type
+\item inserts the outcome, visit and subjid variables into the \code{data.frame}
+naming them as \code{outcome}, \code{visit} and \code{subjid}
+\item Splits a grouping variable out into separate columns, i.e. if \code{group} has 3 levels then the
+output \code{data.frame} will have dummy indicator variables \code{G1}, \code{G2} & \code{G3}
+}
 }

@@ -236,7 +236,7 @@ test_that("as_mmrm_df & as_mmrm_formula", {
         outcome = dat$outcome,
         visit = dat$visit,
         subjid = dat$id,
-        groups = sample(c("A", "B", "C"), size = nrow(x), replace = TRUE)
+        group = sample(c("A", "B", "C"), size = nrow(x), replace = TRUE)
     )
 
     expect_equal(ncol(x), ncol(dat) + 6)
