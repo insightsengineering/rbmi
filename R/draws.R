@@ -57,7 +57,7 @@
 #' - `subjid`: a factor vector containing the subject ids.
 #' - `visit`: a factor vector containing the visit the outcome was observed on.
 #' - `group`: a factor vector containing the group that the subject belongs to.
-#' - `outcome`: a numeric vector containing the outcome that was (or wasn't) observed.
+#' - `outcome`: a numeric vector containing the outcome variable. It might contain missing values.
 #' Additional baseline or time-varying covariates must be included in `data`.
 #'
 #' `data` must have one row per visit per subject. This means that incomplete
@@ -68,9 +68,8 @@
 #' Note that LOCF is generally not a principled imputation method and should only be used when appropriate 
 #' for the specific covariate.
 #'
-#' Please note that there is no special provisioning for "baseline". If you do not want baseline
-#' observations to be included in the model then these should be removed in advance from `data`. 
-#' The imputation model(s) created by `draws()` will fit the distribution to all levels of `data["visit"]`.
+#' Please note that there is no special provisioning for the baseline outcome values. If you do not want baseline
+#' observations to be included in the model then these should be removed in advance from the outcome variable in `data`. 
 #'
 #' The argument `data_ice` contains information about the occurrence of ICEs. It is a
 #' `data.frame` with 3 columns:
