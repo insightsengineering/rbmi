@@ -54,10 +54,10 @@
 #' Conditional mean imputation methods are discussed in Wolbers et al (2021).
 #'
 #' The argument `data` contains the longitudinal data. It must have at least the following variables:
-#' - `subjid`: a factor containing the subject ids variable.
-#' - `visit`: a factor containing the visit variable.
-#' - `group`: a factor containing the group variable.
-#' - `outcome`: the outcome variable. Must be numeric.
+#' - `subjid`: a factor vector containing the subject ids.
+#' - `visit`: a factor vector containing the visit the outcome was observed on.
+#' - `group`: a factor vector containing the group that the subject belongs to.
+#' - `outcome`: a numeric vector containing the outcome variable. It might contain missing values.
 #' Additional baseline or time-varying covariates must be included in `data`.
 #'
 #' `data` must have one row per visit per subject. This means that incomplete
@@ -67,6 +67,9 @@
 #' Last Observation Carried Forward (LOCF) imputation to impute the covariates values. 
 #' Note that LOCF is generally not a principled imputation method and should only be used when appropriate 
 #' for the specific covariate.
+#'
+#' Please note that there is no special provisioning for the baseline outcome values. If you do not want baseline
+#' observations to be included in the model as part of the response variable then these should be removed in advance from the outcome variable in `data`. At the same time if you want to include the baseline outcome as covariate in the model, then this should be included as a separate column of `data` (as any other covariate).
 #'
 #' The argument `data_ice` contains information about the occurrence of ICEs. It is a
 #' `data.frame` with 3 columns:
