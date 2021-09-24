@@ -228,8 +228,3 @@ test_that("NULL data_ice works uses MAR by default", {
     expect_true(all(unlist(dobj$data$is_mar)))
     expect_true(all(!unlist(dobj$data$is_post_ice)))
 })
-
-
-
-
-

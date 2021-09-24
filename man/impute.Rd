@@ -95,6 +95,8 @@ impute(
 
 }
 \references{
-James R Carpenter, James H Roger, and Michael G Kenward. Analysis of longitudinal trials with protocol deviation: a framework for relevant,
-accessible assumptions, and inference via multiple imputation. Journal of Biopharmaceutical Statistics, 23(6):1352–1371, 2013. [Section 4.2 and 4.3]
+James R Carpenter, James H Roger, and Michael G Kenward. Analysis of longitudinal trials with protocol deviation:
+a framework for relevant,
+accessible assumptions, and inference via multiple imputation. Journal of Biopharmaceutical Statistics,
+23(6):1352–1371, 2013. [Section 4.2 and 4.3]
 }

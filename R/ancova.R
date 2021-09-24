@@ -2,7 +2,7 @@
 #' Analysis of Covariance
 #'
 #' Performs an analysis of covariance between two groups returning the estimated
-#' "treatment effect" (i.e. the contrast between the two treatment groups) and 
+#' "treatment effect" (i.e. the contrast between the two treatment groups) and
 #' the least square means estimates in each group.
 #'
 #' @param data A data.frame containing the data to be used in the model

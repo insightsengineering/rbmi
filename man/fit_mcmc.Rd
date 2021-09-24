@@ -52,7 +52,8 @@ A named list composed by the following:
 }
 }
 \description{
-\code{fit_mcmc()} fits the base imputation model using a Bayesian approach. This is done through a MCMC method that is implemented in \code{stan}
+\code{fit_mcmc()} fits the base imputation model using a Bayesian approach.
+This is done through a MCMC method that is implemented in \code{stan}
 and is run by using the function \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}.
 The function returns the draws from the posterior distribution of the model parameters
 and the \code{stanfit} object. Additionally it performs multiple diagnostics checks of the chain
@@ -67,7 +68,8 @@ The chain is initialized using the REML parameter estimates from MMRM as startin
 The function performs the following steps:
 \enumerate{
 \item Fit MMRM using a REML approach.
-\item Prepare the input data for the MCMC fit as described in the \verb{data\{\}} block of the Stan file. See \code{\link[=prepare_stan_data]{prepare_stan_data()}} for details.
+\item Prepare the input data for the MCMC fit as described in the \verb{data\{\}}
+block of the Stan file. See \code{\link[=prepare_stan_data]{prepare_stan_data()}} for details.
 \item Run the MCMC according the input arguments and using as starting values the REML parameter estimates
 estimated at point 1.
 \item Performs diagnostics checks of the MCMC. See \code{\link[=check_mcmc]{check_mcmc()}} for details.
@@ -75,7 +77,9 @@ estimated at point 1.
 }
 
 The chains perform \code{n_imputations} draws by keeping one every \code{burn_between} iterations. Additionally
-the first \code{burn_in} iterations are discarded. The total number of iterations will then be \code{burn_in + burn_between*n_imputations}.
-The purpose of \code{burn_in} is to ensure that the samples are drawn from the stationary distribution of the Markov Chain.
+the first \code{burn_in} iterations are discarded. The total number of iterations will
+then be \code{burn_in + burn_between*n_imputations}.
+The purpose of \code{burn_in} is to ensure that the samples are drawn from the stationary
+distribution of the Markov Chain.
 The \code{burn_between} aims to keep the draws uncorrelated each from other.
 }

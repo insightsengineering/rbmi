@@ -141,7 +141,7 @@ delta_template <- function(
 ) {
     dat <- get_delta_template(imputations)
 
-    if(is.null(delta)) return(dat)
+    if (is.null(delta)) return(dat)
 
     ld <- imputations$data
 
@@ -193,7 +193,7 @@ delta_template <- function(
 #' for defining delta. See [delta_template()] for full details.
 #'
 #' @param imputations an imputations object created by [impute()].
-get_delta_template <- function(imputations){
+get_delta_template <- function(imputations) {
     ld <- imputations$data
     x <- lapply(
         ld$ids,
