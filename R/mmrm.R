@@ -159,7 +159,7 @@ extract_params <- function(fit) {
 #' Fit a MMRM model
 #'
 #' @description
-#' Fits a mmrm model allowing for different covariance structures using [glmmTMB::glmmTMB()].
+#' Fits a MMRM model allowing for different covariance structures using [glmmTMB::glmmTMB()].
 #' Returns a glmmTMB fit object with an additional element `failed` indicating whether or not
 #' the fit failed to converge.
 #'
