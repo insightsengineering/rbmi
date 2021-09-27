@@ -8,22 +8,27 @@
 A data frame with 608 rows and 11 variables:
 \itemize{
 \item \code{PATIENT}: patients IDs.
+\item \code{HAMATOTL}: total score Hamilton Anxiety Rating Scale.
+\item \code{PGIIMP}: patient’s Global Impression of Improvement Rating Scale.
+\item \code{RELDAYS}: number of days between visit and baseline.
 \item \code{VISIT}: post-baseline visit. Has levels 4,5,6,7.
 \item \code{THERAPY}: the treatment group variable. It is equal to \code{PLACEBO} for observations
 from the placebo arm, or \code{DRUG} for observations from the active arm.
-\item \code{basval}: baseline outcome value.
+\item \code{GENDER}: patient's sex.
+\item \code{POOLINV}: pooled investigator.
+\item \code{BASVAL}: baseline outcome value.
 \item \code{HAMDTL17}: Hamilton 17-item rating scale value.
-\item \code{change}: change from baseline in the Hamilton 17-item rating scale.
-\item ...
+\item \code{CHANGE}: change from baseline in the Hamilton 17-item rating scale.
 }
 }
 \usage{
 antidepressant_data
 }
 \description{
-A dataset containing the data from a public available antidepressant clinical trial of an active drug versus placebo.
+A dataset containing data from a publicly available antidepressant clinical trial of an active drug versus placebo.
+The dataset is available \href{https://www.lshtm.ac.uk/research/centres-projects-groups/missing-data#dia-missing-data}{here}.
 The relevant endpoint is the Hamilton 17-item rating scale for depression (HAMD17) which was assessed at baseline and weeks 1, 2, 4, and 6.
-Study drug discontinuation occurred in 24\% (20/84) for the active drug and 26\% (23/88) for placebo.
+Study drug discontinuation occurred in 24\% subjects from the active drug and 26\% from placebo.
 All data after study drug discontinuation are missing and there is a single additional intermittent missing observation.
 }
 \keyword{datasets}
