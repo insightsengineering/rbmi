@@ -23,10 +23,10 @@ will not cover any of the underlying theory.
 The rbmi package consists of 4 core functions as well as a several key helper functions.
 In particular the core functions are:
 
-- `draws()` - Creates the imputation models
-- `impute()` - Creates multiple imputed datasets
-- `analyse()` - Analyses the multiple imputed datasets
-- `pool()` - Combines the multiple analysis results into a single statistic
+- `draws()` - Creates the imputation models.
+- `impute()` - Creates multiple imputed datasets.
+- `analyse()` - Analyses the multiple imputed datasets.
+- `pool()` - Combines the multiple analysis results into a single statistic.
 
 ## The Data
 
@@ -65,7 +65,7 @@ dat <- expand_locf(
 The draws function is used to create our imputation models. The 3 main inputs to the `draws()`
 function include:
 
-- `data` the primary longitudinal data.frame containing the outcome variable and all covariates
+- `data` the primary longitudinal data.frame containing the outcome variable and all covariates.
 - `data_ice` a data.frame specifying which visit (if any) the patient's intercurrent 
 event (ICE) occurred on, or more precisely the first visit in which the outcome has been affected by the ICE. If the patient had multiple ICEs this should 
 specify the first visit affected by the ICE which is to be imputed by a non-MAR. It also 
@@ -138,18 +138,18 @@ thus the inclusion of `group * visit` in the list of covariates.
 
 Available methods include:
 
-- Bayes - `method_bayes()`
-- Approximate Bayes - `method_approxbayes()`
-- Conditional Mean (Bootstrap) - `method_condmean(type = "bootstrap")`
-- Conditional Mean (Jackknife) - `method_condmean(type = "jackknife")`
+- Bayes - `method_bayes()`.
+- Approximate Bayes - `method_approxbayes()`.
+- Conditional Mean (Bootstrap) - `method_condmean(type = "bootstrap")`.
+- Conditional Mean (Jackknife) - `method_condmean(type = "jackknife")`.
 
 Available imputation strategies include:
 
-- Missing Completely at Random - "MAR"
-- Jump to Reference - "JR"
-- Copy Reference - "CR"
-- Copy increments from Reference - "CIR"
-- Last Mean Carried Forward - "LMCF"
+- Missing Completely at Random - `"MAR"`.
+- Jump to Reference - `"JR"`.
+- Copy Reference - `"CR"`.
+- Copy increments from Reference - `"CIR"`.
+- Last Mean Carried Forward - `"LMCF"`.
 
 
 ## Impute
@@ -261,9 +261,9 @@ the hypothesis test that $H_0 = 0$.
 Note that the pooling method is automatically derived based on the method that was specified
 in the original call to `draws()`:
 
-- If `method_bayes()` or `method_approxbayes()` was used then pooling and inference are based on Rubin's rules
-- If `method_condmean(type = "bootstrap") ` was used then inference is based on either normal approximation of the treatment effect distribution (`pool(..., type = "normal")`) or on percentiles (`pool(..., type = "percentile")`)
-- If `method_condmean(type = "jackknife")` was used then inference is based on normal approximation
+- If `method_bayes()` or `method_approxbayes()` was used then pooling and inference are based on Rubin's rules.
+- If `method_condmean(type = "bootstrap") ` was used then inference is based on either normal approximation of the treatment effect distribution (`pool(..., type = "normal")`) or on percentiles (`pool(..., type = "percentile")`).
+- If `method_condmean(type = "jackknife")` was used then inference is based on normal approximation.
 
 Since we have used Bayesian methods in this vignette the `pool()` function will automatically use Rubin's rules.
 
