@@ -47,7 +47,7 @@
 #' estimates in [draws()]. Missing values are imputed by using the mean of the conditional
 #' imputation distribution. Please note that the first imputed dataset refers to the conditional
 #' mean imputation on the original dataset whereas all subsequent imputed datasets refer to
-#  conditional mean imputations for bootstrap or jackknife samples, respectively, of the original data)
+#' conditional mean imputations for bootstrap or jackknife samples, respectively, of the original data.
 #'
 #' The `update_strategy` argument can be used to update the imputation strategy that was
 #' originally set via the `data_ice` option in [draws()]. This avoids having to re-run the [draws()]

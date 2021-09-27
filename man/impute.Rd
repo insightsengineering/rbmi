@@ -53,6 +53,7 @@ bootstrapped or jackknife dataset that was used to generate the corresponding pa
 estimates in \code{\link[=draws]{draws()}}. Missing values are imputed by using the mean of the conditional
 imputation distribution. Please note that the first imputed dataset refers to the conditional
 mean imputation on the original dataset whereas all subsequent imputed datasets refer to
+conditional mean imputations for bootstrap or jackknife samples, respectively, of the original data.
 }
 
 The \code{update_strategy} argument can be used to update the imputation strategy that was
