@@ -58,7 +58,7 @@ simulate_data <- function(
     n = 200,
     sd = c(3, 5, 7),
     cor = c(0.1, 0.7, 0.4),
-    mu = list("int" = 10, "age" = 3, "sex" = 2, "trt" = c(0,4,8), "visit" = c(0,1,2))
+    mu = list("int" = 10, "age" = 3, "sex" = 2, "trt" = c(0, 4, 8), "visit" = c(0, 1, 2))
 ) {
 
     nv <- length(sd)
@@ -69,7 +69,7 @@ simulate_data <- function(
     num_dig <- floor(log(x = n, base = 10)) + 1
     num_dig_vis <- floor(log(x = nv, base = 10)) + 1
 
-    n_cor <- sum(seq_len(length(sd)-1))
+    n_cor <- sum(seq_len(length(sd) - 1))
     assert_that(
         length(sd) == n_cor,
         msg = sprintf("There should be %s correlation parameters", n_cor)
@@ -85,8 +85,8 @@ simulate_data <- function(
         msg = sprintf("`mu$trt` must be of length 1 or %s", nv)
     )
 
-    pt_ids <- sprintf( paste0("P%0", num_dig, "d"), seq_len(n))
-    vis_ids <- sprintf( paste0("visit_%0", num_dig_vis, "d"), 1:nv)
+    pt_ids <- sprintf(paste0("P%0", num_dig, "d"), seq_len(n))
+    vis_ids <- sprintf(paste0("visit_%0", num_dig_vis, "d"), 1:nv)
     sigma <- as_vcov(sd, cor)
 
     covars <- data.frame(
@@ -102,14 +102,14 @@ simulate_data <- function(
         sample_mvnorm(rep(0, nv), sigma),
         simplify = FALSE
     )
-    samps_mat <- matrix(unlist(samps), nrow = n, byrow= TRUE)
+    samps_mat <- matrix(unlist(samps), nrow = n, byrow = TRUE)
     colnames(samps_mat) <- vis_ids
 
     samps_dat <- as.data.frame(samps_mat)
     samps_dat$id <- pt_ids
 
     dat <- Reduce(rbind, lapply(vis_ids, function(vis) {
-        x <- samps_dat[,c("id", vis)]
+        x <- samps_dat[, c("id", vis)]
         colnames(x) <- c("id", "outcome")
         x[["visit"]] <- vis
         as.data.frame(x)

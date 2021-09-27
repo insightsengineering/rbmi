@@ -2,7 +2,7 @@
 % Please edit documentation in R/mmrm.R
 \name{fit_mmrm}
 \alias{fit_mmrm}
-\title{Title}
+\title{Fit a MMRM model}
 \usage{
 fit_mmrm(
   designmat,
@@ -18,26 +18,35 @@ fit_mmrm(
 )
 }
 \arguments{
-\item{designmat}{TODO}
+\item{designmat}{a \code{data.frame} or \code{matrix} containing the covariates to use in the MMRM model.
+Dummy variables must already be expanded out, i.e. via \code{\link[stats:model.matrix]{stats::model.matrix()}}. Cannot contain
+any missing values}
 
-\item{outcome}{TODO}
+\item{outcome}{a numeric vector. The outcome value to be regressed on in the MMRM model.}
 
-\item{subjid}{TODO}
+\item{subjid}{a character / factor vector. The subject identifier used to link separate visits that belong to
+the same subject.}
 
-\item{visit}{TODO}
+\item{visit}{a character / factor vector. Indicates which visit the outcome value occoured on.}
 
-\item{group}{TODO}
+\item{group}{a character / factor vector. Indicates which treatment group the patient belongs to.}
 
-\item{cov_struct}{TODO}
+\item{cov_struct}{a character value. Specifies which covariance structure to use. Must be one of
+\code{"us"}, \code{"toep"}, \code{"cs"} or  \code{"ar1"}}
 
-\item{REML}{TODO}
+\item{REML}{logical. Specifies whether restricted maximium likelihood should be used}
 
-\item{same_cov}{TODO}
+\item{same_cov}{logical. Used to specify if a shared or individual covariance matrix should be used
+per \code{group}}
 
-\item{initial_values}{TODO}
+\item{initial_values}{a list with names \code{beta} and \code{theta}. Specifies the initial values to start
+the optimizer for \code{\link[glmmTMB:glmmTMB]{glmmTMB::glmmTMB()}} at.}
 
-\item{optimizer}{TODO}
+\item{optimizer}{a character value. Specifies the optimizer to be used in \code{\link[glmmTMB:glmmTMB]{glmmTMB::glmmTMB()}}. See
+\code{\link[stats:optim]{stats::optim()}} for the available options}
 }
 \description{
-Title
+Fits a MMRM model allowing for different covariance structures using \code{\link[glmmTMB:glmmTMB]{glmmTMB::glmmTMB()}}.
+Returns a glmmTMB fit object with an additional element \code{failed} indicating whether or not
+the fit failed to converge.
 }

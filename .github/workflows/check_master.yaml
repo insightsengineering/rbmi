@@ -6,7 +6,7 @@ on:
       - main
       - master
 
-name: Check Develop
+name: Check Master
 
 jobs:
 

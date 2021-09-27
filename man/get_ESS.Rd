@@ -2,13 +2,16 @@
 % Please edit documentation in R/mcmc.R
 \name{get_ESS}
 \alias{get_ESS}
-\title{Title - TODO}
+\title{Extract the Effective Sample Size (ESS) from a \code{stanfit} object}
 \usage{
 get_ESS(stan_fit)
 }
 \arguments{
-\item{stan_fit}{TODO}
+\item{stan_fit}{A \code{stanfit} object.}
+}
+\value{
+A named vector containing the ESS for each parameter of the model.
 }
 \description{
-Title - TODO
+Extract the Effective Sample Size (ESS) from a \code{stanfit} object
 }

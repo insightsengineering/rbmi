@@ -2,13 +2,23 @@
 % Please edit documentation in R/mcmc.R
 \name{check_hmc_diagn}
 \alias{check_hmc_diagn}
-\title{Title - TODO}
+\title{Diagnostics of the MCMC based on HMC-related measures.}
 \usage{
 check_hmc_diagn(stan_fit)
 }
 \arguments{
-\item{stan_fit}{TODO}
+\item{stan_fit}{A \code{stanfit} object.}
+}
+\value{
+A warning message in case of detected problems.
 }
 \description{
-Title - TODO
+Check that:
+\enumerate{
+\item There are no divergent iterations.
+\item The Bayesian Fraction of Missing Information (BFMI) is sufficiently low.
+\item The number of iterations that saturated the max treedepth is zero.
+}
+
+Please see \code{\link[rstan:check_hmc_diagnostics]{rstan::check_hmc_diagnostics()}} for details.
 }

@@ -55,7 +55,7 @@ has_class <- function(x, cls) {
 #' @param vars an `ivars` object as created by [set_vars()]
 #' @return
 #' A formula
-as_simple_formula <- function(vars){
+as_simple_formula <- function(vars) {
     variables <- c(
         vars$group,
         vars$visit,
@@ -310,7 +310,8 @@ str_contains <- function(x, subs) {
 #' Sorts a dataframe (ascending by default) based upon variables within the dataset
 #' @param df data.frame
 #' @param vars character vector of variables
-#' @param decreasing logical whether sort order should be in descending or ascending (default) order. Can be either a single logical value (in which case it is applied to
+#' @param decreasing logical whether sort order should be in descending or ascending (default) order.
+#' Can be either a single logical value (in which case it is applied to
 #' all variables) or a vector which is the same length as `vars`
 #' @examples
 #' \dontrun{
@@ -429,7 +430,6 @@ set_vars <- function(
 #' @param ... not used
 #' @export
 validate.ivars <- function(x, ...) {
-    covars <- extract_covariates(x$covariates)
 
     assert_that(
         is_char_one(x$outcome),
@@ -456,8 +456,9 @@ validate.ivars <- function(x, ...) {
         msg = "`vars$strategy` should be a length 1 character"
     )
 
+    covars <- extract_covariates(x$covariates)
     assert_that(
-        is.character(x$covars) | is.null(x$covars),
+        is.character(covars) | is.null(covars),
         msg = "`vars$covars` should be a character vector or NULL"
     )
 

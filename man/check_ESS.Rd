@@ -2,17 +2,32 @@
 % Please edit documentation in R/mcmc.R
 \name{check_ESS}
 \alias{check_ESS}
-\title{Title - TODO}
+\title{Diagnostics of the MCMC based on ESS}
 \usage{
-check_ESS(stan_fit, n_draws, threshold = 0.4)
+check_ESS(stan_fit, n_draws, threshold_lowESS = 0.4)
 }
 \arguments{
-\item{stan_fit}{TODO}
+\item{stan_fit}{A \code{stanfit} object.}
 
-\item{n_draws}{TODO}
+\item{n_draws}{Number of MCMC draws.}
 
-\item{threshold}{TODO}
+\item{threshold_lowESS}{A number in \verb{[0,1]} indicating the minimum acceptable
+value of the relative ESS. See details.}
+}
+\value{
+A warning message in case of detected problems.
 }
 \description{
-Title - TODO
+Check the quality of the MCMC draws from the posterior distribution
+by checking whether the relative ESS is sufficiently large.
+}
+\details{
+\code{check_ESS()} works as follows:
+\enumerate{
+\item Extract the ESS from \code{stan_fit} for each parameter of the model.
+\item Compute the relative ESS (i.e. the ESS divided by the number of draws).
+\item Check whether for any of the parameter the ESS is lower than \code{threshold}.
+If for at least one parameter the relative ESS is below the threshold,
+a warning is thrown.
+}
 }

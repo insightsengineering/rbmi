@@ -30,8 +30,8 @@ the results from a multiple imputation procedure. The pooled point estimate \cod
 is the average across the point estimates from the complete-data analyses (given by the input argument \code{ests}).
 The total variance \code{var_t} is the sum of two terms representing the within-variance
 and the between-variance (see Little-Rubin (2002)). The function
-also returns \code{df}, the estimation of the pooled degrees of freedom according to Barnard-Rubin (1999)
-that can be used for inference based on t-distribution.
+also returns \code{df}, the estimated pooled degrees of freedom according to Barnard-Rubin (1999)
+that can be used for inference based on the t-distribution.
 }
 \references{
 Barnard, J. and Rubin, D.B. (1999).

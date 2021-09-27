@@ -115,6 +115,8 @@ test_that("condmean - jackknife", {
 })
 
 
+
+
 test_that("bayes", {
     set.seed(40123)
     d <- get_data(40)
@@ -157,20 +159,6 @@ test_that("failure limits", {
     expect_true(t_01 < t_05)
     expect_true(t_05 < t_10)
 })
-
-
-#### TODO - Draw functions to test
-# get_bootstrap_draws <- function(longdata, method, use_samp_ids = FALSE, first_sample_orig = FALSE)
-# get_jackknife_draws <- function(longdata, method)
-# get_mmrm_sample <- function(ids, longdata, method)
-# extract_data_nmar_as_na <- function(longdata)
-# as_sample_single <- function(...)
-# validate.sample_single <- function(...)
-# as_sample_list  <- function(...)
-# validate.sample_list <- function(x, ...)
-# as_draws <- function(method, samples, data, formula, n_failures = NA, fit = NA)
-
-
 
 
 
@@ -242,8 +230,3 @@ test_that("NULL data_ice works uses MAR by default", {
     expect_true(all(unlist(dobj$data$is_mar)))
     expect_true(all(!unlist(dobj$data$is_post_ice)))
 })
-
-
-
-
-
