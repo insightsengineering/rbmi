@@ -8,9 +8,11 @@
 
 ## Overview
 
-rbmi is an R package for performing reference based multiple imputation. The package
-provides implementations for common, patient-specific imputation strategies whilst allowing the user to 
-select between various standard Bayesian and frequentist approaches.
+rbmi is a R package for imputation of missing data in clinical trials with continuous multivariate normal longitudinal outcomes. 
+It supports imputation under a missing at random (MAR) assumption, reference-based imputation methods, 
+and delta adjustments (as required for sensitivity analysis such as tipping point analyses). The package implements both Bayesian and 
+approximate Bayesian multiple imputation combined with Rubin's rules for inference, and frequentist conditional mean imputation combined with 
+(jackknife or bootstrap) resampling. 
 
 ## Installation
 
@@ -29,7 +31,7 @@ The package is designed around its 4 core functions:
 - `analyse()` - Analyses multiple datasets
 - `pool()` - Pools multiple results into a single statistic
 
-Full details including a walkthrough can be found in the quickstart vignette:
+The basic usage of these core functions is described in the quickstart vignette:
 
 ```
 vignette(topic= "quickstart", package = "rbmi")
