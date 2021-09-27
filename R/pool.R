@@ -1,6 +1,6 @@
 
 
-#' Pool analysis results
+#' Pool analysis results obtained from the imputed datasets
 #'
 #' @param results an analysis object created by [analyse()].
 #'
@@ -11,7 +11,7 @@
 #' must be one of "two.sided" (default), "greater" or "less".
 #'
 #' @param type a character string of either `"percentile"` (default) or
-#' `"normal"`. Determines what method should be used to calculate the confidence
+#' `"normal"`. Determines what method should be used to calculate the bootstrap confidence
 #' intervals. See details.
 #' Only used if `method_condmean(type = "bootstrap")` was specified
 #' in the original call to [draws()].
@@ -30,9 +30,9 @@
 #'  and variances across multiple imputed data, and the Barnard-Rubin rule to pool
 #'  degree's of freedom; see Little & Rubin (2002).
 #' - `method_condmean(type = "bootstrap")` Uses percentile or normal approximation;
-#' See Efron & Tibshirani (1994). Note that under this method no standard error is
-#' calculated and as such will be `NA` in the returned object / data.frame.
-#' - `method_condmean(type = "jackknife")` Uses the standard jackknife formula;
+#' See Efron & Tibshirani (1994). Note that for the percentile bootstrap, no standard error is
+#' calculated, i.e. the standard errors will be `NA` in the object / data.frame.
+#' - `method_condmean(type = "jackknife")` Uses the standard jackknife variance formula;
 #' See Efron & Tibshirani (1994).
 #'
 #'
@@ -211,7 +211,7 @@ pool_internal.rubin <- function(results, conf.level, alternative, type) {
 
 #' @title Barnard and Rubin degrees of freedom adjustment
 #'
-#' @description Compute degrees of freedom according to Barnard-Rubin formula.
+#' @description Compute degrees of freedom according to the Barnard-Rubin formula.
 #'
 #' @param v_com Positive number representing the degrees of freedom in the complete-data analysis.
 #' @param var_b Between-variance of point estimate across multiply imputed datasets.
@@ -221,7 +221,7 @@ pool_internal.rubin <- function(results, conf.level, alternative, type) {
 #' @return Degrees of freedom according to Barnard-Rubin formula. See Barnard-Rubin (1999).
 #'
 #' @details The computation takes into account limit cases where there is no missing data
-#'   (i.e. the between-variance `var_b` is zero) and the complete-data degrees of freedom is
+#'   (i.e. the between-variance `var_b` is zero) or where the complete-data degrees of freedom is
 #'   set to `Inf`. Moreover, if `v_com` is given as `NA`, the function returns `Inf`.
 #'
 #' @references
@@ -234,13 +234,13 @@ rubin_df <- function(v_com, var_b, var_t, M) {
     } else {
         lambda <- (1 + 1 / M) * var_b / var_t
 
-        if(!is.infinite(v_com)) {
+        if (!is.infinite(v_com)) {
             v_obs <- ((v_com + 1) / (v_com + 3)) * v_com * (1 - lambda)
         }
 
-        if(lambda != 0) {
+        if (lambda != 0) {
             v_old <- (M - 1)  / lambda^2
-            if(is.infinite(v_com))
+            if (is.infinite(v_com))
                 df <- v_old
             else {
                 df <- (v_old * v_obs) / (v_old + v_obs)
@@ -274,8 +274,8 @@ rubin_df <- function(v_com, var_b, var_t, M) {
 #' is the average across the point estimates from the complete-data analyses (given by the input argument `ests`).
 #' The total variance `var_t` is the sum of two terms representing the within-variance
 #' and the between-variance (see Little-Rubin (2002)). The function
-#' also returns `df`, the estimation of the pooled degrees of freedom according to Barnard-Rubin (1999)
-#' that can be used for inference based on t-distribution.
+#' also returns `df`, the estimated pooled degrees of freedom according to Barnard-Rubin (1999)
+#' that can be used for inference based on the t-distribution.
 #'
 #' @seealso [rubin_df()] for the degrees of freedom estimation.
 #'
@@ -519,7 +519,7 @@ transpose_results <- function(results, components) {
 as.data.frame.pool <- function(x, ...) {
     data.frame(
         parameter = names(x$pars),
-        est =vapply(x$pars, function(x) x$est, numeric(1)),
+        est = vapply(x$pars, function(x) x$est, numeric(1)),
         se = vapply(x$pars, function(x) x$se, numeric(1)),
         lci = vapply(x$pars, function(x) x$ci[[1]], numeric(1)),
         uci = vapply(x$pars, function(x) x$ci[[2]], numeric(1)),

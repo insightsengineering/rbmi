@@ -2,7 +2,8 @@
 % Please edit documentation in R/draws.R
 \name{extract_data_nmar_as_na}
 \alias{extract_data_nmar_as_na}
-\title{Set to NA outcome values that are MNAR}
+\title{Set to NA outcome values that would be MNAR if they were missing
+(i.e. which occur after an ICE handled using a reference-based imputation strategy)}
 \usage{
 extract_data_nmar_as_na(longdata)
 }
@@ -14,5 +15,6 @@ A \code{data.frame} containing \code{longdata$get_data(longdata$ids)}, but MNAR 
 values are set to \code{NA}.
 }
 \description{
-Set to NA outcome values that are MNAR
+Set to NA outcome values that would be MNAR if they were missing
+(i.e. which occur after an ICE handled using a reference-based imputation strategy)
 }

@@ -4,7 +4,7 @@
 \alias{pool}
 \alias{as.data.frame.pool}
 \alias{print.pool}
-\title{Pool analysis results}
+\title{Pool analysis results obtained from the imputed datasets}
 \usage{
 pool(
   results,
@@ -27,7 +27,7 @@ Must be a single number between 0 and 1. Default is 0.95.}
 must be one of "two.sided" (default), "greater" or "less".}
 
 \item{type}{a character string of either \code{"percentile"} (default) or
-\code{"normal"}. Determines what method should be used to calculate the confidence
+\code{"normal"}. Determines what method should be used to calculate the bootstrap confidence
 intervals. See details.
 Only used if \code{method_condmean(type = "bootstrap")} was specified
 in the original call to \code{\link[=draws]{draws()}}.}
@@ -37,7 +37,7 @@ in the original call to \code{\link[=draws]{draws()}}.}
 \item{...}{not used.}
 }
 \description{
-Pool analysis results
+Pool analysis results obtained from the imputed datasets
 }
 \details{
 The calculation used to generate the point estimate, standard errors and
@@ -48,9 +48,9 @@ call to \code{\link[=draws]{draws()}}; In particular:
 and variances across multiple imputed data, and the Barnard-Rubin rule to pool
 degree's of freedom; see Little & Rubin (2002).
 \item \code{method_condmean(type = "bootstrap")} Uses percentile or normal approximation;
-See Efron & Tibshirani (1994). Note that under this method no standard error is
-calculated and as such will be \code{NA} in the returned object / data.frame.
-\item \code{method_condmean(type = "jackknife")} Uses the standard jackknife formula;
+See Efron & Tibshirani (1994). Note that for the percentile bootstrap, no standard error is
+calculated, i.e. the standard errors will be \code{NA} in the object / data.frame.
+\item \code{method_condmean(type = "jackknife")} Uses the standard jackknife variance formula;
 See Efron & Tibshirani (1994).
 }
 }

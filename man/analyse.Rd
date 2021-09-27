@@ -68,10 +68,14 @@ Please note that this function
 requires that a vars object, as created by \code{\link[=set_vars]{set_vars()}}, is provided via
 the \code{vars} argument e.g. \code{analyse(imputeObj, vars = set_vars(...))}. Please
 see the documentation for \code{\link[=ancova]{ancova()}} for full details.
+Please also note that the theoretical justification for the conditional mean imputation
+method (\code{method = method_condmean()} in \code{\link[=draws]{draws()}}) relies on the fact that ANCOVA is
+a linear transformation of the outcomes.
+Thus care is required when applying alternative analysis functions in this setting.
 
 The \code{delta} argument can be used to specify offsets to be applied
-to the outcome variable in the imputed datasets which can be used
-as part of a sensitivity or tipping point analysis. The
+to the outcome variable in the imputed datasets prior to the analysis.
+This is typically used for sensitivity or tipping point analysis. The
 delta dataset must contain columns \code{vars$subjid}, \code{vars$visit} (as specified
 in the original call to \code{\link[=draws]{draws()}}) and \code{delta}. Essentially this data.frame
 is merged onto the imputed dataset by \code{vars$subjid} and \code{vars$visit} and then

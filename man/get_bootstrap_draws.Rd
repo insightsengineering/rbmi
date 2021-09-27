@@ -53,9 +53,11 @@ Fit the base imputation model using a ML/REML approach on a given number of boot
 specified by \code{method$n_samples}. Returns the parameter estimates from the model fit.
 }
 \details{
+Bootstrapping refers to resampling of subjects (and their full longitudinal data) from \code{data} with
+replacement and and not to resampling of individual rows from \code{data}.
 If the model fit fails in the original dataset, an error message is thrown. If
-the model fit fails in a bootstrap sample, such bootstrap sample is not considered
-and it is replaced by another bootstrap sample. \code{method$threshold} defines the
+the model fit fails in a bootstrap sample, then that bootstrap sample is not considered
+and replaced by another bootstrap sample. \code{method$threshold} defines the
 maximum fraction of model fit failures: if the number of failures overcomes
 \code{ceiling(method$threshold * method$n_samples)} the process stops and an error message
 is displayed.

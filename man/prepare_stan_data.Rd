@@ -2,21 +2,45 @@
 % Please edit documentation in R/mcmc.R
 \name{prepare_stan_data}
 \alias{prepare_stan_data}
-\title{Title - TODO}
+\title{Prepare input data to run the Stan model}
 \usage{
 prepare_stan_data(ddat, subjid, visit, outcome, group)
 }
 \arguments{
-\item{ddat}{TODO}
+\item{ddat}{A design matrix}
 
-\item{subjid}{TODO}
+\item{subjid}{Character vector containing the subjects IDs.}
 
-\item{visit}{TODO}
+\item{visit}{Vector containing the visits.}
 
-\item{outcome}{TODO}
+\item{outcome}{Numeric vector containing the outcome variable.}
 
-\item{group}{TODO}
+\item{group}{Vector containing the group variable.}
+}
+\value{
+A \code{stan_data} object. A named list as per \verb{data\{\}} block of the related Stan file. In particular it returns:
+\itemize{
+\item N - The number of rows in the design matrix
+\item P - The number of columns in the design matrix
+\item G - The number of distinct covariance matrix groups (i.e. \code{length(unique(group))})
+\item n_visit - The number of unique outcome visits
+\item n_pat - The total number of pattern groups (as defined by missingness patterns & covariance group)
+\item pat_G - Index for which Sigma each pattern group should use
+\item pat_n_pt - number of patients within each pattern group
+\item pat_n_visit - number of non-missing visits in each pattern group
+\item pat_sigma_index - rows/cols from Sigma to subset on for the pattern group (padded by 0's)
+\item y - The outcome variable
+\item Q - design matrix (after QR decomposition)
+\item R - R matrix from the QR decomposition of the design matrix
+}
 }
 \description{
-Title - TODO
+Prepare input data to run the Stan model.
+Creates / calculates all the required inputs as required by the \verb{data\{\}} block of the MMRM Stan program.
+}
+\details{
+\itemize{
+\item The \code{group} argument determines which covariance matrix group the subject belongs to. If you
+want all subjects to use a shared covariance matrix then set group to "1" for everyone.
+}
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ancova.R
 \name{ancova_single}
 \alias{ancova_single}
-\title{Implements analysis of Covariance}
+\title{Implements an Analysis of Covariance (ANCOVA)}
 \usage{
 ancova_single(data, outcome, group, covariates)
 }
@@ -13,8 +13,8 @@ ancova_single(data, outcome, group, covariates)
 
 \item{group}{Character, the name of the group variable in \code{data}.}
 
-\item{covariates}{Character vector containing the name of any covariates
-to be used in the model as well as any interaction terms required.}
+\item{covariates}{Character vector containing the name of any additional covariates
+to be included in the model as well as any interaction terms.}
 }
 \description{
 Performance analysis of covariance. See \code{\link[=ancova]{ancova()}} for full details.

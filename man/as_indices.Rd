@@ -2,12 +2,13 @@
 % Please edit documentation in R/mcmc.R
 \name{as_indices}
 \alias{as_indices}
-\title{TODO}
+\title{Convert indicator to index}
 \usage{
 as_indices(x)
 }
 \arguments{
-\item{x}{TODO}
+\item{x}{a character vector whose values are all either "0" or "1". All elements of
+the vector must be the same length}
 }
 \description{
 Converts a string of 0's and 1's into index positions of the 1's

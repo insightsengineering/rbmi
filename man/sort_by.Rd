@@ -11,7 +11,8 @@ sort_by(df, vars = NULL, decreasing = FALSE)
 
 \item{vars}{character vector of variables}
 
-\item{decreasing}{logical whether sort order should be in descending or ascending (default) order. Can be either a single logical value (in which case it is applied to
+\item{decreasing}{logical whether sort order should be in descending or ascending (default) order.
+Can be either a single logical value (in which case it is applied to
 all variables) or a vector which is the same length as \code{vars}}
 }
 \description{

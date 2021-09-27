@@ -14,9 +14,9 @@ extract_imputed_dfs(
 \arguments{
 \item{imputations}{An imputations object as created by \code{\link[=impute]{impute()}}.}
 
-\item{index}{The indexes of the imputed data.frames to return. By default will
-return all data.frames within the imputations object
-(i.e. use this argument if you just want the "1st" data.frame).}
+\item{index}{The indexes of the imputed data.frames to return. By default,
+all data.frames within the imputations object will be returned
+(i.e. use this argument if you just want e.g. the first data.frame only).}
 
 \item{delta}{A data.frame containing the delta transformation to be
 applied to the imputed dataset. See \code{\link[=analyse]{analyse()}} for details on the
@@ -31,7 +31,7 @@ subject IDs.}
 A list of data.frames equal in length to the \code{index} argument.
 }
 \description{
-Extracts the imputed datasets contained with an imputations object generated
+Extracts the imputed datasets contained within an imputations object generated
 by \code{\link[=impute]{impute()}}.
 }
 \examples{

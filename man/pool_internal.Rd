@@ -31,7 +31,7 @@ Must be a single number between 0 and 1. Default is 0.95.}
 must be one of "two.sided" (default), "greater" or "less".}
 
 \item{type}{a character string of either \code{"percentile"} (default) or
-\code{"normal"}. Determines what method should be used to calculate the confidence
+\code{"normal"}. Determines what method should be used to calculate the bootstrap confidence
 intervals. See details.
 Only used if \code{method_condmean(type = "bootstrap")} was specified
 in the original call to \code{\link[=draws]{draws()}}.}

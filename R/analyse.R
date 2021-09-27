@@ -57,10 +57,14 @@
 #' requires that a vars object, as created by [set_vars()], is provided via
 #' the `vars` argument e.g. `analyse(imputeObj, vars = set_vars(...))`. Please
 #' see the documentation for [ancova()] for full details.
+#' Please also note that the theoretical justification for the conditional mean imputation
+#' method (`method = method_condmean()` in [draws()]) relies on the fact that ANCOVA is
+#' a linear transformation of the outcomes.
+#' Thus care is required when applying alternative analysis functions in this setting.
 #'
 #' The `delta` argument can be used to specify offsets to be applied
-#' to the outcome variable in the imputed datasets which can be used
-#' as part of a sensitivity or tipping point analysis. The
+#' to the outcome variable in the imputed datasets prior to the analysis.
+#' This is typically used for sensitivity or tipping point analysis. The
 #' delta dataset must contain columns `vars$subjid`, `vars$visit` (as specified
 #' in the original call to [draws()]) and `delta`. Essentially this data.frame
 #' is merged onto the imputed dataset by `vars$subjid` and `vars$visit` and then
@@ -175,13 +179,13 @@ analyse <- function(imputations, fun = ancova, delta = NULL, ...) {
 #' Extract imputed datasets
 #'
 #' @description
-#' Extracts the imputed datasets contained with an imputations object generated
+#' Extracts the imputed datasets contained within an imputations object generated
 #' by [impute()].
 #'
 #' @param imputations An imputations object as created by [impute()].
-#' @param index The indexes of the imputed data.frames to return. By default will
-#' return all data.frames within the imputations object
-#' (i.e. use this argument if you just want the "1st" data.frame).
+#' @param index The indexes of the imputed data.frames to return. By default,
+#' all data.frames within the imputations object will be returned
+#' (i.e. use this argument if you just want e.g. the first data.frame only).
 #' @param delta A data.frame containing the delta transformation to be
 #' applied to the imputed dataset. See [analyse()] for details on the
 #' format and specification of this data.frame.
@@ -336,7 +340,7 @@ print.analysis <- function(x, ...) {
         sprintf("Number of Results: %s", n_samp_string),
         sprintf("Analysis Function: %s", x$fun_name),
         sprintf("Delta Applied: %s", !is.null(x$delta)),
-        "Analysis Parameters:",
+        "Analysis Estimates:",
         sprintf("    %s", names(x$results[[1]])),
         ""
     )
@@ -441,7 +445,7 @@ validate_analyse_pars <- function(results, pars) {
 
     devnull <- lapply(
         results_unnested,
-        function(x){
+        function(x) {
             assert_that(
                 is.list(x),
                 all(pars %in% names(x)),
@@ -464,5 +468,3 @@ validate_analyse_pars <- function(results, pars) {
 
     return(invisible(TRUE))
 }
-
-

@@ -142,18 +142,14 @@ validate_datalong_notMissing <- function(data, vars) {
 validate_datalong_complete <- function(data, vars) {
     unique_subjects <- unique(data[[vars$subjid]])
     unique_visits <- levels(data[[vars$visit]])
-    is_complete_list <- tapply(
-        data[[vars$visit]],
-        data[[vars$subjid]],
-        function(x) {
-            all(unique_visits %in% x) & length(unique_visits) == length(x)
-        },
-        simplify = FALSE
+
+    data_dedup <- unique(data[, c(vars$subjid, vars$visit)])
+
+    assert_that(
+        nrow(data) == length(unique_subjects) * length(unique_visits),
+        nrow(data_dedup) == nrow(data),
+        msg = "At least one subject has either incomplete or duplicated data"
     )
-    is_complete <- unlist(is_complete_list, use.names = FALSE)
-    if (! all(is_complete)) {
-        stop("At least one subject has either incomplete or duplicate data")
-    }
     return(invisible(TRUE))
 }
 
@@ -229,5 +225,3 @@ validate_dataice <- function(data, data_ice, vars, update = FALSE) {
 
     return(TRUE)
 }
-
-
