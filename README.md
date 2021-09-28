@@ -34,7 +34,7 @@ The package is designed around its 4 core functions:
 The basic usage of these core functions is described in the quickstart vignette:
 
 ```
-vignette(topic= "quickstart", package = "rbmi")
+vignette(topic = "quickstart", package = "rbmi")
 ```
 
 ## Support
