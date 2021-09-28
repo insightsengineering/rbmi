@@ -155,7 +155,7 @@ imputeObj <- impute(
 imputeObj
 ```
 
-In this instance we are specifying that the `PLACEBO` group should be the reference group for itself as well as for the `DRUG` group (as standard for imputation using reference-based methods). 
+In this instance we are specifying that the `PLACEBO` group should be the reference group for itself as well as for the `DRUG` group (as is standard for imputation using reference-based methods). 
 
 Generally speaking, there is no need to see or directly interact with the imputed
 datasets. However if you do wish to inspect them, they can be extracted from the imputation
@@ -200,10 +200,10 @@ Note that, similar to `draws()`, the `ancova()` function uses the `set_vars()`
 function which determines the names of the key variables within the data and the covariates 
 (in addition to the treatment group) for which the analysis model will be adjusted. 
 
-Additionally we can use the `delta` argument of `analyse()` to perform a delta adjustment. 
-Essentially this works by specifying a data.frame that contains the amount
-of bias to add to the outcome variable. This must be specified separately for each patient
-at each visit. This data.frame must contain the columns `vars$visit`, `vars$subjid` and `delta`.
+Additionally we can use the `delta` argument of `analyse()` to perform a delta adjustments of the imputed datasets prior to the analysis. 
+In brief, this is implemented by specifying a data.frame that contains the amount
+of adjustment to be added to each longitudinal outcome for each subject and visit, i.e. 
+the data.frame must contain the columns `subjid`, `visit`, and `delta`.
 
 It is appreciated that this is potentially tedious to specify and as such some helper
 functions have been provided to simplify this process. In particular
