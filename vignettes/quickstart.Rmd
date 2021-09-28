@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 The purpose of this vignette is to provide a 15 minute quickstart guide to the core functions of the rbmi package.
 
-The rbmi package consists of 4 core functions (as well as a several helper functions):
+The rbmi package consists of 4 core functions (as well as several helper functions):
 
 - `draws()` - fits the imputation models and stores their parameters.
 - `impute()` - creates multiple imputed datasets.
@@ -61,7 +61,7 @@ The `draws()` function fits the imputation models and stores the corresponding p
 The 3 main inputs to the `draws()` function are:
 
 - `data` the primary longitudinal data.frame containing the outcome variable and all covariates.
-- `data_ice` a data.frame specifying which specifies the first visit affected by an intercurrent event (ICE) and the imputation strategy for handling missing outcome data after the ICE. At most one ICE which is to be imputed by a non-MAR strategy is allowed per subject. 
+- `data_ice` a data.frame which specifies the first visit affected by an intercurrent event (ICE) and the imputation strategy for handling missing outcome data after the ICE. At most one ICE which is to be imputed by a non-MAR strategy is allowed per subject. 
 - `method` specifies the method used to fit the imputation models and the imputed data sets.
 
 For the antidepressant trial, the subject's first visit affected by the ICE "study drug discontinuation" is the
@@ -174,8 +174,8 @@ For `method_bayes()` or `method_approxbayes()`, all imputed datasets correspond 
 ## Analyse
 
 The next step is to run the analysis model on each imputed dataset. This is done by defining
-an analysis function and then getting `analyse()` to apply this function across all
-imputed datasets. For this vignette will, we use the `ancova()` function provided by the rbmi
+an analysis function and then calling `analyse()` to apply this function across all
+imputed datasets. For this vignette we use the `ancova()` function provided by the rbmi
 package which fits a separate ANCOVA model for the outcomes from each visit and returns a treatment 
 effect estimates and corresponding least square means for each group per visit. 
 
