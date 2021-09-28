@@ -4,7 +4,7 @@
 #' The dataset is available on the website of the 
 #' [Drug Information Association Scientific Working Group on Estimands and Missing Data](https://www.lshtm.ac.uk/research/centres-projects-groups/missing-data#dia-missing-data).
 #' As per that website, the original data are from an antidepressant clinical trial with four treatments; two doses of an experimental medication, 
-#' a positive control, and placebo and published in Goldstein et al (2004). To mask the real data, week 8 observations were removed and two arms were created: 
+#' a positive control, and placebo and was published in Goldstein et al (2004). To mask the real data, week 8 observations were removed and two arms were created: 
 #' the original placebo arm and a “drug arm” created by randomly selecting patients from the three non-placebo arms.
 #' 
 #' The relevant endpoint is the Hamilton 17-item rating scale for depression (HAMD17) for which baseline and weeks 1, 2, 4, and 6 assessments are included.
