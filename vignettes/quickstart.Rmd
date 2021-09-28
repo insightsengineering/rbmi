@@ -20,7 +20,7 @@ The purpose of this vignette is to provide a 15 minute quickstart guide to the c
 
 The rbmi package consists of 4 core functions (as well as a several helper functions):
 
-- `draws()` - fits the imputation models and stores their parameteters.
+- `draws()` - fits the imputation models and stores their parameters.
 - `impute()` - creates multiple imputed datasets.
 - `analyse()` - analyses each of the multiple imputed datasets.
 - `pool()` - combines the analysis results across imputed datasets into a single statistic.
