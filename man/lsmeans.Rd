@@ -42,7 +42,7 @@ lsmeans(mod, Species = "versicolor", Petal.Length = 1)
 }
 }
 \references{
-\url{https://cran.r-project.org/web/packages/emmeans/index.html}
+\url{https://CRAN.R-project.org/package=emmeans}
 
 \url{https://documentation.sas.com/doc/en/pgmsascdc/9.4_3.3/statug/statug_glm_details41.htm}
 }
