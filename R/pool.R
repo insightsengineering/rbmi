@@ -329,6 +329,17 @@ rubin_rules <- function(ests, ses, v_com) {
 pool_bootstrap_percentile <- function(est, conf.level, alternative) {
     est_orig <- est[1]
     est <- est[-1]
+
+    if(length(est) == 0) { # if n_samples = 0 we cannot estimate pvalue and CIs
+        ret <- list(
+            est = est_orig,  # First estimate should be original dataset
+            ci = c(NA, NA),
+            se = NA,
+            pvalue = NA
+        )
+        return(ret)
+    }
+
     alpha <- 1 - conf.level
     pvals <- (c(sum(est < 0), sum(est > 0)) + 1) / (length(est) + 1)
 
