@@ -16,21 +16,19 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-The purpose of this vignette is to provide a 15 minute quickstart guide to the rbmi
-package showcasing it's primary functions and usage. Please note that this vignette
-will not cover any of the underlying theory. 
+The purpose of this vignette is to provide a 15 minute quickstart guide to the core functions of the rbmi package.
 
-The rbmi package consists of 4 core functions as well as a several key helper functions.
-In particular the core functions are:
 
-- `draws()` - Creates the imputation models.
+The rbmi package consists of 4 core functions (as well as a several key helper functions):
+
+- `draws()` - Fits the imputation models and stores their parameteters.
 - `impute()` - Creates multiple imputed datasets.
-- `analyse()` - Analyses the multiple imputed datasets.
-- `pool()` - Combines the multiple analysis results into a single statistic.
+- `analyse()` - Analyses each of the multiple imputed datasets.
+- `pool()` - Combines the analysis results across imputed datasets into a single statistic.
 
 ## The Data
 
-In order to demonstrate the package we will use a publicly available example data set from an antidepressant clinical trial of an active drug versus placebo. The relevant endpoint is the Hamilton 17-item rating scale for depression (HAMD17) which was assessed at baseline and weeks 1, 2, 4, and 6. Study drug discontinuation occurred in 24% subjects from the active drug and 26% subjects from placebo. All data after study drug discontinuation are missing and there is a single additional intermittent missing observation.
+We use a publicly available example data set from an antidepressant clinical trial of an active drug versus placebo. The relevant endpoint is the Hamilton 17-item rating scale for depression (HAMD17) which was assessed at baseline and weeks 1, 2, 4, and 6. Study drug discontinuation occurred in 24% of subjects from the active drug and 26% of subjects from placebo. All data after study drug discontinuation are missing and there is a single additional intermittent missing observation.
 
 ```{r}
 library(rbmi)
@@ -40,11 +38,9 @@ data("antidepressant_data")
 dat <- antidepressant_data
 ```
 
-We consider an imputation model with the mean change from baseline in the HAMD17 score as the outcome (variable `CHANGE` in the dataset), included the treatment group (`THERAPY`), the (categorical) visit (`VISIT`), treatment-by-visit interactions, the baseline HAMD17 score (`BASVAL`), and baseline HAMD17-by-visit interactions as covariates, and assumed a common unstructured covariance matrix in both groups. The chosen analysis model is ANCOVA which adjusts for the baseline HAMD17 value.
+We consider an imputation model with the mean change from baseline in the HAMD17 score as the outcome (variable `CHANGE` in the dataset). The following covariates are included in the imputation model: the treatment group (`THERAPY`), the (categorical) visit (`VISIT`), treatment-by-visit interactions, the baseline HAMD17 score (`BASVAL`), and baseline HAMD17 score-by-visit interactions. A common unstructured covariance matrix structure is assumed for both groups. The analysis model is an ANCOVA model with the treatment group as the primary covariate and adjustment for the baseline HAMD17 value.
 
-`rbmi` expects its input dataset to be complete; that is that there must be 1 row
-per patient per visit. Missing outcome values should be coded as `NA`, while missing values in the covariates are not allowed. If your dataset is incomplete then the `expand_locf()` helper function can be used to add in any missing rows, using LOCF imputation to impute the covariate values. In our dataset the rows corresponding to missing outcomes are not present, to address this we will therefore use the `expand_locf()` function
-as follows:
+`rbmi` expects its input dataset to be complete; that is that there must be one row per patient per visit. Missing outcome values should be coded as `NA`, while missing values in the covariates are not allowed. If your dataset is incomplete, then the `expand_locf()` helper function can be used to add any missing rows, using LOCF imputation to carry forward the observed baseline covariate values to visits with missing outcomes. Rows corresponding to missing outcomes are not present in the antidepressant dataset. To address this we will therefore use the `expand_locf()` function as follows:
 
 ```{r}
 
@@ -62,26 +58,21 @@ dat <- expand_locf(
 
 ## Draws
 
-The draws function is used to create our imputation models. The 3 main inputs to the `draws()`
-function include:
+The `draws()` function fits the imputation models and stores the corresponding parameter estimates or Bayesian posterior draws. 
+The 3 main inputs to the `draws()` function are:
 
 - `data` the primary longitudinal data.frame containing the outcome variable and all covariates.
-- `data_ice` a data.frame specifying which visit (if any) the patient's intercurrent 
-event (ICE) occurred on, or more precisely the first visit in which the outcome has been affected by the ICE. If the patient had multiple ICEs this should 
-specify the first visit affected by the ICE which is to be imputed by a non-MAR. It also 
-specifies which reference based imputation strategy we want to use.
-- `method` specifies what method we want to use to fit our imputation models as well as what
-method we want to use to generate our imputed values. 
+- `data_ice` a data.frame specifying which specifies the first visit affected by an intercurrent event (ICE) and the imputation strategy for handling missing outcome data after the ICE. At most one ICE which is to be imputed by a non-MAR strategy is allowed for a subject. 
+- `method` specifies the method used to fit our imputation models and the imputed data sets.
 
-In our example the patients ICE visit is the
-first visit in which a missing value has occurred. We assume that all patients will be
-imputed under the Jump To Reference (JR) strategy. We will create 150 imputation models using Bayesian
-methods to sample the model coefficients from their posterior distributions for a model 
-of `CHANGE ~ 1 + BASVAL * VISIT + THERAPY * VISIT`.
-
+For the antidepressant trial, the subject's first visit affected by the ICE "study drug discontinuation" is the
+first terminal missing observation. 
+For this example, we assume that the imputation strategy after the ICE is Jump To Reference (JR) for all subjects
+and that the imputations are based on 150 multiple imputed datasets using Bayesian posterior draws from the imputation model. 
+We first create 150 Baysian posterior draws of the parmaters imputation model parameters:
 ```{r}
-# create data_ice setting the imputation method to JR for
-# each patient with at least one missing value
+# create data_ice and set the imputation strategy to JR for
+# each patient with at least one missing observation
 dat_ice <- dat %>% 
     arrange(PATIENT, VISIT) %>% 
     filter(is.na(CHANGE)) %>% 
@@ -91,15 +82,15 @@ dat_ice <- dat %>%
     select(PATIENT, VISIT) %>% 
     mutate(strategy = "JR")
 
-# The patient with id 3618 is the unique one that has an intermittent missing values ->
-# remove from data_ice since he does not experience any ICE.
-# (it will be automatically imputed under MAR assumption)
+# In this dataset, subject 3618 has an intermittent missing values which does not 
+# correspond to a study drug discontinuation. We therefore remove this subject from 
+# `dat_ice`. (In the later imputation step, it will be automatically imputed under the default MAR assumption.)
 dat_ice <- dat_ice[-which(dat_ice$PATIENT == 3618),]
 
 dat_ice
 
 # Define the names of key variables in our dataset using `set_vars()`
-# Note that covariates argument can contain interactions
+# Note that the covariates argument can also include interaction terms
 vars <- set_vars(
     outcome = "CHANGE",
     visit = "VISIT",
@@ -108,8 +99,7 @@ vars <- set_vars(
     covariates = c("BASVAL*VISIT", "THERAPY*VISIT")
 )
 
-# Define what method we want to use e.g. here we specify we 
-# want to use Bayesian methods to create 100 samples
+# Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets) 
 method <- method_bayes(
     burn_in = 200,
     burn_between = 5,
@@ -118,8 +108,7 @@ method <- method_bayes(
 )
 
 
-# Create samples for the parameters of interest by running the 
-# draws() function
+# Create samples for the imputation parameters by running the draws() function
 set.seed(987)
 drawObj <- draws(
     data = dat,
@@ -131,21 +120,21 @@ drawObj
 ```
 
 
-Note the use of `set_vars()` which specifies what the names of the key variables 
-within the dataset. Additionally please note that whilst `vars$group` and `vars$visit`
-are added as terms to the imputation model by default that their interaction is not,
+Note the use of `set_vars()` which specifies the names of the key variables 
+within the dataset and the imputation model. Additionally please note that whilst `vars$group` and `vars$visit`
+are added as terms to the imputation model by default, their interaction is not,
 thus the inclusion of `group * visit` in the list of covariates. 
 
 Available methods include:
 
-- Bayes - `method_bayes()`.
-- Approximate Bayes - `method_approxbayes()`.
-- Conditional Mean (Bootstrap) - `method_condmean(type = "bootstrap")`.
-- Conditional Mean (Jackknife) - `method_condmean(type = "jackknife")`.
+- Bayesian imputation - `method_bayes()`.
+- Approximate Bayes imputation - `method_approxbayes()`.
+- Conditional Mean imputation (bootstrap) - `method_condmean(type = "bootstrap")`.
+- Conditional Mean imputation (jackknife) - `method_condmean(type = "jackknife")`.
 
 Available imputation strategies include:
 
-- Missing Completely at Random - `"MAR"`.
+- Missing at Random - `"MAR"`.
 - Jump to Reference - `"JR"`.
 - Copy Reference - `"CR"`.
 - Copy increments from Reference - `"CIR"`.
@@ -154,23 +143,22 @@ Available imputation strategies include:
 
 ## Impute
 
-The next step is to use our imputation models to generate our imputed datasets. This is
-done via the `impute()` function. The function only has 2 key inputs; the imputation 
-models and the references to use when imputing the missing values. It's usage is thus:
+The next step is to use the parameters from the imputation model to generate the imputed datasets. This is
+done via the `impute()` function. The function only has two key inputs: the imputation 
+models and the reference groups to use when imputing the missing values. It's usage is thus:
 
 ```{r}
 imputeObj <- impute(
     drawObj,
-    c("DRUG" = "PLACEBO", "PLACEBO" = "PLACEBO")
+    references = c("DRUG" = "PLACEBO", "PLACEBO" = "PLACEBO")
 )
 imputeObj
 ```
 
-In this instance we are specifying that group `PLACEBO` should use itself as its reference group and that group `DRUG` should
-use the group `PLACEBO` as its reference group (as standard for imputation using reference-based methods). 
+In this instance we are specifying that the `PLACEBO` group should be the reference group for itself as well as for the `DRUG` group (as standard for imputation using reference-based methods). 
 
-Generally speaking, there is no need to see or directly interact with any of the imputed
-datasets. However if you do wish to inspect them they can be extracted from the imputation
+Generally speaking, there is no need to see or directly interact with the imputed
+datasets. However if you do wish to inspect them, they can be extracted from the imputation
 object using the `extract_imputed_dfs()` helper function, i.e.:
 
 ```{r}
@@ -180,19 +168,18 @@ imputed_dfs[[1]]
 imputed_dfs[[2]]
 ```
 
-Note that in the case of `method_condmean()` the first imputed dataset will always be the
-"full" dataset containing all the original patients. In the case of `type=jackknife` the
-other datasets will all contain n-1 patients, whilst in the case of `type=bootstrap` each
-dataset will contain a bootstrap sample of patients.
-
+Note that in the case of `method_condmean()` the first imputed dataset will always 
+correspond to the completed original dataset containing all subjects. 
+For `type=jackknife` the remaining datasets correspond to conditional mean imputations on leave-one-subject-out data sets
+whereas for `type=bootstrap` each subsequent dataset correspond to conditional mean imputations on bootstrapped data sets.
 
 ## Analyse
 
-The next step is to run our analysis on each of our imputed datasets. This is done by defining
-an analysis function and then getting `analyse()` to map this function across each of our
+The next step is to run the analysis model on each imputed dataset. This is done by defining
+an analysis function and then getting `analyse()` to map this function across all
 imputed datasets. For this vignette will we use the `ancova()` function provided by the rbmi
-package which fits an ANCOVA model independently for each visit returning the treatment 
-effect and least square means for each visit. 
+package which fits a separate ANCOVA model for the outcomes from each visit and returns a treatment 
+effect estimates and corresponding least square means for each group per visit. 
 
 ```{r}
 anaObj <- analyse(
@@ -209,9 +196,9 @@ anaObj <- analyse(
 anaObj
 ```
 
-Note that, similar to `draws()`, the `ancova()` function needs to use the `set_vars()`
-function to tell it the names of the key variables within the data as well as which
-covariates we want to include in our analysis model.
+Note that, similar to `draws()`, the `ancova()` function uses the `set_vars()`
+function which determines the names of the key variables within the data and the covariates 
+(in addition to the treatment group) for which the analysis model will be adjusted. 
 
 Additionally we can use the `delta` argument of `analyse()` to perform a delta adjustment. 
 Essentially this works by specifying a data.frame that contains the amount
