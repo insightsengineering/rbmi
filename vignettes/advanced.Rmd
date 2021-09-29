@@ -18,12 +18,11 @@ knitr::opts_chunk$set(
 ## Introduction
 
 The purpose of this vignette is to provide an overview of some of the more advanced
-features that the package offers. Please note that this vignette
-will not cover any of the underlying statistical theory. 
+features of the `rbmi` package. 
 
 
 In order to demonstrate these advanced functions we will first create a simulated dataset
-and perform a mock analysis so that we have all the require objects available to us.
+and perform a mock analysis so that all the require objects are available.
 
 ```{r}
 library(rbmi)
@@ -59,35 +58,23 @@ vars <- set_vars(
     group = "group",
     covariates = c("age", "sex", "group*visit")
 )
-
-
 ```
 
 
 ## Efficiently Changing Imputation Strategies
 
-The `draws()` function is by far the most computationally intensive function in
-rbmi. It is recognised that this can pose an issue for doing repeated analyses
-using different imputation strategies. To try and address this issue `impute()`
-has an additional argument `update_strategies` which allows the user to 
-change each subjects imputation strategy without having to re-run the `draws()`
-function.
+The `draws()` function is by far the most computationally intensive function in `rbmi`. 
+In some settings, it may be important to explore the impact of a different 
+reference-based imputation strategy than the one chosen for the main analysis. 
+This change in the imputation strategy does not affect the imputation model but it does 
+affect the subsequent imputation step. 
+In order to allow changes in the imputation strategy without having to re-run the 
+`draws()` function, the function `impute()` has an additional argument `update_strategies`.  
 
-Please note though that this functionality comes with a few key limitations:
-- The visit on which the ICE occured can not be updated.
-- The imputation strategy cannot be changed from MAR to a non-MAR strategy if .
-there is any observed data after the ICE visit
+Please note though that this functionality comes with a some key limitations:
+From a theoretical point of view, such updates are only sensible if the base imputation model and the data to which it is fitted is also applicable to the revised imputation strategy. For example, as described in the help to the `draws()` function, observed post-ICE data are included in the imputation model for the MAR strategy but excluded for non-MAR strategies. For this reason, the imputation strategy cannot be changed from MAR to a non-MAR strategy via argument `update_strategies` in case there are any observed data after the ICE. A change from a non-MAR to MAR triggers a warning because in this case the imputation model was not fitted to all relevant data and may be inefficient. Similarly, it is not possible to change the first visit which is affected by an ICE via argument `update_strategies`. 
 
-Both of these restrictions exist to protect the validity of the imputation model.
-It is worth noting that whilst a strategy of MAR cannot be changed to non-MAR, a
-non-MAR strategy can be changed to MAR. However, please bear in mind that a potential 
-issue with this
-is that it means that the imputation model hasn't used all of the available data;
-as such the package will issue a warning if the user attempts to do this. 
-
-As an example, lets say in our first analysis we want to use the copy 
-increments from reference strategy but then as a sensitivity we wanted to use the
-jump to reference imputation strategy, this could be done as follows:
+As an example, let's assume we want to use the copy  increments from reference strategy for the main analysis and explore the jump to reference imputation strategy as a sensitivity analysis. This could be implemented as follows:
 
 ```{r}
 dat_ice_CIR <- dat_ice
@@ -98,18 +85,22 @@ draw_obj <- draws(
     data = dat,
     data_ice = dat_ice_CIR,
     vars = vars,
-    method = method_condmean(n_samples = 15)
+    method = method_condmean(type = "bootstrap", n_samples = 10)
+    # Note that the chosen number of bootstrap samples of 10 would be much too low for 
+    # reliable inference. 
 )
 
 impute_obj_CIR <- impute(
     draw_obj,
     references = c("A" = "B", "B" = "B")
 )
+
 ana_obj_CIR <- analyse(
     impute_obj_CIR,
     vars = set_vars()
 )
-pool(ana_obj_CIR)
+
+pool(ana_obj_CIR, type = "percentile")
 
 ## Now we re-use our draws samples but using the Jump to Reference 
 ## Imputation strategy
@@ -123,17 +114,19 @@ impute_obj_JR <- impute(
     references = c("A" = "B", "B" = "B"),
     update_strategy = dat_ice_JR
 )
+
 ana_obj_JR <- analyse(
     impute_obj_JR,
     vars = set_vars()
 )
+
 pool(ana_obj_JR)
 ```
 
 
-## Custom Strategy Functions
+## Custom Imputation Strategies
 
-Out of the box rbmi has support for the following imputation strategies:
+The following imputation strategies are implemented in `rbmi`:
 
 - Missing at Random (MAR)
 - Jump to Reference (JR)
@@ -141,8 +134,8 @@ Out of the box rbmi has support for the following imputation strategies:
 - Copy Increments from Reference (CIR)
 - Last Mean Carried Forward (LMCF)
 
-However, rbmi also supports the ability for users to define their own imputation 
-strategies. To do this there are 3 things the user needs to do:
+In addition, `rbmi` allows the user to implement their own imputation 
+strategy. To do this there are 3 things the user needs to do:
 
 1. Define their own imputation strategy function.
 2. Specify which patients use this strategy in the `data_ice` dataset provided to `draws()`.
@@ -223,8 +216,8 @@ impute_obj <- impute(
 
 ## Custom Analysis Functions
 
-By default rbmi will analyse the data by performing ancova at each visit independently,
-returning the "treatment effect" estimate as well as the corresponding least square means
+By default rbmi will analyse the data by fitting an ANCOVA model to the outcome from each visit separately,
+and returning the "treatment effect" estimate as well as the corresponding least square means
 for each group. If the user wants to perform a different analysis, or return different
 statistics from the analysis, then this can be done by using a custom analysis function.
 
@@ -278,7 +271,7 @@ pool(anl_obj)
 
 The `delta` argument of `analyse()` allows users to modify the outcome variable
 which can be utilised as part of a tipping point or sensitivity analysis. To do 
-this the user needs to provide a `data.frame` containing a column for the subject
+this, the user needs to provide a `data.frame` containing a column for the subject
 and visit which identifies the observation to be adjusted, and then a 3rd column
 called `delta` which specifies how much to offset the outcome by.
 
