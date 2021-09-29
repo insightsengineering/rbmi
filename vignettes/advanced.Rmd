@@ -85,7 +85,7 @@ draw_obj <- draws(
     data = dat,
     data_ice = dat_ice_CIR,
     vars = vars,
-    method =  method_approxbayes(n_sample=10)
+    method = method_approxbayes(n_sample=10)
 )
 
 impute_obj_CIR <- impute(
@@ -98,7 +98,7 @@ ana_obj_CIR <- analyse(
     vars = set_vars()
 )
 
-pool(ana_obj_CIR, type = "percentile")
+pool(ana_obj_CIR)
 
 ## Now we re-use our draws samples but using the Jump to Reference 
 ## Imputation strategy
@@ -143,7 +143,7 @@ The imputation strategy function must take 3 arguments (`pars_group`, `pars_ref`
 Here, `pars_group` contains the predicted mean trajectory (`pars_group$mu`, a numeric vector) and covariance matrix (`pars_group$sigma`) for a subject conditional on their assigned treatment group and covariates. `pars_ref` contains the corresponding mean trajectory and covariance matrix conditional on the reference group and the subject's covariates. `index_mar` is a logical vector which specifies for each visit whether the visit is unaffected by an ICE handled using reference-based methods or not. As an example, the user can check how the CIR strategy was implemented by looking at function `strategy_CIR()`.
 
 ```{r}
-strategy_CIR()
+strategy_CIR
 ```
 
 To further illustrate this for a simple example, assume that a strategy is to be implemented according to which the marginal mean of the imputation distribution is equal to the marginal mean trajectory for the subject according to their assigned group and covariates up to the ICE and equal to the average of the visit-wise marginal means based on the subjects covariates and the assigned group or the reference group, respectively. For the covariance matrix of the marginal imputation distribution, the covariance matrix from the assigned group is taken. 
@@ -230,7 +230,7 @@ visit between the groups without any covariate adjustment. This could then lead 
 ```{r}
 compare_prop_lastvisit <- function(data,...){
   fit <- summary(glm(I(outcome>10)~group,family=binomial(),data=data[data[[visit]] == "visit_3", ]))
-  res <- list(est = fit$coefficients["groupB","Estimate"], se = fit$coefficients["groupB","Std. Error"], df =Inf)
+  res <- list( trt = list(est = fit$coefficients["groupB","Estimate"], se = fit$coefficients["groupB","Std. Error"], df = Inf) )
   return(res)
 }
 ```
