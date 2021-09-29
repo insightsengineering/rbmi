@@ -229,7 +229,7 @@ visit between the groups without any covariate adjustment. This could then lead 
 
 ```{r}
 compare_prop_lastvisit <- function(data,...){
-  fit <- summary(glm(I(outcome>10)~group,family=binomial(),data=data[data[[visit]] == "visit_3", ]))
+  fit <- summary(glm(I(outcome>10)~group,family=binomial(),data=data[data[["visit"]] == "visit_3", ]))
   res <- list( trt = list(est = fit$coefficients["groupB","Estimate"], se = fit$coefficients["groupB","Std. Error"], df = Inf) )
   return(res)
 }
