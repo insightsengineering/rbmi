@@ -74,7 +74,7 @@ In order to allow changes in the imputation strategy without having to re-run th
 Please note though that this functionality comes with a some key limitations:
 From a theoretical point of view, such updates are only sensible if the base imputation model and the data to which it is fitted is also applicable to the revised imputation strategy. For example, as described in the help to the `draws()` function, observed post-ICE data are included in the imputation model for the MAR strategy but excluded for non-MAR strategies. For this reason, the imputation strategy cannot be changed from MAR to a non-MAR strategy via argument `update_strategies` in case there are any observed data after the ICE. A change from a non-MAR to MAR triggers a warning because in this case the imputation model was not fitted to all relevant data and may be inefficient. Similarly, it is not possible to change the first visit which is affected by an ICE via argument `update_strategies`. 
 
-As an example, let's assume we want to use the copy  increments from reference strategy for the main analysis and explore the jump to reference imputation strategy as a sensitivity analysis. This could be implemented as follows:
+As an example, let's assume we want to use the copy  increments from reference strategy for the main analysis and explore the jump to reference imputation strategy as a sensitivity analysis. If we use approximate Bayesian multiple imputation with 10 random imputation, this could be implemented as follows:
 
 ```{r}
 dat_ice_CIR <- dat_ice
@@ -85,9 +85,7 @@ draw_obj <- draws(
     data = dat,
     data_ice = dat_ice_CIR,
     vars = vars,
-    method = method_condmean(type = "bootstrap", n_samples = 10)
-    # Note that the chosen number of bootstrap samples of 10 would be much too low for 
-    # reliable inference. 
+    method =  method_approxbayes(n_sample=10)
 )
 
 impute_obj_CIR <- impute(
@@ -134,29 +132,24 @@ The following imputation strategies are implemented in `rbmi`:
 - Copy Increments from Reference (CIR)
 - Last Mean Carried Forward (LMCF)
 
-In addition, `rbmi` allows the user to implement their own imputation 
-strategy. To do this there are 3 things the user needs to do:
+In addition, `rbmi` allows the user to implement their own imputation strategy. 
+To do this there are three things which the user needs to do:
 
-1. Define their own imputation strategy function.
+1. Define their own imputation strategy function. 
 2. Specify which patients use this strategy in the `data_ice` dataset provided to `draws()`.
 3. Provide the imputation strategy function to `impute()`.
 
-This is perhaps better demonstrated by an example. We will implement a strategy
-in which all post-ice missing values are be imputed by the average outcome between 
-the subject's group and reference group.
+The imputation strategy function must take 3 arguments (`pars_group`, `pars_ref`, and `index_mar`) and calculates the marginal mean trajectory and covariance matrix of a subject's marginal imputation distribution which will then be applied to subjects to which the strategy applies. 
+Here, `pars_group` contains the predicted mean trajectory (`pars_group$mu`, a numeric vector) and covariance matrix (`pars_group$sigma`) for a subject conditional on their assigned treatment group and covariates. `pars_ref` contains the corresponding mean trajectory and covariance matrix conditional on the reference group and the subject's covariates. `index_mar` is a logical vector which specifies for each visit whether the visit is unaffected by an ICE handled using reference-based methods or not. As an example, the user can check how the CIR strategy was implemented by looking at function `strategy_CIR()`.
 
-To do this we first need to define our imputation function. This function must take
-3 arguments: `pars_group`, `pars_ref` and `index_mar`.  Both `pars_group` and `pars_ref`
-will be a list with elements `mu` (a numeric vector) and `sigma` (a covariance matrix)
-which are the parameters for the patient's outcome distribution
-assuming that they belong to their own group and the reference group respectively.
-The `index_mar` argument
-is then a logical vector indicating which visits for the subject meet the MAR assumption.
-This can be used to identify the observations that occur after an ICE that are addressed
-with a non-MAR imputation strategy. 
+```{r}
+strategy_CIR()
+```
 
-As such our example imputation function could be coded as:
+To further illustrate this for a simple example, assume that a strategy is to be implemented according to which the marginal mean of the imputation distribution is equal to the marginal mean trajectory for the subject according to their assigned group and covariates up to the ICE and equal to the average of the visit-wise marginal means based on the subjects covariates and the assigned group or the reference group, respectively. For the covariance matrix of the marginal imputation distribution, the covariance matrix from the assigned group is taken. 
 
+
+To do this, we first need to define the imputation function which for this example could be coded as: 
 
 ```{r}
 strategy_AVG <- function(pars_group, pars_ref, index_mar) {
@@ -190,8 +183,8 @@ index_mar <- c(TRUE, TRUE, FALSE)
 strategy_AVG(pars_group, pars_ref, index_mar)
 ```
 
-To incorporate this into rbmi, `data_ice` needs to be updated such that subjects are 
-specified as using this `AVG` imputation strategy. Additionally the function then needs
+To incorporate this into `rbmi`, `data_ice` needs to be updated such that subjects are 
+specified as using the `AVG` imputation strategy. Additionally, the function needs
 to be provided to `impute()` via the `getStrategies()` function as shown below:
 
 ```{r}
@@ -202,7 +195,7 @@ draw_obj <- draws(
     data = dat,
     data_ice = dat_ice,
     vars = vars,
-    method = method_condmean(n_samples = 10)
+    method = method_approxbayes(n_sample=10)
 )
 
 impute_obj <- impute(
@@ -212,45 +205,31 @@ impute_obj <- impute(
 )
 ```
 
-
-
 ## Custom Analysis Functions
 
-By default rbmi will analyse the data by fitting an ANCOVA model to the outcome from each visit separately,
-and returning the "treatment effect" estimate as well as the corresponding least square means
+By default `rbmi` will analyse the data by using the `ancova()` function as the analysis function which fits 
+an ANCOVA model to the outcomes from each visit separately,
+and returns the "treatment effect" estimate as well as the corresponding least square means
 for each group. If the user wants to perform a different analysis, or return different
 statistics from the analysis, then this can be done by using a custom analysis function.
+Beware that for conditional mean imputation, the consistency of treatment effect estimation
+has only been formally established for analysis functions corresponding to linear models (such as ANCOVA) and caution is 
+required when applying alternative analysis functions.
 
-The rules for this custom analysis function are that it must take a `data.frame` as its 
-first argument and that it must return a named `list` with each element itself being a `list`
-containing a single numeric element called `est`. If you had originally specified `method_bayes()` 
-or `method_approxbayes()` then the analysis function must also return a standard error estimate 
-for the given statistics and the degrees of freedom of the complete-data analysis model. These
-should be included in the named `list` using names `se` and `df` respectively.
+The custom analysis function must take a `data.frame` as its 
+first argument and return a named `list` with each element itself being a `list`
+containing a at a minimum a point estimate, called `est`. 
+For method `method_bayes()` or `method_approxbayes()`, the list must additionally contain a 
+standard error (element `se`) and, if available, the degrees of freedom of the complete-data analysis model (element `df`). 
 
-The reason for this is that if `method_bayes()` or `method_approxbayes()` are specified
-then `pool()` will perform its inference based upon Rubin's rules which require the estimate (`est`),
-the standard error of the estimate (`se`) as well as the degrees of freedom (`df`).
-
-
-As an example lets say that for your analysis
-you are also interested in calculating the overall mean at each visit (i.e. not the treatment
-effect), this could then be done as follows:
+As an example, let's say that the analysis comparing the proportion of subjects with an outcome > 10 at the last 
+visit between the groups without any covariate adjustment. This could then lead to the following (naive) analysis function:
 
 ```{r}
-mean_fun <- function(dat, ...) {
-
-    mod <- dat %>%
-        group_by(visit) %>%
-        summarise(m = mean(outcome))
-
-    results <- lapply(
-        mod$m,
-        function(x) list(est = x)
-    )
-
-    names(results) <- paste0("mean_", mod$visit)
-    return(results)
+compare_prop_lastvisit <- function(data,...){
+  fit <- summary(glm(I(outcome>10)~group,family=binomial(),data=data[data[[visit]] == "visit_3", ]))
+  res <- list(est = fit$coefficients["groupB","Estimate"], se = fit$coefficients["groupB","Std. Error"], df =Inf)
+  return(res)
 }
 ```
 
@@ -259,13 +238,10 @@ This analysis function can then be used in combination with `analyse()` as follo
 ```{r}
 anl_obj <- analyse(
     imputations = impute_obj_CIR,
-    fun = mean_fun
-)
+    fun = compare_prop_lastvisit)
 
 pool(anl_obj)
 ```
-
-
 
 ## Delta Adjustment
 
@@ -273,12 +249,12 @@ The `delta` argument of `analyse()` allows users to modify the outcome variable
 which can be utilised as part of a tipping point or sensitivity analysis. To do 
 this, the user needs to provide a `data.frame` containing a column for the subject
 and visit which identifies the observation to be adjusted, and then a 3rd column
-called `delta` which specifies how much to offset the outcome by.
+called `delta` which specifies the value which will be added to the outcome prior to the analysis. 
 
 The `delta_template()` function creates a skeleton `data.frame` containing
 1 row per subject per visit with the value of delta set to 0 for all observations.
-The `delta_template()` function though also has two additional arguments `delta`
-and `dlag` which allows the user to specify initial accumulative delta values based upon a
+The `delta_template()` function has two additional arguments `delta`
+and `dlag` which allow the user to specify initial cumulative delta values based upon a
 default value and a scaling coefficient based upon how far away the visit
 in question is from the ICE visit. 
 
