@@ -222,12 +222,12 @@ containing a at a minimum a point estimate, called `est`.
 For method `method_bayes()` or `method_approxbayes()`, the list must additionally contain a 
 standard error (element `se`) and, if available, the degrees of freedom of the complete-data analysis model (element `df`). 
 
-As an example, let's say that the analysis comparing the proportion of subjects with an outcome > 10 at the last 
+As an example, let's say that the analysis compares the proportion of subjects with an outcome > 10 at the last 
 visit between the groups without any covariate adjustment. This could then lead to the following (naive) analysis function:
 
 ```{r}
 compare_prop_lastvisit <- function(data,...){
-  fit <- summary(glm(I(outcome>10)~group,family=binomial(),data=data[data[["visit"]] == "visit_3", ]))
+  fit <- summary(glm(I(outcome > 10) ~ group, family = binomial(), data = data[data[["visit"]] == "visit_3", ]))
   res <- list( trt = list(est = fit$coefficients["groupB","Estimate"], se = fit$coefficients["groupB","Std. Error"], df = Inf) )
   return(res)
 }
