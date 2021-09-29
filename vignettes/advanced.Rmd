@@ -225,8 +225,6 @@ standard error (element `se`) and, if available, the degrees of freedom of the c
 As an example, let's say that the analysis comparing the proportion of subjects with an outcome > 10 at the last 
 visit between the groups without any covariate adjustment. This could then lead to the following (naive) analysis function:
 
-!!! My apologies, the revised example creates an error currently. 
-
 ```{r}
 compare_prop_lastvisit <- function(data,...){
   fit <- summary(glm(I(outcome>10)~group,family=binomial(),data=data[data[["visit"]] == "visit_3", ]))
