@@ -225,6 +225,8 @@ standard error (element `se`) and, if available, the degrees of freedom of the c
 As an example, let's say that the analysis comparing the proportion of subjects with an outcome > 10 at the last 
 visit between the groups without any covariate adjustment. This could then lead to the following (naive) analysis function:
 
+!!! My apologies, the revised example creates an error currently. 
+
 ```{r}
 compare_prop_lastvisit <- function(data,...){
   fit <- summary(glm(I(outcome>10)~group,family=binomial(),data=data[data[[visit]] == "visit_3", ]))
@@ -253,18 +255,21 @@ called `delta` which specifies the value which will be added to the outcome prio
 
 The `delta_template()` function creates a skeleton `data.frame` containing
 1 row per subject per visit with the value of delta set to 0 for all observations.
-The `delta_template()` function has two additional arguments `delta`
+The `delta_template()` function has two additional mandatory arguments `delta`
 and `dlag` which allow the user to specify initial cumulative delta values based upon a
 default value and a scaling coefficient based upon how far away the visit
 in question is from the ICE visit. 
 
 More specifically; the `delta` argument specifies the default amount of delta
-that should be applied to each visit (if it was both post-ICE & unobserved), whilst
+that should be applied to each post-ICE visit, whilst
 `dlag` specifies the scaling coefficient to be applied based upon the visits proximity
-to the ICE visit. This is perhaps best illustrated with an example:
+to first visit affected by the ICE. By default, the delta will only be added to unobserved (i.e. imputed) post-ICE 
+outcomes but this can be changed by setting the optional argument `missing_only = FALSE`.
+
+The usage of the `delta` and `dlag` arguments is best illustrated with a few examples:
 
 Let `delta = c(5,6,7,8)` and `dlag=c(1,2,3,4)` (i.e. assuming there are 4 visits) and lets 
-say that the subject had an ICE on visit 2. The calculation would then be as follows:
+say that the subject's first visit affected by the ICE is visit 2. The calculation would then be as follows:
 
 ```
 v1  v2  v3  v4
@@ -277,9 +282,9 @@ v1  v2  v3  v4
  0   6  20  44  # accumulative sum / delta to be applied to each visit
 ```
 
-That is to say the subject would have a delta offset of 0 applied for visit-1, 6 for 
-visit-2, 20 for visit-3 and 44 for visit-4. As a comparison, lets say that the subject 
-instead had their ICE on visit 3, the calculation would then be as follows:
+That is to say the subject would have a delta offset of 0 applied for visit v1, 6 for 
+visit v2, 20 for visit v3 and 44 for visit v4. As a comparison, lets say that the subject 
+instead that the subject's first visit affected by the ICE was visit 3. Then, would be as follows:
 
 ```
 v1  v2  v3  v4
@@ -292,10 +297,10 @@ v1  v2  v3  v4
  0   0   7  23  # accumulative sum / delta to be applied to each visit
  ```
  
-In terms of practical usage, lets say that you wanted a delta of 5 to be used for all
-post ICE visits regardless of their proximity to the ICE visit. This can be achieved
-by setting `delta = c(5,5,5,5)` and `dlag = c(1,0,0,0)`. For example lets say a subject
-had their ICE on visit-1, then the calculation would be as follows:
+If one alternatively wanted to apply a constant delta value of 5 to all visits affected by the ICE
+regarrdless of their proximity to the first ICE visit, this could be achieved
+by setting `delta = c(5,5,5,5)` and `dlag = c(1,0,0,0)`. For example lets say the first visit v1 
+was already affected by the ICE for a subject. Then the calculation would be as follows:
 
 ```
 v1  v2  v3  v4
@@ -307,20 +312,23 @@ v1  v2  v3  v4
 --------------
  5   5   5  5  # accumulative sum / delta to be applied to each visit
  ```
- 
+
+!!! The example below used the wording "the ICE occurred at" but in data_ICE we only know the first visit affected by the ICE.
+!!! I tried to clean up the wording accordingly but ran into some problems. Please help to fix this! 
+
 Another way of using these arguments is to set delta to be the difference in time 
 between visits and dlag to be the amount of delta per unit of time. For example 
 lets say that we have a visit on weeks 1, 5, 6 & 9 and that we want a delta of 3
 to be applied for each week after an ICE. This can be achieved by setting 
 `delta = c(0,4,1,3)` (the difference in weeks between each visit) and `dlag = c(3, 3, 3, 3)`. 
-For example lets say we have a subject who had their ICE on week-5 (i.e. visit-2) then 
+For example lets say we have a subject whose first visit affected by the ICE was week 5 (i.e. visit v2) then 
 the calculation would be:
 
 ```
 v1  v2  v3  v4
 --------------
  0   4   1   3  # delta assigned to each visit
- 0   0   3   3  # scaling starting from the first visit after the subjects ICE
+ 0   0   3   3  # scaling starting from the first visit after the subjects ICE 
 --------------
  0   0   3   9  # delta * scaling
 --------------
@@ -359,20 +367,4 @@ Finally we can now use our delta `data.frame` to apply our desired delta offset 
 ```{r}
 anl_delta <- analyse(impute_obj_CIR, delta = delta_df2, vars = set_vars())
 pool(anl_delta)  
-```
-
-
-Please note that in the case of observed post-ICE data, `delta_template()` will calculate the delta for all
-observations assuming that all post-ICE data are missing; it will then set the value of `delta` to
-0 for those observations that were actually observed. If you wish to retain the value of `delta`
-for the observed post-ICE visits then you can use the `missing_only = FALSE` argument to do so I.e.:
-
-```{r}
-delta_template(
-    impute_obj_CIR, 
-    delta = c(5, 5, 5), 
-    dlag = c(1, 0, 0),
-    missing_only = FALSE
-) %>% 
-    as_tibble()
 ```
