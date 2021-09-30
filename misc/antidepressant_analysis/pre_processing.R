@@ -33,7 +33,7 @@ data <- read_sas(sasfile)
 data <- data %>%
     mutate_at(
         vars(c(PATIENT, VISIT, THERAPY)),
-        factor
+        as.factor
     ) %>%
     mutate_at(
         vars(c(basval, change)),
