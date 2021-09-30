@@ -15,7 +15,9 @@ pkgs <- c(
     "testthat",
     "nlme",
     "roxygen2",
-    "tinytex"
+    "tinytex",
+    "bookdown",
+    "RhpcBLASctl"
 )
 
 options(warn = 2)
