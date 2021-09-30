@@ -70,7 +70,7 @@ lscombinations <- function(data, mterms, fix) {
 #' `trt = 1` or `age = 50`. The name of the argument must be the name
 #' of the variable within the dataset
 #'
-#' @references \url{https://cran.r-project.org/web/packages/emmeans/index.html}
+#' @references \url{https://CRAN.R-project.org/package=emmeans}
 #' @references \url{https://documentation.sas.com/doc/en/pgmsascdc/9.4_3.3/statug/statug_glm_details41.htm}
 #' @examples
 #' \dontrun{
