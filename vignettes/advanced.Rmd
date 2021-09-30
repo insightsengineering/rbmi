@@ -1,6 +1,11 @@
 ---
-title: "rbmi Advanced Functionality"
-output: rmarkdown::html_vignette
+title: "rbmi: Advanced Functionality"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 4
+    number_sections: true
+    citation_package: natbib
 bibliography: "references.bib"
 vignette: >
   %\VignetteIndexEntry{advanced}
@@ -16,7 +21,7 @@ knitr::opts_chunk$set(
 ```
 
 
-## Introduction
+# Introduction
 
 The purpose of this vignette is to provide an overview of some of the more advanced
 features of the `rbmi` package. 
@@ -62,7 +67,7 @@ vars <- set_vars(
 ```
 
 
-## Efficiently Changing Imputation Strategies
+# Efficiently Changing Imputation Strategies
 
 The `draws()` function is by far the most computationally intensive function in `rbmi`. 
 In some settings, it may be important to explore the impact of a different 
@@ -123,7 +128,7 @@ pool(ana_obj_JR)
 ```
 
 
-## Custom Imputation Strategies
+# Custom Imputation Strategies
 
 The following imputation strategies are implemented in `rbmi`:
 
@@ -206,7 +211,7 @@ impute_obj <- impute(
 )
 ```
 
-## Custom Analysis Functions
+# Custom Analysis Functions
 
 By default `rbmi` will analyse the data by using the `ancova()` function as the analysis function which fits 
 an ANCOVA model to the outcomes from each visit separately,
@@ -249,7 +254,7 @@ compare_prop_lastvisit <- function(data,...){
 }
 ```
 
-The user should be aware that according to Rubin's rules, if the degrees of freedom from the complete-data analysis model is infinite, this does not imply that the pooled degrees of freedom is also infinite. It can be proven that in this case the pooled degrees of freedom is `(M-1)/lambda^2`, where `M` is the number of imputations and `lambda` is the fraction of missing information. Please see @Barnard1999 for details.
+The user should be aware that according to Rubin's rules, if the degrees of freedom from the complete-data analysis model is infinite, this does not imply that the pooled degrees of freedom is also infinite. It can be proven that in this case the pooled degrees of freedom is `(M-1)/lambda^2`, where `M` is the number of imputations and `lambda` is the fraction of missing information. Please see @Barnard1999 for details. If you want to force the pooled degrees of freedom to be `Inf`, please set `df = NA` as returned value from the analysis function.
 
 This analysis function can then be used in combination with `analyse()` as follows:
 
@@ -261,7 +266,7 @@ anl_obj <- analyse(
 pool(anl_obj)
 ```
 
-## Delta Adjustment
+# Delta Adjustment
 
 The `delta` argument of `analyse()` allows users to modify the outcome variable
 which can be utilised as part of a tipping point or sensitivity analysis. To do 
