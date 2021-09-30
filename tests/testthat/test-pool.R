@@ -144,7 +144,7 @@ test_that("Can recover known jackknife with  H0 < 0 & H0 > 0", {
         conf.level = 0.90,
         alternative = "less"
     )
-    expect_equal(expected, observed)
+    expect_equal(observed, expected)
 
 
 
@@ -159,7 +159,7 @@ test_that("Can recover known jackknife with  H0 < 0 & H0 > 0", {
         se = jest_se,
         pvalue = pnorm(7, sd = jest_se, lower.tail = FALSE)
     )
-    expect_equal(expected, observed)
+    expect_equal(observed, expected)
 
 
 
@@ -174,7 +174,7 @@ test_that("Can recover known jackknife with  H0 < 0 & H0 > 0", {
         se = jest_se,
         pvalue = pnorm(7, sd = jest_se, lower.tail = FALSE) * 2
     )
-    expect_equal(expected, observed)
+    expect_equal(observed, expected)
 
 })
 
@@ -200,7 +200,7 @@ test_that("Can recover known values using bootstrap percentiles", {
         alternative = "greater",
         type =  "percentile"
     )
-    expect_equal(expected, observed)
+    expect_equal(observed, expected)
 
 
 
@@ -218,7 +218,7 @@ test_that("Can recover known values using bootstrap percentiles", {
         alternative = "less",
         type =  "percentile"
     )
-    expect_equal(expected, observed)
+    expect_equal(observed, expected)
 
 
 
@@ -237,8 +237,101 @@ test_that("Can recover known values using bootstrap percentiles", {
         alternative = "two.sided",
         type =  "percentile"
     )
-    expect_equal(expected, observed)
+    expect_equal(observed, expected)
 })
+
+
+
+test_that("Results of bootstrap percentiles when n_samples = 0 or 1", {
+
+    ################### n_samples = 0
+
+    best <- c(1)
+    expected <- list(
+        est = best[1],
+        ci = c(NA, NA),
+        se = NA,
+        pvalue = NA
+    )
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.90,
+        alternative = "greater",
+        type =  "percentile"
+    )
+    expect_equal(observed, expected)
+
+
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.90,
+        alternative = "less",
+        type =  "percentile"
+    )
+    expect_equal(observed, expected)
+
+
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.80,
+        alternative = "two.sided",
+        type =  "percentile"
+    )
+    expect_equal(observed, expected)
+
+
+
+
+    ################## n_samples = 1
+
+    best <- c(1,3)
+    expected <- list(
+        est = best[1],
+        ci = c(-Inf, 3),
+        se = NA,
+        pvalue = 0.5
+    )
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.90,
+        alternative = "greater",
+        type =  "percentile"
+    )
+    expect_equal(observed, expected)
+
+
+
+    expected <- list(
+        est = best[1],
+        ci = c(3, Inf),
+        se = NA,
+        pvalue = 1
+    )
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.90,
+        alternative = "less",
+        type =  "percentile"
+    )
+    expect_equal(observed, expected)
+
+
+
+    expected <- list(
+        est = best[1],
+        ci = c(3, 3),
+        se = NA,
+        pvalue = 1
+    )
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.80,
+        alternative = "two.sided",
+        type =  "percentile"
+    )
+    expect_equal(observed, expected)
+}
+)
 
 
 
@@ -260,7 +353,7 @@ test_that("Can recover known values using bootstrap Normal", {
         alternative = "two.sided",
         type =  "normal"
     )
-    expect_equal(expected, observed)
+    expect_equal(observed, expected)
 
 
 
@@ -276,7 +369,7 @@ test_that("Can recover known values using bootstrap Normal", {
         alternative = "less",
         type =  "normal"
     )
-    expect_equal(expected, observed)
+    expect_equal(observed, expected)
 
 
 
@@ -292,8 +385,88 @@ test_that("Can recover known values using bootstrap Normal", {
         alternative = "greater",
         type =  "normal"
     )
-    expect_equal(expected, observed)
+    expect_equal(observed, expected)
 })
+
+
+
+
+test_that("Results of bootstrap Normal when n_samples = 0 or 1", {
+
+    ################### n_samples = 0
+
+    best <- c(1)
+    expected <- list(
+        est = best[1],
+        ci = as.numeric(c(NA, NA)),
+        se = as.numeric(NA),
+        pvalue = as.numeric(NA)
+    )
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.90,
+        alternative = "greater",
+        type =  "normal"
+    )
+    observed <- lapply(observed, as.numeric)
+    expect_equal(observed, expected)
+
+
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.90,
+        alternative = "less",
+        type =  "normal"
+    )
+    observed <- lapply(observed, as.numeric)
+    expect_equal(observed, expected)
+
+
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.80,
+        alternative = "two.sided",
+        type =  "normal"
+    )
+    observed <- lapply(observed, as.numeric)
+    expect_equal(observed, expected)
+
+
+
+
+    ################## n_samples = 1
+
+    best <- c(1,3)
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.90,
+        alternative = "greater",
+        type =  "normal"
+    )
+    observed <- lapply(observed, as.numeric)
+    expect_equal(observed, expected)
+
+
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.90,
+        alternative = "less",
+        type =  "normal"
+    )
+    observed <- lapply(observed, as.numeric)
+    expect_equal(observed, expected)
+
+
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.80,
+        alternative = "two.sided",
+        type =  "normal"
+    )
+    observed <- lapply(observed, as.numeric)
+    expect_equal(observed, expected)
+}
+)
 
 
 
