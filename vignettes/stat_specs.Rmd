@@ -24,17 +24,6 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r, include=TRUE, echo=FALSE}
-suppressPackageStartupMessages( {
-  suppressWarnings({
-    library(knitr)
-    library(kableExtra)
-  }
-  )
-}
-)
-```
-
 # Scope of this document
 
 This document describes the statistical methods implemented in the `rbmi` R package for standard and reference-based multiple imputation of continuous longitudinal outcomes. 
