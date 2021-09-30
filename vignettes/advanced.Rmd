@@ -1,6 +1,7 @@
 ---
 title: "rbmi Advanced Functionality"
 output: rmarkdown::html_vignette
+bibliography: "references.bib"
 vignette: >
   %\VignetteIndexEntry{advanced}
   %\VignetteEngine{knitr::rmarkdown}
@@ -227,11 +228,28 @@ visit between the groups without any covariate adjustment. This could then lead 
 
 ```{r}
 compare_prop_lastvisit <- function(data,...){
-  fit <- summary(glm(I(outcome > 10) ~ group, family = binomial(), data = data[data[["visit"]] == "visit_3", ]))
-  res <- list( trt = list(est = fit$coefficients["groupB","Estimate"], se = fit$coefficients["groupB","Std. Error"], df = Inf) )
+  
+  fit <- summary(
+    glm(
+      I(outcome > 10) ~ group,
+      family = binomial(),
+      data = data[data[["visit"]] == "visit_3", ]
+    )
+  )
+  
+  res <- list(
+    trt = list( 
+      est = fit$coefficients["groupB", "Estimate"],
+      se = fit$coefficients["groupB", "Std. Error"],
+      df = Inf
+    )
+  )
+  
   return(res)
 }
 ```
+
+The user should be aware that according to Rubin's rules, if the degrees of freedom from the complete-data analysis model is infinite, this does not imply that the pooled degrees of freedom is also infinite. It can be proven that in this case the pooled degrees of freedom is `(M-1)/lambda^2`, where `M` is the number of imputations and `lambda` is the fraction of missing information. Please see @Barnard1999 for details.
 
 This analysis function can then be used in combination with `analyse()` as follows:
 
