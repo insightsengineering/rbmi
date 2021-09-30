@@ -19,7 +19,7 @@ approximate Bayesian multiple imputation combined with Rubin's rules for inferen
 The package can be installed directly from GitHub via:
 
 ```
-devtools::install_github("insightsengineering/rbmi")
+devtools::install_github("insightsengineering/rbmi", build_vignettes = TRUE)
 ```
 
 ## Usage
