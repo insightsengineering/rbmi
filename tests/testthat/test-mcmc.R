@@ -50,7 +50,7 @@ get_within <- function(x, real){
         mutate(inside = real >= lci &  real <= uci)
 }
 
-test_extract_draws <- function(extract_draws_obj, same_cov, n_groups, n_visits) {
+test_extract_draws <- function(draws_extracted, same_cov, n_groups, n_visits) {
 
     expect_type(draws_extracted, "list")
     expect_length(draws_extracted, 2)
@@ -400,7 +400,7 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
     # check extract_draws() worked properly
     test_extract_draws(
         extract_draws(fit$fit),
-        same_cov = FALSE,
+        same_cov = TRUE,
         n_groups = 2,
         n_visits = 3
     )
@@ -438,7 +438,7 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
     # check extract_draws() worked properly
     test_extract_draws(
         extract_draws(fit$fit),
-        same_cov = FALSE,
+        same_cov = TRUE,
         n_groups = 2,
         n_visits = 3
     )
