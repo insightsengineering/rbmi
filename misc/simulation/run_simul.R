@@ -291,7 +291,7 @@ run_simul <- function(H0) {
 
     return(results)
 }
-# estimated time of one full simulation: 31 minutes
+
 runsim <- function(i, H0) {
     xx <- run_simul(H0)
     saveRDS(c(i=i, H0=H0, xx), file = file.path('Results/Res_each_sim', paste('res', i, H0, '.rds', sep = '_')))
@@ -300,7 +300,10 @@ runsim <- function(i, H0) {
 
 N <- 10000
 
+######### simulation example using parallel computing, under H0 = TRUE
 parallel::mclapply(seq.int(N), runsim, H0=TRUE, mc.cores = parallel::detectCores())
 
 li <- list.files('Results', pattern = '.*\\.rds$', full.names = TRUE)
 saveRDS(bind_rows(lapply(li, function(X) unlist(readRDS(X)))), file = "results.rds")
+
+# results can be seen at Wolbers et al 2021 (https://arxiv.org/abs/2109.11162, tables 2,3)
