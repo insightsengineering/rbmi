@@ -197,7 +197,7 @@ As in the "SAS five macros", the MCMC algorithm is initialized at the parameters
 
 ### Approximate Bayesian posterior draws via the bootstrap {#sec:imputationModelBoot}
 
-Several authors have suggested  that a faster and stabler way to get Bayesian posterior draws from the imputation model is to bootstrap the incomplete data and to calculate REML estimates for each bootstrap sample (@LittleRubin1992, @Efron1994, @Honaker2010, @vanHippelBartlett2021). This method is proper in that the REML estimates from the bootstrap samples are asymptotically equivalent to a sample from the posterior distribution and may provide additional robustness to model misspecification (@LittleRubin1992 [Section 10.2.3, part 6], @Honaker2010). In order to retain balance between treatment groups and stratification factors across bootstrap samples, the user is able to provide stratification variables for the bootstrap in the `rbmi` implementation.
+Several authors have suggested that a faster and stabler way to get Bayesian posterior draws from the imputation model is to bootstrap the incomplete data and to calculate REML estimates for each bootstrap sample (@LittleRubin1992, @Efron1994, @Honaker2010, @vanHippelBartlett2021). This method is proper in that the REML estimates from the bootstrap samples are asymptotically equivalent to a sample from the posterior distribution and may provide additional robustness to model misspecification (@LittleRubin1992 [Section 10.2.3, part 6], @Honaker2010). In order to retain balance between treatment groups and stratification factors across bootstrap samples, the user is able to provide stratification variables for the bootstrap in the `rbmi` implementation.
 
 ## Imputation step {#sec:imputationStep}
 
