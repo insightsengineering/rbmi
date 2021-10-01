@@ -7,9 +7,9 @@
 char2fct(data)
 }
 \arguments{
-\item{data}{A dataframe}
+\item{data}{A \code{data.frame}}
 }
 \description{
-Converts all character variables within a dataframe to factor.
-Deterimines character variables by \code{is.character()}
+Converts all character variables within a \code{data.frame} to factor.
+Determines character variables by \code{is.character()}
 }

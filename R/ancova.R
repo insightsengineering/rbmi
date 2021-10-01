@@ -128,15 +128,15 @@ ancova <- function(data, vars, visits = NULL) {
 #' @description
 #' Performance analysis of covariance. See [ancova()] for full details.
 #'
-#' @param data The data.frame containing all of the data required for the model.
+#' @param data The `data.frame` containing all of the data required for the model.
 #' @param outcome Character, the name of the outcome variable in `data`.
 #' @param group Character, the name of the group variable in `data`.
 #' @param covariates Character vector containing the name of any additional covariates
 #' to be included in the model as well as any interaction terms.
 #'
 #' @details
-#' `group` must be a factor variable with only 2 levels.
-#' `outcome` must be a continuous numeric variable.
+#' - `group` must be a factor variable with only 2 levels.
+#' - `outcome` must be a continuous numeric variable.
 #'
 #' @examples
 #' \dontrun{

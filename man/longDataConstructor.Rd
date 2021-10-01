@@ -117,7 +117,7 @@ for all observations. This list is populated by a call to \code{self$set_strateg
 \if{html}{\out{<a id="method-get_data"></a>}}
 \if{latex}{\out{\hypertarget{method-get_data}{}}}
 \subsection{Method \code{get_data()}}{
-Returns a dataframe based upon required subject IDs. Replaces missing
+Returns a \code{data.frame} based upon required subject IDs. Replaces missing
 values with new ones if provided.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$get_data(
@@ -162,19 +162,20 @@ in by those specified in the imputation list object.  i.e.\preformatted{obj <- a
 longdata$get_data(obj)
 }
 
-Will return a dataframe consisting of all observations for \code{pt1} twice and all of the
+Will return a \code{data.frame} consisting of all observations for \code{pt1} twice and all of the
 observations for \code{pt3} once. The first set of observations for \code{pt1} will have missing
 values filled in with \code{c(1,2,3)} and the second set will be filled in by \code{c(4,5,6)}. The
 length of the values must be equal to \code{sum(self$is_missing[[id]])}.
 
-If \code{obj} is not \code{NULL} then all subject IDs will be scrambled in order to ensure that they are unique
+If \code{obj} is not \code{NULL} then all subject IDs will be scrambled in order to ensure that they
+are unique
 i.e. If the \code{pt2} is requested twice then this process guarantees that each set of observations
 be have a unique subject ID number. The \code{idmap} attribute (if requested) can be used
 to map from the new ids back to the old ids.
 }
 
 \subsection{Returns}{
-A dataframe.
+A \code{data.frame}.
 }
 }
 \if{html}{\out{<hr>}}
@@ -280,7 +281,7 @@ information.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat_ice}}{Dataframe containing ICE information. See details.}
+\item{\code{dat_ice}}{a \code{data.frame} containing ICE information. See details.}
 
 \item{\code{update}}{Logical, indicates that the ICE data should be used as an update. See details.}
 }

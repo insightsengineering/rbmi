@@ -7,7 +7,7 @@
 get_conditional_parameters(pars, values)
 }
 \arguments{
-\item{pars}{a list with values "mu" and "sigma" defining the mean vector and
+\item{pars}{a \code{list} with elements \code{mu} and \code{sigma} defining the mean vector and
 covariance matrix respectively.}
 
 \item{values}{a vector of observed values to condition on, must be same length as \code{pars$mu}.

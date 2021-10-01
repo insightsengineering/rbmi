@@ -73,9 +73,9 @@ as_simple_formula <- function(vars) {
 
 
 
-#' Expand dataframe into a design matrix
+#' Expand `data.frame` into a design matrix
 #'
-#' Expands out a dataframe using a formula to create a design matrix.
+#' Expands out a `data.frame` using a formula to create a design matrix.
 #' Key details are that it will always place the outcome variable into
 #' the first column of the return object.
 #'
@@ -108,10 +108,10 @@ as_model_df <- function(dat, frm) {
 
 #' Character 2 Factor
 #'
-#' Converts all character variables within a dataframe to factor.
-#' Deterimines character variables by `is.character()`
+#' Converts all character variables within a `data.frame` to factor.
+#' Determines character variables by `is.character()`
 #'
-#' @param data A dataframe
+#' @param data A `data.frame`
 char2fct <- function(data) {
     for (v in colnames(data)) {
         if (is.character(data[[v]])) {
@@ -305,9 +305,9 @@ str_contains <- function(x, subs) {
 
 
 
-#' Sort Data Frame
+#' Sort `data.frame`
 #'
-#' Sorts a dataframe (ascending by default) based upon variables within the dataset
+#' Sorts a `data.frame` (ascending by default) based upon variables within the dataset
 #' @param df data.frame
 #' @param vars character vector of variables
 #' @param decreasing logical whether sort order should be in descending or ascending (default) order.

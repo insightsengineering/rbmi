@@ -20,7 +20,7 @@ that is constructed by averaging the data. See details for more information.
 }
 \details{
 Numeric variables are evaluated at the mean across the entire dataset
-(after removing missing values)
+(after removing missing values).
 Factor variables are evaluated at all levels (including combinations
 with other factor variables) with the final return value being
 average across all the predictions generated at each of these levels.

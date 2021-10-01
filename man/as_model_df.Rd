@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{as_model_df}
 \alias{as_model_df}
-\title{Expand dataframe into a design matrix}
+\title{Expand \code{data.frame} into a design matrix}
 \usage{
 as_model_df(dat, frm)
 }
@@ -12,7 +12,7 @@ as_model_df(dat, frm)
 \item{frm}{a formula}
 }
 \description{
-Expands out a dataframe using a formula to create a design matrix.
+Expands out a \code{data.frame} using a formula to create a design matrix.
 Key details are that it will always place the outcome variable into
 the first column of the return object.
 }

@@ -107,7 +107,7 @@ Additional baseline or time-varying covariates must be included in \code{data}.
 \code{data} must have one row per visit per subject. This means that incomplete
 outcome data must be set as \code{NA} instead of having the related row missing. Missing values
 in the covariates are not allowed. If \code{data} is incomplete
-then the \code{\link[=expand_locf]{expand_locf()}} helper function can be used to add in any missing rows, which uses
+then the \code{\link[=expand_locf]{expand_locf()}} helper function can be used to insert any missing rows using
 Last Observation Carried Forward (LOCF) imputation to impute the covariates values.
 Note that LOCF is generally not a principled imputation method and should only be used when appropriate
 for the specific covariate.

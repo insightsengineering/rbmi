@@ -11,13 +11,11 @@ as_strata(...)
 }
 \description{
 Collapse multiple categorical variables into distinct unique categories.
-e.g.\preformatted{}
-}
-\details{
-\preformatted{would return
+e.g.\preformatted{as_strata(c(1,1,2,2,2,1), c(5,6,5,5,6,5))
 }
 
-c(1,2,3,3,4,1)\preformatted{}
+would return\preformatted{c(1,2,3,3,4,1)
+}
 }
 \examples{
 \dontrun{

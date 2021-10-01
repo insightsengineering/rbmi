@@ -43,7 +43,7 @@ We consider an imputation model with the mean change from baseline in the HAMD17
 
 ```{r}
 
-## Use expand_locf to add those dropped observations into the dataset
+## Use expand_locf to add the dropped observations into the dataset
 dat <- expand_locf(
     dat,
     PATIENT = levels(dat$PATIENT), # expand by PATIENT and VISIT 
@@ -203,11 +203,13 @@ In brief, this is implemented by specifying a data.frame that contains the amoun
 of adjustment to be added to each longitudinal outcome for each subject and visit, i.e. 
 the data.frame must contain the columns `subjid`, `visit`, and `delta`.
 
-It is appreciated that this is potentially tedious to specify and some helper
-functions have been provided to simplify this process. In particular
-`delta_template()` provides a shell data.frame where the delta-adjustment is set to 0 for all
-patients but where several relavant meta-variables are provided in order to support
-the derivation of the adjustment.   
+
+It is appreciated that carrying out this procedure is potentially tedious, therefore the
+`delta_template()` helper function has been provided to simplify it. In particular
+`delta_template()` returns a shell `data.frame` where the delta-adjustment is set to 0 for all
+patients. Additionally `delta_template()` adds several meta-variables onto the shell
+`data.frame` which can be used for manual derivation or manipulation of the delta-adjustment.
+
 
 For example lets say we want to add a delta-value of 5 to all imputed values (i.e. those values
 which were missing in the original dataset) in the drug arm. That could then be implemented as follows:

@@ -10,9 +10,10 @@ get_visit_distribution_parameters(dat, beta, sigma)
 \item{dat}{Patient level dataset, must be 1 row per visit. Column order must
 be in the same order as beta. The number of columns must match the length of beta}
 
-\item{beta}{List of model beta coefficients 1 for each sample i.e.
-\code{list( c(1,2,3) , c(4,5,6), c(7,8,9))}
-all values of beta must be the same length and must be the same length and order as \code{dat}.}
+\item{beta}{List of model beta coefficients. There should be 1 element for each sample
+e.g. if there were 3 samples and the models each had 4 beta coefficients then this argument
+should be of the form  \code{list( c(1,2,3,4) , c(5,6,7,8), c(9,10,11,12))}.
+All elements of beta must be the same length and must be the same length and order as \code{dat}.}
 
 \item{sigma}{List of sigma. Must have the same number of entries as \code{beta}.}
 }

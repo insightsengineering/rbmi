@@ -131,7 +131,7 @@ longDataConstructor <- R6::R6Class(
 
         #' @description
         #'
-        #' Returns a dataframe based upon required subject IDs. Replaces missing
+        #' Returns a `data.frame` based upon required subject IDs. Replaces missing
         #' values with new ones if provided.
         #'
         #' @param obj Either `NULL`, a character vector of subjects IDs or a
@@ -165,19 +165,20 @@ longDataConstructor <- R6::R6Class(
         #' )
         #' longdata$get_data(obj)
         #' ```
-        #' Will return a dataframe consisting of all observations for `pt1` twice and all of the
+        #' Will return a `data.frame` consisting of all observations for `pt1` twice and all of the
         #' observations for `pt3` once. The first set of observations for `pt1` will have missing
         #' values filled in with `c(1,2,3)` and the second set will be filled in by `c(4,5,6)`. The
         #' length of the values must be equal to `sum(self$is_missing[[id]])`.
         #'
-        #' If `obj` is not `NULL` then all subject IDs will be scrambled in order to ensure that they are unique
+        #' If `obj` is not `NULL` then all subject IDs will be scrambled in order to ensure that they
+        #' are unique
         #' i.e. If the `pt2` is requested twice then this process guarantees that each set of observations
         #' be have a unique subject ID number. The `idmap` attribute (if requested) can be used
         #' to map from the new ids back to the old ids.
         #'
         #' @return
         #'
-        #' A dataframe.
+        #' A `data.frame`.
         get_data = function(obj = NULL, nmar.rm = FALSE, na.rm = FALSE, idmap = FALSE) {
 
             if (is.null(obj)) return(self$data)
@@ -356,7 +357,7 @@ longDataConstructor <- R6::R6Class(
         #' See [impute()] for the format of `dat_ice` if `update=TRUE`.
         #' If `update=TRUE` this function ensures that MAR strategies cannot be changed to non-MAR in the presence
         #' of post-ICE observations.
-        #' @param dat_ice Dataframe containing ICE information. See details.
+        #' @param dat_ice a `data.frame` containing ICE information. See details.
         #' @param update Logical, indicates that the ICE data should be used as an update. See details.
         set_strategies = function(dat_ice = NULL, update=FALSE) {
 
@@ -500,7 +501,7 @@ longDataConstructor <- R6::R6Class(
 
 #' Transpose imputations
 #'
-#' Takes a `imputation_list` object and transposes it i.e.
+#' Takes an `imputation_list` object and transposes it e.g.
 #' ```
 #' list(
 #'     list(

@@ -5,7 +5,7 @@
 #' Collapse multiple categorical variables into distinct unique categories.
 #' e.g.
 #' ```
-#'
+#' as_strata(c(1,1,2,2,2,1), c(5,6,5,5,6,5))
 #' ```
 #' would return
 #' ```

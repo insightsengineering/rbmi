@@ -14,7 +14,7 @@ to be applied to each visit. See details. If a numeric vector it must have
 the same length as the number of unique visits in the original dataset.}
 
 \item{dlag}{\code{NULL} or a numeric vector. Determines the scaling to be applied
-to \code{delta} based upon with visit the ICE occurred on. See details. If a
+to \code{delta} based upon which visit the ICE occurred on. See details. If a
 numeric vector it must have the same length as the number of unique visits in
 the original dataset.}
 
@@ -29,11 +29,11 @@ of applying a delta adjustment.
 }
 \details{
 To apply a delta adjustment the \code{\link[=analyse]{analyse()}} function expects
-a delta data.frame with 3 variables; \code{vars$subjid}, \code{vars$visit} and \code{delta}
+a delta data.frame with 3 variables: \code{vars$subjid}, \code{vars$visit} and \code{delta}
 (where \code{vars} is the object supplied in the original call to \code{\link[=draws]{draws()}}
 as created by the \code{\link[=set_vars]{set_vars()}} function).
 
-These functions will return a data.frame with the aforementioned variables with 1
+This functions will return a \code{data.frame} with the aforementioned variables with 1
 row per subject per visit. If the \code{delta} argument to this function is \code{NULL}
 then the \code{delta} column in the returned data.frame will be 0 for all observations.
 If the \code{delta} argument is not \code{NULL} then \code{delta} will be calculated separately
@@ -47,11 +47,11 @@ and lets say that the subject had an ICE on visit 2. The calculation would then 
 as follows:\preformatted{v1  v2  v3  v4
 --------------
  5   6   7   8  # delta assigned to each visit
- 0   1   2   3  # scaling starting from the first visit after the subjects ICE
+ 0   1   2   3  # lagged scaling starting from the first visit after the subjects ICE
 --------------
- 0   6  14  24  # delta * scaling
+ 0   6  14  24  # delta * lagged scaling
 --------------
- 0   6  20  44  # accumulative sum / delta to be applied to each visit
+ 0   6  20  44  # accumulative sum of delta to be applied to each visit
 }
 
 That is to say the subject would have a delta offset of 0 applied for visit-1, 6
@@ -59,11 +59,11 @@ for visit-2, 20 for visit-3 and 44 for visit-4. As a comparison, lets say that t
 subject instead had their ICE on visit 3, the calculation would then be as follows:\preformatted{v1  v2  v3  v4
 --------------
  5   6   7   8  # delta assigned to each visit
- 0   0   1   2  # scaling starting from the first visit after the subjects ICE
+ 0   0   1   2  # lagged scaling starting from the first visit after the subjects ICE
 --------------
- 0   0   7  16  # delta * scaling
+ 0   0   7  16  # delta * lagged scaling
 --------------
- 0   0   7  23  # accumulative sum / delta to be applied to each visit
+ 0   0   7  23  # accumulative sum of delta to be applied to each visit
 }
 
 In terms of practical usage, lets say that you wanted a delta of 5 to be used for all post ICE visits
@@ -72,11 +72,11 @@ regardless of their proximity to the ICE visit. This can be achieved by setting
 ICE on visit-1, then the calculation would be as follows:\preformatted{v1  v2  v3  v4
 --------------
  5   5   5   5  # delta assigned to each visit
- 1   0   0   0  # scaling starting from the first visit after the subjects ICE
+ 1   0   0   0  # lagged scaling starting from the first visit after the subjects ICE
 --------------
- 5   0   0  0  # delta * scaling
+ 5   0   0  0  # delta * lagged scaling
 --------------
- 5   5   5  5  # accumulative sum / delta to be applied to each visit
+ 5   5   5  5  # accumulative sum of delta to be applied to each visit
 }
 
 Another way of using these arguments
@@ -88,11 +88,11 @@ and \code{dlag = c(3, 3, 3, 3)}. For example lets say we have a subject who had 
 (i.e. visit-2) then the calculation would be:\preformatted{v1  v2  v3  v4
 --------------
  0   4   1   3  # delta assigned to each visit
- 0   0   3   3  # scaling starting from the first visit after the subjects ICE
+ 0   0   3   3  # lagged scaling starting from the first visit after the subjects ICE
 --------------
- 0   0   3   9  # delta * scaling
+ 0   0   3   9  # delta * lagged scaling
 --------------
- 0   0   3  12  # accumulative sum / delta to be applied to each visit
+ 0   0   3  12  # accumulative sum of delta to be applied to each visit
 }
 
 i.e. on week-6 (1 week after the ICE) they have a delta of 3 and on week-9 (4 weeks after the ICE)

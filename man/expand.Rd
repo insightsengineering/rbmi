@@ -4,7 +4,7 @@
 \alias{expand}
 \alias{fill_locf}
 \alias{expand_locf}
-\title{Expand and fill in missing dataframe rows}
+\title{Expand and fill in missing \code{data.frame} rows}
 \usage{
 expand(data, ...)
 
@@ -23,28 +23,32 @@ levels will result in multiple rows for that level).}
 \item{group}{character vector containing the names of variables to group
 by when performing LOCF imputation of \code{var}.}
 
-\item{order}{character vector containing the names of additional variables to sort the dataframe
+\item{order}{character vector containing the names of additional variables to sort the \code{data.frame}
 by before performing LOCF.}
 }
 \description{
 These functions are essentially wrappers around \code{\link[base:expand.grid]{base::expand.grid()}} to ensure that missing
-combinations of data are inserted into a dataframe with imputation/fill methods for updating
+combinations of data are inserted into a \code{data.frame} with imputation/fill methods for updating
 covariate values of newly created rows.
 }
 \details{
-The \code{\link[=draws]{draws()}} function makes the assumption that all subjects and visits are present in the dataframe
-and that all covariate values are non missing; \code{expand()}, \code{fill_locf()} and \code{expand_locf()} are utility
-functions to support users in ensuring that their dataframes conform to these assumptions.
+The \code{\link[=draws]{draws()}} function makes the assumption that all subjects and visits are present
+in the \code{data.frame} and that all covariate values are non missing; \code{expand()},
+\code{fill_locf()} and \code{expand_locf()} are utility functions to support users in ensuring
+that their \code{data.frame}'s conform to these assumptions.
 
-\code{expand()} takes vectors for expected levels in a dataframe and expands out all combinations inserting any
-missing rows into the dataframe. Note that all "expanded" variables are cast as factors.
+\code{expand()} takes vectors for expected levels in a \code{data.frame} and expands out all
+combinations inserting any missing rows into the \code{data.frame}. Note that all "expanded"
+variables are cast as factors.
 
-\code{fill_locf()} applies LOCF imputation to named covariates to fill in any NAs created by the insertion of new
-rows by \code{expand()} (though do note that no distinction is made between existing NAs and newly created NAs).
-Note that the dataframe is sorted by \code{c(group, order)} before performing the LOCF imputation; the dataframe
+\code{fill_locf()} applies LOCF imputation to named covariates to fill in any NAs created
+by the insertion of new rows by \code{expand()} (though do note that no distinction is
+made between existing NAs and newly created NAs). Note that the \code{data.frame} is sorted
+by \code{c(group, order)} before performing the LOCF imputation; the \code{data.frame}
 will be returned in the original sort order however.
 
-\code{expand_locf()} a simple composition function of \code{fill_locf()} and \code{expand()} i.e. \code{fill_locf(expand(...))}.
+\code{expand_locf()} a simple composition function of \code{fill_locf()} and \code{expand()} i.e.
+\code{fill_locf(expand(...))}.
 }
 \examples{
 \dontrun{
