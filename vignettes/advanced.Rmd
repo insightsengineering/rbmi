@@ -78,7 +78,7 @@ In order to allow changes in the imputation strategy without having to re-run th
 `draws()` function, the function `impute()` has an additional argument `update_strategies`.  
 
 Please note though that this functionality comes with a some key limitations:
-From a theoretical point of view, such updates are only sensible if the base imputation model and the data to which it is fitted is also applicable to the revised imputation strategy. For example, as described in the help to the `draws()` function, observed post-ICE data are included in the imputation model for the MAR strategy but excluded for non-MAR strategies. For this reason, the imputation strategy cannot be changed from MAR to a non-MAR strategy via argument `update_strategies` in case there are any observed data after the ICE. A change from a non-MAR to MAR triggers a warning because in this case the imputation model was not fitted to all relevant data and may be inefficient. Similarly, it is not possible to change the first visit which is affected by an ICE via argument `update_strategies`. 
+From a theoretical point of view, such updates are only sensible if the base imputation model and the data to which it is fitted are also applicable to the revised imputation strategy. For example, as described in `help("draws", "rbmi")`, observed post-ICE data are included in the imputation model for the MAR strategy but excluded for non-MAR strategies. For this reason, the imputation strategy cannot be changed from MAR to a non-MAR strategy in the presence of observed data after the ICE. Likewise, a change from a non-MAR to MAR in the presence of observed data after the ICE triggers a warning because the imputation model was not fitted to all relevant data and may be inefficient. Similarly, it is not possible to change the first visit which is affected by an ICE via argument `update_strategies`. 
 
 As an example, let's assume we want to use the copy  increments from reference strategy for the main analysis and explore the jump to reference imputation strategy as a sensitivity analysis. If we use approximate Bayesian multiple imputation with 10 random imputation, this could be implemented as follows:
 
@@ -334,7 +334,6 @@ v1  v2  v3  v4
  5   5   5  5  # accumulative sum / delta to be applied to each visit
  ```
 
-!!! The example below used the wording "the ICE occurred at" but in data_ICE we only know the first visit affected by the ICE.
 !!! I tried to clean up the wording accordingly but ran into some problems. Please help to fix this! 
 
 Another way of using these arguments is to set delta to be the difference in time 
