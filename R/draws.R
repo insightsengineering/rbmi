@@ -2,19 +2,20 @@
 #'
 #' @description `draws` fits the base imputation model to the observed outcome data
 #' according to the given multiple imputation methodology.
-#' According to the user's method specification, it returns either draws from the posterior distribution of the  model parameters
-#' as required for Bayesian multiple imputation or frequentist parameter estimates from the original data and
-#' bootstrapped or leave-one-out datasets as required for conditional mean imputation.
+#' According to the user's method specification, it returns either draws from the posterior distribution of the
+#' model parameters as required for Bayesian multiple imputation or frequentist parameter estimates from the
+#' original data and bootstrapped or leave-one-out datasets as required for conditional mean imputation.
 #' The purpose of the imputation model is to estimate model parameters
 #' in the absence of intercurrent events (ICEs) handled using reference-based imputation methods.
 #' For this reason, any observed outcome data after ICEs, for which reference-based imputation methods are
-#' specified, are removed and considered as missing for the purpose of estimating the imputation model, and for this purpose only.
-#' The imputation model is a mixed effects model repeated measures (MMRM) model that is valid under a missing-at-random (MAR) assumption.
+#' specified, are removed and considered as missing for the purpose of estimating the imputation model, and for
+#' this purpose only. The imputation model is a mixed effects model repeated measures (MMRM) model that is valid
+#' under a missing-at-random (MAR) assumption.
 #' It can be fit using frequentist maximum likelihood (ML) or restricted ML (REML) estimation,
 #' a Bayesian approach, or an approximate Bayesian approach according to the user's method specification.
-#' The ML/REML approaches and the approximate Bayesian approach support several possible covariance structures, while the Bayesian
-#' approach based on MCMC sampling supports only an unstructured covariance structure. In any case
-#' the covariance matrix can be assumed to be the same or different across each group.
+#' The ML/REML approaches and the approximate Bayesian approach support several possible covariance structures,
+#' while the Bayesian approach based on MCMC sampling supports only an unstructured covariance structure.
+#' In any case the covariance matrix can be assumed to be the same or different across each group.
 #'
 #' @name draws
 #' @param data A `data.frame` containing the data to be used in the model. See details.
@@ -39,7 +40,8 @@
 #' - Approximate Bayesian MI based on bootstrapping: `draws` returns
 #' the draws from the posterior distribution of the parameters using an approximate Bayesian approach,
 #' where the sampling from the posterior distribution is simulated by fitting the MMRM model
-#' on bootstrap samples of the original dataset. This method can be specified by using `method = method_approxbayes()]`.
+#' on bootstrap samples of the original dataset. This method can be specified by using
+#' `method = method_approxbayes()]`.
 #' - Conditional mean imputation with bootstrap re-sampling: `draws` returns the
 #' MMRM parameter estimates from the original dataset and from `n_samples` bootstrap samples.
 #' This method can be specified by using `method = method_condmean()` with
@@ -69,18 +71,20 @@
 #' for the specific covariate.
 #'
 #' Please note that there is no special provisioning for the baseline outcome values. If you do not want baseline
-#' observations to be included in the model as part of the response variable then these should be removed in advance from the outcome variable in `data`. At the same time if you want to include the baseline outcome as covariate in the model, then this should be included as a separate column of `data` (as any other covariate).
+#' observations to be included in the model as part of the response variable then these should be removed in advance
+#' from the outcome variable in `data`. At the same time if you want to include the baseline outcome as covariate in
+#' the model, then this should be included as a separate column of `data` (as any other covariate).
 #'
 #' The argument `data_ice` contains information about the occurrence of ICEs. It is a
 #' `data.frame` with 3 columns:
-#' - Subject ID: a character vector containing the ids of the subjects that experienced
+#' - **Subject ID**: a character vector containing the ids of the subjects that experienced
 #'   the ICE. This column must be named as specified in `vars$subjid`.
-#' - Visit: a character vector containing the first visit after the occurrence of the ICE
+#' - **Visit**: a character vector containing the first visit after the occurrence of the ICE
 #'   (i.e. the first visit affected by the ICE).
 #'   The visits must be equal to one of the levels of `data[[vars$visit]]`.
 #'   If multiple ICEs happen for the same subject, then only the first non-MAR visit should be used.
 #'   This column must be named as specified in `vars$visit`.
-#' - Strategy: a character vector specifying the imputation strategy to address the ICE for this subject.
+#' - **Strategy**: a character vector specifying the imputation strategy to address the ICE for this subject.
 #'   This column must be named as specified in `vars$strategy`.
 #'   Possible imputation strategies are:
 #'   - `"MAR"`: Missing At Random.
@@ -100,7 +104,14 @@
 #' (performed with the function ([impute()]). To summarize, **at this stage only pre-ICE data
 #' and post-ICE data that is after ICEs for which MAR imputation is specified are used**.
 #'
-#' The vars argument is a named list that specifies the names of key variables within
+#' If the `data_ice` argument is omitted, or if a subject doesn't have a record within `data_ice`, then it is
+#' assumed that all of the relevant subject's data is pre-ICE and as such all missing
+#' visits will be imputed under the MAR assumption and all observed data will be used to fit the base imputation model.
+#' Please note that the ICE visit cannot be updated via the `update_strategy` argument
+#' in [impute()]; this means that subjects who didn't have a record in `data_ice` will always have their
+#' missing data imputed under the MAR assumption even if their strategy is updated.
+#'
+#' The `vars` argument is a named list that specifies the names of key variables within
 #' `data` and `data_ice`. This list is created by [set_vars()] and contains the following named elements:
 #' - `subjid`: name of the column in `data` and `data_ice` which contains the subject ids variable.
 #' - `visit`: name of the column in `data` and `data_ice` which contains the visit variable.
@@ -127,16 +138,19 @@
 #'
 #' @references
 #'
-#' James R Carpenter, James H Roger, and Michael G Kenward. Analysis of longitudinal trials with protocol deviation: a framework for relevant,
-#' accessible assumptions, and inference via multiple imputation. Journal of Biopharmaceutical Statistics, 23(6):1352–1371, 2013.
+#' James R Carpenter, James H Roger, and Michael G Kenward. Analysis of longitudinal trials with protocol deviation: a
+#' framework for relevant, accessible assumptions, and inference via multiple imputation. Journal of Biopharmaceutical
+#' Statistics, 23(6):1352–1371, 2013.
 #'
-#' Suzie Cro, Tim P Morris, Michael G Kenward, and James R Carpenter. Sensitivity analysis for clinical trials with missing continuous outcome
-#' data using controlled multiple imputation: a practical guide. Statistics in Medicine, 39(21):2815–2842, 2020.
+#' Suzie Cro, Tim P Morris, Michael G Kenward, and James R Carpenter. Sensitivity analysis for clinical trials with
+#' missing continuous outcome data using controlled multiple imputation: a practical guide. Statistics in
+#' Medicine, 39(21):2815–2842, 2020.
 #'
-#' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. \[Section 10.2.3\]
+#' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing Data, Second Edition. John Wiley & Sons,
+#' Hoboken, New Jersey, 2002. \[Section 10.2.3\]
 #'
-#' Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Reference-based imputation methods based on conditional mean
-#' imputation. \url{http://arxiv.org/abs/2109.11162}, 2021.
+#' Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Reference-based
+#' imputation methods based on conditional mean imputation. \url{http://arxiv.org/abs/2109.11162}, 2021.
 #'
 #' @export
 draws <- function(data, data_ice = NULL, vars, method) {
