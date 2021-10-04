@@ -333,6 +333,28 @@ test_that("Results of bootstrap percentiles when n_samples = 0 or 1", {
 }
 )
 
+test_that("Bootstrap percentile does not return two-sided p-value larger than 1 when number of positive and negative estimates is equal", {
+    best <- c(1,-1,-2,3,2,1,-4,-3,2)
+
+    x1 <- quantile(best[-1], 0.10, type = 6)[[1]]
+    x2 <- quantile(best[-1], 0.90, type = 6)[[1]]
+    pval <- (sum(best[-1] < 0) + 1 ) / length(best)
+    expected <- list(
+        est = best[1],
+        ci = c(x1, x2),
+        se = NA,
+        pvalue = 1 # 2*pval is larger than one in this case: (n_samples+2)/(n_samples+1)
+    )
+    observed <- pool_internal.bootstrap(
+        list(est = best),
+        conf.level = 0.80,
+        alternative = "two.sided",
+        type =  "percentile"
+    )
+    expect_equal(observed, expected)
+
+})
+
 
 
 
