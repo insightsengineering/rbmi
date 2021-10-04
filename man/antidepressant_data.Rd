@@ -3,13 +3,13 @@
 \docType{data}
 \name{antidepressant_data}
 \alias{antidepressant_data}
-\title{Antidepressant trial data.}
+\title{Antidepressant trial data}
 \format{
 A data frame with 608 rows and 11 variables:
 \itemize{
 \item \code{PATIENT}: patients IDs.
 \item \code{HAMATOTL}: total score Hamilton Anxiety Rating Scale.
-\item \code{PGIIMP}: patient’s Global Impression of Improvement Rating Scale.
+\item \code{PGIIMP}: patient's Global Impression of Improvement Rating Scale.
 \item \code{RELDAYS}: number of days between visit and baseline.
 \item \code{VISIT}: post-baseline visit. Has levels 4,5,6,7.
 \item \code{THERAPY}: the treatment group variable. It is equal to \code{PLACEBO} for observations from the placebo arm, or \code{DRUG} for observations from the active arm.
@@ -29,7 +29,7 @@ The dataset is available on the website of the
 \href{https://www.lshtm.ac.uk/research/centres-projects-groups/missing-data#dia-missing-data}{Drug Information Association Scientific Working Group on Estimands and Missing Data}.
 As per that website, the original data are from an antidepressant clinical trial with four treatments; two doses of an experimental medication,
 a positive control, and placebo and was published in Goldstein et al (2004). To mask the real data, week 8 observations were removed and two arms were created:
-the original placebo arm and a “drug arm” created by randomly selecting patients from the three non-placebo arms.
+the original placebo arm and a "drug arm" created by randomly selecting patients from the three non-placebo arms.
 }
 \details{
 The relevant endpoint is the Hamilton 17-item rating scale for depression (HAMD17) for which baseline and weeks 1, 2, 4, and 6 assessments are included.

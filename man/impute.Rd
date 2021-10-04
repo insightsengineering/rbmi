@@ -60,7 +60,7 @@ conditional mean imputations for bootstrap or jackknife samples, respectively, o
 The \code{update_strategy} argument can be used to update the imputation strategy that was
 originally set via the \code{data_ice} option in \code{\link[=draws]{draws()}}. This avoids having to re-run the \code{\link[=draws]{draws()}}
 function when changing the imputation strategy in certain circumstances (as detailed below).
-The \code{data.frame} provided to to \code{update_strategy} argument must contain two columns,
+The \code{data.frame} provided to \code{update_strategy} argument must contain two columns,
 one for the subject ID and another for the imputation strategy, whose names are the same as
 those defined in the \code{vars} argument as specified in the call to \code{\link[=draws]{draws()}}. Please note that this
 argument only allows you to update the imputation strategy and not other argument such as the

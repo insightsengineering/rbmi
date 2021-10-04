@@ -33,7 +33,7 @@ a delta data.frame with 3 variables: \code{vars$subjid}, \code{vars$visit} and \
 (where \code{vars} is the object supplied in the original call to \code{\link[=draws]{draws()}}
 as created by the \code{\link[=set_vars]{set_vars()}} function).
 
-This functions will return a \code{data.frame} with the aforementioned variables with 1
+This function will return a \code{data.frame} with the aforementioned variables with 1
 row per subject per visit. If the \code{delta} argument to this function is \code{NULL}
 then the \code{delta} column in the returned data.frame will be 0 for all observations.
 If the \code{delta} argument is not \code{NULL} then \code{delta} will be calculated separately

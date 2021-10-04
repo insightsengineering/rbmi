@@ -24,7 +24,7 @@ format and specification of this data.frame.}
 
 \item{idmap}{Logical. The subject IDs in the imputed \code{data.frame}'s are
 replaced with new IDs to ensure they are unique. Setting this argument to
-\code{TRUE} attaches an attribute, called \code{idmap}, to the returned \code{data.frames}
+\code{TRUE} attaches an attribute, called \code{idmap}, to the returned \code{data.frame}'s
 that will provide a map from the new subject IDs to the old subject IDs.}
 }
 \value{
