@@ -88,7 +88,8 @@ test_that("print - Approx Bayes", {
 
 test_that("print - Bayes", {
 
-    skip_on_cran()  # CRAN / Stan seed does not appear to be reproducible ....
+    # Stan seed is not reproducible across different OS's
+    skip_if_not(is_nightly())  
 
     dobj <- get_data(100)
     set.seed(413)
