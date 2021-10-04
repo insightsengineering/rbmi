@@ -51,8 +51,8 @@ longDataConstructor <- R6::R6Class(
         strata = NULL,
 
 
-        #' @field ice_visit_index A list indexed by subject storing the visit index number which
-        #' the patient had their ICE on
+        #' @field ice_visit_index A list indexed by subject storing the index number of the first visit
+        #' affected by the ICE. If there is no ICE then it is set equal to the number of visits plus 1.
         ice_visit_index = list(),
 
 

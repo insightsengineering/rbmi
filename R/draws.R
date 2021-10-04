@@ -104,11 +104,12 @@
 #' (performed with the function ([impute()]). To summarize, **at this stage only pre-ICE data
 #' and post-ICE data that is after ICEs for which MAR imputation is specified are used**.
 #'
-#' If the `data_ice` argument is omitted, or if a subject doesn't have a record within it, then it is
-#' assumed that a hypothetical ICE occurred after the last visit for all impacted subjects and as such all missing data
-#' will be imputed under MAR. Please note that the ICE visit cannot be changed by the `update_strategy` argument
-#' in [impute()] and as such the subjects missing data will still be imputed under MAR even if you change the
-#' subjects imputation strategy.
+#' If the data_ice argument is omitted, or if a subject doesn't have a record within data_ice, then it is
+#' assumed that all of the relevant subject's data is pre-ICE and as such all missing
+#' visits will be imputed under the MAR assumption and all observed data will be used to fit the base imputation model.
+#' Please note that the ICE visit cannot be updated via the update_strategy argument
+#' in [impute()]; this means that subjects who didn't have a record in data_ice will always have their
+#' missing data imputed under the MAR assumption even if their strategy is updated.
 #'
 #' The `vars` argument is a named list that specifies the names of key variables within
 #' `data` and `data_ice`. This list is created by [set_vars()] and contains the following named elements:
