@@ -51,9 +51,9 @@ longDataConstructor <- R6::R6Class(
         strata = NULL,
 
 
-        #' @field visit_ice A list indexed by subject storing the visit level which
+        #' @field ice_visit_index A list indexed by subject storing the visit index number which
         #' the patient had their ICE on
-        visit_ice = list(),
+        ice_visit_index = list(),
 
 
         #' @field values A list indexed by subject storing a numeric vector of the
@@ -296,6 +296,7 @@ longDataConstructor <- R6::R6Class(
             self$strategy_lock[[id]] <- FALSE
             self$indexes[[id]] <- indexes
             self$is_missing[[id]] <- is_missing
+            self$ice_visit_index[[id]] <- length(self$visits) + 1
         },
 
 
@@ -380,7 +381,8 @@ longDataConstructor <- R6::R6Class(
                 new_strategy <- dat_ice_pt[[self$vars$strategy]]
 
                 if (!update) {
-                    self$visit_ice[[subject]] <- dat_ice_pt[[self$vars$visit]]
+                    visit <- dat_ice_pt[[self$vars$visit]]
+                    self$ice_visit_index[[subject]] <- which(self$visits == visit)
                 } else {
                     if (self$strategy_lock[[subject]]) {
                         current_strategy <- self$strategies[[subject]]
@@ -400,11 +402,9 @@ longDataConstructor <- R6::R6Class(
                     }
                 }
 
-                visit <- self$visit_ice[[subject]]
-
                 self$strategies[[subject]] <- new_strategy
 
-                index <- which(self$visits == visit)
+                index <- self$ice_visit_index[[subject]]
 
                 if (new_strategy != "MAR") {
                     self$is_mar[[subject]] <- seq_along(self$visits) < index
@@ -484,10 +484,10 @@ longDataConstructor <- R6::R6Class(
             validate_datalong(data, vars)
             self$data <- sort_by(data, c(vars$subjid, vars$visit))
             self$vars <- vars
+            self$visits <- levels(self$data[[self$vars$visit]])
             subjects <- levels(self$data[[self$vars$subjid]])
             for (id in subjects) self$add_subject(id)
             self$ids <- subjects
-            self$visits <- levels(self$data[[self$vars$visit]])
             self$set_strata()
             self$check_has_data_at_each_visit()
         }

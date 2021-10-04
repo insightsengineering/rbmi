@@ -7,22 +7,31 @@ suppressPackageStartupMessages({
 
 
 ld_2_list <- function(ld) {
-    list(
-        visits = ld$visits,
-        is_mar = ld$is_mar,
-        data = ld$data,
-        ids = ld$ids,
-        group = ld$group,
-        indexes = ld$indexes,
-        vars = ld$vars,
-        strata = ld$strata,
-        strategies = ld$strategies,
-        strat_lock = ld$strategy_lock,
-        values = ld$values,
-        visit_ice = ld$visit_ice,
-        is_missing = ld$is_missing,
-        is_post_ice = ld$is_post_ice
+
+    vars <- c(
+        "visits",
+        "is_mar",
+        "data",
+        "ids",
+        "group",
+        "indexes",
+        "vars",
+        "strata",
+        "strategies",
+        "strategy_lock",
+        "values",
+        "ice_visit_index",
+        "is_missing",
+        "is_post_ice"
     )
+
+    assert_that(
+        all(vars %in% names(ld))
+    )
+
+    HOLD <- lapply( vars, function(x, ld) ld[[x]], ld = ld)
+    names(HOLD) <- vars
+    return(HOLD)
 }
 
 
@@ -336,6 +345,11 @@ test_that("Strategies", {
         rep("MAR", dobj$n)
     )
 
+    expect_equal(
+        unlist(ld$ice_visit_index, use.names = FALSE),
+        rep(4, dobj$n)
+    )
+
     dat_ice <- tribble(
         ~visit, ~subjid, ~strategy,
         "Visit 1", "1",  "ABC",
@@ -355,13 +369,15 @@ test_that("Strategies", {
         c(FALSE, TRUE, TRUE, FALSE)
     )
 
-
     expect_equal(
         unlist(ld$is_mar, use.names = FALSE),
         c(F, F, F,    T, T, T,    T, T, F,    T, T, T)
     )
 
-    pre_update_ice_visit <- ld$visit_ice
+    expect_equal(
+        unlist(ld$ice_visit_index, use.names = FALSE),
+        c(1, 2, 3, 4)
+    )
 
     dat_ice <- tribble(
         ~subjid, ~strategy,
@@ -371,9 +387,10 @@ test_that("Strategies", {
     )
     ld$update_strategies(dat_ice)
 
-    post_update_ice_visit <- ld$visit_ice
-
-    expect_equal(pre_update_ice_visit, post_update_ice_visit)
+    expect_equal(
+        unlist(ld$ice_visit_index, use.names = FALSE),
+        c(1, 2, 3, 4)
+    )
 
     expect_equal(
         unlist(ld$is_mar, use.names = FALSE),
@@ -398,6 +415,7 @@ test_that("Strategies", {
          ~subjid, ~strategy,
           "3",  "MAR",
     )
+
     expect_warning(
         ld$update_strategies(dat_ice),
         "from non-MAR to MAR"
@@ -436,6 +454,39 @@ test_that("strategies part 2", {
     expect_equal(ld_2_list(ld), pre_update_ld)
 
 
+
+
+    dat_ice <- tribble(
+        ~subjid, ~strategy, ~visit,
+        "1", "LKJ", "Visit 2",
+        "2", "MAR", "Visit 7",
+        "3", "XYZ", "Visit 1"
+    )
+
+    ld$update_strategies(dat_ice)
+
+    expect_equal(
+        ld$is_mar,
+        pre_update_ld$is_mar
+    )
+
+    expect_equal(
+        ld$ice_visit_index,
+        pre_update_ld$ice_visit_index
+    )
+
+    expect_equal(
+        unlist(ld$strategies, use.names = FALSE),
+        c("LKJ", "MAR", "XYZ", "MAR")
+    )
+
+
+    #### Show that not setting an ICE doesn't affect the ice_visit_index
+    dobj <- get_ld()
+    ld <- dobj$ld
+    dat <- dobj$dat
+    ld$set_strategies()
+
     dat_ice <- tribble(
         ~subjid, ~strategy, ~visit,
         "1", "LKJ", "Visit 2",
@@ -443,9 +494,16 @@ test_that("strategies part 2", {
         "3", "XYZ", "Visit 1"
     )
     ld$update_strategies(dat_ice)
-    expect_equal(ld$is_mar, pre_update_ld$is_mar)
-    expect_equal(ld$visit_ice, pre_update_ld$visit_ice)
-    expect_equal(unlist(ld$strategies, use.names = FALSE), c("LKJ", "MAR", "XYZ", "MAR"))
+
+    expect_equal(
+        unlist(ld$ice_visit_index, use.names = FALSE),
+        c(4,4,4,4)
+    )
+    expect_equal(
+        unlist(ld$strategies, use.names = FALSE),
+        c("LKJ", "MAR", "XYZ", "MAR")
+    )
+
 })
 
 

@@ -36,7 +36,7 @@ This field is only used as part of the \code{self$sample_ids()} function to enab
 stratified bootstrap
 sampling}
 
-\item{\code{visit_ice}}{A list indexed by subject storing the visit level which
+\item{\code{ice_visit_index}}{A list indexed by subject storing the visit index number which
 the patient had their ICE on}
 
 \item{\code{values}}{A list indexed by subject storing a numeric vector of the
