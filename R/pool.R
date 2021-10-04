@@ -374,7 +374,7 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
         est = est_orig,  # First estimate should be original dataset
         ci = ci,
         se = NA,
-        pvalue = min(pvals[index]) * length(pvals[index])
+        pvalue = min(min(pvals[index]) * length(pvals[index]), 1)
     )
     return(ret)
 }
