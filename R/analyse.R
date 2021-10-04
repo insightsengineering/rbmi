@@ -191,7 +191,7 @@ analyse <- function(imputations, fun = ancova, delta = NULL, ...) {
 #' format and specification of this data.frame.
 #' @param idmap Logical. The subject IDs in the imputed `data.frame`'s are
 #' replaced with new IDs to ensure they are unique. Setting this argument to
-#' `TRUE` attaches an attribute, called `idmap`, to the returned `data.frames`
+#' `TRUE` attaches an attribute, called `idmap`, to the returned `data.frame`'s
 #' that will provide a map from the new subject IDs to the old subject IDs.
 #'
 #' @examples
