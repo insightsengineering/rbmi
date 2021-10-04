@@ -30,11 +30,10 @@
 #'  and variances across multiple imputed data, and the Barnard-Rubin rule to pool
 #'  degree's of freedom; see Little & Rubin (2002).
 #' - `method_condmean(type = "bootstrap")` Uses percentile or normal approximation;
-#' See Efron & Tibshirani (1994). Note that for the percentile bootstrap, no standard error is
+#' see Efron & Tibshirani (1994). Note that for the percentile bootstrap, no standard error is
 #' calculated, i.e. the standard errors will be `NA` in the object / data.frame.
 #' - `method_condmean(type = "jackknife")` Uses the standard jackknife variance formula;
-#' See Efron & Tibshirani (1994).
-#'
+#' see Efron & Tibshirani (1994).
 #'
 #' @references
 #' Bradley Efron and Robert J Tibshirani. An introduction to the bootstrap. CRC

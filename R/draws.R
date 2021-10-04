@@ -63,7 +63,7 @@
 #' `data` must have one row per visit per subject. This means that incomplete
 #' outcome data must be set as `NA` instead of having the related row missing. Missing values
 #' in the covariates are not allowed. If `data` is incomplete
-#' then the [expand_locf()] helper function can be used to add in any missing rows, which uses
+#' then the [expand_locf()] helper function can be used to insert any missing rows using
 #' Last Observation Carried Forward (LOCF) imputation to impute the covariates values.
 #' Note that LOCF is generally not a principled imputation method and should only be used when appropriate
 #' for the specific covariate.

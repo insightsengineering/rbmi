@@ -10,7 +10,7 @@ transpose_imputations(imputations)
 \item{imputations}{An \code{imputation_list} object created by \code{\link[=as_imputation_list]{as_imputation_list()}}}
 }
 \description{
-Takes a \code{imputation_list} object and transposes it i.e.\preformatted{list(
+Takes an \code{imputation_list} object and transposes it e.g.\preformatted{list(
     list(
         id = "a",
         values = c(1,2,3)

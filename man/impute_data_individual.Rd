@@ -18,7 +18,7 @@ impute_data_individual(
 \arguments{
 \item{id}{Character string identifying the subject.}
 
-\item{index}{The sample indexes which the subject belongs to i.e \code{c(1,1,1,2,2,4)}.}
+\item{index}{The sample indexes which the subject belongs to e.g \code{c(1,1,1,2,2,4)}.}
 
 \item{beta}{A list of beta coefficients for each sample, i.e. \code{beta[[1]]} is the set of
 beta coefficients for the first sample.}
@@ -32,7 +32,7 @@ beta coefficients for the first sample.}
 imputed values. Should be of the form \code{c("Group" = "Reference", "Group" = "Reference")}.}
 
 \item{strategies}{A named list of functions. Defines the imputation functions to be used.
-The names of of the list should mirror the values specified in \code{method} column of \code{data_ice}.
+The names of the list should mirror the values specified in \code{method} column of \code{data_ice}.
 Default = \code{getStrategies()}. See \code{\link[=getStrategies]{getStrategies()}} for more details.}
 
 \item{condmean}{Logical. If \code{TRUE} will impute using the conditional mean values, if \code{FALSE}

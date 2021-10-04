@@ -12,10 +12,10 @@ validate_strategies(strategies, reference)
 \item{reference}{list or character vector of strategies that need to be defined.}
 }
 \value{
-Will error if there is an issue otherwise will return \code{TRUE}.
+Will throw an error if there is an issue otherwise will return \code{TRUE}.
 }
 \description{
 Compares the user provided strategies to those that are
-required (the reference). Will error if not all values
+required (the reference). Will throw an error if not all values
 of reference have been defined.
 }

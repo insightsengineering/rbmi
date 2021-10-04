@@ -32,7 +32,7 @@ scalerConstructor <- R6::R6Class(
         #' Uses `dat` to determine the relevant column means and standard deviations to use
         #' when scaling and un-scaling future datasets. Implicitly assumes that new datasets
         #' have the same column order as `dat`
-        #' @param dat A dataframe or matrix. All columns must be numeric (i.e dummy variables,
+        #' @param dat A `data.frame` or matrix. All columns must be numeric (i.e dummy variables,
         #' must have already been expanded out).
         #' @details
         #' Categorical columns (as determined by those who's values are entirely `1` or `0`)
@@ -43,7 +43,7 @@ scalerConstructor <- R6::R6Class(
             assert_that(
                 is.data.frame(dat) | is.matrix(dat),
                 all(vapply(dat, is.numeric, logical(1))),
-                msg = "Input must be a numeric dataframe or matrix"
+                msg = "Input must be a numeric data.frame or matrix"
             )
 
             cat_flag <- vapply(
@@ -77,7 +77,7 @@ scalerConstructor <- R6::R6Class(
         #' @description
         #' Scales a dataset so that all continuous variables have a mean of 0 and a
         #' standard deviation of 1.
-        #' @param dat A dataframe or matrix whose columns are all numeric (i.e. dummy
+        #' @param dat A `data.frame` or matrix whose columns are all numeric (i.e. dummy
         #' variables have all been expanded out) and whose columns are in the same
         #' order as the dataset used in the initialization function.
         scale = function(dat) {
@@ -85,7 +85,7 @@ scalerConstructor <- R6::R6Class(
             assert_that(
                 is.data.frame(dat) | is.matrix(dat),
                 all(vapply(dat, is.numeric, logical(1))),
-                msg = "Input must be a numeric dataframe or matrix"
+                msg = "Input must be a numeric data.frame or matrix"
             )
 
             assert_that(
@@ -118,7 +118,7 @@ scalerConstructor <- R6::R6Class(
         #' @description
         #' Unscales a sigma value (or matrix) as estimated by a linear model
         #' using a design matrix scaled by this object. This function only
-        #' works if the first column of the initialisation dataframe was the outcome
+        #' works if the first column of the initialisation `data.frame` was the outcome
         #' variable.
         #' @param sigma A numeric value or matrix.
         #' @return A numeric value or matrix
@@ -134,9 +134,9 @@ scalerConstructor <- R6::R6Class(
         #' @description
         #' Unscales a beta value (or vector) as estimated by a linear model
         #' using a design matrix scaled by this object. This function only
-        #' works if the first column of the initialization dataframe was the outcome
+        #' works if the first column of the initialization `data.frame` was the outcome
         #' variable.
-        #' @param beta A numeric vector of beta coefficients as estiamted from a linear model.
+        #' @param beta A numeric vector of beta coefficients as estimated from a linear model.
         #' @return A numeric vector.
         unscale_beta = function(beta) {
 

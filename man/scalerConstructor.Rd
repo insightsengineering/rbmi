@@ -53,7 +53,7 @@ have the same column order as \code{dat}
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat}}{A dataframe or matrix. All columns must be numeric (i.e dummy variables,
+\item{\code{dat}}{A \code{data.frame} or matrix. All columns must be numeric (i.e dummy variables,
 must have already been expanded out).}
 }
 \if{html}{\out{</div>}}
@@ -78,7 +78,7 @@ standard deviation of 1.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat}}{A dataframe or matrix whose columns are all numeric (i.e. dummy
+\item{\code{dat}}{A \code{data.frame} or matrix whose columns are all numeric (i.e. dummy
 variables have all been expanded out) and whose columns are in the same
 order as the dataset used in the initialization function.}
 }
@@ -91,7 +91,7 @@ order as the dataset used in the initialization function.}
 \subsection{Method \code{unscale_sigma()}}{
 Unscales a sigma value (or matrix) as estimated by a linear model
 using a design matrix scaled by this object. This function only
-works if the first column of the initialisation dataframe was the outcome
+works if the first column of the initialisation \code{data.frame} was the outcome
 variable.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{scalerConstructor$unscale_sigma(sigma)}\if{html}{\out{</div>}}
@@ -114,7 +114,7 @@ A numeric value or matrix
 \subsection{Method \code{unscale_beta()}}{
 Unscales a beta value (or vector) as estimated by a linear model
 using a design matrix scaled by this object. This function only
-works if the first column of the initialization dataframe was the outcome
+works if the first column of the initialization \code{data.frame} was the outcome
 variable.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{scalerConstructor$unscale_beta(beta)}\if{html}{\out{</div>}}
@@ -123,7 +123,7 @@ variable.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{beta}}{A numeric vector of beta coefficients as estiamted from a linear model.}
+\item{\code{beta}}{A numeric vector of beta coefficients as estimated from a linear model.}
 }
 \if{html}{\out{</div>}}
 }

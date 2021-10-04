@@ -22,10 +22,10 @@ all data.frames within the imputations object will be returned
 applied to the imputed dataset. See \code{\link[=analyse]{analyse()}} for details on the
 format and specification of this data.frame.}
 
-\item{idmap}{Logical. The subject IDs in the imputed data.frame will be scrambled
-setting this argument to \code{TRUE} will add an attribute called "idmap" to the
-imputed data.frame which will provide a map from the new subject IDs to the old
-subject IDs.}
+\item{idmap}{Logical. The subject IDs in the imputed \code{data.frame}'s are
+replaced with new IDs to ensure they are unique. Setting this argument to
+\code{TRUE} attaches an attribute, called \code{idmap}, to the returned \code{data.frame}'s
+that will provide a map from the new subject IDs to the old subject IDs.}
 }
 \value{
 A list of data.frames equal in length to the \code{index} argument.

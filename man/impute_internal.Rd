@@ -12,13 +12,13 @@ impute_internal(draws, references, update_strategy, strategies, condmean)
 \item{references}{a named vector. Identifies the references to be used for reference-based
 imputation methods. Should be of the form \code{c("Group1" = "Reference1", "Group2" = "Reference2")}.}
 
-\item{update_strategy}{an optional dataframe. Updates the imputation method that was
+\item{update_strategy}{an optional \code{data.frame}. Updates the imputation method that was
 originally set via the \code{data_ice} option in \code{\link[=draws]{draws()}}. See the details section for more
 information.}
 
 \item{strategies}{a named list of functions. Defines the imputation functions to be used.
 The names of the list should mirror the values specified in \code{strategy} column of \code{data_ice}.
-Default = \code{getStrategies()}. See \code{\link[=getStrategies]{getStrategies()}} for more details.}
+Default = \code{\link[=getStrategies]{getStrategies()}}. See \code{\link[=getStrategies]{getStrategies()}} for more details.}
 
 \item{condmean}{logical. If TRUE will impute using the conditional mean values, if values
 will impute by taking a random draw from the multivariate normal distribution.}

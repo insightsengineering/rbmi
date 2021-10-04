@@ -27,7 +27,7 @@ Only exception is MAR which cannot be overwritten.
 All user defined functions must take 3 inputs: \code{pars_group}, \code{pars_ref} and
 \code{index_mar}. \code{pars_group} and \code{pars_ref} are both lists with elements \code{mu}
 and \code{sigma} representing the multivariate normal distribution parameters for
-the subjects current and reference group respectively.  \code{index_mar} will be
+the subject's current group and reference group respectively.  \code{index_mar} will be
 a logical vector specifying which visits the subject met the MAR assumption
 at. The function must return a list with elements \code{mu} and \code{sigma}. See
 \code{\link[=strategy_JR]{strategy_JR()}} for an example.

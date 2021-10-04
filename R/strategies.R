@@ -216,7 +216,7 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar) {
 #' All user defined functions must take 3 inputs: `pars_group`, `pars_ref` and
 #'  `index_mar`. `pars_group` and `pars_ref` are both lists with elements `mu`
 #' and `sigma` representing the multivariate normal distribution parameters for
-#' the subjects current and reference group respectively.  `index_mar` will be
+#' the subject's current group and reference group respectively.  `index_mar` will be
 #' a logical vector specifying which visits the subject met the MAR assumption
 #' at. The function must return a list with elements `mu` and `sigma`. See
 #' [strategy_JR()] for an example.

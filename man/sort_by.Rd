@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{sort_by}
 \alias{sort_by}
-\title{Sort Data Frame}
+\title{Sort \code{data.frame}}
 \usage{
 sort_by(df, vars = NULL, decreasing = FALSE)
 }
@@ -16,7 +16,7 @@ Can be either a single logical value (in which case it is applied to
 all variables) or a vector which is the same length as \code{vars}}
 }
 \description{
-Sorts a dataframe (ascending by default) based upon variables within the dataset
+Sorts a \code{data.frame} (ascending by default) based upon variables within the dataset
 }
 \examples{
 \dontrun{
