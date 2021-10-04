@@ -53,7 +53,7 @@
 #' The `update_strategy` argument can be used to update the imputation strategy that was
 #' originally set via the `data_ice` option in [draws()]. This avoids having to re-run the [draws()]
 #' function when changing the imputation strategy in certain circumstances (as detailed below).
-#' The `data.frame` provided to to `update_strategy` argument must contain two columns,
+#' The `data.frame` provided to `update_strategy` argument must contain two columns,
 #' one for the subject ID and another for the imputation strategy, whose names are the same as
 #' those defined in the `vars` argument as specified in the call to [draws()]. Please note that this
 #' argument only allows you to update the imputation strategy and not other argument such as the

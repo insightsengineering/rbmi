@@ -12,7 +12,7 @@
 #' (where `vars` is the object supplied in the original call to [draws()]
 #' as created by the [set_vars()] function).
 #'
-#' This functions will return a `data.frame` with the aforementioned variables with 1
+#' This function will return a `data.frame` with the aforementioned variables with 1
 #' row per subject per visit. If the `delta` argument to this function is `NULL`
 #' then the `delta` column in the returned data.frame will be 0 for all observations.
 #' If the `delta` argument is not `NULL` then `delta` will be calculated separately
