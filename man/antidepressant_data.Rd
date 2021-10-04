@@ -3,18 +3,17 @@
 \docType{data}
 \name{antidepressant_data}
 \alias{antidepressant_data}
-\title{Antidepressant trial data.}
+\title{Antidepressant trial data}
 \format{
 A data frame with 608 rows and 11 variables:
 \itemize{
 \item \code{PATIENT}: patients IDs.
 \item \code{HAMATOTL}: total score Hamilton Anxiety Rating Scale.
-\item \code{PGIIMP}: patient’s Global Impression of Improvement Rating Scale.
+\item \code{PGIIMP}: patient's Global Impression of Improvement Rating Scale.
 \item \code{RELDAYS}: number of days between visit and baseline.
 \item \code{VISIT}: post-baseline visit. Has levels 4,5,6,7.
-\item \code{THERAPY}: the treatment group variable. It is equal to \code{PLACEBO} for observations
-from the placebo arm, or \code{DRUG} for observations from the active arm.
-\item \code{GENDER}: patient's sex.
+\item \code{THERAPY}: the treatment group variable. It is equal to \code{PLACEBO} for observations from the placebo arm, or \code{DRUG} for observations from the active arm.
+\item \code{GENDER}: patient's gender.
 \item \code{POOLINV}: pooled investigator.
 \item \code{BASVAL}: baseline outcome value.
 \item \code{HAMDTL17}: Hamilton 17-item rating scale value.
@@ -25,10 +24,20 @@ from the placebo arm, or \code{DRUG} for observations from the active arm.
 antidepressant_data
 }
 \description{
-A dataset containing data from a publicly available antidepressant clinical trial of an active drug versus placebo.
-The dataset is available \href{https://www.lshtm.ac.uk/research/centres-projects-groups/missing-data#dia-missing-data}{here}.
-The relevant endpoint is the Hamilton 17-item rating scale for depression (HAMD17) which was assessed at baseline and weeks 1, 2, 4, and 6.
+A dataset containing data from a publicly available example data set from an antidepressant clinical trial.
+The dataset is available on the website of the
+\href{https://www.lshtm.ac.uk/research/centres-projects-groups/missing-data#dia-missing-data}{Drug Information Association Scientific Working Group on Estimands and Missing Data}.
+As per that website, the original data are from an antidepressant clinical trial with four treatments; two doses of an experimental medication,
+a positive control, and placebo and was published in Goldstein et al (2004). To mask the real data, week 8 observations were removed and two arms were created:
+the original placebo arm and a "drug arm" created by randomly selecting patients from the three non-placebo arms.
+}
+\details{
+The relevant endpoint is the Hamilton 17-item rating scale for depression (HAMD17) for which baseline and weeks 1, 2, 4, and 6 assessments are included.
 Study drug discontinuation occurred in 24\% subjects from the active drug and 26\% from placebo.
 All data after study drug discontinuation are missing and there is a single additional intermittent missing observation.
+}
+\references{
+Goldstein, Lu, Detke, Wiltse, Mallinckrodt, Demitrack. Duloxetine in the treatment of depression: a double-blind placebo-controlled comparison with paroxetine.
+J Clin Psychopharmacol 2004;24: 389-399.
 }
 \keyword{datasets}
