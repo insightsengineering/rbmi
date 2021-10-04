@@ -3,3 +3,7 @@
 ^LICENSE\.md$
 ^\.github$
 ^codecov\.yml$
+^misc$
+^\.lintr$
+^.gitignore$
+^src/\.gitkeep$

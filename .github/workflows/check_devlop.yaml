@@ -1,0 +1,43 @@
+
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - master
+      - main
+  schedule:
+    - cron: '0 4 * * 1,2,3,4,5'
+
+name: Check Develop
+
+jobs:
+
+  R-CMD-Check-develop:
+
+    strategy:
+      fail-fast: false
+      matrix:
+       config:
+         - { image: "gowerc/rbmi:r404"}
+         - { image: "gowerc/rbmi:r410"}
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: ${{ matrix.config.image }}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_TEST_NIGHTLY: ${{ github.event_name == 'schedule' && 'TRUE' || 'FALSE' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Check
+        run: |
+          options(crayon.enabled = TRUE)
+          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
+        shell: Rscript {0}
+

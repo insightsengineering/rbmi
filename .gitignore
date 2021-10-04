@@ -43,3 +43,11 @@ docs/
 
 # translation temp files
 po/*~
+
+# C++ code from Stan
+src/*
+
+.DS_store
+
+!.gitkeep
+inst/doc

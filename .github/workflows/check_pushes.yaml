@@ -1,0 +1,20 @@
+
+
+on: [push]
+
+name: Check Pushes
+
+jobs:
+  R-CMD-check:
+    runs-on: ubuntu-latest
+    container:
+      image: gowerc/rbmi:r404
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Check
+        run: |
+          options(crayon.enabled = TRUE)
+          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
+        shell: Rscript {0}
