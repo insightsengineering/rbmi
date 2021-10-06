@@ -7,7 +7,7 @@
 invert_indexes(x)
 }
 \arguments{
-\item{x}{list of elements to invert and calculate index from (see details)}
+\item{x}{list of elements to invert and calculate index from (see details).}
 }
 \description{
 Takes a list of elements and creates a new list

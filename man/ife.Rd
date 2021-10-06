@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{ife}
 \alias{ife}
-\title{Title - TODO}
+\title{if else}
 \usage{
 ife(x, a, b)
 }
@@ -14,6 +14,11 @@ ife(x, a, b)
 \item{b}{value to return if False}
 }
 \description{
-A wrapper around if() else() to prevent unexpected
-interactions between ifelse() and factor variables
+A wrapper around \verb{if() else()} to prevent unexpected
+interactions between \code{ifelse()} and factor variables
+}
+\details{
+By default \code{ifelse()} will convert factor variables to their
+numeric values which is often undesirable. This connivance
+function avoids that problem
 }

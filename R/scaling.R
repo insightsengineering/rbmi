@@ -1,29 +1,49 @@
 
-#' Title
+#' R6 Class for scaling (and un-scaling) design matrices
 #'
-#' Descriptions
-#' @return TODO
+#' @description
+#' Scales a design matrix so that all non-categorical columns have a mean
+#' of 0 and an standard deviation of 1.
+#'
+#' @details
+#' The object initialisation
+#' is used to determine the relevant mean and SD's to scale by and then
+#' the scaling (and un-scaling) itself is performed by the relevant object
+#' methods.
+#'
+#' Un-scaling is done on linear model Beta and Sigma coefficients. For this purpose
+#' the first column on the dataset to be scaled is assumed to be the outcome variable
+#' with all other variables assumed to be post-transformation predictor variables (i.e.
+#' all dummy variables have already been expanded).
 scalerConstructor <- R6::R6Class(
     classname = "scaler",
     public = list(
 
-        #' @field center TODO
-        center = NULL,
+        #' @field centre Vector of column means. The first value is the outcome
+        #' variable, all other variables are the predictors.
+        centre = NULL,
 
-        #' @field scales TODO
+        #' @field scales Vector of column standard deviations. The first value is the outcome
+        #' variable, all other variables are the predictors.
         scales = NULL,
 
 
         #' @description
-        #' TODO
-        #' @param dat TODO
-        #' @return TODO
+        #' Uses `dat` to determine the relevant column means and standard deviations to use
+        #' when scaling and un-scaling future datasets. Implicitly assumes that new datasets
+        #' have the same column order as `dat`
+        #' @param dat A `data.frame` or matrix. All columns must be numeric (i.e dummy variables,
+        #' must have already been expanded out).
+        #' @details
+        #' Categorical columns (as determined by those who's values are entirely `1` or `0`)
+        #' will not be scaled. This is achieved by setting the corresponding values of centre
+        #' to `0` and scale to `1`.
         initialize = function(dat) {
 
             assert_that(
                 is.data.frame(dat) | is.matrix(dat),
                 all(vapply(dat, is.numeric, logical(1))),
-                msg = "Input must be a numeric dataframe or matrix"
+                msg = "Input must be a numeric data.frame or matrix"
             )
 
             cat_flag <- vapply(
@@ -33,7 +53,7 @@ scalerConstructor <- R6::R6Class(
                 USE.NAMES = FALSE
             )
 
-            center <- vapply(
+            centre <- vapply(
                 X = dat,
                 FUN = function(x) mean(x, na.rm = TRUE),
                 FUN.VALUE = numeric(1),
@@ -47,28 +67,30 @@ scalerConstructor <- R6::R6Class(
                 USE.NAMES = FALSE
             )
 
-            center[cat_flag] <- 0
+            centre[cat_flag] <- 0
             scales[cat_flag] <- 1
-            self$center <- center
+            self$centre <- centre
             self$scales <- scales
         },
 
 
         #' @description
-        #' TODO
-        #' @param dat TODO
-        #' @return TODO
+        #' Scales a dataset so that all continuous variables have a mean of 0 and a
+        #' standard deviation of 1.
+        #' @param dat A `data.frame` or matrix whose columns are all numeric (i.e. dummy
+        #' variables have all been expanded out) and whose columns are in the same
+        #' order as the dataset used in the initialization function.
         scale = function(dat) {
 
             assert_that(
                 is.data.frame(dat) | is.matrix(dat),
                 all(vapply(dat, is.numeric, logical(1))),
-                msg = "Input must be a numeric dataframe or matrix"
+                msg = "Input must be a numeric data.frame or matrix"
             )
 
             assert_that(
-                ncol(dat) == length(self$center),
-                msg = sprintf("Input must have %s columns", length(self$center))
+                ncol(dat) == length(self$centre),
+                msg = sprintf("Input must have %s columns", length(self$centre))
             )
 
             dat2 <- dat
@@ -76,7 +98,7 @@ scalerConstructor <- R6::R6Class(
             dat2 <- sweep(
                 dat2,
                 MARGIN = 2,
-                STATS = self$center,
+                STATS = self$centre,
                 FUN = `-`
             )
 
@@ -94,9 +116,12 @@ scalerConstructor <- R6::R6Class(
 
 
         #' @description
-        #' TODO
-        #' @param sigma TODO
-        #' @return TODO
+        #' Unscales a sigma value (or matrix) as estimated by a linear model
+        #' using a design matrix scaled by this object. This function only
+        #' works if the first column of the initialisation `data.frame` was the outcome
+        #' variable.
+        #' @param sigma A numeric value or matrix.
+        #' @return A numeric value or matrix
         unscale_sigma = function(sigma) {
             assert_that(
                 is.matrix(sigma) | (is.numeric(sigma) & length(sigma) == 1),
@@ -107,12 +132,15 @@ scalerConstructor <- R6::R6Class(
 
 
         #' @description
-        #' TODO
-        #' @param beta TODO
-        #' @return TODO
+        #' Unscales a beta value (or vector) as estimated by a linear model
+        #' using a design matrix scaled by this object. This function only
+        #' works if the first column of the initialization `data.frame` was the outcome
+        #' variable.
+        #' @param beta A numeric vector of beta coefficients as estimated from a linear model.
+        #' @return A numeric vector.
         unscale_beta = function(beta) {
 
-            len <- length(self$center) - 1
+            len <- length(self$centre) - 1
 
             assert_that(
                 is.numeric(beta),
@@ -123,8 +151,8 @@ scalerConstructor <- R6::R6Class(
             b_0 <- beta[1]
             b_i <- beta[-1]
 
-            mu_y <- self$center[1]
-            mu_i <- self$center[-c(1, 2)]
+            mu_y <- self$centre[1]
+            mu_i <- self$centre[-c(1, 2)]
 
             sig_y <- self$scales[1]
             sig_i <- self$scales[-c(1, 2)]

@@ -3,8 +3,8 @@
 
 #' Last Observation Carried Forward
 #'
-#' Returns a vector after applied last observation carried forward imputation
-#' @param x a vector
+#' Returns a vector after applied last observation carried forward imputation.
+#' @param x a vector.
 #'
 #' @examples
 #' \dontrun{
@@ -21,40 +21,43 @@ locf <- function(x) {
 
 
 
-#' Expand and fill in missing dataframe rows
+#' Expand and fill in missing `data.frame` rows
 #'
 #' These functions are essentially wrappers around [base::expand.grid()] to ensure that missing
-#' combinations of data are inserted into a dataframe with imputation/fill methods for updating
-#' covariate values of newly created rows
+#' combinations of data are inserted into a `data.frame` with imputation/fill methods for updating
+#' covariate values of newly created rows.
 #'
-#' @param data Dataset to expand or fill in
+#' @param data Dataset to expand or fill in.
 #' @param ... variables and the levels that should be expanded out (note that duplicate entries of
-#' levels will result in multiple rows for that level)
-#' @param vars character vector containing the names of variables that need to be filled in
+#' levels will result in multiple rows for that level).
+#' @param vars character vector containing the names of variables that need to be filled in.
 #' @param group character vector containing the names of variables to group
-#' by when performing LOCF imputation of `var`
-#' @param order character vector containing the names of additional variables to sort the dataframe
-#' by before performing LOCF
+#' by when performing LOCF imputation of `var`.
+#' @param order character vector containing the names of additional variables to sort the `data.frame`
+#' by before performing LOCF.
 #'
 #' @details
 #'
-#' The [draws()] function makes the assumption that all subjects and visits are present in the dataframe
-#' and that all covariate values are none missing; `expand()`, `fill_locf()` and `expand_locf()` are utility
-#' functions to support users in ensuring that their dataframes conform to these assumptions.
+#' The [draws()] function makes the assumption that all subjects and visits are present
+#' in the `data.frame` and that all covariate values are non missing; `expand()`,
+#' `fill_locf()` and `expand_locf()` are utility functions to support users in ensuring
+#' that their `data.frame`'s conform to these assumptions.
 #'
-#' `expand()` takes vectors for expected levels in a dataframe and expands out all combinations inserting any
-#' missing rows into the dataframe. Note that all "expanded" variables are cast as factors.
+#' `expand()` takes vectors for expected levels in a `data.frame` and expands out all
+#' combinations inserting any missing rows into the `data.frame`. Note that all "expanded"
+#' variables are cast as factors.
 #'
-#' `fill_locf()` applies LOCF imputation to named covariates to fill in any NAs created by the insertion of new
-#' rows by `expand()` (though do note that no distinction is made between existing NAs and newly created NAs).
-#' Note that the dataframe is sorted by `c(group, order)` before performing the LOCF imputation; the dataframe
+#' `fill_locf()` applies LOCF imputation to named covariates to fill in any NAs created
+#' by the insertion of new rows by `expand()` (though do note that no distinction is
+#' made between existing NAs and newly created NAs). Note that the `data.frame` is sorted
+#' by `c(group, order)` before performing the LOCF imputation; the `data.frame`
 #' will be returned in the original sort order however.
 #'
-#' `expand_locf()` a simple composition function of `fill_locf()` and `expand()` i.e. `fill_locf(expand(...))`
+#' `expand_locf()` a simple composition function of `fill_locf()` and `expand()` i.e.
+#' `fill_locf(expand(...))`.
 #'
 #' @examples
 #' \dontrun{
-#'
 #' dat_expanded <- expand(
 #'     data = dat,
 #'     subject = c("pt1", "pt2", "pt3", "pt4"),
@@ -176,7 +179,7 @@ fill_locf <- function(data, vars, group = NULL, order = NULL) {
 
 #' Assert that all variables exist within a dataset
 #'
-#' Performs an assertion check to ensure that a vector of variable exists within a data.frame as expected
+#' Performs an assertion check to ensure that a vector of variable exists within a data.frame as expected.
 #'
 #' @param data a data.frame
 #' @param vars a character vector of variable names

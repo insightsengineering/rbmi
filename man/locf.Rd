@@ -7,10 +7,10 @@
 locf(x)
 }
 \arguments{
-\item{x}{a vector}
+\item{x}{a vector.}
 }
 \description{
-Returns a vector after applied last observation carried forward imputation
+Returns a vector after applied last observation carried forward imputation.
 }
 \examples{
 \dontrun{

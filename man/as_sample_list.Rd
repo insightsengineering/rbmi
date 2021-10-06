@@ -2,13 +2,14 @@
 % Please edit documentation in R/draws.R
 \name{as_sample_list}
 \alias{as_sample_list}
-\title{TODO}
+\title{Create and validate a \code{sample_list} object}
 \usage{
 as_sample_list(...)
 }
 \arguments{
-\item{...}{TODO}
+\item{...}{A list of \code{sample_single} objects.}
 }
 \description{
-TODO
+Given a list of \code{sample_single} objects generate by \code{\link[=as_sample_single]{as_sample_single()}},
+creates a \code{sample_list} objects and validate it.
 }

@@ -1,17 +1,56 @@
 
-#' Title - TODO
+#' Fit the base imputation model using a Bayesian approach
 #'
-#' @param designmat TODO
-#' @param outcome TODO
-#' @param group TODO
-#' @param subjid TODO
-#' @param visit TODO
-#' @param same_cov TODO
-#' @param n_imputations TODO
-#' @param burn_in TODO
-#' @param burn_between TODO
-#' @param verbose TODO
-#' @param seed TODO
+#' @description
+#' `fit_mcmc()` fits the base imputation model using a Bayesian approach.
+#' This is done through a MCMC method that is implemented in `stan`
+#' and is run by using the function [rstan::sampling()].
+#' The function returns the draws from the posterior distribution of the model parameters
+#' and the `stanfit` object. Additionally it performs multiple diagnostics checks of the chain
+#' and returns warnings in case of any detected issues.
+#'
+#' @param designmat The design matrix of the fixed effects.
+#' @param outcome The response variable. Must be numeric.
+#' @param group Character vector containing the group variable.
+#' @param subjid Character vector containing the subjects IDs.
+#' @param visit Character vector containing the visit variable.
+#' @param same_cov Logical. If `TRUE` the model assumes the same covariance matrix for each group.
+#' If `FALSE` a different covariance matrix for each group is assumed.
+#' @param n_imputations Integer number corresponding to the draws from the posterior distribution needed.
+#' It corresponds to the number of imputations to be done in the multiple imputation procedure.
+#' @param burn_in Integer number corresponding to the number of initial MCMC iterations to be discarded. See details.
+#' @param burn_between Integer number corresponding to the thinning of the chain. It is the number
+#' of iterations that are discarded between two consecutive draws. See details.
+#' @param verbose Logical. If `TRUE` the chain flow of information is displayed in the console.
+#' @param seed Integer number to set the seed for reproducibility of the MCMC draws.
+#'
+#' @details
+#' The Bayesian model assumes a multivariate normal likelihood function and weakly-informative
+#' priors for the model parameters: in particular, uniform priors are assumed for the regression
+#' coefficients and inverse-Wishart priors for the covariance matrices.
+#' The chain is initialized using the REML parameter estimates from MMRM as starting values.
+#'
+#' The function performs the following steps:
+#' 1. Fit MMRM using a REML approach.
+#' 2. Prepare the input data for the MCMC fit as described in the `data{}`
+#' block of the Stan file. See [prepare_stan_data()] for details.
+#' 3. Run the MCMC according the input arguments and using as starting values the REML parameter estimates
+#' estimated at point 1.
+#' 4. Performs diagnostics checks of the MCMC. See [check_mcmc()] for details.
+#' 5. Extract the draws from the model fit.
+#'
+#' The chains perform `n_imputations` draws by keeping one every `burn_between` iterations. Additionally
+#' the first `burn_in` iterations are discarded. The total number of iterations will
+#' then be `burn_in + burn_between*n_imputations`.
+#' The purpose of `burn_in` is to ensure that the samples are drawn from the stationary
+#' distribution of the Markov Chain.
+#' The `burn_between` aims to keep the draws uncorrelated each from other.
+#'
+#' @return
+#' A named list composed by the following:
+#' - `samples`: a named list containing the draws for each parameter. It corresponds to the output of [extract_draws()].
+#' - `fit`: a `stanfit` object.
+#'
 #'
 #' @import Rcpp
 #' @import methods
@@ -114,10 +153,51 @@ fit_mcmc <- function(
 
 
 
-#' Title - TODO
+#' Transform array into list of arrays
 #'
-#' @param a TODO
-#' @param n TODO
+#' @description
+#' Transform an array into list of arrays where the listing
+#' is performed on a given dimension.
+#'
+#' @param a Array with number of dimensions at least 2.
+#' @param n Positive integer. Dimension of `a` to be listed.
+#'
+#' @details
+#' For example, if `a` is a 3 dimensional array and `n = 1`,
+#' `split_dim(a,n)` returns a list of 2 dimensional arrays (i.e.
+#' a list of matrices) where each element of the list is `a[i, , ]`, where
+#' `i` takes values from 1 to the length of the first dimension of the array.
+#'
+#' Example:
+#'
+#' inputs:
+#' `a <- array( c(1,2,3,4,5,6,7,8,9,10,11,12), dim = c(3,2,2))`,
+#' which means that:
+#' ```
+#' a[1,,]     a[2,,]     a[3,,]
+#'
+#' [,1] [,2]  [,1] [,2]  [,1] [,2]
+#' ---------  ---------  ---------
+#'  1    7     2    8     3    9
+#'  4    10    5    11    6    12
+#' ```
+#'
+#' `n <- 1`
+#'
+#' output of `res <- split_dim(a,n)` is a list of 3 elements:
+#' ```
+#' res[[1]]   res[[2]]   res[[3]]
+#'
+#' [,1] [,2]  [,1] [,2]  [,1] [,2]
+#' ---------  ---------  ---------
+#'  1    7     2    8     3    9
+#'  4    10    5    11    6    12
+#' ```
+#'
+#' @return
+#' A list of length `n` of arrays with number of dimensions equal to the
+#' number of dimensions of `a` minus 1.
+#'
 #' @importFrom stats setNames
 split_dim <- function(a, n) {
     x <- split(
@@ -136,9 +216,26 @@ split_dim <- function(a, n) {
 }
 
 
-#' Title - TODO
+#' Extract draws from a `stanfit` object
 #'
-#' @param stan_fit TODO
+#' @description
+#' Extract draws from a `stanfit` object and convert them into lists.
+#'
+#' The function [rstan::extract()] returns the draws for a given parameter as an array. This function
+#' calls [rstan::extract()] to extract the draws from a `stanfit` object
+#' and then convert the arrays into lists.
+#'
+#' @param stan_fit A `stanfit` object.
+#'
+#' @return
+#' A named list of length 2 containing:
+#' - `beta`: a list of length equal to the number of draws containing
+#'   the draws from the posterior distribution of the regression coefficients.
+#' - `sigma`: a list of length equal to the number of draws containing
+#'   the draws from the posterior distribution of the covariance matrices. Each element
+#'   of the list is a list with length equal to 1 if `same_cov = TRUE` or equal to the
+#'   number of groups if `same_cov = FALSE`.
+#'
 #' @importFrom rstan extract
 extract_draws <- function(stan_fit) {
 
@@ -146,19 +243,12 @@ extract_draws <- function(stan_fit) {
     names(pars) <- c("beta", "sigma")
 
     ##################### from array to list
-    pars$sigma <- split_dim(pars$sigma, 1)
+    pars$sigma <- split_dim(pars$sigma, 1) # list of length equal to the number of draws
 
-    if (length(dim(pars$sigma[[1]])) == 3) { # if same_cov == FALSE
-        pars$sigma <- lapply(
-            pars$sigma,
-            function(x) split_dim(x, 1)
-        )
-    } else {
-        pars$sigma <- lapply(
-            pars$sigma,
-            function(x) list(x, x)
-        )
-    }
+    pars$sigma <- lapply(
+        pars$sigma,
+        function(x) split_dim(x, 1)
+    )
 
     pars$beta <- split_dim(pars$beta, 1)
     pars$beta <- lapply(pars$beta, as.vector)
@@ -167,31 +257,48 @@ extract_draws <- function(stan_fit) {
 }
 
 
-#' Title - TODO
+#' Extract the Effective Sample Size (ESS) from a `stanfit` object
 #'
-#' @param stan_fit TODO
+#' @param stan_fit A `stanfit` object.
+#'
+#' @return
+#' A named vector containing the ESS for each parameter of the model.
+#'
 #' @importFrom rstan summary
 get_ESS <- function(stan_fit) {
     return(rstan::summary(stan_fit, pars = c("beta", "Sigma"))$summary[, "n_eff"])
 }
 
 
-#' Title - TODO
+#' Diagnostics of the MCMC based on ESS
 #'
-#' @param stan_fit TODO
-#' @param n_draws TODO
-#' @param threshold TODO
-check_ESS <- function(stan_fit, n_draws, threshold = 0.4) {
+#' @description
+#' Check the quality of the MCMC draws from the posterior distribution
+#' by checking whether the relative ESS is sufficiently large.
+#'
+#' @inheritParams check_mcmc
+#'
+#' @details
+#' `check_ESS()` works as follows:
+#' 1. Extract the ESS from `stan_fit` for each parameter of the model.
+#' 2. Compute the relative ESS (i.e. the ESS divided by the number of draws).
+#' 3. Check whether for any of the parameter the ESS is lower than `threshold`.
+#'    If for at least one parameter the relative ESS is below the threshold,
+#'    a warning is thrown.
+#'
+#' @inherit check_mcmc return
+#'
+check_ESS <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
 
     ESS <- get_ESS(stan_fit)
 
-    n_low_ESS <- sum((ESS / n_draws) < threshold)
+    n_low_ESS <- sum((ESS / n_draws) < threshold_lowESS)
 
-    if (any((ESS / n_draws) < threshold)) {
+    if (any((ESS / n_draws) < threshold_lowESS)) {
         warning(
             paste0(
                 "The Effective Sample Size is below ",
-                threshold * 100,
+                threshold_lowESS * 100,
                 "% for ",
                 n_low_ESS,
                 " parameters. Please consider increasing burn-in and/or burn-between, or the number of samples"
@@ -204,9 +311,20 @@ check_ESS <- function(stan_fit, n_draws, threshold = 0.4) {
 }
 
 
-#' Title - TODO
+#' Diagnostics of the MCMC based on HMC-related measures.
 #'
-#' @param stan_fit TODO
+#' @description
+#' Check that:
+#' 1. There are no divergent iterations.
+#' 2. The Bayesian Fraction of Missing Information (BFMI) is sufficiently low.
+#' 3. The number of iterations that saturated the max treedepth is zero.
+#'
+#' Please see [rstan::check_hmc_diagnostics()] for details.
+#'
+#' @param stan_fit A `stanfit` object.
+#'
+#' @inherit check_mcmc return
+#'
 check_hmc_diagn <- function(stan_fit) {
 
     if (
@@ -224,17 +342,26 @@ check_hmc_diagn <- function(stan_fit) {
 }
 
 
-#' Title - TODO
+#' Diagnostics of the MCMC
 #'
-#' @param stan_fit TODO
-#' @param n_draws TODO
-#' @param threshold_lowESS TODO
+#' @param stan_fit A `stanfit` object.
+#' @param n_draws Number of MCMC draws.
+#' @param threshold_lowESS A number in `[0,1]` indicating the minimum acceptable
+#' value of the relative ESS. See details.
+#'
+#' @details
+#' Performs checks of the quality of the MCMC. See [check_ESS()] and [check_hmc_diagn()]
+#' for details.
+#'
+#' @returns
+#' A warning message in case of detected problems.
+#'
 check_mcmc <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
 
     check_ESS(
         stan_fit = stan_fit,
         n_draws = n_draws,
-        threshold = threshold_lowESS
+        threshold_lowESS = threshold_lowESS
     )
 
     check_hmc_diagn(stan_fit)
@@ -246,7 +373,11 @@ check_mcmc <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
 
 #' QR decomposition
 #'
-#' @param mat A Matrix to perform the QR decomposition on
+#' @description
+#' QR decomposition as defined in the
+#' [Stan user's guide (section 1.2)](https://mc-stan.org/docs/2_27/stan-users-guide/QR-reparameterization-section.html).
+#'
+#' @param mat A matrix to perform the QR decomposition on.
 QR_decomp <- function(mat) {
     qr_obj <- qr(mat)
     N <- nrow(mat)
@@ -263,13 +394,38 @@ QR_decomp <- function(mat) {
 
 
 
-#' Title - TODO
+#' Prepare input data to run the Stan model
 #'
-#' @param ddat TODO
-#' @param subjid TODO
-#' @param visit TODO
-#' @param outcome TODO
-#' @param group TODO
+#' @description
+#' Prepare input data to run the Stan model.
+#' Creates / calculates all the required inputs as required by the `data{}` block of the MMRM Stan program.
+#'
+#' @param ddat A design matrix
+#' @param subjid Character vector containing the subjects IDs.
+#' @param visit Vector containing the visits.
+#' @param outcome Numeric vector containing the outcome variable.
+#' @param group Vector containing the group variable.
+#'
+#' @details
+#' - The `group` argument determines which covariance matrix group the subject belongs to. If you
+#' want all subjects to use a shared covariance matrix then set group to "1" for everyone.
+#'
+#'
+#' @returns
+#' A `stan_data` object. A named list as per `data{}` block of the related Stan file. In particular it returns:
+#'
+#' - N - The number of rows in the design matrix
+#' - P - The number of columns in the design matrix
+#' - G - The number of distinct covariance matrix groups (i.e. `length(unique(group))`)
+#' - n_visit - The number of unique outcome visits
+#' - n_pat - The total number of pattern groups (as defined by missingness patterns & covariance group)
+#' - pat_G - Index for which Sigma each pattern group should use
+#' - pat_n_pt - number of patients within each pattern group
+#' - pat_n_visit - number of non-missing visits in each pattern group
+#' - pat_sigma_index - rows/cols from Sigma to subset on for the pattern group (padded by 0's)
+#' - y - The outcome variable
+#' - Q - design matrix (after QR decomposition)
+#' - R - R matrix from the QR decomposition of the design matrix
 prepare_stan_data <- function(ddat, subjid, visit, outcome, group) {
 
     assert_that(
@@ -331,12 +487,18 @@ prepare_stan_data <- function(ddat, subjid, visit, outcome, group) {
 }
 
 
-#' Title TODO
+#' Get Pattern Summary
 #'
 #' Takes a dataset of pattern information and creates a summary dataset of it
 #' with just 1 row per pattern
 #'
-#' @param patterns TODO
+#' @param patterns A `data.frame` with the columns `pgroup`, `pattern` and `group`
+#' @details
+#' - The column `pgroup` must be a numeric vector indicating which pattern group the patient belongs to
+#' - The column `pattern` must be a character string of `0`'s or `1`'s. It must be identical for all
+#' rows within the same `pgroup`
+#' - The column `group` must be a character / numeric vector indicating which covariance group the observation
+#' belongs to. It must be identical within the same `pgroup`
 get_pattern_groups_unique <- function(patterns) {
     u_pats <- unique(patterns[, c("pgroup", "pattern", "group")])
     u_pats <- sort_by(u_pats, "pgroup")
@@ -352,13 +514,15 @@ get_pattern_groups_unique <- function(patterns) {
 }
 
 
-#' Title - TODO
+#' Determine patients missingness group
 #'
 #' Takes a design matrix with multiple rows per subject and returns a dataset
 #' with 1 row per subject with a new column `pgroup` indicating which group
 #' the patient belongs to (based upon their missingness pattern and treatment group)
 #'
-#' @param ddat TODO
+#' @param ddat a `data.frame` with columns `subjid`, `visit`, `group`, `is_avail`
+#' @details
+#' - The column `is_avail` must be a character or numeric `0` or `1`
 get_pattern_groups <- function(ddat) {
     ddat <- sort_by(ddat, c("subjid", "visit"))[, c("subjid", "group", "is_avail")]
 
@@ -384,14 +548,18 @@ get_pattern_groups <- function(ddat) {
 }
 
 
-#' TODO
+#' Convert indicator to index
 #'
 #' Converts a string of 0's and 1's into index positions of the 1's
 #' padding the results by 0's so they are all the same length
 #'
-#' i.e. patmap(c("1101", "0001"))  ->   list(c(1,2,4,0), c(4,0,0,0))
+#' i.e.
+#' ```
+#' patmap(c("1101", "0001"))  ->   list(c(1,2,4,0), c(4,0,0,0))
+#' ```
 #'
-#' @param x TODO
+#' @param x a character vector whose values are all either "0" or "1". All elements of
+#' the vector must be the same length
 as_indices <- function(x) {
 
     assert_that(
@@ -415,9 +583,13 @@ as_indices <- function(x) {
     )
 }
 
-#' Title - TODO
+#' As array
 #'
-#' @param x TODO
+#' Converts a numeric value of length 1 into a 1 dimension array.
+#' This is to avoid type errors that are thrown by stan when length 1 numeric vectors
+#' are provided by R for stan::vector inputs
+#'
+#' @param x a numeric vector
 as_stan_array <- function(x) {
     ife(
         length(x) == 1,
@@ -427,9 +599,13 @@ as_stan_array <- function(x) {
 }
 
 
-#' Title TODO
+#' Remove subjects from dataset if they have no observed values
 #'
-#' @param dat TODO
+#' This function takes a `data.frame` with variables `visit`, `outcome` & `subjid`.
+#' It then removes all rows for a given `subjid` if they don't have any non-missing
+#' values for `outcome`.
+#'
+#' @param dat a `data.frame`
 remove_if_all_missing <- function(dat) {
     n_visit <- length(unique(dat$visit))
     n_miss <- tapply(dat$outcome, dat$subjid, function(x) sum(is.na(x)))
@@ -439,6 +615,11 @@ remove_if_all_missing <- function(dat) {
 }
 
 
+#' Validate a `stan_data` object
+#'
+#' @param x A `stan_data` object.
+#' @param ... Not used.
+#'
 #' @export
 validate.stan_data <- function(x, ...) {
     assert_that(

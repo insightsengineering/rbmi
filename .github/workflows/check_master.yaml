@@ -6,7 +6,7 @@ on:
       - main
       - master
 
-name: Check Develop
+name: Check Master
 
 jobs:
 
@@ -16,10 +16,10 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { R: "devel", os: "ubuntu-20.04", pkg_repo: "https://packagemanager.rstudio.com/all/__linux__/focal/latest"}
+          - { R: "devel", os: "ubuntu-20.04", pkg_repo: "https://cran.rstudio.com/"}
           - { R: "release", os: "macos-latest", pkg_repo: "https://cran.rstudio.com/"}
           - { R: "release", os: "windows-latest", pkg_repo: "https://cran.rstudio.com/"}
-          - { R: "release", os: "ubuntu-20.04", pkg_repo: "https://packagemanager.rstudio.com/all/__linux__/focal/latest"}
+          - { R: "release", os: "ubuntu-20.04", pkg_repo: "https://cran.rstudio.com/"}
 
     runs-on: ${{ matrix.config.os }}
 
@@ -41,7 +41,7 @@ jobs:
 
       - name: Install Additional Linux Dependencies
         if: startsWith(runner.os, 'Linux')
-        run: sudo apt install libcurl4-openssl-dev
+        run: sudo apt install -y libcurl4-openssl-dev libv8-dev libsodium-dev libgsl-dev libpng-dev
 
       - name: Determine dependencies & Create Package Directory
         run: |

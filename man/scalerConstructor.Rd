@@ -2,24 +2,30 @@
 % Please edit documentation in R/scaling.R
 \name{scalerConstructor}
 \alias{scalerConstructor}
-\title{Title}
-\value{
-TODO
-}
+\title{R6 Class for scaling (and un-scaling) design matrices}
 \description{
-Title
-
-Title
+Scales a design matrix so that all non-categorical columns have a mean
+of 0 and an standard deviation of 1.
 }
 \details{
-Descriptions
+The object initialisation
+is used to determine the relevant mean and SD's to scale by and then
+the scaling (and un-scaling) itself is performed by the relevant object
+methods.
+
+Un-scaling is done on linear model Beta and Sigma coefficients. For this purpose
+the first column on the dataset to be scaled is assumed to be the outcome variable
+with all other variables assumed to be post-transformation predictor variables (i.e.
+all dummy variables have already been expanded).
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{center}}{TODO}
+\item{\code{centre}}{Vector of column means. The first value is the outcome
+variable, all other variables are the predictors.}
 
-\item{\code{scales}}{TODO}
+\item{\code{scales}}{Vector of column standard deviations. The first value is the outcome
+variable, all other variables are the predictors.}
 }
 \if{html}{\out{</div>}}
 }
@@ -37,7 +43,9 @@ Descriptions
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
-TODO
+Uses \code{dat} to determine the relevant column means and standard deviations to use
+when scaling and un-scaling future datasets. Implicitly assumes that new datasets
+have the same column order as \code{dat}
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{scalerConstructor$new(dat)}\if{html}{\out{</div>}}
 }
@@ -45,19 +53,24 @@ TODO
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat}}{TODO}
+\item{\code{dat}}{A \code{data.frame} or matrix. All columns must be numeric (i.e dummy variables,
+must have already been expanded out).}
 }
 \if{html}{\out{</div>}}
 }
-\subsection{Returns}{
-TODO
+\subsection{Details}{
+Categorical columns (as determined by those who's values are entirely \code{1} or \code{0})
+will not be scaled. This is achieved by setting the corresponding values of centre
+to \code{0} and scale to \code{1}.
 }
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-scale"></a>}}
 \if{latex}{\out{\hypertarget{method-scale}{}}}
 \subsection{Method \code{scale()}}{
-TODO
+Scales a dataset so that all continuous variables have a mean of 0 and a
+standard deviation of 1.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{scalerConstructor$scale(dat)}\if{html}{\out{</div>}}
 }
@@ -65,19 +78,21 @@ TODO
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat}}{TODO}
+\item{\code{dat}}{A \code{data.frame} or matrix whose columns are all numeric (i.e. dummy
+variables have all been expanded out) and whose columns are in the same
+order as the dataset used in the initialization function.}
 }
 \if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-TODO
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-unscale_sigma"></a>}}
 \if{latex}{\out{\hypertarget{method-unscale_sigma}{}}}
 \subsection{Method \code{unscale_sigma()}}{
-TODO
+Unscales a sigma value (or matrix) as estimated by a linear model
+using a design matrix scaled by this object. This function only
+works if the first column of the initialisation \code{data.frame} was the outcome
+variable.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{scalerConstructor$unscale_sigma(sigma)}\if{html}{\out{</div>}}
 }
@@ -85,19 +100,22 @@ TODO
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{sigma}}{TODO}
+\item{\code{sigma}}{A numeric value or matrix.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-TODO
+A numeric value or matrix
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-unscale_beta"></a>}}
 \if{latex}{\out{\hypertarget{method-unscale_beta}{}}}
 \subsection{Method \code{unscale_beta()}}{
-TODO
+Unscales a beta value (or vector) as estimated by a linear model
+using a design matrix scaled by this object. This function only
+works if the first column of the initialization \code{data.frame} was the outcome
+variable.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{scalerConstructor$unscale_beta(beta)}\if{html}{\out{</div>}}
 }
@@ -105,12 +123,12 @@ TODO
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{beta}}{TODO}
+\item{\code{beta}}{A numeric vector of beta coefficients as estimated from a linear model.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-TODO
+A numeric vector.
 }
 }
 \if{html}{\out{<hr>}}

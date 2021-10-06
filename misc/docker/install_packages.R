@@ -15,10 +15,11 @@ pkgs <- c(
     "testthat",
     "nlme",
     "roxygen2",
-    "tinytex"
+    "tinytex",
+    "bookdown",
+    "RhpcBLASctl"
 )
 
 options(warn = 2)
 
 install.packages(pkgs, repos = Sys.getenv("CRANURL"), dependencies = TRUE)
-

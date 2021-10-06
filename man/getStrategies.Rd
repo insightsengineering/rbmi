@@ -2,32 +2,35 @@
 % Please edit documentation in R/strategies.R
 \name{getStrategies}
 \alias{getStrategies}
-\title{Define imputation strategies}
+\title{Get Imputation Strategies}
 \usage{
 getStrategies(...)
 }
 \arguments{
-\item{...}{User defined methods to be added to the return list. Input must be a function}
+\item{...}{User defined methods to be added to the return list. Input must
+be a function.}
 }
 \description{
 Returns a list defining the imputation strategies to be used to create the
-multivariate normal distribution parameters by merging those of the source group and reference
-group per patient.
+multivariate normal distribution parameters by merging those of the source
+group and reference group per patient.
 }
 \details{
-By default Jump to Reference (JR), Copy Reference (CR),
-Copy Increments from Reference (CIR), Last Mean Carried Forward (LMCF) and
-Missing at Random (MAR) are defined.
+By default Jump to Reference (JR), Copy Reference (CR), Copy Increments from
+Reference (CIR), Last Mean Carried Forward (LMCF) and Missing at Random (MAR)
+are defined.
 
 The user can define their own strategy functions (or overwrite the pre-defined ones)
 by specifying a named input to the function i.e. \code{NEW = function(...) ...}.
-Only exception is MAR which cannot be overwritten
+Only exception is MAR which cannot be overwritten.
 
-All user defined functions must take 3 inputs \code{pars_group}, \code{pars_ref} & \code{index_mar}.
-\code{pars_group} and \code{pars_ref} are both lists with elements \code{mu} and \code{sigma} representing
-the multivariate normal distribution parameters for the subjects current and reference group
-respectively.  \code{index_mar} will be a logical vector specifying which visits the subject met
-the MAR assumption at. The function must return a list with elements \code{mu} and \code{sigma}.
+All user defined functions must take 3 inputs: \code{pars_group}, \code{pars_ref} and
+\code{index_mar}. \code{pars_group} and \code{pars_ref} are both lists with elements \code{mu}
+and \code{sigma} representing the multivariate normal distribution parameters for
+the subject's current group and reference group respectively.  \code{index_mar} will be
+a logical vector specifying which visits the subject met the MAR assumption
+at. The function must return a list with elements \code{mu} and \code{sigma}. See
+\code{\link[=strategy_JR]{strategy_JR()}} for an example.
 }
 \examples{
 \dontrun{
@@ -37,5 +40,4 @@ getStrategies(
     JR = function(pars_group, pars_ref, index_mar) <more code>
 )
 }
-
 }

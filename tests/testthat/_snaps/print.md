@@ -48,7 +48,7 @@
       Number of Results: 5
       Analysis Function: ancova
       Delta Applied: FALSE
-      Analysis Parameters:
+      Analysis Estimates:
           trt_visit_1
           lsm_ref_visit_1
           lsm_alt_visit_1
@@ -141,7 +141,7 @@
       Number of Results: 11
       Analysis Function: rbmi::ancova
       Delta Applied: TRUE
-      Analysis Parameters:
+      Analysis Estimates:
           trt_visit_1
           lsm_ref_visit_1
           lsm_alt_visit_1
@@ -228,7 +228,7 @@
       Number of Results: 1 + 6
       Analysis Function: ancova
       Delta Applied: FALSE
-      Analysis Parameters:
+      Analysis Estimates:
           trt_visit_1
           lsm_ref_visit_1
           lsm_alt_visit_1
@@ -318,7 +318,7 @@
           threshold: 0.5
           same_cov: FALSE
           REML: TRUE
-          n_samples: NA
+          n_samples: NULL
           type: jackknife
       
 
@@ -351,7 +351,7 @@
       Number of Results: 1 + 35
       Analysis Function: ancova
       Delta Applied: FALSE
-      Analysis Parameters:
+      Analysis Estimates:
           trt_visit_1
           lsm_ref_visit_1
           lsm_alt_visit_1

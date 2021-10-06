@@ -5,7 +5,7 @@ suppressPackageStartupMessages({
 })
 
 get_data <- function(n) {
-    sigma <- as_covmat(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
+    sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
 
     set.seed(1518)
 
@@ -115,6 +115,8 @@ test_that("condmean - jackknife", {
 })
 
 
+
+
 test_that("bayes", {
     set.seed(40123)
     d <- get_data(40)
@@ -159,20 +161,6 @@ test_that("failure limits", {
 })
 
 
-#### TODO - Draw functions to test
-# get_bootstrap_draws <- function(longdata, method, use_samp_ids = FALSE, first_sample_orig = FALSE)
-# get_jackknife_draws <- function(longdata, method)
-# get_mmrm_sample <- function(ids, longdata, method)
-# extract_data_nmar_as_na <- function(longdata)
-# as_sample_single <- function(...)
-# validate.sample_single <- function(...)
-# as_sample_list  <- function(...)
-# validate.sample_list <- function(x, ...)
-# as_draws <- function(method, samples, data, formula, n_failures = NA, fit = NA)
-
-
-
-
 
 
 test_that("nmar data is removed as expected", {
@@ -183,9 +171,9 @@ test_that("nmar data is removed as expected", {
 
     set.seed(101)
 
-    mysig <- as_covmat(
-        sig = c(1, 3, 5),
-        corr = c(0.3, 0.5, 0.8)
+    mysig <- as_vcov(
+        sd = c(1, 3, 5),
+        cor = c(0.3, 0.5, 0.8)
     )
 
     dat <- get_sim_data(20, mysig)
@@ -218,8 +206,27 @@ test_that("nmar data is removed as expected", {
 })
 
 
+test_that("NULL data_ice works uses MAR by default", {
 
+    set.seed(314)
+    dat <- simulate_data(n = 100)
 
+    dat2 <- dat %>%
+        mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 0, outcome, NA_real_))
 
+    dobj <- draws(
+        dat2,
+        method = method_condmean(n_samples = 5),
+        vars = set_vars(
+            outcome = "outcome",
+            visit = "visit",
+            subjid = "id",
+            group = "group",
+            strategy = "strategy",
+            covariates = c("age", "sex")
+        )
+    )
 
-
+    expect_true(all(unlist(dobj$data$is_mar)))
+    expect_true(all(!unlist(dobj$data$is_post_ice)))
+})

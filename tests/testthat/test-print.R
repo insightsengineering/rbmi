@@ -5,7 +5,7 @@ suppressPackageStartupMessages({
 
 
 get_data <- function(n) {
-    sigma <- as_covmat(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
+    sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
 
     set.seed(1518)
 
@@ -88,7 +88,8 @@ test_that("print - Approx Bayes", {
 
 test_that("print - Bayes", {
 
-    skip_on_cran()  # CRAN / Stan seed does not appear to be reproducible ....
+    # Stan seed is not reproducible across different OS's
+    skip_if_not(is_nightly())  
 
     dobj <- get_data(100)
     set.seed(413)

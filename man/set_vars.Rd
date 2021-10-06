@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{set_vars}
 \alias{set_vars}
-\title{TODO}
+\title{Set Key Variables}
 \usage{
 set_vars(
   subjid = "subjid",
@@ -15,20 +15,59 @@ set_vars(
 )
 }
 \arguments{
-\item{subjid}{TODO}
+\item{subjid}{The name of the "subject ID" variable. A length 1 character vector.}
 
-\item{visit}{TODO}
+\item{visit}{The name of the "Visit" variable. A length 1 character vector.}
 
-\item{outcome}{TODO}
+\item{outcome}{The name of the "Outcome" variable. A length 1 character vector.}
 
-\item{group}{TODO}
+\item{group}{The name of the "group" variable. A length 1 character vector.}
 
-\item{covariates}{TODO}
+\item{covariates}{The name of any covariates to be used in the context of modelling.
+See details.}
 
-\item{strata}{TODO}
+\item{strata}{The name of the any stratification models to be used in the context of bootstrap
+sampling. See details.}
 
-\item{strategy}{TODO}
+\item{strategy}{The name of the "strategy" variable. A length 1 character vector.}
 }
 \description{
-TODO
+This function is used to define the names of key variables within the \code{data.frame}'s
+that are provided as input arguments to \code{\link[=draws]{draws()}} and \code{\link[=ancova]{ancova()}}.
+}
+\details{
+In both \code{\link[=draws]{draws()}} and \code{\link[=ancova]{ancova()}} the \code{covariates} argument can be specified to indicate
+which variables should be included in the imputation and analysis models respectively. If you wish
+to include interaction terms these need to be manually specified i.e.
+\code{covariates = c("group*visit", "age*sex")}. Please note that the use of the \code{\link[=I]{I()}} function to
+inhibit the interpretation/conversion of objects is not supported.
+
+Currently \code{strata} is only used by \code{\link[=draws]{draws()}} in combination with \code{method_condmean(type = "bootstrap")}
+and \code{method_approxbayes()} in order to allow for the specification of stratified bootstrap sampling.
+By default \code{strata} is set equal to the value of \code{group} as it is assumed most users will want to
+preserver the group size between samples. See \code{\link[=draws]{draws()}} for more details.
+
+Likewise, currently the \code{strategy} argument is only used by \code{\link[=draws]{draws()}} to specify the name of the
+strategy variable within the \code{data_ice} data.frame. See \code{\link[=draws]{draws()}} for more details.
+}
+\examples{
+\dontrun{
+
+# Using CDISC variable names as an example
+set_vars(
+    subjid = "usubjid",
+    visit = "avisit",
+    outcome = "aval",
+    group = "arm",
+    covariates = c("bwt", "bht", "arm * avisit"),
+    strategy = "strat"
+)
+
+}
+
+}
+\seealso{
+\code{\link[=draws]{draws()}}
+
+\code{\link[=ancova]{ancova()}}
 }

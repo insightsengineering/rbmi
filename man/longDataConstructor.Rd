@@ -4,23 +4,23 @@
 \alias{longDataConstructor}
 \title{R6 Class for Storing / Accessing & Sampling Longitudinal Data}
 \description{
-A longdata object allows for efficient storage and recall of longitudinal datasets for use in
-bootstrap sampling. The object works by de-constructing data into lists based upon subject id
-enabling efficient lookup.
+A \code{longdata} object allows for efficient storage and recall of longitudinal datasets for use in
+bootstrap sampling. The object works by de-constructing the data into lists based upon subject id
+thus enabling efficient lookup.
 }
 \details{
 The object also handles multiple other operations specific to rbmi such as defining whether an
 outcome value is MAR / Missing or not as well as tracking which imputation strategy is assigned
-to each subject
+to each subject.
 
 It is recognised that this objects functionality is fairly overloaded and is hoped that this can
 be split out into more area specific objects / functions in the future. Further additions of functionality
-to this object should be avoided.
+to this object should be avoided if possible.
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{data}}{The original dataset passed to the constructor}
+\item{\code{data}}{The original dataset passed to the constructor (sorted by id and visit)}
 
 \item{\code{vars}}{The vars object (list of key variables) passed to the constructor}
 
@@ -28,49 +28,71 @@ to this object should be avoided.
 
 \item{\code{ids}}{A character vector containing the unique ids of each subject in \code{self$data}}
 
-\item{\code{ids_levels}}{A character vector containing the exact levels (and order) of the
-original \code{data[[vars$subjid]]} variable}
-
-\item{\code{strata}}{A numeric vector indicating which strata each corresponding value of \code{self$ids} belongs to.
-If no stratification variable is defined this will default to 1 for all subjects (i.e. same group).
-This field is only used as part of the \code{self$sample_ids()} function to enable stratified bootstrap
+\item{\code{strata}}{A numeric vector indicating which strata each corresponding value of
+\code{self$ids} belongs to.
+If no stratification variable is defined this will default to 1 for all subjects
+(i.e. same group).
+This field is only used as part of the \code{self$sample_ids()} function to enable
+stratified bootstrap
 sampling}
 
-\item{\code{visit_ice}}{A list indexed by subject storing the visit which the patient had their ICE on}
+\item{\code{ice_visit_index}}{A list indexed by subject storing the index number of the first visit
+affected by the ICE. If there is no ICE then it is set equal to the number of visits plus 1.}
 
-\item{\code{values}}{A list indexed by subject storing the original outcome values}
+\item{\code{values}}{A list indexed by subject storing a numeric vector of the
+original (unimputed) outcome values}
 
-\item{\code{group}}{A list indexed by subject storing the a single character indicating which imputation
-group the subject belongs to. This is typically the subjects treatment group but can vary. It is used
+\item{\code{group}}{A list indexed by subject storing a single character
+indicating which imputation group the subject belongs to as defined
+by \code{self$data[id, self$ivars$group]}
+It is used
 to determine what reference group should be used when imputing the subjects data.}
 
-\item{\code{is_mar}}{A list indexed by subject storing logical values indicating if the subjects outcome values
-are MAR or not. This list is defaulted to TRUE for all subjects & outcomes and is then
-modified by calls to \code{self$set_strategies()}.}
+\item{\code{is_mar}}{A list indexed by subject storing logical values indicating
+if the subjects outcome values are MAR or not.
+This list is defaulted to TRUE for all subjects & outcomes and is then
+modified by calls to \code{self$set_strategies()}.
+Note that this does not indicate which values are missing, this variable
+is True for outcome values that either occoured before the ICE visit
+or are post the ICE visit and have an imputation strategy of MAR}
 
-\item{\code{strategies}}{A list indexed by subject storing a single character value indicating the imputation
-strategy assigned to a specific subject. This list is defaulted to "MAR" for all subjects and is then
-modified by calls to either \code{self$set_strategies()} or \code{self$update_strategies()}.}
+\item{\code{strategies}}{A list indexed by subject storing a single character
+value indicating the imputation
+strategy assigned to that subject. This list is defaulted to "MAR"
+for all subjects and is then
+modified by calls to either \code{self$set_strategies()} or \code{self$update_strategies()}}
 
-\item{\code{strategy_lock}}{A list indexed by subject storing a single logical value indicating whether a
-patients imputation strategy is locked or not. If a strategy is locked it means that it can't change
-from MAR to non-MAR or non-MAR to MAR. Strategies are locked if the patient has non-missing after
-their ICE. This list is populated by a call to \code{self$set_strategies()}.}
+\item{\code{strategy_lock}}{A list indexed by subject storing a single
+logical value indicating whether a
+patients imputation strategy is locked or not. If a strategy is
+locked it means that it can't change
+from MAR to non-MAR. Strategies can be changed from non-MAR to MAR though
+this will trigger a warning.
+Strategies are locked if the patient is assigned a MAR strategy and
+has non-missing after their ICE date. This list is populated by a call to
+\code{self$set_strategies()}.}
 
-\item{\code{indexes}}{A list indexed by subject storing a numeric vector of indexes which specify which rows in the
-original dataset below to this subject i.e. to recover the full data for subject "pt3" you can use
-\code{self$data[self$indexes[["pt3"]],]}. This may seem redundant over filtering the data directly
+\item{\code{indexes}}{A list indexed by subject storing a numeric vector of
+indexes which specify which rows in the
+original dataset belong to this subject i.e. to recover the full data
+for subject "pt3" you can use
+\code{self$data[self$indexes[["pt3"]],]}. This may seem redundant over filtering
+the data directly
 however it enables efficient bootstrap sampling of the data i.e.\preformatted{indexes <- unlist(self$indexes[c("pt3", "pt3")])
 self$data[indexes,]
 }
 
 This list is populated during the object initialisation.}
 
-\item{\code{is_missing}}{A list indexed by subject storing a logical vector indicating whether the corresponding
-outcome of a subject is missing. This list is populated during the object initialisation.}
+\item{\code{is_missing}}{A list indexed by subject storing a logical vector
+indicating whether the corresponding
+outcome of a subject is missing. This list is populated during the
+object initialisation.}
 
-\item{\code{is_post_ice}}{A list indexed by subject storing a logical vector indicating whether the corresponding
-outcome of a subject is post the date of their ICE. If no ICE data has been provided this defaults to False
+\item{\code{is_post_ice}}{A list indexed by subject storing a logical vector
+indicating whether the corresponding
+outcome of a subject is post the date of their ICE. If no ICE data has
+been provided this defaults to False
 for all observations. This list is populated by a call to \code{self$set_strategies()}.}
 }
 \if{html}{\out{</div>}}
@@ -95,7 +117,8 @@ for all observations. This list is populated by a call to \code{self$set_strateg
 \if{html}{\out{<a id="method-get_data"></a>}}
 \if{latex}{\out{\hypertarget{method-get_data}{}}}
 \subsection{Method \code{get_data()}}{
-Returns a dataframe based upon required subject IDs. Replaces missing values if new values are provided.
+Returns a \code{data.frame} based upon required subject IDs. Replaces missing
+values with new ones if provided.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$get_data(
   obj = NULL,
@@ -108,53 +131,60 @@ Returns a dataframe based upon required subject IDs. Replaces missing values if 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{obj}}{Either NULL, a character vector of subjects IDs or a list of lists
-with elements "id" and "values". See details.}
+\item{\code{obj}}{Either \code{NULL}, a character vector of subjects IDs or a
+imputation list object. See details.}
 
-\item{\code{nmar.rm}}{logical value. If TRUE will remove observations that are not regarded as MAR (as
-determined from \code{self$is_mar})}
+\item{\code{nmar.rm}}{Logical value. If \code{TRUE} will remove observations that are
+not regarded as MAR (as determined from \code{self$is_mar}).}
 
-\item{\code{na.rm}}{logical value. If TRUE will remove outcome values that are missing (as
-determined from \code{self$is_missing})}
+\item{\code{na.rm}}{Logical value. If \code{TRUE} will remove outcome values that are
+missing (as determined from \code{self$is_missing}).}
 
-\item{\code{idmap}}{logical value. If TRUE will add an attribute \code{idmap} which contains a mapping from the
-new subject ids to the old subject ids}
+\item{\code{idmap}}{Logical value. If \code{TRUE} will add an attribute \code{idmap} which
+contains a mapping from the new subject ids to the old subject ids. See details.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Details}{
-If \code{obj} is NULL then the full original dataset is returned. If \code{obj} is a
-character vector then a new dataset consisting of just those subjects is returned; if the
-character vector contains duplicate entries then that subject will be returned multiple times.
-If \code{obj} is a list of lists with elements \code{id} and \code{values} then a dataset of those subjects
-will be returned but with missing values filled in by the values in \code{values}.
-i.e.\preformatted{obj <- list(
-  list( id = "pt1", values = c(1,2,3)),
-  list( id = "pt1", values = c(4,5,6)),
-  list( id = "pt3", values = c(7,8))
+If \code{obj} is \code{NULL} then the full original dataset is returned.
+
+If \code{obj} is a character vector then a new dataset consisting of just those subjects is
+returned; if the character vector contains duplicate entries then that subject will be
+returned multiple times.
+
+If \code{obj} is an \code{imputation_list} object (as created by \code{\link[=as_imputation_list]{as_imputation_list()}}) then the
+subject ids specified in the object will be returned and missing values will be filled
+in by those specified in the imputation list object.  i.e.\preformatted{obj <- as_imputation_list(
+  as_imputation_single( id = "pt1", values = c(1,2,3)),
+  as_imputation_single( id = "pt1", values = c(4,5,6)),
+  as_imputation_single( id = "pt3", values = c(7,8))
 )
-ld$get_data(obj)
+longdata$get_data(obj)
 }
 
-Will return a dataframe consisting of all observations for pt1 twice and all of the
-observations for "pt3" once. The first set of observations for "pt1" will have missing
+Will return a \code{data.frame} consisting of all observations for \code{pt1} twice and all of the
+observations for \code{pt3} once. The first set of observations for \code{pt1} will have missing
 values filled in with \code{c(1,2,3)} and the second set will be filled in by \code{c(4,5,6)}. The
 length of the values must be equal to \code{sum(self$is_missing[[id]])}.
 
-If \code{obj} is not NULL then all subject IDs will be scrambled in order to ensure that they are unique
-i.e. If the "pt2" is requested twice then this process guarantees that each set of observations
-be have a unique subject ID number.
+If \code{obj} is not \code{NULL} then all subject IDs will be scrambled in order to ensure that they
+are unique
+i.e. If the \code{pt2} is requested twice then this process guarantees that each set of observations
+be have a unique subject ID number. The \code{idmap} attribute (if requested) can be used
+to map from the new ids back to the old ids.
 }
 
 \subsection{Returns}{
-A dataframe
+A \code{data.frame}.
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-add_subject"></a>}}
 \if{latex}{\out{\hypertarget{method-add_subject}{}}}
 \subsection{Method \code{add_subject()}}{
-TODO
+This function decomposes a patient data from \code{self$data} and populates
+all the corresponding lists i.e. \code{self$is_missing}, \code{self$values}, \code{self$group}, etc.
+This function is only called upon the objects initialization.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$add_subject(id)}\if{html}{\out{</div>}}
 }
@@ -162,19 +192,16 @@ TODO
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{id}}{TODO}
+\item{\code{id}}{Character subject id that exists within \code{self$data}.}
 }
 \if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-TODO
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-validate_ids"></a>}}
 \if{latex}{\out{\hypertarget{method-validate_ids}{}}}
 \subsection{Method \code{validate_ids()}}{
-TODO
+Throws an error if any element of \code{ids} is not within the source data \code{self$data}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$validate_ids(ids)}\if{html}{\out{</div>}}
 }
@@ -182,32 +209,35 @@ TODO
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{ids}}{TODO}
+\item{\code{ids}}{A character vector of ids.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-TODO
+TRUE
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-sample_ids"></a>}}
 \if{latex}{\out{\hypertarget{method-sample_ids}{}}}
 \subsection{Method \code{sample_ids()}}{
-TODO
+Performs random stratified sampling of patient ids (with replacement)
+Each patient has an equal weight of being picked within their strata (i.e is not dependent on
+how many non-missing visits they had).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$sample_ids()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{
-TODO
+Character vector of ids.
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-extract_by_id"></a>}}
 \if{latex}{\out{\hypertarget{method-extract_by_id}{}}}
 \subsection{Method \code{extract_by_id()}}{
-TODO
+Returns a list of key information for a given subject. Is a convenience wrapper
+to save having to manually grab each element.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$extract_by_id(id)}\if{html}{\out{</div>}}
 }
@@ -215,19 +245,17 @@ TODO
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{id}}{TODO}
+\item{\code{id}}{Character subject id that exists within \code{self$data}.}
 }
 \if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-TODO
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-update_strategies"></a>}}
 \if{latex}{\out{\hypertarget{method-update_strategies}{}}}
 \subsection{Method \code{update_strategies()}}{
-TODO
+Convenience function to run self$set_strategies(dat_ice, update=TRUE)
+kept for legacy reasons.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$update_strategies(dat_ice)}\if{html}{\out{</div>}}
 }
@@ -235,19 +263,17 @@ TODO
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat_ice}}{TODO}
+\item{\code{dat_ice}}{A data.frame containing ICE information see \code{\link[=impute]{impute()}} for the format of this dataframe.}
 }
 \if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-TODO
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-set_strategies"></a>}}
 \if{latex}{\out{\hypertarget{method-set_strategies}{}}}
 \subsection{Method \code{set_strategies()}}{
-TODO
+Updates the \code{self$strategies}, \code{self$is_mar}, \code{self$is_post_ice} variables based upon the provided ICE
+information.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$set_strategies(dat_ice = NULL, update = FALSE)}\if{html}{\out{</div>}}
 }
@@ -255,47 +281,49 @@ TODO
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat_ice}}{TODO}
+\item{\code{dat_ice}}{a \code{data.frame} containing ICE information. See details.}
 
-\item{\code{update}}{TODO}
+\item{\code{update}}{Logical, indicates that the ICE data should be used as an update. See details.}
 }
 \if{html}{\out{</div>}}
 }
-\subsection{Returns}{
-TODO
+\subsection{Details}{
+See \code{\link[=draws]{draws()}} for the specification of \code{dat_ice} if \code{update=FALSE}.
+See \code{\link[=impute]{impute()}} for the format of \code{dat_ice} if \code{update=TRUE}.
+If \code{update=TRUE} this function ensures that MAR strategies cannot be changed to non-MAR in the presence
+of post-ICE observations.
 }
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-check_has_data_at_each_visit"></a>}}
 \if{latex}{\out{\hypertarget{method-check_has_data_at_each_visit}{}}}
 \subsection{Method \code{check_has_data_at_each_visit()}}{
-TODO
+Ensures that all visits have at least 1 observed "MAR" observation. Throws
+an error if this criteria is not met. This is to ensure that the initial
+MMRM can be resolved.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$check_has_data_at_each_visit()}\if{html}{\out{</div>}}
 }
 
-\subsection{Returns}{
-TODO
-}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-set_strata"></a>}}
 \if{latex}{\out{\hypertarget{method-set_strata}{}}}
 \subsection{Method \code{set_strata()}}{
-TODO
+Populates the \code{self$strata} variable. If the user has specified stratification variables
+The first visit is used to determine the value of those variables. If no stratification variables
+have been specified then everyone is defined as being in strata 1.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$set_strata()}\if{html}{\out{</div>}}
 }
 
-\subsection{Returns}{
-TODO
-}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
-TODO
+Constructor function.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$new(data, vars)}\if{html}{\out{</div>}}
 }
@@ -303,14 +331,11 @@ TODO
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{data}}{TODO}
+\item{\code{data}}{longditudinal dataset.}
 
-\item{\code{vars}}{TODO}
+\item{\code{vars}}{an \code{ivars} object created by \code{\link[=set_vars]{set_vars()}}.}
 }
 \if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-TODO
 }
 }
 \if{html}{\out{<hr>}}

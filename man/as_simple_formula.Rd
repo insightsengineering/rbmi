@@ -2,13 +2,18 @@
 % Please edit documentation in R/utilities.R
 \name{as_simple_formula}
 \alias{as_simple_formula}
-\title{Title}
+\title{Convert an \code{ivars} object into a formula}
 \usage{
 as_simple_formula(vars)
 }
 \arguments{
-\item{vars}{TODO}
+\item{vars}{an \code{ivars} object as created by \code{\link[=set_vars]{set_vars()}}}
+}
+\value{
+A formula
 }
 \description{
-Title
+Takes an \code{ivars} object (as created by \code{\link[=set_vars]{set_vars()}}) and converts
+it into a formula roughly of the form:\preformatted{outcome ~ group + visit + covariate1 + covariate2 + ...
+}
 }

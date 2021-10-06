@@ -12,5 +12,10 @@ str_contains(x, subs)
 \item{subs}{a character vector of substrings to look for}
 }
 \description{
-Loops over \code{x} returning \code{TRUE}/\code{FALSE} if any element of \code{subs} occours as a substring within it
+Returns a vector of \code{TRUE}/\code{FALSE} for each element of x
+if it contains any element in \code{subs}
+
+i.e.\preformatted{str_contains( c("ben", "tom", "harry"), c("e", "y"))
+[1] TRUE FALSE TRUE
+}
 }

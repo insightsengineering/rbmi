@@ -2,15 +2,17 @@
 % Please edit documentation in R/validate.R
 \name{validate}
 \alias{validate}
-\title{TODO}
+\title{Generic validation method}
 \usage{
 validate(x, ...)
 }
 \arguments{
-\item{x}{TODO}
+\item{x}{object to be validated.}
 
-\item{...}{TODO}
+\item{...}{additional arguments to pass to the specific validation method.}
 }
 \description{
-TODO
+This function is used to perform assertions that an object
+conforms to its expected structure and no basic assumptions
+have been violated. Will throw an error if checks do not pass.
 }

@@ -7,7 +7,7 @@ suppressPackageStartupMessages({
 })
 
 bign <- 700
-sigma <- as_covmat(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
+sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
 nsamp <- 200
 
 
@@ -514,30 +514,31 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         x_pl$pars$trt_visit_3$ci
     }
 
-    set.seed(151)
+    set.seed(2351)
 
     s1 <- 6
     s2 <- 9
     s3 <- 28
 
-    mcoefs_b <- list("int" = 10, "age" = 3, "sex" = 6, "trt_slope" = s1, "visit_slope" = 2)
-    mcoefs_c <- list("int" = 10, "age" = 3, "sex" = 6, "trt_slope" = s2, "visit_slope" = 2)
-    mcoefs_d <- list("int" = 10, "age" = 3, "sex" = 6, "trt_slope" = s3, "visit_slope" = 2)
+    mcoefs_b <- list("int" = 10, "age" = 3, "sex" = 6, "trt" = s1, "visit" = 2)
+    mcoefs_c <- list("int" = 10, "age" = 3, "sex" = 6, "trt" = s2, "visit" = 2)
+    mcoefs_d <- list("int" = 10, "age" = 3, "sex" = 6, "trt" = s3, "visit" = 2)
 
-    sigma <- as_covmat(c(2, 2, 2), c(0.1, 0.5, 0.3))
+    sigma_sd <-c(2, 2, 2)
+    sigma_cor <- c(0.1, 0.5, 0.3)
 
     n <- 100
 
     dat <- bind_rows(
-        get_sim_dat2(n, mcoefs_b, sigma) %>%
+        simulate_data(n, mu = mcoefs_b, sd = sigma_sd, cor = sigma_cor) %>%
             mutate(group2 = if_else(group == "A", "A", "B")) %>%
             mutate(id = paste0(id, "A")),
 
-        get_sim_dat2(n, mcoefs_c, sigma) %>%
+        simulate_data(n, mu = mcoefs_c, sd = sigma_sd, cor = sigma_cor) %>%
             mutate(group2 = if_else(group == "A", "A", "C")) %>%
             mutate(id = paste0(id, "B")),
 
-        get_sim_dat2(n, mcoefs_d, sigma) %>%
+        simulate_data(n, mu = mcoefs_d, sd = sigma_sd, cor = sigma_cor) %>%
             mutate(group2 = if_else(group == "A", "A", "D")) %>%
             mutate(id = paste0(id, "C"))
     ) %>%
@@ -574,18 +575,35 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         )
     )
 
+
+    lm(
+        data = dat %>% filter(visit == "visit_3"),
+        outcome ~ sex + age + group
+    )
+
+
+
+    t1 <- (s1 + 0) / 2
+    t2 <- (s2 + 0) / 2
+    t3 <- (s3 + 0) / 2
     expect_within(
-        ((s1 + 0) / 2) + ((s2 + 0) / 2) + ((s3 + 0) / 2),
+        mean(c(t1, t2, t3)),
         extract_ci(x, c("A" = "A", "B" = "A", "C" = "A", "D" = "A"))
     )
 
+    t1 <- (s1 + s1) / 2
+    t2 <- (s2 + s2) / 2
+    t3 <- (s3 + s3) / 2
     expect_within(
-        ((s1 + s1) / 2) + ((s2 + s2) / 2) + ((s3 + s3) / 2),
+        mean(c(t1, t2, t3)),
         extract_ci(x, c("A" = "A", "B" = "B", "C" = "C", "D" = "D"))
     )
 
+    t1 <- (s1 + s2) / 2
+    t2 <- (s2 + s2) / 2
+    t3 <- (s3 + s2) / 2
     expect_within(
-        ((s1 + s2) / 2) + ((s2 + s2) / 2) + ((s3 + s2) / 2),
+        mean(c(t1, t2, t3)),
         extract_ci(x, c("A" = "A", "B" = "C", "C" = "C", "D" = "C"))
     )
 
@@ -613,18 +631,27 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         !identical(x$samples[[1]]$sigma[["A"]], x$samples[[2]]$sigma[["A"]])
     )
 
+    t1 <- (s1 + 0) / 2
+    t2 <- (s2 + 0) / 2
+    t3 <- (s3 + 0) / 2
     expect_within(
-        ((s1 + 0) / 2) + ((s2 + 0) / 2) + ((s3 + 0) / 2),
+        mean(c(t1, t2, t3)),
         extract_ci(x, c("A" = "A", "B" = "A", "C" = "A", "D" = "A"))
     )
 
+    t1 <- (s1 + s1) / 2
+    t2 <- (s2 + s2) / 2
+    t3 <- (s3 + s3) / 2
     expect_within(
-        ((s1 + s1) / 2) + ((s2 + s2) / 2) + ((s3 + s3) / 2),
+        mean(c(t1, t2, t3)),
         extract_ci(x, c("A" = "A", "B" = "B", "C" = "C", "D" = "D"))
     )
 
+    t1 <- (s1 + s2) / 2
+    t2 <- (s2 + s2) / 2
+    t3 <- (s3 + s2) / 2
     expect_within(
-        ((s1 + s2) / 2) + ((s2 + s2) / 2) + ((s3 + s2) / 2),
+        mean(c(t1, t2, t3)),
         extract_ci(x, c("A" = "A", "B" = "C", "C" = "C", "D" = "C"))
     )
 })

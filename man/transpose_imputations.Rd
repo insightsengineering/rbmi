@@ -2,13 +2,30 @@
 % Please edit documentation in R/longData.R
 \name{transpose_imputations}
 \alias{transpose_imputations}
-\title{Title}
+\title{Transpose imputations}
 \usage{
 transpose_imputations(imputations)
 }
 \arguments{
-\item{imputations}{TODO}
+\item{imputations}{An \code{imputation_list} object created by \code{\link[=as_imputation_list]{as_imputation_list()}}}
 }
 \description{
-Title
+Takes an \code{imputation_list} object and transposes it e.g.\preformatted{list(
+    list(
+        id = "a",
+        values = c(1,2,3)
+    ),
+    list(
+        id = "b",
+        values = c(4,5,6)
+    )
+)
+}
+}
+\details{
+becomes\preformatted{list(
+    ids = c("a", "b"),
+    values = c(1,2,3,4,5,6)
+)
+}
 }

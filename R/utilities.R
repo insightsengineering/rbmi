@@ -1,8 +1,10 @@
 
-#' Title
+#' Set Class
 #'
-#' @param x TODO
-#' @param cls TODO
+#' Utility function to set an objects class.
+#'
+#' @param x Object to set the class of
+#' @param cls The class to be set
 #' @export
 as_class <- function(x, cls) {
     class(x) <- cls
@@ -10,10 +12,13 @@ as_class <- function(x, cls) {
 }
 
 
-#' Title
+#' Add a class
 #'
-#' @param x TODO
-#' @param cls TODO
+#' Utility function to add a class to an object. Adds the new class
+#' after any existing classes.
+#'
+#' @param x Object to add a class to
+#' @param cls the class to be added
 #' @export
 add_class <- function(x, cls) {
     class(x) <- c(class(x), cls)
@@ -21,19 +26,36 @@ add_class <- function(x, cls) {
 }
 
 
-#' TODO
+#' Does object have a class ?
 #'
-#' @param x TODO
-#' @param cls TODO
+#' Utility function to see if an object has a particular class.
+#' Useful when we don't know how many other classes the object may
+#' have
+#'
+#' @return
+#' True if the object has the class
+#' False if the object does not have the class
+#'
+#' @param x The object we want to check the class of
+#' @param cls The class we want to know if it has or not
 #' @export
 has_class <- function(x, cls) {
     cls %in% class(x)
 }
 
-#' Title
+
+#' Convert an `ivars` object into a formula
 #'
-#' @param vars TODO
-as_simple_formula <- function(vars){
+#' Takes an `ivars` object (as created by [set_vars()]) and converts
+#' it into a formula roughly of the form:
+#' ```
+#' outcome ~ group + visit + covariate1 + covariate2 + ...
+#' ```
+#'
+#' @param vars an `ivars` object as created by [set_vars()]
+#' @return
+#' A formula
+as_simple_formula <- function(vars) {
     variables <- c(
         vars$group,
         vars$visit,
@@ -51,9 +73,9 @@ as_simple_formula <- function(vars){
 
 
 
-#' Expand dataframe into a design matrix
+#' Expand `data.frame` into a design matrix
 #'
-#' Expands out a dataframe using a formula to create a design matrix.
+#' Expands out a `data.frame` using a formula to create a design matrix.
 #' Key details are that it will always place the outcome variable into
 #' the first column of the return object.
 #'
@@ -84,11 +106,12 @@ as_model_df <- function(dat, frm) {
 
 
 
-#' Title - TODO
+#' Character 2 Factor
 #'
-#' Converts all character variables within a dataframe to factor
+#' Converts all character variables within a `data.frame` to factor.
+#' Determines character variables by `is.character()`
 #'
-#' @param data A dataframe
+#' @param data A `data.frame`
 char2fct <- function(data) {
     for (v in colnames(data)) {
         if (is.character(data[[v]])) {
@@ -100,10 +123,15 @@ char2fct <- function(data) {
 
 
 
-#' Title - TODO
+#' if else
 #'
-#' A wrapper around if() else() to prevent unexpected
-#' interactions between ifelse() and factor variables
+#' A wrapper around `if() else()` to prevent unexpected
+#' interactions between `ifelse()` and factor variables
+#'
+#' @details
+#' By default `ifelse()` will convert factor variables to their
+#' numeric values which is often undesirable. This connivance
+#' function avoids that problem
 #'
 #' @param x True / False
 #' @param a value to return if True
@@ -144,13 +172,32 @@ sample_mvnorm <- function(mu, sigma) {
 
 
 
-#' record
+#' Capture all Output
 #'
 #' This function silences all warnings, errors & messages and instead returns a list
 #' containing the results (if it didn't error) + the warning and error messages as
 #' character vectors.
 #'
 #' @param expr An expression to be executed
+#'
+#' @return
+#' A list containing
+#'
+#' - **results** - The object returned by `expr` or `list()` if an error was thrown
+#' - **warnings** - NULL or a character vector if warnings were thrown
+#' - **errors** - NULL or a string if an error was thrown
+#' - **messages** - NULL or a character vector if messages were produced
+#'
+#' @examples
+#' \dontrun{
+#' record({
+#'   x <- 1
+#'   y <- 2
+#'   warning("something went wrong")
+#'   message("O nearly done")
+#'   x + y
+#' })
+#' }
 record <- function(expr) {
     env <- new.env()
     result <- withCallingHandlers(
@@ -236,7 +283,14 @@ extract_covariates <- function(x) {
 #' @param subs a character vector of substrings to look for
 #'
 #' @description
-#' Loops over `x` returning `TRUE`/`FALSE` if any element of `subs` occours as a substring within it
+#' Returns a vector of `TRUE`/`FALSE` for each element of x
+#' if it contains any element in `subs`
+#'
+#' i.e.
+#' ```
+#' str_contains( c("ben", "tom", "harry"), c("e", "y"))
+#' [1] TRUE FALSE TRUE
+#' ```
 str_contains <- function(x, subs) {
     strings <- x
     res_list <- lapply(subs, function(x) grepl(x, strings, fixed = T))
@@ -251,21 +305,27 @@ str_contains <- function(x, subs) {
 
 
 
-#' Sort Data Frame
+#' Sort `data.frame`
 #'
-#' Sorts a dataframe (ascending only) based upon variables within the dataset
-#' This function is essentially a wrapper around do.call to ease the syntax
+#' Sorts a `data.frame` (ascending by default) based upon variables within the dataset
 #' @param df data.frame
 #' @param vars character vector of variables
-#' @param decreasing logical wether sort order should be in descending or ascending (default) order
-sort_by <- function(df, vars = NULL, decreasing = NULL) {
+#' @param decreasing logical whether sort order should be in descending or ascending (default) order.
+#' Can be either a single logical value (in which case it is applied to
+#' all variables) or a vector which is the same length as `vars`
+#' @examples
+#' \dontrun{
+#' sort_by(iris, c("Sepal.Length", "Sepal.Width"), decreasing = c(TRUE, FALSE))
+#' }
+sort_by <- function(df, vars = NULL, decreasing = FALSE) {
     if (is.null(vars)) {
         return(df)
     }
     assert_that(
-        is.data.frame(df), 
+        is.data.frame(df),
         all(vars %in% names(df)),
-        is.null(decreasing) | length(decreasing) == 1 | length(decreasing) == length(vars)
+        is.logical(decreasing),
+        length(decreasing) == 1 | length(decreasing) == length(vars)
     )
     args <- as.list(df[, vars, drop = FALSE])
     args$decreasing <- decreasing
@@ -279,18 +339,62 @@ sort_by <- function(df, vars = NULL, decreasing = NULL) {
 
 
 
-#' TODO
-#' 
+#' Set Key Variables
+#'
 #' @description
-#' TODO
-#' 
-#' @param subjid TODO
-#' @param visit TODO
-#' @param outcome TODO
-#' @param group TODO
-#' @param covariates TODO
-#' @param strata TODO
-#' @param strategy TODO
+#' This function is used to define the names of key variables within the `data.frame`'s
+#' that are provided as input arguments to [draws()] and [ancova()].
+#'
+#' @param subjid The name of the "subject ID" variable. A length 1 character vector.
+#'
+#' @param visit The name of the "Visit" variable. A length 1 character vector.
+#'
+#' @param outcome The name of the "Outcome" variable. A length 1 character vector.
+#'
+#' @param group The name of the "group" variable. A length 1 character vector.
+#'
+#' @param covariates The name of any covariates to be used in the context of modelling.
+#' See details.
+#'
+#' @param strata The name of the any stratification models to be used in the context of bootstrap
+#' sampling. See details.
+#'
+#' @param strategy The name of the "strategy" variable. A length 1 character vector.
+#'
+#' @details
+#'
+#' In both [draws()] and [ancova()] the `covariates` argument can be specified to indicate
+#' which variables should be included in the imputation and analysis models respectively. If you wish
+#' to include interaction terms these need to be manually specified i.e.
+#' `covariates = c("group*visit", "age*sex")`. Please note that the use of the [I()] function to
+#' inhibit the interpretation/conversion of objects is not supported.
+#'
+#' Currently `strata` is only used by [draws()] in combination with `method_condmean(type = "bootstrap")`
+#' and `method_approxbayes()` in order to allow for the specification of stratified bootstrap sampling.
+#' By default `strata` is set equal to the value of `group` as it is assumed most users will want to
+#' preserver the group size between samples. See [draws()] for more details.
+#'
+#' Likewise, currently the `strategy` argument is only used by [draws()] to specify the name of the
+#' strategy variable within the `data_ice` data.frame. See [draws()] for more details.
+#'
+#' @seealso [draws()]
+#' @seealso [ancova()]
+#'
+#' @examples
+#' \dontrun{
+#'
+#' # Using CDISC variable names as an example
+#' set_vars(
+#'     subjid = "usubjid",
+#'     visit = "avisit",
+#'     outcome = "aval",
+#'     group = "arm",
+#'     covariates = c("bwt", "bht", "arm * avisit"),
+#'     strategy = "strat"
+#' )
+#'
+#' }
+#'
 #' @export
 set_vars <- function(
     subjid = "subjid",
@@ -326,7 +430,6 @@ set_vars <- function(
 #' @param ... not used
 #' @export
 validate.ivars <- function(x, ...) {
-    covars <- extract_covariates(x$covariates)
 
     assert_that(
         is_char_one(x$outcome),
@@ -353,8 +456,9 @@ validate.ivars <- function(x, ...) {
         msg = "`vars$strategy` should be a length 1 character"
     )
 
+    covars <- extract_covariates(x$covariates)
     assert_that(
-        is.character(x$covars) | is.null(x$covars),
+        is.character(covars) | is.null(covars),
         msg = "`vars$covars` should be a character vector or NULL"
     )
 
@@ -363,4 +467,33 @@ validate.ivars <- function(x, ...) {
         msg = "`vars$strata` should be a character vector or NULL"
     )
     return(invisible(TRUE))
+}
+
+
+#' Is single character
+#'
+#' returns true if x is a length 1 character vector
+#'
+#' @param x a character vector
+is_char_one <- function(x) {
+    is.character(x) & (length(x) == 1)
+}
+
+
+#' Is character or factor
+#'
+#' returns true if x is character or factor vector
+#'
+#' @param x a character or factor vector
+is_char_fact <- function(x) {
+    is.character(x) | is.factor(x)
+}
+
+#' Is character, factor or numeric
+#'
+#' returns true if x is a character, numeric or factor vector
+#'
+#' @param x a character, numeric or factor vector
+is_num_char_fact <- function(x) {
+    is.numeric(x) | is.character(x) | is.factor(x)
 }

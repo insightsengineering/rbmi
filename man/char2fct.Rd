@@ -2,13 +2,14 @@
 % Please edit documentation in R/utilities.R
 \name{char2fct}
 \alias{char2fct}
-\title{Title - TODO}
+\title{Character 2 Factor}
 \usage{
 char2fct(data)
 }
 \arguments{
-\item{data}{A dataframe}
+\item{data}{A \code{data.frame}}
 }
 \description{
-Converts all character variables within a dataframe to factor
+Converts all character variables within a \code{data.frame} to factor.
+Determines character variables by \code{is.character()}
 }

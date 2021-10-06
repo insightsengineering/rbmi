@@ -4,7 +4,7 @@ devtools::load_all()
 
 library(dplyr)
 
-sigma <- as_covmat(
+sigma <- as_vcov(
     c(5, 5, 6, 6, 8),
     c(0.3, 0.4, 0.45, 0.4, 0.3, 0.2, 0.1, 0.2, 0.3, 0.4)
 )
