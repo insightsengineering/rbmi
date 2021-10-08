@@ -14,12 +14,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build report
-        uses: insightsengineering/r-pkg-validation@add/generator
+        uses: insightsengineering/thevalidatoR
           
       - name: Upload visR validation report
         uses: actions/upload-artifact@v2
         if: success()
         with:
-          name: visR-report.pdf
+          name: rbmi-report.pdf
           path: ./validation-report.pdf
           if-no-files-found: error
