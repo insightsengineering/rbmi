@@ -71,7 +71,7 @@ capabilities()
 
 # Metric based assessment
 
-```{r}
+```{r riskmetric, eval = FALSE}
 params$pkg_dir  %>%
   riskmetric::pkg_ref() %>%
   riskmetric::pkg_assess() %>%
