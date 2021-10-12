@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build report
-        uses: insightsengineering/thevalidatoR@normalize-path-pkgdir
+        uses: insightsengineering/thevalidatoR@main
           
       - name: Upload visR validation report
         uses: actions/upload-artifact@v2
