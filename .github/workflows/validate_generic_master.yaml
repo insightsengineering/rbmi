@@ -16,7 +16,7 @@ jobs:
       - name: Build report
         uses: insightsengineering/thevalidatoR@main
           
-      - name: Upload visR validation report
+      - name: Upload validation report
         uses: actions/upload-artifact@v2
         if: success()
         with:
