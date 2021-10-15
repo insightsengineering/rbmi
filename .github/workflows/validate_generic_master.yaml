@@ -1,25 +1,33 @@
 ---
-name: Generic Validation Action
+name: R Package Validation report
 
-on:
-  push:
-    branches:
-      - generic-validation
+on: # Run this action when a release is published
+  release:
+    types: [published]
 
 jobs:
-  thevalidatoR:
+  r-pkg-validation:
+    name: Create report 📃
     runs-on: ubuntu-latest
-    env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    # Set Github token permissions
+    permissions:
+      contents: write
+      packages: write
+      deployments: write
     steps:
-      - uses: actions/checkout@v2
-      - name: Build report
-        uses: insightsengineering/thevalidatoR@covtraceroutput
-          
-      - name: Upload validation report
-        uses: actions/upload-artifact@v2
+      - name: Checkout repo 🛎
+        uses: actions/checkout@v2
+
+      - name: Build report 🏗
+        uses: insightsengineering/thevalidatoR@main
+
+      # Upload the validation report to the release
+      - name: Upload report to release 🔼
         if: success()
+        uses: svenstaro/upload-release-action@v2
         with:
-          name: rbmi-report.pdf
-          path: ./validation_report.pdf
-          if-no-files-found: error
+          file: ./validation_report.pdf
+          asset_name: validation-report.pdf
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          overwrite: false
