@@ -2,8 +2,11 @@
 name: R Package Validation report
 
 on: # Run this action when a release is published
-  release:
-    types: [published]
+  push:
+    branches:
+      - generic-validation
+#  release:
+#    types: [published]
 
 jobs:
   r-pkg-validation:
