@@ -47,3 +47,4 @@ SystemRequirements: GNU make
 Depends: 
     R (>= 3.4.0)
 License: Apache License (>= 2)
+VignetteBuilder: knitr
