@@ -35,4 +35,4 @@ jobs:
           asset_name: validation-report.pdf
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
-          overwrite: true
+          overwrite: false
