@@ -3,10 +3,8 @@ name: R Package Validation report
 
 on: # Run this action when a release is published
   push:
-    branches:
-      - generic-validation
-#  release:
-#    types: [published]
+    release:
+      types: [published]
 
 jobs:
   r-pkg-validation:
