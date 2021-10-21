@@ -7,4 +7,3 @@
 ^\.lintr$
 ^.gitignore$
 ^src/\.gitkeep$
-^template\.Rmd$
