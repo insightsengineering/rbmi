@@ -154,7 +154,7 @@ fill_locf <- function(data, vars, group = NULL, order = NULL) {
     data_sorted <- data[ord, ]
 
     if (!is.null(group)) {
-        group_index <- do.call(as_strata, data_sorted[, group])
+        group_index <- do.call(as_strata, data_sorted[, group, drop = FALSE])
     } else {
         group_index <- rep(1, nrow(data))
     }
@@ -165,10 +165,10 @@ fill_locf <- function(data, vars, group = NULL, order = NULL) {
     )
 
     for (var in vars) {
-        data_sorted[[var]] <- unlist(
-            tapply(data_sorted[[var]], group_index, locf),
-            use.names = FALSE
-        )
+        new_vals_list <- tapply(data_sorted[[var]], group_index, locf)
+        new_vals <- do.call("c", new_vals_list)
+        names(new_vals) <- NULL
+        data_sorted[[var]] <- new_vals
     }
 
     ## Restore orginal data sorting
