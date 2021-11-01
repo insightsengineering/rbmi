@@ -148,7 +148,7 @@ fill_locf <- function(data, vars, group = NULL, order = NULL) {
     if (is.null(c(group, order))) {
         ord <- seq_len(nrow(data))
     } else {
-        ord <- do.call(base::order, data[, unique(c(group, order))])
+        ord <- do.call(base::order, data[, unique(c(group, order)), drop = FALSE])
     }
 
     data_sorted <- data[ord, ]
@@ -166,8 +166,8 @@ fill_locf <- function(data, vars, group = NULL, order = NULL) {
 
     for (var in vars) {
         new_vals_list <- tapply(data_sorted[[var]], group_index, locf)
-        new_vals <- do.call("c", new_vals_list)
-        names(new_vals) <- NULL
+        new_vals <- unlist(new_vals_list, recursive = FALSE, use.names = FALSE)
+        attributes(new_vals) <- attributes(data_sorted[[var]])
         data_sorted[[var]] <- new_vals
     }
 
@@ -176,6 +176,7 @@ fill_locf <- function(data, vars, group = NULL, order = NULL) {
     return(data_return)
 
 }
+
 
 #' Assert that all variables exist within a dataset
 #'

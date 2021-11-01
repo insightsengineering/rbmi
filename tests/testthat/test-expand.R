@@ -322,4 +322,34 @@ test_that("fill_locf works with factors", {
 
     expect_equal(df_actual, df_expected)
 
+
+
+    # Making sure there's no complications with factor levels only occurring within certain groups
+    input_df <- data.frame(
+        v1 = c(NA, 1, 2, NA, NA, 3, NA, 4),
+        pt = c("a", "a", "a", "a", "b", "b", "b", "b"),
+        srt1 = c(1, 1, 1, 1, 2, 2, 2, 2),
+        srt2 = c(1, 2, 3, 4, 1, 2, 3, 4),
+        myfac1 = factor(c("A", "A", NA, NA, NA, "B", "C", NA), levels = c("A", "B","C", "D")),
+        v2 = c(1, 2, 3, 4, NA, 6, NA, 8)
+    )
+
+    df_actual <- fill_locf(
+        input_df,
+        vars = c("v1", "myfac1"),
+        group = "pt",
+        order = c("srt1", "srt2")
+    )
+
+    df_expected <- data.frame(
+        v1 = c(NA, 1, 2, 2, NA, 3, 3, 4),
+        pt = c("a", "a", "a", "a", "b", "b", "b", "b"),
+        srt1 = c(1, 1, 1, 1, 2, 2, 2, 2),
+        srt2 = c(1, 2, 3, 4, 1, 2, 3, 4),
+        myfac1 = factor(c("A", "A", "A", "A", NA, "B", "C", "C"), levels = c("A", "B","C", "D")),
+        v2 = c(1, 2, 3, 4, NA, 6, NA, 8)
+    )
+
+    expect_equal(df_actual, df_expected)
+
 })
