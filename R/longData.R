@@ -241,8 +241,9 @@ longDataConstructor <- R6::R6Class(
                 names(id_map) <- new_ids_single
                 attr(new_data, "idmap") <- id_map
             }
-
-            return(new_data)
+            new_data2 <- new_data
+            row.names(new_data2) <- NULL
+            return(new_data2)
         },
 
 
@@ -361,6 +362,9 @@ longDataConstructor <- R6::R6Class(
         #' @param dat_ice a `data.frame` containing ICE information. See details.
         #' @param update Logical, indicates that the ICE data should be used as an update. See details.
         set_strategies = function(dat_ice = NULL, update=FALSE) {
+
+            dat_ice <- as.data.frame(dat_ice)
+            row.names(dat_ice) <- NULL
 
             if (is.null(dat_ice)) {
                 return(self)
@@ -481,9 +485,12 @@ longDataConstructor <- R6::R6Class(
         #' @param data longditudinal dataset.
         #' @param vars an `ivars` object created by [set_vars()].
         initialize = function(data, vars) {
+            data <- as.data.frame(data)
             validate(vars)
             validate_datalong(data, vars)
-            self$data <- sort_by(data, c(vars$subjid, vars$visit))
+            data_sorted <- sort_by(data, c(vars$subjid, vars$visit))
+            row.names(data_sorted) <- NULL
+            self$data <- data_sorted
             self$vars <- vars
             self$visits <- levels(self$data[[self$vars$visit]])
             subjects <- levels(self$data[[self$vars$subjid]])
