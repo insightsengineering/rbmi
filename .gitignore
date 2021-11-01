@@ -51,3 +51,4 @@ src/*
 
 !.gitkeep
 inst/doc
+docs

@@ -178,10 +178,9 @@ strategy_CIR <- function(pars_group, pars_ref, index_mar) {
 #' @rdname stratgies
 #' @export
 strategy_LMCF <- function(pars_group, pars_ref, index_mar) {
-
-    if(all(index_mar)) {
+    if (all(index_mar)) {
         return(pars_group)
-    } else if(all(!index_mar)) {
+    } else if (all(!index_mar)) {
         stop("LMCF cannot be adopted since all outcome values are missing")
     }
 
@@ -223,13 +222,12 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar) {
 #'
 #' @param ... User defined methods to be added to the return list. Input must
 #' be a function.
-#'
 #' @examples
 #' \dontrun{
 #' getStrategies()
 #' getStrategies(
-#'     NEW = function(pars_group, pars_ref, index_mar) <code>,
-#'     JR = function(pars_group, pars_ref, index_mar) <more code>
+#'     NEW = function(pars_group, pars_ref, index_mar) code ,
+#'     JR = function(pars_group, pars_ref, index_mar)  more_code
 #' )
 #' }
 #' @export

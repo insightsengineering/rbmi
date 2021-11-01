@@ -1,8 +1,8 @@
 ---
-title: "rbmi Quickstart"
+title: "rbmi: Quickstart"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{quickstart}
+  %\VignetteIndexEntry{rbmi: Quickstart}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
