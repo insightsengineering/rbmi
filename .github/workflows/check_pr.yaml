@@ -1,22 +1,15 @@
 
 
-on:
-  pull_request:
-    branches:
-      - develop
-      - master
-      - main
-  schedule:
-    - cron: '0 4 * * 1,2,3,4,5'
+on: [pull_request]
 
-name: Check Develop
+name: Check Pull Requests
 
 jobs:
 
-  R-CMD-Check-develop:
+  rcmdcheck:
 
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
        config:
          - { image: "gowerc/rbmi:r404"}
@@ -29,7 +22,7 @@ jobs:
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_TEST_NIGHTLY: ${{ github.event_name == 'schedule' && 'TRUE' || 'FALSE' }}
+      R_TEST_NIGHTLY: 'FALSE'
 
     steps:
       - name: Checkout

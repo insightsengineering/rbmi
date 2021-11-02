@@ -1,0 +1,40 @@
+
+
+on:
+  schedule:
+    - cron: '0 4 * * 1'
+
+name: Check Nightly (master)
+
+jobs:
+
+  rcmdcheck:
+
+    strategy:
+      fail-fast: true
+      matrix:
+       config:
+         - { image: "gowerc/rbmi:r404"}
+         - { image: "gowerc/rbmi:r410"}
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: ${{ matrix.config.image }}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_TEST_NIGHTLY: 'TRUE' 
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: master
+
+      - name: Check
+        run: |
+          options(crayon.enabled = TRUE)
+          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
+        shell: Rscript {0}
+

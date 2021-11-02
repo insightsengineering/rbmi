@@ -8,6 +8,7 @@ suppressPackageStartupMessages({
 
 test_that("basic constructions of `analysis` work as expected",{
 
+    expect_true(FALSE)
 
     x <- as_analysis(
         results = list(

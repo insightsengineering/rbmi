@@ -5,16 +5,17 @@ on: [push]
 name: Check Pushes
 
 jobs:
-  R-CMD-check:
+  testthat:
     runs-on: ubuntu-latest
     container:
       image: gowerc/rbmi:r404
     steps:
+      
       - name: Checkout
         uses: actions/checkout@v2
-
+      
       - name: Check
         run: |
           options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
+          devtools::test(stop_on_failure=TRUE)
         shell: Rscript {0}
