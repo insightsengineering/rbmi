@@ -363,12 +363,14 @@ longDataConstructor <- R6::R6Class(
         #' @param update Logical, indicates that the ICE data should be used as an update. See details.
         set_strategies = function(dat_ice = NULL, update=FALSE) {
 
-            dat_ice <- as.data.frame(dat_ice)
-            row.names(dat_ice) <- NULL
+
 
             if (is.null(dat_ice)) {
                 return(self)
             }
+
+            dat_ice <- as.data.frame(dat_ice)
+            row.names(dat_ice) <- NULL
 
             validate_dataice(self$data, dat_ice, self$vars, update)
 

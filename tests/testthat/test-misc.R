@@ -38,8 +38,8 @@ test_that("rbmi can handle 'grouped' dplyr data", {
 
     method <- method_bayes(
         burn_in = 200,
-        burn_between = 5,
-        n_samples = 150,
+        burn_between = 3,
+        n_samples = 250,
         verbose = FALSE
     )
 
