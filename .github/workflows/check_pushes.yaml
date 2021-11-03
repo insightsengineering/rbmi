@@ -11,19 +11,29 @@ jobs:
       image: gowerc/rbmi:r404
     steps:
       
+      
       - name: Checkout
         uses: actions/checkout@v2
       
-      - name: misc testing
+      
+      - name: Determine system/package state
         run: |
-          echo ${{ job.container }}
+          sink(".github/meta.txt")
+          list(
+              version = version,
+              pkgs = installed.packages()[c("Rcpp", "rstan", "rstantools"), c("Version", "Package")]
+          )
+          sink()
+        shell: Rscript {0}
+    
     
       - name: Cache Compiled Stan Code
         id: cache
         uses: actions/cache@v2
         with:
           path: src/*
-          key: ${{ job.container }}-${{ hashFiles('inst/stan/MMRM.stan') }}
+          key: ${{ hashFiles('.github/meta.txt') }}-${{ hashFiles('inst/stan/MMRM.stan') }}
+    
     
       - name: Compile Stan Code
         if: steps.cache.outputs.cache-hit != 'true'
@@ -31,7 +41,6 @@ jobs:
           devtools::load_all()
         shell: Rscript {0}
       
-
       
       - name: Check
         run: |
