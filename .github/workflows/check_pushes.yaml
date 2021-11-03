@@ -46,12 +46,12 @@ jobs:
       - name: Compile Stan Code
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          devtools::load_all()
+          pkgload::compile_dll()
         shell: Rscript {0}
       
       
       - name: Check
         run: |
           options(crayon.enabled = TRUE, cli.dynamic = FALSE)
-          devtools::test(stop_on_failure=TRUE)
+          devtools::test(stop_on_failure = TRUE, reporter = testthat::CheckReporter)
         shell: Rscript {0}

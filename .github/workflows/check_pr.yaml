@@ -48,7 +48,7 @@ jobs:
       - name: Compile Stan Code
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          devtools::load_all()
+          pkgload::compile_dll()
         shell: Rscript {0}
       
       
