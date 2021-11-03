@@ -318,8 +318,6 @@ get_jackknife_draws <- function(longdata, method) {
         "BFGS" = samples[[1]][c("beta", "theta")]
     )
 
-    ids_jack <- lapply(seq_along(ids), function(i) ids[-i])
-
     for (i in seq_along(ids)) {
         ids_jack <- ids[-i]
         sample <- get_mmrm_sample(
