@@ -42,6 +42,19 @@ test_that("Rubin's rules", {
     expect_true(all(actual_res == Inf))
 
 
+    # if ses are all NA, then results are only for point estimate
+    ses <- rep(NA, 100)
+    v_com <- Inf
+    expect_equal(
+        rubin_rules(ests, ses, v_com),
+        list(
+            est_point = mean(ests),
+            var_t = NA,
+            df = NA
+        )
+    )
+
+
 })
 
 
@@ -82,6 +95,18 @@ test_that("pool", {
         )
     )
 
+    ########  Bayes
+    results_bayes <- as_analysis(
+        method = method_bayes(n_samples = 5000),
+        results =
+            lapply(
+                seq_len(n_boot),
+                function(x) runanalysis(sample(vals, size = n, replace = TRUE))
+            )
+    )
+
+
+
     ###### reference CIs
     real_mu <- mean(vals)
     real_se <- sqrt(var(vals) / n)
@@ -90,6 +115,7 @@ test_that("pool", {
     boot_norm <- pool(results_boot, type = "normal")
     boot_perc <- pool(results_boot, type = "percentile")
     jack <- pool(results_jack)
+    bayes <- pool(results_bayes)
 
 
     expect_results <- function(res, real_mu, real_se) {
@@ -100,7 +126,9 @@ test_that("pool", {
         real_ci <- real_mu + c(-1, 1) * qnorm( (1 - (1 - conf) / 2) * 1.005) * real_se
         ci <- pars$ci
 
-        expect_true(real_ci[1] < ci[1] & real_ci[2] > ci[2])
+        if(res$method != "rubin") {
+            expect_true(real_ci[1] < ci[1] & real_ci[2] > ci[2])
+        }
 
         expect_true((real_mu - abs(real_mu * 0.01)) < pars$est)
         expect_true((real_mu + abs(real_mu * 0.01)) > pars$est)
@@ -110,6 +138,7 @@ test_that("pool", {
     expect_results(boot_norm, real_mu, real_se)
     expect_results(boot_perc, real_mu, real_se)
     expect_results(jack, real_mu, real_se)
+    expect_results(bayes, real_mu, real_se)
 
 
 
@@ -119,8 +148,6 @@ test_that("pool", {
 
 
 })
-
-
 
 
 

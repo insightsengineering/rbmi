@@ -107,7 +107,7 @@ pool <- function(
 #' either `"rubin"`, `"jackknife"` or "`bootstrap"`.
 get_pool_components <- function(x) {
     switch(x,
-           "rubin" = c("est", "df", "se"),
+           "rubin" = c("est", "se", "df"),
            "jackknife" = c("est"),
            "bootstrap" = c("est")
     )
@@ -177,11 +177,6 @@ pool_internal.rubin <- function(results, conf.level, alternative, type) {
     alpha <- 1 - conf.level
 
     v_com <- unique(dfs)
-
-    assert_that(
-        all(!is.na(ses)),
-        msg = "Standard Errors for Rubin's rules can not be NA"
-    )
 
     assert_that(
         length(v_com) == 1,
@@ -288,6 +283,16 @@ rubin_rules <- function(ests, ses, v_com) {
 
     M <- length(ests)
     est_point <- mean(ests)
+
+    if(all(is.na(ses))) {
+        return(
+            list(
+            est_point = est_point,
+            var_t = NA,
+            df = NA
+            )
+        )
+    }
 
     var_w <- mean(ses^2)
     var_b <- var(ests)
