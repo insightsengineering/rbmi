@@ -39,7 +39,7 @@ jobs:
       # inst/include/stan_meta_header.hpp  so we touch the .so object to push its time
       # stamp beyond that of the .hpp file
       - name: List compiled code
-        if: steps.cache.outputs.cache-hit == 'true' & runner.os != 'Windows'
+        if: steps.cache.outputs.cache-hit == 'true' && runner.os != 'Windows'
         run: touch src/*.so
 
 
