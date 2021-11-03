@@ -37,15 +37,21 @@ jobs:
       - name: List compiled code
         run: ls -l src/
     
-      - name: Compile Stan Code
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          devtools::load_all()
-        shell: Rscript {0}
+      - name: Upload Project
+        uses: actions/upload-artifact@main
+        with:
+          name: current-repo
+          path: .
+    
+      # - name: Compile Stan Code
+      #   if: steps.cache.outputs.cache-hit != 'true'
+      #   run: |
+      #     devtools::load_all()
+      #   shell: Rscript {0}
       
       
-      - name: Check
-        run: |
-          options(crayon.enabled = TRUE)
-          devtools::test(stop_on_failure=TRUE)
-        shell: Rscript {0}
+      # - name: Check
+      #   run: |
+      #     options(crayon.enabled = TRUE)
+      #     devtools::test(stop_on_failure=TRUE)
+      #   shell: Rscript {0}
