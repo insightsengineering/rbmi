@@ -34,8 +34,7 @@ jobs:
           path: src/*
           key: ${{ hashFiles('.github/meta.txt') }}-${{ hashFiles('inst/stan/MMRM.stan') }}
     
-      - name: Compile Stan Code
-        if: steps.cache.outputs.cache-hit != 'true'
+      - name: List compiled code
         run: ll src/
     
       - name: Compile Stan Code
