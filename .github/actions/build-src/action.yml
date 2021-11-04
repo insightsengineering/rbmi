@@ -30,9 +30,7 @@ runs:
     - name: Build if needed
       shell: bash
       run: |
-        echo ${{ runner.os }} ${{ steps.cache.outputs.cache-hit }}
-        echo ${{ steps.cache.outputs.cache-hit }} && "${{ runner.os }}" !=  'Windows'
-        if [[ ${{ steps.cache.outputs.cache-hit }} && "${{ runner.os }}" !=  'Windows' ]] ; then
+        if [[ ${{ steps.cache.outputs.cache-hit }} && "${{ runner.os }}" !=  "Windows" ]] ; then
             touch src/*.so
         else
             Rscript -e "pkgbuild::compile_dll()"
