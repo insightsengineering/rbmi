@@ -14,10 +14,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       
-      - name: My first step
-        uses: ./.github/actions/cache-src
+      - name: Build src
+        uses: ./.github/actions/build-src
       
-      - name: Check
+      - name: testthat
         run: |
           options(crayon.enabled = TRUE, cli.dynamic = FALSE)
           devtools::test(stop_on_failure = TRUE, reporter = testthat::CheckReporter)
