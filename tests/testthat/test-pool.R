@@ -198,7 +198,7 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     expect_equal(
         bayes$pars$p1,
         list(est = real_mu,
-             ci = as,numeric(c(NA, NA)),
+             ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
              pvalue = as.numeric(NA)),
         tolerance = 1e-2
