@@ -149,7 +149,7 @@ test_that("pool", {
 
 })
 
-test_that("Pool (Rubin) works as expected when se = NA in analysis model") {
+test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     set.seed(101)
 
     mu <- 0
@@ -203,7 +203,7 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model") {
              pvalue = as.numeric(NA)),
         tolerance = 1e-2
     )
-}
+})
 
 test_that("Can recover known jackknife with  H0 < 0 & H0 > 0", {
     jest <- c( 7, 3, 4 , 5 , 3 ,3 , 9)
