@@ -27,13 +27,13 @@ runs:
     # pkgbuild compares time stamps of *.so object to all header files including
     # inst/include/stan_meta_header.hpp  so we touch the .so object to push its time
     # stamp beyond that of the .hpp file
-    - name: List compiled code
-      if: steps.cache.outputs.cache-hit == 'true' && runner.os != 'Windows'
-      run: touch src/*.so
-    
-    
-    - name: Compile Stan Code
-      if: steps.cache.outputs.cache-hit != 'true'
+    - name: Build if needed
+      shell: bash
       run: |
-        pkgload::compile_dll()
-      shell: Rscript {0}
+        echo ${{ runner.os }} ${{ steps.cache.outputs.cache-hit }}
+        echo ${{ steps.cache.outputs.cache-hit }} && ${{ runner.os }} !=  'Windows'
+        if [[ ${{ steps.cache.outputs.cache-hit }} && ${{ runner.os }} !=  'Windows' ]] ;
+            touch src/*.so
+        else
+            Rscript -e "pkgbuild::compile_dll()""
+        fi
