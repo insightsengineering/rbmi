@@ -35,5 +35,5 @@ runs:
         if [[ ${{ steps.cache.outputs.cache-hit }} && ${{ runner.os }} !=  'Windows' ]] ;
             touch src/*.so
         else
-            Rscript -e "pkgbuild::compile_dll()""
+            Rscript -e "pkgbuild::compile_dll()"
         fi
