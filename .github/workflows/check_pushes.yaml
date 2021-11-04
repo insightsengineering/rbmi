@@ -11,44 +11,11 @@ jobs:
       image: gowerc/rbmi:r404
     steps:
       
-      
       - name: Checkout
         uses: actions/checkout@v2
       
-      
-      - name: Determine system/package state
-        run: |
-          sink(".github/meta.txt")
-          list(
-              version = version,
-              pkgs = installed.packages()[c("Rcpp", "rstan", "rstantools"), c("Version", "Package")]
-          )
-          sink()
-        shell: Rscript {0}
-    
-    
-      - name: Cache Compiled Stan Code
-        id: cache
-        uses: actions/cache@v2
-        with:
-          path: src/*
-          key: ${{ hashFiles('.github/meta.txt') }}-${{ hashFiles('inst/stan/MMRM.stan') }}
-    
-    
-      # pkgbuild compares time stamps of *.so object to all header files including
-      # inst/include/stan_meta_header.hpp  so we touch the .so object to push its time
-      # stamp beyond that of the .hpp file
-      - name: List compiled code
-        if: steps.cache.outputs.cache-hit == 'true' && runner.os != 'Windows'
-        run: touch src/*.so
-
-
-      - name: Compile Stan Code
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          pkgload::compile_dll()
-        shell: Rscript {0}
-      
+      - name: My first step
+        uses: ./.github/actions/cache-src
       
       - name: Check
         run: |
