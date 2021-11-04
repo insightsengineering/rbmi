@@ -327,7 +327,9 @@ get_jackknife_draws <- function(longdata, method) {
             optimizer = optimizer
         )
         if (sample$failed) {
-            stop("Jackknife sample failed")
+            stop(sprintf("Fitting MMRM to jackknife sample without subject with ID %s failed",
+                         ids[i])
+            )
         }
         samples[[i + 1]] <- sample
     }
