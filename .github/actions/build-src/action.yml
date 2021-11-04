@@ -31,7 +31,9 @@ runs:
       shell: bash
       run: |
         if [[ ${{ steps.cache.outputs.cache-hit }} && "${{ runner.os }}" !=  "Windows" ]] ; then
+            echo "No compilation needed!"
             touch src/*.so
         else
+            echo "Compilation needed!"
             Rscript -e "pkgbuild::compile_dll()"
         fi
