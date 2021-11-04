@@ -149,7 +149,61 @@ test_that("pool", {
 
 })
 
+test_that("Pool (Rubin) works as expected when se = NA in analysis model") {
+    set.seed(101)
 
+    mu <- 0
+    sd <- 1
+    n <- 2000
+    vals <- rnorm(n, mu, sd)
+    real_mu <- mean(vals)
+
+    runanalysis <- function(x) {
+        list("p1" = list(est = mean(x), se = NA, df = NA))
+    }
+
+    results_bayes <- as_analysis(
+        method = method_bayes(n_samples = 5000),
+        results =
+            lapply(
+                seq_len(5000),
+                function(x) runanalysis(sample(vals, size = n, replace = TRUE))
+            )
+    )
+    bayes <- pool(results_bayes)
+
+    expect_equal(
+        bayes$pars$p1,
+        list(est = real_mu,
+             ci = as.numeric(c(NA, NA)),
+             se = as.numeric(NA),
+             pvalue = as.numeric(NA)),
+        tolerance = 1e-2
+    )
+
+    runanalysis <- function(x) {
+        list("p1" = list(est = mean(x), se = NA, df = Inf))
+    }
+
+    results_bayes <- as_analysis(
+        method = method_bayes(n_samples = 5000),
+        results =
+            lapply(
+                seq_len(5000),
+                function(x) runanalysis(sample(vals, size = n, replace = TRUE))
+            )
+    )
+    bayes <- pool(results_bayes)
+
+    expect_equal(
+        bayes$pars$p1,
+        list(est = real_mu,
+             ci = as,numeric(c(NA, NA)),
+             se = as.numeric(NA),
+             pvalue = as.numeric(NA)),
+        tolerance = 1e-2
+    )
+}
 
 test_that("Can recover known jackknife with  H0 < 0 & H0 > 0", {
     jest <- c( 7, 3, 4 , 5 , 3 ,3 , 9)
