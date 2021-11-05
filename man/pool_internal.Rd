@@ -22,7 +22,7 @@ pool_internal(results, conf.level, alternative, type, D)
 
 \method{pool_internal}{bmlmi}(results, conf.level, alternative, type, D)
 
-\method{pool_internal}{rubin}(results, conf.level, alternative, type)
+\method{pool_internal}{rubin}(results, conf.level, alternative, type, D)
 }
 \arguments{
 \item{results}{A list of results i.e. the x$results element of an

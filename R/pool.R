@@ -34,6 +34,8 @@
 #' calculated, i.e. the standard errors will be `NA` in the object / data.frame.
 #' - `method_condmean(type = "jackknife")` Uses the standard jackknife variance formula;
 #' see Efron & Tibshirani (1994).
+#' - `method_bmlmi` Uses pooling procedure for Bootstrapped Maximum Likelihood MI (BMLMI).
+#' See Von Hippel & Bartlett (2021).
 #'
 #' @references
 #' Bradley Efron and Robert J Tibshirani. An introduction to the bootstrap. CRC
@@ -42,6 +44,9 @@
 #' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing
 #' Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. \[Section 5.4\]
 #'
+#' Von Hippel, Paul T and Bartlett, Jonathan W.
+#' Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021.
+
 #' @export
 pool <- function(
     results,
@@ -216,8 +221,8 @@ pool_internal.bmlmi <- function(
 #' are related to the second bootstrap sample and so on.
 #'
 #' @references
-#'   von Hippel, Paul T and Bartlett, Jonathan W (2021).
-#'   Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws.
+#'   Von Hippel, Paul T and Bartlett, Jonathan W8.
+#'   Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021
 get_ests_bmlmi <- function(ests, D) {
 
     B <- length(ests)/D
@@ -249,7 +254,7 @@ get_ests_bmlmi <- function(ests, D) {
 #' @importFrom stats qt pt
 #' @rdname pool_internal
 #' @export
-pool_internal.rubin <- function(results, conf.level, alternative, type) {
+pool_internal.rubin <- function(results, conf.level, alternative, type, D) {
     ests <- results$est
     ses <- results$se
     dfs <- results$df

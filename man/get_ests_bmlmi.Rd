@@ -25,6 +25,6 @@ random imputation of one bootstrap sample. The second set of D elements (i.e. fr
 are related to the second bootstrap sample and so on.
 }
 \references{
-von Hippel, Paul T and Bartlett, Jonathan W (2021).
-Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws.
+Von Hippel, Paul T and Bartlett, Jonathan W8.
+Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021
 }

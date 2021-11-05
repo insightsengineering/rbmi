@@ -156,7 +156,7 @@
 #' Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Reference-based
 #' imputation methods based on conditional mean imputation. \url{http://arxiv.org/abs/2109.11162}, 2021.
 #'
-#' von Hippel, Paul T and Bartlett, Jonathan W.
+#' Von Hippel, Paul T and Bartlett, Jonathan W.
 #' Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021.
 #'
 #' @export
