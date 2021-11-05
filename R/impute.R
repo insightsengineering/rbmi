@@ -50,6 +50,11 @@
 #' mean imputation on the original dataset whereas all subsequent imputed datasets refer to
 #' conditional mean imputations for bootstrap or jackknife samples, respectively, of the original data.
 #'
+#' - Bootstrapped Maximum Likelihood MI (BMLMI): it performs `D` random imputations of each bootstrapped
+#' dataset that was used to generate the corresponding parameter estimates in [draws()]. A total number of
+#' `B*D` imputed datasets is provided, where `B` is the number of bootstrapped datasets. Missing values
+#' are imputed by taking a random sample from the conditional imputation distribution.
+#'
 #' The `update_strategy` argument can be used to update the imputation strategy that was
 #' originally set via the `data_ice` option in [draws()]. This avoids having to re-run the [draws()]
 #' function when changing the imputation strategy in certain circumstances (as detailed below).
@@ -158,6 +163,8 @@ impute_internal <- function(draws, references, update_strategy, strategies, cond
     validate(draws$samples)
     samples_grouped <- transpose_samples(draws$samples)
 
+    n_imputations = ifelse(is.null(draws$method$D), 1, draws$method$D)
+
     imputes <- mapply(
         impute_data_individual,
         names(samples_grouped$index),
@@ -168,17 +175,34 @@ impute_internal <- function(draws, references, update_strategy, strategies, cond
             data = data,
             references = references,
             strategies = strategies,
-            condmean = condmean
+            condmean = condmean,
+            n_imputations = n_imputations
         ),
         SIMPLIFY = FALSE
     )
 
+    if(n_imputations > 1) {
+        imputes <- lapply(
+            imputes,
+            function(x) {
+                if (nrow(x$values[[1]]) == 0) {
+                    x$values <- rep(x$values, each = n_imputations)
+                } else {
+                    x$values <- unlist(lapply(x$values, function(y) split(y, seq(nrow(y)))), recursive = FALSE)
+                    names(x$values) <- NULL
+                }
+                return(x)
+            }
+        )
+    }
+
     x <- as_imputation(
-        imputations = untranspose_imputations(imputes, lapply(draws$samples, function(x) x$ids)),
+        imputations = untranspose_imputations(imputes, rep(lapply(draws$samples, function(x) x$ids), each = n_imputations)),
         data = data,
         method = draws$method,
         references = references
     )
+
     return(x)
 }
 
@@ -369,6 +393,9 @@ invert_indexes <- function(x) {
 #'
 #' @param condmean Logical. If `TRUE` will impute using the conditional mean values, if `FALSE`
 #' will impute by taking a random draw from the multivariate normal distribution.
+#'
+#' @param n_imputations When `condmean = FALSE` numeric representing the number of random imputations to be performed for each sample.
+#' Default is `1` (one random imputation per sample).
 impute_data_individual <- function(
     id,
     index,
@@ -377,13 +404,14 @@ impute_data_individual <- function(
     data,
     references,
     strategies,
-    condmean
+    condmean,
+    n_imputations = 1
 ) {
 
     # Define default return value if nothing needs to be imputed
     result <- list(
         id = id,
-        values = replicate(n = length(index), numeric(0))
+        values = replicate(n = length(index), as.matrix(numeric(0)))
     )
 
     id_data <- data$extract_by_id(id)
@@ -432,7 +460,7 @@ impute_data_individual <- function(
     if (condmean) {
         imputed_outcome <- lapply(conditional_parameters, function(x) as.vector(x$mu))
     } else {
-        imputed_outcome <- lapply(conditional_parameters, impute_outcome)
+        imputed_outcome <- lapply(conditional_parameters, function(x) impute_outcome(x, n_imputations))
     }
 
     result$values <- imputed_outcome
@@ -486,8 +514,12 @@ get_visit_distribution_parameters <- function(dat, beta, sigma) {
 #'
 #' @param conditional_parameters a list with elements `mu` and `sigma` which
 #' contain the mean vector and covariance matrix to sample from.
+#'
+#' @param n_imputations numeric representing the number of random samples from the multivariate
+#' normal distribution to be performed. Default is `1`.
+#'
 #' @importFrom stats rnorm
-impute_outcome <- function(conditional_parameters) {
+impute_outcome <- function(conditional_parameters, n_imputations = 1) {
 
     assert_that(
         all(!is.na(conditional_parameters$mu)),
@@ -495,12 +527,19 @@ impute_outcome <- function(conditional_parameters) {
         msg = "Sigma or Mu contain missing values"
     )
 
-    result <- sample_mvnorm(
-        conditional_parameters$mu,
-        conditional_parameters$sigma
+    result <- do.call(
+        rbind,
+        lapply(
+            seq.int(n_imputations),
+            function(x)
+            sample_mvnorm(
+                conditional_parameters$mu,
+                conditional_parameters$sigma
+            )
+        )
     )
 
-    return(as.vector(result))
+    return(result)
 }
 
 

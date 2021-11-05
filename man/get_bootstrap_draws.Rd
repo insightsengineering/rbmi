@@ -44,7 +44,7 @@ Each element of \code{samples} is a named list containing the following:
 }
 \item \code{fit}: if \code{method_bayes()} is chosen, returns the MCMC Stan fit object. Otherwise \code{NULL}.
 \item \code{n_failures}: absolute number of failures of the model fit.
-Relevant only for \code{method_condmean(type = "bootstrap")} and \code{method_approxbayes()}.
+Relevant only for \code{method_condmean(type = "bootstrap")}, \code{method_approxbayes()} and \code{method_bmlmi()}.
 \item \code{formula}: fixed effects formula object used for the model specification.
 }
 }

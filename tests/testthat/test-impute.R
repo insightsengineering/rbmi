@@ -658,7 +658,7 @@ test_that("impute can recover known values", {
     expect_length(x$imputations, 1)
     expect_length(x$imputations[[1]], 3)
     expect_equal(x$imputations[[1]][[1]]$values, c(9, 10))
-    expect_equal(x$imputations[[1]][[2]]$values, numeric(0))
+    expect_equal(x$imputations[[1]][[2]]$values, as.matrix(numeric(0)))
     expect_equal(x$imputations[[1]][[3]]$values, c(50))
     expect_equal(vapply(x$imputations[[1]], function(x) x$id, character(1)), c("1", "2", "4"))
 
@@ -671,7 +671,7 @@ test_that("impute can recover known values", {
     expect_equal(x$imputations[[1]][[1]]$values, 50)
     expect_equal(x$imputations[[1]][[2]]$values, 50)
     expect_equal(x$imputations[[1]][[3]]$values, c(9, 10))
-    expect_equal(x$imputations[[1]][[4]]$values, numeric(0))
+    expect_equal(x$imputations[[1]][[4]]$values, as.matrix(numeric(0)))
     expect_equal(vapply(x$imputations[[1]], function(x) x$id, character(1)), c("4", "4", "1", "3"))
 
 
@@ -692,11 +692,11 @@ test_that("impute can recover known values", {
     expect_equal(x$imputations[[1]][[1]]$values, 50)
     expect_equal(x$imputations[[1]][[2]]$values, 50)
     expect_equal(x$imputations[[1]][[3]]$values, c(9, 10))
-    expect_equal(x$imputations[[1]][[4]]$values, numeric(0))
+    expect_equal(x$imputations[[1]][[4]]$values, as.matrix(numeric(0)))
     expect_equal(vapply(x$imputations[[1]], function(x) x$id, character(1)), c("4", "4", "1", "3"))
 
     expect_length(x$imputations[[2]], 3)
-    expect_equal(x$imputations[[2]][[1]]$values, numeric(0))
+    expect_equal(x$imputations[[2]][[1]]$values, as.matrix(numeric(0)))
     expect_equal(x$imputations[[2]][[2]]$values, c(12, 11))
     expect_equal(x$imputations[[2]][[3]]$values, c(27))
     expect_equal(vapply(x$imputations[[2]], function(x) x$id, character(1)), c("2", "1", "4"))
@@ -734,7 +734,7 @@ test_that("impute can recover known values", {
     expect_length(x$imputations, 1)
     expect_length(x$imputations[[1]], 3)
     expect_equal(x$imputations[[1]][[1]]$values, c(9, 18))
-    expect_equal(x$imputations[[1]][[2]]$values, numeric(0))
+    expect_equal(x$imputations[[1]][[2]]$values, as.matrix(numeric(0)))
     expect_equal(x$imputations[[1]][[3]]$values, c(50))
     expect_equal(vapply(x$imputations[[1]], function(x) x$id, character(1)), c("1", "2", "4"))
 })

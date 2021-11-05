@@ -295,14 +295,15 @@ as_analysis <- function(results, method, delta = NULL, fun = NULL, fun_name = NU
             method$type == "jackknife",
             "jackknife",
             "bootstrap"
-        )
+        ),
+        bmlmi = "bmlmi"
     )
 
     assert_that(
         is.list(results),
         length(next_class) == 1,
         is.character(next_class),
-        next_class %in% c("jackknife", "bootstrap", "rubin")
+        next_class %in% c("jackknife", "bootstrap", "rubin", "bmlmi")
     )
 
     x <- list(
@@ -364,8 +365,8 @@ validate.analysis <- function(x, ...) {
     next_class <- class(x$results)[[1]]
 
     assert_that(
-        next_class %in% c("jackknife", "bootstrap", "rubin"),
-        msg = "`results` must be of class 'jackknife', 'bootstrap' or 'rubin'"
+        next_class %in% c("jackknife", "bootstrap", "rubin", "bmlmi"),
+        msg = "`results` must be of class 'jackknife', 'bootstrap', 'rubin' or 'bmlmi'"
     )
 
     if (next_class %in% c("bootstrap", "rubin")) {
@@ -404,6 +405,11 @@ validate.bootstrap <- function(x, ...) {
 #' @export
 validate.rubin <- function(x, ...) {
     validate_analyse_pars(x, get_pool_components("rubin"))
+}
+
+#' @export
+validate.bmlmi <- function(x, ...) {
+    validate_analyse_pars(x, get_pool_components("bmlmi"))
 }
 
 

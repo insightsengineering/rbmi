@@ -77,7 +77,8 @@ pool <- function(
         function(x, ...) pool_internal(as_class(x, pool_type), ...),
         conf.level = conf.level,
         alternative = alternative,
-        type = type
+        type = type,
+        D = results$method$D
     )
 
     if (pool_type == "bootstrap") {
@@ -104,12 +105,13 @@ pool <- function(
 #' depending on what analysis method was specified.
 #'
 #' @param x Character name of the analysis method, must one of
-#' either `"rubin"`, `"jackknife"` or "`bootstrap"`.
+#' either `"rubin"`, `"jackknife"`, "`bootstrap"` or `"bmlmi"`.
 get_pool_components <- function(x) {
     switch(x,
            "rubin" = c("est", "df", "se"),
            "jackknife" = c("est"),
-           "bootstrap" = c("est")
+           "bootstrap" = c("est"),
+           "bmlmi" = c("est")
     )
 }
 
@@ -122,10 +124,11 @@ get_pool_components <- function(x) {
 #' @inheritParams pool
 #' @param results A list of results i.e. the x$results element of an
 #' analyse object created by [analyse()]).
+#' @param D numeric representing the number of imputations between each bootstrap sample in the BMLMI method.
 #'
 #' @name pool_internal
 #' @export
-pool_internal <- function(results, conf.level, alternative, type) {
+pool_internal <- function(results, conf.level, alternative, type, D) {
     UseMethod("pool_internal")
 }
 
@@ -133,7 +136,7 @@ pool_internal <- function(results, conf.level, alternative, type) {
 #' @importFrom stats qnorm pnorm
 #' @rdname pool_internal
 #' @export
-pool_internal.jackknife <- function(results, conf.level, alternative, type) {
+pool_internal.jackknife <- function(results, conf.level, alternative, type, D) {
     alpha <- 1 - conf.level
     ests <- results$est
     est_point <- ests[1]
@@ -153,7 +156,8 @@ pool_internal.bootstrap <- function(
     results,
     conf.level,
     alternative,
-    type = c("percentile", "normal")
+    type = c("percentile", "normal"),
+    D
 ) {
     type <- match.arg(type)
     bootfun <- switch(
@@ -168,6 +172,81 @@ pool_internal.bootstrap <- function(
 
 
 #' @importFrom stats qt pt var
+#' @rdname pool_internal
+#' @export
+pool_internal.bmlmi <- function(
+    results,
+    conf.level,
+    alternative,
+    type,
+    D) {
+
+    ests <- results$est
+    alpha <- 1 - conf.level
+
+    pooled_est <- get_ests_bmlmi(ests, D)
+
+    ret <- parametric_ci(
+        point = pooled_est$est_point,
+        se = sqrt(pooled_est$est_var),
+        alpha = alpha,
+        alternative = alternative,
+        qfun = qt,
+        pfun = pt,
+        df = pooled_est$df
+    )
+
+    return(ret)
+}
+
+
+#' @title Von Hippel and Bartlett pooling of BMLMI method
+#'
+#' @description Compute pooled point estimates, standard error and degrees of freedom
+#' according to the Von Hippel and Bartlett formula for Bootstrapped Maximum Likelihood
+#' Multiple Imputation (BMLMI).
+#'
+#' @param ests numeric vector containing estimates from the analysis of the imputed datasets.
+#' @param D numeric representing the number of imputations between each bootstrap sample in the BMLMI method.
+#'
+#' @return a list containing point estimate, standard error and degrees of freedom.
+#'
+#' @details `ests` must be provided in the following order: the firsts D elements are related to analyses from
+#' random imputation of one bootstrap sample. The second set of D elements (i.e. from D+1 to 2*D)
+#' are related to the second bootstrap sample and so on.
+#'
+#' @references
+#'   von Hippel, Paul T and Bartlett, Jonathan W (2021).
+#'   Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws.
+get_ests_bmlmi <- function(ests, D) {
+
+    B <- length(ests)/D
+
+    ests <- matrix(ests, nrow = B, ncol = D, byrow = TRUE)
+
+    est_point <- mean(ests)
+
+    SSW <- sum((ests - rowMeans(ests))^2)
+    SSB <- D * sum((rowMeans(ests) - est_point)^2)
+    MSW <- SSW/(B * (D - 1))
+    MSB <- SSB/(B - 1)
+    resVar <- MSW
+    randIntVar <- (MSB - MSW)/D
+
+    est_var <- (1 + 1/B) * randIntVar + resVar/(B * D)
+    df <- (est_var^2)/((((B + 1)/(B * D))^2 *
+                        MSB^2/(B - 1)) + MSW^2/(B * D^2 * (D - 1)))
+    df <- max(3, df)
+
+    ret_obj <- list(
+        est_point = est_point,
+        est_var = est_var,
+        df = df
+    )
+    return(ret_obj)
+}
+
+#' @importFrom stats qt pt
 #' @rdname pool_internal
 #' @export
 pool_internal.rubin <- function(results, conf.level, alternative, type) {
@@ -284,6 +363,7 @@ rubin_df <- function(v_com, var_b, var_t, M) {
 #'
 #' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing
 #' Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. \[Section 5.4\]
+#' @importFrom stats var
 rubin_rules <- function(ests, ses, v_com) {
 
     M <- length(ests)
