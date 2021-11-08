@@ -225,7 +225,19 @@ pool_internal.bmlmi <- function(
 #'   Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021
 get_ests_bmlmi <- function(ests, D) {
 
-    B <- length(ests)/D
+    l <- length(ests)
+
+    assert_that(
+        l %% D == 0,
+        msg = "length of `ests` must be a multiple of `D`"
+    )
+
+    assert_that(
+        D > 1,
+        msg = "`D` must be a numeric larger than 1"
+    )
+
+    B <- l/D
 
     ests <- matrix(ests, nrow = B, ncol = D, byrow = TRUE)
 

@@ -46,6 +46,37 @@ test_that("Rubin's rules", {
 
 
 
+test_that("get_ests_bmlmi", {
+
+    ests <- rnorm(100)
+    D <- 5
+
+    res <- get_ests_bmlmi(ests, D)
+
+    expect_true(
+        is.list(res) &
+            length(res) == 3 &
+            all(!is.na(res)) &
+            all(!is.null(res)) &
+            all(sapply(res, is.numeric)) &
+            all(sapply(res, function(x) length(x) == 1)) &
+            res$est_point == mean(ests)
+    )
+
+    D <- 3
+    expect_error(
+        get_ests_bmlmi(ests, D),
+        regexp = "length of `ests` must be a multiple of `D`"
+    )
+
+    D <- 1
+    expect_error(
+        get_ests_bmlmi(ests, D),
+        regexp = "`D` must be a numeric larger than 1"
+    )
+
+})
+
 
 test_that("pool", {
     set.seed(101)

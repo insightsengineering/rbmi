@@ -184,6 +184,11 @@ method_bmlmi <- function(
 ) {
     covariance <- match.arg(covariance)
 
+    assert_that(
+        D > 1,
+        msg = "`D` must be a numeric larger than 1"
+    )
+
     x <- list(
         covariance = covariance,
         threshold = threshold,
