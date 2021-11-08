@@ -116,7 +116,7 @@ test_that("pool", {
         ci <- pars$ci
 
 
-            expect_true(real_ci[1] < ci[1] & real_ci[2] > ci[2])
+        expect_true(real_ci[1] < ci[1] & real_ci[2] > ci[2])
 
         expect_true((real_mu - abs(real_mu * 0.01)) < pars$est)
         expect_true((real_mu + abs(real_mu * 0.01)) > pars$est)
