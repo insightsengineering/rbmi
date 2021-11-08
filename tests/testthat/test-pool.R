@@ -152,6 +152,117 @@ test_that("pool", {
 })
 
 
+test_that("pool BMLMI estimates", {
+    set.seed(100)
+
+    mu <- 0
+    sd <- 1
+    n <- 500
+    B <- 1000
+    D <- 10
+
+    data <- rnorm(n, mu, sd)
+
+    ############ NO MISSING VALUES
+
+    boot_data <- lapply(seq.int(B), function(x) sample(data, size = n, replace = TRUE))
+    vals <- unlist(lapply(boot_data, function(x) lapply(seq.int(D), function(y)
+    {
+        mu_est <- mean(x, na.rm = TRUE)
+        sd_est <- sd(x, na.rm = TRUE)
+        x[is.na(x)] <- rnorm(sum(is.na(x)), mu_est, sd_est) # impute
+        return(x)
+    }
+    )
+    ), recursive = FALSE)
+
+    runanalysis <- function(x) {
+        list("p1" = list(est = mean(x), se = sqrt(var(x) / length(x)), df = NA))
+    }
+
+
+    ########  BMLMI
+    results_bmlmi <- as_analysis(
+        method = method_bmlmi(B = B, D = D),
+        results =
+            lapply(
+                vals,
+                runanalysis
+            )
+    )
+
+    real_mu <- mean(sapply(vals, mean))
+
+    means_per_boot <- lapply(split(vals, rep(seq.int(B), each = D)), function(x) sapply(x, function(y) mean(y)))
+    var_within <- mean(sapply(means_per_boot, function(x) var(x))) # within bootstrap variability (0 if no missing values)
+    real_se <- sqrt(mean(sapply(vals[seq(1, B*D, by = D)], function(x) var(x)/n)) + var_within)
+
+    # real_se is the sum of the within and between bootstrap variability.
+    # It should be similar to the se estimate from the bmlmi pooling method
+    # (exact equality is not proven)
+
+    pooled_res <- pool(results_bmlmi)
+
+    expect_results <- function(res, real_mu, real_se) {
+        conf <- res$conf.level
+
+        pars <- res$pars[[1]]
+
+        real_ci <- real_mu + c(-1, 1) * qnorm( (1 - (1 - conf) / 2) * 1.005) * real_se
+        ci <- pars$ci
+
+        expect_true(real_ci[1] < ci[1] & real_ci[2] > ci[2])
+
+        expect_true((real_mu - abs(real_mu * 0.01)) < pars$est)
+        expect_true((real_mu + abs(real_mu * 0.01)) > pars$est)
+
+    }
+
+    expect_results(pooled_res, real_mu = real_mu, real_se = real_se)
+
+
+
+    ############### WITH MISSING VALUES
+
+    data[1:ceiling(n/5)] <- NA # 20% missing values
+    boot_data <- lapply(seq.int(B), function(x) sample(data, size = n, replace = TRUE))
+    vals <- unlist(lapply(boot_data, function(x) lapply(seq.int(D), function(y)
+    {
+        mu_est <- mean(x, na.rm = TRUE)
+        sd_est <- sd(x, na.rm = TRUE)
+        x[is.na(x)] <- rnorm(sum(is.na(x)), mu_est, sd_est) # impute
+        return(x)
+    }
+    )
+    ), recursive = FALSE)
+
+
+    ########  BMLMI
+    results_bmlmi <- as_analysis(
+        method = method_bmlmi(B = B, D = D),
+        results =
+            lapply(
+                vals,
+                runanalysis
+            )
+    )
+
+    real_mu <- mean(sapply(vals, mean))
+
+    means_per_boot <- lapply(split(vals, rep(seq.int(B), each = D)), function(x) sapply(x, function(y) mean(y)))
+    var_within <- mean(sapply(means_per_boot, function(x) var(x))) # within bootstrap variability
+    real_se <- sqrt(mean(sapply(vals[seq(1, B*D, by = D)], function(x) var(x)/n)) + var_within)
+
+    # real_se should be similar to the se estimate from the bmlmi pooling method
+    # (exact equality is not proven)
+
+    pooled_res <- pool(results_bmlmi)
+
+    expect_results(pooled_res, real_mu = real_mu, real_se = real_se)
+    expect_true(sd/sqrt(n) < pooled_res$pars$p1$se)
+
+})
+
 
 
 
