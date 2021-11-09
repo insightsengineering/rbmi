@@ -45,6 +45,38 @@ test_that("Rubin's rules", {
 })
 
 
+test("pval_percentile", {
+
+    est <- c(0,rep(1,3))
+    pvals <- pval_percentile(est)
+    expected <- c("pval_greater" = 0.2, "pval_less" = 0.8)
+    expect_equal(pvals, expected)
+
+    est <- rep(0,4)
+    pvals <- pval_percentile(est)
+    expected <- c("pval_greater" = 1, "pval_less" = 1)
+    expect_equal(pvals, expected)
+
+    est <- c(0, rep(-1,3))
+    pvals <- pval_percentile(est)
+    expected <- c("pval_greater" = 0.8, "pval_less" = 0.2)
+    expect_equal(pvals, expected)
+
+    est <- rep(1,4)
+    pvals <- pval_percentile(est)
+    expected <- c("pval_greater" = 0, "pval_less" = 1)
+    expect_equal(pvals, expected)
+
+    est <- rep(-1,4)
+    pvals <- pval_percentile(est)
+    expected <- c("pval_greater" = 1, "pval_less" = 0)
+    expect_equal(pvals, expected)
+
+    set.seed(101)
+    est <- rnorm(10000)
+    pvals <- pval_percentile(est)
+    expect_true(all(pvals > 0.485 & pvals < 0.515)) # the "true" p-values are 0.5
+})
 
 
 test_that("pool", {
