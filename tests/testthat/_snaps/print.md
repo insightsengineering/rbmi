@@ -90,93 +90,6 @@
         ---------------------------------------------------
       
 
-# print - Bayes
-
-    Code
-      print(drawobj_b)
-    Output
-      
-      Draws Object
-      ------------
-      Number of Samples: 11
-      Number of Failed Samples: 0
-      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
-      Imputation Type: random
-      Method:
-          Type: Bayes
-          burn_in: 200
-          burn_between: 2
-          same_cov: TRUE
-          n_samples: 11
-          verbose: FALSE
-          seed: 859
-      
-
----
-
-    Code
-      print(impute_b)
-    Output
-      
-      Imputation Object
-      -----------------
-      Number of Imputed Datasets: 11
-      Fraction of Missing Data (Original Dataset):
-          visit_1:   0%
-          visit_2:   0%
-          visit_3:  54%
-      References:
-          TRT     -> TRT
-          Placebo -> Placebo
-      
-
----
-
-    Code
-      print(analysis_b)
-    Output
-      
-      Analysis Object
-      ---------------
-      Number of Results: 11
-      Analysis Function: rbmi::ancova
-      Delta Applied: TRUE
-      Analysis Estimates:
-          trt_visit_1
-          lsm_ref_visit_1
-          lsm_alt_visit_1
-          trt_visit_3
-          lsm_ref_visit_3
-          lsm_alt_visit_3
-      
-
----
-
-    Code
-      print(pool_b)
-    Output
-      
-      Pool Object
-      -----------
-      Number of Results Combined: 11
-      Method: rubin
-      Confidence Level: 0.95
-      Alternative: two.sided
-      
-      Results:
-      
-        ========================================================
-            parameter      est     se     lci     uci     pval  
-        --------------------------------------------------------
-           trt_visit_1    7.313   0.418  6.482   8.143   <0.001 
-         lsm_ref_visit_1  7.204   0.274   6.66   7.748   <0.001 
-         lsm_alt_visit_1  14.516  0.315  13.89   15.143  <0.001 
-           trt_visit_3    7.943   0.187  7.561   8.326   <0.001 
-         lsm_ref_visit_3  6.825   0.141  6.529   7.122   <0.001 
-         lsm_alt_visit_3  14.769  0.154  14.448  15.09   <0.001 
-        --------------------------------------------------------
-      
-
 # print - condmean (bootstrap)
 
     Code
@@ -255,19 +168,19 @@
       
       Results:
       
-        ====================================================
-            parameter      est     se   lci    uci    pval  
-        ----------------------------------------------------
-           trt_visit_1    7.584   <NA>  -Inf  8.645   0.143 
-         lsm_ref_visit_1  6.937   <NA>  -Inf  7.599   0.143 
-         lsm_alt_visit_1  14.522  <NA>  -Inf  16.244  0.143 
-           trt_visit_2    8.356   <NA>  -Inf  9.087   0.143 
-         lsm_ref_visit_2  6.583   <NA>  -Inf  6.937   0.143 
-         lsm_alt_visit_2  14.94   <NA>  -Inf  16.025  0.143 
-           trt_visit_3    4.397   <NA>  -Inf  6.073   0.143 
-         lsm_ref_visit_3  6.891   <NA>  -Inf   7.39   0.143 
-         lsm_alt_visit_3  11.287  <NA>  -Inf  13.464  0.143 
-        ----------------------------------------------------
+        =====================================================
+            parameter      est     se   lci    uci     pval  
+        -----------------------------------------------------
+           trt_visit_1    7.584   <NA>  -Inf  8.645   <0.001 
+         lsm_ref_visit_1  6.937   <NA>  -Inf  7.599   <0.001 
+         lsm_alt_visit_1  14.522  <NA>  -Inf  16.244  <0.001 
+           trt_visit_2    8.356   <NA>  -Inf  9.087   <0.001 
+         lsm_ref_visit_2  6.583   <NA>  -Inf  6.937   <0.001 
+         lsm_alt_visit_2  14.94   <NA>  -Inf  16.025  <0.001 
+           trt_visit_3    4.397   <NA>  -Inf  6.073   <0.001 
+         lsm_ref_visit_3  6.891   <NA>  -Inf   7.39   <0.001 
+         lsm_alt_visit_3  11.287  <NA>  -Inf  13.464  <0.001 
+        -----------------------------------------------------
       
 
 ---

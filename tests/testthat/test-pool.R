@@ -45,7 +45,7 @@ test_that("Rubin's rules", {
 })
 
 
-test("pval_percentile", {
+test_that("pval_percentile", {
 
     est <- c(0,rep(1,3))
     pvals <- pval_percentile(est)
@@ -219,7 +219,8 @@ test_that("Can recover known values using bootstrap percentiles", {
     best <- c(1,-1,-2,3,2,1,-4,3,2)
 
     x <- quantile(best[-1], 0.9, type = 6)[[1]]
-    pval <- (sum(best[-1] < 0) + 1 ) / length(best)
+    pval <- pval_percentile(best[-1])[1]
+    names(pval) <- NULL
     expected <- list(
         est = best[1],
         ci = c(-Inf, x),
@@ -237,7 +238,8 @@ test_that("Can recover known values using bootstrap percentiles", {
 
 
     x <- quantile(best[-1], 0.1, type = 6)[[1]]
-    pval <- (sum(best[-1] > 0) + 1 ) / length(best)
+    pval <- pval_percentile(best[-1])[2]
+    names(pval) <- NULL
     expected <- list(
         est = best[1],
         ci = c(x, Inf),
@@ -256,12 +258,13 @@ test_that("Can recover known values using bootstrap percentiles", {
 
     x1 <- quantile(best[-1], 0.10, type = 6)[[1]]
     x2 <- quantile(best[-1], 0.90, type = 6)[[1]]
-    pval <- (sum(best[-1] < 0) + 1 ) / length(best)
+    pval <- pval_percentile(best[-1])
+    names(pval) <- NULL
     expected <- list(
         est = best[1],
         ci = c(x1, x2),
         se = NA,
-        pvalue = pval * 2
+        pvalue = min(pval) * 2
     )
     observed <- pool_internal.bootstrap(
         list(est = best),
@@ -321,7 +324,7 @@ test_that("Results of bootstrap percentiles when n_samples = 0 or 1", {
         est = best[1],
         ci = c(-Inf, 3),
         se = NA,
-        pvalue = 0.5
+        pvalue = 0
     )
     observed <- pool_internal.bootstrap(
         list(est = best),
@@ -353,7 +356,7 @@ test_that("Results of bootstrap percentiles when n_samples = 0 or 1", {
         est = best[1],
         ci = c(3, 3),
         se = NA,
-        pvalue = 1
+        pvalue = 0
     )
     observed <- pool_internal.bootstrap(
         list(est = best),
@@ -370,12 +373,11 @@ test_that("Bootstrap percentile does not return two-sided p-value larger than 1 
 
     x1 <- quantile(best[-1], 0.10, type = 6)[[1]]
     x2 <- quantile(best[-1], 0.90, type = 6)[[1]]
-    pval <- (sum(best[-1] < 0) + 1 ) / length(best)
     expected <- list(
         est = best[1],
         ci = c(x1, x2),
         se = NA,
-        pvalue = 1 # 2*pval is larger than one in this case: (n_samples+2)/(n_samples+1)
+        pvalue = 1
     )
     observed <- pool_internal.bootstrap(
         list(est = best),

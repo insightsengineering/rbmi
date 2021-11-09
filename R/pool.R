@@ -344,6 +344,7 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
     pvals <- pval_percentile(
         est = est
     )
+    names(pvals) <- NULL
 
     index <- switch(
         alternative,
