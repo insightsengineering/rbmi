@@ -657,3 +657,140 @@ test_that("Multiple imputation references / groups work as expected (end to end 
 })
 
 
+
+
+test_that("rbmi works for one arm trials", {
+
+    skip_if_not(is_nightly())
+
+    # ancova cannot be applied for 1 arm trial. Use a custom analysis function
+    myanalysis <- function(data,...) {
+
+        data_anal <- data[data[[vars$visit]] == "visit_3",][[vars$outcome]]
+        res <- list(
+            trt = list(
+                est = mean(data_anal),
+                se = sd(data_anal)/sqrt(length(data_anal)),
+                df = length(data_anal) - 1
+            )
+        )
+        return(res)
+    }
+
+    vars <- set_vars(
+        outcome = "outcome",
+        visit = "visit",
+        subjid = "id",
+        group = "group",
+        strata = "group",
+        covariates = c("age", "sex", "visit")
+    )
+
+    vars_wrong <- vars
+    vars_wrong$covariates <- c("age", "sex", "group*visit")
+
+    vars_wrong2 <- vars
+    vars_wrong2$covariates <- c("age", "sex", "group", "visit")
+
+    set.seed(169)
+    dat_full <- simulate_data(n = 100, sd = 1e-1*c(3,5,7)) %>% as_tibble()
+
+    ## Introduce missingness
+    dat <- dat_full
+    missing_index_vis2 <- rbinom(nrow(dat), 1, 0.3) == 1 & dat$visit == "visit_2"
+    missing_index_vis3 <- rbinom(nrow(dat), 1, 0.4) == 1 & dat$visit == "visit_3"
+    dat[missing_index_vis2, "outcome"] <- NA_real_
+    dat[missing_index_vis3, "outcome"] <- NA_real_
+
+    # select subjects belonging to one group only
+    dat <- dat[dat$group == "A",]
+
+    # re-factor
+    dat$group_wrong <- dat$group # 2 levels factor with only "A" observed
+    dat$id <- factor(dat$id, levels = unique(dat$id))
+    dat$group <- factor(dat$group, levels = unique(dat$group))
+
+    vars_wrong3 <- vars
+    vars_wrong3$group <- vars_wrong3$strata <- "group_wrong"
+
+    dat_ice <- dat %>%
+        arrange(id, visit) %>%
+        filter(is.na(outcome)) %>%
+        group_by(id) %>%
+        slice(1) %>%
+        ungroup() %>%
+        select(id, visit) %>%
+        mutate(strategy = "MAR")
+
+    runtest <- function(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method) {
+        draw_obj <- draws(
+            data = dat,
+            data_ice = dat_ice,
+            vars = vars,
+            method = method
+        )
+
+        expect_error(draws(
+            data = dat,
+            data_ice = dat_ice,
+            vars = vars_wrong,
+            method = method
+        ))
+
+        expect_error(draws(
+            data = dat,
+            data_ice = dat_ice,
+            vars = vars_wrong2,
+            method = method
+        ))
+
+        expect_error(draws(
+            data = dat,
+            data_ice = dat_ice,
+            vars = vars_wrong3,
+            method = method
+        ))
+
+        impute_obj <- impute(
+            draw_obj,
+            references = c("A" = "A")
+        )
+
+        vars$covariates <- c("age", "sex")
+        anl_obj <- analyse(
+            imputations = impute_obj,
+            vars = vars,
+            fun = myanalysis
+        )
+
+        expect_error(analyse(
+            imputations = impute_obj,
+            vars = vars_anal,
+            fun = ancova
+        ))
+
+        if(class(anl_obj$method)[2] == "condmean") {
+            pooled <- pool(anl_obj, type = "normal")
+        } else {
+            pooled <- pool(anl_obj)
+        }
+        expect_length(pooled$pars$trt, 4)
+        expect_true(all(!is.null(unlist(pooled$pars$trt))))
+        expect_true(all(!is.na(unlist(pooled$pars$trt))))
+        expect_true(all(is.double(unlist(pooled$pars$trt))))
+
+    }
+
+    method <- method_condmean(type = "jackknife")
+    runtest(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method)
+
+    method <- method_bayes(n_samples = 150, burn_between = 10, verbose = FALSE)
+    runtest(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method)
+
+    method <- method_approxbayes(n_samples = 3)
+    runtest(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method)
+
+    method <- method_condmean(type = "bootstrap", n_samples = 2)
+    runtest(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method)
+
+})

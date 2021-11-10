@@ -12,7 +12,8 @@ impute_data_individual(
   data,
   references,
   strategies,
-  condmean
+  condmean,
+  is_multi_groups
 )
 }
 \arguments{
@@ -37,6 +38,9 @@ Default = \code{getStrategies()}. See \code{\link[=getStrategies]{getStrategies(
 
 \item{condmean}{Logical. If \code{TRUE} will impute using the conditional mean values, if \code{FALSE}
 will impute by taking a random draw from the multivariate normal distribution.}
+
+\item{is_multi_groups}{Logical. If \code{TRUE}, the \code{vars$group} variable is added in the model formula.
+It should be \code{TRUE} if \code{vars$group} has at least 2 levels, \code{FALSE} otherwise.}
 }
 \description{
 This function performs the imputation for a single subject at a time implementing the

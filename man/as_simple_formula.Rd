@@ -4,10 +4,13 @@
 \alias{as_simple_formula}
 \title{Convert an \code{ivars} object into a formula}
 \usage{
-as_simple_formula(vars)
+as_simple_formula(vars, is_multi_groups)
 }
 \arguments{
 \item{vars}{an \code{ivars} object as created by \code{\link[=set_vars]{set_vars()}}}
+
+\item{is_multi_groups}{logical. If \code{TRUE}, the \code{vars$group} variable is added in the model formula.
+It should be \code{TRUE} if \code{vars$group} has at least 2 levels, \code{FALSE} otherwise.}
 }
 \value{
 A formula

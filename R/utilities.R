@@ -53,14 +53,25 @@ has_class <- function(x, cls) {
 #' ```
 #'
 #' @param vars an `ivars` object as created by [set_vars()]
+#' @param is_multi_groups logical. If `TRUE`, the `vars$group` variable is added in the model formula.
+#' It should be `TRUE` if `vars$group` has at least 2 levels, `FALSE` otherwise.
 #' @return
 #' A formula
-as_simple_formula <- function(vars) {
-    variables <- c(
-        vars$group,
-        vars$visit,
-        vars$covariates
+as_simple_formula <- function(vars, is_multi_groups) {
+
+    variables <- ife(
+        is_multi_groups,
+        c(
+            vars$group,
+            vars$visit,
+            vars$covariates
+        ),
+        c(
+            vars$visit,
+            vars$covariates
+        )
     )
+
     frm <- stats::as.formula(
         paste0(
             vars$outcome,
