@@ -160,7 +160,7 @@ ancova_single <- function(data, outcome, group, covariates) {
 
     data2 <- data[, c(extract_covariates(covariates), outcome, group)]
 
-    frm <- as_simple_formula(list(group = group, outcome = outcome, covariates = covariates))
+    frm <- as_simple_formula(list(group = group, outcome = outcome, covariates = covariates), is_multi_groups = TRUE)
 
     mod <- lm(formula = frm, data = data2)
 
