@@ -420,6 +420,38 @@ test_that("Strategies", {
         ld$update_strategies(dat_ice),
         "from non-MAR to MAR"
     )
+
+
+    # check that warning when passing from non-MAR to MAR is unique
+
+    dat_ice <- tribble(
+        ~visit, ~subjid, ~strategy,
+        "Visit 1", "1",  "ABC",
+        "Visit 1",  "2",  "ABC",
+        "Visit 3",  "3",  "XYZ"
+    )
+
+    ld$set_strategies(dat_ice)
+
+    dat_ice <- tribble(
+        ~subjid, ~strategy,
+        "2",  "MAR",
+        "3",  "MAR",
+    )
+
+    withWarnings <- function(expr) {
+        myWarnings <- NULL
+        wHandler <- function(w) {
+            myWarnings <<- c(myWarnings, list(w))
+            invokeRestart("muffleWarning")
+        }
+        withCallingHandlers(expr, warning = wHandler)
+        return(myWarnings)
+    }
+
+    catched_warnings <- withWarnings(ld$update_strategies(dat_ice))
+    expect_length(catched_warnings, 1)
+    expect_true(grepl("from non-MAR to MAR", catched_warnings))
 })
 
 
