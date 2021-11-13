@@ -9,11 +9,12 @@ on:
       - develop
     paths:
       - 'misc/docker/**'
-  pull-request:
+  pull_request:
     branches:
       - develop
     paths:
       - 'misc/docker/**'
+  workflow_dispatch:
 
 
 jobs:
