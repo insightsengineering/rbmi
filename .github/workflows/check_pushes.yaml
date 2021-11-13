@@ -1,6 +1,9 @@
 
 
-on: [push]
+on:
+  push:
+    paths-ignore:
+      - 'misc/**'
 
 name: Check Pushes
 
