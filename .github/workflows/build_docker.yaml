@@ -80,7 +80,9 @@ jobs:
           context: ./misc/docker
           push: ${{ github.event_name == 'push' }}
           tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.config.tag }}
-          build-args: IMAGE=${{ matrix.config.src_image }},CRANURL=${{ matrix.config.cran_url }}
+          build-args: |
+            IMAGE=${{ matrix.config.src_image }}
+            CRANURL=${{ matrix.config.cran_url }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
