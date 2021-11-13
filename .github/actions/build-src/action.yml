@@ -17,7 +17,7 @@ runs:
     
     
     - name: Cache Compiled Stan Code
-      id: cache
+      id: cache-pkgs
       uses: actions/cache@v2
       with:
         path: src/*
@@ -30,7 +30,7 @@ runs:
     - name: Build if needed
       shell: bash
       run: |
-        if [[ ${{ steps.cache.outputs.cache-hit }} && "${{ runner.os }}" !=  "Windows" ]] ; then
+        if [[ ${{ steps.cache-pkgs.outputs.cache-hit == 'true' }} && "${{ runner.os }}" !=  "Windows" ]] ; then
             echo "No compilation needed!"
             touch src/*.so
         else
