@@ -2,18 +2,20 @@
 
 on:
   pull_request:
+    paths-ignore:
+      - 'misc/**'
     branches:
       - main
       - master
 
-name: Check Master
+name: Check Pull Requests (Master)
 
 jobs:
 
-  R-CMD-Check-develop:
+  rcmdcheck:
 
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         config:
           - { R: "devel", os: "ubuntu-20.04", pkg_repo: "https://cran.rstudio.com/"}
@@ -25,6 +27,7 @@ jobs:
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_TEST_NIGHTLY: 'FALSE' 
 
     steps:
       - name: Checkout
@@ -67,13 +70,5 @@ jobs:
         run: |
           .libPaths(".github/rpkg")
           options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
+          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning")
         shell: Rscript {0}
-
-      - name: Upload check results
-        if: failure()
-        uses: actions/upload-artifact@main
-        with:
-          name: ${{ matrix.config.os }}-r${{ matrix.config.r }}-results
-          path: check
-
