@@ -158,9 +158,29 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
             )
     )
     bayes <- pool(results_bayes)
+    bayes2 <- pool(results_bayes, conf.level = 0.8)
+    bayes3 <- pool(results_bayes, alternative = "greater")
 
     expect_equal(
         bayes$pars$p1,
+        list(est = real_mu,
+             ci = as.numeric(c(NA, NA)),
+             se = as.numeric(NA),
+             pvalue = as.numeric(NA)),
+        tolerance = 1e-2
+    )
+
+    expect_equal(
+        bayes2$pars$p1,
+        list(est = real_mu,
+             ci = as.numeric(c(NA, NA)),
+             se = as.numeric(NA),
+             pvalue = as.numeric(NA)),
+        tolerance = 1e-2
+    )
+
+    expect_equal(
+        bayes3$pars$p1,
         list(est = real_mu,
              ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
@@ -181,9 +201,29 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
             )
     )
     bayes <- pool(results_bayes)
+    bayes2 <- pool(results_bayes, conf.level = 0.8)
+    bayes3 <- pool(results_bayes, alternative = "greater")
 
     expect_equal(
         bayes$pars$p1,
+        list(est = real_mu,
+             ci = as.numeric(c(NA, NA)),
+             se = as.numeric(NA),
+             pvalue = as.numeric(NA)),
+        tolerance = 1e-2
+    )
+
+    expect_equal(
+        bayes2$pars$p1,
+        list(est = real_mu,
+             ci = as.numeric(c(NA, NA)),
+             se = as.numeric(NA),
+             pvalue = as.numeric(NA)),
+        tolerance = 1e-2
+    )
+
+    expect_equal(
+        bayes3$pars$p1,
         list(est = real_mu,
              ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
