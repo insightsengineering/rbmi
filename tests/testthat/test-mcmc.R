@@ -440,7 +440,7 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
 })
 
 
-test_that("fit_mcmc return error if mmrm on original sample fails", {
+test_that("fit_mcmc returns error if mmrm on original sample fails", {
     set.seed(101)
 
     mcoefs <- list(
@@ -451,7 +451,7 @@ test_that("fit_mcmc return error if mmrm on original sample fails", {
     )
     sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
 
-    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    dat <- get_mcmc_sim_dat(100, mcoefs, sigma)
     mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
     mat[,2] <- 1
 
