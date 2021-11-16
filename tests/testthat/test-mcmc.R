@@ -436,9 +436,64 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         n_groups = 2,
         n_visits = 3
     )
+
 })
 
 
+test_that("fit_mcmc return error if mmrm on original sample fails", {
+    set.seed(101)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
+    mat[,2] <- 1
+
+    method <- method_bayes(
+        n_samples = 2,
+        burn_between = 10,
+        verbose = FALSE
+    )
+
+    expect_error(
+        fit_mcmc(
+            designmat = mat,
+            outcome = dat2$outcome,
+            group = dat2$group,
+            subjid = dat2$id,
+            visit = dat2$visit,
+            method = method
+        )
+        ,
+        "Fitting MMRM to original dataset failed"
+    )
+
+    method <- method_bayes(
+        n_samples = 2,
+        burn_between = 10,
+        same_cov = FALSE,
+        verbose = FALSE
+    )
+
+    expect_error(
+        fit_mcmc(
+            designmat = mat,
+            outcome = dat2$outcome,
+            group = dat2$group,
+            subjid = dat2$id,
+            visit = dat2$visit,
+            method = method
+        )
+        ,
+        "Fitting MMRM to original dataset failed"
+    )
+})
 
 
 
@@ -541,4 +596,7 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
         n_groups = 2,
         n_visits = 3
     )
+
+
+
 })
