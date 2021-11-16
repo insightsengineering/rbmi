@@ -626,8 +626,8 @@ test_that("longdata can handle data that isn't sorted", {
 
     dat2 <- dat %>%
         arrange(id, visit) %>%
-        as.data.frame()
-    row.names(dat2) <- NULL
+        as_dataframe()
+
     expect_equal(
         dat2,
         ld$get_data()

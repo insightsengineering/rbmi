@@ -5,7 +5,7 @@ suppressPackageStartupMessages({
 })
 
 
-test_that("delta_template & delta_lagscale",{
+test_that("delta_template & delta_lagscale", {
     set.seed(101)
 
     n_vis <- 5

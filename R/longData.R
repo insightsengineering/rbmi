@@ -241,9 +241,7 @@ longDataConstructor <- R6::R6Class(
                 names(id_map) <- new_ids_single
                 attr(new_data, "idmap") <- id_map
             }
-            new_data2 <- new_data
-            row.names(new_data2) <- NULL
-            return(new_data2)
+            return(as_dataframe(new_data))
         },
 
 
@@ -369,8 +367,7 @@ longDataConstructor <- R6::R6Class(
                 return(self)
             }
 
-            dat_ice <- as.data.frame(dat_ice)
-            row.names(dat_ice) <- NULL
+            dat_ice <- as_dataframe(dat_ice)
 
             validate_dataice(self$data, dat_ice, self$vars, update)
 
@@ -491,8 +488,7 @@ longDataConstructor <- R6::R6Class(
             validate(vars)
             validate_datalong(data, vars)
             data_sorted <- sort_by(data, c(vars$subjid, vars$visit))
-            row.names(data_sorted) <- NULL
-            self$data <- data_sorted
+            self$data <- as_dataframe(data_sorted)
             self$vars <- vars
             self$visits <- levels(self$data[[self$vars$visit]])
             subjects <- levels(self$data[[self$vars$subjid]])

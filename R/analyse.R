@@ -261,8 +261,7 @@ extract_imputed_df <- function(imputation, ld, delta = NULL, idmap = FALSE) {
         dat2 <- dat
     }
 
-    dat2 <- as.data.frame(dat2)
-    row.names(dat2) <- NULL
+    dat2 <- as_dataframe(dat2)
 
     if (idmap) {
         attr(dat2, "idmap") <- id_map
