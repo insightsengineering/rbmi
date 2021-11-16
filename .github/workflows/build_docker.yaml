@@ -65,7 +65,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: "docker-cache"
+          key: docker-cache-${{ matrix.config.tag }}
+
       
       - name: debug
         run: |
