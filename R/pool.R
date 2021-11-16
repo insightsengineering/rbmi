@@ -107,7 +107,7 @@ pool <- function(
 #' either `"rubin"`, `"jackknife"` or "`bootstrap"`.
 get_pool_components <- function(x) {
     switch(x,
-           "rubin" = c("est", "se", "df"),
+           "rubin" = c("est", "df", "se"),
            "jackknife" = c("est"),
            "bootstrap" = c("est")
     )
