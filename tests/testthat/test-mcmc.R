@@ -464,10 +464,10 @@ test_that("fit_mcmc return error if mmrm on original sample fails", {
     expect_error(
         fit_mcmc(
             designmat = mat,
-            outcome = dat2$outcome,
-            group = dat2$group,
-            subjid = dat2$id,
-            visit = dat2$visit,
+            outcome = dat$outcome,
+            group = dat$group,
+            subjid = dat$id,
+            visit = dat$visit,
             method = method
         )
         ,
@@ -484,10 +484,10 @@ test_that("fit_mcmc return error if mmrm on original sample fails", {
     expect_error(
         fit_mcmc(
             designmat = mat,
-            outcome = dat2$outcome,
-            group = dat2$group,
-            subjid = dat2$id,
-            visit = dat2$visit,
+            outcome = dat$outcome,
+            group = dat$group,
+            subjid = dat$id,
+            visit = dat$visit,
             method = method
         )
         ,
