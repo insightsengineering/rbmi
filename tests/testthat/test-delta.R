@@ -5,7 +5,7 @@ suppressPackageStartupMessages({
 })
 
 
-test_that("delta_template & delta_lagscale",{
+test_that("delta_template & delta_lagscale", {
     set.seed(101)
 
     n_vis <- 5
@@ -276,6 +276,7 @@ test_that("extract_imputed_dfs + delta", {
     d1 <- extract_imputed_dfs(iobj, 1)[[1]] %>%
         select(-id)
 
-    expect_equal(d1, select(dat, -id))
+    expect_equal(d1, select(dat, -id) %>%  as.data.frame)
 
 })
+
