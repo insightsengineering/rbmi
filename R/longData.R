@@ -381,6 +381,7 @@ longDataConstructor <- R6::R6Class(
 
                 new_strategy <- dat_ice_pt[[self$vars$strategy]]
 
+                has_nonMAR_to_MAR <- FALSE
                 if (!update) {
                     visit <- dat_ice_pt[[self$vars$visit]]
                     self$ice_visit_index[[subject]] <- which(self$visits == visit)
@@ -394,11 +395,7 @@ longDataConstructor <- R6::R6Class(
                             ))
                         }
                         if (current_strategy != "MAR" & new_strategy == "MAR") {
-                            warning(paste(
-                                "Updating strategies from non-MAR to MAR for subjects with post-ICE data means",
-                                "that the imputation model has been fitted without using all of the available data.",
-                                "You are advised to re-run `draws()` applying this update there instead"
-                            ))
+                            has_nonMAR_to_MAR <- TRUE
                         }
                     }
                 }
@@ -425,6 +422,15 @@ longDataConstructor <- R6::R6Class(
 
                 validate(as_class(self$is_mar[[subject]], "is_mar"))
             }
+
+            if(has_nonMAR_to_MAR) {
+                warning(paste(
+                    "Updating strategies from non-MAR to MAR for subjects with post-ICE data means",
+                    "that the imputation model has been fitted without using all of the available data.",
+                    "You are advised to re-run `draws()` applying this update there instead"
+                ))
+            }
+
             self$check_has_data_at_each_visit()
         },
 
