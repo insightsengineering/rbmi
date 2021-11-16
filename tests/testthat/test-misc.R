@@ -36,11 +36,8 @@ test_that("rbmi can handle 'grouped' dplyr data", {
         covariates = c("sex*age", "visit*group")
     )
 
-    method <- method_bayes(
-        burn_in = 200,
-        burn_between = 3,
-        n_samples = 250,
-        verbose = FALSE
+    method <- method_condmean(
+        n_samples = 10
     )
 
     set.seed(987)
@@ -56,15 +53,35 @@ test_that("rbmi can handle 'grouped' dplyr data", {
     vars2 <- vars
     vars2$covariates <- c("sex*age")
     anaObj <- analyse(imputeObj, vars = vars2)
-    poolObj <- pool(anaObj)
+    poolObj_1 <- pool(anaObj)
+
+
 
     devnull <- capture.output({
         print(drawObj)
         print(imputeObj)
         print(anaObj)
-        print(poolObj)
+        print(poolObj_1)
     })
     expect_true(length(devnull) >= 1)
+
+
+    set.seed(987)
+    drawObj <- draws(
+        data = dat,
+        data_ice = dat_ice,
+        vars = vars,
+        method = method
+    )
+
+    imputeObj <- impute(drawObj, references = c("A" = "A", "B" = "A"))
+
+    vars2 <- vars
+    vars2$covariates <- c("sex*age")
+    anaObj <- analyse(imputeObj, vars = vars2)
+    poolObj_2 <- pool(anaObj)
+
+    expect_equal(poolObj_1, poolObj_2)
 })
 
 
