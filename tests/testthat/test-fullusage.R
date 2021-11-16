@@ -23,7 +23,7 @@ expect_pool_est <- function(po, expected, param = "trt_visit_3") {
     )
 
     if ("lsm_alt_visit_3" %in% names(po$pars)) {
-          lsm_trt <- (po$pars$lsm_alt_visit_3$est - po$pars$lsm_ref_visit_3$est)
+        lsm_trt <- (po$pars$lsm_alt_visit_3$est - po$pars$lsm_ref_visit_3$est)
 
         expect_within(
             lsm_trt - po$pars[[param]]$est,
@@ -657,126 +657,126 @@ test_that("Multiple imputation references / groups work as expected (end to end 
 })
 
 
-test_that("Three arms trial run smoothly and give expected results", {
+test_that("Three arms trial runs smoothly and gives expected results", {
 
-copy_group <- function(dat, name_group) {
-    datC <- dat[dat$group == name_group,]
-    datC$group <- "C"
-    datC$id <- paste0(datC$id, "C")
-    dat <- rbind(dat, datC)
-    return(dat)
-}
+    copy_group <- function(dat, name_group) {
+        datC <- dat[dat$group == name_group,]
+        datC$group <- "C"
+        datC$id <- paste0(datC$id, "C")
+        dat <- rbind(dat, datC)
+        return(dat)
+    }
 
-myanfun <- function(data, ...) {
+    myanfun <- function(data, ...) {
 
-    # apply ancova between A and B
-    data_temp <- data[data$group %in% c("A", "B"), ]
-    data_temp$group <- factor(data_temp$group, levels = c("A", "B"))
-    resB <- ancova(data_temp, ...)
+        # apply ancova between A and B
+        data_temp <- data[data$group %in% c("A", "B"), ]
+        data_temp$group <- factor(data_temp$group, levels = c("A", "B"))
+        resB <- ancova(data_temp, ...)
 
-    # apply ancova between A and C
-    data_temp <- data[data$group %in% c("A", "C"), ]
-    data_temp$group <- factor(data_temp$group, levels = c("A", "C"))
-    resC <- ancova(data_temp, ...)
+        # apply ancova between A and C
+        data_temp <- data[data$group %in% c("A", "C"), ]
+        data_temp$group <- factor(data_temp$group, levels = c("A", "C"))
+        resC <- ancova(data_temp, ...)
 
-    ret_obj <- list(
-        trtB = resB$trt_visit_3,
-        trtC = resC$trt_visit_3
+        ret_obj <- list(
+            trtB = resB$trt_visit_3,
+            trtC = resC$trt_visit_3
+        )
+
+        return(ret_obj)
+
+    }
+
+    set.seed(101)
+    bign <- 30
+    sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
+    nsamp <- 0
+
+    dat <- get_sim_data(bign, sigma, trt = 8)
+    dat <- dat %>%
+        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
+        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        select(-is_miss)
+    dat <- copy_group(dat, name_group = "B")
+    datB <- dat$outcome[dat$group == "B" & !is.na(dat$outcome)]
+    datC <- dat$outcome[dat$group == "C" & !is.na(dat$outcome)]
+    expect_true(all(datB == datC))
+
+    dat_ice <- dat %>%
+        group_by(id) %>%
+        arrange(id, visit) %>%
+        filter(is.na(outcome)) %>%
+        slice(1) %>%
+        ungroup() %>%
+        select(id, visit) %>%
+        mutate(strategy = "JR")
+
+
+    vars <- set_vars(
+        outcome = "outcome",
+        group = "group",
+        strategy = "strategy",
+        subjid = "id",
+        visit = "visit",
+        covariates = c("sex", "age", "visit * group")
     )
 
-    return(ret_obj)
+    drawobj <- draws(
+        data = dat,
+        data_ice = dat_ice,
+        vars = vars,
+        method = method_condmean(n_samples = nsamp, type = "bootstrap", same_cov = TRUE)
+    )
 
-}
+    imputeobj <- impute(
+        draws = drawobj,
+        references = c("A" = "A", "B" = "A", "C" = "A")
+    )
 
-set.seed(101)
-bign <- 30
-sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
-nsamp <- 0
+    vars2 <- vars
+    vars2$covariates <- c("sex", "age")
 
-dat <- get_sim_data(bign, sigma, trt = 8)
-dat <- dat %>%
-    mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-    mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
-    select(-is_miss)
-dat <- copy_group(dat, name_group = "B")
-datB <- dat$outcome[dat$group == "B" & !is.na(dat$outcome)]
-datC <- dat$outcome[dat$group == "C" & !is.na(dat$outcome)]
-expect_true(all(datB == datC))
+    anaobj <- analyse(
+        imputeobj,
+        fun = myanfun,
+        vars = vars2,
+        visits = "visit_3"
+    )
+    pooled <- pool(anaobj)
 
-dat_ice <- dat %>%
-    group_by(id) %>%
-    arrange(id, visit) %>%
-    filter(is.na(outcome)) %>%
-    slice(1) %>%
-    ungroup() %>%
-    select(id, visit) %>%
-    mutate(strategy = "JR")
-
-
-vars <- set_vars(
-    outcome = "outcome",
-    group = "group",
-    strategy = "strategy",
-    subjid = "id",
-    visit = "visit",
-    covariates = c("sex", "age", "visit * group")
-)
-
-drawobj <- draws(
-    data = dat,
-    data_ice = dat_ice,
-    vars = vars,
-    method = method_condmean(n_samples = nsamp, type = "bootstrap", same_cov = TRUE)
-)
-
-imputeobj <- impute(
-    draws = drawobj,
-    references = c("A" = "A", "B" = "A", "C" = "A")
-)
-
-vars2 <- vars
-vars2$covariates <- c("sex", "age")
-
-anaobj <- analyse(
-    imputeobj,
-    fun = myanfun,
-    vars = vars2,
-    visits = "visit_3"
-)
-pooled <- pool(anaobj)
-
-# check that groups B and C have same imputed values, same estimated and pooled treatment effect
-imp_dat <- extract_imputed_dfs(imputeobj)[[1]]
-expect_equal(imp_dat$outcome[imp_dat$group == "B"], imp_dat$outcome[imp_dat$group == "C"])
-expect_equal(anaobj$results[[1]]$trtB, anaobj$results[[1]]$trtC)
-expect_equal(pooled$pars$trtB, pooled$pars$trtC)
+    # check that groups B and C have same imputed values, same estimated and pooled treatment effect
+    imp_dat <- extract_imputed_dfs(imputeobj)[[1]]
+    expect_equal(imp_dat$outcome[imp_dat$group == "B"], imp_dat$outcome[imp_dat$group == "C"])
+    expect_equal(anaobj$results[[1]]$trtB, anaobj$results[[1]]$trtC)
+    expect_equal(pooled$pars$trtB, pooled$pars$trtC)
 
 
-########## same_cov = FALSE
-drawobj <- draws(
-    data = dat,
-    data_ice = dat_ice,
-    vars = vars,
-    method = method_condmean(n_samples = nsamp, type = "bootstrap", same_cov = FALSE)
-)
+    ########## same_cov = FALSE
+    drawobj <- draws(
+        data = dat,
+        data_ice = dat_ice,
+        vars = vars,
+        method = method_condmean(n_samples = nsamp, type = "bootstrap", same_cov = FALSE)
+    )
 
-imputeobj <- impute(
-    draws = drawobj,
-    references = c("A" = "A", "B" = "A", "C" = "A")
-)
+    imputeobj <- impute(
+        draws = drawobj,
+        references = c("A" = "A", "B" = "A", "C" = "A")
+    )
 
-anaobj <- analyse(
-    imputeobj,
-    fun = myanfun,
-    vars = vars2,
-    visits = "visit_3"
-)
-pooled <- pool(anaobj)
+    anaobj <- analyse(
+        imputeobj,
+        fun = myanfun,
+        vars = vars2,
+        visits = "visit_3"
+    )
+    pooled <- pool(anaobj)
 
-# check that groups B and C have same imputed values, same estimated and pooled treatment effect
-imp_dat <- extract_imputed_dfs(imputeobj)[[1]]
-expect_equal(imp_dat$outcome[imp_dat$group == "B"], imp_dat$outcome[imp_dat$group == "C"])
-expect_equal(anaobj$results[[1]]$trtB, anaobj$results[[1]]$trtC)
-expect_equal(pooled$pars$trtB, pooled$pars$trtC)
+    # check that groups B and C have same imputed values, same estimated and pooled treatment effect
+    imp_dat <- extract_imputed_dfs(imputeobj)[[1]]
+    expect_equal(imp_dat$outcome[imp_dat$group == "B"], imp_dat$outcome[imp_dat$group == "C"])
+    expect_equal(anaobj$results[[1]]$trtB, anaobj$results[[1]]$trtC)
+    expect_equal(pooled$pars$trtB, pooled$pars$trtC)
 
 })
