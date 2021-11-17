@@ -38,6 +38,13 @@ jobs:
         id: install-r
         with:
           r-version: ${{ matrix.config.R }}
+      
+      - name: Install nlopt
+        if: ${{ matrix.config.os == "windows-latest" }}
+        shell: bash
+        run: |
+          pacman -Sy
+          pacman -S mingw-w64-x86_64-nlopt
 
       - uses: r-lib/actions/setup-r-dependencies@v1
         name: Install R package dependencies
