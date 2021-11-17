@@ -40,7 +40,7 @@ jobs:
           r-version: ${{ matrix.config.R }}
       
       - name: Install nlopt
-        if: ${{ matrix.config.os == 'windows-latest' }}
+        if: ${{ matrix.config.os == 'windows-latest'  }}
         shell: bash
         run: |
           pacman -Sy
