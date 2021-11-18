@@ -38,13 +38,20 @@ jobs:
         id: install-r
         with:
           r-version: ${{ matrix.config.R }}
-      
-      - name: Install nlopt
+          
+          
+      - name: Install nlopt 1
         if: ${{ matrix.config.os == 'windows-latest'  }}
-        shell: C:\rtools40\mysys2.exe {0}
+        shell: bash
         run: |
-          pacman -Sy
-          yes | pacman -S mingw-w64-x86_64-nlopt
+          echo 'options(install.packages.check.source = "no")' >>  .Rprofile
+          
+      - name: Install nlopt 2
+        if: ${{ matrix.config.os == 'windows-latest'  }}
+        shell: Rscript {0}
+        run: |
+          x <- options(install.packages.check.source)
+          print(x)
 
       - uses: r-lib/actions/setup-r-dependencies@v1
         name: Install R package dependencies
