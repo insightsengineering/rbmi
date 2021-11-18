@@ -50,7 +50,7 @@ jobs:
         if: ${{ matrix.config.os == 'windows-latest'  }}
         shell: Rscript {0}
         run: |
-          x <- options(install.packages.check.source)
+          x <- options("install.packages.check.source")
           print(x)
 
       - uses: r-lib/actions/setup-r-dependencies@v1
