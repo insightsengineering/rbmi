@@ -41,7 +41,7 @@ jobs:
       
       - name: Install nlopt
         if: ${{ matrix.config.os == 'windows-latest'  }}
-        shell: bash
+        shell: C:\rtools40\mysys2.exe {0}
         run: |
           pacman -Sy
           yes | pacman -S mingw-w64-x86_64-nlopt
