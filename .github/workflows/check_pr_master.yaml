@@ -38,20 +38,12 @@ jobs:
         id: install-r
         with:
           r-version: ${{ matrix.config.R }}
-          
-          
-      - name: Install nlopt 1
+
+      - name: Prevent Windows from installing non-binary packages
         if: ${{ matrix.config.os == 'windows-latest'  }}
         shell: bash
         run: |
           echo 'options(install.packages.check.source = "no")' >>  .Rprofile
-          
-      - name: Install nlopt 2
-        if: ${{ matrix.config.os == 'windows-latest'  }}
-        shell: Rscript {0}
-        run: |
-          x <- options("install.packages.check.source")
-          print(x)
 
       - uses: r-lib/actions/setup-r-dependencies@v1
         name: Install R package dependencies
