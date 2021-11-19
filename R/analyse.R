@@ -459,10 +459,16 @@ validate_analyse_pars <- function(results, pars) {
     )
 
     for (par in pars) {
-        if (par != "df") {
+        if (!par %in% c("df", "se")) {
             assert_that(
                 all(!is.na(vapply(results_unnested, function(x) x[[par]], numeric(1)))),
                 msg = sprintf("Parameter `%s` contains missing values", par)
+            )
+        } else {
+            assert_that(
+                all(!is.na(vapply(results_unnested, function(x) x[[par]], numeric(1)))) ||
+                all(is.na(vapply(results_unnested, function(x) x[[par]], numeric(1)))) ,
+                msg = sprintf("Parameter `%s` contains both missing and observed values", par)
             )
         }
     }

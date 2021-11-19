@@ -47,6 +47,26 @@ test_that("basic constructions of `analysis` work as expected",{
     )
     expect_true(validate(x))
 
+
+    x <- as_analysis(
+        results = list(
+            list(p1 = list("est" = 1, "df" = 4, "se" = NA)),
+            list(p1 = list("est" = 2, "df" = 3, "se" = NA))
+        ),
+        method = method_bayes(n_samples = 2)
+    )
+    expect_true(validate(x))
+
+
+    x <- as_analysis(
+        results = list(
+            list(p1 = list("est" = 1, "df" = 4, "se" = NA)),
+            list(p1 = list("est" = 2, "df" = 3, "se" = NA))
+        ),
+        method = method_approxbayes(n_samples = 2)
+    )
+    expect_true(validate(x))
+
 })
 
 
@@ -209,7 +229,7 @@ test_that("incorrect constructions of as_analysis fail", {
             ),
             method = method_bayes(n_sample = 2)
         ),
-        "`se` contains missing values"
+        "`se` contains both missing and observed values"
     )
 
     x <- as_analysis(
