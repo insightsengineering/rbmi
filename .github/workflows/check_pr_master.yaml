@@ -18,10 +18,10 @@ jobs:
       fail-fast: true
       matrix:
         config:
-          - { R: "devel", os: "ubuntu-20.04", pkg_repo: "https://cran.rstudio.com/"}
-          - { R: "release", os: "macos-latest", pkg_repo: "https://cran.rstudio.com/"}
-          - { R: "release", os: "windows-latest", pkg_repo: "https://cran.rstudio.com/"}
-          - { R: "release", os: "ubuntu-20.04", pkg_repo: "https://cran.rstudio.com/"}
+          - { R: "devel", os: "ubuntu-20.04"}
+          - { R: "release", os: "macos-latest"}
+          - { R: "release", os: "windows-latest"}
+          - { R: "release", os: "ubuntu-20.04"}
 
     runs-on: ${{ matrix.config.os }}
 
@@ -39,36 +39,25 @@ jobs:
         with:
           r-version: ${{ matrix.config.R }}
 
+      - name: Prevent Windows from installing non-binary packages
+        if: ${{ matrix.config.os == 'windows-latest'  }}
+        shell: bash
+        run: |
+          echo 'options(install.packages.check.source = "no")' >>  .Rprofile
+
+      - uses: r-lib/actions/setup-r-dependencies@v1
+        name: Install R package dependencies
+        with:
+          cache-version: 2
+          extra-packages: |
+            remotes
+            rcmdcheck
+
       - name: Install Pandoc
         uses: r-lib/actions/setup-pandoc@v1
 
-      - name: Install Additional Linux Dependencies
-        if: startsWith(runner.os, 'Linux')
-        run: sudo apt install -y libcurl4-openssl-dev libv8-dev libsodium-dev libgsl-dev libpng-dev
-
-      - name: Determine dependencies & Create Package Directory
-        run: |
-          dir.create(".github/rpkg")
-          saveRDS(read.dcf("DESCRIPTION")[, c("Imports", "Suggests")], ".github/r-depends.rds")
-        shell: Rscript {0}
-
-      - name: Cache Installed R packages
-        uses: actions/cache@v2
-        with:
-          path: .github/rpkg/*
-          key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
-
-      - name: Install R packages
-        run: |
-          .libPaths(".github/rpkg")
-          options(repos = "${{ matrix.config.pkg_repo }}")
-          install.packages(c("remotes", "rcmdcheck"))
-          remotes::install_deps(dependencies = TRUE, upgrade = FALSE)
-        shell: Rscript {0}
-
       - name: Check
         run: |
-          .libPaths(".github/rpkg")
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning")
         shell: Rscript {0}
