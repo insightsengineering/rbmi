@@ -399,22 +399,22 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
 pval_percentile <- function(est){
 
     if (all(est == 0)) {
-        ret <- c(0, 0)
+        ret <- c(1, 1)
     } else if (min(est) > 0) {
         ret <- c(0, 1)
     } else if (max(est) < 0) {
         ret <- c(1, 0)
     } else if (any(est == 0)) {
         # see ?quantile "type=6" section for explanation
-        quant <- rank(est, ties.method="first")/(length(est) + 1) 
+        quant <- rank(est, ties.method="first")/(length(est) + 1)
         ret <- c(
             min(quant[est == 0]),
             1 - max(quant[est == 0])
         )
     } else {
         x <- uniroot(
-            function(q) quantile(est, probs = q, type = 6), 
-            lower = 0, 
+            function(q) quantile(est, probs = q, type = 6),
+            lower = 0,
             upper = 1
         )$root
         ret <- c(x, 1-x)
