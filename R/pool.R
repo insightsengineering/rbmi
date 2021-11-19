@@ -419,7 +419,7 @@ pval_percentile <- function(est){
         )$root
         ret <- c(x, 1-x)
     }
-    names(x) <- c("pval_greater", "pval_less")
+    names(ret) <- c("pval_greater", "pval_less")
     return(ret)
 }
 
