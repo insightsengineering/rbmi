@@ -1,7 +1,94 @@
+# print - Bayes
+
+    Code
+      print(.test_print$bayes$draws)
+    Output
+      
+      Draws Object
+      ------------
+      Number of Samples: 50
+      Number of Failed Samples: 0
+      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
+      Imputation Type: random
+      Method:
+          Type: Bayes
+          burn_in: 200
+          burn_between: 1
+          same_cov: TRUE
+          n_samples: 50
+          verbose: TRUE
+          seed: 859
+      
+
+---
+
+    Code
+      print(.test_print$bayes$impute)
+    Output
+      
+      Imputation Object
+      -----------------
+      Number of Imputed Datasets: 50
+      Fraction of Missing Data (Original Dataset):
+          visit_1:   0%
+          visit_2:   0%
+          visit_3:  42%
+      References:
+          TRT     -> TRT
+          Placebo -> Placebo
+      
+
+---
+
+    Code
+      print(.test_print$bayes$analysis)
+    Output
+      
+      Analysis Object
+      ---------------
+      Number of Results: 50
+      Analysis Function: rbmi::ancova
+      Delta Applied: TRUE
+      Analysis Estimates:
+          trt_visit_1
+          lsm_ref_visit_1
+          lsm_alt_visit_1
+          trt_visit_3
+          lsm_ref_visit_3
+          lsm_alt_visit_3
+      
+
+---
+
+    Code
+      print(.test_print$bayes$pool)
+    Output
+      
+      Pool Object
+      -----------
+      Number of Results Combined: 50
+      Method: rubin
+      Confidence Level: 0.95
+      Alternative: two.sided
+      
+      Results:
+      
+        ========================================================
+            parameter      est     se     lci     uci     pval  
+        --------------------------------------------------------
+           trt_visit_1    7.253   0.781  5.665   8.842   <0.001 
+         lsm_ref_visit_1  7.318   0.574   6.15   8.485   <0.001 
+         lsm_alt_visit_1  14.571  0.474  13.607  15.534  <0.001 
+           trt_visit_3    7.984   0.258  7.448    8.52   <0.001 
+         lsm_ref_visit_3  7.074   0.205  6.642   7.505   <0.001 
+         lsm_alt_visit_3  15.058  0.164  14.716   15.4   <0.001 
+        --------------------------------------------------------
+      
+
 # print - Approx Bayes
 
     Code
-      print(drawobj_ab)
+      print(.test_print$approxbayes$draws)
     Output
       
       Draws Object
@@ -22,7 +109,7 @@
 ---
 
     Code
-      print(impute_ab)
+      print(.test_print$approxbayes$impute)
     Output
       
       Imputation Object
@@ -31,7 +118,7 @@
       Fraction of Missing Data (Original Dataset):
           visit_1:   0%
           visit_2:   0%
-          visit_3:  54%
+          visit_3:  42%
       References:
           TRT     -> Placebo
           Placebo -> Placebo
@@ -40,7 +127,7 @@
 ---
 
     Code
-      print(analysis_ab)
+      print(.test_print$approxbayes$analysis)
     Output
       
       Analysis Object
@@ -63,7 +150,7 @@
 ---
 
     Code
-      print(pool_ab)
+      print(.test_print$approxbayes$pool)
     Output
       
       Pool Object
@@ -78,114 +165,27 @@
         ===================================================
             parameter      est     se     lci    uci  pval 
         ---------------------------------------------------
-           trt_visit_1    7.313   0.418  6.773   Inf   1   
-         lsm_ref_visit_1  7.204   0.274   6.85   Inf   1   
-         lsm_alt_visit_1  14.516  0.315  14.109  Inf   1   
-           trt_visit_2    8.015   0.193  7.767   Inf   1   
-         lsm_ref_visit_2  6.768   0.126  6.606   Inf   1   
-         lsm_alt_visit_2  14.784  0.145  14.596  Inf   1   
-           trt_visit_3    3.595   0.559  2.873   Inf   1   
-         lsm_ref_visit_3   6.82   0.375  6.335   Inf   1   
-         lsm_alt_visit_3  10.415  0.424  9.867   Inf   1   
+           trt_visit_1    7.253   0.781  6.232   Inf   1   
+         lsm_ref_visit_1  7.318   0.574  6.567   Inf   1   
+         lsm_alt_visit_1  14.571  0.474  13.952  Inf   1   
+           trt_visit_2    7.406   0.388  6.898   Inf   1   
+         lsm_ref_visit_2  7.088   0.285  6.715   Inf   1   
+         lsm_alt_visit_2  14.494  0.235  14.186  Inf   1   
+           trt_visit_3    5.303   1.089  3.879   Inf   1   
+         lsm_ref_visit_3  6.838   0.821  5.761   Inf   1   
+         lsm_alt_visit_3  12.141  0.654  11.285  Inf   1   
         ---------------------------------------------------
       
 
-# print - Bayes
+# print - Condmean Bootstrap
 
     Code
-      print(drawobj_b)
+      print(.test_print$condmean_boot$draws)
     Output
       
       Draws Object
       ------------
-      Number of Samples: 11
-      Number of Failed Samples: 0
-      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
-      Imputation Type: random
-      Method:
-          Type: Bayes
-          burn_in: 200
-          burn_between: 2
-          same_cov: TRUE
-          n_samples: 11
-          verbose: FALSE
-          seed: 859
-      
-
----
-
-    Code
-      print(impute_b)
-    Output
-      
-      Imputation Object
-      -----------------
-      Number of Imputed Datasets: 11
-      Fraction of Missing Data (Original Dataset):
-          visit_1:   0%
-          visit_2:   0%
-          visit_3:  54%
-      References:
-          TRT     -> TRT
-          Placebo -> Placebo
-      
-
----
-
-    Code
-      print(analysis_b)
-    Output
-      
-      Analysis Object
-      ---------------
-      Number of Results: 11
-      Analysis Function: rbmi::ancova
-      Delta Applied: TRUE
-      Analysis Estimates:
-          trt_visit_1
-          lsm_ref_visit_1
-          lsm_alt_visit_1
-          trt_visit_3
-          lsm_ref_visit_3
-          lsm_alt_visit_3
-      
-
----
-
-    Code
-      print(pool_b)
-    Output
-      
-      Pool Object
-      -----------
-      Number of Results Combined: 11
-      Method: rubin
-      Confidence Level: 0.95
-      Alternative: two.sided
-      
-      Results:
-      
-        ========================================================
-            parameter      est     se     lci     uci     pval  
-        --------------------------------------------------------
-           trt_visit_1    7.313   0.418  6.482   8.143   <0.001 
-         lsm_ref_visit_1  7.204   0.274   6.66   7.748   <0.001 
-         lsm_alt_visit_1  14.516  0.315  13.89   15.143  <0.001 
-           trt_visit_3    7.943   0.187  7.561   8.326   <0.001 
-         lsm_ref_visit_3  6.825   0.141  6.529   7.122   <0.001 
-         lsm_alt_visit_3  14.769  0.154  14.448  15.09   <0.001 
-        --------------------------------------------------------
-      
-
-# print - condmean (bootstrap)
-
-    Code
-      print(drawobj_cmb)
-    Output
-      
-      Draws Object
-      ------------
-      Number of Samples: 1 + 6
+      Number of Samples: 1 + 5
       Number of Failed Samples: 0
       Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
       Imputation Type: condmean
@@ -195,23 +195,23 @@
           threshold: 0.2
           same_cov: TRUE
           REML: TRUE
-          n_samples: 6
+          n_samples: 5
           type: bootstrap
       
 
 ---
 
     Code
-      print(impute_cmb)
+      print(.test_print$condmean_boot$impute)
     Output
       
       Imputation Object
       -----------------
-      Number of Imputed Datasets: 1 + 6
+      Number of Imputed Datasets: 1 + 5
       Fraction of Missing Data (Original Dataset):
           visit_1:   0%
           visit_2:   0%
-          visit_3:  48%
+          visit_3:  42%
       References:
           TRT     -> Placebo
           Placebo -> Placebo
@@ -220,12 +220,12 @@
 ---
 
     Code
-      print(analysis_cmb)
+      print(.test_print$condmean_boot$analysis)
     Output
       
       Analysis Object
       ---------------
-      Number of Results: 1 + 6
+      Number of Results: 1 + 5
       Analysis Function: ancova
       Delta Applied: FALSE
       Analysis Estimates:
@@ -243,12 +243,12 @@
 ---
 
     Code
-      print(pool_cmb_p)
+      print(.test_print$condmean_boot$pool$percentile)
     Output
       
       Pool Object
       -----------
-      Number of Results Combined: 1 + 6
+      Number of Results Combined: 1 + 5
       Method: bootstrap (percentile)
       Confidence Level: 0.95
       Alternative: greater
@@ -258,27 +258,27 @@
         ====================================================
             parameter      est     se   lci    uci    pval  
         ----------------------------------------------------
-           trt_visit_1    7.584   <NA>  -Inf  8.645   0.143 
-         lsm_ref_visit_1  6.937   <NA>  -Inf  7.599   0.143 
-         lsm_alt_visit_1  14.522  <NA>  -Inf  16.244  0.143 
-           trt_visit_2    8.356   <NA>  -Inf  9.087   0.143 
-         lsm_ref_visit_2  6.583   <NA>  -Inf  6.937   0.143 
-         lsm_alt_visit_2  14.94   <NA>  -Inf  16.025  0.143 
-           trt_visit_3    4.397   <NA>  -Inf  6.073   0.143 
-         lsm_ref_visit_3  6.891   <NA>  -Inf   7.39   0.143 
-         lsm_alt_visit_3  11.287  <NA>  -Inf  13.464  0.143 
+           trt_visit_1    6.643   <NA>  -Inf  7.346   0.167 
+         lsm_ref_visit_1  7.656   <NA>  -Inf  8.157   0.167 
+         lsm_alt_visit_1  14.299  <NA>  -Inf  14.443  0.167 
+           trt_visit_2    6.906   <NA>  -Inf  7.365   0.167 
+         lsm_ref_visit_2  7.364   <NA>  -Inf  7.911   0.167 
+         lsm_alt_visit_2  14.271  <NA>  -Inf  14.576  0.167 
+           trt_visit_3    4.118   <NA>  -Inf  4.398   0.167 
+         lsm_ref_visit_3  7.603   <NA>  -Inf  8.114   0.167 
+         lsm_alt_visit_3  11.721  <NA>  -Inf  11.613  0.167 
         ----------------------------------------------------
       
 
 ---
 
     Code
-      print(pool_cmb_n)
+      print(.test_print$condmean_boot$pool$normal)
     Output
       
       Pool Object
       -----------
-      Number of Results Combined: 1 + 6
+      Number of Results Combined: 1 + 5
       Method: bootstrap (normal)
       Confidence Level: 0.95
       Alternative: greater
@@ -288,22 +288,22 @@
         ======================================================
             parameter      est     se    lci    uci     pval  
         ------------------------------------------------------
-           trt_visit_1    7.584   0.477  -Inf  8.369   <0.001 
-         lsm_ref_visit_1  6.937   0.447  -Inf  7.672   <0.001 
-         lsm_alt_visit_1  14.522  0.634  -Inf  15.565  <0.001 
-           trt_visit_2    8.356   0.392  -Inf    9     <0.001 
-         lsm_ref_visit_2  6.583   0.227  -Inf  6.956   <0.001 
-         lsm_alt_visit_2  14.94   0.381  -Inf  15.566  <0.001 
-           trt_visit_3    4.397   0.693  -Inf  5.536   <0.001 
-         lsm_ref_visit_3  6.891   0.273  -Inf   7.34   <0.001 
-         lsm_alt_visit_3  11.287  0.937  -Inf  12.828  <0.001 
+           trt_visit_1    6.643   0.758  -Inf  7.889   <0.001 
+         lsm_ref_visit_1  7.656   0.602  -Inf  8.646   <0.001 
+         lsm_alt_visit_1  14.299  0.496  -Inf  15.115  <0.001 
+           trt_visit_2    6.906   0.586  -Inf   7.87   <0.001 
+         lsm_ref_visit_2  7.364   0.443  -Inf  8.094   <0.001 
+         lsm_alt_visit_2  14.271  0.416  -Inf  14.955  <0.001 
+           trt_visit_3    4.118   0.754  -Inf  5.359   <0.001 
+         lsm_ref_visit_3  7.603   0.413  -Inf  8.283   <0.001 
+         lsm_alt_visit_3  11.721  0.729  -Inf  12.919  <0.001 
         ------------------------------------------------------
       
 
-# print - Condmean (jackknife)
+# print - Condmean Jack
 
     Code
-      print(drawobj_cmj)
+      print(.test_print$condmean_jack$draws)
     Output
       
       Draws Object
@@ -325,7 +325,7 @@
 ---
 
     Code
-      print(impute_cmj)
+      print(.test_print$condmean_jack$impute)
     Output
       
       Imputation Object
@@ -343,7 +343,7 @@
 ---
 
     Code
-      print(analysis_cmj)
+      print(.test_print$condmean_jack$analysis)
     Output
       
       Analysis Object
@@ -366,7 +366,7 @@
 ---
 
     Code
-      print(pool_cmj)
+      print(.test_print$condmean_jack$pool)
     Output
       
       Pool Object
