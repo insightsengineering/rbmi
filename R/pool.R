@@ -341,9 +341,7 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
 
     alpha <- 1 - conf.level
 
-    pvals <- pval_percentile(
-        est = est
-    )
+    pvals <- pval_percentile(est = est)
     names(pvals) <- NULL
 
     index <- switch(
@@ -400,23 +398,28 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
 #' @importFrom stats uniroot
 pval_percentile <- function(est){
 
-    if (all(est == 0)){ # non-unique solution
-        qmin <-0
-        qmax <- 1
-    } else if (min(est) > 0){ # if 0 below range of est, still give value 0
-        qmin <- qmax <- 0
-    } else if (max(est) < 0) { # if 0 above range of est, still give value 1
-        qmin <- qmax <- 1
-    } else if (any(est == 0)){ # non-unique solution if at least one est is 0
-        quant <- rank(est, ties.method="first")/(length(est) + 1) # see ?quantile "type=6" section for explanation
-        qmin <- min(quant[est == 0])
-        qmax <- max(quant[est == 0])
+    if (all(est == 0)) {
+        ret <- c(0, 0)
+    } else if (min(est) > 0) {
+        ret <- c(0, 1)
+    } else if (max(est) < 0) {
+        ret <- c(1, 0)
+    } else if (any(est == 0)) {
+        # see ?quantile "type=6" section for explanation
+        quant <- rank(est, ties.method="first")/(length(est) + 1) 
+        ret <- c(
+            min(quant[est == 0]),
+            1 - max(quant[est == 0])
+        )
     } else {
-        qmin <- qmax <-
-            uniroot(function(q) quantile(est, probs = q, type = 6), lower = 0, upper = 1)$root
+        x <- uniroot(
+            function(q) quantile(est, probs = q, type = 6), 
+            lower = 0, 
+            upper = 1
+        )$root
+        ret <- c(x, 1-x)
     }
-
-    ret <- c("pval_greater" = qmax, "pval_less" = 1 - qmin)
+    names(x) <- c("pval_greater", "pval_less")
     return(ret)
 }
 
