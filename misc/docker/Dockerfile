@@ -47,8 +47,8 @@ ADD install_packages.R /
 
 RUN Rscript  /install_packages.R
 
+
 RUN wget -qO- "https://yihui.org/tinytex/install-unx.sh" | sh -s - --admin --no-path && \
     ~/.TinyTeX/bin/*/tlmgr path add && \
     tlmgr install makeindex && \
     ln -s ~/.TinyTeX/bin/*/makeindex  /usr/local/bin
-

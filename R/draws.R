@@ -327,12 +327,14 @@ get_jackknife_draws <- function(longdata, method) {
         optimizer = c("L-BFGS-B", "BFGS")
     )
 
+    if (samples[[1]]$failed) {
+        stop("Fitting MMRM to original dataset failed")
+    }
+
     optimizer <- list(
         "L-BFGS-B" = NULL,
         "BFGS" = samples[[1]][c("beta", "theta")]
     )
-
-    ids_jack <- lapply(seq_along(ids), function(i) ids[-i])
 
     for (i in seq_along(ids)) {
         ids_jack <- ids[-i]
@@ -343,7 +345,7 @@ get_jackknife_draws <- function(longdata, method) {
             optimizer = optimizer
         )
         if (sample$failed) {
-            stop("Jackknife sample failed")
+            stop(sprintf("MMRM failed to fit to the data after removing subject %s", ids[i]))
         }
         samples[[i + 1]] <- sample
     }
@@ -453,12 +455,7 @@ draws.bayes <- function(data, data_ice = NULL, vars, method) {
         group = data2[[vars$group]],
         visit = data2[[vars$visit]],
         subjid = data2[[vars$subjid]],
-        n_imputations = method$n_samples,
-        burn_in = method$burn_in,
-        seed = method$seed,
-        burn_between = method$burn_between,
-        same_cov = method$same_cov,
-        verbose = method$verbose
+        method = method
     )
 
     # set names of covariance matrices

@@ -340,19 +340,23 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
     dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
     mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
 
+    method <- method_bayes(
+        n_samples = 200,
+        burn_in = 100,
+        burn_between = 3,
+        same_cov = TRUE,
+        verbose = FALSE,
+        seed = 8931
+    )
+
     ### No missingness
     fit <- fit_mcmc(
-        seed = 8931,
         designmat = mat,
         outcome = dat$outcome,
         group = dat$group,
         subjid = dat$id,
         visit = dat$visit,
-        same_cov = TRUE,
-        n_imputations = 200,
-        burn_in = 100,
-        burn_between = 3,
-        verbose = FALSE
+        method = method
     )
 
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
@@ -378,17 +382,12 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         mutate(outcome = if_else(rbinom(n(), 1, 0.3) == 1, NA_real_, outcome))
 
     fit <- fit_mcmc(
-        seed = 8931,
         designmat = mat,
         outcome = dat2$outcome,
         group = dat2$group,
         subjid = dat2$id,
         visit = dat2$visit,
-        same_cov = TRUE,
-        n_imputations = 200,
-        burn_in = 100,
-        burn_between = 3,
-        verbose = FALSE
+        method = method
     )
 
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
@@ -416,17 +415,12 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         ))
 
     fit <- fit_mcmc(
-        seed = 8931,
         designmat = mat,
         outcome = dat2$outcome,
         group = dat2$group,
         subjid = dat2$id,
         visit = dat2$visit,
-        same_cov = TRUE,
-        n_imputations = 200,
-        burn_in = 100,
-        burn_between = 3,
-        verbose = FALSE
+        method = method
     )
 
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
@@ -442,9 +436,64 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         n_groups = 2,
         n_visits = 3
     )
+
 })
 
 
+test_that("fit_mcmc returns error if mmrm on original sample fails", {
+    set.seed(101)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+
+    dat <- get_mcmc_sim_dat(100, mcoefs, sigma)
+    mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
+    mat[,2] <- 1
+
+    method <- method_bayes(
+        n_samples = 2,
+        burn_between = 10,
+        verbose = FALSE
+    )
+
+    expect_error(
+        fit_mcmc(
+            designmat = mat,
+            outcome = dat$outcome,
+            group = dat$group,
+            subjid = dat$id,
+            visit = dat$visit,
+            method = method
+        )
+        ,
+        "Fitting MMRM to original dataset failed"
+    )
+
+    method <- method_bayes(
+        n_samples = 2,
+        burn_between = 10,
+        same_cov = FALSE,
+        verbose = FALSE
+    )
+
+    expect_error(
+        fit_mcmc(
+            designmat = mat,
+            outcome = dat$outcome,
+            group = dat$group,
+            subjid = dat$id,
+            visit = dat$visit,
+            method = method
+        )
+        ,
+        "Fitting MMRM to original dataset failed"
+    )
+})
 
 
 
@@ -475,19 +524,23 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
 
     mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
 
+    method <- method_bayes(
+        n_samples = 250,
+        burn_in = 100,
+        burn_between = 3,
+        same_cov = FALSE,
+        verbose = FALSE,
+        seed = 8931
+    )
+
     ### No missingness
     fit <- fit_mcmc(
-        seed = 8931,
         designmat = mat,
         outcome = dat$outcome,
         group = dat$group,
         subjid = dat$id,
         visit = dat$visit,
-        same_cov = FALSE,
-        n_imputations = 250,
-        burn_in = 100,
-        burn_between = 3,
-        verbose = FALSE
+        method = method
     )
 
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
@@ -517,17 +570,12 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
         mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 1, NA_real_, outcome))
 
     fit <- fit_mcmc(
-        seed = 8931,
         designmat = mat,
         outcome = dat2$outcome,
         group = dat2$group,
         subjid = dat2$id,
         visit = dat2$visit,
-        same_cov = FALSE,
-        n_imputations = 250,
-        burn_in = 100,
-        burn_between = 3,
-        verbose = FALSE
+        method = method
     )
 
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
@@ -548,4 +596,7 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
         n_groups = 2,
         n_visits = 3
     )
+
+
+
 })

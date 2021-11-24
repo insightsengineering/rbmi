@@ -85,7 +85,7 @@ get_ld <- function() {
 }
 
 
-get_data <- function(n){
+get_data <- function(n) {
     sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
 
     set.seed(1518)
@@ -182,7 +182,10 @@ test_that("longData - Sampling", {
         dat %>% filter(subjid == "1"),
         dat %>% filter(subjid == "3")
     )
-    expect_equal(select(x, -subjid), select(y, -subjid))
+    expect_equal(
+        select(x, -subjid),
+        select(y, -subjid) %>% as.data.frame()
+    )
     expect_true(all(x$subjid != y$subjid))
 
 
@@ -207,7 +210,10 @@ test_that("longData - Sampling", {
         dat %>% filter(subjid == "2") %>% mutate(outcome = pt2_val)
     )
 
-    expect_equal(select(x, -subjid), select(y, -subjid))
+    expect_equal(
+        select(x, -subjid),
+        select(y, -subjid) %>% as.data.frame()
+    )
     expect_true(all(x$subjid != y$subjid))
 
 
@@ -222,7 +228,10 @@ test_that("longData - Sampling", {
         dat %>% filter(subjid == "2"),
     ) %>%
         filter(!is.na(outcome))
-    expect_equal(select(x, -subjid), select(y, -subjid))
+    expect_equal(
+        select(x, -subjid),
+        select(y, -subjid) %>% as.data.frame()
+    )
     expect_true(all(x$subjid != y$subjid))
 
 
@@ -277,7 +286,7 @@ test_that("Stratification works as expected", {
 
     real <- dat %>% group_by(group, sex) %>% tally()
 
-    for (i in 1:20){
+    for (i in 1:20) {
         sampled <- ld$get_data(ld$sample_ids()) %>%
             group_by(group, sex) %>%
             tally()
@@ -420,7 +429,31 @@ test_that("Strategies", {
         ld$update_strategies(dat_ice),
         "from non-MAR to MAR"
     )
+
+
+    # Ensure that only 1 warning is issued when converting non-MAR to MAR data
+    dat_ice <- tribble(
+        ~visit, ~subjid, ~strategy,
+        "Visit 1", "1",  "ABC",
+        "Visit 1",  "2",  "ABC",
+        "Visit 3",  "3",  "XYZ"
+    )
+
+    ld$set_strategies(dat_ice)
+
+    upd_dat_ice <- tribble(
+        ~subjid, ~strategy,
+        "2",  "MAR",
+        "3",  "MAR",
+    )
+
+    recorded_result <- record(ld$update_strategies(upd_dat_ice))
+    expect_length(recorded_result$warnings, 1)
+    expect_length(recorded_result$errors, 0)
+    expect_true(grepl("Updating strategies from non-MAR to MAR", recorded_result$warnings))
 })
+
+
 
 
 test_that("strategies part 2", {
@@ -615,8 +648,14 @@ test_that("longdata can handle data that isn't sorted", {
     expect_equal(ld$is_missing, list("1" = c(F, F, F), "2" = c(F, T, F)))
     expect_equal(ld$is_mar, list("1" = c(T, T, T), "2" = c(T, F, F)))
 
-    dat2 <- dat %>% arrange(id, visit)
-    expect_equal(dat2, ld$get_data())
+    dat2 <- dat %>%
+        arrange(id, visit) %>%
+        as_dataframe()
+
+    expect_equal(
+        dat2,
+        ld$get_data()
+    )
 })
 
 
@@ -687,3 +726,4 @@ test_that(
 
     }
 )
+
