@@ -163,7 +163,7 @@ impute_internal <- function(draws, references, update_strategy, strategies, cond
     validate(draws$samples)
     samples_grouped <- transpose_samples(draws$samples)
 
-    n_imputations = ifelse(is.null(draws$method$D), 1, draws$method$D)
+    n_imputations <- ifelse(is.null(draws$method$D), 1, draws$method$D)
 
     imputes <- mapply(
         impute_data_individual,
@@ -460,7 +460,7 @@ impute_data_individual <- function(
     if (condmean) {
         imputed_outcome <- lapply(conditional_parameters, function(x) as.vector(x$mu))
     } else {
-        imputed_outcome <- lapply(conditional_parameters, function(x) impute_outcome(x, n_imputations))
+        imputed_outcome <- lapply(conditional_parameters, impute_outcome, n_imputations = n_imputations)
     }
 
     result$values <- imputed_outcome
@@ -527,16 +527,17 @@ impute_outcome <- function(conditional_parameters, n_imputations = 1) {
         msg = "Sigma or Mu contain missing values"
     )
 
-    result <- do.call(
-        rbind,
-        lapply(
-            seq.int(n_imputations),
-            function(x)
+    samps <- replicate(
+        n = n_imputations,
+        simplify = FALSE,
+        expr = {
             sample_mvnorm(
                 conditional_parameters$mu,
                 conditional_parameters$sigma
             )
-        )
+        }
+    )
+    result <- matrix(nrow = n_imputations, unlist(samps))
     )
 
     return(result)
