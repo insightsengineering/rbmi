@@ -241,8 +241,7 @@ longDataConstructor <- R6::R6Class(
                 names(id_map) <- new_ids_single
                 attr(new_data, "idmap") <- id_map
             }
-
-            return(new_data)
+            return(as_dataframe(new_data))
         },
 
 
@@ -362,9 +361,13 @@ longDataConstructor <- R6::R6Class(
         #' @param update Logical, indicates that the ICE data should be used as an update. See details.
         set_strategies = function(dat_ice = NULL, update=FALSE) {
 
+
+
             if (is.null(dat_ice)) {
                 return(self)
             }
+
+            dat_ice <- as_dataframe(dat_ice)
 
             validate_dataice(self$data, dat_ice, self$vars, update)
 
@@ -381,6 +384,7 @@ longDataConstructor <- R6::R6Class(
 
                 new_strategy <- dat_ice_pt[[self$vars$strategy]]
 
+                has_nonMAR_to_MAR <- FALSE
                 if (!update) {
                     visit <- dat_ice_pt[[self$vars$visit]]
                     self$ice_visit_index[[subject]] <- which(self$visits == visit)
@@ -394,11 +398,7 @@ longDataConstructor <- R6::R6Class(
                             ))
                         }
                         if (current_strategy != "MAR" & new_strategy == "MAR") {
-                            warning(paste(
-                                "Updating strategies from non-MAR to MAR for subjects with post-ICE data means",
-                                "that the imputation model has been fitted without using all of the available data.",
-                                "You are advised to re-run `draws()` applying this update there instead"
-                            ))
+                            has_nonMAR_to_MAR <- TRUE
                         }
                     }
                 }
@@ -425,6 +425,15 @@ longDataConstructor <- R6::R6Class(
 
                 validate(as_class(self$is_mar[[subject]], "is_mar"))
             }
+
+            if(has_nonMAR_to_MAR) {
+                warning(paste(
+                    "Updating strategies from non-MAR to MAR for subjects with post-ICE data means",
+                    "that the imputation model has been fitted without using all of the available data.",
+                    "You are advised to re-run `draws()` applying this update there instead"
+                ))
+            }
+
             self$check_has_data_at_each_visit()
         },
 
@@ -481,9 +490,11 @@ longDataConstructor <- R6::R6Class(
         #' @param data longditudinal dataset.
         #' @param vars an `ivars` object created by [set_vars()].
         initialize = function(data, vars) {
+            data <- as.data.frame(data)
             validate(vars)
             validate_datalong(data, vars)
-            self$data <- sort_by(data, c(vars$subjid, vars$visit))
+            data_sorted <- sort_by(data, c(vars$subjid, vars$visit))
+            self$data <- as_dataframe(data_sorted)
             self$vars <- vars
             self$visits <- levels(self$data[[self$vars$visit]])
             subjects <- levels(self$data[[self$vars$subjid]])

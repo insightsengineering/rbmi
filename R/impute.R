@@ -466,7 +466,7 @@ impute_data_individual <- function(
     if (condmean) {
         imputed_outcome <- lapply(conditional_parameters, function(x) as.vector(x$mu))
     } else {
-        imputed_outcome <- lapply(conditional_parameters, function(x) impute_outcome(x, n_imputations))
+        imputed_outcome <- lapply(conditional_parameters, impute_outcome, n_imputations = n_imputations)
     }
     result$values <- imputed_outcome
     return(result)
