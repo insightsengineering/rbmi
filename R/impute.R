@@ -538,7 +538,6 @@ impute_outcome <- function(conditional_parameters, n_imputations = 1) {
         }
     )
     result <- matrix(nrow = n_imputations, unlist(samps))
-    )
 
     return(result)
 }
