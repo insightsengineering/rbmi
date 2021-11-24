@@ -29,4 +29,13 @@ test_that("methods", {
         NULL
     )
 
+    expect_equal(
+        method_bmlmi(B = 10)$B,
+        10
+    )
+
+    expect_equal(
+        method_bmlmi(D = 5)$D,
+        5
+    )
 })

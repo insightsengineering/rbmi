@@ -194,8 +194,8 @@ method_bmlmi <- function(
         threshold = threshold,
         same_cov = same_cov,
         REML = REML,
-        B = 20,
-        D = 2
+        B = B,
+        D = D
     )
     return(as_class(x, c("method", "bmlmi")))
 }
