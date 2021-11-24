@@ -163,7 +163,7 @@ impute_internal <- function(draws, references, update_strategy, strategies, cond
     validate(draws$samples)
     samples_grouped <- transpose_samples(draws$samples)
 
-    n_imputations = ifelse(is.null(draws$method$D), 1, draws$method$D)
+    n_imputations <- ifelse(is.null(draws$method$D), 1, draws$method$D)
 
     imputes <- mapply(
         impute_data_individual,
@@ -181,23 +181,22 @@ impute_internal <- function(draws, references, update_strategy, strategies, cond
         SIMPLIFY = FALSE
     )
 
-    if(n_imputations > 1) {
-        imputes <- lapply(
+    sample_ids_list <-  lapply(draws$samples, function(x) x$ids)
+
+    hold <- list()
+    for (i in seq_len(n_imputations)) {
+        imps <- lapply(
             imputes,
             function(x) {
-                if (nrow(x$values[[1]]) == 0) {
-                    x$values <- rep(x$values, each = n_imputations)
-                } else {
-                    x$values <- unlist(lapply(x$values, function(y) split(y, seq(nrow(y)))), recursive = FALSE)
-                    names(x$values) <- NULL
-                }
-                return(x)
+                x$values <- lapply(x$values, function(x) x[[i]])
+                x
             }
         )
+        hold[[i]] <- untranspose_imputations(imps, sample_ids_list)
     }
 
     x <- as_imputation(
-        imputations = untranspose_imputations(imputes, rep(lapply(draws$samples, function(x) x$ids), each = n_imputations)),
+        imputations = unlist(HOLD, recursive = FALSE, use.names = FALSE),
         data = data,
         method = draws$method,
         references = references
@@ -411,7 +410,15 @@ impute_data_individual <- function(
     # Define default return value if nothing needs to be imputed
     result <- list(
         id = id,
-        values = replicate(n = length(index), as.matrix(numeric(0)))
+        values = replicate(
+            n = length(index),
+            replicate(
+                n = n_imputations,
+                numeric(0),
+                simplify = FALSE
+            ),
+            simplify = FALSE
+        )
     )
 
     id_data <- data$extract_by_id(id)
@@ -456,13 +463,11 @@ impute_data_individual <- function(
         get_conditional_parameters,
         values = id_data$outcome
     )
-
     if (condmean) {
         imputed_outcome <- lapply(conditional_parameters, function(x) as.vector(x$mu))
     } else {
         imputed_outcome <- lapply(conditional_parameters, function(x) impute_outcome(x, n_imputations))
     }
-
     result$values <- imputed_outcome
     return(result)
 }
@@ -526,20 +531,18 @@ impute_outcome <- function(conditional_parameters, n_imputations = 1) {
         all(!is.na(conditional_parameters$sigma)),
         msg = "Sigma or Mu contain missing values"
     )
-
-    result <- do.call(
-        rbind,
-        lapply(
-            seq.int(n_imputations),
-            function(x)
+ 
+    results <- replicate(
+        n = n_imputations,
+        simplify = FALSE,
+        expr = {
             sample_mvnorm(
                 conditional_parameters$mu,
                 conditional_parameters$sigma
             )
-        )
+        }
     )
-
-    return(result)
+    return(results)
 }
 
 
