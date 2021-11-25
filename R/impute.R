@@ -147,7 +147,6 @@ impute.condmean <- function(draws, references, update_strategy = NULL, strategie
 #' @param condmean logical. If TRUE will impute using the conditional mean values, if values
 #' will impute by taking a random draw from the multivariate normal distribution.
 impute_internal <- function(draws, references, update_strategy, strategies, condmean) {
-
     references <- add_class(references, "references")
     validate(draws)
     data <- draws$data$clone(deep = TRUE)
@@ -181,8 +180,75 @@ impute_internal <- function(draws, references, update_strategy, strategies, cond
         SIMPLIFY = FALSE
     )
 
-    sample_ids_list <-  lapply(draws$samples, function(x) x$ids)
+    imputes_unpacked <- unpack_imputes(
+        imputes,
+        lapply(draws$samples, `[[`, "ids"),
+        n_imputations
+    )
 
+    x <- as_imputation(
+        imputations = imputes_unpacked,
+        data = data,
+        method = draws$method,
+        references = references
+    )
+
+    return(x)
+}
+
+
+#' Unpack imputes objects
+#'
+#' @param imputes a list of objects returned by [impute_data_individual()]
+#' @param sample_ids A list of ids belonging to each sample with 1 element per sample (passed
+#' onto [untranspose_imputations()])
+#' @param n_imputations The number of imputations to draw from each bootstrap sample (i.e
+#' the value of D in [method_bmlmi()])
+#'
+#' To accomdate for `method_bmlmi()` the `impute_data_individual()` function returns
+#' each subject's imputation values in a nested list depending on the values selected
+#' for B (the number of boostrap samples) and D (The number of random samples within
+#' each bootstrap sample to create). Please note that all other methods are a special case of
+#' this where B = n_samples and D = 1.  As an example lets say B=2 & D=3 then
+#' `impute_data_individual()` for a single individual would return:
+#'
+#' ```
+#' list(
+#'     id = "pt1",
+#'     values = list(
+#'         list(
+#'             list( c(values) ),  # B=1 D=1
+#'             list( c(values) ),  # B=1 D=2
+#'             list( c(values) ),  # B=1 D=3
+#'             list( c(values) )   # B=1 D=4
+#'         ),
+#'         list(
+#'             list( c(values) ),  # B=2 D=1
+#'             list( c(values) ),  # B=2 D=2
+#'             list( c(values) ),  # B=2 D=3
+#'             list( c(values) )   # B=2 D=4
+#'         ),
+#'     )
+#' )
+#' ```
+#'
+#' This function function extracts all imputation objects assertaining to a single dataset (e.g.
+#' B=1, D=1 for all subjects) and untransposes them so they are in the correct format for
+#' `analyse()`.  As a final step the function then re-indexes them so that all of the repetitions
+#' for a given bootstrap sample are co-located. I.e. the return value is:
+#'
+#' ```
+#' list(
+#'     imputation_list(...), # B = 1, D = 1
+#'     imputation_list(...), # B = 1, D = 2
+#'     imputation_list(...), # B = 1, D = 3
+#'     imputation_list(...), # B = 2, D = 1
+#'     imputation_list(...), # B = 2, D = 2
+#'     imputation_list(...), # B = 2, D = 3
+#' )
+#' ```
+#'
+unpack_imputes <- function(imputes, sample_ids, n_imputations) {
     hold <- list()
     for (i in seq_len(n_imputations)) {
         imps <- lapply(
@@ -192,18 +258,19 @@ impute_internal <- function(draws, references, update_strategy, strategies, cond
                 x
             }
         )
-        hold[[i]] <- untranspose_imputations(imps, sample_ids_list)
+        hold[[i]] <- untranspose_imputations(imps, sample_ids)
     }
 
-    x <- as_imputation(
-        imputations = unlist(HOLD, recursive = FALSE, use.names = FALSE),
-        data = data,
-        method = draws$method,
-        references = references
-    )
+    imputations_unpacked <- unlist(hold, recursive = FALSE, use.names = FALSE)
 
-    return(x)
+    D <- n_imputations
+    B <- length(imputations_unpacked) / n_imputations
+    index <- c()
+    for (i in seq_len(B)) index = c(index, i + (seq_len(D) - 1) * B)
+
+    return(imputations_unpacked[index])
 }
+
 
 
 
