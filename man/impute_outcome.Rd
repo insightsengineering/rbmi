@@ -4,7 +4,7 @@
 \alias{impute_outcome}
 \title{Sample outcome value}
 \usage{
-impute_outcome(conditional_parameters, n_imputations = 1)
+impute_outcome(conditional_parameters, n_imputations = 1, condmean = FALSE, id)
 }
 \arguments{
 \item{conditional_parameters}{a list with elements \code{mu} and \code{sigma} which

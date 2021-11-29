@@ -190,11 +190,11 @@ test_that("longData - Sampling", {
 
 
 
-    imputes <- as_imputation_list(
-        as_imputation_single(id = "1", values = c(1, 2, 3)),
-        as_imputation_single(id = "4", values = c()),
-        as_imputation_single(id = "1", values = c(4, 5, 6)),
-        as_imputation_single(id = "2", values = c(7, 8))
+    imputes <- imputation_df(
+        imputation_single(id = "1", values = c(1, 2, 3)),
+        imputation_single(id = "4", values = c()),
+        imputation_single(id = "1", values = c(4, 5, 6)),
+        imputation_single(id = "2", values = c(7, 8))
     )
     x <- ld$get_data(imputes)
     pt2_val <- dat %>%
@@ -237,9 +237,9 @@ test_that("longData - Sampling", {
 
 
 
-    ilist <- as_imputation_list(
-        as_imputation_single(id = "1", values = c(1, 2)),
-        as_imputation_single(id = "2", values = c(1, 2, 3))
+    ilist <- imputation_df(
+        imputation_single(id = "1", values = c(1, 2)),
+        imputation_single(id = "2", values = c(1, 2, 3))
     )
 
     expect_error(
@@ -248,12 +248,12 @@ test_that("longData - Sampling", {
     )
 
     expect_error(
-        ld$get_data(as_imputation_list(ilist[1])),
+        ld$get_data(imputation_df(ilist[1])),
         "Number of missing values doesn't equal"
     )
 
     expect_error(
-        ld$get_data(as_imputation_list(ilist[2])),
+        ld$get_data(imputation_df(ilist[2])),
         "Number of missing values doesn't equal"
     )
 })
@@ -601,10 +601,10 @@ test_that("idmap", {
         c("new_pt_1" = "1", "new_pt_2" = "1", "new_pt_3" = "3")
     )
 
-    imps <- as_imputation_list(list(
-        as_imputation_single(id = "1", values = c(1, 2, 3)),
-        as_imputation_single(id = "3", values = c(4)),
-        as_imputation_single(id = "3", values = 5)
+    imps <- imputation_df(list(
+        imputation_single(id = "1", values = c(1, 2, 3)),
+        imputation_single(id = "3", values = c(4)),
+        imputation_single(id = "3", values = 5)
     ))
     x <- ld$get_data(imps, idmap = TRUE)
     expect_equal(
