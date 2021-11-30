@@ -90,12 +90,15 @@ with_mocking <- function(expr, ..., where) {
     fun <- x[[1]]
     assertthat::assert_that(length(x) == 1)
     hold <- get(nam, envir = where)
+    islocked <- bindingIsLocked(nam, where)
+    if (islocked) unlockBinding(nam, where)
     assign(nam, fun, envir = where)
 
     x <- tryCatch(
         expr,
         finally = {
             assign(nam, hold, where)
+            if (islocked) lockBinding(nam, where)
         }
     )
     return(x)
