@@ -493,7 +493,6 @@ impute_data_individual <- function(
 
     # Define default return value if nothing needs to be imputed
     results <- imputation_list_single(
-        id = id,
         D = n_imputations,
         imputations = replicate(
             n = n_imputations * length(index),
@@ -553,7 +552,6 @@ impute_data_individual <- function(
     ), recursive = FALSE)
 
     results <- imputation_list_single(
-        id = id,
         D = n_imputations,
         imputations = lapply(imputed_outcome, function(x) {
             imputation_single(id = id, values = x)
@@ -581,7 +579,6 @@ impute_data_individual <- function(
 #' All elements of beta must be the same length and must be the same length and order as `dat`.
 #' @param sigma List of sigma. Must have the same number of entries as `beta`.
 get_visit_distribution_parameters <- function(dat, beta, sigma) {
-
     assert_that(
         length(unique(vapply(beta, length, numeric(1)))) == 1,
         msg = "All elements of beta must be the same length"
@@ -615,8 +612,11 @@ get_visit_distribution_parameters <- function(dat, beta, sigma) {
 #' @param n_imputations numeric representing the number of random samples from the multivariate
 #' normal distribution to be performed. Default is `1`.
 #'
+#' @param condmean should conditional mean imputation be performed (as opposed to random
+#' sampling)
+#'
 #' @importFrom stats rnorm
-impute_outcome <- function(conditional_parameters, n_imputations = 1, condmean = FALSE, id) {
+impute_outcome <- function(conditional_parameters, n_imputations = 1, condmean = FALSE) {
 
     if (condmean) {
         expr <- quote(
@@ -883,10 +883,3 @@ print.imputation <- function(x, ...) {
 
 
 
-repr <- function(x, ...) {
-    UseMethod("repr")
-}
-
-repr.numeric <- function(x, ...) {
-    paste0("c(", paste0(round(x, 2), collapse = ", "), ")")
-}

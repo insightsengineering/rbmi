@@ -188,9 +188,30 @@ print.imputation_df <- function(x, ...) {
 
 
 
+#' A collection of `imputation_singles()` grouped by a single subjid ID
+#'
+#' @param imputations a list of [imputation_single()] objects ordered so that repetitions
+#' are grouped sequentially
+#' @param D the number of repetitions that were performed which determines how many columns
+#' the imputation matrix should have
+#'
+#' This is a constructor function to create a `imputation_list_single` object
+#' which contains a matrix of [imputation_single()] objects grouped by a single `id`. The matrix
+#' is split so that it has D columns (i.e. for non-bmlmi methods this will always be 1)
+#'
+#' The `id` attribute is deterimined by extracting the `id` attribute from the contributing
+#' [imputation_single()] objects. An error is throw if multiple `id` are detected
+imputation_list_single <- function(imputations, D = 1) {
 
-imputation_list_single <- function(id, imputations, D) {
-    assert_that(length(imputations) %% D == 0)
+    ids <- vapply(imputations, `[[`, character(1), "id")
+    id <- unique(ids)
+
+    assert_that(
+        length(imputations) %% D == 0,
+        length(id) == 1,
+        msg = "multiple `ids` were detected"
+    )
+
     x <- list(
         id = id,
         imputations = matrix(imputations, ncol = D, byrow = TRUE)
@@ -205,9 +226,8 @@ validate.imputation_list_single <- function(x, ...) {
         is.character(x$id),
         length(x$id) == 1,
         is.matrix(x$imputations),
-        all(apply(x$imputations, c(1, 2), function(z) {
-            has_class(z[[1]], "imputation_single")
-        }))
+        all(apply(x$imputations, c(1, 2), function(z) has_class(z[[1]], "imputation_single"))),
+        all(vapply(x$imputations, `[[`, character(1), "id") == x$id)
     )
     return(TRUE)
 }
@@ -252,3 +272,13 @@ print.imputation_list_df <- function(x, ...) {
     }
 }
 
+
+
+
+repr <- function(x, ...) {
+    UseMethod("repr")
+}
+
+repr.numeric <- function(x, ...) {
+    paste0("c(", paste0(round(x, 2), collapse = ", "), ")")
+}

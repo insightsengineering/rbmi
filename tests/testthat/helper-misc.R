@@ -83,4 +83,21 @@ is_nightly <- function() {
 
 
 
+# Simple function to enable 1 function mocks
+with_mocking <- function(expr, ..., where) {
+    x <- list(...)
+    nam <- names(x)
+    fun <- x[[1]]
+    assertthat::assert_that(length(x) == 1)
+    hold <- get(nam, envir = where)
+    assign(nam, fun, envir = where)
+
+    x <- tryCatch(
+        expr,
+        finally = {
+            assign(nam, hold, where)
+        }
+    )
+    return(x)
+}
 

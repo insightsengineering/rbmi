@@ -808,3 +808,209 @@ test_that("impute can recover known values", {
 })
 
 
+
+
+test_that("convert_to_imputation_list_df works as expected", {
+
+
+    ### Basic Usage
+    imputes <- list(
+        imputation_list_single(
+            imputations = list(
+                imputation_single("Tom", c(1)),
+                imputation_single("Tom", c(1,2)),
+                imputation_single("Tom", c(1,2,3)),
+                imputation_single("Tom", c(2)),
+                imputation_single("Tom", c(2,3)),
+                imputation_single("Tom", c(2,3,4))
+            ),
+            D = 2
+        ),
+        imputation_list_single(
+            imputations = list(
+                imputation_single("Harry", matrix(numeric(0))),
+                imputation_single("Harry", c(9, 8))
+            ),
+            D = 2
+        )
+    )
+
+    sample_ids <- list(
+        c("Tom", "Harry", "Tom"),
+        c("Tom")
+    )
+
+    expected_output <- imputation_list_df(
+        imputation_df(
+            imputation_single("Tom", c(1)),
+            imputation_single("Harry", matrix(numeric(0))),
+            imputation_single("Tom", c(1, 2, 3))
+        ),
+        imputation_df(
+            imputation_single("Tom", c(1, 2)),
+            imputation_single("Harry", c(9, 8)),
+            imputation_single("Tom", c(2))
+        ),
+        imputation_df(
+            imputation_single("Tom", c(2, 3))
+        ),
+        imputation_df(
+            imputation_single("Tom", c(2, 3, 4))
+        )
+    )
+
+    expect_equal(
+        convert_to_imputation_list_df(imputes, sample_ids),
+        expected_output
+    )
+
+
+    ## Error handling
+    sample_ids <- list(
+        c("Tom", "Harry", "Dave"),
+        c("Tom")
+    )
+
+    expect_error(
+        convert_to_imputation_list_df(imputes, sample_ids),
+        regexp = "index is not compatible with the object"
+    )
+
+    sample_ids <- list(
+        c("Tom", "Harry", "Tom", "Tom"),
+        c("Tom")
+    )
+
+    expect_error(
+        convert_to_imputation_list_df(imputes, sample_ids),
+        regexp = "Number of samples available does not equal"
+    )
+
+    sample_ids <- list(
+        c("Tom", "Harry", "Harry"),
+        c("Tom")
+    )
+
+    expect_error(
+        convert_to_imputation_list_df(imputes, sample_ids),
+        regexp = "index is not compatible with the object"
+    )
+
+})
+
+
+
+
+
+
+
+
+test_that("method_bmlmi is working as expected in combination with impute", {
+
+    vars <- set_vars(
+        outcome = "outcome",
+        visit = "visit",
+        subjid = "id",
+        group = "group",
+        strategy = "strategy",
+        covariates = c("cov1", "cov1*group")
+    )
+
+    dat <- tibble(
+        visit = factor(rep(c("v1", "v2", "v3"), 4), levels = c("v1", "v2", "v3")),
+        id = factor(rep(c("PA", "PB", "PC", "PD"), each = 3)),
+        group = factor(rep(c("A", "B"), each = 6)),
+        cov1 =    c(1, 1, 1,      2, 2, 2,     3, 3, 3,    4, 4, 4),
+        outcome = c(1, NA, NA,    4, 3, 6,     1, 1, 1,    5, NA, 6)
+    )
+
+
+
+    sample_1_coef <- c(4, 2, 3, 4, 1, 2)
+    sample_2_coef <- c(9, 1, 1, 3, 4, 5)
+
+    model_mat <- model.matrix(~ 1 + group + visit + cov1 + cov1 * group, data = dat)
+
+    # Convienance dataset so we know what numbers to put down in the expected outcomes
+    dat2 <- dat %>%
+        mutate(expected_1 = model_mat %*% sample_1_coef %>% as.vector) %>%
+        mutate(expected_2 = model_mat %*% sample_2_coef %>% as.vector)
+
+
+    ld <- longDataConstructor$new(dat, vars)
+
+    ## Use 0 correlation so that the conditional parameters doesn't change the
+    ## expected mu and sigma parameters
+
+    dobj <- as_draws(
+        samples = sample_list(
+            sample_single(
+                ids = c("PA", "PB", "PD"),
+                beta = sample_1_coef,
+                sigma = list(
+                    "A" = as_vcov(sd = c(1, 1, 1), cor = c(0, 0, 0)),
+                    "B" = as_vcov(sd = c(1, 1, 1), cor = c(0, 0, 0))
+                )
+            ),
+            sample_single(
+                ids = c("PC", "PA", "PA"),
+                beta = sample_2_coef,
+                sigma = list(
+                    "A" = as_vcov(sd = c(1, 1, 1), cor = c(0, 0, 0)),
+                    "B" = as_vcov(sd = c(1, 1, 1), cor = c(0, 0, 0))
+                )
+            )
+        ),
+        data = ld,
+        method = method_bmlmi(B = 2, D = 3),
+        formula = x ~ y
+    )
+
+    expected_output <- imputation_list_df(
+        imputation_df(
+            imputation_single("PA", c(8, 9)),
+            imputation_single("PB", matrix(numeric(0))),
+            imputation_single("PD", 21)
+        ),
+        imputation_df(
+            imputation_single("PA", c(8, 9)),
+            imputation_single("PB", matrix(numeric(0))),
+            imputation_single("PD", 21)
+        ),
+        imputation_df(
+            imputation_single("PA", c(8, 9)),
+            imputation_single("PB", matrix(numeric(0))),
+            imputation_single("PD", 21)
+        ),
+        imputation_df(
+            imputation_single("PC", matrix(numeric(0))),
+            imputation_single("PA", c(14, 16)),
+            imputation_single("PA", c(14, 16))
+        ),
+        imputation_df(
+            imputation_single("PC", matrix(numeric(0))),
+            imputation_single("PA", c(14, 16)),
+            imputation_single("PA", c(14, 16))
+        ),
+        imputation_df(
+            imputation_single("PC", matrix(numeric(0))),
+            imputation_single("PA", c(14, 16)),
+            imputation_single("PA", c(14, 16))
+        )
+    )
+
+    ## We replace sample_mvnorm with our own function that essentially emulates
+    ## conditional mean imputation so that we know what the results of the function
+    ## will be
+    x <- with_mocking(
+        expr = {
+            impute(dobj, c("A" = "B", "B" = "B"))
+        },
+        sample_mvnorm = function(mu, sigma) as.vector(mu),
+        where = environment(impute)
+    )
+    
+    expect_equal(x$imputations, expected_output)
+})
+
+
