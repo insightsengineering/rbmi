@@ -162,8 +162,8 @@ object using the `extract_imputed_dfs()` helper function, i.e.:
 
 ```{r}
 imputed_dfs <- extract_imputed_dfs(imputeObj)
-imputed_dfs[[1]]
-imputed_dfs[[2]]
+head(imputed_dfs[[1]])
+head(imputed_dfs[[2]])
 ```
 
 Note that in the case of `method_condmean()` the first imputed dataset will always correspond to the completed original dataset containing all subjects. 
