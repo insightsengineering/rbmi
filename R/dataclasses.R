@@ -247,7 +247,11 @@ print.imputation_list_single <- function(x, ...) {
 
 
 
-
+#' List of imputations_df
+#'
+#' A container for multiple [imputation_df]'s
+#'
+#' @param ... objects of class `imputation_df`
 imputation_list_df <- function(...) {
     x <- list(...)
     class(x) <- c("imputation_list_df", "list")
