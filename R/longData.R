@@ -41,6 +41,10 @@ longDataConstructor <- R6::R6Class(
         ids = NULL,
 
 
+        #' @field formula A formula expressing how the design matrix for the data should be constructed
+        formula = NULL,
+
+
         #' @field strata A numeric vector indicating which strata each corresponding value of
         #' `self$ids` belongs to.
         #' If no stratification variable is defined this will default to 1 for all subjects
@@ -486,6 +490,12 @@ longDataConstructor <- R6::R6Class(
             self$data <- sort_by(data, c(vars$subjid, vars$visit))
             self$vars <- vars
             self$visits <- levels(self$data[[self$vars$visit]])
+            frmvars <- c(
+                ife(nlevels(data[[vars$group]]) >= 2, vars$group, character()),
+                vars$visit,
+                vars$covariates
+            )
+            self$formula <- as_simple_formula(vars$outcome, frmvars)
             subjects <- levels(self$data[[self$vars$subjid]])
             for (id in subjects) self$add_subject(id)
             self$ids <- subjects
@@ -495,8 +505,6 @@ longDataConstructor <- R6::R6Class(
 
     )
 )
-
-
 
 
 #' Transpose imputations
@@ -559,7 +567,6 @@ transpose_imputations <- function(imputations) {
 #' Will error if there is an issue otherwise will return `TRUE`.
 #' @export
 validate.is_mar <- function(x, ...) {
-
     if (all(x) || all(!x)) {
         return(invisible(TRUE))
     }

@@ -63,11 +63,10 @@ test_that("as_simple_formula", {
         visit = "visit"
     )
 
-    expected1 <- as.formula(outcome ~ 1 + group + visit)
-    expected2 <- as.formula(outcome ~ 1 + visit)
-    expect_true(as_simple_formula(vars, is_multi_groups = TRUE) == expected1)
-    expect_true(as_simple_formula(vars, is_multi_groups = FALSE) == expected2)
+    actual <- as_simple_formula(vars$outcome, c(vars$group, vars$visit, vars$covariates))
+    expected <- as.formula(outcome ~ 1 + group + visit)
 
+    expect_true(actual == expected)
 })
 
 

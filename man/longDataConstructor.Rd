@@ -28,6 +28,8 @@ to this object should be avoided if possible.
 
 \item{\code{ids}}{A character vector containing the unique ids of each subject in \code{self$data}}
 
+\item{\code{formula}}{A formula expressing how the design matrix for the data should be constructed}
+
 \item{\code{strata}}{A numeric vector indicating which strata each corresponding value of
 \code{self$ids} belongs to.
 If no stratification variable is defined this will default to 1 for all subjects

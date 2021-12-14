@@ -687,3 +687,86 @@ test_that(
 
     }
 )
+
+
+
+
+
+
+test_that("Formula is created properly", {
+
+    vars <- set_vars(
+        outcome = "outcome",
+        visit = "visit",
+        subjid = "subjid",
+        group = "group",
+        strata = "strata",
+        covariates = c("sex", "age"),
+        strategy = "strategy"
+    )
+
+    dat <- tibble(
+        subjid = factor(rep(c("Tom", "Harry", "Phil", "Ben"), each = 3), levels = c("Tom", "Harry", "Phil", "Ben")),
+        age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
+        group = factor(rep(c("B", "B", "A", "A"), each = 3), levels = c("A", "B")),
+        sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),
+        strata = rep(c("A", "A", "A", "B"), each = 3),
+        visit = factor(rep(c("Visit 1", "Visit 2", "Visit 3"), 4)),
+        outcome = c(
+            NA, NA, NA,
+            NA, 4.14, NA,
+            NA, -1.34, 2.41,
+            -1.53, 1.03, 2.58
+        )
+    )
+    ld <- longDataConstructor$new(
+        data = dat,
+        vars = vars
+    )
+    formula_actual <- outcome ~ 1 + group + visit + sex + age
+    expect_true(formula_actual  == ld$formula)
+
+
+    dat <- tibble(
+        subjid = factor(rep(c("Tom", "Harry", "Phil", "Ben"), each = 3), levels = c("Tom", "Harry", "Phil", "Ben")),
+        age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
+        group = factor(rep(c("B", "B", "B", "B"), each = 3), levels = c("B")),
+        sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),
+        strata = rep(c("A", "A", "A", "B"), each = 3),
+        visit = factor(rep(c("Visit 1", "Visit 2", "Visit 3"), 4)),
+        outcome = c(
+            NA, NA, NA,
+            NA, 4.14, NA,
+            NA, -1.34, 2.41,
+            -1.53, 1.03, 2.58
+        )
+    )
+    ld <- longDataConstructor$new(
+        data = dat,
+        vars = vars
+    )
+    formula_actual <- outcome ~ 1 + visit + sex + age
+    expect_true(formula_actual  == ld$formula)
+
+
+    dat <- tibble(
+        subjid = factor(rep(c("Tom", "Harry", "Phil", "Ben"), each = 3), levels = c("Tom", "Harry", "Phil", "Ben")),
+        age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
+        group = factor(rep(c("A", "B", "C", "D"), each = 3), levels = c("A", "B", "C", "D")),
+        sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),
+        strata = rep(c("A", "A", "A", "B"), each = 3),
+        visit = factor(rep(c("Visit 1", "Visit 2", "Visit 3"), 4)),
+        outcome = c(
+            NA, NA, NA,
+            NA, 4.14, NA,
+            NA, -1.34, 2.41,
+            -1.53, 1.03, 2.58
+        )
+    )
+    ld <- longDataConstructor$new(
+        data = dat,
+        vars = vars
+    )
+    formula_actual <- outcome ~ 1 + group + visit + sex + age
+    expect_true(formula_actual  == ld$formula)
+})

@@ -2,21 +2,18 @@
 % Please edit documentation in R/utilities.R
 \name{as_simple_formula}
 \alias{as_simple_formula}
-\title{Convert an \code{ivars} object into a formula}
+\title{Creates a simple formula object from a string}
 \usage{
-as_simple_formula(vars, is_multi_groups)
+as_simple_formula(outcome, covars)
 }
 \arguments{
-\item{vars}{an \code{ivars} object as created by \code{\link[=set_vars]{set_vars()}}}
+\item{outcome}{character (length 1 vector). Name of the outcome variable}
 
-\item{is_multi_groups}{logical. If \code{TRUE}, the \code{vars$group} variable is added in the model formula.
-It should be \code{TRUE} if \code{vars$group} has at least 2 levels, \code{FALSE} otherwise.}
+\item{covars}{character (vector). Name of covariates}
 }
 \value{
 A formula
 }
 \description{
-Takes an \code{ivars} object (as created by \code{\link[=set_vars]{set_vars()}}) and converts
-it into a formula roughly of the form:\preformatted{outcome ~ group + visit + covariate1 + covariate2 + ...
-}
+Converts a string list of variables into a formula object
 }
