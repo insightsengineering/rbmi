@@ -217,11 +217,12 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar) {
 #' and `sigma` representing the multivariate normal distribution parameters for
 #' the subject's current group and reference group respectively.  `index_mar` will be
 #' a logical vector specifying which visits the subject met the MAR assumption
-#' at. The function must return a list with elements `mu` and `sigma`. See
-#' [strategy_JR()] for an example.
+#' at. The function must return a list with elements `mu` and `sigma`. See the implementation 
+#' of `strategy_JR()` for an example.
 #'
 #' @param ... User defined methods to be added to the return list. Input must
 #' be a function.
+#'
 #' @examples
 #' \dontrun{
 #' getStrategies()
@@ -230,6 +231,7 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar) {
 #'     JR = function(pars_group, pars_ref, index_mar)  more_code
 #' )
 #' }
+#'
 #' @export
 getStrategies <- function(...) {
     user_strats <- list(...)
