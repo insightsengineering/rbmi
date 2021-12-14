@@ -1,6 +1,6 @@
 Package: rbmi
 Title: Reference Based Multiple Imputation
-Version: 1.0.1
+Version: 1.0.2
 Authors@R: c(
     person("Craig", "Gower-Page", email = "craig.gower-page@roche.com", role = "aut"),
     person("Alessandro", "Noci", email = "alessandro.noci@roche.com", role = c("aut", "cre")),
@@ -23,7 +23,8 @@ Suggests:
     mvtnorm,
     knitr,
     rmarkdown,
-    bookdown
+    bookdown,
+    lubridate
 Biarch: true
 Config/testthat/edition: 3
 Imports: 

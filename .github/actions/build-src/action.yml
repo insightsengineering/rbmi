@@ -1,0 +1,39 @@
+
+name: 'Build src'
+description: 'Build src!'
+runs:
+  using: "composite"
+  steps:
+    
+    - name: Determine system/package state
+      run: |
+        sink(".github/meta.txt")
+            list(
+                version = version,
+                pkgs = installed.packages()[c("Rcpp", "rstan", "rstantools"), c("Version", "Package")]
+            )
+        sink()
+      shell: Rscript {0}
+    
+    
+    - name: Cache Compiled Stan Code
+      id: cache-pkgs
+      uses: actions/cache@v2
+      with:
+        path: src/*
+        key: ${{ hashFiles('.github/meta.txt') }}-${{ hashFiles('inst/stan/MMRM.stan') }}
+    
+    
+    # pkgbuild compares time stamps of *.so object to all header files including
+    # inst/include/stan_meta_header.hpp  so we touch the .so object to push its time
+    # stamp beyond that of the .hpp file
+    - name: Build if needed
+      shell: bash
+      run: |
+        if [[ ${{ steps.cache-pkgs.outputs.cache-hit == 'true' }} && "${{ runner.os }}" !=  "Windows" ]] ; then
+            echo "No compilation needed!"
+            touch src/*.so
+        else
+            echo "Compilation needed!"
+            Rscript -e "pkgbuild::compile_dll()"
+        fi
