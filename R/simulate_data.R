@@ -150,7 +150,6 @@ validate.simul_pars <- function(x, ...) {
 #' - `outcome_noICE`: Numeric variable that specifies the longitudinal outcome assuming no ICEs.
 #' - `ind_ice1`: Binary variable that takes value `1` if the corresponding visit is affected by ICE1 and `0` otherwise.
 #' - `dropout_ice1`: Binary variable that takes value `1` if the corresponding visit is affected by the drop-out following ICE1 and `0` otherwise.
-#' - `out_ice1`: Numeric variable that specifies the longitudinal outcome including ICE1.
 #' - `dropout2`: Binary variable that takes value `1` if the corresponding visit is affected by the uninformative study drop-out.
 #' - `ind_ice2`: Binary variable that takes value `1` if the corresponding visit is affected by ICE2.
 #' - `outcome`: Numeric variable that specifies the longitudinal outcome including ICE1, ICE2 and the intermittent missing values.
