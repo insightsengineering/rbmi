@@ -52,9 +52,9 @@
 #' @param mu the coefficients to use to construct the mean outcome value at each visit. Must
 #' be a named list with elements `int`, `age`, `sex`, `trt` & `visit`. See details.
 #'
-#' @name simulate_data
+#' @name simulate_test_data
 #' @export
-simulate_data <- function(
+simulate_test_data <- function(
     n = 200,
     sd = c(3, 5, 7),
     cor = c(0.1, 0.7, 0.4),
@@ -141,7 +141,7 @@ simulate_data <- function(
 
 
 
-#' @rdname simulate_data
+#' @rdname simulate_test_data
 #' @export
 as_vcov <- function(sd, cor) {
     x <- diag(rep(1, length(sd)))

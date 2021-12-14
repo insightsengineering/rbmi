@@ -209,7 +209,7 @@ test_that("nmar data is removed as expected", {
 test_that("NULL data_ice works uses MAR by default", {
 
     set.seed(314)
-    dat <- simulate_data(n = 100)
+    dat <- simulate_test_data(n = 100)
 
     dat2 <- dat %>%
         mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 0, outcome, NA_real_))
