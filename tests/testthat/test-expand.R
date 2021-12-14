@@ -209,3 +209,147 @@ test_that("expand_locf",{
 })
 
 
+
+
+test_that("fill_locf - works with data.frames & Dates", {
+    input_df <- data.frame(
+        v1 = c(NA, 1, 2, NA, NA, 3, NA, 4),
+        pt = c("b", "a", "a", "a", "b", "a", "b", "b"),
+        srt1 = c(3, 1, 3, 3, 3, 2, 2, 1),
+        srt2 = c(2, 1, 2, 1, 1, 1, 1, 1),
+        mydate = lubridate::ymd("2020:04:30") + lubridate::days(c(1:8) * 25),
+        v2 = c(1:8)
+    )
+
+    #  arrange(input_df, pt, srt1, srt2)
+    input_df[c(1, 7), "mydate"] <- NA
+
+    df_actual <- fill_locf(
+        input_df,
+        vars = c("v1", "v2", "mydate"),
+        group = "pt",
+        order = c("srt1", "srt2")
+    )
+
+    df_expected <-  data.frame(
+        v1 = c(4,   1,   2,   3,  4,  3,   4,  4),
+        pt = c("b", "a", "a", "a", "b", "a", "b", "b"),
+        srt1 = c(3,  1,   3,   3,   3,   2,   2,   1),
+        srt2 = c(2,  1,   2,   1,   1,   1,   1,   1),
+        mydate = lubridate::ymd(
+            "2020-09-02", "2020-06-19", "2020-07-14", "2020-08-08",
+            "2020-09-02", "2020-09-27", "2020-11-16", "2020-11-16"
+        ),
+        v2 = c(1:8)
+    )
+
+    expect_equal(df_actual, df_expected)
+})
+
+
+
+
+
+test_that("fill_locf - works with list columns", {
+    input_df <- dplyr::tibble(
+        pt = c("a", "a", "b", "b", "b"),
+        srt1 = c(1, 2, 1, 2, 3),
+        list_val = list(c(1, 1), NA, NA, c(4, 4,4,4), NA)
+    )
+    df_actual <- fill_locf(
+        input_df,
+        vars = "list_val",
+        group = "pt",
+        order = "srt1"
+    )
+    df_expected <- dplyr::tibble(
+        pt = c("a", "a", "b", "b", "b"),
+        srt1 = c(1, 2, 1, 2, 3),
+        list_val = list(c(1, 1), c(1, 1), NA, c(4, 4,4,4), c(4,4,4,4))
+    )
+    expect_equal(df_actual, df_expected)
+
+
+
+    mod1 <- lm(data = iris, Sepal.Width ~ Sepal.Length)
+    input_df <- dplyr::tibble(
+        pt = c("a", "a", "b", "b", "b", "b", "b"),
+        srt1 = c(1, 2, 1, 2, 3, 4, 5),
+        list_val = list(NA, mod1, mod1, NA, iris, NA, NA)
+    )
+    df_actual <- fill_locf(
+        input_df,
+        vars = "list_val",
+        group = "pt",
+        order = "srt1"
+    )
+    df_expected <- dplyr::tibble(
+        pt = c("a", "a", "b", "b", "b", "b", "b"),
+        srt1 = c(1, 2, 1, 2, 3, 4, 5),
+        list_val = list(NA, mod1, mod1, mod1, iris, iris, iris)
+    )
+    expect_equal(df_actual, df_expected)
+})
+
+
+
+test_that("fill_locf works with factors", {
+
+    input_df <- data.frame(
+        v1 = c(NA, 1, 2, NA, NA, 3, NA, 4),
+        pt = c("a", "a", "a", "a", "b", "b", "b", "b"),
+        srt1 = c(1, 1, 1, 1, 2, 2, 2, 2),
+        srt2 = c(1, 2, 3, 4, 1, 2, 3, 4),
+        myfac1 = factor(c("A", "A", NA, "B", NA, "A", "B", NA), levels = c("A", "B","C")),
+        v2 = c(1, 2, 3, 4, NA, 6, NA, 8)
+    )
+
+    df_actual <- fill_locf(
+        input_df,
+        vars = c("v1", "myfac1"),
+        group = "pt",
+        order = c("srt1", "srt2")
+    )
+
+    df_expected <- data.frame(
+        v1 = c(NA, 1, 2, 2, NA, 3, 3, 4),
+        pt = c("a", "a", "a", "a", "b", "b", "b", "b"),
+        srt1 = c(1, 1, 1, 1, 2, 2, 2, 2),
+        srt2 = c(1, 2, 3, 4, 1, 2, 3, 4),
+        myfac1 = factor(c("A", "A", "A", "B", NA, "A", "B", "B"), levels = c("A", "B","C")),
+        v2 = c(1, 2, 3, 4, NA, 6, NA, 8)
+    )
+
+    expect_equal(df_actual, df_expected)
+
+
+
+    # Making sure there's no complications with factor levels only occurring within certain groups
+    input_df <- data.frame(
+        v1 = c(NA, 1, 2, NA, NA, 3, NA, 4),
+        pt = c("a", "a", "a", "a", "b", "b", "b", "b"),
+        srt1 = c(1, 1, 1, 1, 2, 2, 2, 2),
+        srt2 = c(1, 2, 3, 4, 1, 2, 3, 4),
+        myfac1 = factor(c("A", "A", NA, NA, NA, "B", "C", NA), levels = c("A", "B","C", "D")),
+        v2 = c(1, 2, 3, 4, NA, 6, NA, 8)
+    )
+
+    df_actual <- fill_locf(
+        input_df,
+        vars = c("v1", "myfac1"),
+        group = "pt",
+        order = c("srt1", "srt2")
+    )
+
+    df_expected <- data.frame(
+        v1 = c(NA, 1, 2, 2, NA, 3, 3, 4),
+        pt = c("a", "a", "a", "a", "b", "b", "b", "b"),
+        srt1 = c(1, 1, 1, 1, 2, 2, 2, 2),
+        srt2 = c(1, 2, 3, 4, 1, 2, 3, 4),
+        myfac1 = factor(c("A", "A", "A", "A", NA, "B", "C", "C"), levels = c("A", "B","C", "D")),
+        v2 = c(1, 2, 3, 4, NA, 6, NA, 8)
+    )
+
+    expect_equal(df_actual, df_expected)
+
+})

@@ -42,6 +42,19 @@ test_that("Rubin's rules", {
     expect_true(all(actual_res == Inf))
 
 
+    # if ses are all NA, then results are only for point estimate
+    ses <- rep(NA, 100)
+    v_com <- Inf
+    expect_equal(
+        rubin_rules(ests, ses, v_com),
+        list(
+            est_point = mean(ests),
+            var_t = NA,
+            df = NA
+        )
+    )
+
+
 })
 
 
@@ -114,6 +127,8 @@ test_that("pool", {
         )
     )
 
+
+
     ###### reference CIs
     real_mu <- mean(vals)
     real_se <- sqrt(var(vals) / n)
@@ -131,6 +146,7 @@ test_that("pool", {
 
         real_ci <- real_mu + c(-1, 1) * qnorm( (1 - (1 - conf) / 2) * 1.005) * real_se
         ci <- pars$ci
+
 
         expect_true(real_ci[1] < ci[1] & real_ci[2] > ci[2])
 
@@ -152,9 +168,101 @@ test_that("pool", {
 
 })
 
+test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
+    set.seed(101)
 
+    mu <- 0
+    sd <- 1
+    n <- 2000
+    vals <- rnorm(n, mu, sd)
+    real_mu <- mean(vals)
 
+    runanalysis <- function(x) {
+        list("p1" = list(est = mean(x), se = NA, df = NA))
+    }
 
+    results_bayes <- as_analysis(
+        method = method_bayes(n_samples = 5000),
+        results =
+            lapply(
+                seq_len(5000),
+                function(x) runanalysis(sample(vals, size = n, replace = TRUE))
+            )
+    )
+    bayes <- pool(results_bayes)
+    bayes2 <- pool(results_bayes, conf.level = 0.8)
+    bayes3 <- pool(results_bayes, alternative = "greater")
+
+    expect_equal(
+        bayes$pars$p1,
+        list(est = real_mu,
+             ci = as.numeric(c(NA, NA)),
+             se = as.numeric(NA),
+             pvalue = as.numeric(NA)),
+        tolerance = 1e-2
+    )
+
+    expect_equal(
+        bayes2$pars$p1,
+        list(est = real_mu,
+             ci = as.numeric(c(NA, NA)),
+             se = as.numeric(NA),
+             pvalue = as.numeric(NA)),
+        tolerance = 1e-2
+    )
+
+    expect_equal(
+        bayes3$pars$p1,
+        list(est = real_mu,
+             ci = as.numeric(c(NA, NA)),
+             se = as.numeric(NA),
+             pvalue = as.numeric(NA)),
+        tolerance = 1e-2
+    )
+
+    runanalysis <- function(x) {
+        list("p1" = list(est = mean(x), se = NA, df = Inf))
+    }
+
+    results_bayes <- as_analysis(
+        method = method_bayes(n_samples = 5000),
+        results =
+            lapply(
+                seq_len(5000),
+                function(x) runanalysis(sample(vals, size = n, replace = TRUE))
+            )
+    )
+    bayes <- pool(results_bayes)
+    bayes2 <- pool(results_bayes, conf.level = 0.8)
+    bayes3 <- pool(results_bayes, alternative = "greater")
+
+    expect_equal(
+        bayes$pars$p1,
+        list(est = real_mu,
+             ci = as.numeric(c(NA, NA)),
+             se = as.numeric(NA),
+             pvalue = as.numeric(NA)),
+        tolerance = 1e-2
+    )
+
+    expect_equal(
+        bayes2$pars$p1,
+        list(est = real_mu,
+             ci = as.numeric(c(NA, NA)),
+             se = as.numeric(NA),
+             pvalue = as.numeric(NA)),
+        tolerance = 1e-2
+    )
+
+    expect_equal(
+        bayes3$pars$p1,
+        list(est = real_mu,
+             ci = as.numeric(c(NA, NA)),
+             se = as.numeric(NA),
+             pvalue = as.numeric(NA)),
+        tolerance = 1e-2
+    )
+})
 
 test_that("Can recover known jackknife with  H0 < 0 & H0 > 0", {
     jest <- c( 7, 3, 4 , 5 , 3 ,3 , 9)

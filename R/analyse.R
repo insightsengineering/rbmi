@@ -261,6 +261,8 @@ extract_imputed_df <- function(imputation, ld, delta = NULL, idmap = FALSE) {
         dat2 <- dat
     }
 
+    dat2 <- as_dataframe(dat2)
+
     if (idmap) {
         attr(dat2, "idmap") <- id_map
     } else {
@@ -459,10 +461,16 @@ validate_analyse_pars <- function(results, pars) {
     )
 
     for (par in pars) {
-        if (par != "df") {
+        if (!par %in% c("df", "se")) {
             assert_that(
                 all(!is.na(vapply(results_unnested, function(x) x[[par]], numeric(1)))),
                 msg = sprintf("Parameter `%s` contains missing values", par)
+            )
+        } else {
+            assert_that(
+                all(!is.na(vapply(results_unnested, function(x) x[[par]], numeric(1)))) ||
+                all(is.na(vapply(results_unnested, function(x) x[[par]], numeric(1)))) ,
+                msg = sprintf("Parameter `%s` contains both missing and observed values", par)
             )
         }
     }
