@@ -154,14 +154,14 @@ longDataConstructor <- R6::R6Class(
         #' returned; if the character vector contains duplicate entries then that subject will be
         #' returned multiple times.
         #'
-        #' If `obj` is an `imputation_list` object (as created by [as_imputation_list()]) then the
+        #' If `obj` is an `imputation_df` object (as created by [imputation_df()]) then the
         #' subject ids specified in the object will be returned and missing values will be filled
         #' in by those specified in the imputation list object.  i.e.
         #' ```
-        #' obj <- as_imputation_list(
-        #'   as_imputation_single( id = "pt1", values = c(1,2,3)),
-        #'   as_imputation_single( id = "pt1", values = c(4,5,6)),
-        #'   as_imputation_single( id = "pt3", values = c(7,8))
+        #' obj <- imputation_df(
+        #'   imputation_single( id = "pt1", values = c(1,2,3)),
+        #'   imputation_single( id = "pt1", values = c(4,5,6)),
+        #'   imputation_single( id = "pt3", values = c(7,8))
         #' )
         #' longdata$get_data(obj)
         #' ```
@@ -183,11 +183,11 @@ longDataConstructor <- R6::R6Class(
 
             if (is.null(obj)) return(self$data)
 
-            if (! any(c("imputation_list", "character") %in% class(obj))) {
-                stop("Object must be an imputation_list or a character vector")
+            if (! any(c("imputation_df", "character") %in% class(obj))) {
+                stop("Object must be an imputation_df or a character vector")
             }
 
-            list_flag <- "imputation_list" %in% class(obj)
+            list_flag <- "imputation_df" %in% class(obj)
 
             if (list_flag) {
                 obj_expanded <- transpose_imputations(obj)
@@ -512,16 +512,11 @@ longDataConstructor <- R6::R6Class(
 
 #' Transpose imputations
 #'
-#' Takes an `imputation_list` object and transposes it e.g.
+#' Takes an `imputation_df` object and transposes it e.g.
 #' ```
 #' list(
-#'     list(
-#'         id = "a",
-#'         values = c(1,2,3)
-#'     ),
-#'     list(
-#'         id = "b",
-#'         values = c(4,5,6)
+#'     list(id = "a", values = c(1,2,3)),
+#'     list(id = "b", values = c(4,5,6)
 #'     )
 #' )
 #' ```
@@ -534,7 +529,7 @@ longDataConstructor <- R6::R6Class(
 #'     values = c(1,2,3,4,5,6)
 #' )
 #' ```
-#' @param imputations An `imputation_list` object created by [as_imputation_list()]
+#' @param imputations An `imputation_df` object created by [imputation_df()]
 transpose_imputations <- function(imputations) {
     len <- length(imputations)
     values <- vector(mode = "list", length = len)

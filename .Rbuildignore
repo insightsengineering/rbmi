@@ -7,3 +7,5 @@
 ^\.lintr$
 ^.gitignore$
 ^src/\.gitkeep$
+^data-draw$
+^.git$
