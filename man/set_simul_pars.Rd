@@ -22,7 +22,7 @@ set_simul_pars(
 
 \item{n}{Number of subjects belonging to the group.}
 
-\item{prob_ice1}{Numeric vector that specifies for each visit the probability of experiencing ICE1 after the current visit for a patient with outcome equal to the mean at baseline.
+\item{prob_ice1}{Numeric vector that specifies for each visit the probability of experiencing ICE1 after the current visit for a subject with outcome equal to the mean at baseline.
 If a single numeric is provided, then the same probability is applied to each visit.}
 
 \item{or_outcome_ice1}{Numeric number that specifies the odds ratio of ICE1 corresponding to a +1 higher value of the outcome at the visit.}
@@ -39,12 +39,12 @@ then dropout also triggers discontinuation of study drug and a corresponding ICE
 A \code{simul_pars} object which is a named list containing the simulation parameters.
 }
 \description{
-Use this function to provide input arguments for each study group needed to simulate data with \code{\link[=simulate]{simulate()}}.
-\code{\link[=simulate]{simulate()}} generates data for a two-arms clinical trial with longitudinal continuous outcome and two intercurrent events (ICEs).
+This function provides input arguments for each study group needed to simulate data with \code{\link[=simulate_data]{simulate_data()}}.
+\code{\link[=simulate_data]{simulate_data()}} generates data for a two-arms clinical trial with longitudinal continuous outcome and two intercurrent events (ICEs).
 }
 \details{
-For the details, please see \code{\link[=simulate]{simulate()}}.
+For the details, please see \code{\link[=simulate_data]{simulate_data()}}.
 }
 \seealso{
-\code{\link[=simulate]{simulate()}}
+\code{\link[=simulate_data]{simulate_data()}}
 }

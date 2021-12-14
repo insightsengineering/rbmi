@@ -7,21 +7,33 @@
 simulate_ice(outcome, visits, ids, prob_ice, or_outcome_ice, baseline_mean)
 }
 \arguments{
-\item{outcome}{TODO}
+\item{outcome}{Numeric variable that specifies the longitudinal outcome for a single group.}
 
-\item{visits}{TODO}
+\item{visits}{Factor variable that specifies the visit of each assessment.}
 
-\item{ids}{TODO}
+\item{ids}{Factor variable that specifies the id of each subject.}
 
-\item{prob_ice}{TODO}
+\item{prob_ice}{Numeric vector that specifies for each visit the probability of experiencing the ICE after the current visit for a subject with outcome equal to the mean at baseline.
+If a single numeric is provided, then the same probability is applied to each visit.}
 
-\item{or_outcome_ice}{TODO}
+\item{or_outcome_ice}{Numeric number that specifies the odds ratio of the ICE corresponding to a +1 higher value of the outcome at the visit.}
 
-\item{baseline_mean}{TODO}
+\item{baseline_mean}{Mean outcome value at baseline.}
 }
 \value{
-TODO
+A binary variable that takes value \code{1} if the corresponding outcome is affected by the ICE and \code{0} otherwise.
 }
 \description{
 Simulate intercurrent event
+}
+\details{
+The probability of the ICE at each visit is modeled according to the following logistic regression:
+\code{~ 1 + I(visit == 0) + ... + I(visit == n_visits-1) + I((x-alpha))} where:
+\itemize{
+\item \code{n_visits} is the number of visits (including baseline).
+\item \code{alpha} is the baseline outcome mean set with \code{baseline_mean}.
+The term \code{I((x-alpha))} specifies the dependency of the probability of the ICE on the current outcome value.
+The corresponding coefficient is \code{log(or_outcome_ice)} which represents the increase of the ICE probability
+due to a +1 higher value of the outcome at the visit.
+}
 }

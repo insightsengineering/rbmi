@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulate_data.R
 \name{adjust_trajectories_single}
 \alias{adjust_trajectories_single}
-\title{Adjust trajectory of a patient's outcome due to the intercurrent event (ICE)}
+\title{Adjust trajectory of a subject's outcome due to the intercurrent event (ICE)}
 \usage{
 adjust_trajectories_single(
   distr_pars_group,
@@ -12,17 +12,29 @@ adjust_trajectories_single(
 )
 }
 \arguments{
-\item{distr_pars_group}{TODO}
+\item{distr_pars_group}{Named list containing the simulation parameters of the multivariate normal distribution assumed for the given treatment group. It contains the following elements:
+\itemize{
+\item \code{mu}: Numeric vector indicating the mean outcome trajectory. It should include the outcome at baseline.
+\item \code{sigma} Covariance matrix of the outcome trajectory.
+}}
 
-\item{outcome}{TODO}
+\item{outcome}{Numeric variable that specifies the longitudinal outcome.}
 
-\item{strategy_fun}{TODO}
+\item{strategy_fun}{Function implementing trajectories after the intercurrent event (ICE). Must be one of \code{\link[=getStrategies]{getStrategies()}}. See \code{\link[=getStrategies]{getStrategies()}} for details.}
 
-\item{distr_pars_ref}{TODO}
+\item{distr_pars_ref}{Optional. Named list containing the simulation parameters of the reference arm. It contains the following elements:
+\itemize{
+\item \code{mu}: Numeric vector indicating the mean outcome trajectory assuming no ICEs. It should include the outcome at baseline.
+\item \code{sigma} Covariance matrix of the outcome trajectory assuming no ICEs.
+}}
 }
 \value{
-TODO
+A numeric vector containing the adjusted trajectory for a single subject.
 }
 \description{
-Adjust trajectory of a patient's outcome due to the intercurrent event (ICE)
+Adjust trajectory of a subject's outcome due to the intercurrent event (ICE)
+}
+\details{
+\code{outcome} should be specified such that all-and-only the post-ICE observations (i.e. the
+observations to be adjusted) are set to \code{NA}.
 }
