@@ -7,3 +7,6 @@
 ^\.lintr$
 ^.gitignore$
 ^src/\.gitkeep$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

@@ -345,7 +345,9 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
     }
 
     alpha <- 1 - conf.level
-    pvals <- (c(sum(est < 0), sum(est > 0)) + 1) / (length(est) + 1)
+
+    pvals <- pval_percentile(est = est)
+    names(pvals) <- NULL
 
     index <- switch(
         alternative,
@@ -383,6 +385,48 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
     return(ret)
 }
 
+#' @title P-value of percentile bootstrap
+#'
+#' @description Determines the (not necessarily unique) quantile (type=6) of "est" which gives a value of 0
+#' From this, derive the p-value corresponding to the percentile bootstrap via inversion.
+#'
+#' @param est a numeric vector of point estimates from each bootstrap sample.
+#'
+#' @details The p-value for H_0: theta=0 vs H_A: theta>0 is the value `alpha` for which `q_alpha = 0`.
+#' If there is at least one estimate equal to zero it returns the largest `alpha` such that `q_alpha = 0`.
+#' If all bootstrap estimates are > 0 it returns 0; if all bootstrap estimates are < 0 it returns 1. Analogous
+#' reasoning is applied for the p-value for H_0: theta=0 vs H_A: theta<0.
+#'
+#' @return A named numeric vector of length 2 containing the p-value for H_0: theta=0 vs H_A: theta>0
+#' (`"pval_greater"`) and the p-value for H_0: theta=0 vs H_A: theta<0 (`"pval_less"`).
+#'
+#' @importFrom stats uniroot
+pval_percentile <- function(est){
+
+    if (all(est == 0)) {
+        ret <- c(1, 1)
+    } else if (min(est) > 0) {
+        ret <- c(0, 1)
+    } else if (max(est) < 0) {
+        ret <- c(1, 0)
+    } else if (any(est == 0)) {
+        # see ?quantile "type=6" section for explanation
+        quant <- rank(est, ties.method="first")/(length(est) + 1)
+        ret <- c(
+            min(quant[est == 0]),
+            1 - max(quant[est == 0])
+        )
+    } else {
+        x <- uniroot(
+            function(q) quantile(est, probs = q, type = 6),
+            lower = 0,
+            upper = 1
+        )$root
+        ret <- c(x, 1-x)
+    }
+    names(ret) <- c("pval_greater", "pval_less")
+    return(ret)
+}
 
 #' Bootstrap Pooling via normal approximation
 #' @description
