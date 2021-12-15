@@ -276,9 +276,7 @@ get_bootstrap_draws <- function(
         method = method,
         samples = as_sample_list(samples),
         data = longdata,
-        formula = as_simple_formula(
-            longdata$vars,
-            is_multi_groups = ifelse(nlevels(longdata$data[[longdata$vars$group]]) > 1, TRUE, FALSE)),
+        formula = longdata$formula,
         n_failures = failed_samples
     )
     return(ret)
@@ -337,9 +335,7 @@ get_jackknife_draws <- function(longdata, method) {
         method = method,
         samples = as_sample_list(samples),
         data = longdata,
-        formula = as_simple_formula(
-            longdata$vars,
-            is_multi_groups = ifelse(nlevels(longdata$data[[longdata$vars$group]]) > 1, TRUE, FALSE)),
+        formula = longdata$formula,
         n_failures = 0
     )
     return(ret)
@@ -367,10 +363,7 @@ get_mmrm_sample <- function(ids, longdata, method, optimizer) {
     dat <- longdata$get_data(ids, nmar.rm = TRUE, na.rm = TRUE)
     model_df <- as_model_df(
         dat = dat,
-        frm = as_simple_formula(
-            vars,
-            is_multi_groups = ifelse(nlevels(longdata$data[[vars$group]]) > 1, TRUE, FALSE)
-        )
+        frm = longdata$formula
     )
 
     sample <- fit_mmrm_multiopt(
@@ -434,13 +427,9 @@ draws.bayes <- function(data, data_ice = NULL, vars, method) {
     data2 <- extract_data_nmar_as_na(longdata)
 
     # compute design matrix
-    frm = as_simple_formula(
-        vars,
-        is_multi_groups = ifelse(nlevels(longdata$data[[vars$group]]) > 1, TRUE, FALSE)
-    )
     model_df <- as_model_df(
         dat = data2,
-        frm = frm
+        frm = longdata$formula
     )
 
     # scale input data
@@ -496,7 +485,7 @@ draws.bayes <- function(data, data_ice = NULL, vars, method) {
         samples = as_sample_list(samples),
         data = longdata,
         fit = fit$fit,
-        formula = frm,
+        formula = longdata$formula,
         n_failures = 0
     )
 

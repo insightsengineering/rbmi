@@ -168,8 +168,7 @@ impute_internal <- function(draws, references, update_strategy, strategies, cond
             data = data,
             references = references,
             strategies = strategies,
-            condmean = condmean,
-            is_multi_groups = ifelse(nlevels(data$data[[data$vars$group]]) > 1, TRUE, FALSE)
+            condmean = condmean
         ),
         SIMPLIFY = FALSE
     )
@@ -371,8 +370,6 @@ invert_indexes <- function(x) {
 #' @param condmean Logical. If `TRUE` will impute using the conditional mean values, if `FALSE`
 #' will impute by taking a random draw from the multivariate normal distribution.
 #'
-#' @param is_multi_groups Logical. If `TRUE`, the `vars$group` variable is added in the model formula.
-#' It should be `TRUE` if `vars$group` has at least 2 levels, `FALSE` otherwise.
 impute_data_individual <- function(
     id,
     index,
@@ -381,8 +378,7 @@ impute_data_individual <- function(
     data,
     references,
     strategies,
-    condmean,
-    is_multi_groups
+    condmean
 ) {
 
     # Define default return value if nothing needs to be imputed
@@ -405,8 +401,8 @@ impute_data_individual <- function(
     dat_ref <- dat_pt
     dat_ref[, vars$group] <- factor(group_ref, levels = levels(id_data$group))
 
-    dat_pt_mod <- as_model_df(dat_pt, as_simple_formula(vars, is_multi_groups))
-    dat_ref_mod <- as_model_df(dat_ref, as_simple_formula(vars, is_multi_groups))
+    dat_pt_mod <- as_model_df(dat_pt, data$formula)
+    dat_ref_mod <- as_model_df(dat_ref, data$formula)
 
     parameters_group <- get_visit_distribution_parameters(
         dat = dat_pt_mod[-1],  # -1 as first col from as_model_df is the outcome variable
