@@ -32,7 +32,7 @@ trunctate <- function(x, n) {
 # please use `simulate_data` instead, this function is left here for compatibility with
 # tests that have already been defined based upon it
 #
-get_sim_data <- function(n, sigma, trt = 4){
+get_sim_data <- function(n, sigma, trt = 4) {
     nv <- ncol(sigma)
     covars <- tibble::tibble(
         id = 1:n,
@@ -44,7 +44,7 @@ get_sim_data <- function(n, sigma, trt = 4){
     dat <- mvtnorm::rmvnorm(n, sigma = sigma) %>%
         set_col_names(paste0("visit_", 1:nv)) %>%
         dplyr::as_tibble() %>%
-        dplyr::mutate(id = 1:n()) %>%
+        dplyr::mutate(id = 1:dplyr::n()) %>%
         tidyr::gather("visit", "outcome", -id) %>%
         dplyr::mutate(visit = factor(visit)) %>%
         dplyr::arrange(id, visit) %>%

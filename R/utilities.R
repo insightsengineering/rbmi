@@ -508,3 +508,17 @@ is_char_fact <- function(x) {
 is_num_char_fact <- function(x) {
     is.numeric(x) | is.character(x) | is.factor(x)
 }
+
+
+
+#' Convert object to dataframe
+#'
+#' @param x a data.frame like object
+#'
+#' Utility function to convert a "data.frame-like" object to an actual `data.frame`
+#' to avoid issues with inconsitencies on methods (such as  `[`() and dplyr's grouped dataframes)
+as_dataframe <- function(x) {
+    x2 <- as.data.frame(x)
+    row.names(x2) <- NULL
+    return(x2)
+}
