@@ -24,11 +24,10 @@ A \code{data.frame} containing the simulated data. It includes the following var
 \item \code{id}: Factor variable that specifies the id of each subject.
 \item \code{visit}: Factor variable that specifies the visit of each assessment. Visit \code{0} denotes the baseline visit.
 \item \code{group}: Factor variable that specifies which treatment group each subject belongs to.
-\item \code{out_bl}: Numeric variable that specifies the baseline outcome.
-\item \code{out_noICE}: Numeric variable that specifies the longitudinal outcome assuming no ICEs.
+\item \code{outcome_bl}: Numeric variable that specifies the baseline outcome.
+\item \code{outcome_noICE}: Numeric variable that specifies the longitudinal outcome assuming no ICEs.
 \item \code{ind_ice1}: Binary variable that takes value \code{1} if the corresponding visit is affected by ICE1 and \code{0} otherwise.
 \item \code{dropout_ice1}: Binary variable that takes value \code{1} if the corresponding visit is affected by the drop-out following ICE1 and \code{0} otherwise.
-\item \code{out_ice1}: Numeric variable that specifies the longitudinal outcome including ICE1.
 \item \code{dropout2}: Binary variable that takes value \code{1} if the corresponding visit is affected by the uninformative study drop-out.
 \item \code{ind_ice2}: Binary variable that takes value \code{1} if the corresponding visit is affected by ICE2.
 \item \code{outcome}: Numeric variable that specifies the longitudinal outcome including ICE1, ICE2 and the intermittent missing values.

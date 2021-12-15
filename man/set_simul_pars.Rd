@@ -16,31 +16,39 @@ set_simul_pars(
 )
 }
 \arguments{
-\item{mu}{Numeric vector indicating the mean outcome trajectory assuming no ICEs. It should include the outcome at baseline.}
+\item{mu}{Numeric vector describing the mean outcome trajectory at each visit (including baseline) assuming no ICEs.}
 
 \item{sigma}{Covariance matrix of the outcome trajectory assuming no ICEs.}
 
 \item{n}{Number of subjects belonging to the group.}
 
-\item{prob_ice1}{Numeric vector that specifies for each visit the probability of experiencing ICE1 after the current visit for a subject with outcome equal to the mean at baseline.
+\item{prob_ice1}{Numeric vector that specifies the probability of experiencing ICE1 (discontinuation from study treatment due to SDCR reasons)
+after each visit for a subject with observed outcome at that visit equal to the mean at baseline (\code{mu[1]}).
 If a single numeric is provided, then the same probability is applied to each visit.}
 
-\item{or_outcome_ice1}{Numeric number that specifies the odds ratio of ICE1 corresponding to a +1 higher value of the outcome at the visit.}
+\item{or_outcome_ice1}{Numeric value that specifies the odds ratio of experiencing ICE1 after each visit corresponding to a +1 higher value of the observed outcome at that visit.}
 
-\item{prob_post_ice1_dropout}{Numeric number that specifies the drop-out probability following ICE1.}
+\item{prob_post_ice1_dropout}{Numeric value that specifies the probability of study drop-out following ICE1.
+If a subject is simulated to drop-out after ICE1, all outcomes after ICE1 are set to missing.}
 
-\item{prob_dropout}{Numeric that specifies the probability that a post-baseline visit is affected by study drop-out. In case the subject is still on treatment at the subject's (first) visit affected drop-out,
-then dropout also triggers discontinuation of study drug and a corresponding ICE called "ICE2" is generated.}
+\item{prob_dropout}{Numeric that specifies an additional probability that a post-baseline visit is affected by study drop-out.
+Outcome data at the subject's first simulated visit affected by study drop-out and all subsequent visits are set to missing.
+In case the subject's first simulated visit affected by study drop-out is prior to ICE1
+(i.e. in case the subject is still on study treatment), then it is assumed that the study drop-out also triggers discontinuation due the NSDRC reasons
+and a corresponding intercurrent event ICE2 is generated.}
 
-\item{prob_miss}{Numeric number that specifies the probability for a given post-baseline observation to be missing. It can be used to produce
-"intermittent" missing values (which are missing completely at random).}
+\item{prob_miss}{Numeric value that specifies an additional probability for a given post-baseline observation to be missing. This can be used to produce
+"intermittent" missing values which are not associated with any ICE.}
 }
 \value{
 A \code{simul_pars} object which is a named list containing the simulation parameters.
 }
 \description{
 This function provides input arguments for each study group needed to simulate data with \code{\link[=simulate_data]{simulate_data()}}.
-\code{\link[=simulate_data]{simulate_data()}} generates data for a two-arms clinical trial with longitudinal continuous outcome and two intercurrent events (ICEs).
+\code{\link[=simulate_data]{simulate_data()}} generates data for a two-arms clinical trial with longitudinal continuous outcomes and two intercurrent events (ICEs).
+ICE1 may be thought of as a discontinuation from study treatment due to study drug or condition related (SDCR) reasons.
+ICE2 may be thought of as discontinuation from study treatment due to uninformative study drop-out, i.e. due to not study drug or
+condition related (NSDRC) reasons and outcome data after ICE2 is always missing.
 }
 \details{
 For the details, please see \code{\link[=simulate_data]{simulate_data()}}.
