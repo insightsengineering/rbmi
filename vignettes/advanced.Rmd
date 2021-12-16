@@ -34,7 +34,7 @@ and perform a mock analysis so that all the require objects are available.
 library(rbmi)
 library(dplyr)
 set.seed(169)
-dat_full <- simulate_data(n = 120) %>% as_tibble()
+dat_full <- simulate_test_data(n = 120) %>% as_tibble()
 
 ## Introduce missingness
 dat <- dat_full
