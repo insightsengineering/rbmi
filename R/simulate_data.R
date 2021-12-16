@@ -64,6 +64,10 @@ validate.simul_pars <- function(x, ...) {
         msg = "`x` must be a named list of length 8"
     )
     assert_that(
+        all(!sapply(x, function(y) any(is.na(y)))),
+        msg = "some element of `x` contains missing values"
+    )
+    assert_that(
         is.vector(x$mu) &&
             is.matrix(x$sigma) &&
             all(length(x$mu) == dim(x$sigma)),
@@ -189,9 +193,9 @@ simulate_data <- function(pars_c, pars_t, post_ice_traj, strategies = getStrateg
 
     n_visits <- length(pars_c$mu)
     # overwrite ids to have unique ids
-    data$id <- rep(paste0("id_", seq.int(pars_c$n + pars_t$n)), each = n_visits)
+    data$id <- as.factor(rep(paste0("id_", seq.int(pars_c$n + pars_t$n)), each = n_visits))
     # add group variable
-    data$group <- rep(c(rep("Control", pars_c$n), rep("Intervention", pars_t$n)), each = n_visits)
+    data$group <- as.factor(rep(c(rep("Control", pars_c$n), rep("Intervention", pars_t$n)), each = n_visits))
 
     return(data)
 }
@@ -315,10 +319,11 @@ simulate_ice <- function(outcome, visits, ids, prob_ice, or_outcome_ice, baselin
     )
 
     n_visits <- nlevels(visits)
-    if(length(prob_ice == 1)) {
+    if(length(prob_ice) == 1) {
         prob_ice <- rep(prob_ice, n_visits)
     }
     prob_ice[prob_ice == 0] <- 1e-20
+    prob_ice[prob_ice == 1] <- 1-1e-15
 
     create_model_ice <- function(n_visits, baseline_mean) {
         model_ice <- "~ 1"
@@ -382,7 +387,7 @@ simulate_dropout <- function(prob_dropout, ids, subset = NULL) {
 
     dropout <- rep(0, length(ids))
     dropout[subset == 1] <- rbinom(n = sum(subset), size = 1, prob = prob_dropout)
-    dropout <- unlist(tapply(dropout, factor(ids, levels = unique(ids)), function(x) pmin(cumsum(x), 1)))
+    dropout <- unlist(tapply(dropout, factor(ids, levels = unique(ids)), function(x) pmin(cumsum(x), 1)), use.names = FALSE)
     return(dropout)
 }
 
@@ -406,6 +411,11 @@ simulate_dropout <- function(prob_dropout, ids, subset = NULL) {
 #'
 adjust_trajectories <- function(distr_pars_group, outcome, ids, ind_ice, strategy_fun, distr_pars_ref = NULL) {
 
+    assert_that(
+        all(!is.na(outcome)),
+        msg = "`outcome` contains missing values"
+    )
+
     outcome[ind_ice == 1] <- NA
     outcome <- unlist(tapply(outcome, factor(ids, levels = unique(ids)), function(x) adjust_trajectories_single(
         outcome = x,
@@ -413,7 +423,7 @@ adjust_trajectories <- function(distr_pars_group, outcome, ids, ind_ice, strateg
         strategy_fun = strategy_fun,
         distr_pars_ref = distr_pars_ref
     )
-    ))
+    ), use.names = FALSE)
 
     return(outcome)
 }
