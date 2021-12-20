@@ -392,8 +392,8 @@ where $MSB$ is the mean square between the bootstrapped datasets, and $MSW$ is t
 
 $$
 \begin{align*}
-MSB = \frac{D}{B-1} \sum_{b = 1}^B (\bar{\theta_{b}} - \hat{\theta})^2 \\
-MSW = \frac{1}{B(D-1)} \sum_{b = 1}^B \sum_{d = 1}^D (\theta_{bd} - \bar{\theta_b})^2
+MSB &= \frac{D}{B-1} \sum_{b = 1}^B (\bar{\theta_{b}} - \hat{\theta})^2 \\
+MSW &= \frac{1}{B(D-1)} \sum_{b = 1}^B \sum_{d = 1}^D (\theta_{bd} - \bar{\theta_b})^2
 \end{align*} 
 $$
 where $\bar{\theta_{b}}$ is the mean across the $D$ estimates obtained from random imputation of the $b$-th bootstrap sample.
