@@ -1,16 +1,6 @@
 ---
 title: 'rbmi: A R package for reference-based multiple imputation methods'
-author:
-    - name: Alessandro Noci [^1] [^2]
-      orcid: "0000-0003-0872-7098"
-      affiliation: 1
-    - name: Craig Gower-Page[^1] [^2]
-      affiliation: 1
-    - name: Marcel Wolbers [^1]
-      affiliation: 1
-affiliation:
-  - name: "F.Hoffmann La-Roche"
-    index: 1
+author: Alessandro Noci [^1] [^2], Craig Gower-Page[^1] [^2], Marcel Wolbers [^1]
 tags:
   - R
   - Biostatistics
@@ -19,6 +9,10 @@ tags:
   - Missing Data
   - Multiple Imputation
   - Reference-based Methods
+output: 
+  bookdown::pdf_book:
+    toc: false
+    citation_package: natbib
 date: '21 December 2021'
 bibliography: references.bib
 link-citations: true   
