@@ -13,7 +13,7 @@ output:
   bookdown::pdf_book:
     toc: false
     citation_package: natbib
-date: '21 December 2021'
+date: \today
 bibliography: references.bib
 link-citations: true
 ---
