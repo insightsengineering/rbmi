@@ -13,9 +13,6 @@ output:
   bookdown::pdf_book:
     toc: false
     citation_package: natbib
-header-includes:
-   - \usepackage{url}
-   - \usepackage{xcolor}
 date: '21 December 2021'
 bibliography: references.bib
 link-citations: true
