@@ -1,6 +1,6 @@
----
+--- 
 title: 'rbmi: A R package for reference-based multiple imputation methods'
-author: Alessandro Noci [^1] [^2], Craig Gower-Page[^1] [^2], Marcel Wolbers [^1]
+author: Alessandro Noci[^1], Craig Gower-Page[^1], Marcel Wolbers[^1]
 tags:
   - R
   - Biostatistics
@@ -20,17 +20,15 @@ link-citations: true
 
 [^1]: Affiliation: F.Hoffmann La-Roche
 
-[^2]: Co-first authors
-
 # Summary
 
 In clinical trials the estimand framework is a systematic approach to define in detail what needs to be estimated to address the scientific question of interest posed by the trial objective. This framework has been proposed in the ICH E9(R1) addendum on estimands and sensitivity analyses to ensure alignment among clinical trial objectives, trial execution/conduct, statistical analyses, and interpretation of results [@iche9r1].
 
 Once the estimand has been defined, the evaluation of the efficacy of the treatment under investigation requires the definition of an estimator which is well-aligned with the estimand. For more than a decade a mixed effects model repeated measures (MMRM) approach has been the de facto standard for the primary analysis when the primary outcome is a continuous longitudinal variable. However, it is increasingly recognized that alternative statistical methods to MMRM may be required in order to properly align the analysis method with the targeted estimand. A recent overview of methods to align the estimator with the estimand is @Mallinckrodt2020. A short introduction on estimation methods for studies with longitudinal endpoints can also be found in @Wolbers2021. One prominent statistical method for this purpose is multiple imputation (MI), which is the target of the `rbmi` package. 
 
-Methods based on MI are an attractive and flexible alternative to MMRM. They allow for the imputation of missing data under both missing-at-random (MAR) and missing-not-at-random (MNAR) assumptions. For example, they allow imputation of missing data after a treatment discontinuation in the active arm based on data from the control arm (so-called reference-based imputation). Different reference-based assumption can be adopted depending on the disease area and the anticipated mechanism of action of the intervention. For a general description and review of reference-based imputation methods, we refer to @CarpenterEtAl2013, @CroEtAlTutorial2020, and @Wolbers2021.
+Methods based on MI are an attractive and flexible alternative to MMRM. They allow for the imputation of missing data under both missing-at-random (MAR) and missing-not-at-random (MNAR) assumptions. For example, they allow imputation of missing data after a treatment discontinuation in the active arm based on data from the control arm (so-called reference-based imputation). Different reference-based assumptions can be adopted depending on the disease area and the anticipated mechanism of action of the intervention. For a general description and review of reference-based imputation methods, we refer to @CarpenterEtAl2013, @CroEtAlTutorial2020, and @Wolbers2021.
 
-The ICH E9(R1) addendum also stresses the importance of performing proper sensitivity analyses to assess how robust the results given by the primary analysis are [@iche9r1]. Sensitivity analyses should also be planned to evaluate the impact of the modeling assumptions about missing data. For example, one could penalize the mean outcome of subjects with unobserved data by a pre-specified fixed amount. This kind of approach is called $\delta$-adjustment [@CroEtAlTutorial2020], where $\delta$ refers to the amount of the penalization. This method can be used to perform a "tipping-point analysis", which consists in progressively increasing the amount of $\delta$ adjustment from 0 until the conclusions from the primary analysis are overturned. Sensitivity analyses should also be performed for MI-based estimators and `rbmi` also supports this.
+The ICH E9(R1) addendum also stresses the importance of performing proper sensitivity analyses to assess how robust the results given by the primary analysis are [@iche9r1]. Sensitivity analyses should also be planned to evaluate the impact of the modeling assumptions about missing data. For example, one could penalize the mean outcome of subjects with unobserved data by a pre-specified fixed amount. This kind of approach is called $\delta$-adjustment [@CroEtAlTutorial2020], where $\delta$ refers to the amount of the penalization. This method can be used to perform a "tipping-point analysis", which consists in progressively increasing the amount of $\delta$ adjustment from 0 until the conclusions from the primary analysis are overturned. Sensitivity analyses should also be performed for MI-based estimators and `rbmi` supports this.
 
 # Statement of need
 
@@ -47,9 +45,9 @@ All the approaches implemented in `rbmi` follow a common workflow based on 4 ste
 
 The different approaches can be set by defining a `method` object using the functions:
 
-- `method_bayes()` for conventional Bayesian MI based on MCMC sampling and random imputation. Inference is based on Rubin's rules.
-- `method_approxbayes()` for approximate Bayesian MI where posterior draws are obtained via bootstrap.
-- `method_condmean()` for maximum likelihood parameter estimation and conditional mean imputation. Inference is based on re-sampling techniques (bootstrap or jackknife).
+- `method_bayes()` for conventional Bayesian MI based on MCMC sampling and random imputation. Inference is based on Rubin's rules (@Barnard1999, @LittleRubin1992). This method is described in @CarpenterEtAl2013 and @CroEtAlTutorial2020.
+- `method_approxbayes()` for approximate Bayesian MI where posterior draws are obtained via bootstrap instead of via MCMC (@LittleRubin1992, @Efron1994, @Honaker2010, @vanHippelBartlett2021).
+- `method_condmean()` for maximum likelihood parameter estimation and conditional mean imputation. Inference is based on re-sampling techniques (bootstrap [@EfronTibs1994] or jackknife [@Efron1981]). This method is described in @Wolbers2021.
 - `method_bmlmi()` for bootstrapped maximum likelihood MI as described in @vanHippelBartlett2021.
 
 A detailed description and comparison of the implemented methods can be found in @Wolbers2021, as well as in the package vignette describing the statistical specifications of the package.
