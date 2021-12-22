@@ -18,8 +18,7 @@ header-includes:
    - \usepackage{xcolor}
 date: '21 December 2021'
 bibliography: references.bib
-link-citations: true   
-linkcolor: blue
+link-citations: true
 ---
 
 [^1]: Affiliation: F.Hoffmann La-Roche
