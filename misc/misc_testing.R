@@ -1,5 +1,11 @@
 
 
+
+###########################
+#
+#  Setup - Part 1 - parallel testing
+#
+
 suppressPackageStartupMessages({
     library(dplyr)
     library(testthat)
@@ -46,7 +52,14 @@ vars <- set_vars(
 )
 
 
-test_parallel <- function(method) {
+
+###########################
+#
+#  Potential Unit tests
+#
+
+
+test_parallel <- function(method, ncores = 2) {
     set.seed(101)
     time_1_core <- time_it({
         results_1 <- draws(
@@ -65,7 +78,7 @@ test_parallel <- function(method) {
             data_ice = dat_ice,
             vars = vars,
             method = method,
-            ncores = 2
+            ncores = ncores
         )
     })
 
@@ -88,19 +101,13 @@ x <- test_parallel(method_condmean(n_samples = 80))
 x <- test_parallel(method_condmean(type = "jackknife"))
 
 
-
-profvis::profvis({
-    results_2 <- draws(
-        data = dat,
-        data_ice = dat_ice,
-        vars = vars,
-        method = method_approxbayes(n_samples = 80),
-        ncores = 1
-    )
-})
+###########################
+#
+#  Manual time testing
+#
 
 
-method <- method_approxbayes(n_samples = 80)
+method <- method_approxbayes(n_samples = 20)
 method <- method_condmean(n_samples = 80)
 method <- method_condmean(type = "jackknife")
 
@@ -131,7 +138,10 @@ time_it({
 
 
 
-
+###########################
+#
+#  Setup - Part 2 - Failure testing
+#
 
 
 bign <- 75
@@ -189,77 +199,144 @@ MockLongData <- R6Class("MockLongData",
     )
 )
 
-MockStack <- R6Class("MockStack",
-    inherit = Stack,
-    public = list(
-        tracker = 0,
-        pop = function(...) {
-            x = super$pop(...)
-            self$tracker = self$tracker + length(x)
-            return(x)
-        },
-        reset = function(){
-            self$tracker = 0
-            stack = list()
-        }
-    )
-)
-
-stack <- MockStack$new()
 
 ld <- MockLongData$new(dat, vars)
 ld$set_strategies(dat_ice)
 
+
+##################
+#
+# Bootstrap 1 core
+#
+#
+
+
+method <- method_approxbayes(n_samples = 10, threshold = 0.5)
 ld$set_failed_sample_index(seq_len(4))
-x <- get_bootstrap_draws(
+stack <- get_sample_stack("bootstrap", ld, method)
+x <- get_draws_mle(
     longdata = ld,
-    method = method_approxbayes(n_samples = 10, threshold = 0.5),
+    method = method,
+    n_target_samples = method$n_samples,
+    failure_limit = (method$threshold * method$n_samples),
     use_samp_ids = FALSE,
     ncores = 1,
-    stack = stack
-)
-expect_equal(x$n_failures, 4)
-expect_equal(ld$tracker, 14 + 1)  # +1 for original sample
-expect_equal(stack$tracker, 14)
-
-
-
-ld$set_failed_sample_index(seq_len(3))
-stack$reset()
-expect_error(
-    get_bootstrap_draws(
-        longdata = ld,
-        method = method_approxbayes(n_samples = 20, threshold = 0.1),
-        use_samp_ids = FALSE,
-        ncores = 1,
-        stack = stack
-    ),
-    regexp = "Try using a simpler covariance"
-)
-expect_equal(ld$tracker, 23)  # +1 for original sample
-expect_equal(stack$tracker, 4)
-
-
-
-
-ld$set_failed_sample_index(c(1:4))
-x <- get_bootstrap_draws(
-    longdata = ld,
-    method = method_approxbayes(n_samples = 10, threshold = 0.5),
-    use_samp_ids = FALSE,
-    ncores = 2
+    first_sample_orig = FALSE,
+    sample_stack = stack
 )
 expect_equal(x$n_failures, 4)
 expect_equal(ld$tracker, 15)
+expect_length(stack$stack, 1)
 
 
-ld$set_failed_sample_index(c(1:6))
+
+method <- method_approxbayes(n_samples = 10, threshold = 0.3)
+ld$set_failed_sample_index(2:5)
+stack <- get_sample_stack("bootstrap", ld, method)
 expect_error(
-    get_bootstrap_draws(
+    get_draws_mle(
         longdata = ld,
-        method = method_approxbayes(n_samples = 40, threshold = 0.5),
+        method = method,
+        n_target_samples = method$n_samples,
+        failure_limit = (method$threshold * method$n_samples),
         use_samp_ids = FALSE,
-        ncores = 2
-    ),
-    regexp = "Try using a simpler covariance"
+        ncores = 1,
+        first_sample_orig = FALSE,
+        sample_stack = stack
+    )
 )
+expect_equal(ld$tracker, 13)
+expect_length(stack$stack, 8)
+
+
+
+##################
+#
+# Bootstrap 2 core
+#
+#
+
+method <- method_approxbayes(n_samples = 10, threshold = 0.5)
+ld$set_failed_sample_index(seq_len(4))
+stack <- get_sample_stack("bootstrap", ld, method)
+x <- get_draws_mle(
+    longdata = ld,
+    method = method,
+    n_target_samples = method$n_samples,
+    failure_limit = (method$threshold * method$n_samples),
+    use_samp_ids = FALSE,
+    ncores = 2,
+    first_sample_orig = FALSE,
+    sample_stack = stack
+)
+expect_equal(x$n_failures, 4)
+expect_equal(ld$tracker, 15)
+expect_length(stack$stack, 1)
+
+
+
+
+method <- method_approxbayes(n_samples = 10, threshold = 0.3)
+ld$set_failed_sample_index(2:5)
+stack <- get_sample_stack("bootstrap", ld, method)
+expect_error(
+    get_draws_mle(
+        longdata = ld,
+        method = method,
+        n_target_samples = method$n_samples,
+        failure_limit = (method$threshold * method$n_samples),
+        use_samp_ids = FALSE,
+        ncores = 2,
+        first_sample_orig = FALSE,
+        sample_stack = stack
+    )
+)
+expect_equal(ld$tracker, 13)
+expect_length(stack$stack, 13 - 6)
+
+
+
+##################
+#
+# Jackknife - failures only
+#
+#
+
+method <- method_condmean(type = "jackknife")
+stack <- get_sample_stack("jackknife", ld, method)
+for (i in 5:10) {
+    stack$stack[[i]] <- c("1", "2")
+}
+expect_error(
+    x <- get_draws_mle(
+        longdata = ld,
+        method = method,
+        n_target_samples = length(ld$ids),
+        failure_limit = 0,
+        use_samp_ids = FALSE,
+        ncores = 1,
+        first_sample_orig = FALSE,
+        sample_stack = stack
+    )
+)
+expect_length(stack$stack, length(ld$ids) - 5)
+
+
+method <- method_condmean(type = "jackknife")
+stack <- get_sample_stack("jackknife", ld, method)
+for (i in 5:10) {
+    stack$stack[[i]] <- c("1", "2")
+}
+expect_error(
+    x <- get_draws_mle(
+        longdata = ld,
+        method = method,
+        n_target_samples = length(ld$ids),
+        failure_limit = 0,
+        use_samp_ids = FALSE,
+        ncores = 2,
+        first_sample_orig = FALSE,
+        sample_stack = stack
+    )
+)
+expect_length(stack$stack, length(ld$ids) - 6)
