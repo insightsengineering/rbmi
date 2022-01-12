@@ -1,6 +1,9 @@
 --- 
-title: 'rbmi: A R package for reference-based multiple imputation methods'
-author: Alessandro Noci[^1], Craig Gower-Page[^1], Marcel Wolbers[^1]
+title: 'rbmi: A R package for standard and reference-based multiple imputation methods'
+author: 
+ - Craig Gower-Page^[Data & Statistical Sciences, Pharma Development, Roche, Welwyn Garden City, UK] 
+ - Alessandro Noci^[Data & Statistical Sciences, Pharma Development, Roche, Basel, Switzerland] 
+ - Marcel Wolbers$^{\dagger}$
 tags:
   - R
   - Biostatistics
@@ -18,42 +21,54 @@ bibliography: references.bib
 link-citations: true
 ---
 
-[^1]: Affiliation: F.Hoffmann La-Roche
+# Summary {-}
 
-# Summary
+Many randomized controlled clinical trials compare a continuous outcome variable which is assessed longitudinally at scheduled follow-up visits between the subjects assigned to the intervention treatment and those assigned to the control group. 
+Missing outcome measurements may occur because subjects miss an assessment or drop out from the trial altogether. 
+Moreover, intercurrent events (ICEs) such as discontinuations of the assigned treatment or initiations of rescue medications may affect the interpretation or the existence of the outcome measurements associated with the clinical question of interest. The ICH E9(R1) addendum on estimands, a regulatory document published by the International Council for Harmonisation of Technical Requirements for Pharmaceuticals for Human Use, presents a structured framework to link trial objectives to a precise description of the targeted treatment effect in the presence of ICEs and missing data [@iche9r1].
 
-In clinical trials the estimand framework is a systematic approach to define in detail what needs to be estimated to address the scientific question of interest posed by the trial objective. This framework has been proposed in the ICH E9(R1) addendum on estimands and sensitivity analyses to ensure alignment among clinical trial objectives, trial execution/conduct, statistical analyses, and interpretation of results [@iche9r1].
+The R package `rbmi` was created to support trial analyses which are aligned with the estimands framework.
+Missing data is handled using multiple imputation (MI) assuming multivariate normally distributed data. 
+The package supports both standard imputation under a missing-at-random assumption and reference-based imputation methods. Reference-based methods impute missing data in the intervention treatment group based on observed data from the control group [@CarpenterEtAl2013]. $\delta$-based imputation methods which add an offset term, $\delta$, to the imputed values prior to the analysis in order to assess the impact of unobserved outcomes being worse or better than those observed are also supported. Such methods are frequently used for sensitivity or "tipping point" analyses [@CroEtAlTutorial2020]. 
 
-Once the estimand has been defined, the evaluation of the efficacy of the treatment under investigation requires the definition of an estimator which is well-aligned with the estimand. For more than a decade a mixed effects model repeated measures (MMRM) approach has been the de facto standard for the primary analysis when the primary outcome is a continuous longitudinal variable. However, it is increasingly recognized that alternative statistical methods to MMRM may be required in order to properly align the analysis method with the targeted estimand. A recent overview of methods to align the estimator with the estimand is @Mallinckrodt2020. A short introduction on estimation methods for studies with longitudinal endpoints can also be found in @Wolbers2021. One prominent statistical method for this purpose is multiple imputation (MI), which is the target of the `rbmi` package. 
 
-Methods based on MI are an attractive and flexible alternative to MMRM. They allow for the imputation of missing data under both missing-at-random (MAR) and missing-not-at-random (MNAR) assumptions. For example, they allow imputation of missing data after a treatment discontinuation in the active arm based on data from the control arm (so-called reference-based imputation). Different reference-based assumptions can be adopted depending on the disease area and the anticipated mechanism of action of the intervention. For a general description and review of reference-based imputation methods, we refer to @CarpenterEtAl2013, @CroEtAlTutorial2020, and @Wolbers2021.
+# Statement of need {-}
 
-The ICH E9(R1) addendum also stresses the importance of performing proper sensitivity analyses to assess how robust the results given by the primary analysis are [@iche9r1]. Sensitivity analyses should also be planned to evaluate the impact of the modeling assumptions about missing data. For example, one could penalize the mean outcome of subjects with unobserved data by a pre-specified fixed amount. This kind of approach is called $\delta$-adjustment [@CroEtAlTutorial2020], where $\delta$ refers to the amount of the penalization. This method can be used to perform a "tipping-point analysis", which consists in progressively increasing the amount of $\delta$ adjustment from 0 until the conclusions from the primary analysis are overturned. Sensitivity analyses should also be performed for MI-based estimators and `rbmi` supports this.
+`rbmi` is a flexible `R` package designed to support the analysis of randomized clinical trials with continuous longitudinal endpoints. 
+Both conventional MI methods based on Bayesian posterior draws and novel methods based on maximum likelihood estimation and re-sampling are implemented [@vanHippelBartlett2021, @Wolbers2021]. `rbmi` was designed for statisticians from both academic clinical research units and pharmaceutical industry. To our knowledge, a comprehensive and fully validated `R` implementation of such approaches is still lacking. An established software implementation of reference-based imputation in SAS are the so-called "five macros" [@FiveMacros]. An alternative `R` implementation which is currently under development is the R package `RefBasedMI`[@RefbasedMIpackage].
 
-# Statement of need
+# Implementation {-}
 
-`rbmi` is a flexible R package designed to support the analysis of randomized clinical trials with continuous longitudinal endpoints. It allows for imputation under missing-at-random and under reference-based methods. Both conventional MI methods based on Bayesian posterior draws and novel methods based on conditional mean imputation and re-sampling are supported. `rbmi` also includes the possibility of performing sensitivity analyses based on fixed $\delta$-adjustments. `rbmi` was designed for statisticians from both academic research units and pharmaceutical industry who deal with late-phase randomized clinical trials. `rbmi` could be used for regulatory purposes or in simulation studies. To our knowledge, a comprehensive, reliable and fully validated implementation of such approaches that also serves for regulatory purposes is still missing. An established software implementation of reference-based imputation in SAS are the so-called "five macros" by James Roger [@FiveMacros]. An alternative `R` implementation which is also currently under development is the R package `RefBasedMI`[@RefbasedMIpackage].
+All approaches implemented in `rbmi` follow a common workflow based on 4 core functions which are called sequentially: 
 
-# Implementation
+- `draws()` - fits the imputation models and stores their parameters
+- `impute()` - creates multiple imputed datasets
+- `analyse()` - analyses each of the multiple imputed datasets
+- `pool()` - combines the analysis results across imputed datasets into a single statistic
 
-All the approaches implemented in `rbmi` follow a common workflow based on 4 steps whose corresponding functions should be called sequentially. Additionally, helper functions that simplify the set-up of the input parameters and the interpretation of the outputs have also been implemented. This creates a user-friendly environment that allow the user to have a direct control on all the phases of the estimation process. The 4 core functions are the following:
+This modular design creates a user-friendly and extensible environment that allow the user to have a direct control on all the phases of the estimation process. 
+In addition, a variety of helper functions have been implemented to further support the user.
 
-- `draws()` - fits the imputation models and stores their parameters.
-- `impute()` - creates multiple imputed datasets.
-- `analyse()` - analyses each of the multiple imputed datasets.
-- `pool()` - combines the analysis results across imputed datasets into a single statistic.
+The `draws()` function has 3 input arguments: 
 
-The different approaches can be set by defining a `method` object using the functions:
+- `data`: The primary longitudinal `data.frame` containing the outcome variable and all covariates. The inclusion of time-varying covariates is also possible.
+- `data_ice`: A `data.frame` which specifies the first visit affected by an ICE and the imputation strategy for handling missing outcome data after the ICE.
+- `method`: The selected statistical approaches which may be defined by creating a `method` object using the functions:
+    - `method_bayes()` for MI based on Bayesian posterior parameter draws from MCMC sampling and inference based on Rubin's rules [@CarpenterEtAl2013].
+    - `method_approxbayes()`: as for `method_bayes()` except that  approximate Bayesian posterior draws are obtained via bootstrapping and maximum likelihood estimation (@LittleRubin1992[Section 10.2.3, part 6]).
+    - `method_condmean()` for conditional mean imputation based on maximum likelihood estimation. Inference is based on re-sampling techniques (bootstrap or jackknife) as described in @Wolbers2021.
+    - `method_bmlmi()` for bootstrapped maximum likelihood MI as described in @vanHippelBartlett2021.
 
-- `method_bayes()` for conventional Bayesian MI based on MCMC sampling and random imputation. Inference is based on Rubin's rules (@Barnard1999, @LittleRubin1992). This method is described in @CarpenterEtAl2013 and @CroEtAlTutorial2020.
-- `method_approxbayes()` for approximate Bayesian MI where posterior draws are obtained via bootstrap instead of via MCMC (@LittleRubin1992, @Efron1994, @Honaker2010, @vanHippelBartlett2021).
-- `method_condmean()` for maximum likelihood parameter estimation and conditional mean imputation. Inference is based on re-sampling techniques (bootstrap [@EfronTibs1994] or jackknife [@Efron1981]). This method is described in @Wolbers2021.
-- `method_bmlmi()` for bootstrapped maximum likelihood MI as described in @vanHippelBartlett2021.
+In addition to detailed help files for all functions, the package contains three vignettes: a `quickstart` vignette which describes the basic functionality, an `advanced` vignette which describes some of the advanced features, and a `stat_specs` vignette which describes the statistical methodology in detail. 
 
-A detailed description and comparison of the implemented methods can be found in @Wolbers2021, as well as in the package vignette describing the statistical specifications of the package.
+# Availability and validation {-}
 
-# Acknowledgements
+`rbmi` is developed open source on https://github.com/insightsengineering/rbmi and major releases will also be uploaded to [CRAN](https://cran.r-project.org/).
+Source code can only be promoted to the master branch after review by a second programmer. Unit tests which define and document the expected input and output of each function have been implemented to ensure that the package performs as expected. To date, `rbmi` has been used in two simulation studies reported in @Wolbers2021 and @Noci2021.
 
-TODO
+
+# Acknowledgements {-}
+
+The authors thank Jonathan Bartlett from the University of Bath and Paul Delmar and Daniel Sabanés Bové from Roche for many helpful discussions on the statistical methodology and the software implementation.
 
 # References
