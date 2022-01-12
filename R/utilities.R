@@ -511,3 +511,28 @@ as_dataframe <- function(x) {
     row.names(x2) <- NULL
     return(x2)
 }
+
+
+
+
+#' TODO - Document Stack
+Stack <- R6::R6Class(
+    classname = "Stack",
+    public = list(
+        stack = list(),
+        add = function(x) {
+            self$stack <- append(self$stack, x)
+        },
+        pop = function(i) {
+            assert_that(
+                length(self$stack) > 0,
+                msg = "Stack doesn't have any items to return"
+            )
+            i2 <- min(i, length(self$stack))
+            index <- seq_len(i2)
+            res <- self$stack[index]
+            self$stack <- self$stack[-index]
+            return(res)
+        }
+    )
+)

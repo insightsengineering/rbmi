@@ -8,7 +8,9 @@ get_bootstrap_draws(
   longdata,
   method,
   use_samp_ids = FALSE,
-  first_sample_orig = FALSE
+  first_sample_orig = FALSE,
+  ncores = 1,
+  stack = Stack$new()
 )
 }
 \arguments{
@@ -25,6 +27,10 @@ the first sample contains the parameter estimates from the original dataset and 
 samples contain the parameter estimates from bootstrap samples.
 If \code{FALSE} the function returns \code{method$n_samples} samples containing the parameter estimates from
 bootstrap samples.}
+
+\item{ncores}{Number of processes to parallise the job over}
+
+\item{stack}{A R6 stack instance. Ignore this is only used for unit testing purposes}
 }
 \value{
 A \code{draws} object which is a named list containing the following:
