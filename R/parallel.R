@@ -6,7 +6,9 @@ get_cluster <- function(ncores = 1) {
         return(NULL)
     }
 
-    cl <- parallel::makeCluster(ncores)
+    cl <- parallel::makePSOCKcluster(
+        ncores
+    )
 
     pkgenv <- environment(get_cluster)
 
