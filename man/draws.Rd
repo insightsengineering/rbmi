@@ -27,8 +27,8 @@ to the ICEs and the imputation strategies. See details.}
 \code{\link[=method_approxbayes]{method_approxbayes()}} or \code{\link[=method_condmean]{method_condmean()}}.
 It specifies the multiple imputation methodology to be used. See details.}
 
-\item{ncores}{A single numeric specifying the number of cores to parallelise the frequentist
-MMRM fitting over. See details. (Default = 1).}
+\item{ncores}{A single numeric specifying the number of cores to use in creating the draws object.
+Note that this parameter is ignored for \code{\link[=method_bayes]{method_bayes()}} (Default = 1).}
 }
 \value{
 A \code{draws} object which is a named list containing the following:

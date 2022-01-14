@@ -66,7 +66,9 @@ test_that("approxbayes", {
     standard_checks(dobj, d, meth)
 
     expect_length(dobj$samples, 6)
-    expect_true(all(vapply(dobj$samples, function(x) all(x$ids == levels(d$dat$id)), logical(1))))
+    for (samp in dobj$samples) {
+        expect_equal(samp$ids, levels(d$dat$id))
+    }
 })
 
 
@@ -80,7 +82,11 @@ test_that("condmean - bootstrap", {
 
     expect_length(dobj$samples, 6)
     expect_equal(dobj$samples[[1]]$ids, levels(d$dat$id))
-    expect_true(all(vapply(dobj$samples[-1], function(x) any(x$ids != levels(d$dat$id)), logical(1))))
+
+    for (samp in dobj$samples[-1]) {
+        expect_true(max(tapply(samp$ids, samp$ids, length)) >= 2)
+        expect_true(length(samp$ids) == length(dobj$samples[[1]]$ids))
+    }
 
     set.seed(623)
     meth <- method_condmean(n_samples = 5)
@@ -129,35 +135,6 @@ test_that("bayes", {
     expect_length(dobj$samples, 7)
     expect_true(all(vapply(dobj$samples, function(x) all(x$ids == levels(d$dat$id)), logical(1))))
 
-})
-
-
-test_that("failure limits", {
-
-    time_it_catch_error <- function(expr) {
-        start <- Sys.time()
-        tryCatch(expr, error = function(x) list())
-        stop <- Sys.time()
-        as.numeric(difftime(stop, start, units = "secs"))
-    }
-
-    set.seed(40123)
-    d <- get_data(15)
-
-    meth_01 <- method_approxbayes(n_samples = 10, threshold = 0.1)
-    meth_05 <- method_approxbayes(n_samples = 10, threshold = 0.5)
-    meth_10 <- method_approxbayes(n_samples = 10, threshold = 1.0)
-
-    expect_error(draws(d$dat, d$dat_ice, d$vars, meth_01), "More than 1 failed fits")
-    expect_error(draws(d$dat, d$dat_ice, d$vars, meth_05), "More than 5 failed fits")
-    expect_error(draws(d$dat, d$dat_ice, d$vars, meth_10), "More than 10 failed fits")
-
-    t_01 <- time_it_catch_error(draws(d$dat, d$dat_ice, d$vars, meth_01))
-    t_05 <- time_it_catch_error(draws(d$dat, d$dat_ice, d$vars, meth_05))
-    t_10 <- time_it_catch_error(draws(d$dat, d$dat_ice, d$vars, meth_10))
-
-    expect_true(t_01 < t_05)
-    expect_true(t_05 < t_10)
 })
 
 
@@ -230,3 +207,328 @@ test_that("NULL data_ice works uses MAR by default", {
     expect_true(all(unlist(dobj$data$is_mar)))
     expect_true(all(!unlist(dobj$data$is_post_ice)))
 })
+
+
+
+
+test_that("Failure is handled properly", {
+
+    bign <- 75
+    sigma <- as_vcov(
+        c(2, 1, 0.7),
+        c(
+            0.3,
+            0.4, 0.2
+        )
+    )
+
+    dat <- get_sim_data(bign, sigma, trt = 8) %>%
+        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
+        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        select(-is_miss)
+
+    dat_ice <- dat %>%
+        group_by(id) %>%
+        arrange(id, visit) %>%
+        filter(is.na(outcome)) %>%
+        slice(1) %>%
+        ungroup() %>%
+        select(id, visit) %>%
+        mutate(strategy = "JR")
+
+    vars <- set_vars(
+        outcome = "outcome",
+        group = "group",
+        strategy = "strategy",
+        subjid = "id",
+        visit = "visit",
+        covariates = c("age", "sex", "visit * group")
+    )
+
+    MockLongData <- R6Class("MockLongData",
+        inherit = longDataConstructor,
+        public = list(
+            failure_index = 0,
+            tracker = 0,
+            sample_ids = function() {
+                self$tracker = self$tracker + 1
+                if (self$tracker %in% self$failure_index) {
+                    return(c("1", "2"))
+                }
+                super$sample_ids()
+            },
+            set_failed_sample_index = function(x) {
+                self$tracker = 0
+                self$failure_index = x
+            }
+        )
+    )
+
+    ld <- MockLongData$new(dat, vars)
+    ld$set_strategies(dat_ice)
+
+
+    ##################
+    #
+    # Bootstrap - 1 core
+    #
+
+    method <- method_approxbayes(n_samples = 10, threshold = 0.5)
+    ld$set_failed_sample_index(seq_len(4))
+    stack <- get_bootstrap_stack(ld, method)
+    x <- get_draws_mle(
+        longdata = ld,
+        method = method,
+        n_target_samples = method$n_samples,
+        failure_limit = (method$threshold * method$n_samples),
+        use_samp_ids = FALSE,
+        ncores = 1,
+        first_sample_orig = FALSE,
+        sample_stack = stack
+    )
+    expect_equal(x$n_failures, 4)
+    expect_equal(ld$tracker, 15)
+    expect_length(stack$stack, 1)
+
+
+
+    method <- method_approxbayes(n_samples = 10, threshold = 0.3)
+    ld$set_failed_sample_index(2:5)
+    stack <- get_bootstrap_stack(ld, method)
+    expect_error(
+        get_draws_mle(
+            longdata = ld,
+            method = method,
+            n_target_samples = method$n_samples,
+            failure_limit = (method$threshold * method$n_samples),
+            use_samp_ids = FALSE,
+            ncores = 1,
+            first_sample_orig = FALSE,
+            sample_stack = stack
+        )
+    )
+    expect_equal(ld$tracker, 13)
+    expect_length(stack$stack, 8)
+
+
+
+    ##################
+    #
+    # Bootstrap - 2 core
+    #
+
+    method <- method_approxbayes(n_samples = 10, threshold = 0.5)
+    ld$set_failed_sample_index(seq_len(4))
+    stack <- get_bootstrap_stack(ld, method)
+    x <- get_draws_mle(
+        longdata = ld,
+        method = method,
+        n_target_samples = method$n_samples,
+        failure_limit = (method$threshold * method$n_samples),
+        use_samp_ids = FALSE,
+        ncores = 2,
+        first_sample_orig = FALSE,
+        sample_stack = stack
+    )
+    expect_equal(x$n_failures, 4)
+    expect_equal(ld$tracker, 15)
+    expect_length(stack$stack, 1)
+
+
+
+
+    method <- method_approxbayes(n_samples = 10, threshold = 0.3)
+    ld$set_failed_sample_index(2:5)
+    stack <- get_bootstrap_stack(ld, method)
+    expect_error(
+        get_draws_mle(
+            longdata = ld,
+            method = method,
+            n_target_samples = method$n_samples,
+            failure_limit = (method$threshold * method$n_samples),
+            use_samp_ids = FALSE,
+            ncores = 2,
+            first_sample_orig = FALSE,
+            sample_stack = stack
+        )
+    )
+    expect_equal(ld$tracker, 13)
+    expect_length(stack$stack, 13 - 6)
+
+
+    ##################
+    #
+    # Jackknife - failures only
+    #
+
+    method <- method_condmean(type = "jackknife")
+    stack <- get_jackknife_stack(ld)
+    for (i in 5:10) {
+        stack$stack[[i]] <- c("1", "2")
+    }
+    expect_error(
+        x <- get_draws_mle(
+            longdata = ld,
+            method = method,
+            n_target_samples = length(ld$ids),
+            failure_limit = 0,
+            use_samp_ids = FALSE,
+            ncores = 1,
+            first_sample_orig = FALSE,
+            sample_stack = stack
+        ),
+        regexp = "after removing subject '3'"
+    )
+    expect_length(stack$stack, length(ld$ids) - 5)
+
+
+    method <- method_condmean(type = "jackknife")
+    stack <- get_jackknife_stack(ld)
+    for (i in 5:10) {
+        stack$stack[[i]] <- c("1", "2", "3")
+    }
+    expect_error(
+        x <- get_draws_mle(
+            longdata = ld,
+            method = method,
+            n_target_samples = length(ld$ids),
+            failure_limit = 0,
+            use_samp_ids = FALSE,
+            ncores = 2,
+            first_sample_orig = FALSE,
+            sample_stack = stack
+        ),
+        regex = "after removing subject '4'"
+    )
+    expect_length(stack$stack, length(ld$ids) - 6)
+
+})
+
+
+
+
+
+
+test_that("draws is calling get_mmrm_sample properly", {
+    bign <- 75
+    sigma <- as_vcov(
+        c(2, 1, 0.7),
+        c(
+            0.3,
+            0.4, 0.2
+        )
+    )
+
+    dat <- get_sim_data(bign, sigma, trt = 8) %>%
+        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
+        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        select(-is_miss)
+
+    dat_ice <- dat %>%
+        group_by(id) %>%
+        arrange(id, visit) %>%
+        filter(is.na(outcome)) %>%
+        slice(1) %>%
+        ungroup() %>%
+        select(id, visit) %>%
+        mutate(strategy = "JR")
+
+    vars <- set_vars(
+        outcome = "outcome",
+        group = "group",
+        strategy = "strategy",
+        subjid = "id",
+        visit = "visit",
+        covariates = c("age", "sex", "visit * group")
+    )
+
+
+    ##################################
+    #
+    #  Conditional Mean
+    #
+
+
+    method <- method_condmean(n_samples = 2)
+    ld <- longDataConstructor$new(dat, vars)
+    ld$set_strategies(dat_ice)
+    x <- draws(dat, dat_ice, vars, method)
+
+    s1 <- get_mmrm_sample(
+        ids = ld$ids,
+        longdata = ld,
+        method = method,
+        optimizer = c("L-BFGS-B", "BFGS")
+    )
+    expect_equal(ld$ids, x$samples[[1]]$ids)
+    expect_equal(s1, x$samples[[1]])
+
+
+    s2 <- get_mmrm_sample(
+        ids = x$samples[[2]]$ids,
+        longdata = ld,
+        method = method,
+        optimizer = optimizer <- list(
+            "L-BFGS-B" = NULL,
+            "BFGS" = s1[c("beta", "theta")]
+        )
+    )
+    expect_true(!all(ld$ids %in% x$samples[[2]]$ids))
+    expect_true(length(ld$ids) == length(x$samples[[2]]$ids))
+    expect_equal(s2, x$samples[[2]])
+
+
+
+
+    ##################################
+    #
+    #  Approx Bayesian
+    #
+
+
+    method <- method_approxbayes(n_samples = 2)
+    ld <- longDataConstructor$new(dat, vars)
+    ld$set_strategies(dat_ice)
+    x <- draws(dat, dat_ice, vars, method)
+
+    s0 <- get_mmrm_sample(
+        ids = ld$ids,
+        longdata = ld,
+        method = method,
+        optimizer = c("L-BFGS-B", "BFGS")
+    )
+
+    s1 <- get_mmrm_sample(
+        ids = x$samples[[1]]$ids_samp,
+        longdata = ld,
+        method = method,
+        optimizer = optimizer <- list(
+            "L-BFGS-B" = NULL,
+            "BFGS" = s0[c("beta", "theta")]
+        )
+    )
+    s1$ids <- ld$ids
+    expect_true(!all(ld$ids %in% x$samples[[1]]$ids_samp))
+    expect_true(all(ld$ids %in% x$samples[[1]]$ids))
+    expect_true(length(ld$ids) == length(x$samples[[1]]$ids))
+    expect_equal(s1, x$samples[[1]])
+
+
+
+    s2 <- get_mmrm_sample(
+        ids = x$samples[[2]]$ids_samp,
+        longdata = ld,
+        method = method,
+        optimizer = optimizer <- list(
+            "L-BFGS-B" = NULL,
+            "BFGS" = s0[c("beta", "theta")]
+        )
+    )
+    s2$ids <- ld$ids
+    expect_true(!all(ld$ids %in% x$samples[[2]]$ids_samp))
+    expect_true(all(ld$ids %in% x$samples[[2]]$ids))
+    expect_true(length(ld$ids) == length(x$samples[[2]]$ids))
+    expect_equal(s2, x$samples[[2]])
+})
+
+
