@@ -1,5 +1,5 @@
 ---
-title: "rbmi: Statistical specifications"
+title: "rbmi: Statistical Specifications"
 output: 
   bookdown::html_document2:
     toc: true
@@ -11,7 +11,7 @@ bibliography: "references.bib"
 link-citations: true   
 linkcolor: blue
 vignette: >
-  %\VignetteIndexEntry{stat_specs}
+  %\VignetteIndexEntry{rbmi: Statistical Specifications}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

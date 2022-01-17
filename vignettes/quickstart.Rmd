@@ -11,7 +11,7 @@ bibliography: "references.bib"
 link-citations: true   
 linkcolor: blue
 vignette: >
-  %\VignetteIndexEntry{quickstart}
+  %\VignetteIndexEntry{rbmi: Quickstart}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
