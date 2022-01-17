@@ -47,7 +47,7 @@ get_cluster <- function(ncores = 1) {
 #' @seealso [get_cluster()] for more documentation on the function inputs
 #' 
 #' @param cl Either a cluster from [get_cluster()] or `NULL`
-#' @param longdata A longdata object from [longDataConstructor$new()]
+#' @param longdata A longdata object from `longDataConstructor$new()`
 #' @param method A method object
 #' @param optimizer an optimizer list
 encap_get_mmrm_sample <- function(cl, longdata, method, optimizer) {
