@@ -413,7 +413,7 @@ extract_data_nmar_as_na <- function(longdata) {
 
 #' @rdname draws
 #' @export
-draws.bayes <- function(data, data_ice = NULL, vars, method) {
+draws.bayes <- function(data, data_ice = NULL, vars, method, ncores = 1) {
 
     if (!is.na(method$seed)) {
         set.seed(method$seed)

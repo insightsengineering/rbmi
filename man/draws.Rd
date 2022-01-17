@@ -13,7 +13,7 @@ draws(data, data_ice = NULL, vars, method, ncores = 1)
 
 \method{draws}{condmean}(data, data_ice = NULL, vars, method, ncores = 1)
 
-\method{draws}{bayes}(data, data_ice = NULL, vars, method)
+\method{draws}{bayes}(data, data_ice = NULL, vars, method, ncores = 1)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing the data to be used in the model. See details.}
