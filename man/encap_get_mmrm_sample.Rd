@@ -9,7 +9,7 @@ encap_get_mmrm_sample(cl, longdata, method, optimizer)
 \arguments{
 \item{cl}{Either a cluster from \code{\link[=get_cluster]{get_cluster()}} or \code{NULL}}
 
-\item{longdata}{A longdata object from \code{\link[=longDataConstructor$new]{longDataConstructor$new()}}}
+\item{longdata}{A longdata object from \code{longDataConstructor$new()}}
 
 \item{method}{A method object}
 
