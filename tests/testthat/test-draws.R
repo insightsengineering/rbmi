@@ -532,3 +532,69 @@ test_that("draws is calling get_mmrm_sample properly", {
 })
 
 
+
+test_that("draws.bmlmi works as expected", {
+
+    bign <- 60
+    sigma <- as_vcov(
+        c(2, 1, 0.7),
+        c(
+            0.3,
+            0.4, 0.2
+        )
+    )
+
+    dat <- get_sim_data(bign, sigma, trt = 8) %>%
+        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
+        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        select(-is_miss)
+
+    dat_ice <- dat %>%
+        group_by(id) %>%
+        arrange(id, visit) %>%
+        filter(is.na(outcome)) %>%
+        slice(1) %>%
+        ungroup() %>%
+        select(id, visit) %>%
+        mutate(strategy = "JR")
+
+    vars <- set_vars(
+        outcome = "outcome",
+        group = "group",
+        strategy = "strategy",
+        subjid = "id",
+        visit = "visit",
+        covariates = c("age", "sex", "visit * group")
+    )
+
+    set.seed(3013)
+    x1 <- draws(
+        dat,
+        dat_ice,
+        vars,
+        method = method_bmlmi(B = 21),
+        ncores = 2
+    )
+
+    set.seed(3013)
+    x2 <- draws(
+        dat,
+        dat_ice,
+        vars,
+        method = method_approxbayes(n_samples = 21)
+    )
+
+    ### BMLMI should be identical to approx bayes within draws except for sample ids
+    expect_equal(
+        lapply(x1$samples, function(x) x[c("beta", "sigma", "theta", "failed")]),
+        lapply(x2$samples, function(x) x[c("beta", "sigma", "theta", "failed")])
+    )
+
+    ### Bootstrapped sample ids should have the same subject appearing multiple times
+    ### in each sample
+    for (samp in x1$samples) {
+        expect_true(max(tapply(samp$ids, samp$ids, length)) > 1)
+    }
+})
+
+

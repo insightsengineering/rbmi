@@ -184,7 +184,8 @@ pool_internal.bmlmi <- function(
     conf.level,
     alternative,
     type,
-    D) {
+    D
+) {
 
     ests <- results$est
     alpha <- 1 - conf.level
