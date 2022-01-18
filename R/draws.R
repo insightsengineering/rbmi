@@ -542,7 +542,7 @@ print.draws <- function(x, ...) {
         sprintf("Model Formula: %s", frm_str),
         sprintf("Imputation Type: %s", class(x)[[2]]),
         "Method:",
-        sprintf("    Type: %s", meth),
+        sprintf("    name: %s", meth),
         meth_args,
         ""
     )
