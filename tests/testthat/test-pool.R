@@ -120,7 +120,54 @@ test_that("get_ests_bmlmi", {
         regexp = "`D` must be a numeric larger than 1"
     )
 
+
+    ## Re-implement bmlmi Var & df implementations to ensure no
+    ## small silly coding errors
+    local_bmlmi <- function(x, D) {
+        D <- 20
+        B <- length(x) / D
+        M <- matrix(x, ncol = D, byrow = TRUE)
+        point <- mean(M)
+        est_B <- rowMeans(M)
+        SSW <- sum(sweep(M, 1, est_B)^2)
+        SSB <- D * sum((est_B - mean(est_B))^2)
+        MSW <- SSW / ((B * D) - B)
+        MSB <- SSB / (B - 1)
+        V <- (1 / D) * (MSB * (1 + 1 / B) - MSW)
+        df_num <- ((MSB * (B + 1)) - (MSW * B))^2
+        df_den_1 <- ((MSB^2) * ((B + 1)^2)) / (B - 1)
+        df_den_2 <- (MSW^2 * B) / (D-1)
+        df <- df_num / (df_den_1 + df_den_2)
+        list(
+            est_point = point,
+            est_var = V,
+            df = max(3, df)
+        )
+    }
+
+    set.seed(3713)
+    x <- c(
+        rnorm(100, 10, sd = 2),
+        rnorm(100, 5, sd = 7),
+        rnorm(100, 20, sd = 3),
+        rnorm(100, 30, sd = 4)
+    )
+    expect_equal(
+        local_bmlmi(x, D),
+        get_ests_bmlmi(x, D)
+    )
+
+    set.seed(13)
+    x <- rnorm(100, 10, sd = 2)
+    expect_equal(
+        local_bmlmi(x, D),
+        get_ests_bmlmi(x, D)
+    )
+
 })
+
+
+
 
 
 test_that("pool", {

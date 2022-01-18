@@ -86,6 +86,7 @@ test_that("Parallisation works as expected", {
     x1 <- test_parallel(method_approxbayes(n_samples = 80))
     x2 <- test_parallel(method_condmean(n_samples = 80))
     x3 <- test_parallel(method_condmean(type = "jackknife"))
+    x4 <- test_parallel(method_bmlmi(B = 40, D = 10))
 
 })
 
