@@ -162,14 +162,14 @@
 #' Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021.
 #'
 #' @export
-draws <- function(data, data_ice = NULL, vars, method, ncores = 1) {
+draws <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE) {
     UseMethod("draws", method)
 }
 
 
 #' @rdname draws
 #' @export
-draws.approxbayes <- function(data, data_ice = NULL, vars, method, ncores = 1) {
+draws.approxbayes <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE) {
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
     x <- get_draws_mle(
@@ -180,15 +180,17 @@ draws.approxbayes <- function(data, data_ice = NULL, vars, method, ncores = 1) {
         first_sample_orig = FALSE,
         ncores = ncores,
         n_target_samples = method$n_samples,
-        failure_limit = ceiling(method$threshold * method$n_samples)
+        failure_limit = ceiling(method$threshold * method$n_samples), 
+        quiet = quiet
     )
     return(x)
 }
 
 
+
 #' @rdname draws
 #' @export
-draws.condmean <- function(data, data_ice = NULL, vars, method, ncores = 1) {
+draws.condmean <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE) {
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
 
@@ -197,7 +199,8 @@ draws.condmean <- function(data, data_ice = NULL, vars, method, ncores = 1) {
         method = method,
         ncores = ncores,
         first_sample_orig = TRUE,
-        use_samp_ids = TRUE
+        use_samp_ids = TRUE, 
+        quiet = quiet
     )
 
     if (method$type == "bootstrap") {
@@ -223,7 +226,7 @@ draws.condmean <- function(data, data_ice = NULL, vars, method, ncores = 1) {
 
 #' @rdname draws
 #' @export
-draws.bmlmi <- function(data, data_ice = NULL, vars, method, ncores = 1) {
+draws.bmlmi <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE) {
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
     method$n_samples <- method$B
@@ -235,7 +238,8 @@ draws.bmlmi <- function(data, data_ice = NULL, vars, method, ncores = 1) {
         failure_limit = ceiling(method$threshold * method$n_samples),
         use_samp_ids = TRUE,
         first_sample_orig = FALSE,
-        ncores = ncores
+        ncores = ncores, 
+        quiet = quiet
     )
     x$method$n_samples <- NULL
     return(x)
@@ -285,7 +289,8 @@ get_draws_mle <- function(
     first_sample_orig,
     use_samp_ids,
     failure_limit = 0,
-    ncores = 1
+    ncores = 1,
+    quiet = FALSE
 ) {
     
     max_sample_attempts <- n_target_samples + failure_limit
@@ -317,7 +322,8 @@ get_draws_mle <- function(
     cl <- get_cluster(ncores)
     mmrm_sample <- encap_get_mmrm_sample(cl, longdata, method, optimizer)
     samples <- list()
-    n_failed_samples <- 0
+    n_failed_samples <- 0    
+    logger <- progressLogger$new(n_target_samples, quiet = quiet)
 
     while (length(samples) < n_target_samples) {
         ids <- sample_stack$pop(min(ncores, n_target_samples - length(samples)))
@@ -338,6 +344,7 @@ get_draws_mle <- function(
             msg <- "More than %s failed fits. Try using a simpler covariance structure"
             stop(sprintf(msg, failure_limit))
         }
+        logger$add(length(new_samples_keep))
         samples <- append(samples, new_samples_keep)
     }
 
@@ -440,7 +447,7 @@ extract_data_nmar_as_na <- function(longdata) {
 
 #' @rdname draws
 #' @export
-draws.bayes <- function(data, data_ice = NULL, vars, method, ncores = 1) {
+draws.bayes <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE) {
 
     if (!is.na(method$seed)) {
         set.seed(method$seed)
@@ -657,3 +664,49 @@ validate.draws <- function(x, ...) {
         has_class(x$formula, "formula")
     )
 }
+
+
+
+
+
+
+
+progressLogger <- R6::R6Class(
+    classname = "progressLogger",
+    public = list(
+        step = NULL,
+        step_current = 0,
+        n = 0,
+        n_max = NULL,
+        quiet = FALSE,
+        initialize = function(n_max, quiet = FALSE, step = 0.1) {
+            self$step = step
+            self$n_max = n_max
+            self$quiet = quiet
+        },
+        add = function(n) {
+            if (self$quiet) {
+                return(invisible())
+            }
+            self$n <- self$n + n
+            self$step_current <- self$step_current + n / self$n_max
+            if (self$step_current >= self$step) {
+                self$print_progress()
+                self$step_current = 0
+            }
+        },
+        print_progress = function() {
+            cat(
+                # sprintf(
+                #     "Fitted %s / %s (%3.0f%%) models\n",
+                #     self$n,
+                #     self$n_max,
+                #     self$n * 100 / self$n_max
+                # )
+                sprintf("Progress: %3.0f%%\n", self$n * 100 / self$n_max)
+            )
+        }
+    )
+)
+
+
