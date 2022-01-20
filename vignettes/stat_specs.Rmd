@@ -86,7 +86,9 @@ Two general imputation approaches are implemented in `rbmi`:
 
 1. Conventional multiple imputation based on Bayesian (or approximate Bayesian) posterior draws from the imputation model combined with Rubin's rule for inference.
 
-2. Conditional mean imputation based on the REML estimate of the imputation model combined with resampling techniques for inference. 
+2. Conditional mean imputation based on the REML estimate of the imputation model combined with resampling techniques for inference.
+
+3. Multiple imputation of bootstrap samples from the original dataset based on the REML estimate of the imputation model fitted on the bootstrap samples.
 
 The **multiple imputation** approach includes the following steps:
 
@@ -137,6 +139,33 @@ The **conditional mean imputation** approach includes the following steps:
 4. **Jackknife or bootstrap inference step** (Section \@ref(sec:bootInference))
 
   + Inference for the treatment effect estimate from 3. is based on re-sampling techniques. Both the jackknife and the bootstrap are supported.
+  
+The **bootstrapped maximum likelihood multiple imputation** approach includes the following steps:
+
+1. **Base imputation model fitting step** (Section \@ref(sec:imputationModel))
+
+  + Apply conventional restricted maximum-likelihood (REML) parameter estimation of the MMRM model to $B$ nonparametric bootstrap samples from the original dataset using the observed longitudinal outcomes after exclusion of data after ICEs for which reference-based missing data imputation is desired.
+  
+2. **Imputation step** (Section \@ref(sec:imputationStep))
+
+  + Take the set of parameters estimate from the $b$-th ($b\in 1,\ldots, B)$ bootstrap sample.
+
+  + For each subject, use the sampled parameters and the defined strategy for dealing with their ICEs to determine the mean and covariance matrix describing the subject's marginal outcome distribution for all longitudinal outcome assessments (i.e. observed and missing outcomes). 
+
+  + For each subjects, construct the conditional multivariate normal distribution of their missing outcomes given their observed outcomes (including observed outcomes after ICEs for which reference-based missing data imputation is desired). 
+  
+  + For each subject, draw $D$ samples from this conditional distributions to impute their missing outcomes leading to $D$ complete imputed dataset.
+  
+  + For sensitivity analyses, a pre-defined $\delta$-adjustment may be applied to the imputed data prior to the analysis step. (Section \@ref(sec:deltaAdjustment)).
+
+
+3. **Analysis step** (Section \@ref(sec:analysis))
+
+  + Analyze the imputed dataset using an analysis model (e.g. ANCOVA) resulting in a point estimate and a standard error of the targeted treatment effect.
+  
+4. **Pooling step for inference** (Section \@ref(sec:poolbmlmi))
+
+  + Repeat steps 2. and 3. for each bootstrap sample $b$, resulting in $B*D$ complete datasets and $B*D$ point estimates of the treatment effect. Pool the $B*D$ treatment effect estimates using the rules by Von Hippel and Bartlett [@vanHippelBartlett2021] to obtain the final pooled treatment effect estimator, standard error, and degrees of freedom.
 
 ## Setting, notation, and missing data assumptions
 
@@ -346,6 +375,41 @@ The jacknife is an alternative to the bootstrap and has close similarities to it
 $$\hat{se}_{jack}=[\frac{(n-1)}{n}\cdot\sum_{b=1}^{n} (\hat{\theta}_{(-b)}-\bar{\theta}_{(.)})^2]^{1/2}$$ 
 where $\bar{\theta}_{(.)}$ denotes the mean of all jackknife estimates. Confidence and statistical tests can then be based on the jackknife standard error as described previously for the bootstrap standard error. 
 
+## Pooling step for inference of the bootstrapped maximum likelihood multiple imputation {#sec:poolbmlmi}
+
+Assume that the analysis model has been applied to $B*D$ multiple imputed random datasets which resulted in $B*D$ treatment effect estimates $\hat{\theta}_{bd}$ ($b=1,\ldots,B$; $d=1,\ldots,D$).
+
+The final estimate of the treatment effect is calculated as the sample mean over the $B*D$ treatment effect estimates:
+$$
+\hat{\theta} = \frac{1}{BD} \sum_{b = 1}^B \sum_{d = 1}^D \hat{\theta}_{bd}.
+$$
+The pooled variance is based on two components that reflect the variability within and the between imputed bootstrap samples [@vanHippelBartlett2021, formula 8.4]:
+$$
+V(\hat{\theta}) = (1 + \frac{1}{B})\frac{MSB - MSW}{D} + \frac{MSW}{BD}
+$$
+
+where $MSB$ is the mean square between the bootstrapped datasets, and $MSW$ is the mean square within the bootstrapped datasets and between the imputed datasets:
+
+$$
+\begin{align*}
+MSB &= \frac{D}{B-1} \sum_{b = 1}^B (\bar{\theta_{b}} - \hat{\theta})^2 \\
+MSW &= \frac{1}{B(D-1)} \sum_{b = 1}^B \sum_{d = 1}^D (\theta_{bd} - \bar{\theta_b})^2
+\end{align*} 
+$$
+where $\bar{\theta_{b}}$ is the mean across the $D$ estimates obtained from random imputation of the $b$-th bootstrap sample.
+
+The degrees of freedom are estimated with the following formula [@vanHippelBartlett2021, formula 8.6]:
+
+$$
+\nu = \frac{(MSB(B+1) - MSW(B))^2}{\frac{MSB^2(B+1)^2}{B-1} + \frac{MSW^2 B}{D-1}}
+$$
+
+Confidence intervals and tests of the null hypothesis $H_0: \theta=\theta_0$ are based on the $t$-statistics $T$:
+
+$$ T= (\hat{\theta}-\theta_0)/\sqrt{V(\hat{\theta})}. $$
+Under the null hypothesis, $T$ has an approximate $t$-distribution with $\nu$ degrees of freedom.
+
+
 ## Comparison between the implemented approaches  {#sec:methodsComparison}
 
 The proposed Bayesian multiple imputation approaches use Rubin's combination rules for inference. 
@@ -354,8 +418,10 @@ Simulations in @Wolbers2021 which relied on the `rbmi` package also confirmed th
 @CroEtAl2019 argued that Rubin's rule is nevertheless valid for reference-based imputation methods because it is approximately information-anchored, i.e. standard error estimates from reference-based imputation methods are similar to those observed under MAR imputation. In contrast, several other authors have implicitly or explicitly favored inference that is correct from a frequentist repeated-sampling perspective [@Seaman2014, @LiuPang2016, @Tang2017, @Bartlett2021]. To us, information anchoring is a sensible concept for sensitivity analyses, whereas for a primary analyses, we feel that that it is more important to adhere to the principles of frequentist inference. 
 
 In contrast, the proposed conditional mean imputation approach uses the jackknife or the bootstrap for inference.
-This approach provides consistent point estimates with the Bayesian approach and frequentist consistent estimates of the standard error for both MAR or reference-based imputation models. 
+This approach provides consistent point estimates with the Bayesian approach and frequentist consistent estimates of the standard error for both MAR or reference-based imputation models, assuming that the analysis model is a linear function of the outcome vector. 
 In a simulation study based on the `rbmi` package reported in @Wolbers2021, the jackknife demonstrated exact protection of the type I error in simulations with a relatively low sample size ($n=100$ per group) and a substantial amount of missing data (>25\% of subjects with treatment discontinuations) whereas the bootstrap based on a normal approximation showed a slightly increased type I error rate compared to the nominal value (simulated rate up to 5.3\% at a nominal 5\% significance level). Based on these simulations, the jackknife is preferable to the bootstrap in our specific. Further advantages of the jackknife include that it is typically less computationally intensive and that it leads to deterministic treatment effect estimates, standard errors, and inference in this setting. This is particularly important in a regulatory setting where it is important to ascertain whether a calculated $p$-value which is close to the critical boundary of 5\% is truly below or above that threshold rather than being uncertain about this because of Monte Carlo error. 
+
+The bootstrapped maximum likelihood multiple imputation approach [@vanHippelBartlett2021] also provides consistent point estimates with the Bayesian approach and frequentist consistent estimates of the standard error for both MAR or reference-based imputation models. Additionally this method ensures congeniality between imputation and analysis model even if the analysis model is a non-linear function of the outcome vector. However this approach does not provide fully deterministic treatment effect estimates, nor are the standard errors. All estimates will have uncertainty due to the Monte Carlo error and this property might be considered as undesirable in the regulatory setting.
 
 # Mapping of statistical methods to `rbmi` functions {#sec:rbmiFunctions}
 
@@ -366,9 +432,10 @@ For a full documentation of the `rbmi` package functionality we refer to the hel
   + Approximate Bayesian posterior parameter draws from the imputation model are obtained via argument `method = method_approxbayes()`.
   + ML or REML parameter estimates of the imputation model parameters for the original dataset and all leave-one-subject-out datasets (as required for the jackknife) are obtained via argument `method = method_condmean(type = "jackknife")`.
   + ML or REML parameter estimates of the imputation model parameters for the original dataset and bootstrapped datasets are obtained via argument `method = method_condmean(type = "bootstrap")`.
+  + The bootstrapped maximum likelihood multiple imputation (BMLMI) method can be set via the argument `method = method_bmlmi()`. In particular, at this step ML or REML parameter estimates from $B$ bootstrap samples needed to perform $D$ random imputations of the bootstrapped samples are obtained with `method = method_bmlmi(B = B, D = D)`.
 - Random imputations based on (approximate) Bayesian posterior parameter draws and deterministic conditional mean imputation are implemented in function `impute()`. Imputation can be performed assuming the already implemented imputation strategies as presented in section \@ref(sec:imputationStep). Additionally, user-defined imputation strategies can also be provided by the user.
 - The analysis step is implemented in function `analyse()` which applies the analysis model to all imputed datasets. By default, the analysis model (argument `fun`) is the `ancova()` function but alternative analysis functions can also be provided by the user. The `analyse()` function also allows $\delta$-adjustments to the imputed datasets prior to the analysis via argument `delta`.
-- The inference step is implemented in function `pool()` which pools the results across imputed datasets. The Rubin and Bernard rule is applied in case of (approximate) Bayesian multiple imputation. For conditional mean imputation,  jackknife and bootstrap (normal approximation or percentile) inference is supported. 
+- The inference step is implemented in function `pool()` which pools the results across imputed datasets. The Rubin and Bernard rule is applied in case of (approximate) Bayesian multiple imputation. For conditional mean imputation, jackknife and bootstrap (normal approximation or percentile) inference is supported. For BMLMI, the pooling and inference steps are performed via `pool()` which in this case implements what described in Section \@ref(sec:poolbmlmi).
 
 #  Comparison to other software implementations {#sec:otherSoftware}
 
