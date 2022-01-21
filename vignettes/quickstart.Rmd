@@ -136,6 +136,8 @@ Available methods include:
 - Conditional mean imputation (jackknife) - `method_condmean(type = "jackknife")`.
 - Bootstrapped multiple imputation - `method = method_bmlmi()`.
 
+For a comparison of these methods, we refer to the `stat_specs` vignette (Section 3.10).
+
 Available imputation strategies include:
 
 - Missing at Random - `"MAR"`.
