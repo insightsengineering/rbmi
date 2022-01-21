@@ -1,5 +1,6 @@
 ---
 title: "rbmi: Statistical Specifications"
+author: Alessandro Noci and Marcel Wolbers
 output: 
   bookdown::html_document2:
     toc: true
@@ -21,43 +22,50 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+rmarkdown::find_pandoc(dir = '/usr/lib/rstudio-server/bin/pandoc', cache = FALSE) # hack to run this on http://rkalvbee.kau.roche.com:8787/
 ```
 
 
 # Scope of this document
 
 This document describes the statistical methods implemented in the `rbmi` R package for standard and reference-based multiple imputation of continuous longitudinal outcomes. 
-The package implements two classes of multiple imputation approaches: 
+The package implements three classes of multiple imputation (MI) approaches: 
 
-1. Conventional multiple imputation methods based on Bayesian posterior draws of model parameters combined with Rubin's rule to make inferences as described in @CarpenterEtAl2013 and @CroEtAlTutorial2020.
+1. Conventional MI methods based on Bayesian (or approximate Bayesian) posterior draws of model parameters combined with Rubin's rules to make inferences as described in @CarpenterEtAl2013 and @CroEtAlTutorial2020.
 
 2. Conditional mean imputation methods combined with re-sampling techniques as described in @Wolbers2021. 
 
-The document is structured as follows: we first provide an informal introduction to estimands and corresponding treatment effect estimation based on multiple imputation (section \@ref(sec:intro)). The core of this document consists of section \@ref(sec:statsMethods) which describes the statistical methodology in detail. The link between theory and the functions included in package `rbmi` is provided in section \@ref(sec:rbmiFunctions). We conclude with a comparison of our package to some alternative software implementations of reference-based imputation methods (section \@ref(sec:otherSoftware)).
+3. Bootstrapped MI methods as described in @vonHippelBartlett2021.
+
+The document is structured as follows: we first provide an informal introduction to estimands and corresponding treatment effect estimation based on MI (section \@ref(sec:intro)). The core of this document consists of section \@ref(sec:statsMethods) which describes the statistical methodology in detail and also contains a comparison of the implemented approaches (section \@ref(sec:methodsComparison)). The link between theory and the functions included in package `rbmi` is described in section  \@ref(sec:rbmiFunctions). We conclude with a comparison of our package to some alternative software implementations of reference-based imputation methods (section \@ref(sec:otherSoftware)).
 
 # Introduction to estimands and estimation methods {#sec:intro}
 
 ## Estimands
 
-The ICH E9(R1) addendum on estimands and sensitivity analyses is a systematic approach to ensure alignment among clinical trial objectives, trial execution/conduct, statistical analyses, and interpretation of results [@iche9r1]. 
+The ICH E9(R1) addendum on estimands and sensitivity analyses describes a systematic approach to ensure alignment among clinical trial objectives, trial execution/conduct, statistical analyses, and interpretation of results (@iche9r1). 
 As per the addendum, an estimand is a precise description of the treatment effect reflecting the clinical question posed by the trial objective which summarizes at a population-level what the outcomes would be in the same patients under different
 treatment conditions being compared.
-One important attribute of an estimand is a list of possible intercurrent events (ICEs), i.e. of events occurring after treatment initiation that affect either the interpretation or the existence of the measurements associated with the clinical question of interest, and the definition of appropriate strategies to deal with ICEs. The three most relevant strategies for the purpose of this document are the hypothetical strategy, the treatment policy strategy, and the composite strategy. For the hypothetical strategy, a scenario is envisaged in which the ICE would not occur. Under this scenario, endpoint values after the ICE are not directly observable and treated using models for missing data. For the treatment policy strategy, the occurrence of the ICE is considered irrelevant in defining the treatment effect of interest and the value for the outcome of interest is used regardless of whether or not the
-ICE occurs. For the composite strategy, the ICE itself is included as a component of the endpoint.
+One important attribute of an estimand is a list of possible intercurrent events (ICEs), i.e. of events occurring after treatment initiation that affect either the interpretation or the existence of the measurements associated with the clinical question of interest, and the definition of appropriate strategies to deal with ICEs. The three most relevant strategies for the purpose of this document are the hypothetical strategy, the treatment policy strategy, and the composite strategy. For the hypothetical strategy, a scenario is envisaged in which the ICE would not occur. Under this scenario, endpoint values after the ICE are not directly observable and treated using models for missing data. 
+For the treatment policy strategy, the treatment effect in the presence of the ICEs is targeted and analyses are based on the observed outcomes regardless whether the subject had an ICE or not. 
+For the composite strategy, the ICE itself is included as a component of the endpoint.
 
 ## Alignment between the estimand and the estimation method 
 
-The ICH E9(R1) addendum distinguishes between ICEs and missing data [@iche9r1]. Whereas ICEs such as treatment discontinuations reflect clinical practice, the amount of missing data can be minimized in the conduct of a clinical trial. However, there are many connections between missing data and ICEs. For example, it is often difficult to retain subjects in a clinical trial after treatment discontinuation and a subject's withdrawal from the trial leads to missing data. As another example, for an ICE handled by a hypothetical strategy, outcome values after the ICE are not directly observable under the hypothetical scenario. Consequently, any observed outcome values after such ICEs are typically discarded and treated as missing data. 
+The ICH E9(R1) addendum distinguishes between ICEs and missing data (@iche9r1). Whereas ICEs such as treatment discontinuations reflect clinical practice, the amount of missing data can be minimized in the conduct of a clinical trial. However, there are many connections between missing data and ICEs. For example, it is often difficult to retain subjects in a clinical trial after treatment discontinuation and a subject's withdrawal from the trial leads to missing data. As another example, for an ICE handled by a hypothetical strategy, outcome values after the ICE are not directly observable under the hypothetical scenario. Consequently, any observed outcome values after such ICEs are typically discarded and treated as missing data. 
 
 The addendum proposes that estimation methods to address the problem presented by missing data should be selected to align with the estimand. A recent overview of methods to align the estimator with the estimand is @Mallinckrodt2020. A short introduction on estimation methods for studies with longitudinal endpoints can also be found in @Wolbers2021. One prominent statistical method for this purpose is multiple imputation (MI), which is the target of the `rbmi` package. 
 
 ### Missing data prior to ICEs
 
-Missing data may also occur in subjects without an ICE or prior to the occurrence of an ICE. As such missing outcomes are not associated with an ICE, it is often plausible to impute them under a missing-at-random (MAR) assumption. Informally, MAR occurs if the missing data can be fully accounted for by the baseline variables included in the model and the observed longitudinal outcomes, and if the model is correctly specified. MAR informally states that unobserved values after an ICE would have been similar to the observed data from subjects who did not have the ICE and remained under follow-up.  However, in some situations, it may be more reasonable to assume that missingness is "informative" and indicates a systematically better or worse outcome than in observed subjects. In such situations, MNAR imputation with a $\delta$-adjustment could be explored as sensitivity analyses. $\delta$-adjustments add a fixed or random quantity to the imputations in order to make the imputed outcomes systematically worse or better than those observed. $\delta$-adjustments are also described in @CroEtAlTutorial2020.
+Missing data may occur in subjects without an ICE or prior to the occurrence of an ICE. As such missing outcomes are not associated with an ICE, it is often plausible to impute them under a missing-at-random (MAR) assumption using a standard MMRM imputation model of the longitudinal outcomes. Informally, MAR occurs if the missing data can be fully accounted for by the baseline variables included in the model and the observed longitudinal outcomes, and if the model is correctly specified. 
 
 ### Implementation of the hypothetical strategy
 
-The MAR assumption is often a good starting point for implementing a hypothetical strategy. MNAR imputation with a $\delta$-adjustment may also be used for sensitivity analyses [@Mallinckrodt2020].
+The MAR imputation model described above is often also a good starting point for imputing data after an ICE handled using a hypothetical strategy (@Mallinckrodt2020). 
+Informally, this assumes that unobserved values after the ICE would have been similar to the observed data from subjects who did not have the ICE and remained under follow-up.
+However, in some situations, it may be more reasonable to assume that missingness is "informative" and indicates a systematically better or worse outcome than in observed subjects. In such situations, MNAR imputation with a $\delta$-adjustment could be explored as a sensitivity analysis. $\delta$-adjustments add a fixed or random quantity to the imputations in order to make the imputed outcomes systematically worse or better than those observed as described in @CroEtAlTutorial2020.
 
 ### Implementation of the treatment policy strategy
 
@@ -65,16 +73,16 @@ Ideally, data collection continues after an ICE handled with a treatment policy 
 Indeed, such post-ICE data are increasingly systematically collected in RCTs. 
 However, despite best efforts, missing data after an ICE such as study treatment discontinuation may still occur because the subject drops out from the study after discontinuation. It is difficult to give definite recommendations regarding the implementation of the treatment policy strategy in the presence of missing data at this stage because the optimal method is highly context dependent and a topic of ongoing statistical research.
 
-For ICEs which are thought to have a negligible effect on efficacy outcomes, standard MAR-based imputation may be appropriate. In contrast, an ICE such as treatment discontinuation may be expected to have a more substantial impact on efficacy outcomes. In such settings, the MAR assumption may still be plausible after conditioning on the subject's time-varying treatment status [@Guizzaro2021]. In this case, one option is to impute missing post-discontinuation data based on subjects who also discontinued treatment but continued to be followed up [@PolverejanDragalin2020]. Another option which may require somewhat less post-discontinuation data is to include all subjects in the imputation procedure but to model post-discontinuation data by using a time-varying treatment status indicators (e.g. time-varying indicators of treatment compliance, discontinuation, or initiation of rescue
-treatment)) [@Guizzaro2021]. In this approach, post-ICE outcomes are included
+For ICEs which are thought to have a negligible effect on efficacy outcomes, standard MAR-based imputation may be appropriate. In contrast, an ICE such as treatment discontinuation may be expected to have a more substantial impact on efficacy outcomes. In such settings, the MAR assumption may still be plausible after conditioning on the subject's time-varying treatment status (@Guizzaro2021). In this case, one option is to impute missing post-discontinuation data based on subjects who also discontinued treatment but continued to be followed up (@PolverejanDragalin2020). Another option which may require somewhat less post-discontinuation data is to include all subjects in the imputation procedure but to model post-discontinuation data by using a time-varying treatment status indicators (e.g. time-varying indicators of treatment compliance, discontinuation, or initiation of rescue
+treatment)) (@Guizzaro2021). In this approach, post-ICE outcomes are included
 in every step of the analysis, including in the fitting of the imputation model. 
 It assumes that ICEs may impact post-ICE outcomes but that otherwise missingness is non-informative. The approach also assumes that the time-varying covariates do not contain missing values, deviations in outcomes after the ICE are correctly modeled by these time varying covariates, and that sufficient post-ICE data are available to reliably estimate the effect of ICEs on outcome data. These proposals are relatively recent and there remain open questions regarding the appropriate trade-off between model complexity (e.g. to account for a differential effect depending on the timing of the treatment discontinuation) and the variance in the resulting treatment effect estimate. More generally, it is not yet established how much post-discontinuation data is required to implement such methods robustly and without the risk of substantial inflation of variance.    
 
-In practice, treatment discontinuation rates may be relatively low or it may be difficult to retain patients in the trial after the ICE. In such settings, the amount of available post treatment discontinuation data may be insufficient to inform the imputation model. Depending on the disease area and the anticipated mechanism of action of the intervention, it may be plausible to assume that subjects in the intervention group behave similarly to subjects in the control group after the ICE treatment discontinuation. In this case, reference-based imputation methods are an option [@Mallinckrodt2020]. Reference-based imputation methods are increasingly popular for handling missing data under a missing-not-at-random (MNAR) assumption. They formalize the idea to impute missing data in the intervention group based on data from a control or reference group. For a general description and review of reference-based imputation methods, we refer to @CarpenterEtAl2013, @CroEtAlTutorial2020, and @Wolbers2021. For a technical description of the implemented statistical methodology for reference-based imputation, we refer to section \@ref(sec:statsMethods) (in particular section \@ref(sec:imputationStep)). 
+In practice, treatment discontinuation rates may be relatively low or it may be difficult to retain patients in the trial after the ICE. In such settings, the amount of available post treatment discontinuation data may be insufficient to inform the imputation model. Depending on the disease area and the anticipated mechanism of action of the intervention, it may be plausible to assume that subjects in the intervention group behave similarly to subjects in the control group after the ICE treatment discontinuation. In this case, reference-based imputation methods are an option (@Mallinckrodt2020). Reference-based imputation methods formalize the idea to impute missing data in the intervention group based on data from a control or reference group. For a general description and review of reference-based imputation methods, we refer to @CarpenterEtAl2013, @CroEtAlTutorial2020, @White2020causal and @Wolbers2021. For a technical description of the implemented statistical methodology for reference-based imputation, we refer to section \@ref(sec:statsMethods) (in particular section \@ref(sec:imputationStep)). 
 
 ### Implementation of the composite strategy
 
-The composite strategy is typically applied to binary outcomes but it can also be used for continuous outcomes by ascribing a suitably unfavorable value to patients who experience ICEs for which a composite strategy has been defined. As described in @Darken2020, this could be implemented using MI with a $\delta$-adjustment for post-ICE data.
+The composite strategy is typically applied to binary outcomes but it can also be used for continuous outcomes by ascribing a suitably unfavorable value to patients who experience ICEs for which a composite strategy has been defined. One possibility to implement this is to use MI with a $\delta$-adjustment for post-ICE data as described in @Darken2020.
 
 # Statistical methodology {#sec:statsMethods}
 
@@ -82,19 +90,19 @@ The composite strategy is typically applied to binary outcomes but it can also b
 
 Analyses of datasets with missing data always rely on missing data assumptions. The methods described here can be used to produce valid imputations under a MAR assumption or under reference-based imputation assumptions. MNAR imputation based on fixed $\delta$-adjustments as typically used in sensitivity analyses such as tipping-point analyses are also supported. 
 
-Two general imputation approaches are implemented in `rbmi`:
+Three general imputation approaches are implemented in `rbmi`:
 
-1. Conventional multiple imputation based on Bayesian (or approximate Bayesian) posterior draws from the imputation model combined with Rubin's rule for inference.
+1. **Conventional MI** based on Bayesian (or approximate Bayesian) posterior draws from the imputation model combined with Rubin's rules for inference as described in @CarpenterEtAl2013 and @CroEtAlTutorial2020.
 
-2. Conditional mean imputation based on the REML estimate of the imputation model combined with resampling techniques for inference.
+2. **Conditional mean imputation** based on the REML estimate of the imputation model combined with resampling techniques (the jackknife or the bootstrap) for inference as described in @Wolbers2021. 
 
-3. Multiple imputation of bootstrap samples from the original dataset based on the REML estimate of the imputation model fitted on the bootstrap samples.
+3. **Bootstrapped MI** methods based on REML estimates of the imputation model as described in @vonHippelBartlett2021.
 
-The **multiple imputation** approach includes the following steps:
+The **conventional MI** approaches includes the following steps:
 
 1. **Base imputation model fitting step** (Section \@ref(sec:imputationModel))
 
-  + Fit a Bayesian multivariate normal/ mixed model for repeated measures (MMRM) model to the observed longitudinal outcomes after exclusion of data after ICEs for which reference-based missing data imputation is desired (Section \@ref(sec:imputationModelBayes)). Draw $M$ posterior samples of the estimated parameters (regression coefficients and covariance matrices) from this model. 
+  + Fit a Bayesian multivariate normal mixed model for repeated measures (MMRM) model to the observed longitudinal outcomes after exclusion of data after ICEs for which reference-based missing data imputation is desired (Section \@ref(sec:imputationModelBayes)). Draw $M$ posterior samples of the estimated parameters (regression coefficients and covariance matrices) from this model. 
   
   + Alternatively, $M$ approximate posterior draws from the posterior distribution can be sampled by repeatedly applying conventional restricted maximum-likelihood (REML) parameter estimation of the MMRM model to nonparametric bootstrap samples from the original dataset (Section \@ref(sec:imputationModelBoot)). 
   
@@ -112,7 +120,7 @@ The **multiple imputation** approach includes the following steps:
 
 3. **Analysis step** (Section \@ref(sec:analysis))
 
-  + Analyze the imputed dataset using an analysis model (e.g. ANCOVA) resulting in a point estimate and a standard error (with corresponding degrees of freedom) of the targeted treatment effect. 
+  + Analyze the imputed dataset using an analysis model (e.g. ANCOVA) resulting in a point estimate and a standard error (with corresponding degrees of freedom) of the  treatment effect. 
   
 4. **Pooling step for inference** (Section \@ref(sec:pooling))
 
@@ -134,38 +142,38 @@ The **conditional mean imputation** approach includes the following steps:
   
 3. **Analysis step** (Section \@ref(sec:analysis))
 
-  + Apply an analysis model (e.g. ANCOVA) to the completed dataset resulting in a point estimate of the targeted treatment effect. 
+  + Apply an analysis model (e.g. ANCOVA) to the completed dataset resulting in a point estimate of the treatment effect. 
   
 4. **Jackknife or bootstrap inference step** (Section \@ref(sec:bootInference))
 
-  + Inference for the treatment effect estimate from 3. is based on re-sampling techniques. Both the jackknife and the bootstrap are supported.
+  + Inference for the treatment effect estimate from 3. is based on re-sampling techniques. Both the jackknife and the bootstrap are supported. Importantly, these methods require repeating all steps of the imputation procedure (i.e. imputation, conditional mean imputation, and analysis steps) on each of the resampled data sets.
   
-The **bootstrapped maximum likelihood multiple imputation** approach includes the following steps:
+The **bootstrapped MI** approach includes the following steps:
 
 1. **Base imputation model fitting step** (Section \@ref(sec:imputationModel))
 
   + Apply conventional restricted maximum-likelihood (REML) parameter estimation of the MMRM model to $B$ nonparametric bootstrap samples from the original dataset using the observed longitudinal outcomes after exclusion of data after ICEs for which reference-based missing data imputation is desired.
   
-2. **Imputation step** (Section \@ref(sec:imputationStep))
+2. **Imputation step** (Section \@ref(sec:imputationStep)) 
 
-  + Take the set of parameters estimate from the $b$-th ($b\in 1,\ldots, B)$ bootstrap sample.
-
-  + For each subject, use the sampled parameters and the defined strategy for dealing with their ICEs to determine the mean and covariance matrix describing the subject's marginal outcome distribution for all longitudinal outcome assessments (i.e. observed and missing outcomes). 
-
-  + For each subjects, construct the conditional multivariate normal distribution of their missing outcomes given their observed outcomes (including observed outcomes after ICEs for which reference-based missing data imputation is desired). 
+  + Take a bootstrapped dataset $b$ ($b\in 1,\ldots, B)$ and its corresponding imputation model parameter estimates.
   
-  + For each subject, draw $D$ samples from this conditional distributions to impute their missing outcomes leading to $D$ complete imputed dataset.
+  + For each subject (from the bootstrapped dataset), use the parameter estimates and the defined strategy for dealing with their ICEs to determine the mean and covariance matrix describing the subject's marginal outcome distribution for all longitudinal outcome assessments (i.e. observed and missing outcomes). 
+
+  + For each subjects (from the bootstrapped dataset), construct the conditional multivariate normal distribution of their missing outcomes given their observed outcomes (including observed outcomes after ICEs for which reference-based missing data imputation is desired). 
+  
+  + For each subject (from the bootstrapped dataset), draw $D$ samples from this conditional distributions to impute their missing outcomes leading to $D$ complete imputed dataset for bootstrap sample $b$.
   
   + For sensitivity analyses, a pre-defined $\delta$-adjustment may be applied to the imputed data prior to the analysis step. (Section \@ref(sec:deltaAdjustment)).
 
 
 3. **Analysis step** (Section \@ref(sec:analysis))
 
-  + Analyze the imputed dataset using an analysis model (e.g. ANCOVA) resulting in a point estimate and a standard error of the targeted treatment effect.
+  + Analyze the imputed dataset using an analysis model (e.g. ANCOVA) resulting in a point estimate of the treatment effect.
   
 4. **Pooling step for inference** (Section \@ref(sec:poolbmlmi))
 
-  + Repeat steps 2. and 3. for each bootstrap sample $b$, resulting in $B*D$ complete datasets and $B*D$ point estimates of the treatment effect. Pool the $B*D$ treatment effect estimates using the rules by Von Hippel and Bartlett [@vanHippelBartlett2021] to obtain the final pooled treatment effect estimator, standard error, and degrees of freedom.
+  + Repeat steps 2. and 3. for each bootstrap sample $b$, resulting in $B*D$ complete datasets and $B*D$ point estimates of the treatment effect. Pool the $B*D$ treatment effect estimates as described in @vonHippelBartlett2021 to obtain the final pooled treatment effect estimate, standard error, and degrees of freedom.
 
 ## Setting, notation, and missing data assumptions
 
@@ -185,7 +193,7 @@ MNAR $\delta$-adjustments are added to the imputed datasets after the formal imp
 
 The purpose of the imputation model is to estimate (covariate-dependent) mean trajectories and covariance matrices for each group in the absence of ICEs handled using reference-based imputation methods. Conventionally,
 publications on reference-based imputation methods have implicitly assumed that the corresponding post-ICE
-data is missing for all subjects [@CarpenterEtAl2013]. We also allow the situation where post-ICE data
+data is missing for all subjects (@CarpenterEtAl2013). We also allow the situation where post-ICE data
 is available for some subjects but needs to be imputed using reference-based methods for others. However,
 any observed data after ICEs for which reference-based imputation methods are specified are not compatible
 with the imputation model described below and they are therefore removed and considered as missing for
@@ -194,7 +202,7 @@ That is, the base imputation model is fitted to $Y'_{i!}$ and not to $Y_{i!}$.
 If we did not exclude these data, then the imputation model would mistakenly estimate mean trajectories based on a mixture of observed pre- and post-ICE data which are not relevant for reference-based imputations.
 
 The base imputation model of the longitudinal outcomes $Y'_i$ assumes that the mean structure is a linear function of covariates. Full flexibility for the specification of the linear predictor of the model is supported. At a minimum, the covariates should include the treatment group, the (categorical) visit, and treatment-by-visit interactions. Typically, other covariates including the baseline outcome are also included.
-External time-varying covariates (e.g. calendar time of the visit) as well as internal time-varying (e.g. time-varying indicators of treatment discontinuation or initiation of rescue treatment) may in principle also be included if indicated [@Guizzaro2021]. Missing covariate values are not allowed. This means that the values of time-varying covariates must be non-missing at every visit regardless of whether the outcome is measured or missing. 
+External time-varying covariates (e.g. calendar time of the visit) as well as internal time-varying (e.g. time-varying indicators of treatment discontinuation or initiation of rescue treatment) may in principle also be included if indicated (@Guizzaro2021). Missing covariate values are not allowed. This means that the values of time-varying covariates must be non-missing at every visit regardless of whether the outcome is measured or missing. 
 
 Denote the $J\times p$ design matrix for subject $i$ corresponding to the mean structure model by $X_i$ and the same matrix after removal of rows corresponding to missing outcomes in $Y'_{i!}$ by $X'_{i!}$. 
 Here $p$ is the number of parameters in the mean structure of the model for the elements of $Y'_{i!}$.
@@ -210,9 +218,9 @@ Frequentist parameter estimation for the base imputation is based on REML. The u
 
 ### Bayesian model fitting {#sec:imputationModelBayes}
 
-The Bayesian imputation model is fitted with the R package `rstan` [@Rstan]. `rstan` is the R interface of Stan. Stan is a powerful and flexible statistical software developed by a dedicated team and implements Bayesian inference with state-of-the-art MCMC sampling procedures. The multivariate normal model with missing data specified in section \@ref(sec:imputationModelSpecs) can be considered a generalization of the models described in the Stan user's guide (see @Rstan [section 3.5]).
+The Bayesian imputation model is fitted with the R package `rstan` (@Rstan). `rstan` is the R interface of Stan. Stan is a powerful and flexible statistical software developed by a dedicated team and implements Bayesian inference with state-of-the-art MCMC sampling procedures. The multivariate normal model with missing data specified in section \@ref(sec:imputationModelSpecs) can be considered a generalization of the models described in the Stan user's guide (see @Rstan [section 3.5]).
 
-The same prior distributions as in the SAS implementation of the "five macros" are used [@FiveMacros], i.e. an improper flat priors for the regression coefficients and a weakly informative inverse Wishart prior for the covariance matrix (or matrices). Specifically, let $S \in \mathbb{R}^{J \times J}$ be a symmetric positive definite matrix and $\nu \in (J-1, \infty)$. Then the symmetric positive definite matrix $x \in \mathbb{R}^{J \times J}$ has density:
+The same prior distributions as in the SAS implementation of the "five macros" are used (@FiveMacros), i.e. an improper flat priors for the regression coefficients and a weakly informative inverse Wishart prior for the covariance matrix (or matrices). Specifically, let $S \in \mathbb{R}^{J \times J}$ be a symmetric positive definite matrix and $\nu \in (J-1, \infty)$. Then the symmetric positive definite matrix $x \in \mathbb{R}^{J \times J}$ has density:
 $$
 \text{InvWish}(x \vert \nu, S) = \frac{1}{2^{\nu J/2}} \frac{1}{\Gamma_J(\frac{\nu}{2})} \vert S \vert^{\nu/2} \vert x \vert ^{-(\nu + J + 1)/2} \text{exp}(-\frac{1}{2} \text{tr}(Sx^{-1})).
 $$
@@ -222,17 +230,17 @@ E[x] = \frac{S}{\nu - J - 1}.
 $$
 We choose $S$ equal to the estimated covariance matrix from the frequentist REML fit and $\nu = J+2$ as these are the lowest degrees of freedom that guarantee a finite mean. Setting the degrees of freedom with such a low $\nu$ ensures that the prior has little impact on the posterior. Moreover, this choice allows to interpret the parameter $S$ as the mean of the prior distribution.
 
-As in the "SAS five macros", the MCMC algorithm is initialized at the parameters from a frequentist REML fit (see section \@ref(sec:imputationModelREML)). As described above, we are using only weakly informative priors for the parameters. Therefore, the Markov chain is essentially starting from the targeted stationary posterior distribution and only a minimal amount of burn-in of the chain is required. 
+As in the "five macros", the MCMC algorithm is initialized at the parameters from a frequentist REML fit (see section \@ref(sec:imputationModelREML)). As described above, we are using only weakly informative priors for the parameters. Therefore, the Markov chain is essentially starting from the targeted stationary posterior distribution and only a minimal amount of burn-in of the chain is required. 
 
 ### Approximate Bayesian posterior draws via the bootstrap {#sec:imputationModelBoot}
 
-Several authors have suggested that a faster and stabler way to get Bayesian posterior draws from the imputation model is to bootstrap the incomplete data and to calculate REML estimates for each bootstrap sample (@LittleRubin1992, @Efron1994, @Honaker2010, @vanHippelBartlett2021). This method is proper in that the REML estimates from the bootstrap samples are asymptotically equivalent to a sample from the posterior distribution and may provide additional robustness to model misspecification (@LittleRubin1992 [Section 10.2.3, part 6], @Honaker2010). In order to retain balance between treatment groups and stratification factors across bootstrap samples, the user is able to provide stratification variables for the bootstrap in the `rbmi` implementation.
+Several authors have suggested that a faster and stabler way to get Bayesian posterior draws from the imputation model is to bootstrap the incomplete data and to calculate REML estimates for each bootstrap sample (@LittleRubin1992, @Efron1994, @Honaker2010, @vonHippelBartlett2021). This method is proper in that the REML estimates from the bootstrap samples are asymptotically equivalent to a sample from the posterior distribution and may provide additional robustness to model misspecification (@LittleRubin1992 [Section 10.2.3, part 6], @Honaker2010). In order to retain balance between treatment groups and stratification factors across bootstrap samples, the user is able to provide stratification variables for the bootstrap in the `rbmi` implementation.
 
 ## Imputation step {#sec:imputationStep}
 
 ### Marginal imputation distribution for a subject - MAR case  {#sec:imputatioMNAR}
 
-For each subject $i$, the marginal distribution of the complete $J$-dimensional outcome vector from all assessment visits according to the imputation model is a multivariate normal distribution . Its mean $\tilde{\mu}_i$ is given by the predicted mean from the imputation model conditional on the subject's baseline characteristics, group, and, optionally, time-varying covariates. Its covariance matrix $\tilde{\Sigma}_i$ is given by the overall estimated covariance matrix or, if different covariance matrices are assumed for different groups, the covariance matrix corresponding to the subject $i$'s group.  
+For each subject $i$, the marginal distribution of the complete $J$-dimensional outcome vector from all assessment visits according to the imputation model is a multivariate normal distribution. Its mean $\tilde{\mu}_i$ is given by the predicted mean from the imputation model conditional on the subject's baseline characteristics, group, and, optionally, time-varying covariates. Its covariance matrix $\tilde{\Sigma}_i$ is given by the overall estimated covariance matrix or, if different covariance matrices are assumed for different groups, the covariance matrix corresponding to the subject $i$'s group.  
 
 ### Marginal imputation distribution for a subject - reference-based imputation methods {#sec:imputationRefBased}
 
@@ -310,8 +318,8 @@ Conventional random imputation consists in sampling from this conditional multiv
 
 ## $\delta$-adjustment {#sec:deltaAdjustment}
 
-A *marginal* $\delta$-adjustment approach similar to the "five macros" in SAS is implemented [@FiveMacros], i.e. fixed non-stochastic values are added after the multivariate normal imputation step and prior to the analysis.
-This is relevant for sensitivity analyses in order to make imputed data systematically worse or better, respectively, than observed data. In addition, some authors have suggested $\delta$-type adjustments to implement a composite strategy for continuous outcomes [@Darken2020].
+A *marginal* $\delta$-adjustment approach similar to the "five macros" in SAS is implemented (@FiveMacros), i.e. fixed non-stochastic values are added after the multivariate normal imputation step and prior to the analysis.
+This is relevant for sensitivity analyses in order to make imputed data systematically worse or better, respectively, than observed data. In addition, some authors have suggested $\delta$-type adjustments to implement a composite strategy for continuous outcomes (@Darken2020).
 
 The implementation provides full flexibility regarding the specific implementation of the $\delta$-adjustment, i.e. the value that is added may depend on the randomized treatment arm, the timing of the subject's ICE, and other factors. For suggestions and case studies regarding this topic, we refer to @CroEtAlTutorial2020.
 
@@ -320,7 +328,7 @@ The implementation provides full flexibility regarding the specific implementati
 
 After data imputation, a standard analysis model can be applied to the completed data resulting in a treatment effect estimate. As the imputed data no longer contains missing values, the analysis model is often simple. For example, it can be an analysis of covariance (ANCOVA) model with the outcome (or the change in the outcome from baseline) at a specific visit j as the dependent variable, the randomized treatment group as the primary covariate and, typically, adjustment for the same baseline covariates as for the imputation model.
 
-## Pooling step for inference of (approximate) Bayesian multiple imputations and the Barnard and Rubin rules {#sec:pooling}
+## Pooling step for inference of (approximate) Bayesian MI and Rubin's rules {#sec:pooling}
 
 Assume that the analysis model has been applied to $M$ multiple imputed random datasets which resulted in $m$ treatment effect estimates $\hat{\theta}_m$ ($m=1,\ldots,M$) with corresponding standard error $SE_m$ and (if available) degrees of freedom $\nu_{com}$. If degrees of freedom are not available for an analysis model, set $\nu_{com}=\infty$ for inference based on the normal distribution. 
 
@@ -337,7 +345,7 @@ where $V_W(\hat{\theta}) = \frac{1}{M}\sum_{m = 1}^M SE^2_m$ is the within-varia
 Confidence intervals and tests of the null hypothesis $H_0: \theta=\theta_0$ are based on the $t$-statistics $T$:
 
 $$ T= (\hat{\theta}-\theta_0)/\sqrt{V(\hat{\theta})}. $$
-Under the null hypothesis, $T$ has an approximate $t$-distribution with $\nu$ degrees of freedom. $\nu$ is calculated according to the Barnard and Rubin approximation [@Barnard1999 (formula 3), @LittleRubin1992 (formula (5.24), page 87)]: 
+Under the null hypothesis, $T$ has an approximate $t$-distribution with $\nu$ degrees of freedom. $\nu$ is calculated according to the Barnard and Rubin approximation, see @Barnard1999 (formula 3) or @LittleRubin1992 (formula (5.24), page 87): 
 
 $$
 \nu = \frac{\nu_{old}* \nu_{obs}}{\nu_{old} + \nu_{obs}}
@@ -350,32 +358,33 @@ where $\lambda = \frac{(1 + \frac{1}{M})V_B}{V(\hat{\theta})}$ is the fraction o
 
 ## Boostrap and jackknife inference for conditional mean imputation {#sec:bootInference}
 
-Several authors have proposed to use bootstrap inference for consistent standard error estimation for multiple imputation methods under uncongeniality and model misspecification, see @BartlettHughes2020 for a review. Specifically, bootstrap inference for multiple imputation methods based on maximum likelihood estimation of the imputation parameters (rather than random sampling from the Bayesian posterior distribution) is justified and discussed in @vanHippelBartlett2021. As an alternative to the bootstrap, the jackknife is also implemented.
-
-These alternative methods are particularly relevant here because reference-based imputation methods are not congenial and, consequently, Rubin's rule may not provide valid frequentist inference [@Seaman2014, @LiuPang2016, @Tang2017, @Bartlett2021]. We revisit this topic in Section  \@ref(sec:methodsComparison). 
-
 ### Point estimate of the treatment effect
 
-The point estimator is obtained by applying the analysis model (Section \@ref(sec:analysis)) to a single conditional mean imputation of the missing data (see Section \@ref(sec:imputationRandomConditionalMean)) based on the REML estimator of the parameters of the imputation model (see Section \@ref(sec:imputationModelREML)). We denote this treatment effect estimator by $\hat{\theta}_{MLCMI}$.
+The point estimator is obtained by applying the analysis model (Section \@ref(sec:analysis)) to a single conditional mean imputation of the missing data (see Section \@ref(sec:imputationRandomConditionalMean)) based on the REML estimator of the parameters of the imputation model (see Section \@ref(sec:imputationModelREML)). We denote this treatment effect estimator by $\hat{\theta}$.
 
-@vanHippelBartlett2021 propose to perform $M$ random imputations based on the REML estimator instead, to analyse them, and to use the average of treatment effects estimates across random impuations as the overall treatment effect estimator. We denote the treatment effect from a single randomly imputed dataset $m$ by $\hat{\theta}_{MLSI,m}$ and the overall average treatment effect by $\hat{\theta}_{MLMI,M}=\frac{1}{M}\sum_{m=1}^M \hat{\theta}_{MLSI,m}$ They also state that using the maximum likelihood estimator (or the asymptotically equivalent REML estimator) leads to a slightly more efficient estimator than using Bayesian posterior draws. 
-
-For multivariate normal imputation and linear regression, e.g. ANCOVA, as the analysis model, it is easy to show that the proposed estimator $\hat{\theta}_{MLCMI}$ based on a single imputed dataset using conditional mean imputation is identical to the pooled treatment effect under multiple random imputation with an infinity number of imputation or, more precisely, $$ \hat{\theta}_{MLMI,M} \to \hat{\theta}_{MLCMI} \mbox{  as  } M\to\infty \mbox{ (a.s.)}$$
-Thus, in our specific setting, the proposed estimator corresponds to an efficient implementation of the proposal by @vanHippelBartlett2021. For a simple proof of this fact, we refer to @Wolbers2021. We expect that conditional mean imputation is also valid for general MMRM analysis models but this has not been formally justified.
-
-### Bootstrap confidence intervals (CI) and tests for the treatment effect
-
-@vanHippelBartlett2021 discuss analytic formulas of standard errors for random maximum likelihood multiple imputations but these formulas are not straightforward to translate to our setting. Therefore, we propose to use resampling techniques for conducting frequentist inference for REML conditional mean imputation. As in section \@ref(sec:imputationModelBoot), we also allow the user to use the stratified bootstrap in order to retain balance between treatment groups and stratification factors across bootstrap samples.
-
-Two different bootstrap methods are implemented in `rbmi`: Methods based on the *bootstrap standard error and the normal approximation* and *percentile bootstrap methods*. Denote the treatment effect estimates from $B$ bootstrap samples by $\hat{\theta}^*_b$ ($b=1,\ldots,B$). The *bootstrap standard error* $\hat{se}_{boot}$ is defined as the empirical standard deviation of the bootstrapped treatment effect estimates. The corresponding two-sided normal approximation $1-\alpha$ CI is defined as $\hat{\theta}\pm z^{1-\alpha/2}\cdot \hat{se}_{boot}$ where $\hat{\theta}$ is the treatment effect estimate in the original dataset, i.e. $\hat{\theta}=\hat{\theta}_{CMI}$. Tests of the null hypothesis $H_0: \theta=\theta_0$ are then based on the $Z$-score $Z=(\hat{\theta}-\theta_0)/\hat{se}_{boot}$ using a standard normal approximation. We refer to @EfronTibs1994 and @DavisonHinkley1997 for general background on bootstrap methods and, in particular, formulas for the percentile bootstrap. Explicit formulas for bootstrap inference as implemented in the `rbmi` package and some considerations regarding the required number of bootstrap samples are included in the Appendix of @Wolbers2021.
+As demonstrated in @Wolbers2021 (Section 2.4), this treatment effect estimator is valid if the analysis model is an ANCOVA model or, more generally, if the treatment effect estimator is a linear function of the imputed outcome vector. Indeed, if this is the case, then the estimator is identical to the pooled treatment effect across multiple random REML imputation with an infinite number of imputations and corresponds to a computationally efficient implementation of a proposal by @vonHippelBartlett2021. We expect that the conditional mean imputation method is also applicable to some other analysis models (e.g. for general MMRM analysis models) but this has not been formally justified.
 
 ### Jackknife standard errors, confidence intervals (CI) and tests for the treatment effect
 
-The jacknife is an alternative to the bootstrap and has close similarities to it [@EfronTibs1994, chapter 10]. For a sample size of $n$, the jackknife standard error depends on treatment effect estimates $\hat{\theta}_{(-b)}$ ($b=1,\ldots,n$) from samples from the original dataset which leave out observation $b$. Then, the *jackknife standard error* is defined as 
-$$\hat{se}_{jack}=[\frac{(n-1)}{n}\cdot\sum_{b=1}^{n} (\hat{\theta}_{(-b)}-\bar{\theta}_{(.)})^2]^{1/2}$$ 
-where $\bar{\theta}_{(.)}$ denotes the mean of all jackknife estimates. Confidence and statistical tests can then be based on the jackknife standard error as described previously for the bootstrap standard error. 
+For a dataset containing $n$ subjects, the jackknife standard error depends on treatment effect estimates $\hat{\theta}_{(-b)}$ ($b=1,\ldots,n$) from samples of the original dataset which leave out the observation from subject $b$. As described previously, to obtain treatment effect estimates for  leave-one-subject-out datasets, all
+steps of the imputation procedure (i.e. imputation, conditional mean imputation, and analysis steps) need to be repeated on this new dataset. 
 
-## Pooling step for inference of the bootstrapped maximum likelihood multiple imputation {#sec:poolbmlmi}
+Then, the *jackknife standard error* is defined as 
+$$\hat{se}_{jack}=[\frac{(n-1)}{n}\cdot\sum_{b=1}^{n} (\hat{\theta}_{(-b)}-\bar{\theta}_{(.)})^2]^{1/2}$$ 
+where $\bar{\theta}_{(.)}$ denotes the mean of all jackknife estimates (@EfronTibs1994, chapter 10). The corresponding two-sided normal approximation $1-\alpha$ CI is defined as $\hat{\theta}\pm z^{1-\alpha/2}\cdot \hat{se}_{jack}$ where $\hat{\theta}$ is the treatment effect estimate from the original dataset. Tests of the null hypothesis $H_0: \theta=\theta_0$ are then based on the $Z$-score $Z=(\hat{\theta}-\theta_0)/\hat{se}_{jack}$ using a standard normal approximation.
+
+A simulation study reported in @Wolbers2021 demonstrated exact protection of the type I error for jackknife-based inference with a relatively low sample size (n = 100 per group) and a substantial amount of missing data (>25% of subjects with an ICE).
+
+### Bootstrap standard errors, confidence intervals (CI) and tests for the treatment effect
+
+As an alternative to the jackknife, the bootstrap has also been implemented in `rbmi` (@EfronTibs1994, @DavisonHinkley1997). 
+
+Two different bootstrap methods are implemented in `rbmi`: Methods based on the *bootstrap standard error and the normal approximation* and *percentile bootstrap methods*. Denote the treatment effect estimates from $B$ bootstrap samples by $\hat{\theta}^*_b$ ($b=1,\ldots,B$). The *bootstrap standard error* $\hat{se}_{boot}$ is defined as the empirical standard deviation of the bootstrapped treatment effect estimates. Confidence intervals and tests based on the bootstrap standard error can then be constructed in the same way as for the jackknife. Confidence intervals using the *percentile bootstrap* are based on empirical quantiles of the bootstrap distribution and corresponding statistical tests are implemented in `rbmi` via inversion of the confidence interval. Explicit formulas for bootstrap inference as implemented in the `rbmi` package and some considerations regarding the required number of bootstrap samples are included in the Appendix of @Wolbers2021.
+
+A simulation study reported in @Wolbers2021 demonstrated a small inflation of the type I error rate for inference based on the bootstrap standard error  (up to $5.3\%$ for a nominal type I error rate of $5\%$) for a sample size of n = 100 per group and a substantial amount of missing data (>25% of subjects with an ICE). Based on this simulations, we recommend the jackknife over the bootstrap for inference because it performed better in our simulation study and is typically much faster to
+compute than the bootstrap.
+
+## Pooling step for inference of the bootstrapped MI methods {#sec:poolbmlmi}
 
 Assume that the analysis model has been applied to $B*D$ multiple imputed random datasets which resulted in $B*D$ treatment effect estimates $\hat{\theta}_{bd}$ ($b=1,\ldots,B$; $d=1,\ldots,D$).
 
@@ -383,7 +392,7 @@ The final estimate of the treatment effect is calculated as the sample mean over
 $$
 \hat{\theta} = \frac{1}{BD} \sum_{b = 1}^B \sum_{d = 1}^D \hat{\theta}_{bd}.
 $$
-The pooled variance is based on two components that reflect the variability within and the between imputed bootstrap samples [@vanHippelBartlett2021, formula 8.4]:
+The pooled variance is based on two components that reflect the variability within and between imputed bootstrap samples (@vonHippelBartlett2021, formula 8.4):
 $$
 V(\hat{\theta}) = (1 + \frac{1}{B})\frac{MSB - MSW}{D} + \frac{MSW}{BD}
 $$
@@ -398,7 +407,7 @@ MSW &= \frac{1}{B(D-1)} \sum_{b = 1}^B \sum_{d = 1}^D (\theta_{bd} - \bar{\theta
 $$
 where $\bar{\theta_{b}}$ is the mean across the $D$ estimates obtained from random imputation of the $b$-th bootstrap sample.
 
-The degrees of freedom are estimated with the following formula [@vanHippelBartlett2021, formula 8.6]:
+The degrees of freedom are estimated with the following formula (@vonHippelBartlett2021, formula 8.6):
 
 $$
 \nu = \frac{(MSB(B+1) - MSW(B))^2}{\frac{MSB^2(B+1)^2}{B-1} + \frac{MSW^2 B}{D-1}}
@@ -412,40 +421,55 @@ Under the null hypothesis, $T$ has an approximate $t$-distribution with $\nu$ de
 
 ## Comparison between the implemented approaches  {#sec:methodsComparison}
 
-The proposed Bayesian multiple imputation approaches use Rubin's combination rules for inference. 
-For MAR imputation, Rubin's rule provides frequentist consistent estimates of the standard error. However, it is well known that Rubin's rule does not provide frequentist consistent estimates of the standard error for reference-based imputation methods [@Seaman2014, @LiuPang2016, @Tang2017, @CroEtAl2019, @Bartlett2021]. 
-Simulations in @Wolbers2021 which relied on the `rbmi` package also confirmed this finding and demonstrated that inference based on Rubin's rule gave  inflated standard errors relative to the true repeated sampling variance, very conservative observed type I error rates and a substantially decreased statistical power for reference-based imputation methods. Intuitively, this occurs because reference-based imputation methods borrow information from the reference group for imputation in the intervention group. This creates a positive correlation between outcomes in the two treatment groups and leads to a reduction in the frequentist variance of the resulting treatment effect contrast which is not captured by Rubin's variance estimator. Formally, the discrepancy is due to uncongeniality between the imputation and analysis models in reference-based imputation methods [@Meng1994, @Bartlett2021].
-@CroEtAl2019 argued that Rubin's rule is nevertheless valid for reference-based imputation methods because it is approximately information-anchored, i.e. standard error estimates from reference-based imputation methods are similar to those observed under MAR imputation. In contrast, several other authors have implicitly or explicitly favored inference that is correct from a frequentist repeated-sampling perspective [@Seaman2014, @LiuPang2016, @Tang2017, @Bartlett2021]. To us, information anchoring is a sensible concept for sensitivity analyses, whereas for a primary analyses, we feel that that it is more important to adhere to the principles of frequentist inference. 
+### Treatment effect estimation
 
-In contrast, the proposed conditional mean imputation approach uses the jackknife or the bootstrap for inference.
-This approach provides consistent point estimates with the Bayesian approach and frequentist consistent estimates of the standard error for both MAR or reference-based imputation models, assuming that the analysis model is a linear function of the outcome vector. 
-In a simulation study based on the `rbmi` package reported in @Wolbers2021, the jackknife demonstrated exact protection of the type I error in simulations with a relatively low sample size ($n=100$ per group) and a substantial amount of missing data (>25\% of subjects with treatment discontinuations) whereas the bootstrap based on a normal approximation showed a slightly increased type I error rate compared to the nominal value (simulated rate up to 5.3\% at a nominal 5\% significance level). Based on these simulations, the jackknife is preferable to the bootstrap in our specific. Further advantages of the jackknife include that it is typically less computationally intensive and that it leads to deterministic treatment effect estimates, standard errors, and inference in this setting. This is particularly important in a regulatory setting where it is important to ascertain whether a calculated $p$-value which is close to the critical boundary of 5\% is truly below or above that threshold rather than being uncertain about this because of Monte Carlo error. 
+All approaches provide consistent treatment effect estimates for standard and reference-based imputation methods in case the analysis model of the completed datasets is a general linear model such as ANCOVA. Methods other than conditional mean imputation should also be valid for other analysis models. The validity of conditional mean imputation has only been formally demonstrated for analyses using the general linear model (@Wolbers2021[Section 2.4]) though it may also be applicable more widely (e.g. for general MMRM analysis models). 
 
-The bootstrapped maximum likelihood multiple imputation approach [@vanHippelBartlett2021] also provides consistent point estimates with the Bayesian approach and frequentist consistent estimates of the standard error for both MAR or reference-based imputation models. Additionally this method ensures congeniality between imputation and analysis model even if the analysis model is a non-linear function of the outcome vector. However this approach does not provide fully deterministic treatment effect estimates, nor are the standard errors. All estimates will have uncertainty due to the Monte Carlo error and this property might be considered as undesirable in the regulatory setting.
+Treatment effects based on conditional mean imputation are deterministic. All other methods are affected by Monte Carlo sampling error and the precision of estimates depends on the number of imputations or bootstrap samples, respectively. 
+
+
+### Standard errors of the treatment effect 
+
+All approaches provide frequentist consistent estimates of the standard error for imputation under a MAR assumption. For reference-based imputation methods, methods based on conditional mean imputation or bootstrapped MI provide frequentist consistent estimates of the standard error whereas Rubin's rules applied to conventional MI methods provides so-called information anchored inference (@Bartlett2021, @CroEtAl2019, @vonHippelBartlett2021, @Wolbers2021). Frequentist consistent estimates of the standard error lead to confidence intervals and tests which have (asymptotically) correct coverage and type I error control under the assumption that the reference-based assumption reflects the true data-generating mechanism. For finite samples, simulations for a sample size of $n=100$ per group reported in @Wolbers2021 demonstrated that conditional mean imputation combined with the jackknife provided exact protection of the type one error rate whereas the bootstrap was associated with a small type I error inflation (between 5.1\% to 5.3\% for a nominal level of 5\%).
+
+It is well known that Rubin's rules do not provide frequentist consistent estimates of the standard error for reference-based imputation methods (@Seaman2014, @LiuPang2016, @Tang2017, @CroEtAl2019, @Bartlett2021).  Standard errors from Rubin's rule are typically larger than frequentist standard error estimates leading to conservative inference and a corresponding loss of statistical power, see e.g. the simulations reported in @Wolbers2021. 
+Intuitively, this occurs because reference-based imputation methods borrow information from the reference group for imputations in the intervention group leading to a reduction in the frequentist variance of the resulting treatment effect contrast which is not captured by Rubin’s variance estimator. Formally, this occurs because the imputation and analysis models are uncongenial for reference-based imputation methods (@Meng1994, @Bartlett2021). 
+@CroEtAl2019 argued that Rubin’s rule is nevertheless valid for reference-based imputation methods because it is approximately information-anchored, i.e. that the proportion of information lost due to missing data under MAR is approximately preserved in reference-based analyses. In contrast, frequentist standard errors for reference based imputation are not information anchored for reference-based imputation and standard errors under reference-based assumptions are typically smaller than those for MAR imputation. 
+
+Information anchoring is a sensible concept for sensitivity analyses, whereas for a primary analyses, it may be more important to adhere to the principles of frequentist inference. Analyses of data with missing observations generally rely on unverifiable missing data assumptions and the assumptions for reference-based imputation methods are relatively strong. Therefore, these assumptions need to be clinically justified as appropriate or at least conservative for the considered disease area and the anticipated mechanism of action of the intervention.
+
+Conditional mean imputation combined with the jackknife is the only method which leads to deterministic standard error estimates and, consequently, confidence intervals and p-values are also deterministic. This is particularly important in a regulatory setting where it is important to ascertain whether a calculated p-value which is close to the critical boundary of 5% is truly below or above that threshold rather than being uncertain about this because of Monte Carlo error. 
+
+### Computational complexity 
+
+Bayesian MI methods rely on the specification of prior distributions and the usage of Markov chain Monte Carlo (MCMC) methods. 
+All other methods based on multiple imputation or bootstrapping require no other tuning parameters than the specification of the number of imputations $M$ or bootstrap samples $B$ and rely on numerical optimization for fitting the MMRM imputation models via REML. Conditional mean imputation combined with the jackknife has no tuning parameters. 
+
+In our `rbmi` implementation, the fitting of the MMRM imputation model via REML is computationally most expensive. MCMC sampling using `rstan` (@Rstan) is typically relatively fast in our setting and requires only a small burn-in and burn-between of the chains. In addition, the number of random imputations for reliable inference using Rubin's rules is often smaller than the number of resamples required for the jackknife or the bootstrap (see e.g. the discussions in @White2011multiple[Section 7] for Bayesian MI and the Appendix of @Wolbers2021 for the bootstrap). Thus, for many applications, we expect that conventional MI based on Bayesian posterior draws will be fastest, followed by conventional MI using approximate Bayesian posterior draws and conditional mean imputation combined with the jackknife. Conditional mean imputation combined with the bootstrap and bootstrapped MI methods will typically be most computationally demanding. Of note, all implemented methods are conceptually straightforward to parallelize and some parallelization support is provided by `rbmi`.
 
 # Mapping of statistical methods to `rbmi` functions {#sec:rbmiFunctions}
 
-For a full documentation of the `rbmi` package functionality we refer to the help pages of all functions and the other package vignettes. Here we only give a brief overview of how the different steps of the imputation procedure are mapped to `rbmi` functions:
+For a full documentation of the `rbmi` package functionality we refer to the help pages of all functions and to the other package vignettes. Here we only give a brief overview of how the different steps of the imputation procedure are mapped to `rbmi` functions:
 
-- The base imputation model fitting step is implemented in the function `draws()`. The chosen multiple imputation approach can be set using the argument `method` and should be one of the following:
+- The base imputation model fitting step is implemented in the function `draws()`. The chosen MI approach can be set using the argument `method` and should be one of the following:
   + Bayesian posterior parameter draws from the imputation model are obtained via the argument `method = method_bayes()`.
   + Approximate Bayesian posterior parameter draws from the imputation model are obtained via argument `method = method_approxbayes()`.
   + ML or REML parameter estimates of the imputation model parameters for the original dataset and all leave-one-subject-out datasets (as required for the jackknife) are obtained via argument `method = method_condmean(type = "jackknife")`.
   + ML or REML parameter estimates of the imputation model parameters for the original dataset and bootstrapped datasets are obtained via argument `method = method_condmean(type = "bootstrap")`.
-  + The bootstrapped maximum likelihood multiple imputation (BMLMI) method can be set via the argument `method = method_bmlmi()`. In particular, at this step ML or REML parameter estimates from $B$ bootstrap samples needed to perform $D$ random imputations of the bootstrapped samples are obtained with `method = method_bmlmi(B = B, D = D)`.
-- Random imputations based on (approximate) Bayesian posterior parameter draws and deterministic conditional mean imputation are implemented in function `impute()`. Imputation can be performed assuming the already implemented imputation strategies as presented in section \@ref(sec:imputationStep). Additionally, user-defined imputation strategies can also be provided by the user.
-- The analysis step is implemented in function `analyse()` which applies the analysis model to all imputed datasets. By default, the analysis model (argument `fun`) is the `ancova()` function but alternative analysis functions can also be provided by the user. The `analyse()` function also allows $\delta$-adjustments to the imputed datasets prior to the analysis via argument `delta`.
-- The inference step is implemented in function `pool()` which pools the results across imputed datasets. The Rubin and Bernard rule is applied in case of (approximate) Bayesian multiple imputation. For conditional mean imputation, jackknife and bootstrap (normal approximation or percentile) inference is supported. For BMLMI, the pooling and inference steps are performed via `pool()` which in this case implements what described in Section \@ref(sec:poolbmlmi).
+  + Bootstrapped MI methods are obtained via argument `method = method_bmlmi(B=B, D=D)` where $B$ refers to the number of bootstrap samples and $D$ to the number of random imputations for each bootstrap sample. 
+- The imputation step using random imputation or deterministic conditional mean imputation, respectively, is implemented in function `impute()`. Imputation can be performed assuming the already implemented imputation strategies as presented in section \@ref(sec:imputationStep). Additionally, user-defined imputation strategies are also supported.
+- The analysis step is implemented in function `analyse()` and applies the analysis model to all imputed datasets. By default, the analysis model (argument `fun`) is the `ancova()` function but alternative analysis functions can also be provided by the user. The `analyse()` function also allows for $\delta$-adjustments to the imputed datasets prior to the analysis via argument `delta`.
+- The inference step is implemented in function `pool()` which pools the results across imputed datasets. The Rubin and Bernard rule is applied in case of (approximate) Bayesian MI. For conditional mean imputation, jackknife and bootstrap (normal approximation or percentile) inference is supported. For BMLMI, the pooling and inference steps are performed via `pool()` which in this case implements the method described in Section \@ref(sec:poolbmlmi).
 
 #  Comparison to other software implementations {#sec:otherSoftware}
 
-An established software implementation of reference-based imputation in SAS are the so-called "five macros" by James Roger [@FiveMacros]. An alternative `R` implementation which is also currently under development is the R package `RefBasedMI`[@RefbasedMIpackage].
+An established software implementation of reference-based imputation in SAS are the so-called "five macros" by James Roger (@FiveMacros). An alternative `R` implementation which is also currently under development is the R package `RefBasedMI` (@RefbasedMIpackage).
 
 `rbmi` has several features which are not supported by the other implementations:
 
-1. `rbmi` allows for the usage of data collected after an ICE. For example, suppose that we want to adopt a treatment policy strategy for the ICE "treatment discontinuation". A possible implementation of this strategy is to use the observed outcome data for subjects who remain in the study after the ICE and to use reference-based imputation in case the subject drops out. In our implementation, this is implemented by excluding observed post ICE data from the imputation model which assumes MAR missingness but including them in the analysis model. To our knowledge, this would not be possible with the other implementations. 
+1. In addition to the Bayesian MI approach implemented also in the other packages, our implementation provides three alternative MI approaches: approximate Bayesian MI, conditional mean imputation combined with resampling, and bootstrapped MI. 
 
-2. In addition to the Bayesian multiple imputation approach implemented also in the other packages, our implementation provides two alternative approaches. First, we include a bootstrap procedure with conditional mean imputation as described in section \@ref(sec:bootInference). This procedures is relevant for the reference-based imputation setting because it provides valid frequentist inference even under uncongeniality and misspecification. Second, as an alternative to the MCMC sampling of Bayesian multiple imputation, we also implement an alternative bootstrap approach for the same purpose. 
+2. `rbmi` allows for the usage of data collected after an ICE. For example, suppose that we want to adopt a treatment policy strategy for the ICE "treatment discontinuation". A possible implementation of this strategy is to use the observed outcome data for subjects who remain in the study after the ICE and to use reference-based imputation in case the subject drops out. In our implementation, this is implemented by excluding observed post ICE data from the imputation model which assumes MAR missingness but including them in the analysis model. To our knowledge, this is not directly supported by the other implementations. 
 
 3. `RefBasedMI` fits the imputation model to data from each treatment group separately which implies covariate-treatment group interactions for all covariates for the pooled data from both treatment groups. In contrast, Roger's five macros assume a joint model including data from all the randomized groups and covariate-treatment interactions covariates are not allowed. We also chose to implement a joint model but use a flexible model for the linear predictor which may or may not include an interaction term between any covariate and the treatment group. In addition, our imputation model also allows for the inclusion of time-varying covariates.
 

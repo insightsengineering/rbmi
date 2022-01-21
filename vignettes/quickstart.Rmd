@@ -1,5 +1,6 @@
 ---
 title: "rbmi: Quickstart"
+author: Craig Gower-Page, Alessandro Noci, and Marcel Wolbers
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{rbmi: Quickstart}
