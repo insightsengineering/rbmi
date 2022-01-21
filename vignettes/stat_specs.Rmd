@@ -22,8 +22,6 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-
-rmarkdown::find_pandoc(dir = '/usr/lib/rstudio-server/bin/pandoc', cache = FALSE) # hack to run this on http://rkalvbee.kau.roche.com:8787/
 ```
 
 
