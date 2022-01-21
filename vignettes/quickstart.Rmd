@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 
 The purpose of this vignette is to provide a 15 minute quickstart guide to the core functions of the rbmi package.
 
-The rbmi package consists of 4 core functions (as well as several helper functions):
+The rbmi package consists of 4 core functions which are typically called in sequence (as well as several helper functions):
 
 - `draws()` - fits the imputation models and stores their parameters.
 - `impute()` - creates multiple imputed datasets.
@@ -28,7 +28,7 @@ The rbmi package consists of 4 core functions (as well as several helper functio
 
 ## The Data
 
-We use a publicly available example data set from an antidepressant clinical trial of an active drug versus placebo. The relevant endpoint is the Hamilton 17-item depression rating scale (HAMD17) which was assessed at baseline and weeks 1, 2, 4, and 6. Study drug discontinuation occurred in 24% of subjects from the active drug and 26% of subjects from placebo. All data after study drug discontinuation are missing and there is a single additional intermittent missing observation.
+We use a publicly available example data set from an antidepressant clinical trial of an active drug versus placebo. The relevant endpoint is the Hamilton 17-item depression rating scale (HAMD17) which was assessed at baseline and at weeks 1, 2, 4, and 6. Study drug discontinuation occurred in 24% of subjects from the active drug and 26% of subjects from placebo. All data after study drug discontinuation are missing and there is a single additional intermittent missing observation.
 
 ```{r}
 library(rbmi)
@@ -65,11 +65,13 @@ The 3 main inputs to the `draws()` function are:
 - `data_ice` a data.frame which specifies the first visit affected by an intercurrent event (ICE) and the imputation strategy for handling missing outcome data after the ICE. At most one ICE which is to be imputed by a non-MAR strategy is allowed per subject. 
 - `method` specifies the method used to fit the imputation models and the imputed data sets.
 
-For the antidepressant trial, the subject's first visit affected by the ICE "study drug discontinuation" is the
-first terminal missing observation. 
+For the antidepressant trial data, the dataset `data_ice` is not provided. However, it can be derived because, in this dataset, 
+the subject's first visit affected by the ICE "study drug discontinuation" corresponds to the first terminal missing observation. 
+We first derive the dateset `data_ice` and then create 150 Bayesian posterior draws of the imputation model parameters.
+
 For this example, we assume that the imputation strategy after the ICE is Jump To Reference (JR) for all subjects
 and that 150 multiple imputed datasets using Bayesian posterior draws from the imputation model are to be created. 
-We first create 150 Baysian posterior draws of the imputation model parameters:
+
 ```{r}
 # create data_ice and set the imputation strategy to JR for
 # each patient with at least one missing observation
@@ -90,6 +92,7 @@ dat_ice <- dat_ice[-which(dat_ice$PATIENT == 3618),]
 dat_ice
 
 # Define the names of key variables in our dataset using `set_vars()`
+# and the covariates included in the imputation model
 # Note that the covariates argument can also include interaction terms
 vars <- set_vars(
     outcome = "CHANGE",
@@ -127,10 +130,11 @@ thus the inclusion of `group * visit` in the list of covariates.
 
 Available methods include:
 
-- Bayesian imputation - `method_bayes()`.
-- Approximate Bayesian imputation - `method_approxbayes()`.
+- Bayesian multiple imputation - `method_bayes()`. 
+- Approximate Bayesian multiple imputation - `method_approxbayes()`. 
 - Conditional mean imputation (bootstrap) - `method_condmean(type = "bootstrap")`.
 - Conditional mean imputation (jackknife) - `method_condmean(type = "jackknife")`.
+- Bootstrapped multiple imputation - `method = method_bmlmi()`.
 
 Available imputation strategies include:
 
@@ -145,7 +149,7 @@ Available imputation strategies include:
 
 The next step is to use the parameters from the imputation model to generate the imputed datasets. This is
 done via the `impute()` function. The function only has two key inputs: the imputation 
-model output from `draws()` and the reference groups to use when imputing the missing values. It's usage is thus:
+model output from `draws()` and the reference groups relevant to reference-based imputation methods. It's usage is thus:
 
 ```{r}
 imputeObj <- impute(
@@ -163,8 +167,7 @@ object using the `extract_imputed_dfs()` helper function, i.e.:
 
 ```{r}
 imputed_dfs <- extract_imputed_dfs(imputeObj)
-imputed_dfs[[1]]
-imputed_dfs[[2]]
+head(imputed_dfs[[10]], 12) # first 12 rows of 10th imputed dataset
 ```
 
 Note that in the case of `method_condmean()` the first imputed dataset will always correspond to the completed original dataset containing all subjects. 
@@ -250,10 +253,11 @@ Note that the pooling method is automatically derived based on the method that w
 in the original call to `draws()`:
 
 - If `method_bayes()` or `method_approxbayes()` was used then pooling and inference are based on Rubin's rules.
-- If `method_condmean(type = "bootstrap") ` was used then inference is based on either a normal approximation to the treatment effect distribution (`pool(..., type = "normal")`) or on the bootstrap percentiles (`pool(..., type = "percentile")`).
+- If `method_condmean(type = "bootstrap") ` was used then inference is based on either a normal approximation using the bootstrap standard error (`pool(..., type = "normal")`) or on the bootstrap percentiles (`pool(..., type = "percentile")`).
 - If `method_condmean(type = "jackknife")` was used then inference is based on a normal approximation using the jackknife estimate of the standard error.
+- If `method = method_bmlmi()` was used then inference is according to the methods described by von Hippel and Bartlett (see the `stat_specs` vignette for details)
 
-Since we have used Bayesian imputation in this vignette, the `pool()` function will automatically use Rubin's rules.
+Since we have used Bayesian multiple imputation in this vignette, the `pool()` function will automatically use Rubin's rules.
 
 
 ```{r}
@@ -264,6 +268,11 @@ poolObj <- pool(
 )
 poolObj
 ```
+This output gives an estimated difference of 
+`r paste(formatC(poolObj$pars$trt_7$est,format="f",digits=3)," (95% CI ", 
+         formatC(poolObj$pars$trt_7$ci[1],format="f",digits=3), " to ",
+         formatC(poolObj$pars$trt_7$ci[2],format="f",digits=3),")",sep="")`
+between the two groups at the last visit with an associated $p$-value of `r formatC(poolObj$pars$trt_7$pval,format="f",digits=3)`.
 
 The table of values shown in the print message for `poolObj` can also be extracted using the `as.data.frame()` function:
 
@@ -309,6 +318,7 @@ dat_ice <- dat %>%
 dat_ice <- dat_ice[-which(dat_ice$PATIENT == 3618),]
 
 # Define the names of key variables in our dataset using `set_vars()`
+# and the covariates included in the imputation model
 # Note that the covariates argument can also include interaction terms
 vars <- set_vars(
     outcome = "CHANGE",

@@ -438,7 +438,7 @@ Intuitively, this occurs because reference-based imputation methods borrow infor
 
 Information anchoring is a sensible concept for sensitivity analyses, whereas for a primary analyses, it may be more important to adhere to the principles of frequentist inference. Analyses of data with missing observations generally rely on unverifiable missing data assumptions and the assumptions for reference-based imputation methods are relatively strong. Therefore, these assumptions need to be clinically justified as appropriate or at least conservative for the considered disease area and the anticipated mechanism of action of the intervention.
 
-Conditional mean imputation combined with the jackknife is the only method which leads to deterministic standard error estimates and, consequently, confidence intervals and p-values are also deterministic. This is particularly important in a regulatory setting where it is important to ascertain whether a calculated p-value which is close to the critical boundary of 5% is truly below or above that threshold rather than being uncertain about this because of Monte Carlo error. 
+Conditional mean imputation combined with the jackknife is the only method which leads to deterministic standard error estimates and, consequently, confidence intervals and $p$-values are also deterministic. This is particularly important in a regulatory setting where it is important to ascertain whether a calculated $p$-value which is close to the critical boundary of 5% is truly below or above that threshold rather than being uncertain about this because of Monte Carlo error. 
 
 ### Computational complexity 
 
