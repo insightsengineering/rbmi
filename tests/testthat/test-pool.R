@@ -124,7 +124,6 @@ test_that("get_ests_bmlmi", {
     ## Re-implement bmlmi Var & df implementations to ensure no
     ## small silly coding errors
     local_bmlmi <- function(x, D) {
-        D <- 20
         B <- length(x) / D
         M <- matrix(x, ncol = D, byrow = TRUE)
         point <- mean(M)
@@ -152,12 +151,14 @@ test_that("get_ests_bmlmi", {
         rnorm(100, 20, sd = 3),
         rnorm(100, 30, sd = 4)
     )
+    D <- 4
     expect_equal(
         local_bmlmi(x, D),
         get_ests_bmlmi(x, D)
     )
 
     set.seed(13)
+    D <- 4
     x <- rnorm(100, 10, sd = 2)
     expect_equal(
         local_bmlmi(x, D),
