@@ -11,7 +11,7 @@
       Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
       Imputation Type: random
       Method:
-          Type: Bayes
+          name: Bayes
           burn_in: 200
           burn_between: 1
           same_cov: TRUE
@@ -98,7 +98,7 @@
       Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
       Imputation Type: random
       Method:
-          Type: Approximate Bayes
+          name: Approximate Bayes
           covariance: us
           threshold: 0.5
           same_cov: TRUE
@@ -190,7 +190,7 @@
       Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
       Imputation Type: condmean
       Method:
-          Type: Conditional Mean
+          name: Conditional Mean
           covariance: ar1
           threshold: 0.2
           same_cov: TRUE
@@ -313,7 +313,7 @@
       Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
       Imputation Type: condmean
       Method:
-          Type: Conditional Mean
+          name: Conditional Mean
           covariance: us
           threshold: 0.5
           same_cov: FALSE
