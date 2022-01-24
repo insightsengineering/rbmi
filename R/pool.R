@@ -692,7 +692,7 @@ as.data.frame.pool <- function(x, ...) {
 print.pool <- function(x, ...) {
 
     n_string <- ife(
-        x$method == "rubin",
+        x$method %in% c("rubin", "bmlmi"),
         as.character(x$N),
         sprintf("1 + %s", x$N - 1)
     )
