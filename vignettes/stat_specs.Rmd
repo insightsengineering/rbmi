@@ -118,7 +118,7 @@ The **conventional MI** approaches includes the following steps:
 
 3. **Analysis step** (Section \@ref(sec:analysis))
 
-  + Analyze the imputed dataset using an analysis model (e.g. ANCOVA) resulting in a point estimate and a standard error (with corresponding degrees of freedom) of the  treatment effect. 
+  + Analyze the imputed dataset using an analysis model (e.g. ANCOVA) resulting in a point estimate and a standard error (with corresponding degrees of freedom) of the treatment effect. 
   
 4. **Pooling step for inference** (Section \@ref(sec:pooling))
 
