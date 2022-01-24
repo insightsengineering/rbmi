@@ -408,7 +408,7 @@ where $\bar{\theta_{b}}$ is the mean across the $D$ estimates obtained from rand
 The degrees of freedom are estimated with the following formula (@vonHippelBartlett2021, formula 8.6):
 
 $$
-\nu = \frac{(MSB(B+1) - MSW(B))^2}{\frac{MSB^2(B+1)^2}{B-1} + \frac{MSW^2 B}{D-1}}
+\nu = \frac{(MSB*(B+1) - MSW*B)^2}{\frac{MSB^2*(B+1)^2}{B-1} + \frac{MSW^2*B}{D-1}}
 $$
 
 Confidence intervals and tests of the null hypothesis $H_0: \theta=\theta_0$ are based on the $t$-statistics $T$:
