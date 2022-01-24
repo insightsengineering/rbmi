@@ -50,6 +50,11 @@
 #' mean imputation on the original dataset whereas all subsequent imputed datasets refer to
 #' conditional mean imputations for bootstrap or jackknife samples, respectively, of the original data.
 #'
+#' - Bootstrapped Maximum Likelihood MI (BMLMI): it performs `D` random imputations of each bootstrapped
+#' dataset that was used to generate the corresponding parameter estimates in [draws()]. A total number of
+#' `B*D` imputed datasets is provided, where `B` is the number of bootstrapped datasets. Missing values
+#' are imputed by taking a random sample from the conditional imputation distribution.
+#'
 #' The `update_strategy` argument can be used to update the imputation strategy that was
 #' originally set via the `data_ice` option in [draws()]. This avoids having to re-run the [draws()]
 #' function when changing the imputation strategy in certain circumstances (as detailed below).
@@ -132,6 +137,7 @@ impute.condmean <- function(draws, references, update_strategy = NULL, strategie
 }
 
 
+
 #'  Create imputed datasets
 #'
 #' This is the work horse function that implements most of the functionality of impute.
@@ -142,7 +148,6 @@ impute.condmean <- function(draws, references, update_strategy = NULL, strategie
 #' @param condmean logical. If TRUE will impute using the conditional mean values, if values
 #' will impute by taking a random draw from the multivariate normal distribution.
 impute_internal <- function(draws, references, update_strategy, strategies, condmean) {
-
     references <- add_class(references, "references")
     validate(draws)
     data <- draws$data$clone(deep = TRUE)
@@ -158,7 +163,9 @@ impute_internal <- function(draws, references, update_strategy, strategies, cond
     validate(draws$samples)
     samples_grouped <- transpose_samples(draws$samples)
 
-    imputes <- mapply(
+    n_imputations <- ifelse(is.null(draws$method$D), 1, draws$method$D)
+
+    list_of_imputations_pt <- mapply(
         impute_data_individual,
         names(samples_grouped$index),
         samples_grouped$index,
@@ -168,101 +175,203 @@ impute_internal <- function(draws, references, update_strategy, strategies, cond
             data = data,
             references = references,
             strategies = strategies,
-            condmean = condmean
+            condmean = condmean,
+            n_imputations = n_imputations
         ),
         SIMPLIFY = FALSE
     )
 
+    list_of_imputation_dfs <- convert_to_imputation_list_df(
+        list_of_imputations_pt,
+        lapply(draws$samples, `[[`, "ids")
+    )
+
     x <- as_imputation(
-        imputations = untranspose_imputations(imputes, lapply(draws$samples, function(x) x$ids)),
+        imputations = list_of_imputation_dfs,
         data = data,
         method = draws$method,
         references = references
     )
+    validate(x)
+
     return(x)
 }
 
 
 
-#' Invert imputation list
+
+#' Convert list of [imputation_list_single()] objects to an [imputation_list_df()] object
+#' (i.e. a list of [imputation_df()] objects's)
 #'
-#' @param imputations A list of imputed values with 1 element per unique subject
+#' @param imputes a list of [imputation_list_single()] objects
+#' @param sample_ids A list with 1 element per required imputation_df. Each element
+#' must contain a vector of "ID"'s which correspond to the [imputation_single()] ID's
+#' that are required for that dataset. The total number of ID's must by equal to the
+#' total number of rows within all of `imputes$imputations`
 #'
-#' @param sample_ids A list of ids belonging to each sample with 1 element per sample
+#' To accomdate for `method_bmlmi()` the [impute_data_individual()] function returns
+#' a list of [imputation_list_single()] objects with 1 object per each subject.
+#'
+#' [imputation_list_single()] stores the subjects imputations as a matrix where the columns
+#' of the matrix correspond to the D of [method_bmlmi()]. Note that all other methods
+#' (i.e. `methods_*()`) are a special case of this with D = 1. The number of rows in the
+#' matrix varies for each subject and is equal to the number of times the patient was selected
+#' for imputation (for non-conditional mean methods this should be 1 per subject per imputed
+#' dataset).
+#'
+#' This function is best illustrated by an example:
+#'
+#' ```
+#' imputes = list(
+#'     imputation_list_single(
+#'         id = "Tom",
+#'         imputations = matrix(
+#'              imputation_single_t_1_1,  imputation_single_t_1_2,
+#'              imputation_single_t_2_1,  imputation_single_t_2_2,
+#'              imputation_single_t_3_1,  imputation_single_t_3_2
+#'         )
+#'     ),
+#'     imputation_list_single(
+#'         id = "Tom",
+#'         imputations = matrix(
+#'              imputation_single_h_1_1,  imputation_single_h_1_2,
+#'         )
+#'     )
+#' )
+#'
+#' sample_ids <- list(
+#'     c("Tom", "Harry", "Tom"),
+#'     c("Tom")
+#' )
+#' ```
+#'
+#' Then `convert_to_imputation_df(imputes, sample_ids)` would result in:
+#'
+#' ```
+#' imputation_list_df(
+#'     imputation_df(
+#'         imputation_single_t_1_1,
+#'         imputation_single_h_1_1,
+#'         imputation_single_t_2_1
+#'     ),
+#'     imputation_df(
+#'         imputation_single_t_1_2,
+#'         imputation_single_h_1_2,
+#'         imputation_single_t_2_2
+#'     ),
+#'     imputation_df(
+#'         imputation_single_t_3_1
+#'     ),
+#'     imputation_df(
+#'         imputation_single_t_3_2
+#'     )
+#' )
+#' ```
+#'
+#' Note that the different repititions (i.e. the value set for D) are grouped together
+#' sequentially.
+#'
+convert_to_imputation_list_df <- function(imputes, sample_ids) {
+    D_by_id <- vapply(imputes, function(x) ncol(x$imputations), numeric(1))
+    n_imputations_by_id <- vapply(imputes, function(x) nrow(x$imputations), numeric(1))
+
+    D <- unique(D_by_id)
+    B <- length(sample_ids)
+
+    assert_that(
+        length(D) == 1,
+        msg = "D could not be uniquely determined"
+    )
+    assert_that(
+        sum(n_imputations_by_id) == length(unlist(sample_ids)),
+        msg = "Number of samples available does not equal the number required"
+    )
+
+    impute_dfs_by_d <- lapply(
+        seq_len(D),
+        function(d) {
+            imputations_d <- lapply(imputes, function(x) x$imputations[, d])
+            list_of_singles <- unlist(imputations_d, recursive = FALSE, use.names = FALSE)
+            split_imputations(list_of_singles, sample_ids)
+        }
+    )
+
+    impute_dfs_flat_by_d <- unlist(impute_dfs_by_d, recursive = FALSE, use.names = FALSE)
+
+    index_d2b <- c()
+    for (b in seq_len(B)) index_d2b <- c(index_d2b, b + (seq_len(D) - 1) * B)
+
+    impute_dfs_flat_by_b <- do.call(imputation_list_df, impute_dfs_flat_by_d[index_d2b])
+    return(impute_dfs_flat_by_b)
+}
+
+
+
+#' Split a flat list of [imputation_single()] into multiple [imputation_df()]'s by ID
+#'
+#' @param list_of_singles A list of [imputation_single()]'s
+#'
+#' @param split_ids A list with 1 element per required split. Each element
+#' must contain a vector of "ID"'s which correspond to the [imputation_single()] ID's
+#' that are required within that sample. The total number of ID's must by equal to the
+#' length of `list_of_singles`
+#'
+#' @importFrom utils relist
 #'
 #' @details This function converts a list of imputations from being structured per patient
 #' to being structured per sample i.e. it converts
 #'
-#'```
-#'input_imputes <- list(
-#'     list(id = "Ben", values = list(4, 2, 1),
-#'     list(id = "Harry", values = list(c(1, 2))),
-#'     list(id = "Phil", values = list(c(3, 4), c(5, 6))),
+#' ```
+#' obj <- list(
+#'     imputation_single("Ben", numeric(0)),
+#'     imputation_single("Ben", numeric(0)),
+#'     imputation_single("Ben", numeric(0)),
+#'     imputation_single("Harry", c(1, 2)),
+#'     imputation_single("Phil", c(3, 4)),
+#'     imputation_single("Phil", c(5, 6)),
+#'     imputation_single("Tom", c(7, 8, 9))
 #' )
 #'
-#' sample_ids <- list(
-#'     c("Ben", "Harry", "Phil"),
+#' index <- list(
+#'     c("Ben", "Harry", "Phil", "Tom"),
 #'     c("Ben", "Ben", "Phil")
 #' )
 #' ```
 #'
-#' to
+#' Into:
 #'
 #' ```
-#' list(
-#'     list(
-#'         list(id = "Ben", values = 4),
-#'         list(id = "Harry", values = 1),
-#'         list(id = "Phil", values = c(3,4))
+#' output <- list(
+#'     imputation_df(
+#'         imputation_single(id = "Ben", values = numeric(0)),
+#'         imputation_single(id = "Harry", values = c(1, 2)),
+#'         imputation_single(id = "Phil", values = c(3, 4)),
+#'         imputation_single(id = "Tom", values = c(7, 8, 9))
 #'     ),
-#'     list(
-#'         list(id = "Ben", values = 2),
-#'         list(id = "Ben", values = 1),
-#'         list(id = "Phil", values  = c(5,6))
+#'     imputation_df(
+#'         imputation_single(id = "Ben", values = numeric(0)),
+#'         imputation_single(id = "Ben", values = numeric(0)),
+#'         imputation_single(id = "Phil", values = c(5, 6))
 #'     )
 #' )
-#'
-untranspose_imputations <- function(imputations, sample_ids) {
-
-    imp_names <- vapply(imputations, function(x) x$id, character(1))
-    assert_that(length(imp_names) == length(imputations))
-    names(imputations) <- imp_names
-    sids <- sample_ids
-    uids <- unique(unlist(sids))
-
+#' ```
+split_imputations <- function(list_of_singles, split_ids) {
+    ids_flat <- vapply(list_of_singles, `[[`, character(1), "id")
+    ids_order_index <- order(ids_flat)
+    index_flat <- unlist(split_ids)
+    reindex <- order(order(index_flat))
     assert_that(
-        all(uids %in% imp_names),
-        msg = "sample_ids contains an id not available in imputations"
+        length(reindex) == length(ids_flat),
+        identical(
+            tapply(index_flat, index_flat, length),
+            tapply(ids_flat, ids_flat, length),
+
+        ),
+        msg = "index is not compatible with the object"
     )
-
-
-    index <- list()
-    for (i in uids) index[[i]] <- 1
-    hold <- list()
-    for (i in seq_along(sids)) {
-        hold[[i]] <- list()
-        for (j in seq_along(sids[[i]])) {
-            id <- sids[[i]][[j]]
-            ind <- index[[id]]
-            values <- imputations[[id]]$values[[ind]]
-            hold[[i]][[j]] <- as_imputation_single(id = id, values = values)
-            index[[id]] <- index[[id]] + 1
-        }
-        hold[[i]] <- as_imputation_list(hold[[i]])
-    }
-
-    vapply(hold, validate, logical(1))
-
-    number_used <- sum(vapply(hold, function(x) length(x), numeric(1)))
-    number_avail_1 <- length(unlist(sids))
-    number_avail_2 <- sum(vapply(imputations, function(x) length(x$values), numeric(1)))
-    assert_that(
-        number_used == number_avail_1,
-        number_avail_2 == number_avail_1,
-        msg = "Not all imputations have been used"
-    )
-
-    return(hold)
+    output <- list_of_singles[ids_order_index][reindex]
+    output_list <- relist(output, split_ids)
+    lapply(output_list, imputation_df)
 }
 
 
@@ -370,6 +479,8 @@ invert_indexes <- function(x) {
 #' @param condmean Logical. If `TRUE` will impute using the conditional mean values, if `FALSE`
 #' will impute by taking a random draw from the multivariate normal distribution.
 #'
+#' @param n_imputations When `condmean = FALSE` numeric representing the number of random imputations to be performed for each sample.
+#' Default is `1` (one random imputation per sample).
 impute_data_individual <- function(
     id,
     index,
@@ -378,18 +489,23 @@ impute_data_individual <- function(
     data,
     references,
     strategies,
-    condmean
+    condmean,
+    n_imputations = 1
 ) {
 
     # Define default return value if nothing needs to be imputed
-    result <- list(
-        id = id,
-        values = replicate(n = length(index), numeric(0))
+    results <- imputation_list_single(
+        D = n_imputations,
+        imputations = replicate(
+            n = n_imputations * length(index),
+            simplify = FALSE,
+            expr = imputation_single(id = id, values = matrix(numeric(0)))
+        )
     )
 
     id_data <- data$extract_by_id(id)
 
-    if (sum(id_data$is_missing) == 0) return(result)
+    if (sum(id_data$is_missing) == 0) return(results)
 
     vars <- data$vars
     group_pt <- as.character(id_data$group)
@@ -430,14 +546,22 @@ impute_data_individual <- function(
         values = id_data$outcome
     )
 
-    if (condmean) {
-        imputed_outcome <- lapply(conditional_parameters, function(x) as.vector(x$mu))
-    } else {
-        imputed_outcome <- lapply(conditional_parameters, impute_outcome)
-    }
+    imputed_outcome <- unlist(lapply(
+        conditional_parameters,
+        impute_outcome,
+        n_imputations = n_imputations,
+        condmean = condmean
+    ), recursive = FALSE)
 
-    result$values <- imputed_outcome
-    return(result)
+    results <- imputation_list_single(
+        D = n_imputations,
+        imputations = lapply(imputed_outcome, function(x) {
+            imputation_single(id = id, values = x)
+        })
+    )
+
+    validate(results)
+    return(results)
 }
 
 
@@ -457,7 +581,6 @@ impute_data_individual <- function(
 #' All elements of beta must be the same length and must be the same length and order as `dat`.
 #' @param sigma List of sigma. Must have the same number of entries as `beta`.
 get_visit_distribution_parameters <- function(dat, beta, sigma) {
-
     assert_that(
         length(unique(vapply(beta, length, numeric(1)))) == 1,
         msg = "All elements of beta must be the same length"
@@ -487,8 +610,28 @@ get_visit_distribution_parameters <- function(dat, beta, sigma) {
 #'
 #' @param conditional_parameters a list with elements `mu` and `sigma` which
 #' contain the mean vector and covariance matrix to sample from.
+#'
+#' @param n_imputations numeric representing the number of random samples from the multivariate
+#' normal distribution to be performed. Default is `1`.
+#'
+#' @param condmean should conditional mean imputation be performed (as opposed to random
+#' sampling)
+#'
 #' @importFrom stats rnorm
-impute_outcome <- function(conditional_parameters) {
+impute_outcome <- function(conditional_parameters, n_imputations = 1, condmean = FALSE) {
+
+    if (condmean) {
+        expr <- quote(
+            as.vector(conditional_parameters$mu)
+        )
+    } else {
+        expr <- quote(
+            sample_mvnorm(
+                conditional_parameters$mu,
+                conditional_parameters$sigma
+            )
+        )
+    }
 
     assert_that(
         all(!is.na(conditional_parameters$mu)),
@@ -496,14 +639,13 @@ impute_outcome <- function(conditional_parameters) {
         msg = "Sigma or Mu contain missing values"
     )
 
-    result <- sample_mvnorm(
-        conditional_parameters$mu,
-        conditional_parameters$sigma
+    results <- replicate(
+        n = n_imputations,
+        simplify = FALSE,
+        expr = eval(expr)
     )
-
-    return(as.vector(result))
+    return(results)
 }
-
 
 
 
@@ -640,51 +782,54 @@ validate_strategies <- function(strategies, reference) {
 
 
 
-#' Create a valid `imputation_single` object
+
+
+
+
+
+
+
+
+
+
+#' Create an imputation object
 #'
-#' @param id a character string specifying the subject id.
-#' @param values a numeric vector indicating the imputed values.
-as_imputation_single <- function(id, values) {
-    x <- list(id = id, values = values)
-    class(x) <- c("imputation_single", "list")
-    validate(x)
+#' This function creates the object that is returned from [impute()]. Essentially
+#' it is a glorified wrapper around [list()] ensuring that the required elements have been
+#' set and that the class is added as expected.
+#'
+#' @param imputations A list of `imputations_list`'s as created by [imputation_df()]
+#'
+#' @param data A `longdata` object as created by [longDataConstructor()]
+#'
+#' @param method A `method` object as created by [method_condmean()], [method_bayes()] or
+#'  [method_approxbayes()]
+#'
+#' @param references A named vector. Identifies the references to be used when generating the
+#' imputed values. Should be of the form `c("Group" = "Reference", "Group" = "Reference")`.
+#'
+as_imputation <- function(imputations, data, method, references) {
+    x <- list(
+        imputations = imputations,
+        data = data,
+        method = method,
+        references = references
+    )
+    class(x) <- c("imputation", "list")
     return(x)
 }
 
-#' @export
-validate.imputation_single <- function(x, ...) {
-    assert_that(
-        length(x$id) == 1,
-        is.character(x$id),
-        is.numeric(x$values) | is.null(x$values)
-    )
-    return(TRUE)
-}
-
-
-#' Create a valid `imputation_list` object
-#'
-#' @param ... a list of `imputation_single`.
-as_imputation_list <- function(...) {
-    x <- list(...)
-    if (length(x) == 1 & class(x[[1]])[[1]] != "imputation_single") {
-        x <- x[[1]]
-    }
-    class(x) <- c("imputation_list", "list")
-    validate(x)
-    return(x)
-}
-
-
 
 #' @export
-validate.imputation_list <- function(x, ...) {
+validate.imputation <- function(x, ...) {
     assert_that(
-        is.null(names(x)),
-        all(vapply(x, function(x) class(x)[[1]] == "imputation_single", logical(1)))
+        has_class(x$imputations, "imputation_list_df"),
+        validate(x$imputations),
+        has_class(x$data, "longdata"),
+        has_class(x$method, "method"),
+        has_class(x$references, "references"),
+        validate(x$references, x$data$data[[x$data$vars$group]])
     )
-    vapply(x, validate, logical(1))
-    return(TRUE)
 }
 
 
@@ -736,43 +881,7 @@ print.imputation <- function(x, ...) {
 
 
 
-#' Create an imputation object
-#'
-#' This function creates the object that is returned from [impute()]. Essentially
-#' it is a glorified wrapper around [list()] ensuring that the required elements have been
-#' set and that the class is added as expected.
-#'
-#' @param imputations A list of `imputations_list`'s as created by [as_imputation_list()]
-#'
-#' @param data A `longdata` object as created by [longDataConstructor()]
-#'
-#' @param method A `method` object as created by [method_condmean()], [method_bayes()] or
-#'  [method_approxbayes()]
-#'
-#' @param references A named vector. Identifies the references to be used when generating the
-#' imputed values. Should be of the form `c("Group" = "Reference", "Group" = "Reference")`.
-#'
-as_imputation <- function(imputations, data, method, references) {
-    x <- list(
-        imputations = imputations,
-        data = data,
-        method = method,
-        references = references
-    )
-    class(x) <- c("imputation", "list")
-    validate(x)
-    return(x)
-}
 
 
-#' @export
-validate.imputation <- function(x, ...) {
-    assert_that(
-        is.list(x$imputations),
-        all(vapply(x$imputations, validate, logical(1))),
-        has_class(x$data, "longdata"),
-        has_class(x$method, "method"),
-        has_class(x$references, "references"),
-        validate(x$references, x$data$data[[x$data$vars$group]])
-    )
-}
+
+

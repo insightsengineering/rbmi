@@ -220,3 +220,24 @@ test_that("sort_by", {
     expect_equal(arrange(x, desc(z)), sort_by(x, "z", T))
     expect_equal(arrange(x, x, desc(y)), sort_by(x, c("x", "y"), c(F, T)))
 })
+
+
+
+
+test_that("Stack", {
+    mstack <- Stack$new()
+    mstack$add(list(1, 2, 3, 4, 5, 6, 7))
+    expect_equal(mstack$pop(3), list(1, 2, 3))
+    expect_equal(mstack$pop(3), list(4, 5, 6))
+    expect_equal(mstack$pop(3), list(7))
+    expect_error(mstack$pop(1), "items to return")
+
+    mstack <- Stack$new()
+    mstack$add(list(1, 2, 3, 4))
+    expect_equal(mstack$pop(3), list(1, 2, 3))
+    mstack$add(list(5, 6))
+    expect_equal(mstack$pop(3), list(4, 5, 6))
+    mstack$add(list(7))
+    expect_equal(mstack$pop(3), list(7))
+    expect_error(mstack$pop(1), "items to return")
+})

@@ -7,17 +7,12 @@
 transpose_imputations(imputations)
 }
 \arguments{
-\item{imputations}{An \code{imputation_list} object created by \code{\link[=as_imputation_list]{as_imputation_list()}}}
+\item{imputations}{An \code{imputation_df} object created by \code{\link[=imputation_df]{imputation_df()}}}
 }
 \description{
-Takes an \code{imputation_list} object and transposes it e.g.\preformatted{list(
-    list(
-        id = "a",
-        values = c(1,2,3)
-    ),
-    list(
-        id = "b",
-        values = c(4,5,6)
+Takes an \code{imputation_df} object and transposes it e.g.\preformatted{list(
+    list(id = "a", values = c(1,2,3)),
+    list(id = "b", values = c(4,5,6)
     )
 )
 }

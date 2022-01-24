@@ -5,6 +5,7 @@
 \alias{method_bayes}
 \alias{method_approxbayes}
 \alias{method_condmean}
+\alias{method_bmlmi}
 \title{Set the multiple imputation methodology}
 \usage{
 method_bayes(
@@ -31,6 +32,15 @@ method_condmean(
   REML = TRUE,
   n_samples = NULL,
   type = c("bootstrap", "jackknife")
+)
+
+method_bmlmi(
+  covariance = c("us", "toep", "cs", "ar1"),
+  threshold = 0.01,
+  same_cov = TRUE,
+  REML = TRUE,
+  B = 20,
+  D = 2
 )
 }
 \arguments{
@@ -73,6 +83,11 @@ likelihood.}
 
 \item{type}{a character string that specifies the method to use when calculating
 confidence intervals. Must be one of \code{"bootstrap"} (default) or \code{"percentile"}.}
+
+\item{B}{a numeric that determines the number of bootstrap samples for \code{method_bmlmi}.}
+
+\item{D}{a numeric that determines the number of random imputations for each bootstrap sample.
+Needed for \code{method_bmlmi}.}
 }
 \description{
 These functions determine what methods rbmi should use when creating
@@ -97,7 +112,7 @@ argument. Currently supported structures include:
 
 Note that at present Bayesian methods only support unstructured.
 
-In the case of \code{method_condmean(type = "bootstrap")} and \code{method_approxbayes()} repeated
+In the case of \code{method_condmean(type = "bootstrap")}, \code{method_approxbayes()} and \code{method_bmlmi()} repeated
 bootstrap samples of the original dataset are taken with an MMRM fitted to each sample.
 Due to the randomness of these sampled datasets, as well as limitations in the optimisers
 used to fit the models, it is not uncommon that estimates for a particular dataset can't

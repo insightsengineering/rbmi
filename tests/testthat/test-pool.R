@@ -91,6 +91,85 @@ test_that("pval_percentile", {
     expect_true(all(pvals > 0.485 & pvals < 0.515)) # the "true" p-values are 0.5
 })
 
+test_that("get_ests_bmlmi", {
+
+    ests <- rnorm(100)
+    D <- 5
+
+    res <- get_ests_bmlmi(ests, D)
+
+    expect_true(
+        is.list(res) &
+            length(res) == 3 &
+            all(!is.na(res)) &
+            all(!is.null(res)) &
+            all(sapply(res, is.numeric)) &
+            all(sapply(res, function(x) length(x) == 1)) &
+            res$est_point == mean(ests)
+    )
+
+    D <- 3
+    expect_error(
+        get_ests_bmlmi(ests, D),
+        regexp = "length of `ests` must be a multiple of `D`"
+    )
+
+    D <- 1
+    expect_error(
+        get_ests_bmlmi(ests, D),
+        regexp = "`D` must be a numeric larger than 1"
+    )
+
+
+    ## Re-implement bmlmi Var & df implementations to ensure no
+    ## small silly coding errors
+    local_bmlmi <- function(x, D) {
+        B <- length(x) / D
+        M <- matrix(x, ncol = D, byrow = TRUE)
+        point <- mean(M)
+        est_B <- rowMeans(M)
+        SSW <- sum(sweep(M, 1, est_B)^2)
+        SSB <- D * sum((est_B - mean(est_B))^2)
+        MSW <- SSW / ((B * D) - B)
+        MSB <- SSB / (B - 1)
+        V <- (1 / D) * (MSB * (1 + 1 / B) - MSW)
+        df_num <- ((MSB * (B + 1)) - (MSW * B))^2
+        df_den_1 <- ((MSB^2) * ((B + 1)^2)) / (B - 1)
+        df_den_2 <- (MSW^2 * B) / (D-1)
+        df <- df_num / (df_den_1 + df_den_2)
+        list(
+            est_point = point,
+            est_var = V,
+            df = max(3, df)
+        )
+    }
+
+    set.seed(3713)
+    x <- c(
+        rnorm(100, 10, sd = 2),
+        rnorm(100, 5, sd = 7),
+        rnorm(100, 20, sd = 3),
+        rnorm(100, 30, sd = 4)
+    )
+    D <- 4
+    expect_equal(
+        local_bmlmi(x, D),
+        get_ests_bmlmi(x, D)
+    )
+
+    set.seed(13)
+    D <- 4
+    x <- rnorm(100, 10, sd = 2)
+    expect_equal(
+        local_bmlmi(x, D),
+        get_ests_bmlmi(x, D)
+    )
+
+})
+
+
+
+
 
 test_that("pool", {
     set.seed(101)
@@ -170,7 +249,7 @@ test_that("pool", {
 
 test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     set.seed(101)
-
+  
     mu <- 0
     sd <- 1
     n <- 2000
@@ -262,6 +341,117 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
              pvalue = as.numeric(NA)),
         tolerance = 1e-2
     )
+})
+  
+  test_that("pool BMLMI estimates", {
+    set.seed(100)
+
+    mu <- 0
+    sd <- 1
+    n <- 500
+    B <- 1000
+    D <- 10
+
+    data <- rnorm(n, mu, sd)
+
+    ############ NO MISSING VALUES
+
+    boot_data <- lapply(seq.int(B), function(x) sample(data, size = n, replace = TRUE))
+    vals <- unlist(lapply(boot_data, function(x) lapply(seq.int(D), function(y)
+    {
+        mu_est <- mean(x, na.rm = TRUE)
+        sd_est <- sd(x, na.rm = TRUE)
+        x[is.na(x)] <- rnorm(sum(is.na(x)), mu_est, sd_est) # impute
+        return(x)
+    }
+    )
+    ), recursive = FALSE)
+
+    runanalysis <- function(x) {
+        list("p1" = list(est = mean(x), se = sqrt(var(x) / length(x)), df = NA))
+    }
+
+
+    ########  BMLMI
+    results_bmlmi <- as_analysis(
+        method = method_bmlmi(B = B, D = D),
+        results =
+            lapply(
+                vals,
+                runanalysis
+            )
+    )
+
+    real_mu <- mean(sapply(vals, mean))
+
+    means_per_boot <- lapply(split(vals, rep(seq.int(B), each = D)), function(x) sapply(x, function(y) mean(y)))
+    var_within <- mean(sapply(means_per_boot, function(x) var(x))) # within bootstrap variability (0 if no missing values)
+    real_se <- sqrt(mean(sapply(vals[seq(1, B*D, by = D)], function(x) var(x)/n)) + var_within)
+
+    # real_se is the sum of the within and between bootstrap variability.
+    # It should be similar to the se estimate from the bmlmi pooling method
+    # (exact equality is not proven)
+
+    pooled_res <- pool(results_bmlmi)
+
+    expect_results <- function(res, real_mu, real_se) {
+        conf <- res$conf.level
+
+        pars <- res$pars[[1]]
+
+        real_ci <- real_mu + c(-1, 1) * qnorm( (1 - (1 - conf) / 2) * 1.005) * real_se
+        ci <- pars$ci
+
+        expect_true(real_ci[1] < ci[1] & real_ci[2] > ci[2])
+
+        expect_true((real_mu - abs(real_mu * 0.01)) < pars$est)
+        expect_true((real_mu + abs(real_mu * 0.01)) > pars$est)
+
+    }
+
+    expect_results(pooled_res, real_mu = real_mu, real_se = real_se)
+
+
+
+    ############### WITH MISSING VALUES
+
+    data[1:ceiling(n/5)] <- NA # 20% missing values
+    boot_data <- lapply(seq.int(B), function(x) sample(data, size = n, replace = TRUE))
+    vals <- unlist(lapply(boot_data, function(x) lapply(seq.int(D), function(y)
+    {
+        mu_est <- mean(x, na.rm = TRUE)
+        sd_est <- sd(x, na.rm = TRUE)
+        x[is.na(x)] <- rnorm(sum(is.na(x)), mu_est, sd_est) # impute
+        return(x)
+    }
+    )
+    ), recursive = FALSE)
+
+
+    ########  BMLMI
+    results_bmlmi <- as_analysis(
+        method = method_bmlmi(B = B, D = D),
+        results =
+            lapply(
+                vals,
+                runanalysis
+            )
+    )
+
+    real_mu <- mean(sapply(vals, mean))
+
+    means_per_boot <- lapply(split(vals, rep(seq.int(B), each = D)), function(x) sapply(x, function(y) mean(y)))
+    var_within <- mean(sapply(means_per_boot, function(x) var(x))) # within bootstrap variability
+    real_se <- sqrt(mean(sapply(vals[seq(1, B*D, by = D)], function(x) var(x)/n)) + var_within)
+
+    # real_se should be similar to the se estimate from the bmlmi pooling method
+    # (exact equality is not proven)
+
+    pooled_res <- pool(results_bmlmi)
+
+    expect_results(pooled_res, real_mu = real_mu, real_se = real_se)
+    expect_true(sd/sqrt(n) < pooled_res$pars$p1$se)
+
 })
 
 test_that("Can recover known jackknife with  H0 < 0 & H0 > 0", {

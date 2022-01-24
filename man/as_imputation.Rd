@@ -7,7 +7,7 @@
 as_imputation(imputations, data, method, references)
 }
 \arguments{
-\item{imputations}{A list of \code{imputations_list}'s as created by \code{\link[=as_imputation_list]{as_imputation_list()}}}
+\item{imputations}{A list of \code{imputations_list}'s as created by \code{\link[=imputation_df]{imputation_df()}}}
 
 \item{data}{A \code{longdata} object as created by \code{\link[=longDataConstructor]{longDataConstructor()}}}
 
