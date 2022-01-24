@@ -106,7 +106,7 @@ test_that("Verbose supression works", {
 
     suppressWarnings({
         msg <- capture.output({
-            x <- draws(dat, dat_ice, vars, method_bayes(n_samples = 2, verbose = TRUE))
+            x <- draws(dat, dat_ice, vars, method_bayes(n_samples = 2), quiet = FALSE)
         })
     })
     expect_true(length(msg) > 0)
@@ -114,7 +114,7 @@ test_that("Verbose supression works", {
 
     suppressWarnings({
         msg <- capture.output({
-            x <- draws(dat, dat_ice, vars, method_bayes(n_samples = 2, verbose = FALSE))
+            x <- draws(dat, dat_ice, vars, method_bayes(n_samples = 2), quiet = TRUE)
         })
     })
     expect_true(length(msg) == 0)
@@ -345,7 +345,6 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         burn_in = 100,
         burn_between = 3,
         same_cov = TRUE,
-        verbose = FALSE,
         seed = 8931
     )
 
@@ -356,7 +355,8 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         group = dat$group,
         subjid = dat$id,
         visit = dat$visit,
-        method = method
+        method = method,
+        quiet = TRUE
     )
 
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
@@ -457,8 +457,7 @@ test_that("fit_mcmc returns error if mmrm on original sample fails", {
 
     method <- method_bayes(
         n_samples = 2,
-        burn_between = 10,
-        verbose = FALSE
+        burn_between = 10
     )
 
     expect_error(
@@ -468,7 +467,8 @@ test_that("fit_mcmc returns error if mmrm on original sample fails", {
             group = dat$group,
             subjid = dat$id,
             visit = dat$visit,
-            method = method
+            method = method,
+            quiet = TRUE
         )
         ,
         "Fitting MMRM to original dataset failed"
@@ -477,8 +477,7 @@ test_that("fit_mcmc returns error if mmrm on original sample fails", {
     method <- method_bayes(
         n_samples = 2,
         burn_between = 10,
-        same_cov = FALSE,
-        verbose = FALSE
+        same_cov = FALSE
     )
 
     expect_error(
@@ -488,7 +487,8 @@ test_that("fit_mcmc returns error if mmrm on original sample fails", {
             group = dat$group,
             subjid = dat$id,
             visit = dat$visit,
-            method = method
+            method = method,
+            quiet = TRUE
         )
         ,
         "Fitting MMRM to original dataset failed"
@@ -529,7 +529,6 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
         burn_in = 100,
         burn_between = 3,
         same_cov = FALSE,
-        verbose = FALSE,
         seed = 8931
     )
 
@@ -540,7 +539,8 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
         group = dat$group,
         subjid = dat$id,
         visit = dat$visit,
-        method = method
+        method = method,
+        quiet = TRUE
     )
 
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))

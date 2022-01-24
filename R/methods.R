@@ -93,7 +93,6 @@ method_bayes <- function(
     burn_between = 50,
     same_cov = TRUE,
     n_samples = 20,
-    verbose = TRUE,
     seed = NA
 ) {
     x <- list(
@@ -101,7 +100,6 @@ method_bayes <- function(
         burn_between = burn_between,
         same_cov = same_cov,
         n_samples = n_samples,
-        verbose = verbose,
         seed = seed
     )
     return(as_class(x, c("method", "bayes")))

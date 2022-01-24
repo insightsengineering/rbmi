@@ -27,6 +27,8 @@
 #' It specifies the multiple imputation methodology to be used. See details.
 #' @param ncores A single numeric specifying the number of cores to use in creating the draws object. 
 #' Note that this parameter is ignored for [method_bayes()] (Default = 1).
+#' @param quiet Logical, If true will suppress printing of progress information that is printed to
+#' the console
 #'
 #' @details
 #'
@@ -267,6 +269,8 @@ draws.bmlmi <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet =
 #' what subjects should be used to derive the imputed dataset.
 #' @param failure_limit Number of failed samples that are allowed before throwing an error
 #' @param ncores Number of processes to parallise the job over
+#' @param quiet Logical, If true will suppress printing of progress information that is printed to
+#' the console
 #'
 #' @details
 #'
@@ -303,15 +307,26 @@ get_draws_mle <- function(
         )
     )
 
-    initial_sample <- get_mmrm_sample(
-        ids = longdata$ids,
-        longdata = longdata,
-        method = method,
-        optimizer = c("L-BFGS-B", "BFGS")
-    )
+    time_taken <- system.time({
+        initial_sample <- get_mmrm_sample(
+            ids = longdata$ids,
+            longdata = longdata,
+            method = method,
+            optimizer = c("L-BFGS-B", "BFGS")
+        )
+    })
 
     if (initial_sample$failed) {
         stop("Fitting MMRM to original dataset failed")
+    }
+    
+    if (!quiet) {
+        cat(
+            sprintf(
+                "\nEstimated running time assuming a single core is %s seconds\n\n", 
+                round(time_taken[[3]] * n_target_samples, 2)
+            )
+        )
     }
 
     optimizer <- list(
@@ -472,7 +487,8 @@ draws.bayes <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet =
         group = data2[[vars$group]],
         visit = data2[[vars$visit]],
         subjid = data2[[vars$subjid]],
-        method = method
+        method = method,
+        quiet = quiet
     )
 
     # set names of covariance matrices
@@ -670,20 +686,55 @@ validate.draws <- function(x, ...) {
 
 
 
-
+#' R6 Class for printing current sampling progress
+#'
+#' @description
+#'
+#' Object is initalised with total number of iterations that are expected to occour.
+#' User can then update the object with the `add` method to indicate how many more iterations
+#' have just occoured.
+#' Every time `step` * 100 % of iterations have occured a message is printed to the console.
+#' Use the `quiet` argument to prevent the object from printing anything at all
+#' 
+#' @import R6
 progressLogger <- R6::R6Class(
     classname = "progressLogger",
     public = list(
+        #' @field step real, percentage of iterations to allow before printing the 
+        #' progress to the console
         step = NULL,
+        
+        #' @field step_current integer, the total number of iterations completed since
+        #' progress was last printed to the console
         step_current = 0,
+        
+        #' @field n integer, the current number of completed iterations
         n = 0,
+        
+        #' @field n_max integer, total number of expected iterations to be completed
+        #' acts as the denominator for calculating progress percentages
         n_max = NULL,
+        
+        #' @field quiet logical holds wether or not to print anything
         quiet = FALSE,
+        
+        #' @description
+        #' Create progressLogger object
+        #' @param n_max integer, sets field `n_max`
+        #' @param quiet logical, sets field `quiet`
+        #' @param step real, sets field `step`
         initialize = function(n_max, quiet = FALSE, step = 0.1) {
             self$step = step
             self$n_max = n_max
             self$quiet = quiet
         },
+        
+        #' @description
+        #' Records that n more iterations have been completed
+        #' this will add that number to the current step count (`step_current`) and will
+        #' print a progress message to the log if the step limit (`step`) has been reached.
+        #' This function will do nothing if `quiet` has been set to `TRUE`
+        #' @param n the number of sucessfully complete iterations since `add()` was last called
         add = function(n) {
             if (self$quiet) {
                 return(invisible())
@@ -695,14 +746,11 @@ progressLogger <- R6::R6Class(
                 self$step_current = 0
             }
         },
+        
+        #' @description
+        #' method to print the current state of progress
         print_progress = function() {
             cat(
-                # sprintf(
-                #     "Fitted %s / %s (%3.0f%%) models\n",
-                #     self$n,
-                #     self$n_max,
-                #     self$n * 100 / self$n_max
-                # )
                 sprintf("Progress: %3.0f%%\n", self$n * 100 / self$n_max)
             )
         }
