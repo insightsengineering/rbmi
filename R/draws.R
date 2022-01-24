@@ -323,7 +323,7 @@ get_draws_mle <- function(
     if (!quiet) {
         cat(
             sprintf(
-                "\nEstimated running time assuming a single core is %s seconds\n\n", 
+                "\nEstimated running time (assuming single core) is %s seconds\n\n", 
                 round(time_taken[[3]] * n_target_samples, 2)
             )
         )
