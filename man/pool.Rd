@@ -52,6 +52,8 @@ see Efron & Tibshirani (1994). Note that for the percentile bootstrap, no standa
 calculated, i.e. the standard errors will be \code{NA} in the object / data.frame.
 \item \code{method_condmean(type = "jackknife")} Uses the standard jackknife variance formula;
 see Efron & Tibshirani (1994).
+\item \code{method_bmlmi} Uses pooling procedure for Bootstrapped Maximum Likelihood MI (BMLMI).
+See Von Hippel & Bartlett (2021).
 }
 }
 \references{
@@ -60,4 +62,7 @@ press, 1994. [Section 11]
 
 Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing
 Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. [Section 5.4]
+
+Von Hippel, Paul T and Bartlett, Jonathan W.
+Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021.
 }

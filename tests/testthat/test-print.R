@@ -35,3 +35,11 @@ test_that("print - Condmean Jack", {
     expect_snapshot(print(.test_print$condmean_jack$analysis), cran = TRUE)
     expect_snapshot(print(.test_print$condmean_jack$pool), cran = TRUE)
 })
+
+
+test_that("print - bmlmi", {
+    expect_snapshot(print(.test_print$bmlmi$draws), cran = TRUE)
+    expect_snapshot(print(.test_print$bmlmi$impute), cran = TRUE)
+    expect_snapshot(print(.test_print$bmlmi$analysis), cran = TRUE)
+    expect_snapshot(print(.test_print$bmlmi$pool), cran = TRUE)
+})

@@ -25,6 +25,11 @@
 #' In the case of `method_condmean(type = "jackknife")` this argument
 #' must be set to `NULL`. See details.
 #'
+#' @param B a numeric that determines the number of bootstrap samples for `method_bmlmi`.
+#'
+#' @param D a numeric that determines the number of random imputations for each bootstrap sample.
+#' Needed for `method_bmlmi`.
+#'
 #' @param covariance a character string that specifies the structure of the covariance
 #' matrix to be used in the imputation model. Must be one of `"us"` (default), `"toep"`,
 #' `"cs"` or `"ar1"`. See details.
@@ -66,7 +71,7 @@
 #'
 #' Note that at present Bayesian methods only support unstructured.
 #'
-#' In the case of `method_condmean(type = "bootstrap")` and `method_approxbayes()` repeated
+#' In the case of `method_condmean(type = "bootstrap")`, `method_approxbayes()` and `method_bmlmi()` repeated
 #' bootstrap samples of the original dataset are taken with an MMRM fitted to each sample.
 #' Due to the randomness of these sampled datasets, as well as limitations in the optimisers
 #' used to fit the models, it is not uncommon that estimates for a particular dataset can't
@@ -164,4 +169,33 @@ method_condmean <- function(
         type = type
     )
     return(as_class(x, c("method", "condmean")))
+}
+
+
+#' @rdname method
+#' @export
+method_bmlmi <- function(
+    covariance = c("us", "toep", "cs", "ar1"),
+    threshold = 0.01,
+    same_cov = TRUE,
+    REML = TRUE,
+    B = 20,
+    D = 2
+) {
+    covariance <- match.arg(covariance)
+
+    assert_that(
+        D > 1,
+        msg = "`D` must be a numeric larger than 1"
+    )
+
+    x <- list(
+        covariance = covariance,
+        threshold = threshold,
+        same_cov = same_cov,
+        REML = REML,
+        B = B,
+        D = D
+    )
+    return(as_class(x, c("method", "bmlmi")))
 }
