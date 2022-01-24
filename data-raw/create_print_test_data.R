@@ -251,4 +251,55 @@ pool_cmj <- pool(analysis_cmj, conf.level = 0.9)
 )
 
 
+#########################
+#
+# BMLMI
+#
+#
+
+
+dobj <- get_data(40)
+set.seed(89513)
+
+drawobj_bml <- draws(
+    ncores = 1,
+    data = dobj$dat,
+    data_ice = dobj$dat_ice,
+    vars = dobj$vars,
+    method = method_bmlmi(
+        covariance = "cs",
+        threshold = 0.05,
+        same_cov = TRUE,
+        REML = TRUE,
+        B = 6,
+        D = 4
+    )
+)
+
+impute_bml <- impute(
+    drawobj_bml,
+    references = c("TRT" = "Placebo", "Placebo" = "Placebo"),
+)
+
+
+v2 <- dobj$vars
+v2$covariates <- c("sex*age")
+analysis_bml <- analyse(
+    impute_bml,
+    fun = ancova,
+    vars = v2
+)
+
+pool_bml <- pool(analysis_bml, conf.level = 0.9)
+
+
+.test_print$bmlmi <- list(
+    draws = drawobj_bml,
+    impute = impute_bml,
+    analysis = analysis_bml,
+    pool = pool_bml
+)
+
+
+
 usethis::use_data(.test_print, internal = TRUE, overwrite = TRUE)

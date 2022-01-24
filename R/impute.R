@@ -316,6 +316,8 @@ convert_to_imputation_list_df <- function(imputes, sample_ids) {
 #' that are required within that sample. The total number of ID's must by equal to the
 #' length of `list_of_singles`
 #'
+#' @importFrom utils relist
+#'
 #' @details This function converts a list of imputations from being structured per patient
 #' to being structured per sample i.e. it converts
 #'
