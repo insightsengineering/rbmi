@@ -27,8 +27,8 @@
 #' It specifies the multiple imputation methodology to be used. See details.
 #' @param ncores A single numeric specifying the number of cores to use in creating the draws object. 
 #' Note that this parameter is ignored for [method_bayes()] (Default = 1).
-#' @param quiet Logical, If true will suppress printing of progress information that is printed to
-#' the console
+#' @param quiet Logical, If `TRUE` will suppress printing of progress information that is printed to
+#' the console.
 #'
 #' @details
 #'
@@ -269,8 +269,8 @@ draws.bmlmi <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet =
 #' what subjects should be used to derive the imputed dataset.
 #' @param failure_limit Number of failed samples that are allowed before throwing an error
 #' @param ncores Number of processes to parallise the job over
-#' @param quiet Logical, If true will suppress printing of progress information that is printed to
-#' the console
+#' @param quiet Logical, If `TRUE` will suppress printing of progress information that is printed to
+#' the console.
 #'
 #' @details
 #'
@@ -715,7 +715,7 @@ progressLogger <- R6::R6Class(
         #' acts as the denominator for calculating progress percentages
         n_max = NULL,
         
-        #' @field quiet logical holds wether or not to print anything
+        #' @field quiet logical holds whether or not to print anything
         quiet = FALSE,
         
         #' @description
@@ -730,7 +730,7 @@ progressLogger <- R6::R6Class(
         },
         
         #' @description
-        #' Records that n more iterations have been completed
+        #' Records that `n` more iterations have been completed
         #' this will add that number to the current step count (`step_current`) and will
         #' print a progress message to the log if the step limit (`step`) has been reached.
         #' This function will do nothing if `quiet` has been set to `TRUE`
