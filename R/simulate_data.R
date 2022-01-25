@@ -143,8 +143,8 @@ validate.simul_pars <- function(x, ...) {
 #' The term `I((x-alpha))` specifies the dependency of the probability of the ICE on the current outcome value.
 #' The corresponding regression coefficients of the logistic model are defined as follows:
 #' The intercept is set to 0, the coefficients corresponding to discontinuation after each visit for a subject with outcome equal to
-#' the mean at baseline are set according to parameter `or_outcome_ice1`,
-#' and the regression coefficient associated with the covariate `I((x-alpha))` is set to `log(or_outcome_ice)`.
+#' the mean at baseline are set according to parameters `pars_c$prob_ice1` (`pars_t$prob_ice1`),
+#' and the regression coefficient associated with the covariate `I((x-alpha))` is set to `log(pars_c$or_outcome_ice)` (`log(pars_t$or_outcome_ice)`).
 #'
 #' Please note that the baseline outcome cannot be missing nor be affected by any ICEs.
 #'
