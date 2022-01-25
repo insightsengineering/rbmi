@@ -55,6 +55,10 @@ estimates in \code{\link[=draws]{draws()}}. Missing values are imputed by using 
 imputation distribution. Please note that the first imputed dataset refers to the conditional
 mean imputation on the original dataset whereas all subsequent imputed datasets refer to
 conditional mean imputations for bootstrap or jackknife samples, respectively, of the original data.
+\item Bootstrapped Maximum Likelihood MI (BMLMI): it performs \code{D} random imputations of each bootstrapped
+dataset that was used to generate the corresponding parameter estimates in \code{\link[=draws]{draws()}}. A total number of
+\code{B*D} imputed datasets is provided, where \code{B} is the number of bootstrapped datasets. Missing values
+are imputed by taking a random sample from the conditional imputation distribution.
 }
 
 The \code{update_strategy} argument can be used to update the imputation strategy that was

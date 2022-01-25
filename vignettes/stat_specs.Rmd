@@ -364,8 +364,8 @@ As demonstrated in @Wolbers2021 (Section 2.4), this treatment effect estimator i
 
 ### Jackknife standard errors, confidence intervals (CI) and tests for the treatment effect
 
-For a dataset containing $n$ subjects, the jackknife standard error depends on treatment effect estimates $\hat{\theta}_{(-b)}$ ($b=1,\ldots,n$) from samples of the original dataset which leave out the observation from subject $b$. As described previously, to obtain treatment effect estimates for  leave-one-subject-out datasets, all
-steps of the imputation procedure (i.e. imputation, conditional mean imputation, and analysis steps) need to be repeated on this new dataset. 
+For a dataset containing $n$ subjects, the jackknife standard error depends on treatment effect estimates $\hat{\theta}_{(-b)}$ ($b=1,\ldots,n$) from samples of the original dataset which leave out the observation from subject $b$. As described previously, to obtain treatment effect estimates for leave-one-subject-out datasets, all
+steps of the imputation procedure (i.e. imputation, conditional mean imputation, and analysis steps) need to be repeated on this new dataset.
 
 Then, the *jackknife standard error* is defined as 
 $$\hat{se}_{jack}=[\frac{(n-1)}{n}\cdot\sum_{b=1}^{n} (\hat{\theta}_{(-b)}-\bar{\theta}_{(.)})^2]^{1/2}$$ 

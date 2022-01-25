@@ -1,7 +1,16 @@
 ---
 title: "rbmi: Quickstart"
 author: Craig Gower-Page, Alessandro Noci, and Marcel Wolbers
-output: rmarkdown::html_vignette
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+    number_sections: true
+    citation_package: natbib
+    base_format: rmarkdown::html_vignette
+bibliography: "references.bib"
+link-citations: true   
+linkcolor: blue
 vignette: >
   %\VignetteIndexEntry{rbmi: Quickstart}
   %\VignetteEngine{knitr::rmarkdown}
@@ -176,6 +185,8 @@ Note that in the case of `method_condmean()` the first imputed dataset will alwa
 For `type=jackknife` the remaining datasets correspond to conditional mean imputations on leave-one-subject-out data sets,
 whereas for `type=bootstrap` each subsequent dataset correspond to conditional mean imputations on bootstrapped data sets.
 For `method_bayes()` or `method_approxbayes()`, all imputed datasets correspond to random imputations on the original dataset. 
+For `method_bmlmi()`, all the imputed data sets correspond to sets of random imputations on 
+bootstrapped data sets.
 
 ## Analyse
 

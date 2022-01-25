@@ -4,21 +4,25 @@
 \alias{pool_internal}
 \alias{pool_internal.jackknife}
 \alias{pool_internal.bootstrap}
+\alias{pool_internal.bmlmi}
 \alias{pool_internal.rubin}
 \title{Internal Pool Methods}
 \usage{
-pool_internal(results, conf.level, alternative, type)
+pool_internal(results, conf.level, alternative, type, D)
 
-\method{pool_internal}{jackknife}(results, conf.level, alternative, type)
+\method{pool_internal}{jackknife}(results, conf.level, alternative, type, D)
 
 \method{pool_internal}{bootstrap}(
   results,
   conf.level,
   alternative,
-  type = c("percentile", "normal")
+  type = c("percentile", "normal"),
+  D
 )
 
-\method{pool_internal}{rubin}(results, conf.level, alternative, type)
+\method{pool_internal}{bmlmi}(results, conf.level, alternative, type, D)
+
+\method{pool_internal}{rubin}(results, conf.level, alternative, type, D)
 }
 \arguments{
 \item{results}{A list of results i.e. the x$results element of an
@@ -35,6 +39,8 @@ must be one of "two.sided" (default), "greater" or "less".}
 intervals. See details.
 Only used if \code{method_condmean(type = "bootstrap")} was specified
 in the original call to \code{\link[=draws]{draws()}}.}
+
+\item{D}{numeric representing the number of imputations between each bootstrap sample in the BMLMI method.}
 }
 \description{
 Dispatches pool methods based upon results object class. See
