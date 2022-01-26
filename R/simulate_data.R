@@ -463,6 +463,6 @@ adjust_trajectories_single <- function(distr_pars_group, outcome, strategy_fun, 
     )
 
     conditional_parameters <- get_conditional_parameters(pars, outcome)
-    outcome[is_post_ice] <- impute_outcome(conditional_parameters)
+    outcome[is_post_ice] <- impute_outcome(conditional_parameters)[[1]]
     return(outcome)
 }
