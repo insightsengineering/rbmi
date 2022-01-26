@@ -305,7 +305,7 @@ generate_data_single <- function(pars_group, strategy_fun, distr_pars_ref = NULL
 #'
 #' @return A binary variable that takes value `1` if the corresponding outcome is affected by the ICE and `0` otherwise.
 #'
-#' @importFrom stats rbinom model.matrix
+#' @importFrom stats rbinom model.matrix binomial
 simulate_ice <- function(outcome, visits, ids, prob_ice, or_outcome_ice, baseline_mean) {
 
     assert_that(
