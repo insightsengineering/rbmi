@@ -13,7 +13,6 @@ method_bayes(
   burn_between = 50,
   same_cov = TRUE,
   n_samples = 20,
-  verbose = TRUE,
   seed = NA
 )
 
@@ -61,9 +60,6 @@ matrix will be fit for each group as determined by the \code{group} argument of
 \item{n_samples}{a numeric that determines how many imputed datasets are generated.
 In the case of \code{method_condmean(type = "jackknife")} this argument
 must be set to \code{NULL}. See details.}
-
-\item{verbose}{a logical, if \code{TRUE} (default) Stan's sampling log information will
-be printed to the console, if \code{FALSE} this information will be suppressed.}
 
 \item{seed}{a numeric that specifies a seed to be used in the call to Stan. This
 argument is forward on the the \code{seed} argument of \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}. Note that

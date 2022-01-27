@@ -70,7 +70,8 @@ test_that("Basic Usage - Approx Bayes", {
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method_approxbayes(n_samples = nsamp)
+        method = method_approxbayes(n_samples = nsamp),
+        quiet = TRUE
     )
 
     imputeobj <- impute(
@@ -142,7 +143,8 @@ test_that("Basic Usage - Bayesian", {
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method_bayes(n_samples = nsamp)
+        method = method_bayes(n_samples = nsamp),
+        quiet = TRUE
     )
 
     ### Check to see if updating ice works and if it impacts the original values
@@ -232,7 +234,8 @@ test_that("Basic Usage - Condmean", {
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method_condmean(n_samples = nsamp)
+        method = method_condmean(n_samples = nsamp),
+        quiet = TRUE
     )
 
     ### Check to see if updating ice works and if it impacts the original values
@@ -322,7 +325,8 @@ test_that("Custom Strategies and Custom analysis functions", {
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method_condmean(n_samples = nsamp)
+        method = method_condmean(n_samples = nsamp),
+        quiet = TRUE
     )
 
 
@@ -464,7 +468,8 @@ test_that("Sorting doesn't change results", {
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method
+        method = method,
+        quiet = TRUE
     )
     imputeobj <- impute( draws = drawobj, references = c("A" = "B", "B" = "B"))
     anaobj <- analyse( imputeobj, fun = rbmi::ancova, vars = vars2)
@@ -476,7 +481,8 @@ test_that("Sorting doesn't change results", {
         data = dat2,
         data_ice = dat_ice_2,
         vars = vars,
-        method = method
+        method = method,
+        quiet = TRUE
     )
     imputeobj2 <- impute( draws = drawobj2, references = c("A" = "B", "B" = "B"))
     anaobj2 <- analyse( imputeobj2, fun = rbmi::ancova, vars = vars2)
@@ -570,9 +576,9 @@ test_that("Multiple imputation references / groups work as expected (end to end 
             same_cov = FALSE,
             burn_between = 4,
             n_samples = 150,
-            burn_in = 25,
-            verbose = FALSE
-        )
+            burn_in = 25
+        ),
+        quiet = TRUE
     )
 
 
@@ -610,6 +616,7 @@ test_that("Multiple imputation references / groups work as expected (end to end 
 
     x <- draws(
         data = dat,
+        quiet = TRUE,
         data_ice = dat_ice,
         vars = vars,
         method = method_condmean(
@@ -726,6 +733,7 @@ test_that("Three arms trial runs smoothly and gives expected results", {
         data = dat,
         data_ice = dat_ice,
         vars = vars,
+        quiet = TRUE,
         method = method_condmean(n_samples = nsamp, type = "bootstrap", same_cov = TRUE)
     )
 
@@ -757,6 +765,7 @@ test_that("Three arms trial runs smoothly and gives expected results", {
         data = dat,
         data_ice = dat_ice,
         vars = vars,
+        quiet = TRUE,
         method = method_condmean(n_samples = nsamp, type = "bootstrap", same_cov = FALSE)
     )
 

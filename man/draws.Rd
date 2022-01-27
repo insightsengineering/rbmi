@@ -8,15 +8,15 @@
 \alias{draws.bayes}
 \title{Fit the base imputation model and get parameter estimates}
 \usage{
-draws(data, data_ice = NULL, vars, method, ncores = 1)
+draws(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE)
 
-\method{draws}{approxbayes}(data, data_ice = NULL, vars, method, ncores = 1)
+\method{draws}{approxbayes}(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE)
 
-\method{draws}{condmean}(data, data_ice = NULL, vars, method, ncores = 1)
+\method{draws}{condmean}(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE)
 
-\method{draws}{bmlmi}(data, data_ice = NULL, vars, method, ncores = 1)
+\method{draws}{bmlmi}(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE)
 
-\method{draws}{bayes}(data, data_ice = NULL, vars, method, ncores = 1)
+\method{draws}{bayes}(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing the data to be used in the model. See details.}
@@ -32,6 +32,9 @@ It specifies the multiple imputation methodology to be used. See details.}
 
 \item{ncores}{A single numeric specifying the number of cores to use in creating the draws object.
 Note that this parameter is ignored for \code{\link[=method_bayes]{method_bayes()}} (Default = 1).}
+
+\item{quiet}{Logical, If true will suppress printing of progress information that is printed to
+the console}
 }
 \value{
 A \code{draws} object which is a named list containing the following:

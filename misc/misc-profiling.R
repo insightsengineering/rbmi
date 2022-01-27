@@ -39,14 +39,14 @@ vars <- set_vars(
     visit = "visit",
     covariates = c("age", "sex", "visit * group")
 )
-profvis::profvis({
+# profvis::profvis({
     drawobj <- draws(
         data = dat,
         data_ice = dat_ice,
         vars = vars,
         method = method_bmlmi(B = 30, D = 10)
     )
-})
+# })
 
 # 84 seconds
 
@@ -568,8 +568,8 @@ test_that("Multiple imputation references / groups work as expected (end to end 
             burn_between = 4,
             n_samples = 150,
             burn_in = 25,
-            verbose = FALSE
-        )
+        ),
+        quiet = TRUE
     )
 
 

@@ -27,6 +27,8 @@
 #' It specifies the multiple imputation methodology to be used. See details.
 #' @param ncores A single numeric specifying the number of cores to use in creating the draws object. 
 #' Note that this parameter is ignored for [method_bayes()] (Default = 1).
+#' @param quiet Logical, If `TRUE` will suppress printing of progress information that is printed to
+#' the console.
 #'
 #' @details
 #'
@@ -162,14 +164,14 @@
 #' Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021.
 #'
 #' @export
-draws <- function(data, data_ice = NULL, vars, method, ncores = 1) {
+draws <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE) {
     UseMethod("draws", method)
 }
 
 
 #' @rdname draws
 #' @export
-draws.approxbayes <- function(data, data_ice = NULL, vars, method, ncores = 1) {
+draws.approxbayes <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE) {
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
     x <- get_draws_mle(
@@ -180,15 +182,17 @@ draws.approxbayes <- function(data, data_ice = NULL, vars, method, ncores = 1) {
         first_sample_orig = FALSE,
         ncores = ncores,
         n_target_samples = method$n_samples,
-        failure_limit = ceiling(method$threshold * method$n_samples)
+        failure_limit = ceiling(method$threshold * method$n_samples), 
+        quiet = quiet
     )
     return(x)
 }
 
 
+
 #' @rdname draws
 #' @export
-draws.condmean <- function(data, data_ice = NULL, vars, method, ncores = 1) {
+draws.condmean <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE) {
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
 
@@ -197,7 +201,8 @@ draws.condmean <- function(data, data_ice = NULL, vars, method, ncores = 1) {
         method = method,
         ncores = ncores,
         first_sample_orig = TRUE,
-        use_samp_ids = TRUE
+        use_samp_ids = TRUE, 
+        quiet = quiet
     )
 
     if (method$type == "bootstrap") {
@@ -223,7 +228,7 @@ draws.condmean <- function(data, data_ice = NULL, vars, method, ncores = 1) {
 
 #' @rdname draws
 #' @export
-draws.bmlmi <- function(data, data_ice = NULL, vars, method, ncores = 1) {
+draws.bmlmi <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE) {
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
     method$n_samples <- method$B
@@ -235,7 +240,8 @@ draws.bmlmi <- function(data, data_ice = NULL, vars, method, ncores = 1) {
         failure_limit = ceiling(method$threshold * method$n_samples),
         use_samp_ids = TRUE,
         first_sample_orig = FALSE,
-        ncores = ncores
+        ncores = ncores, 
+        quiet = quiet
     )
     x$method$n_samples <- NULL
     return(x)
@@ -263,6 +269,8 @@ draws.bmlmi <- function(data, data_ice = NULL, vars, method, ncores = 1) {
 #' what subjects should be used to derive the imputed dataset.
 #' @param failure_limit Number of failed samples that are allowed before throwing an error
 #' @param ncores Number of processes to parallise the job over
+#' @param quiet Logical, If `TRUE` will suppress printing of progress information that is printed to
+#' the console.
 #'
 #' @details
 #'
@@ -285,7 +293,8 @@ get_draws_mle <- function(
     first_sample_orig,
     use_samp_ids,
     failure_limit = 0,
-    ncores = 1
+    ncores = 1,
+    quiet = FALSE
 ) {
     
     max_sample_attempts <- n_target_samples + failure_limit
@@ -298,15 +307,26 @@ get_draws_mle <- function(
         )
     )
 
-    initial_sample <- get_mmrm_sample(
-        ids = longdata$ids,
-        longdata = longdata,
-        method = method,
-        optimizer = c("L-BFGS-B", "BFGS")
-    )
+    time_taken <- system.time({
+        initial_sample <- get_mmrm_sample(
+            ids = longdata$ids,
+            longdata = longdata,
+            method = method,
+            optimizer = c("L-BFGS-B", "BFGS")
+        )
+    })
 
     if (initial_sample$failed) {
         stop("Fitting MMRM to original dataset failed")
+    }
+    
+    if (!quiet) {
+        cat(
+            sprintf(
+                "\nEstimated running time (assuming single core) is %s seconds\n\n", 
+                round(time_taken[[3]] * n_target_samples, 2)
+            )
+        )
     }
 
     optimizer <- list(
@@ -317,7 +337,8 @@ get_draws_mle <- function(
     cl <- get_cluster(ncores)
     mmrm_sample <- encap_get_mmrm_sample(cl, longdata, method, optimizer)
     samples <- list()
-    n_failed_samples <- 0
+    n_failed_samples <- 0    
+    logger <- progressLogger$new(n_target_samples, quiet = quiet)
 
     while (length(samples) < n_target_samples) {
         ids <- sample_stack$pop(min(ncores, n_target_samples - length(samples)))
@@ -338,6 +359,7 @@ get_draws_mle <- function(
             msg <- "More than %s failed fits. Try using a simpler covariance structure"
             stop(sprintf(msg, failure_limit))
         }
+        logger$add(length(new_samples_keep))
         samples <- append(samples, new_samples_keep)
     }
 
@@ -440,7 +462,7 @@ extract_data_nmar_as_na <- function(longdata) {
 
 #' @rdname draws
 #' @export
-draws.bayes <- function(data, data_ice = NULL, vars, method, ncores = 1) {
+draws.bayes <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE) {
 
     if (!is.na(method$seed)) {
         set.seed(method$seed)
@@ -465,7 +487,8 @@ draws.bayes <- function(data, data_ice = NULL, vars, method, ncores = 1) {
         group = data2[[vars$group]],
         visit = data2[[vars$visit]],
         subjid = data2[[vars$subjid]],
-        method = method
+        method = method,
+        quiet = quiet
     )
 
     # set names of covariance matrices
@@ -657,3 +680,81 @@ validate.draws <- function(x, ...) {
         has_class(x$formula, "formula")
     )
 }
+
+
+
+
+
+
+#' R6 Class for printing current sampling progress
+#'
+#' @description
+#'
+#' Object is initalised with total number of iterations that are expected to occour.
+#' User can then update the object with the `add` method to indicate how many more iterations
+#' have just occoured.
+#' Every time `step` * 100 % of iterations have occured a message is printed to the console.
+#' Use the `quiet` argument to prevent the object from printing anything at all
+#' 
+#' @import R6
+progressLogger <- R6::R6Class(
+    classname = "progressLogger",
+    public = list(
+        #' @field step real, percentage of iterations to allow before printing the 
+        #' progress to the console
+        step = NULL,
+        
+        #' @field step_current integer, the total number of iterations completed since
+        #' progress was last printed to the console
+        step_current = 0,
+        
+        #' @field n integer, the current number of completed iterations
+        n = 0,
+        
+        #' @field n_max integer, total number of expected iterations to be completed
+        #' acts as the denominator for calculating progress percentages
+        n_max = NULL,
+        
+        #' @field quiet logical holds whether or not to print anything
+        quiet = FALSE,
+        
+        #' @description
+        #' Create progressLogger object
+        #' @param n_max integer, sets field `n_max`
+        #' @param quiet logical, sets field `quiet`
+        #' @param step real, sets field `step`
+        initialize = function(n_max, quiet = FALSE, step = 0.1) {
+            self$step = step
+            self$n_max = n_max
+            self$quiet = quiet
+        },
+        
+        #' @description
+        #' Records that `n` more iterations have been completed
+        #' this will add that number to the current step count (`step_current`) and will
+        #' print a progress message to the log if the step limit (`step`) has been reached.
+        #' This function will do nothing if `quiet` has been set to `TRUE`
+        #' @param n the number of sucessfully complete iterations since `add()` was last called
+        add = function(n) {
+            if (self$quiet) {
+                return(invisible())
+            }
+            self$n <- self$n + n
+            self$step_current <- self$step_current + n / self$n_max
+            if (self$step_current >= self$step) {
+                self$print_progress()
+                self$step_current = 0
+            }
+        },
+        
+        #' @description
+        #' method to print the current state of progress
+        print_progress = function() {
+            cat(
+                sprintf("Progress: %3.0f%%\n", self$n * 100 / self$n_max)
+            )
+        }
+    )
+)
+
+

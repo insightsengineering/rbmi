@@ -12,7 +12,8 @@ get_draws_mle(
   first_sample_orig,
   use_samp_ids,
   failure_limit = 0,
-  ncores = 1
+  ncores = 1,
+  quiet = FALSE
 )
 }
 \arguments{
@@ -38,6 +39,9 @@ what subjects should be used to derive the imputed dataset.}
 \item{failure_limit}{Number of failed samples that are allowed before throwing an error}
 
 \item{ncores}{Number of processes to parallise the job over}
+
+\item{quiet}{Logical, If true will suppress printing of progress information that is printed to
+the console}
 }
 \value{
 A \code{draws} object which is a named list containing the following:
@@ -66,12 +70,12 @@ Fit the base imputation model using a ML/REML approach on a given number of boot
 specified by \code{method$n_samples}. Returns the parameter estimates from the model fit.
 }
 \details{
-This function takes a Stack object which contains multiple lists of patient ids. The function
+This function takes a \code{Stack} object which contains multiple lists of patient ids. The function
 takes this Stack and pulls a set ids and then constructs a dataset just consisting of these
 patients (i.e. potentially a boostrap or a jackknife sample).
 
 The function then fits a MMRM model to this dataset to create a sample object. The function
-repeats this process until \code{n_target_samples} have been reached. If more than \code{failure_liimt}
+repeats this process until \code{n_target_samples} have been reached. If more than \code{failure_limit}
 samples fail to converge then the function throws an error.
 
 After reaching the desired number of samples the function generates and returns a draws object.
