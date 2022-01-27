@@ -2,27 +2,36 @@
 
 #' @title Set simulation parameters of a study group.
 #'
-#' @description This function provides input arguments for each study group needed to simulate data with [simulate_data()].
-#' [simulate_data()] generates data for a two-arms clinical trial with longitudinal continuous outcomes and two intercurrent events (ICEs).
-#' ICE1 may be thought of as a discontinuation from study treatment due to study drug or condition related (SDCR) reasons.
-#' ICE2 may be thought of as discontinuation from study treatment due to uninformative study drop-out, i.e. due to not study drug or
+#' @description This function provides input arguments for each study group needed to
+#' simulate data with [simulate_data()]. [simulate_data()] generates data for a two-arms
+#' clinical trial with longitudinal continuous outcomes and two intercurrent events (ICEs).
+#' ICE1 may be thought of as a discontinuation from study treatment due to study drug or
+#' condition related (SDCR) reasons. ICE2 may be thought of as discontinuation from study
+#' treatment due to uninformative study drop-out, i.e. due to not study drug or
 #' condition related (NSDRC) reasons and outcome data after ICE2 is always missing.
 #'
-#' @param mu Numeric vector describing the mean outcome trajectory at each visit (including baseline) assuming no ICEs.
+#' @param mu Numeric vector describing the mean outcome trajectory at each visit (including
+#' baseline) assuming no ICEs.
 #' @param sigma Covariance matrix of the outcome trajectory assuming no ICEs.
 #' @param n Number of subjects belonging to the group.
-#' @param prob_ice1 Numeric vector that specifies the probability of experiencing ICE1 (discontinuation from study treatment due to SDCR reasons)
-#' after each visit for a subject with observed outcome at that visit equal to the mean at baseline (`mu[1]`).
+#' @param prob_ice1 Numeric vector that specifies the probability of experiencing ICE1
+#' (discontinuation from study treatment due to SDCR reasons) after each visit for a subject
+#' with observed outcome at that visit equal to the mean at baseline (`mu[1]`).
 #' If a single numeric is provided, then the same probability is applied to each visit.
-#' @param or_outcome_ice1 Numeric value that specifies the odds ratio of experiencing ICE1 after each visit corresponding to a +1 higher value of the observed outcome at that visit.
-#' @param prob_post_ice1_dropout Numeric value that specifies the probability of study drop-out following ICE1.
-#' If a subject is simulated to drop-out after ICE1, all outcomes after ICE1 are set to missing.
-#' @param prob_dropout Numeric that specifies an additional probability that a post-baseline visit is affected by study drop-out.
-#' Outcome data at the subject's first simulated visit affected by study drop-out and all subsequent visits are set to missing.
+#' @param or_outcome_ice1 Numeric value that specifies the odds ratio of experiencing ICE1 after
+#' each visit corresponding to a +1 higher value of the observed outcome at that visit.
+#' @param prob_post_ice1_dropout Numeric value that specifies the probability of study
+#' drop-out following ICE1. If a subject is simulated to drop-out after ICE1, all outcomes after
+#' ICE1 are set to missing.
+#' @param prob_dropout Numeric that specifies an additional probability that a post-baseline
+#' visit is affected by study drop-out. Outcome data at the subject's first simulated visit
+#' affected by study drop-out and all subsequent visits are set to missing.
 #' In case the subject's first simulated visit affected by study drop-out is prior to ICE1
-#' (i.e. in case the subject is still on study treatment), then it is assumed that the study drop-out also triggers discontinuation due the NSDRC reasons
+#' (i.e. in case the subject is still on study treatment), then it is assumed that the study
+#' drop-out also triggers discontinuation due the NSDRC reasons
 #' and a corresponding intercurrent event ICE2 is generated.
-#' @param prob_miss Numeric value that specifies an additional probability for a given post-baseline observation to be missing. This can be used to produce
+#' @param prob_miss Numeric value that specifies an additional probability for a given
+#' post-baseline observation to be missing. This can be used to produce
 #' "intermittent" missing values which are not associated with any ICE.
 #'
 #' @details For the details, please see [simulate_data()].
@@ -32,7 +41,14 @@
 #' @seealso [simulate_data()]
 #'
 #' @export
-set_simul_pars <- function(mu, sigma, n, prob_ice1 = 0, or_outcome_ice1 = 1, prob_post_ice1_dropout = 0, prob_dropout = 0, prob_miss = 0) {
+set_simul_pars <- function(
+    mu, sigma, n,
+    prob_ice1 = 0,
+    or_outcome_ice1 = 1,
+    prob_post_ice1_dropout = 0,
+    prob_dropout = 0,
+    prob_miss = 0
+) {
 
     x <- list(
         mu = mu,
@@ -58,9 +74,14 @@ set_simul_pars <- function(mu, sigma, n, prob_ice1 = 0, or_outcome_ice1 = 1, pro
 #' @export
 validate.simul_pars <- function(x, ...) {
 
+    expected_names <- c(
+        "mu", "sigma", "n", "prob_ice1", "or_outcome_ice1",
+        "prob_post_ice1_dropout", "prob_dropout", "prob_miss"
+    )
+
     assert_that(
         length(x) == 8,
-        all(names(x) %in% c("mu", "sigma", "n", "prob_ice1", "or_outcome_ice1", "prob_post_ice1_dropout", "prob_dropout", "prob_miss")),
+        all(names(x) %in% expected_names),
         msg = "`x` must be a named list of length 8"
     )
     assert_that(
@@ -86,19 +107,23 @@ validate.simul_pars <- function(x, ...) {
         msg = "`prob_ice1` must have either length 1 or equal to the length of `mu`"
     )
     assert_that(
-        is.numeric(x$or_outcome_ice1) && x$or_outcome_ice1 > 0,
+        is.numeric(x$or_outcome_ice1),
+        x$or_outcome_ice1 > 0,
         msg = "`or_outcome_ice1` must be a positive number"
     )
     assert_that(
-        is.numeric(x$prob_post_ice1_dropout) && (x$prob_post_ice1_dropout >= 0 && x$prob_post_ice1_dropout <= 1),
+        is.numeric(x$prob_post_ice1_dropout),
+        (x$prob_post_ice1_dropout >= 0 && x$prob_post_ice1_dropout <= 1),
         msg = "`prob_post_ice1_dropout` must be a number in [0,1]"
     )
     assert_that(
-        is.numeric(x$prob_dropout) && (x$prob_dropout >= 0 && x$prob_dropout <= 1),
+        is.numeric(x$prob_dropout),
+        (x$prob_dropout >= 0 && x$prob_dropout <= 1),
         msg = "`prob_dropout` must be a number in [0,1]"
     )
     assert_that(
-        is.numeric(x$prob_miss) && (x$prob_miss >= 0 && x$prob_miss <= 1),
+        is.numeric(x$prob_miss),
+        (x$prob_miss >= 0 && x$prob_miss <= 1),
         msg = "`prob_miss` must be a number in [0,1]"
     )
 }
@@ -106,59 +131,92 @@ validate.simul_pars <- function(x, ...) {
 
 #' @title Generate data
 #'
-#' @description Generate data for a two-arms clinical trial with longitudinal continuous outcome and two intercurrent events (ICEs).
-#' ICE1 may be thought of as a discontinuation from study treatment due to study drug or condition related (SDCR) reasons.
-#' ICE2 may be thought of as discontinuation from study treatment due to uninformative study drop-out, i.e. due to not study drug or
+#' @description Generate data for a two-arms clinical trial with longitudinal continuous
+#' outcome and two intercurrent events (ICEs).
+#' ICE1 may be thought of as a discontinuation from study treatment due to study drug or
+#' condition related (SDCR) reasons.
+#' ICE2 may be thought of as discontinuation from study treatment due to uninformative
+#' study drop-out, i.e. due to not study drug or
 #' condition related (NSDRC) reasons and outcome data after ICE2 is always missing.
 #'
-#' @param pars_c A `simul_pars` object as generated by [set_simul_pars()]. It specifies the simulation parameters of the control arm.
-#' @param pars_t A `simul_pars` object as generated by [set_simul_pars()]. It specifies the simulation parameters of the treatment arm.
-#' @param post_ice_traj A string which specifies how observed outcomes occurring after ICE1 are simulated.
-#' Must target a function included in `strategies`. Possible choices are: Missing At Random `"MAR"`, Jump to Reference `"JR"`,
-#' Copy Reference `"CR"`, Copy Increments in Reference `"CIR"`, Last Mean Carried Forward `"LMCF"`. User-defined strategies
+#' @param pars_c A `simul_pars` object as generated by [set_simul_pars()]. It specifies
+#' the simulation parameters of the control arm.
+#' @param pars_t A `simul_pars` object as generated by [set_simul_pars()]. It specifies
+#' the simulation parameters of the treatment arm.
+#' @param post_ice_traj A string which specifies how observed outcomes occurring after
+#' ICE1 are simulated.
+#' Must target a function included in `strategies`. Possible choices are: Missing At
+#' Random `"MAR"`, Jump to Reference `"JR"`,
+#' Copy Reference `"CR"`, Copy Increments in Reference `"CIR"`, Last Mean Carried
+#' Forward `"LMCF"`. User-defined strategies
 #' could also be added. See [getStrategies()] for details.
-#' @param strategies A named list of functions. Default equal to [getStrategies()]. See [getStrategies()] for details.
+#' @param strategies A named list of functions. Default equal to [getStrategies()].
+#' See [getStrategies()] for details.
 #'
 #'
 #' @details
 #' The data generation works as follows:
 #'
-#' - Generate outcome data for all visits (including baseline) from a multivariate normal distribution with parameters `pars_c$mu` and `pars_c$sigma`
-#' for the control arm and parameters `pars_t$mu` and `pars_t$sigma` for the treatment arm, respectively.
-#' Note that for a randomized trial, outcomes have the same distribution at baseline in both treatment groups, i.e. one should set
+#' - Generate outcome data for all visits (including baseline) from a multivariate
+#' normal distribution with parameters `pars_c$mu` and `pars_c$sigma`
+#' for the control arm and parameters `pars_t$mu` and `pars_t$sigma` for the treatment
+#' arm, respectively.
+#' Note that for a randomized trial, outcomes have the same distribution at baseline
+#' in both treatment groups, i.e. one should set
 #' `pars_c$mu[1]=pars_t$mu[1]` and `pars_c$sigma[1,1]=pars_t$sigma[1,1]`.
-#' - Simulate whether ICE1 (study treatment discontinuation due to SDCR reasons) occurs after each visit according to parameters `pars_c$prob_ice1` and `pars_c$or_outcome_ice1` for the control arm and `pars_t$prob_ice1` and `pars_t$or_outcome_ice1` for the treatment arm, respectively.
-#' - Simulate drop-out following ICE1 according to `pars_c$prob_post_ice1_dropout` and `pars_t$prob_post_ice1_dropout`.
-#' - Simulate an additional uninformative study drop-out with probabilities `pars_c$prob_dropout` and `pars_t$prob_dropout` at each visit.
-#'   The simulated time of drop-out is the subject's first visit which is affected by drop-out and data from this visit and all subsequent visits are consequently set to missing.
-#'   In addition, in case the subject is still on treatment at the subject's (first) visit affected by drop-out (i.e. if this occurs prior to ICE1),
-#'   then dropout also triggers discontinuation of study drug and a corresponding ICE2 (study treatment discontinuation due to NSDCR reasons) is generated.
-#' - Adjust trajectories after ICE according to the given assumption expressed with the `post_ice_traj` argument.
-#' - Simulate additional intermittent missing outcome data as per arguments `pars_c$prob_miss` and `pars_t$prob_miss`.
+#' - Simulate whether ICE1 (study treatment discontinuation due to SDCR reasons) occurs
+#' after each visit according to parameters `pars_c$prob_ice1` and `pars_c$or_outcome_ice1`
+#' for the control arm and `pars_t$prob_ice1` and `pars_t$or_outcome_ice1` for the
+#' treatment arm, respectively.
+#' - Simulate drop-out following ICE1 according to `pars_c$prob_post_ice1_dropout` and
+#' `pars_t$prob_post_ice1_dropout`.
+#' - Simulate an additional uninformative study drop-out with probabilities `pars_c$prob_dropout`
+#' and `pars_t$prob_dropout` at each visit.
+#'   The simulated time of drop-out is the subject's first visit which is affected by
+#' drop-out and data from this visit and all subsequent visits are consequently set to missing.
+#'   In addition, in case the subject is still on treatment at the subject's (first)
+#' visit affected by drop-out (i.e. if this occurs prior to ICE1),
+#'   then dropout also triggers discontinuation of study drug and a corresponding ICE2
+#' (study treatment discontinuation due to NSDCR reasons) is generated.
+#' - Adjust trajectories after ICE according to the given assumption expressed with
+#' the `post_ice_traj` argument.
+#' - Simulate additional intermittent missing outcome data as per arguments `pars_c$prob_miss`
+#' and `pars_t$prob_miss`.
 #'
-#' The probability of the ICE after each visit is modeled according to the following logistic regression model:
+#' The probability of the ICE after each visit is modeled according to the following
+#' logistic regression model:
 #' `~ 1 + I(visit == 0) + ... + I(visit == n_visits-1) + I((x-alpha))` where:
 #' - `n_visits` is the number of visits (including baseline).
 #' - `alpha` is the baseline outcome mean.
-#' The term `I((x-alpha))` specifies the dependency of the probability of the ICE on the current outcome value.
+#' The term `I((x-alpha))` specifies the dependency of the probability of the ICE on
+#' the current outcome value.
 #' The corresponding regression coefficients of the logistic model are defined as follows:
-#' The intercept is set to 0, the coefficients corresponding to discontinuation after each visit for a subject with outcome equal to
+#' The intercept is set to 0, the coefficients corresponding to discontinuation after
+#' each visit for a subject with outcome equal to
 #' the mean at baseline are set according to parameters `pars_c$prob_ice1` (`pars_t$prob_ice1`),
-#' and the regression coefficient associated with the covariate `I((x-alpha))` is set to `log(pars_c$or_outcome_ice)` (`log(pars_t$or_outcome_ice)`).
+#' and the regression coefficient associated with the covariate `I((x-alpha))` is set
+#' to `log(pars_c$or_outcome_ice)` (`log(pars_t$or_outcome_ice)`).
 #'
 #' Please note that the baseline outcome cannot be missing nor be affected by any ICEs.
 #'
 #' @returns A `data.frame` containing the simulated data. It includes the following variables:
 #' - `id`: Factor variable that specifies the id of each subject.
-#' - `visit`: Factor variable that specifies the visit of each assessment. Visit `0` denotes the baseline visit.
+#' - `visit`: Factor variable that specifies the visit of each assessment. Visit `0` denotes
+#' the baseline visit.
 #' - `group`: Factor variable that specifies which treatment group each subject belongs to.
 #' - `outcome_bl`: Numeric variable that specifies the baseline outcome.
-#' - `outcome_noICE`: Numeric variable that specifies the longitudinal outcome assuming no ICEs.
-#' - `ind_ice1`: Binary variable that takes value `1` if the corresponding visit is affected by ICE1 and `0` otherwise.
-#' - `dropout_ice1`: Binary variable that takes value `1` if the corresponding visit is affected by the drop-out following ICE1 and `0` otherwise.
-#' - `dropout2`: Binary variable that takes value `1` if the corresponding visit is affected by the uninformative study drop-out.
-#' - `ind_ice2`: Binary variable that takes value `1` if the corresponding visit is affected by ICE2.
-#' - `outcome`: Numeric variable that specifies the longitudinal outcome including ICE1, ICE2 and the intermittent missing values.
+#' - `outcome_noICE`: Numeric variable that specifies the longitudinal outcome assuming
+#' no ICEs.
+#' - `ind_ice1`: Binary variable that takes value `1` if the corresponding visit is
+#' affected by ICE1 and `0` otherwise.
+#' - `dropout_ice1`: Binary variable that takes value `1` if the corresponding visit is
+#' affected by the drop-out following ICE1 and `0` otherwise.
+#' - `dropout2`: Binary variable that takes value `1` if the corresponding visit is affected
+#' by the uninformative study drop-out.
+#' - `ind_ice2`: Binary variable that takes value `1` if the corresponding visit is affected
+#' by ICE2.
+#' - `outcome`: Numeric variable that specifies the longitudinal outcome including ICE1, ICE2
+#' and the intermittent missing values.
 #'
 #' @export
 simulate_data <- function(pars_c, pars_t, post_ice_traj, strategies = getStrategies()) {
@@ -193,9 +251,22 @@ simulate_data <- function(pars_c, pars_t, post_ice_traj, strategies = getStrateg
 
     n_visits <- length(pars_c$mu)
     # overwrite ids to have unique ids
-    data$id <- as.factor(rep(paste0("id_", seq.int(pars_c$n + pars_t$n)), each = n_visits))
+    data$id <- as.factor(
+        rep(
+            paste0("id_", seq.int(pars_c$n + pars_t$n)),
+            each = n_visits
+        )
+    )
     # add group variable
-    data$group <- as.factor(rep(c(rep("Control", pars_c$n), rep("Intervention", pars_t$n)), each = n_visits))
+    data$group <- as.factor(
+        rep(
+            c(
+                rep("Control", pars_c$n), 
+                rep("Intervention", pars_t$n)
+            ),
+            each = n_visits
+        )
+    )
 
     return(data)
 }
@@ -203,10 +274,14 @@ simulate_data <- function(pars_c, pars_t, post_ice_traj, strategies = getStrateg
 
 #' Generate data for a single group
 #'
-#' @param pars_group A `simul_pars` object as generated by [set_simul_pars()]. It specifies the simulation parameters of the given group.
-#' @param strategy_fun Function implementing trajectories after the intercurrent event (ICE). Must be one of [getStrategies()]. See [getStrategies()] for details.
-#' @param distr_pars_ref Optional. Named list containing the simulation parameters of the reference arm. It contains the following elements:
-#' - `mu`: Numeric vector indicating the mean outcome trajectory assuming no ICEs. It should include the outcome at baseline.
+#' @param pars_group A `simul_pars` object as generated by [set_simul_pars()]. It specifies
+#' the simulation parameters of the given group.
+#' @param strategy_fun Function implementing trajectories after the intercurrent event (ICE).
+#' Must be one of [getStrategies()]. See [getStrategies()] for details.
+#' @param distr_pars_ref Optional. Named list containing the simulation parameters of the
+#' reference arm. It contains the following elements:
+#' - `mu`: Numeric vector indicating the mean outcome trajectory assuming no ICEs. It should
+#' include the outcome at baseline.
 #' - `sigma` Covariance matrix of the outcome trajectory assuming no ICEs.
 #' If `NULL`, then these parameters are inherited from `pars_group`.
 #'
@@ -268,7 +343,15 @@ generate_data_single <- function(pars_group, strategy_fun, distr_pars_ref = NULL
         ids = data$id
     )
     # ICE2 happens if a subject is on treatment and drops-out
-    data$ind_ice2 <- unlist(lapply(split(data[,c("ind_ice1", "dropout2")], factor(data$id, levels = unique(data$id))), function(x) pmin(cumsum(ifelse(x$ind_ice1 == 0, 1, 0)*x$dropout2), 1)))
+    data$ind_ice2 <- unlist(
+        lapply(
+            split(
+                data[, c("ind_ice1", "dropout2")],
+                factor(data$id, levels = unique(data$id))
+            ),
+            function(x) pmin(cumsum(ifelse(x$ind_ice1 == 0, 1, 0) * x$dropout2), 1)
+        )
+    )
 
     data$outcome <- data$out_ice1
     # remove variable out_ice1 (no longer needed)
@@ -288,22 +371,29 @@ generate_data_single <- function(pars_group, strategy_fun, distr_pars_ref = NULL
 #' @param outcome Numeric variable that specifies the longitudinal outcome for a single group.
 #' @param visits Factor variable that specifies the visit of each assessment.
 #' @param ids Factor variable that specifies the id of each subject.
-#' @param prob_ice Numeric vector that specifies for each visit the probability of experiencing the ICE after the current visit for a subject with outcome equal to the mean at baseline.
+#' @param prob_ice Numeric vector that specifies for each visit the probability of experiencing
+#' the ICE after the current visit for a subject with outcome equal to the mean at baseline.
 #' If a single numeric is provided, then the same probability is applied to each visit.
-#' @param or_outcome_ice Numeric value that specifies the odds ratio of the ICE corresponding to a +1 higher value of the outcome at the visit.
+#' @param or_outcome_ice Numeric value that specifies the odds ratio of the ICE corresponding to
+#' a +1 higher value of the outcome at the visit.
 #' @param baseline_mean Mean outcome value at baseline.
 #'
-#' @details The probability of the ICE after each visit is modeled according to the following logistic regression model:
+#' @details The probability of the ICE after each visit is modeled according to the following
+#' logistic regression model:
 #' `~ 1 + I(visit == 0) + ... + I(visit == n_visits-1) + I((x-alpha))` where:
 #' - `n_visits` is the number of visits (including baseline).
 #' - `alpha` is the baseline outcome mean set via argument `baseline_mean`.
-#' The term `I((x-alpha))` specifies the dependency of the probability of the ICE on the current outcome value.
+#' The term `I((x-alpha))` specifies the dependency of the probability of the ICE on the current
+#' outcome value.
 #' The corresponding regression coefficients of the logistic model are defined as follows:
-#' The intercept is set to 0, the coefficients corresponding to discontinuation after each visit for a subject with outcome equal to
+#' The intercept is set to 0, the coefficients corresponding to discontinuation after each visit
+#' for a subject with outcome equal to
 #' the mean at baseline are set according to parameter `or_outcome_ice1`,
-#' and the regression coefficient associated with the covariate `I((x-alpha))` is set to `log(or_outcome_ice)`.
+#' and the regression coefficient associated with the covariate `I((x-alpha))` is set to
+#' `log(or_outcome_ice)`.
 #'
-#' @return A binary variable that takes value `1` if the corresponding outcome is affected by the ICE and `0` otherwise.
+#' @return A binary variable that takes value `1` if the corresponding outcome is affected
+#' by the ICE and `0` otherwise.
 #'
 #' @importFrom stats rbinom model.matrix binomial
 simulate_ice <- function(outcome, visits, ids, prob_ice, or_outcome_ice, baseline_mean) {
@@ -341,10 +431,17 @@ simulate_ice <- function(outcome, visits, ids, prob_ice, or_outcome_ice, baselin
 
     model_coef <- c(0, log(prob_ice/(1-prob_ice)), log(or_outcome_ice))
 
-    lp <- c(model.matrix(model_ice, data.frame("visit" = visits, "x" = as.numeric(outcome)))%*%model_coef) # linear predictor
+    lp <- c(
+        model.matrix(model_ice, data.frame("visit" = visits, "x" = as.numeric(outcome))) %*% model_coef
+    ) # linear predictor
     probs_ice <- binomial(link = "logit")$linkinv(lp)
     ind_ice <- rbinom(n = length(ids), size = 1, prob = probs_ice)
-    ind_ice <- unlist(tapply(ind_ice, factor(ids, levels = unique(ids)), function(x) c(0, pmin(cumsum(x), 1))[-(length(x) + 1)]))
+    ind_ice <- unlist(
+        tapply(
+            ind_ice, factor(ids, levels = unique(ids)),
+            function(x) c(0, pmin(cumsum(x), 1))[-(length(x) + 1)]
+        )
+    )
     names(ind_ice) <- NULL
 
     return(ind_ice)
@@ -353,17 +450,24 @@ simulate_ice <- function(outcome, visits, ids, prob_ice, or_outcome_ice, baselin
 
 #' Simulate drop-out
 #'
-#' @param prob_dropout Numeric that specifies the probability that a post-baseline visit is affected by study drop-out.
+#' @param prob_dropout Numeric that specifies the probability that a post-baseline visit is
+#' affected by study drop-out.
 #' @param ids Factor variable that specifies the id of each subject.
-#' @param subset Binary variable that specifies the subset that could be affected by drop-out. I.e. `subset` is a binary vector
-#' of length equal to the length of `ids` that takes value `1` if the corresponding visit could be affected by drop-out and `0` otherwise.
+#' @param subset Binary variable that specifies the subset that could be affected by drop-out.
+#' I.e. `subset` is a binary vector
+#' of length equal to the length of `ids` that takes value `1` if the corresponding visit could
+#' be affected by drop-out and `0` otherwise.
 #'
-#' @return A binary vector of length equal to the length of `ids` that takes value `1` if the corresponding outcome is
+#' @return A binary vector of length equal to the length of `ids` that takes value `1` if the
+#' corresponding outcome is
 #' affected by study drop-out.
 #'
-#' @details `subset` can be used to specify outcome values that cannot be affected by the drop-out. If `NULL` then
-#' `subset` will be set to `1` for all the values except the values corresponding to the baseline outcome, since baseline is supposed to not be affected by drop-out.
-#' Even if `subset` is specified by the user, the values corresponding to the baseline outcome are still hard-coded to be `0`.
+#' @details `subset` can be used to specify outcome values that cannot be affected by the
+#' drop-out. If `NULL` then
+#' `subset` will be set to `1` for all the values except the values corresponding to the
+#' baseline outcome, since baseline is supposed to not be affected by drop-out.
+#' Even if `subset` is specified by the user, the values corresponding to the baseline
+#' outcome are still hard-coded to be `0`.
 #'
 #' @importFrom stats rbinom
 simulate_dropout <- function(prob_dropout, ids, subset = NULL) {
@@ -387,29 +491,49 @@ simulate_dropout <- function(prob_dropout, ids, subset = NULL) {
 
     dropout <- rep(0, length(ids))
     dropout[subset == 1] <- rbinom(n = sum(subset), size = 1, prob = prob_dropout)
-    dropout <- unlist(tapply(dropout, factor(ids, levels = unique(ids)), function(x) pmin(cumsum(x), 1)), use.names = FALSE)
+    dropout <- unlist(
+        tapply(
+            dropout,
+            factor(ids, levels = unique(ids)),
+            function(x) pmin(cumsum(x), 1)
+        ),
+        use.names = FALSE
+    )
     return(dropout)
 }
 
 
 #' Adjust trajectories due to the intercurrent event (ICE)
 #'
-#' @param distr_pars_group Named list containing the simulation parameters of the multivariate normal distribution assumed for the given treatment group. It contains the following elements:
-#' - `mu`: Numeric vector indicating the mean outcome trajectory. It should include the outcome at baseline.
+#' @param distr_pars_group Named list containing the simulation parameters of the multivariate
+#' normal distribution assumed for the given treatment group. It contains the following elements:
+#' - `mu`: Numeric vector indicating the mean outcome trajectory. It should include the outcome
+#' at baseline.
 #' - `sigma` Covariance matrix of the outcome trajectory.
 #' @param outcome Numeric variable that specifies the longitudinal outcome.
 #' @param ids Factor variable that specifies the id of each subject.
-#' @param ind_ice A binary variable that takes value `1` if the corresponding outcome is affected by the ICE and `0` otherwise.
-#' @param strategy_fun Function implementing trajectories after the intercurrent event (ICE). Must be one of [getStrategies()]. See [getStrategies()] for details.
-#' @param distr_pars_ref Optional. Named list containing the simulation parameters of the reference arm. It contains the following elements:
-#' - `mu`: Numeric vector indicating the mean outcome trajectory assuming no ICEs. It should include the outcome at baseline.
+#' @param ind_ice A binary variable that takes value `1` if the corresponding outcome is affected
+#' by the ICE and `0` otherwise.
+#' @param strategy_fun Function implementing trajectories after the intercurrent event (ICE). Must
+#' be one of [getStrategies()]. See [getStrategies()] for details.
+#' @param distr_pars_ref Optional. Named list containing the simulation parameters of the
+#' reference arm. It contains the following elements:
+#' - `mu`: Numeric vector indicating the mean outcome trajectory assuming no ICEs. It should
+#' include the outcome at baseline.
 #' - `sigma` Covariance matrix of the outcome trajectory assuming no ICEs.
 #'
 #' @return A numeric vector containing the adjusted trajectories.
 #'
 #' @seealso [adjust_trajectories_single()].
 #'
-adjust_trajectories <- function(distr_pars_group, outcome, ids, ind_ice, strategy_fun, distr_pars_ref = NULL) {
+adjust_trajectories <- function(
+    distr_pars_group,
+    outcome,
+    ids,
+    ind_ice,
+    strategy_fun,
+    distr_pars_ref = NULL
+) {
 
     assert_that(
         all(!is.na(outcome)),
@@ -417,13 +541,21 @@ adjust_trajectories <- function(distr_pars_group, outcome, ids, ind_ice, strateg
     )
 
     outcome[ind_ice == 1] <- NA
-    outcome <- unlist(tapply(outcome, factor(ids, levels = unique(ids)), function(x) adjust_trajectories_single(
-        outcome = x,
-        distr_pars_group = distr_pars_group,
-        strategy_fun = strategy_fun,
-        distr_pars_ref = distr_pars_ref
+    outcome <- unlist(
+        tapply(
+            outcome,
+            factor(ids, levels = unique(ids)),
+            function(x) {
+                adjust_trajectories_single(
+                    outcome = x,
+                    distr_pars_group = distr_pars_group,
+                    strategy_fun = strategy_fun,
+                    distr_pars_ref = distr_pars_ref
+                )
+            }
+        ),
+        use.names = FALSE
     )
-    ), use.names = FALSE)
 
     return(outcome)
 }
@@ -431,21 +563,32 @@ adjust_trajectories <- function(distr_pars_group, outcome, ids, ind_ice, strateg
 
 #' Adjust trajectory of a subject's outcome due to the intercurrent event (ICE)
 #'
-#' @param distr_pars_group Named list containing the simulation parameters of the multivariate normal distribution assumed for the given treatment group. It contains the following elements:
-#' - `mu`: Numeric vector indicating the mean outcome trajectory. It should include the outcome at baseline.
+#' @param distr_pars_group Named list containing the simulation parameters of the multivariate
+#' normal distribution assumed for the given treatment group. It contains the following elements:
+#' - `mu`: Numeric vector indicating the mean outcome trajectory. It should include the
+#' outcome at baseline.
 #' - `sigma` Covariance matrix of the outcome trajectory.
 #' @param outcome Numeric variable that specifies the longitudinal outcome.
-#' @param strategy_fun Function implementing trajectories after the intercurrent event (ICE). Must be one of [getStrategies()]. See [getStrategies()] for details.
-#' @param distr_pars_ref Optional. Named list containing the simulation parameters of the reference arm. It contains the following elements:
-#' - `mu`: Numeric vector indicating the mean outcome trajectory assuming no ICEs. It should include the outcome at baseline.
+#' @param strategy_fun Function implementing trajectories after the intercurrent event (ICE).
+#' Must be one of [getStrategies()]. See [getStrategies()] for details.
+#' @param distr_pars_ref Optional. Named list containing the simulation parameters of the
+#' reference arm. It contains the following elements:
+#' - `mu`: Numeric vector indicating the mean outcome trajectory assuming no ICEs. It should
+#' include the outcome at baseline.
 #' - `sigma` Covariance matrix of the outcome trajectory assuming no ICEs.
 #'
 #' @return A numeric vector containing the adjusted trajectory for a single subject.
 #'
-#' @details `outcome` should be specified such that all-and-only the post-ICE observations (i.e. the
+#' @details `outcome` should be specified such that all-and-only the post-ICE observations
+#' (i.e. the
 #' observations to be adjusted) are set to `NA`.
 #'
-adjust_trajectories_single <- function(distr_pars_group, outcome, strategy_fun, distr_pars_ref = NULL) {
+adjust_trajectories_single <- function(
+    distr_pars_group, 
+    outcome, 
+    strategy_fun, 
+    distr_pars_ref = NULL
+) {
 
     is_post_ice <- is.na(outcome)
     if(all(!is_post_ice)) {
