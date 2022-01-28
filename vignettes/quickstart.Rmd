@@ -1,8 +1,17 @@
 ---
 title: "rbmi Quickstart"
-output: rmarkdown::html_vignette
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+    number_sections: true
+    citation_package: natbib
+    base_format: rmarkdown::html_vignette
+bibliography: "references.bib"
+link-citations: true   
+linkcolor: blue
 vignette: >
-  %\VignetteIndexEntry{quickstart}
+  %\VignetteIndexEntry{rbmi: Quickstart}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -130,6 +139,7 @@ Available methods include:
 - Approximate Bayesian imputation - `method_approxbayes()`.
 - Conditional mean imputation (bootstrap) - `method_condmean(type = "bootstrap")`.
 - Conditional mean imputation (jackknife) - `method_condmean(type = "jackknife")`.
+- Bootstrapped maximum likelihood multiple imputation (BMLMI) - `method_bmlmi()`.
 
 Available imputation strategies include:
 
@@ -170,6 +180,8 @@ Note that in the case of `method_condmean()` the first imputed dataset will alwa
 For `type=jackknife` the remaining datasets correspond to conditional mean imputations on leave-one-subject-out data sets,
 whereas for `type=bootstrap` each subsequent dataset correspond to conditional mean imputations on bootstrapped data sets.
 For `method_bayes()` or `method_approxbayes()`, all imputed datasets correspond to random imputations on the original dataset. 
+For `method_bmlmi()`, all the imputed data sets correspond to sets of random imputations on 
+bootstrapped data sets.
 
 ## Analyse
 
@@ -251,6 +263,8 @@ in the original call to `draws()`:
 - If `method_bayes()` or `method_approxbayes()` was used then pooling and inference are based on Rubin's rules.
 - If `method_condmean(type = "bootstrap") ` was used then inference is based on either a normal approximation to the treatment effect distribution (`pool(..., type = "normal")`) or on the bootstrap percentiles (`pool(..., type = "percentile")`).
 - If `method_condmean(type = "jackknife")` was used then inference is based on a normal approximation using the jackknife estimate of the standard error.
+- If `method_bmlmi()` was used then inference is based on a t-test where the standard error
+estimate and degrees of freedom are computed as described by Von Hippel & Bartlett (@vanHippelBartlett2021).
 
 Since we have used Bayesian imputation in this vignette, the `pool()` function will automatically use Rubin's rules.
 
@@ -384,3 +398,5 @@ poolObj <- pool(
     alternative = "two.sided"
 )
 ```
+
+## References

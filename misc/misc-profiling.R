@@ -1,101 +1,98 @@
 
 
-suppressPackageStartupMessages({
-    library(dplyr)
-    library(testthat)
-    library(tibble)
-})
 
-bign <- 700
-sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
-nsamp <- 200
+devtools::load_all()
+library(dplyr)
+library(testthat)
+library(tibble)
 
-
-expect_pool_est <- function(po, expected, param = "trt_visit_3") {
-    expect_contains(
-        po$pars[[param]]$ci,
-        expected
-    )
-
-    expect_contains(
-        po$pars[[param]]$ci,
-        po$pars[[param]]$est
-    )
-
-    if ("lsm_alt_visit_3" %in% names(po$pars)) {
-        lsm_trt <- (po$pars$lsm_alt_visit_3$est - po$pars$lsm_ref_visit_3$est)
-
-        expect_within(
-            lsm_trt - po$pars[[param]]$est,
-            c(-0.005, 0.005)
-        )
-    }
-}
+sigma <- as_vcov(c(2, 1, 0.7,3,0.1), c(0.5, 0.3, 0.2, 0.1, 0.2, 0.3, 0.5, 0.6,0.1, 0.3))
+nsamp <- 500
 
 
 
 
-test_that("Basic Usage - Approx Bayes", {
 
-    skip_if_not(is_nightly())
+set.seed(1512)
 
-    set.seed(1512)
-
-    dat <- get_sim_data(bign, sigma, trt = 8) %>%
-        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
-        select(-is_miss)
+dat <- get_sim_data(nsamp, sigma, trt = 8) %>%
+    mutate(is_miss = rbinom(n(), 1, 0.4)) %>%
+    mutate(outcome = if_else(is_miss == 1, NA_real_, outcome)) %>%
+    select(-is_miss)
 
 
-    dat_ice <- dat %>%
-        group_by(id) %>%
-        arrange(id, visit) %>%
-        filter(is.na(outcome)) %>%
-        slice(1) %>%
-        ungroup() %>%
-        select(id, visit) %>%
-        mutate(strategy = "JR")
+dat_ice <- dat %>%
+    group_by(id) %>%
+    arrange(id, visit) %>%
+    filter(is.na(outcome)) %>%
+    slice(1) %>%
+    ungroup() %>%
+    select(id, visit) %>%
+    mutate(strategy = "JR")
 
 
-    vars <- set_vars(
-        outcome = "outcome",
-        group = "group",
-        strategy = "strategy",
-        subjid = "id",
-        visit = "visit",
-        covariates = c("age", "sex", "visit * group")
-    )
-
+vars <- set_vars(
+    outcome = "outcome",
+    group = "group",
+    strategy = "strategy",
+    subjid = "id",
+    visit = "visit",
+    covariates = c("age", "sex", "visit * group")
+)
+profvis::profvis({
     drawobj <- draws(
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method_approxbayes(n_samples = nsamp)
+        method = method_bmlmi(B = 30, D = 10)
     )
+})
 
+# 84 seconds
+
+profvis::profvis({
+    drawobj <- draws(
+        data = dat,
+        data_ice = dat_ice,
+        vars = vars,
+        method = method_approxbayes(n_samples = 100)
+    )
+})
+
+
+
+
+
+# 3 seconds
+
+profvis::profvis({
     imputeobj <- impute(
         draws = drawobj,
         references = c("A" = "B", "B" = "B")
     )
+})
 
+# 1.5 seconds
+
+profvis::profvis({
     vars2 <- vars
     vars2$covariates <- c("age", "sex")
 
     anaobj <- analyse(
         imputeobj,
         fun = rbmi::ancova,
-        vars = vars2,
-        visits = "visit_3"
+        vars = vars2
     )
-
-    poolobj <- pool(
-        results = anaobj,
-        conf.level = 0.99,
-        alternative = "two.sided"
-    )
-
-    expect_pool_est(poolobj, 4)
 })
+
+
+poolobj <- pool(
+    results = anaobj,
+    conf.level = 0.99,
+    alternative = "two.sided"
+)
+
+expect_pool_est(poolobj, 4)
 
 
 
@@ -530,15 +527,15 @@ test_that("Multiple imputation references / groups work as expected (end to end 
     n <- 100
 
     dat <- bind_rows(
-        simulate_test_data(n, mu = mcoefs_b, sd = sigma_sd, cor = sigma_cor) %>%
+        simulate_data(n, mu = mcoefs_b, sd = sigma_sd, cor = sigma_cor) %>%
             mutate(group2 = if_else(group == "A", "A", "B")) %>%
             mutate(id = paste0(id, "A")),
 
-        simulate_test_data(n, mu = mcoefs_c, sd = sigma_sd, cor = sigma_cor) %>%
+        simulate_data(n, mu = mcoefs_c, sd = sigma_sd, cor = sigma_cor) %>%
             mutate(group2 = if_else(group == "A", "A", "C")) %>%
             mutate(id = paste0(id, "B")),
 
-        simulate_test_data(n, mu = mcoefs_d, sd = sigma_sd, cor = sigma_cor) %>%
+        simulate_data(n, mu = mcoefs_d, sd = sigma_sd, cor = sigma_cor) %>%
             mutate(group2 = if_else(group == "A", "A", "D")) %>%
             mutate(id = paste0(id, "C"))
     ) %>%
@@ -657,126 +654,3 @@ test_that("Multiple imputation references / groups work as expected (end to end 
 })
 
 
-test_that("Three arms trial runs smoothly and gives expected results", {
-
-    copy_group <- function(dat, name_group) {
-        datC <- dat[dat$group == name_group,]
-        datC$group <- "C"
-        datC$id <- paste0(datC$id, "C")
-        dat <- rbind(dat, datC)
-        return(dat)
-    }
-
-    myanfun <- function(data, ...) {
-
-        # apply ancova between A and B
-        data_temp <- data[data$group %in% c("A", "B"), ]
-        data_temp$group <- factor(data_temp$group, levels = c("A", "B"))
-        resB <- ancova(data_temp, ...)
-
-        # apply ancova between A and C
-        data_temp <- data[data$group %in% c("A", "C"), ]
-        data_temp$group <- factor(data_temp$group, levels = c("A", "C"))
-        resC <- ancova(data_temp, ...)
-
-        ret_obj <- list(
-            trtB = resB$trt_visit_3,
-            trtC = resC$trt_visit_3
-        )
-
-        return(ret_obj)
-
-    }
-
-    set.seed(101)
-    bign <- 30
-    sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
-    nsamp <- 0
-
-    dat <- get_sim_data(bign, sigma, trt = 8)
-    dat <- dat %>%
-        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
-        select(-is_miss)
-    dat <- copy_group(dat, name_group = "B")
-    datB <- dat$outcome[dat$group == "B" & !is.na(dat$outcome)]
-    datC <- dat$outcome[dat$group == "C" & !is.na(dat$outcome)]
-    expect_true(all(datB == datC))
-
-    dat_ice <- dat %>%
-        group_by(id) %>%
-        arrange(id, visit) %>%
-        filter(is.na(outcome)) %>%
-        slice(1) %>%
-        ungroup() %>%
-        select(id, visit) %>%
-        mutate(strategy = "JR")
-
-
-    vars <- set_vars(
-        outcome = "outcome",
-        group = "group",
-        strategy = "strategy",
-        subjid = "id",
-        visit = "visit",
-        covariates = c("sex", "age", "visit * group")
-    )
-
-    drawobj <- draws(
-        data = dat,
-        data_ice = dat_ice,
-        vars = vars,
-        method = method_condmean(n_samples = nsamp, type = "bootstrap", same_cov = TRUE)
-    )
-
-    imputeobj <- impute(
-        draws = drawobj,
-        references = c("A" = "A", "B" = "A", "C" = "A")
-    )
-
-    vars2 <- vars
-    vars2$covariates <- c("sex", "age")
-
-    anaobj <- analyse(
-        imputeobj,
-        fun = myanfun,
-        vars = vars2,
-        visits = "visit_3"
-    )
-    pooled <- pool(anaobj)
-
-    # check that groups B and C have same imputed values, same estimated and pooled treatment effect
-    imp_dat <- extract_imputed_dfs(imputeobj)[[1]]
-    expect_equal(imp_dat$outcome[imp_dat$group == "B"], imp_dat$outcome[imp_dat$group == "C"])
-    expect_equal(anaobj$results[[1]]$trtB, anaobj$results[[1]]$trtC)
-    expect_equal(pooled$pars$trtB, pooled$pars$trtC)
-
-
-    ########## same_cov = FALSE
-    drawobj <- draws(
-        data = dat,
-        data_ice = dat_ice,
-        vars = vars,
-        method = method_condmean(n_samples = nsamp, type = "bootstrap", same_cov = FALSE)
-    )
-
-    imputeobj <- impute(
-        draws = drawobj,
-        references = c("A" = "A", "B" = "A", "C" = "A")
-    )
-
-    anaobj <- analyse(
-        imputeobj,
-        fun = myanfun,
-        vars = vars2,
-        visits = "visit_3"
-    )
-    pooled <- pool(anaobj)
-
-    # check that groups B and C have same imputed values, same estimated and pooled treatment effect
-    imp_dat <- extract_imputed_dfs(imputeobj)[[1]]
-    expect_equal(imp_dat$outcome[imp_dat$group == "B"], imp_dat$outcome[imp_dat$group == "C"])
-    expect_equal(anaobj$results[[1]]$trtB, anaobj$results[[1]]$trtC)
-    expect_equal(pooled$pars$trtB, pooled$pars$trtC)
-
-})

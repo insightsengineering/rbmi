@@ -8,7 +8,7 @@ output:
     citation_package: natbib
 bibliography: "references.bib"
 vignette: >
-  %\VignetteIndexEntry{advanced}
+  %\VignetteIndexEntry{rbmi: Advanced Functionality}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
