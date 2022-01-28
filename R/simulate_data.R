@@ -1,4 +1,4 @@
-# To do: clarify length of prob_ice1 in help.
+# TODO: clarify length of prob_ice1 in help.
 
 #' @title Set simulation parameters of a study group.
 #'
