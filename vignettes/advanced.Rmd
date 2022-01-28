@@ -26,46 +26,161 @@ knitr::opts_chunk$set(
 The purpose of this vignette is to provide an overview of some of the more advanced
 features of the `rbmi` package. 
 
+# Data simulation
 
-In order to demonstrate these advanced functions we will first create a simulated dataset
-and perform a mock analysis so that all the require objects are available.
+In order to demonstrate the advanced functions we will first create a simulated dataset with the `rbmi` function `simulate_data()`. A reader interested in other sections of the vignette must not necessarly read through this section. The `simulate_data()` function generates data for a two-arms clinical trial with longitudinal continuous outcome and two intercurrent events (ICEs). One intercurrent event (ICE1) may be thought of as a discontinuation from study treatment due to study drug or condition related (SDCR) reasons. The other one (ICE2) may be thought of as discontinuation from study treatment due to uninformative study drop-out. For the purposes of this vignette we consider the following scenario which is similar to the simulation study used in @Wolbers2021. It is a trial of an active drug versus placebo with 100 subjects per group and 6 post-baseline assessments (bi-monthly visits until 12 months):
+
+- The mean outcome trajectory in the placebo group (and in the active group under the null hypothesis) increased linearly from 50 at baseline to 60 at visit 6.
+- The mean outcome trajectory in the active group was identical to the placebo group up to visit 2. From visit 2 onward, the slope decreased by 50% to 5 points/year.
+- The covariance structure of the baseline and follow-up values in both groups was implied by a random intercept and slope model with a standard deviation of 5 for both the intercept and the slope, and a correlation of 0.25. In addition, an independent residual error with standard deviation 2.5 was added to each assessment.  
+- The probability of study drug discontinuation after each visit was calculated according to a logistic model which also depended on the observed outcome at that visit. Specifically, a visit-wise discontinuation probability of 1.5% and 2.5% in the placebo and active group, respectively, was specified if the observed outcome was 50. For outcomes above 50, the odds of discontinuation further increase by 20% for each 1 point increase. 
+- Study drug discontinuation had no effect on the mean trajectory in the placebo group. In the active group, subjects who discontinued followed the slope of the mean trajectory from the placebo group from that time point onward (CIR). 
+- Study drop-out at the study drug discontinuation visit occurred with a probability of 75% leading to missing outcome data from that time point onward.
+
+This scenario can be implemented as follows:
+
 
 ```{r}
+devtools::load_all(path = "C:/Users/nocia/Documents/R/rbmi_curr/rbmi")
 library(rbmi)
 library(dplyr)
-set.seed(169)
-dat_full <- simulate_test_data(n = 120) %>% as_tibble()
 
-## Introduce missingness
-dat <- dat_full
-missing_index_vis2 <- rbinom(nrow(dat), 1, 0.3) == 1 & dat$visit == "visit_2"
-missing_index_vis3 <- rbinom(nrow(dat), 1, 0.4) == 1 & dat$visit == "visit_3"
-dat[missing_index_vis2, "outcome"] <- NA_real_
-dat[missing_index_vis3, "outcome"] <- NA_real_
+set.seed(135)
+n <- 100
+time <- seq(0,12,by=2)
 
-# create data_ice setting the imputation method to MAR for
-# each patient with at least one missing value
-dat_ice <- dat %>%
-    arrange(id, visit) %>%
-    filter(is.na(outcome)) %>%
-    group_by(id) %>%
-    slice(1) %>%
-    ungroup() %>%
-    select(id, visit) %>%
-    mutate(strategy = "MAR")
+# Mean trajectory control
+muC <- 50+10/12*time
 
+# Mean trajectory intervention
+muT <- 50+10/12*time-5/12*pmax(time-4,0)
 
-# Define the names of key variables in our dataset using `set_vars()`
-# Note that covariates argument can contain interactions
-vars <- set_vars(
-    outcome = "outcome",
-    visit = "visit",
-    subjid = "id",
-    group = "group",
-    covariates = c("age", "sex", "group*visit")
+# Create Sigma
+sd_intercept <- 5
+sd_slope <- 5
+cor_slopeInter <- 0.25
+sd_error <- 2.5
+covRE <- matrix(c(sd_intercept^2,
+                  cor_slopeInter*sd_intercept*sd_slope,
+                  cor_slopeInter*sd_intercept*sd_slope,
+                  sd_slope^2),ncol=2)
+Sigma <- cbind(1,time/12)%*%covRE%*%rbind(1,time/12)+diag(sd_error^2,nrow=length(time))
+
+# Set probability of discontinuation
+probDisc_C <- 0.015
+probDisc_T <- 0.025
+or_outcome <- 1.20 # 1 point increase => +20% probability of discontinuation
+
+# Set drop-out rate following discontinuation
+prob_postDisc_dropout = 0.75
+
+# Set simulation parameters of the control arm
+parsC <- set_simul_pars(
+    mu = muC,
+    sigma = Sigma,
+    n = n,
+    prob_ice1 = probDisc_C,
+    or_outcome_ice1 = or_outcome,
+    prob_post_ice1_dropout = prob_postDisc_dropout
+)
+
+# Set simulation parameters of the active arm
+parsT <- parsC
+parsT$mu <- muT
+parsT$prob_ice1 <- probDisc_T
+
+# Set assumption about post-ice trajectory
+post_ice_traj <- "CIR"
+
+# Simulate data
+data <- simulate_data(
+    pars_c = parsC, 
+    pars_t = parsT, 
+    post_ice_traj = post_ice_traj
 )
 ```
 
+Note that `simulate_data()` requires 3 arguments: 
+
+- `pars_c`: The simulation parameters of the control arm
+- `pars_t`: The simulation parameters of the intervention arm
+- `post_ice_traj`: Specify how observed outcomes occurring after ICE1 are simulated
+
+For more information about this function, please refer to the function documentation `help(simulate_data)`.
+
+# Management of post-ICE observed values handled with a reference-based assumption
+
+The simulated trial explained in the previous section assumes that outcomes in the active arm observed after the ICE "treatment discontinuation" follow the increments observed in the control arm. Thus the imputation of missing data in the active arm after treatment discontinuation might be performed under the CIR assumption. How `rbmi` deals with observed values after an ICE handled using a reference-based method, is to include them in the analysis model but exclude them from the imputation model.
+
+Let's first set-up the estimator: Suppose that imputation model has the mean change from baseline as the outcome, includes the treatment group, the (categorical) visit, treatment-by-visit interactions, the baseline outcome, and baseline outcome-by-visit interactions as covariates, and assumes a common unstructured covariance matrix in both groups. The analysis model is ANCOVA that also adjusts for the baseline outcome value. Below we report the code to set the variables of the imputation and analysis models. For details on the basic set-up to call the key rbmi functions, please refer to the "quickstart" vignette (`vignette("quickstart")`).
+
+```{r}
+
+# Create data_ice: CIR strategy for each patient in the active arm who stops the treatment
+data_ice_CIR <- data %>%
+    group_by(id = factor(id, levels = unique(id))) %>%
+    mutate(
+      is_interv = group == "Intervention",
+      has_ice = any(ind_ice1 == 1)
+    ) %>%
+    filter(is_interv & has_ice) %>% # Select pts in active arm that disc from treatment
+    summarise(
+        visit = visit[ind_ice1 == 1][1] # Select first visit affected by the ICE
+    )
+data_ice_CIR$strategy <- "CIR"
+
+# Compute change from baseline
+data$change <- data$outcome - data$outcome_bl
+
+# Remove rows corresponding to baseline visit
+data <- data[data$visit %in% levels(data$visit)[-1],]
+data$visit <- factor(data$visit, levels <- unique(data$visit))
+
+vars <- set_vars(
+    subjid = "id",
+    visit = "visit",
+    outcome = "change",
+    group = "group",
+    covariates = c("visit*outcome_bl","visit*group"),
+    strategy = "strategy"
+    )
+
+vars_an <- vars
+vars_an$covariates = "outcome_bl"
+
+```
+
+Let's assume that the chosen multiple imputation (MI) method is the approximate Bayesian MI with 10 imputations that can be set with the function `method_approxbayes()` as follows:
+
+```{r}
+method <- method_approxbayes(n_sample = 10)
+```
+
+We can now call sequentially the 4 key functions of `rbmi` to perform the multiple imputation. Please note that the management of post-discontinuation observed data is performed without additional complexity for the user. `draws()` automatically excludes post-ICE data handled with a reference-based method using information provided by the argument `data_ice`. `impute()` will impute only actual missing data in `data[[vars$outcome]]`.
+
+```{r}
+
+set.seed(123)
+draw_obj <- draws(
+    data = data,
+    data_ice = data_ice_CIR,
+    vars = vars,
+    method = method
+)
+
+impute_obj_CIR <- impute(
+    draw_obj,
+    references = c("Control" = "Control", "Intervention" = "Intervention")
+)
+
+ana_obj_CIR <- analyse(
+    impute_obj_CIR,
+    vars = vars_an
+)
+
+pool(ana_obj_CIR)
+
+```
 
 # Efficiently Changing Imputation Strategies
 
@@ -80,28 +195,26 @@ In order to allow changes in the imputation strategy without having to re-run th
 Please note though that this functionality comes with a some key limitations:
 From a theoretical point of view, such updates are only sensible if the base imputation model and the data to which it is fitted are also applicable to the revised imputation strategy. For example, as described in `help("draws", "rbmi")`, observed post-ICE data are included in the imputation model for the MAR strategy but excluded for non-MAR strategies. For this reason, the imputation strategy cannot be changed from MAR to a non-MAR strategy in the presence of observed data after the ICE. Likewise, a change from a non-MAR to MAR in the presence of observed data after the ICE triggers a warning because the imputation model was not fitted to all relevant data and may be inefficient. Similarly, it is not possible to change the first visit which is affected by an ICE via argument `update_strategies`. 
 
-As an example, let's assume we want to use the copy  increments from reference strategy for the main analysis and explore the jump to reference imputation strategy as a sensitivity analysis. If we use approximate Bayesian multiple imputation with 10 random imputation, this could be implemented as follows:
+As an example, let's assume we adopt the copy increments from reference strategy for the main analysis and explore the jump to reference imputation strategy as a sensitivity analysis. If we use approximate Bayesian multiple imputation with 10 random imputation, this could be implemented as follows:
 
 ```{r}
-dat_ice_CIR <- dat_ice
-dat_ice_CIR$strategy <- "CIR"
-dat_ice_CIR
 
+set.seed(123)
 draw_obj <- draws(
-    data = dat,
-    data_ice = dat_ice_CIR,
+    data = data,
+    data_ice = data_ice_CIR,
     vars = vars,
-    method = method_approxbayes(n_sample=10)
+    method = method_approxbayes(n_sample = 10)
 )
 
 impute_obj_CIR <- impute(
     draw_obj,
-    references = c("A" = "B", "B" = "B")
+    references = c("Control" = "Control", "Intervention" = "Intervention")
 )
 
 ana_obj_CIR <- analyse(
     impute_obj_CIR,
-    vars = set_vars()
+    vars = vars_an
 )
 
 pool(ana_obj_CIR)
@@ -109,19 +222,19 @@ pool(ana_obj_CIR)
 ## Now we re-use our draws samples but using the Jump to Reference 
 ## Imputation strategy
 
-dat_ice_JR <- dat_ice
-dat_ice_JR$strategy <- "JR"
-dat_ice_JR
+data_ice_JR <- data_ice_CIR
+data_ice_JR$strategy <- "JR"
+data_ice_JR
 
 impute_obj_JR <- impute(
     draw_obj,
-    references = c("A" = "B", "B" = "B"),
-    update_strategy = dat_ice_JR
+    references = c("Control" = "Control", "Intervention" = "Intervention"),
+    update_strategy = data_ice_JR
 )
 
 ana_obj_JR <- analyse(
     impute_obj_JR,
-    vars = set_vars()
+    vars = vars_an
 )
 
 pool(ana_obj_JR)
@@ -194,19 +307,20 @@ specified as using the `AVG` imputation strategy. Additionally, the function nee
 to be provided to `impute()` via the `getStrategies()` function as shown below:
 
 ```{r}
+dat_ice <- data_ice_CIR
 dat_ice$strategy <- "AVG"
 dat_ice
 
 draw_obj <- draws(
-    data = dat,
+    data = data,
     data_ice = dat_ice,
     vars = vars,
-    method = method_approxbayes(n_sample=10)
+    method = method
 )
 
 impute_obj <- impute(
     draw_obj,
-    references = c("A" = "B", "B" = "B"),
+    references = c("Control" = "Control", "Intervention" = "Intervention"),
     strategies = getStrategies(AVG = strategy_AVG)
 )
 ```
@@ -228,24 +342,24 @@ containing a at a minimum a point estimate, called `est`.
 For method `method_bayes()` or `method_approxbayes()`, the list must additionally contain a 
 standard error (element `se`) and, if available, the degrees of freedom of the complete-data analysis model (element `df`). 
 
-As an example, let's say that the analysis compares the proportion of subjects with an outcome > 10 at the last 
-visit between the groups without any covariate adjustment. This could then lead to the following (naive) analysis function:
+As an example, let's say that the analysis compares the proportion of subjects with an outcome > 60 at the last 
+visit between the groups with baseline outcome as additional covariate. This could then lead to the following (naive) analysis function:
 
 ```{r}
 compare_prop_lastvisit <- function(data,...){
   
   fit <- summary(
     glm(
-      I(outcome > 10) ~ group,
+      I(outcome > 60) ~ group + outcome_bl,
       family = binomial(),
-      data = data[data[["visit"]] == "visit_3", ]
+      data = data[data[["visit"]] == "6", ]
     )
   )
   
   res <- list(
     trt = list( 
-      est = fit$coefficients["groupB", "Estimate"],
-      se = fit$coefficients["groupB", "Std. Error"],
+      est = fit$coefficients["groupIntervention", "Estimate"],
+      se = fit$coefficients["groupIntervention", "Std. Error"],
       df = Inf
     )
   )
@@ -268,15 +382,165 @@ pool(anl_obj)
 
 # Delta Adjustment
 
+A delta-adjustment refers to a shift in the distribution of the (unobserved) outcome values by a certain amount. This might be used to perform sensitivity analyses. In the context of multiple imputation (MI), this is typically done by adding a fixed amount to the imputed values used in the primary analysis. This implies that the delta-adjustment can be performed prior to the third stage of the MI process: The fit of the analysis model (`analyse()`). That is, there is no additional consistent computational time needed to perform this type of sensitivity analysis since there is no need to re-fit the imputation model. For details, please see @CroEtAlTutorial2020.
+
+## Manually set `delta`
+
 The `delta` argument of `analyse()` allows users to modify the outcome variable
 which can be utilised as part of a tipping point or sensitivity analysis. To do 
 this, the user needs to provide a `data.frame` containing a column for the subject
 and visit which identifies the observation to be adjusted, and then a 3rd column
 called `delta` which specifies the value which will be added to the outcome prior to the analysis. 
 
-The `delta_template()` function creates a skeleton `data.frame` containing
+The `delta_template()` function helps the user to set the desired delta-adjustment: it creates a skeleton `data.frame` containing
 1 row per subject per visit with the value of delta set to 0 for all observations.
-The `delta_template()` function has two additional mandatory arguments `delta`
+
+```{r}
+dat_delta <- delta_template(imputations = impute_obj_CIR)
+head(dat_delta)
+```
+
+Note that the output of `delta_template()` contains additional information that can be used to properly set the delta.
+
+Using the example described in the first section, let's say that we want to perform a delta-strategy where the delta applies to all imputed data after treatment discontinuation (regardless of the treatment arm). Assume that we want to fix `delta` proportional to the unadjusted observed mean change from baseline of the outcome value over all trial population. That is, we add `delta` to a missing data after treatment discontinuation at a given visit proportional to the observed mean change from baseline at that visit. Let's first determine the observed mean change from baseline at each visit:
+
+```{r}
+# Estimate mean change from baseline at each visit
+mean_chg <- data %>%
+  group_by(visit) %>%
+  summarise(delta = mean(change, na.rm = TRUE))
+mean_chg
+```
+Note that `na.rm = TRUE` is used to ignore the missing data.
+
+Suppose that we want to apply a delta equal to the $20\%$ of the mean change from baseline, i.e.: 
+```{r} 
+deltas <- mean_chg
+deltas$delta = 0.2*mean_chg$delta
+deltas
+```
+
+Let's include this amount of delta in the `delta_template()` dataset:
+
+```{r}
+
+# Select observations corresponding to missing values after the ICE
+index_delta <- dat_delta$is_missing & dat_delta$is_post_ice
+
+# Include the value of delta from "mean_chg" to "dat_delta" by joining the two data.frames
+dat_delta[index_delta,] <- dat_delta %>% 
+  filter(is_missing & is_post_ice) %>% 
+  select(-delta) %>%
+  left_join(deltas, by = "visit")
+```
+
+Note that the delta is applied only to observations that were missing and that were after the ICE "treatment discontinuation". 
+
+We can now call `analyse()`, that will first add the delta to the corresponding outcomes and then call the analysis model. Be aware that the delta is applied to all imputed datasets:
+
+```{r}
+# Repeat analyses with the delta-adjusted values and pool together the results
+anl_delta <- analyse(impute_obj_CIR, delta = dat_delta, vars = vars_an)
+pool(anl_delta)
+```
+## Tipping point analysis
+
+The tipping point analysis is a way of doing a sensitivity analysis by repeatedly performing a delta-adjustment with worse and worse value of delta until when the result from the primary analysis is overturned.
+
+In the previous section we have added a delta to any imputed value after treatment discontinuation proportional to the observed mean change from baseline at the corresponding visit. We have set the proportion equal to 20%. We can vary the proportion up to when the treatment effect estimated at the last visit is not significant anymore.
+
+Let's start by writing a function that performs a delta-adjustment based on a proportion of the observed mean change from baseline:
+
+```{r}
+delta_adj <- function(impute_obj, mean_chg, prop) {
+  
+  # Get delta template dataset
+  dat_delta <- delta_template(imputations = impute_obj)
+  
+  # Estimate delta values
+  mean_chg$delta = prop*mean_chg$delta
+  
+  # Select observations corresponding to missing values after the ICE
+  index_delta <- dat_delta$is_missing & dat_delta$is_post_ice
+  
+  # Include the value of delta from "mean_chg" to "dat_delta" by joining the two data.frames
+  dat_delta[index_delta,] <- dat_delta %>% 
+    filter(is_missing & is_post_ice) %>% 
+    select(-delta) %>%
+    left_join(mean_chg, by = "visit")
+  
+  # Repeat analyses with the delta-adjusted values and pool together the results
+  anl_delta <- analyse(impute_obj, delta = dat_delta, vars = vars_an)
+  pool_obj <- pool(anl_delta)
+
+  # Return the results together with the proportion used and the delta values
+  pool_obj$prop <- prop
+  pool_obj$delta <- mean_chg
+  return(pool_obj)
+}
+
+```
+
+To perform the tipping point analysis, we loop over increasing values of the proportion and we stop when the p-value is above the desired confidence level (we assume that it is equal to 0.05).
+
+```{r}
+prop <- seq(from = 0.1, to = 1, by = 0.1)
+
+iter <- 1
+p_val <- 0
+while(p_val <= 0.05 & iter <= length(prop)) {
+  
+  # Perform analysis with current "prop"
+  curr_res <- delta_adj(impute_obj, mean_chg, prop = prop[iter])
+  
+  # Extract p-value
+  p_val <- curr_res$pars$trt_6$pvalue
+
+  iter <- iter + 1
+}
+
+curr_res$prop
+curr_res$delta
+```
+
+The p-value is estimated to be above the significance level when a delta equal to the
+```{r, echo=FALSE, results='asis'} 
+cat(curr_res$prop*100)
+```
+% of the mean change from baseline is applied. This correspond to a delta applied at the last visit equal to 
+```{r, echo=FALSE, results='asis'} 
+cat(round(curr_res$delta$delta[curr_res$delta$visit == "6"], 3))
+```
+. Thus the "tipping point" happened somewhere between a delta equal to the 
+```{r, echo=FALSE, results='asis'} 
+cat(prop[iter - 2]*100)
+```
+% and the 
+```{r, echo=FALSE, results='asis'} 
+cat(prop[iter - 1]*100)
+```
+% of the mean change from baseline.
+
+To get a more precise tipping point, one could repeat the tipping point analysis varying the proportion parameter from 
+```{r, echo=FALSE, results='asis'} 
+cat(prop[iter - 2]*100)
+```
+% and the 
+```{r, echo=FALSE, results='asis'} 
+cat(prop[iter - 1]*100)
+```
+%.
+
+## Usage of `dlag` and `delta` arguments of `delta_template()`
+
+The `delta` argument of `analyse()` allows users to modify the outcome variable
+which can be utilised as part of a tipping point or sensitivity analysis. To do 
+this, the user needs to provide a `data.frame` containing a column for the subject
+and visit which identifies the observation to be adjusted, and then a 3rd column
+called `delta` which specifies the value which will be added to the outcome prior to the analysis. 
+
+The `delta_template()` function helps the user to set the desired delta-adjustment: it creates a skeleton `data.frame` containing
+1 row per subject per visit with the value of delta set to 0 for all observations. The `delta_template()` function has two optional additional arguments `delta`
 and `dlag` which allow the user to specify initial cumulative delta values based upon a
 default value and a scaling coefficient based upon how far away the visit
 in question is from the ICE visit. 
@@ -356,19 +620,19 @@ v1  v2  v3  v4
 ```
 
 i.e. on week-6 (1 week after the ICE) they have a delta of 3 and on week-9 (4 weeks
-after the ICE) they have a delta of 12
+after the ICE) they have a delta of 12.
 
 
-To show this in action, lets say that we want a constant delta of 5 to be applied (regardless of
+To show this in action, lets say that we want a constant delta of 2 to be applied (regardless of
 the lag) to all unobserved post-ICE visits in the treatment arm only. This can be achieved as follows:
 
 First use the `delta` and `dlag` arguments of `delta_template()` to setup a template `data.frame`
-in which every unobserved post-ICE visit has a delta of 5:
+in which every unobserved post-ICE visit has a delta of 2:
 ```{r}
 delta_df <- delta_template(
     impute_obj_CIR, 
-    delta = c(5, 5, 5), 
-    dlag = c(1, 0, 0)
+    delta = c(2, 2, 2, 2, 2, 2), 
+    dlag = c(1, 0, 0, 0, 0 ,0)
 )
 
 as_tibble(delta_df)
@@ -378,13 +642,13 @@ Next we can use the additional metadata variables provided by `delta_template()`
 reset the delta values for the control group back to 0:
 ```{r}
 delta_df2 <- delta_df %>% 
-    mutate(delta = if_else(group == "B", 0, delta))
+    mutate(delta = if_else(group == "Control", 0, delta))
 
 as_tibble(delta_df2)
 ```
 
 Finally we can now use our delta `data.frame` to apply our desired delta offset to our analysis:
 ```{r}
-anl_delta <- analyse(impute_obj_CIR, delta = delta_df2, vars = set_vars())
+anl_delta <- analyse(impute_obj_CIR, delta = delta_df2, vars = vars_an)
 pool(anl_delta)  
 ```
