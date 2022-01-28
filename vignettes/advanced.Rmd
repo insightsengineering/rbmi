@@ -1,12 +1,15 @@
 ---
 title: "rbmi: Advanced Functionality"
 output: 
-  rmarkdown::html_vignette:
+  bookdown::html_document2:
     toc: true
     toc_depth: 4
     number_sections: true
     citation_package: natbib
+    base_format: rmarkdown::html_vignette
 bibliography: "references.bib"
+link-citations: true   
+linkcolor: blue
 vignette: >
   %\VignetteIndexEntry{advanced}
   %\VignetteEngine{knitr::rmarkdown}
@@ -26,7 +29,7 @@ knitr::opts_chunk$set(
 The purpose of this vignette is to provide an overview of some of the more advanced
 features of the `rbmi` package. 
 
-# Data simulation
+# Data simulation {#sec:dataSimul}
 
 In order to demonstrate the advanced functions we will first create a simulated dataset with the `rbmi` function `simulate_data()`. A reader interested in other sections of the vignette must not necessarly read through this section. The `simulate_data()` function generates data for a two-arms clinical trial with longitudinal continuous outcome and two intercurrent events (ICEs). One intercurrent event (ICE1) may be thought of as a discontinuation from study treatment due to study drug or condition related (SDCR) reasons. The other one (ICE2) may be thought of as discontinuation from study treatment due to uninformative study drop-out. For the purposes of this vignette we consider the following scenario which is similar to the simulation study used in @Wolbers2021. It is a trial of an active drug versus placebo with 100 subjects per group and 6 post-baseline assessments (bi-monthly visits until 12 months):
 
@@ -110,7 +113,7 @@ For more information about this function, please refer to the function documenta
 
 # Management of post-ICE observed values handled with a reference-based assumption
 
-The simulated trial explained in the previous section assumes that outcomes in the active arm observed after the ICE "treatment discontinuation" follow the increments observed in the control arm. Thus the imputation of missing data in the active arm after treatment discontinuation might be performed under the CIR assumption. How `rbmi` deals with observed values after an ICE handled using a reference-based method, is to include them in the analysis model but exclude them from the imputation model.
+The simulated trial explained in section \@ref(sec:dataSimul) assumes that outcomes in the active arm observed after the ICE "treatment discontinuation" follow the increments observed in the control arm. Thus the imputation of missing data in the active arm after treatment discontinuation might be performed under the CIR assumption. How `rbmi` deals with observed values after an ICE handled using a reference-based method, is to include them in the analysis model but exclude them from the imputation model.
 
 Let's first set-up the estimator: Suppose that imputation model has the mean change from baseline as the outcome, includes the treatment group, the (categorical) visit, treatment-by-visit interactions, the baseline outcome, and baseline outcome-by-visit interactions as covariates, and assumes a common unstructured covariance matrix in both groups. The analysis model is ANCOVA that also adjusts for the baseline outcome value. Below we report the code to set the variables of the imputation and analysis models. For details on the basic set-up to call the key rbmi functions, please refer to the "quickstart" vignette (`vignette("quickstart")`).
 
@@ -384,7 +387,7 @@ pool(anl_obj)
 
 A delta-adjustment refers to a shift in the distribution of the (unobserved) outcome values by a certain amount. This might be used to perform sensitivity analyses. In the context of multiple imputation (MI), this is typically done by adding a fixed amount to the imputed values used in the primary analysis. This implies that the delta-adjustment can be performed prior to the third stage of the MI process: The fit of the analysis model (`analyse()`). That is, there is no additional consistent computational time needed to perform this type of sensitivity analysis since there is no need to re-fit the imputation model. For details, please see @CroEtAlTutorial2020.
 
-## Manually set `delta`
+## Manually set `delta` {#sec:manualDelta}
 
 The `delta` argument of `analyse()` allows users to modify the outcome variable
 which can be utilised as part of a tipping point or sensitivity analysis. To do 
@@ -402,7 +405,7 @@ head(dat_delta)
 
 Note that the output of `delta_template()` contains additional information that can be used to properly set the delta.
 
-Using the example described in the first section, let's say that we want to perform a delta-strategy where the delta applies to all imputed data after treatment discontinuation (regardless of the treatment arm). Assume that we want to fix `delta` proportional to the unadjusted observed mean change from baseline of the outcome value over all trial population. That is, we add `delta` to a missing data after treatment discontinuation at a given visit proportional to the observed mean change from baseline at that visit. Let's first determine the observed mean change from baseline at each visit:
+Using the example described in section \@ref(sec:dataSimul), let's say that we want to perform a delta-strategy where the delta applies to all imputed data after treatment discontinuation (regardless of the treatment arm). Assume that we want to fix `delta` proportional to the unadjusted observed mean change from baseline of the outcome value over all trial population. That is, we add `delta` to a missing data after treatment discontinuation at a given visit proportional to the observed mean change from baseline at that visit. Let's first determine the observed mean change from baseline at each visit:
 
 ```{r}
 # Estimate mean change from baseline at each visit
@@ -443,11 +446,12 @@ We can now call `analyse()`, that will first add the delta to the corresponding 
 anl_delta <- analyse(impute_obj_CIR, delta = dat_delta, vars = vars_an)
 pool(anl_delta)
 ```
+
 ## Tipping point analysis
 
 The tipping point analysis is a way of doing a sensitivity analysis by repeatedly performing a delta-adjustment with worse and worse value of delta until when the result from the primary analysis is overturned.
 
-In the previous section we have added a delta to any imputed value after treatment discontinuation proportional to the observed mean change from baseline at the corresponding visit. We have set the proportion equal to 20%. We can vary the proportion up to when the treatment effect estimated at the last visit is not significant anymore.
+In the previous section (\@ref(sec:manualDelta)) we have added a delta to any imputed value after treatment discontinuation proportional to the observed mean change from baseline at the corresponding visit. We have set the proportion equal to 20%. We can vary the proportion up to when the treatment effect estimated at the last visit is not significant anymore.
 
 Let's start by writing a function that performs a delta-adjustment based on a proportion of the observed mean change from baseline:
 
@@ -652,3 +656,5 @@ Finally we can now use our delta `data.frame` to apply our desired delta offset 
 anl_delta <- analyse(impute_obj_CIR, delta = delta_df2, vars = vars_an)
 pool(anl_delta)  
 ```
+
+# References
