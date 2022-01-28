@@ -14,9 +14,11 @@ adjust_trajectories(
 )
 }
 \arguments{
-\item{distr_pars_group}{Named list containing the simulation parameters of the multivariate normal distribution assumed for the given treatment group. It contains the following elements:
+\item{distr_pars_group}{Named list containing the simulation parameters of the multivariate
+normal distribution assumed for the given treatment group. It contains the following elements:
 \itemize{
-\item \code{mu}: Numeric vector indicating the mean outcome trajectory. It should include the outcome at baseline.
+\item \code{mu}: Numeric vector indicating the mean outcome trajectory. It should include the outcome
+at baseline.
 \item \code{sigma} Covariance matrix of the outcome trajectory.
 }}
 
@@ -24,13 +26,17 @@ adjust_trajectories(
 
 \item{ids}{Factor variable that specifies the id of each subject.}
 
-\item{ind_ice}{A binary variable that takes value \code{1} if the corresponding outcome is affected by the ICE and \code{0} otherwise.}
+\item{ind_ice}{A binary variable that takes value \code{1} if the corresponding outcome is affected
+by the ICE and \code{0} otherwise.}
 
-\item{strategy_fun}{Function implementing trajectories after the intercurrent event (ICE). Must be one of \code{\link[=getStrategies]{getStrategies()}}. See \code{\link[=getStrategies]{getStrategies()}} for details.}
+\item{strategy_fun}{Function implementing trajectories after the intercurrent event (ICE). Must
+be one of \code{\link[=getStrategies]{getStrategies()}}. See \code{\link[=getStrategies]{getStrategies()}} for details.}
 
-\item{distr_pars_ref}{Optional. Named list containing the simulation parameters of the reference arm. It contains the following elements:
+\item{distr_pars_ref}{Optional. Named list containing the simulation parameters of the
+reference arm. It contains the following elements:
 \itemize{
-\item \code{mu}: Numeric vector indicating the mean outcome trajectory assuming no ICEs. It should include the outcome at baseline.
+\item \code{mu}: Numeric vector indicating the mean outcome trajectory assuming no ICEs. It should
+include the outcome at baseline.
 \item \code{sigma} Covariance matrix of the outcome trajectory assuming no ICEs.
 }}
 }
