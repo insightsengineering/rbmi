@@ -185,6 +185,7 @@ pool(ana_obj_CIR)
 
 ```
 
+
 # Efficiently Changing Imputation Strategies
 
 The `draws()` function is by far the most computationally intensive function in `rbmi`. 
