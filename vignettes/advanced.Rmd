@@ -44,7 +44,6 @@ This scenario can be implemented as follows:
 
 
 ```{r}
-devtools::load_all(path = "C:/Users/nocia/Documents/R/rbmi_curr/rbmi")
 library(rbmi)
 library(dplyr)
 
