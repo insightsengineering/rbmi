@@ -238,7 +238,7 @@ simulate_data <- function(pars_c, pars_t, post_ice_traj, strategies = getStrateg
         arg = post_ice_traj,
         choices = names(strategies)
     )
-    strategy_fun <- strategies[[which(names(strategies) == post_ice_traj)]]
+    strategy_fun <- strategies[[post_ice_traj]]
 
     data_c <- generate_data_single(pars_c, strategy_fun)
     data_t <- generate_data_single(
@@ -312,15 +312,17 @@ generate_data_single <- function(pars_group, strategy_fun, distr_pars_ref = NULL
 
     # return binary vector with "1" where first ICE1 visit
     first_ice1_visit <- unlist(
-        tapply(data$ind_ice1, factor(data$id, levels = unique(data$id)), function(x) {
-            subset <- rep(0, n_visits)
-            if(any(x == 1)) {
-                ind <- which(x==1)[1]
-                subset[ind] <- 1
+        tapply(
+            data$ind_ice1, 
+            factor(data$id, levels = unique(data$id)),
+            function(x) {
+                subset <- rep(0, n_visits)
+                subset[which(x == 1)[1]] <- 1
+                return(subset)
             }
-            return(subset)
-        }
-        ))
+        ),
+        use.names = FALSE
+    )
 
     data$dropout_ice1 <- simulate_dropout(
         prob_dropout = pars_group$prob_post_ice1_dropout,
@@ -415,34 +417,24 @@ simulate_ice <- function(outcome, visits, ids, prob_ice, or_outcome_ice, baselin
     prob_ice[prob_ice == 0] <- 1e-20
     prob_ice[prob_ice == 1] <- 1-1e-15
 
-    create_model_ice <- function(n_visits, baseline_mean) {
-        model_ice <- "~ 1"
-        for(visit_num in seq.int(n_visits) - 1) {
-            model_ice <- paste0(model_ice, " + I(visit == ", visit_num,")")
-        }
-        model_ice <- paste0(model_ice, " + I((x - ", baseline_mean,"))")
-        return(as.formula(model_ice))
-    }
-
-    model_ice <- create_model_ice(
-        n_visits = n_visits,
-        baseline_mean = baseline_mean
-    )
-
     model_coef <- c(0, log(prob_ice/(1-prob_ice)), log(or_outcome_ice))
 
-    lp <- c(
-        model.matrix(model_ice, data.frame("visit" = visits, "x" = as.numeric(outcome))) %*% model_coef
-    ) # linear predictor
+    dat <- data.frame(
+        visits = visits,
+        x = outcome - baseline_mean
+    )
+    mod_no_intercept <- model.matrix(~ 0 + visits + x, dat)
+    mod <- cbind(matrix(1, nrow = nrow(dat), ncol = 1), mod_no_intercept)
+    lp <- mod %*% model_coef
     probs_ice <- binomial(link = "logit")$linkinv(lp)
     ind_ice <- rbinom(n = length(ids), size = 1, prob = probs_ice)
     ind_ice <- unlist(
         tapply(
             ind_ice, factor(ids, levels = unique(ids)),
-            function(x) c(0, pmin(cumsum(x), 1))[-(length(x) + 1)]
-        )
+            function(x) c(0, cummax(x))[-(length(x) + 1)]
+        ),
+        use.names = FALSE
     )
-    names(ind_ice) <- NULL
 
     return(ind_ice)
 }
