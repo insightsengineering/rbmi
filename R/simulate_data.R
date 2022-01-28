@@ -305,7 +305,7 @@ generate_data_single <- function(pars_group, strategy_fun, distr_pars_ref = NULL
         outcome = data$outcome_noICE,
         visits = data$visit,
         ids = data$id,
-        prob_ice = pars_group$prob_ice,
+        prob_ice = pars_group$prob_ice1,
         or_outcome_ice = pars_group$or_outcome_ice1,
         baseline_mean = pars_group$mu[1]
     )
