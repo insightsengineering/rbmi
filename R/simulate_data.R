@@ -463,31 +463,22 @@ simulate_ice <- function(outcome, visits, ids, prob_ice, or_outcome_ice, baselin
 #' affected by study drop-out.
 #'
 #' @details `subset` can be used to specify outcome values that cannot be affected by the
-#' drop-out. If `NULL` then
+#' drop-out. By default
 #' `subset` will be set to `1` for all the values except the values corresponding to the
 #' baseline outcome, since baseline is supposed to not be affected by drop-out.
 #' Even if `subset` is specified by the user, the values corresponding to the baseline
 #' outcome are still hard-coded to be `0`.
 #'
 #' @importFrom stats rbinom
-simulate_dropout <- function(prob_dropout, ids, subset = NULL) {
+simulate_dropout <- function(prob_dropout, ids, subset = rep(1, length(ids))) {
 
-    if(is.null(subset)) {
-        subset <- rep(1, length(ids))
-        # baseline values cannot be missing
-        subset <- unlist(tapply(subset, factor(ids, levels = unique(ids)), function(x) {
-            x[1] <- 0
-            return(x)
-        }
-        ))
-    } else {
-        # baseline values cannot be missing
-        subset <- unlist(tapply(subset, factor(ids, levels = unique(ids)), function(x) {
-            x[1] <- 0
-            return(x)
-        }
-        ))
-    }
+
+     # baseline values cannot be missing
+     subset <- unlist(tapply(subset, factor(ids, levels = unique(ids)), function(x) {
+         x[1] <- 0
+         return(x)
+     }
+     ))
 
     dropout <- rep(0, length(ids))
     dropout[subset == 1] <- rbinom(n = sum(subset), size = 1, prob = prob_dropout)
