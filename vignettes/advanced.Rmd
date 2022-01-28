@@ -111,7 +111,7 @@ Note that `simulate_data()` requires 3 arguments:
 
 For more information about this function, please refer to the function documentation `help(simulate_data)`.
 
-# Management of post-ICE observed values handled with a reference-based assumption
+# Management of post-ICE observed values handled with a reference-based assumption {#sec:postICEobs}
 
 The simulated trial explained in section \@ref(sec:dataSimul) assumes that outcomes in the active arm observed after the ICE "treatment discontinuation" follow the increments observed in the control arm. Thus the imputation of missing data in the active arm after treatment discontinuation might be performed under the CIR assumption. How `rbmi` deals with observed values after an ICE handled using a reference-based method, is to include them in the analysis model but exclude them from the imputation model.
 
@@ -162,7 +162,6 @@ method <- method_approxbayes(n_sample = 10)
 We can now call sequentially the 4 key functions of `rbmi` to perform the multiple imputation. Please note that the management of post-discontinuation observed data is performed without additional complexity for the user. `draws()` automatically excludes post-ICE data handled with a reference-based method using information provided by the argument `data_ice`. `impute()` will impute only actual missing data in `data[[vars$outcome]]`.
 
 ```{r}
-
 set.seed(123)
 draw_obj <- draws(
     data = data,
@@ -182,9 +181,61 @@ ana_obj_CIR <- analyse(
 )
 
 pool(ana_obj_CIR)
-
 ```
 
+# Adding time-varying covariates in the imputation model
+
+`rbmi` allows to include time-varying covariates in the imputation model. For example, lets suppose that we want to implement an estimator equivalent to the one described in section \@ref(sec:postICEobs) with the following differences:
+
+- There is an additional time-varying covariate that represents the number of visits from the ICE treatment discontinuation. This is set equal to 0 up to the treatment discontinuation and to the time from treatment discontinuation
+at subsequent visits. Additionally a treatment by time-varying covariate interaction terms is included in the model. This variable allows to estimate the post-ICE trajectory in each arm directly from the data, without explicitly making apriori any (reference-based) assumption.
+- The imputation is performed under MAR.
+
+Indeed, one could assume that post-ICE data are missing-at-random after taking into account baseline characteristics, observed outcomes and additional information regarding the time of the ICE. For a precise description of this approach, we refer to @Guizzaro2021.
+
+Let's first compute the time-varying covariate:
+
+```{r}
+data <- data %>%
+  group_by(id) %>%
+  mutate(time_from_ice1 = cumsum(ind_ice1))
+```
+
+and include it in the imputation model, crossed with the `group` variable:
+
+```{r}
+vars_tv <- set_vars(
+    subjid = "id",
+    visit = "visit",
+    outcome = "change",
+    group = "group",
+    covariates = c("visit*outcome_bl","visit*group", "time_from_ice1*group"),
+    strategy = "strategy"
+    )
+```
+
+We can now call sequentially the 4 key `rbmi` functions:
+
+```{r}
+draw_obj <- draws(
+    data = data,
+    data_ice = NULL, # if NULL, MAR is assumed for every missing data
+    vars = vars_tv,
+    method = method
+)
+
+impute_obj_tv <- impute(
+    draw_obj,
+    references = c("Control" = "Control", "Intervention" = "Intervention")
+)
+
+ana_obj_tv <- analyse(
+    impute_obj_tv,
+    vars = vars_an
+)
+
+pool(ana_obj_tv)
+```
 
 # Efficiently Changing Imputation Strategies
 
@@ -390,11 +441,10 @@ A delta-adjustment refers to a shift in the distribution of the (unobserved) out
 
 ## Manually set `delta` {#sec:manualDelta}
 
-The `delta` argument of `analyse()` allows users to modify the outcome variable
-which can be utilised as part of a tipping point or sensitivity analysis. To do 
+The `delta` argument of `analyse()` allows users to modify the outcome variable prior to the analysis. To do 
 this, the user needs to provide a `data.frame` containing a column for the subject
 and visit which identifies the observation to be adjusted, and then a 3rd column
-called `delta` which specifies the value which will be added to the outcome prior to the analysis. 
+called `delta` which specifies the value which will be added to the outcome. 
 
 The `delta_template()` function helps the user to set the desired delta-adjustment: it creates a skeleton `data.frame` containing
 1 row per subject per visit with the value of delta set to 0 for all observations.
@@ -406,7 +456,7 @@ head(dat_delta)
 
 Note that the output of `delta_template()` contains additional information that can be used to properly set the delta.
 
-Using the example described in section \@ref(sec:dataSimul), let's say that we want to perform a delta-strategy where the delta applies to all imputed data after treatment discontinuation (regardless of the treatment arm). Assume that we want to fix `delta` proportional to the unadjusted observed mean change from baseline of the outcome value over all trial population. That is, we add `delta` to a missing data after treatment discontinuation at a given visit proportional to the observed mean change from baseline at that visit. Let's first determine the observed mean change from baseline at each visit:
+Using the example described in section \@ref(sec:dataSimul), let's say that we want to perform a delta-strategy where the delta applies to all imputed data after treatment discontinuation (regardless of the treatment arm). Assume that we want to fix `delta` proportional to the unadjusted observed mean change from baseline of the outcome value over all trial population. That is, we add `delta` to an imputed data after treatment discontinuation at a given visit proportional to the observed mean change from baseline at that visit. Let's first determine the observed mean change from baseline at each visit:
 
 ```{r}
 # Estimate mean change from baseline at each visit
@@ -450,11 +500,11 @@ pool(anl_delta)
 
 ## Tipping point analysis
 
-The tipping point analysis is a way of doing a sensitivity analysis by repeatedly performing a delta-adjustment with worse and worse value of delta until when the result from the primary analysis is overturned.
+The tipping point analysis is a way of doing sensitivity analysis by repeatedly performing a delta-adjustment with worse and worse value of delta until when the result from the primary analysis is overturned.
 
 In the previous section (\@ref(sec:manualDelta)) we have added a delta to any imputed value after treatment discontinuation proportional to the observed mean change from baseline at the corresponding visit. We have set the proportion equal to 20%. We can vary the proportion up to when the treatment effect estimated at the last visit is not significant anymore.
 
-Let's start by writing a function that performs a delta-adjustment based on a proportion of the observed mean change from baseline:
+Let's start by writing a function that performs a delta-adjustment based on a proportion of the observed mean change from baseline. This function needs as arguments the object resulting from the imputation phase (`impute_obj`), a data.frame containing the mean change from baseline at each visit (`mean_chg`) and a number indicating the chosen proportion (`prop`):
 
 ```{r}
 delta_adj <- function(impute_obj, mean_chg, prop) {
