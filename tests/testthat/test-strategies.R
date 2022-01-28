@@ -196,7 +196,7 @@ test_that("mean and covariance under CR are as expected", {
 
 
 
-test_that( "getStrategies", {
+test_that("getStrategies", {
 
     output_actual <- getStrategies()
     output_expected <- list(
@@ -210,7 +210,7 @@ test_that( "getStrategies", {
 
 
     myfun <- function(x) x
-    output_actual <- getStrategies( fun = myfun, JR = myfun, MAR = myfun)
+    output_actual <- getStrategies(fun = myfun, JR = myfun, MAR = myfun)
     output_expected <- list(
         "JR" = myfun,
         "CR" = strategy_CR,

@@ -11,7 +11,7 @@
       Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
       Imputation Type: random
       Method:
-          Type: Bayes
+          name: Bayes
           burn_in: 200
           burn_between: 1
           same_cov: TRUE
@@ -98,7 +98,7 @@
       Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
       Imputation Type: random
       Method:
-          Type: Approximate Bayes
+          name: Approximate Bayes
           covariance: us
           threshold: 0.5
           same_cov: TRUE
@@ -171,9 +171,9 @@
            trt_visit_2    7.406   0.388  6.898   Inf   1   
          lsm_ref_visit_2  7.088   0.285  6.715   Inf   1   
          lsm_alt_visit_2  14.494  0.235  14.186  Inf   1   
-           trt_visit_3    5.303   1.089  3.879   Inf   1   
-         lsm_ref_visit_3  6.838   0.821  5.761   Inf   1   
-         lsm_alt_visit_3  12.141  0.654  11.285  Inf   1   
+           trt_visit_3    5.289   1.077  3.881   Inf   1   
+         lsm_ref_visit_3  6.844   0.812   5.78   Inf   1   
+         lsm_alt_visit_3  12.133  0.669  11.257  Inf   1   
         ---------------------------------------------------
       
 
@@ -190,7 +190,7 @@
       Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
       Imputation Type: condmean
       Method:
-          Type: Conditional Mean
+          name: Conditional Mean
           covariance: ar1
           threshold: 0.2
           same_cov: TRUE
@@ -255,19 +255,19 @@
       
       Results:
       
-        ====================================================
-            parameter      est     se   lci    uci    pval  
-        ----------------------------------------------------
-           trt_visit_1    6.643   <NA>  -Inf  7.346   0.167 
-         lsm_ref_visit_1  7.656   <NA>  -Inf  8.157   0.167 
-         lsm_alt_visit_1  14.299  <NA>  -Inf  14.443  0.167 
-           trt_visit_2    6.906   <NA>  -Inf  7.365   0.167 
-         lsm_ref_visit_2  7.364   <NA>  -Inf  7.911   0.167 
-         lsm_alt_visit_2  14.271  <NA>  -Inf  14.576  0.167 
-           trt_visit_3    4.118   <NA>  -Inf  4.398   0.167 
-         lsm_ref_visit_3  7.603   <NA>  -Inf  8.114   0.167 
-         lsm_alt_visit_3  11.721  <NA>  -Inf  11.613  0.167 
-        ----------------------------------------------------
+        =====================================================
+            parameter      est     se   lci    uci     pval  
+        -----------------------------------------------------
+           trt_visit_1    6.643   <NA>  -Inf  7.346   <0.001 
+         lsm_ref_visit_1  7.656   <NA>  -Inf  8.157   <0.001 
+         lsm_alt_visit_1  14.299  <NA>  -Inf  14.443  <0.001 
+           trt_visit_2    6.906   <NA>  -Inf  7.365   <0.001 
+         lsm_ref_visit_2  7.364   <NA>  -Inf  7.911   <0.001 
+         lsm_alt_visit_2  14.271  <NA>  -Inf  14.576  <0.001 
+           trt_visit_3    4.118   <NA>  -Inf  4.398   <0.001 
+         lsm_ref_visit_3  7.603   <NA>  -Inf  8.114   <0.001 
+         lsm_alt_visit_3  11.721  <NA>  -Inf  11.613  <0.001 
+        -----------------------------------------------------
       
 
 ---
@@ -313,7 +313,7 @@
       Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
       Imputation Type: condmean
       Method:
-          Type: Conditional Mean
+          name: Conditional Mean
           covariance: us
           threshold: 0.5
           same_cov: FALSE
@@ -390,6 +390,99 @@
            trt_visit_3    4.593   1.063  2.844   6.342   <0.001 
          lsm_ref_visit_3  6.637   0.772  5.366   7.907   <0.001 
          lsm_alt_visit_3  11.229  0.972   9.63   12.829  <0.001 
+        --------------------------------------------------------
+      
+
+# print - bmlmi
+
+    Code
+      print(.test_print$bmlmi$draws)
+    Output
+      
+      Draws Object
+      ------------
+      Number of Samples: 6
+      Number of Failed Samples: 0
+      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
+      Imputation Type: random
+      Method:
+          covariance: cs
+          threshold: 0.05
+          same_cov: TRUE
+          REML: TRUE
+          B: 6
+          D: 4
+          n_samples: NULL
+      
+
+---
+
+    Code
+      print(.test_print$bmlmi$impute)
+    Output
+      
+      Imputation Object
+      -----------------
+      Number of Imputed Datasets: 24
+      Fraction of Missing Data (Original Dataset):
+          visit_1:   0%
+          visit_2:   0%
+          visit_3:  42%
+      References:
+          TRT     -> Placebo
+          Placebo -> Placebo
+      
+
+---
+
+    Code
+      print(.test_print$bmlmi$analysis)
+    Output
+      
+      Analysis Object
+      ---------------
+      Number of Results: 24
+      Analysis Function: ancova
+      Delta Applied: FALSE
+      Analysis Estimates:
+          trt_visit_1
+          lsm_ref_visit_1
+          lsm_alt_visit_1
+          trt_visit_2
+          lsm_ref_visit_2
+          lsm_alt_visit_2
+          trt_visit_3
+          lsm_ref_visit_3
+          lsm_alt_visit_3
+      
+
+---
+
+    Code
+      print(.test_print$bmlmi$pool)
+    Output
+      
+      Pool Object
+      -----------
+      Number of Results Combined: 24
+      Method: bmlmi
+      Confidence Level: 0.9
+      Alternative: two.sided
+      
+      Results:
+      
+        ========================================================
+            parameter      est     se     lci     uci     pval  
+        --------------------------------------------------------
+           trt_visit_1    6.893   0.923  5.032   8.754   0.001  
+         lsm_ref_visit_1  7.711   0.62    6.46   8.961   <0.001 
+         lsm_alt_visit_1  14.604  0.842  12.906  16.301  <0.001 
+           trt_visit_2    7.391   0.469  6.447   8.335   <0.001 
+         lsm_ref_visit_2  7.245   0.453  6.333   8.157   <0.001 
+         lsm_alt_visit_2  14.637  0.571  13.487  15.786  <0.001 
+           trt_visit_3    5.179   0.791  3.581   6.778   0.001  
+         lsm_ref_visit_3  7.245   0.633  5.965   8.524   <0.001 
+         lsm_alt_visit_3  12.424  1.16   10.086  14.762  <0.001 
         --------------------------------------------------------
       
 

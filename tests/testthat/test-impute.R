@@ -48,13 +48,13 @@ test_that("Basic Usage", {
     )
 
     draws_args <- list(
-        samples = as_sample_list(
-            as_sample_single(
+        samples = sample_list(
+            sample_single(
                 ids = c("Tom", "Harry", "Phil", "Ben"),
                 beta = beta,
                 sigma = sigma
             ),
-            as_sample_single(
+            sample_single(
                 ids = c("Ben", "Ben", "Phil"),
                 beta = beta,
                 sigma = sigma
@@ -216,13 +216,16 @@ test_that("invert_indexes", {
 
 
 
-test_that("untranspose_imputations", {
+test_that("split_imputations", {
 
     input_imputes <- list(
-        list(id = "Ben", values = list(numeric(0), numeric(0), numeric(0))),
-        list(id = "Harry", values = list(c(1, 2))),
-        list(id = "Phil", values = list(c(3, 4), c(5, 6))),
-        list(id = "Tom", values = list(c(7, 8, 9)))
+        imputation_single("Ben", numeric(0)),
+        imputation_single("Ben", numeric(0)),
+        imputation_single("Ben", numeric(0)),
+        imputation_single("Harry", c(1, 2)),
+        imputation_single("Phil", c(3, 4)),
+        imputation_single("Phil", c(5, 6)),
+        imputation_single("Tom", c(7, 8, 9))
     )
 
     sample_ids <- list(
@@ -230,19 +233,19 @@ test_that("untranspose_imputations", {
         c("Ben", "Ben", "Phil")
     )
 
-    output_actual <- untranspose_imputations(input_imputes, sample_ids)
+    output_actual <- split_imputations(input_imputes, sample_ids)
 
     output_expected <- list(
-        as_imputation_list(
-            as_imputation_single(id = "Ben", values = numeric(0)),
-            as_imputation_single(id = "Harry", values = c(1, 2)),
-            as_imputation_single(id = "Phil", values = c(3, 4)),
-            as_imputation_single(id = "Tom", values = c(7, 8, 9))
+        imputation_df(
+            imputation_single(id = "Ben", values = numeric(0)),
+            imputation_single(id = "Harry", values = c(1, 2)),
+            imputation_single(id = "Phil", values = c(3, 4)),
+            imputation_single(id = "Tom", values = c(7, 8, 9))
         ),
-        as_imputation_list(
-            as_imputation_single(id = "Ben", values = numeric(0)),
-            as_imputation_single(id = "Ben", values = numeric(0)),
-            as_imputation_single(id = "Phil", values = c(5, 6))
+        imputation_df(
+            imputation_single(id = "Ben", values = numeric(0)),
+            imputation_single(id = "Ben", values = numeric(0)),
+            imputation_single(id = "Phil", values = c(5, 6))
         )
     )
     expect_equal(output_actual, output_expected)
@@ -254,22 +257,22 @@ test_that("untranspose_imputations", {
         c("Phil", "Tom"),
         c("Harry")
     )
-    output_actual <- untranspose_imputations(input_imputes, sample_ids)
+    output_actual <- split_imputations(input_imputes, sample_ids)
     output_expected <- list(
-        as_imputation_list(
-            as_imputation_single(id = "Ben", values = numeric(0))
+        imputation_df(
+            imputation_single(id = "Ben", values = numeric(0))
         ),
-        as_imputation_list(
-            as_imputation_single(id = "Ben", values = numeric(0)),
-            as_imputation_single(id = "Ben", values = numeric(0)),
-            as_imputation_single(id = "Phil", values = c(3, 4))
+        imputation_df(
+            imputation_single(id = "Ben", values = numeric(0)),
+            imputation_single(id = "Ben", values = numeric(0)),
+            imputation_single(id = "Phil", values = c(3, 4))
         ),
-        as_imputation_list(
-            as_imputation_single(id = "Phil", values = c(5, 6)),
-            as_imputation_single(id = "Tom", values = c(7, 8, 9))
+        imputation_df(
+            imputation_single(id = "Phil", values = c(5, 6)),
+            imputation_single(id = "Tom", values = c(7, 8, 9))
         ),
-        as_imputation_list(
-            as_imputation_single(id = "Harry", values = c(1, 2))
+        imputation_df(
+            imputation_single(id = "Harry", values = c(1, 2))
         )
     )
     expect_equal(output_actual, output_expected)
@@ -283,8 +286,8 @@ test_that("untranspose_imputations", {
         c("Harry")
     )
     expect_error(
-        untranspose_imputations(input_imputes, sample_ids),
-        "subscript out of bounds"
+        split_imputations(input_imputes, sample_ids),
+        "index is not compatible with the object"
     )
 
 
@@ -295,8 +298,8 @@ test_that("untranspose_imputations", {
         c("Harry")
     )
     expect_error(
-        untranspose_imputations(input_imputes, sample_ids),
-        "sample_ids contains an id not available in imputations"
+        split_imputations(input_imputes, sample_ids),
+        "index is not compatible with the object"
     )
 
 
@@ -306,9 +309,52 @@ test_that("untranspose_imputations", {
         c("Harry")
     )
     expect_error(
-        untranspose_imputations(input_imputes, sample_ids),
-        "Not all imputations have been used"
+        split_imputations(input_imputes, sample_ids),
+        "index is not compatible with the object"
     )
+
+    # Check that output doesn't change as long as within-ID order is preserved
+
+    input_imputes_1 <- list(
+        imputation_single("Ben", 2),
+        imputation_single("Ben", 1),
+        imputation_single("Ben", c(1, 2)),
+        imputation_single("Harry", 3),
+        imputation_single("Phil", c(1, 2, 3)),
+        imputation_single("Phil", c(4, 5, 6))
+    )
+
+    input_imputes_2 <- list(
+        imputation_single("Ben", 2),
+        imputation_single("Phil", c(1, 2, 3)),
+        imputation_single("Harry", 3),
+        imputation_single("Ben", 1),
+        imputation_single("Phil", c(4, 5, 6)),
+        imputation_single("Ben", c(1, 2))
+    )
+
+    sample_ids <- list(
+        c("Phil", "Ben", "Ben", "Harry"),
+        c("Ben", "Phil")
+    )
+
+    output_actual_1 <- split_imputations(input_imputes_1, sample_ids)
+    output_actual_2 <- split_imputations(input_imputes_2, sample_ids)
+
+    output_expected <- list(
+        imputation_df(
+            imputation_single("Phil", c(1,2,3)),
+            imputation_single("Ben", 2),
+            imputation_single("Ben", 1),
+            imputation_single("Harry", 3)
+        ),
+        imputation_df(
+            imputation_single("Ben", c(1,2)),
+            imputation_single("Phil", c(4,5,6))
+        )
+    )
+    expect_equal(output_actual_1, output_expected)
+    expect_equal(output_actual_2, output_expected)
 
 })
 
@@ -375,11 +421,11 @@ test_that("impute_outcome", {
 
     ##### Univariate
     x <- impute_outcome(list(mu = 5, sigma = 10))
-    expect_length(x, 1)
-    expect_true(is.numeric(x))
+    expect_length(x[[1]], 1)
+    expect_true(is.numeric(x[[1]]))
 
     set.seed(101)
-    x <- replicate(n = 20000, impute_outcome(list(mu = 5, sigma = 10)))
+    x <- unlist(replicate(n = 20000, impute_outcome(list(mu = 5, sigma = 10))))
     mu <- mean(x)
     sig <- sd(x)^2
     expect_true(4.9 <= mu  & mu <= 5.1)
@@ -395,7 +441,7 @@ test_that("impute_outcome", {
         sigma = structure(c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36), .Dim = c(3L, 3L))
     )
 
-    x <- impute_outcome(pars)
+    x <- unlist(impute_outcome(pars))
     expect_length(x, 3)
     expect_true(is.numeric(x))
 
@@ -424,21 +470,30 @@ test_that("impute_outcome", {
         mu = c(8, 10),
         sigma = structure(c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36), .Dim = c(3L, 3L))
     )
-    expect_error(impute_outcome(pars))
+    expect_error(
+        impute_outcome(pars),
+        regexp = "not of compatible sizes"
+    )
 
 
     pars <- list(
         mu = c(8),
         sigma = structure(c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36), .Dim = c(3L, 3L))
     )
-    expect_error(impute_outcome(pars))
+    expect_error(
+        impute_outcome(pars),
+        regexp = "not of compatible sizes"
+    )
 
 
     pars <- list(
         mu = c(8, 2),
         sigma = 1
     )
-    expect_error(impute_outcome(pars))
+    expect_error(
+        impute_outcome(pars),
+        regexp = "not of compatible sizes"
+    )
 
 
     ##### Missing value handling
@@ -446,28 +501,40 @@ test_that("impute_outcome", {
         mu = c(2, NA),
         sigma = 1
     )
-    expect_error(impute_outcome(pars))
+    expect_error(
+        impute_outcome(pars),
+        regexp = "contain missing values"
+    )
 
 
     pars <- list(
         mu = c(1, 2, 4),
         sigma = structure(c(4, 2.4, 6, 2.4, NA, 16.8, 6, 16.8, 36), .Dim = c(3L, 3L))
     )
-    expect_error(impute_outcome(pars))
+    expect_error(
+        impute_outcome(pars),
+        regexp = "contain missing values"
+    )
 
 
     pars <- list(
         mu = c(NA),
         sigma = 1
     )
-    expect_error(impute_outcome(pars))
+    expect_error(
+        impute_outcome(pars),
+        regexp = "contain missing values"
+    )
 
 
     pars <- list(
         mu = c(1),
         sigma = NA
     )
-    expect_error(impute_outcome(pars))
+    expect_error(
+        impute_outcome(pars),
+        regexp = "contain missing values"
+    )
 })
 
 
@@ -638,8 +705,8 @@ test_that("impute can recover known values", {
     #           1     2     3  4      5        6
     # outcome ~ 1 + group + visit + cov1 + cov1*group
     dobj <- as_draws(
-        samples = as_sample_list(
-            as_sample_single(
+        samples = sample_list(
+            sample_single(
                 ids = c("1", "2", "4"),
                 beta = c(1, 2, 3, 4, 5, 6),
                 sigma = list(
@@ -654,30 +721,31 @@ test_that("impute can recover known values", {
     )
 
     x <- impute(dobj, c("A" = "B", "B" = "B"))
-
-    expect_length(x$imputations, 1)
-    expect_length(x$imputations[[1]], 3)
-    expect_equal(x$imputations[[1]][[1]]$values, c(9, 10))
-    expect_equal(x$imputations[[1]][[2]]$values, numeric(0))
-    expect_equal(x$imputations[[1]][[3]]$values, c(50))
-    expect_equal(vapply(x$imputations[[1]], function(x) x$id, character(1)), c("1", "2", "4"))
+    output_expected <- imputation_list_df(
+        imputation_df(
+            imputation_single("1", c(9, 10)),
+            imputation_single("2", as.matrix(numeric(0))),
+            imputation_single("4", c(50))
+        )
+    )
+    expect_equal(x$imputations, output_expected)
 
 
     dobj$samples[[1]]$ids <- c("4", "4", "1", "3")
     x <- impute(dobj, c("A" = "B", "B" = "B"))
+    output_expected <- imputation_list_df(
+        imputation_df(
+            imputation_single("4", c(50)),
+            imputation_single("4", c(50)),
+            imputation_single("1", c(9, 10)),
+            imputation_single("3", as.matrix(numeric(0)))
+        )
+    )
+    expect_equal(x$imputations, output_expected)
 
-    expect_length(x$imputations, 1)
-    expect_length(x$imputations[[1]], 4)
-    expect_equal(x$imputations[[1]][[1]]$values, 50)
-    expect_equal(x$imputations[[1]][[2]]$values, 50)
-    expect_equal(x$imputations[[1]][[3]]$values, c(9, 10))
-    expect_equal(x$imputations[[1]][[4]]$values, numeric(0))
-    expect_equal(vapply(x$imputations[[1]], function(x) x$id, character(1)), c("4", "4", "1", "3"))
 
 
-
-
-    dobj$samples[[2]] <- as_sample_single(
+    dobj$samples[[2]] <- sample_single(
         ids = c("2", "1", "4"),
         beta = c(6, 5, 4, 3, 2, 1),
         sigma = list(
@@ -686,21 +754,20 @@ test_that("impute can recover known values", {
         )
     )
     x <- impute(dobj, c("A" = "B", "B" = "B"))
-    expect_length(x$imputations, 2)
-
-    expect_length(x$imputations[[1]], 4)
-    expect_equal(x$imputations[[1]][[1]]$values, 50)
-    expect_equal(x$imputations[[1]][[2]]$values, 50)
-    expect_equal(x$imputations[[1]][[3]]$values, c(9, 10))
-    expect_equal(x$imputations[[1]][[4]]$values, numeric(0))
-    expect_equal(vapply(x$imputations[[1]], function(x) x$id, character(1)), c("4", "4", "1", "3"))
-
-    expect_length(x$imputations[[2]], 3)
-    expect_equal(x$imputations[[2]][[1]]$values, numeric(0))
-    expect_equal(x$imputations[[2]][[2]]$values, c(12, 11))
-    expect_equal(x$imputations[[2]][[3]]$values, c(27))
-    expect_equal(vapply(x$imputations[[2]], function(x) x$id, character(1)), c("2", "1", "4"))
-
+    output_expected <- imputation_list_df(
+        imputation_df(
+            imputation_single("4", c(50)),
+            imputation_single("4", c(50)),
+            imputation_single("1", c(9, 10)),
+            imputation_single("3", as.matrix(numeric(0)))
+        ),
+        imputation_df(
+            imputation_single("2", as.matrix(numeric(0))),
+            imputation_single("1", c(12, 11)),
+            imputation_single("4", c(27))
+        )
+    )
+    expect_equal(x$imputations, output_expected)
 
 
 
@@ -714,8 +781,8 @@ test_that("impute can recover known values", {
     ld$set_strategies(dat_ice)
 
     dobj <- as_draws(
-        samples = as_sample_list(
-            as_sample_single(
+        samples = sample_list(
+            sample_single(
                 ids = c("1", "2", "4"),
                 beta = c(1, 2, 3, 4, 5, 6),
                 sigma = list(
@@ -730,12 +797,220 @@ test_that("impute can recover known values", {
     )
 
     x <- impute(dobj, c("A" = "B", "B" = "B"))
-
-    expect_length(x$imputations, 1)
-    expect_length(x$imputations[[1]], 3)
-    expect_equal(x$imputations[[1]][[1]]$values, c(9, 18))
-    expect_equal(x$imputations[[1]][[2]]$values, numeric(0))
-    expect_equal(x$imputations[[1]][[3]]$values, c(50))
-    expect_equal(vapply(x$imputations[[1]], function(x) x$id, character(1)), c("1", "2", "4"))
+    output_expected <- imputation_list_df(
+        imputation_df(
+            imputation_single("1", c(9, 18)),
+            imputation_single("2", as.matrix(numeric(0))),
+            imputation_single("4", c(50))
+        )
+    )
+    expect_equal(x$imputations, output_expected)
 })
+
+
+
+
+test_that("convert_to_imputation_list_df works as expected", {
+
+
+    ### Basic Usage
+    imputes <- list(
+        imputation_list_single(
+            imputations = list(
+                imputation_single("Tom", c(1)),
+                imputation_single("Tom", c(1,2)),
+                imputation_single("Tom", c(1,2,3)),
+                imputation_single("Tom", c(2)),
+                imputation_single("Tom", c(2,3)),
+                imputation_single("Tom", c(2,3,4))
+            ),
+            D = 2
+        ),
+        imputation_list_single(
+            imputations = list(
+                imputation_single("Harry", matrix(numeric(0))),
+                imputation_single("Harry", c(9, 8))
+            ),
+            D = 2
+        )
+    )
+
+    sample_ids <- list(
+        c("Tom", "Harry", "Tom"),
+        c("Tom")
+    )
+
+    expected_output <- imputation_list_df(
+        imputation_df(
+            imputation_single("Tom", c(1)),
+            imputation_single("Harry", matrix(numeric(0))),
+            imputation_single("Tom", c(1, 2, 3))
+        ),
+        imputation_df(
+            imputation_single("Tom", c(1, 2)),
+            imputation_single("Harry", c(9, 8)),
+            imputation_single("Tom", c(2))
+        ),
+        imputation_df(
+            imputation_single("Tom", c(2, 3))
+        ),
+        imputation_df(
+            imputation_single("Tom", c(2, 3, 4))
+        )
+    )
+
+    expect_equal(
+        convert_to_imputation_list_df(imputes, sample_ids),
+        expected_output
+    )
+
+
+    ## Error handling
+    sample_ids <- list(
+        c("Tom", "Harry", "Dave"),
+        c("Tom")
+    )
+
+    expect_error(
+        convert_to_imputation_list_df(imputes, sample_ids),
+        regexp = "index is not compatible with the object"
+    )
+
+    sample_ids <- list(
+        c("Tom", "Harry", "Tom", "Tom"),
+        c("Tom")
+    )
+
+    expect_error(
+        convert_to_imputation_list_df(imputes, sample_ids),
+        regexp = "Number of samples available does not equal"
+    )
+
+    sample_ids <- list(
+        c("Tom", "Harry", "Harry"),
+        c("Tom")
+    )
+
+    expect_error(
+        convert_to_imputation_list_df(imputes, sample_ids),
+        regexp = "index is not compatible with the object"
+    )
+
+})
+
+
+
+
+
+
+
+
+test_that("method_bmlmi is working as expected in combination with impute", {
+
+    vars <- set_vars(
+        outcome = "outcome",
+        visit = "visit",
+        subjid = "id",
+        group = "group",
+        strategy = "strategy",
+        covariates = c("cov1", "cov1*group")
+    )
+
+    dat <- tibble(
+        visit = factor(rep(c("v1", "v2", "v3"), 4), levels = c("v1", "v2", "v3")),
+        id = factor(rep(c("PA", "PB", "PC", "PD"), each = 3)),
+        group = factor(rep(c("A", "B"), each = 6)),
+        cov1 =    c(1, 1, 1,      2, 2, 2,     3, 3, 3,    4, 4, 4),
+        outcome = c(1, NA, NA,    4, 3, 6,     1, 1, 1,    5, NA, 6)
+    )
+
+
+
+    sample_1_coef <- c(4, 2, 3, 4, 1, 2)
+    sample_2_coef <- c(9, 1, 1, 3, 4, 5)
+
+    model_mat <- model.matrix(~ 1 + group + visit + cov1 + cov1 * group, data = dat)
+
+    # Convienance dataset so we know what numbers to put down in the expected outcomes
+    dat2 <- dat %>%
+        mutate(expected_1 = model_mat %*% sample_1_coef %>% as.vector) %>%
+        mutate(expected_2 = model_mat %*% sample_2_coef %>% as.vector)
+
+
+    ld <- longDataConstructor$new(dat, vars)
+
+    ## Use 0 correlation so that the conditional parameters doesn't change the
+    ## expected mu and sigma parameters
+
+    dobj <- as_draws(
+        samples = sample_list(
+            sample_single(
+                ids = c("PA", "PB", "PD"),
+                beta = sample_1_coef,
+                sigma = list(
+                    "A" = as_vcov(sd = c(1, 1, 1), cor = c(0, 0, 0)),
+                    "B" = as_vcov(sd = c(1, 1, 1), cor = c(0, 0, 0))
+                )
+            ),
+            sample_single(
+                ids = c("PC", "PA", "PA"),
+                beta = sample_2_coef,
+                sigma = list(
+                    "A" = as_vcov(sd = c(1, 1, 1), cor = c(0, 0, 0)),
+                    "B" = as_vcov(sd = c(1, 1, 1), cor = c(0, 0, 0))
+                )
+            )
+        ),
+        data = ld,
+        method = method_bmlmi(B = 2, D = 3),
+        formula = x ~ y
+    )
+
+    expected_output <- imputation_list_df(
+        imputation_df(
+            imputation_single("PA", c(8, 9)),
+            imputation_single("PB", matrix(numeric(0))),
+            imputation_single("PD", 21)
+        ),
+        imputation_df(
+            imputation_single("PA", c(8, 9)),
+            imputation_single("PB", matrix(numeric(0))),
+            imputation_single("PD", 21)
+        ),
+        imputation_df(
+            imputation_single("PA", c(8, 9)),
+            imputation_single("PB", matrix(numeric(0))),
+            imputation_single("PD", 21)
+        ),
+        imputation_df(
+            imputation_single("PC", matrix(numeric(0))),
+            imputation_single("PA", c(14, 16)),
+            imputation_single("PA", c(14, 16))
+        ),
+        imputation_df(
+            imputation_single("PC", matrix(numeric(0))),
+            imputation_single("PA", c(14, 16)),
+            imputation_single("PA", c(14, 16))
+        ),
+        imputation_df(
+            imputation_single("PC", matrix(numeric(0))),
+            imputation_single("PA", c(14, 16)),
+            imputation_single("PA", c(14, 16))
+        )
+    )
+
+    ## We replace sample_mvnorm with our own function that essentially emulates
+    ## conditional mean imputation so that we know what the results of the function
+    ## will be
+    x <- with_mocking(
+        expr = {
+            impute(dobj, c("A" = "B", "B" = "B"))
+        },
+        sample_mvnorm = function(mu, sigma) as.vector(mu),
+        where = environment(impute)
+    )
+    
+    expect_equal(x$imputations, expected_output)
+})
+
 
