@@ -80,7 +80,8 @@ visit affected by drop-out (i.e. if this occurs prior to ICE1),
 then dropout also triggers discontinuation of study drug and a corresponding ICE2
 (study treatment discontinuation due to NSDCR reasons) is generated.
 \item Adjust trajectories after ICE according to the given assumption expressed with
-the \code{post_ice_traj} argument.
+the \code{post_ice_traj} argument. Note that only post-ICE1 outcomes in the intervention arm can be
+adjusted. Post-ICE1 outcomes from the control arm  are not adjusted.
 \item Simulate additional intermittent missing outcome data as per arguments \code{pars_c$prob_miss}
 and \code{pars_t$prob_miss}.
 }

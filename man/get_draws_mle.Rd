@@ -66,12 +66,12 @@ Fit the base imputation model using a ML/REML approach on a given number of boot
 specified by \code{method$n_samples}. Returns the parameter estimates from the model fit.
 }
 \details{
-This function takes a Stack object which contains multiple lists of patient ids. The function
+This function takes a \code{Stack} object which contains multiple lists of patient ids. The function
 takes this Stack and pulls a set ids and then constructs a dataset just consisting of these
 patients (i.e. potentially a boostrap or a jackknife sample).
 
 The function then fits a MMRM model to this dataset to create a sample object. The function
-repeats this process until \code{n_target_samples} have been reached. If more than \code{failure_liimt}
+repeats this process until \code{n_target_samples} have been reached. If more than \code{failure_limit}
 samples fail to converge then the function throws an error.
 
 After reaching the desired number of samples the function generates and returns a draws object.

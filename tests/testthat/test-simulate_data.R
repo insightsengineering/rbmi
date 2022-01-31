@@ -193,10 +193,12 @@ test_that("adjust_trajectories", {
         use.names = FALSE
     )
 
+    ids <- factor(ids, levels = unique(ids))
+
     distr_pars_group <- list(mu = mu, sigma = sigma)
     strategy_fun <- getStrategies()$JR
     res <- adjust_trajectories(
-        distr_pars_group, 
+        distr_pars_group,
         outcome,
         ids,
         ind_ice = rep(0, length(ids)),
