@@ -4,7 +4,7 @@
 \alias{ancova}
 \title{Analysis of Covariance}
 \usage{
-ancova(data, vars, visits = NULL)
+ancova(data, vars, visits = NULL, weights = c("proportional", "equal"))
 }
 \arguments{
 \item{data}{A data.frame containing the data to be used in the model}
@@ -16,6 +16,9 @@ ancova(data, vars, visits = NULL)
 fit the ancova model at. If \code{NULL}, a separate ancova model will be fit to the
 outcomes from each visits (as determined by \code{unique(data[[vars$visit]])}).
 See details.}
+
+\item{weights}{Character, specifies wether to use "proportional" or "equal" weighting for each
+categorical covariate combination when calculating the lsmeans.}
 }
 \description{
 Performs an analysis of covariance between two groups returning the estimated

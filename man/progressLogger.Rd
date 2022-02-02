@@ -24,7 +24,7 @@ progress was last printed to the console}
 \item{\code{n_max}}{integer, total number of expected iterations to be completed
 acts as the denominator for calculating progress percentages}
 
-\item{\code{quiet}}{logical holds wether or not to print anything}
+\item{\code{quiet}}{logical holds whether or not to print anything}
 }
 \if{html}{\out{</div>}}
 }
@@ -62,7 +62,7 @@ Create progressLogger object
 \if{html}{\out{<a id="method-add"></a>}}
 \if{latex}{\out{\hypertarget{method-add}{}}}
 \subsection{Method \code{add()}}{
-Records that n more iterations have been completed
+Records that \code{n} more iterations have been completed
 this will add that number to the current step count (\code{step_current}) and will
 print a progress message to the log if the step limit (\code{step}) has been reached.
 This function will do nothing if \code{quiet} has been set to \code{TRUE}

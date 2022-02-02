@@ -12,6 +12,8 @@
 #' fit the ancova model at. If `NULL`, a separate ancova model will be fit to the
 #' outcomes from each visits (as determined by `unique(data[[vars$visit]])`).
 #' See details.
+#' @param weights Character, specifies wether to use "proportional" or "equal" weighting for each
+#' categorical covariate combination when calculating the lsmeans.
 #'
 #' @details
 #' The function works as follows:
@@ -46,12 +48,13 @@
 #' @seealso [stats::lm()]
 #' @seealso [set_vars()]
 #' @export
-ancova <- function(data, vars, visits = NULL) {
+ancova <- function(data, vars, visits = NULL, weights = c("proportional", "equal")) {
 
     outcome <- vars[["outcome"]]
     group <- vars[["group"]]
     covariates <- vars[["covariates"]]
     visit <- vars[["visit"]]
+    weights <- match.arg(weights)
 
     expected_vars <- c(extract_covariates(covariates), outcome, group)
 
@@ -113,7 +116,7 @@ ancova <- function(data, vars, visits = NULL) {
         visits,
         function(x) {
             data2 <- data[data[[visit]] == x, ]
-            res <- ancova_single(data2, outcome, group, covariates)
+            res <- ancova_single(data2, outcome, group, covariates, weights)
             names(res) <- paste0(names(res), "_", x)
             return(res)
         }
@@ -133,6 +136,8 @@ ancova <- function(data, vars, visits = NULL) {
 #' @param group Character, the name of the group variable in `data`.
 #' @param covariates Character vector containing the name of any additional covariates
 #' to be included in the model as well as any interaction terms.
+#' @param weights Character, specifies wether to use "proportional" or "equal" weighting for each
+#' categorical covariate combination when calculating the lsmeans.
 #'
 #' @details
 #' - `group` must be a factor variable with only 2 levels.
@@ -146,8 +151,9 @@ ancova <- function(data, vars, visits = NULL) {
 #' }
 #' @seealso [ancova()]
 #' @importFrom stats lm coef vcov df.residual
-ancova_single <- function(data, outcome, group, covariates) {
+ancova_single <- function(data, outcome, group, covariates, weights = c("proportional", "equal")) {
 
+    weights <- match.arg(weights)
     assert_that(
         is.factor(data[[group]]),
         length(levels(data[[group]])) == 2,
@@ -164,7 +170,7 @@ ancova_single <- function(data, outcome, group, covariates) {
 
     mod <- lm(formula = frm, data = data2)
 
-    args <- list(model = mod)
+    args <- list(model = mod, .weights = weights)
     args[[group]] <- 0
     lsm0 <- do.call(lsmeans, args)
 

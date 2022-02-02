@@ -1,49 +1,4 @@
 
-
-
-#' Extract ls values / levels
-#'
-#' Takes a data.frame and a list of variables and returns a list
-#' of values / levels for use in expand.grid.
-#'
-#' For numeric values just the mean is returned whilst for
-#' factor variables a vector of each level is returned.
-#'
-#' In either case the default return value can be overwritten by
-#' values provided to `fix`
-#'
-#' @param data A data.frame
-#' @param mterms a character vector of variables names that exist in
-#' `data` which should be extracted
-#' @param fix A named list of variables with fixed values
-#'
-lscombinations <- function(data, mterms, fix) {
-    x <- lapply(
-        mterms,
-        function(v) {
-            values <- data[[v]]
-            if (is.factor(values)) {
-                val <- factor(
-                    ife(v %in% names(fix), fix[[v]], unique(values)),
-                    levels = levels(values)
-                )
-            } else if (is.numeric(values)) {
-                val <- ife(
-                    v %in% names(fix),
-                    fix[[v]],
-                    mean(values, na.rm = TRUE)
-                )
-            } else {
-                stop("invalid data type")
-            }
-            return(val)
-        }
-    )
-    names(x) <- mterms
-    return(x)
-}
-
-
 #' Least Square Means
 #'
 #'
@@ -52,37 +7,46 @@ lscombinations <- function(data, mterms, fix) {
 #' that is constructed by averaging the data. See details for more information.
 #'
 #' @details
-#' Numeric variables are evaluated at the mean across the entire dataset
-#' (after removing missing values).
-#' Factor variables are evaluated at all levels (including combinations
-#' with other factor variables) with the final return value being
-#' average across all the predictions generated at each of these levels.
+#'
+#' The lsmeans are calculated by calculating hypothetical patients
+#' and predicting their expected values. These hypothetical patients
+#' are constructed by expanding out all possible combinations of each
+#' categorical covariate and by setting any numerical covariates equal
+#' to the mean.
+#'
+#' A final lsmean value is calculating by averaging these hypothetical
+#' patients. If `.weights` equals "proportional" then the values are weighted
+#' by the frequency in which they occour in the full dataset. If `.weights`
+#' equals "equal" then each hypothetical patient is given an equal weight
+#' regardless of what actually occours in the dataset.
 #'
 #' Use the `...` argument to fix specific variables to specific values.
 #'
-#' See the references for identical implementations as done in SAS and via
-#' the emmeans package. This function attempts to re-implement the
-#' emmeans derivation for standard lm's but without having to include
-#' all of their dependencies
+#' See the references for identical implementations as done in SAS and
+#' in R via the emmeans package. This function attempts to re-implement the
+#' emmeans derivation for standard linear models but without having to include
+#' all of it's dependencies
 #'
 #' @param model A model created by lm
 #' @param ... Fixes specific variables to specific values i.e.
 #' `trt = 1` or `age = 50`. The name of the argument must be the name
 #' of the variable within the dataset
+#' @param .weights Character, specifies wether to use "proportional" or "equal" weighting for each
+#' categorical covariate combination when calculating the lsmeans.
 #'
 #' @references \url{https://CRAN.R-project.org/package=emmeans}
 #' @references \url{https://documentation.sas.com/doc/en/pgmsascdc/9.4_3.3/statug/statug_glm_details41.htm}
 #' @examples
 #' \dontrun{
-#' mod <- lm( Sepal.Length ~ Species + Petal.Length, data = iris)
+#' mod <- lm(Sepal.Length ~ Species + Petal.Length, data = iris)
 #' lsmeans(mod)
 #' lsmeans(mod, Species = "virginica")
 #' lsmeans(mod, Species = "versicolor")
 #' lsmeans(mod, Species = "versicolor", Petal.Length = 1)
 #' }
 #' @importFrom stats model.matrix terms reformulate
-lsmeans <- function(model, ...) {
-
+lsmeans <- function(model, ..., .weights = c("proportional", "equal")) {
+    .weights <- match.arg(arg = .weights)
     fix <- list(...)
 
     model_vars <- attr(terms(as.formula(model)), "term.labels")
@@ -98,18 +62,76 @@ lsmeans <- function(model, ...) {
         )
     }
 
-    var_list <- lscombinations(data, covars, fix)
-
-    design <- matrix(
-        apply(model.matrix(frm, expand.grid(var_list)), 2, mean),
-        ncol = 1
+    design_fun <- switch(.weights,
+        equal = ls_design_equal,
+        proportional = ls_design_proportional
     )
 
+    design <- design_fun(data, frm, covars, fix)
     beta <- matrix(coef(model), nrow = 1)
-
     list(
         est = as.vector(beta %*% design),
         se = as.vector(sqrt(t(design) %*% vcov(model) %*% design)),
         df = df.residual(model)
     )
+}
+
+
+#' Calculate design vector for the lsmeans
+#'
+#' Calculates the design vector as required to generate the lsmean
+#' and standard error. `ls_design_equal` calculates it by
+#' applying an equal weight per covariate combination whilst
+#' `ls_design_proportional` applies weighting proportional
+#' to the frequency in which the covariate combination occoured
+#' in the actual dataset.
+#'
+#' @param data A data.frame
+#' @param frm Formula used to fit the original model
+#' @param covars a character vector of variables names that exist in
+#' `data` which should be extracted (`ls_design_equal` only)
+#' @param fix A named list of variables with fixed values
+#' @name ls_design
+ls_design_equal <- function(data, frm, covars, fix) {
+    collection <- list()
+    for (var in covars) {
+        values <- data[[var]]
+        if (is.factor(values)) {
+            lvls <- levels(values)
+            if (var %in% names(fix)) {
+                collection[[var]] <- factor(fix[[var]], levels = lvls)
+            } else {
+                collection[[var]] <- factor(lvls, levels = lvls)
+            }
+        } else if (is.numeric(values)) {
+            if (var %in% names(fix)) {
+                collection[[var]] <- fix[[var]]
+            } else {
+                collection[[var]] <- mean(values)
+            }
+        } else {
+            stop("invalid data type")
+        }
+    }
+    design <- matrix(
+        apply(model.matrix(frm, expand.grid(collection)), 2, mean),
+        ncol = 1
+    )
+    return(design)
+}
+
+
+#' @rdname ls_design
+ls_design_proportional <- function(data, frm, covars, fix) {
+    data2 <- data
+    for (var in names(fix)) {
+        value <- data[[var]]
+        if (is.numeric(value)) {
+            data2[[var]] <- fix[[var]]
+        } else if (is.factor(value)) {
+            data2[[var]] <- factor(fix[[var]], levels = levels(data[[var]]))
+        }
+    }
+    design <- colMeans(model.matrix(frm, data = data2))
+    return(design)
 }
