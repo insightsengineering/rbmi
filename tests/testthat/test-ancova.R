@@ -298,24 +298,30 @@ test_that("Least square means works as expected - Part 2", {
         trt = sample(c("C", "T"), size = n, replace = TRUE, prob = c(0.5, 0.5)),
         age = rnorm(n),
         sex = sample(c("M", "F", "O"), size = n, replace = TRUE, prob = c(0.3, 0.5, 0.2)),
-        cat = sample(c("A", "B"), size = n, replace = TRUE, prob = c(0.8, 0.2))
+        cat = sample(c("A", "B"), size = n, replace = TRUE, prob = c(0.8, 0.2)),
+        visit = "vis1"
     ) %>%
         mutate(sex = factor(sex, levels = c("M", "F", "O"))) %>%
         mutate(trt = factor(trt, levels = c("C", "T"))) %>%
         mutate(cat = factor(cat, levels = c("A", "B")))
 
 
-    OUTCOME <- (
+    outcome_vec <- (
         model.matrix(~ trt * sex * cat + age, dat) %*%
             c(10, 5, 4, 3, 9, 4, 2, 8, 1, -5, -1, -2, -3)
         ) + rnorm(n, 0, 5)
 
     dat2 <- dat %>%
-        mutate(outcome = OUTCOME)
+        mutate(outcome = outcome_vec)
 
 
     mod <- lm(outcome ~ trt * sex * cat + age, data = dat2)
 
+
+    ###########
+    #
+    # Proportional weighting
+    #
 
     d <- suppressMessages({
         as.data.frame(emmeans::emmeans(mod, "trt", weights = "proportional"))
@@ -334,8 +340,26 @@ test_that("Least square means works as expected - Part 2", {
     )
     expect_equal(actual, expected)
 
+    result_actual <- ancova(
+        dat2,
+        set_vars(
+            visit = "visit",
+            covariates = c("age", "sex*cat*trt"),
+            outcome = "outcome",
+            group = "trt"
+        )
+    )[c("lsm_ref_vis1", "lsm_alt_vis1")]
+    result_expected <- list(
+        "lsm_ref_vis1" = lsm1,
+        "lsm_alt_vis1" = lsm2
+    )
+    expect_equal(result_actual, result_expected)
 
 
+    ###########
+    #
+    # Equal weighting
+    #
 
     d <- suppressMessages({
         as.data.frame(emmeans::emmeans(mod, "trt"))
@@ -353,4 +377,22 @@ test_that("Least square means works as expected - Part 2", {
         "df" = c(lsm1$df, lsm2$df)
     )
     expect_equal(actual, expected)
+
+    result_actual <- ancova(
+        dat2,
+        set_vars(
+            visit = "visit",
+            covariates = c("age", "sex*cat*trt"),
+            outcome = "outcome",
+            group = "trt"
+        ),
+        weights = "equal"
+    )[c("lsm_ref_vis1", "lsm_alt_vis1")]
+    result_expected <- list(
+        "lsm_ref_vis1" = lsm1,
+        "lsm_alt_vis1" = lsm2
+    )
+    expect_equal(result_actual, result_expected)
 })
+
+
