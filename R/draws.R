@@ -172,13 +172,13 @@ draws.approxbayes <- function(data, data_ice = NULL, vars, method) {
 
 #' @rdname draws
 #' @export
-draws.condmean <- function(data, data_ice = NULL, vars, method) {
+draws.condmean <- function(data, data_ice = NULL, vars, method, mc.cores=1) {
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
     if (method$type == "bootstrap") {
         x <- get_bootstrap_draws(longdata, method, use_samp_ids = TRUE, first_sample_orig = TRUE)
     } else if (method$type == "jackknife") {
-        x <- get_jackknife_draws(longdata, method)
+        x <- get_jackknife_draws(longdata, method, mc.cores)
     } else {
         stop("Unknown method type")
     }
@@ -296,18 +296,20 @@ get_bootstrap_draws <- function(
 #' @details
 #' If there is a model fit failure, the process stops and an error is displayed.
 #'
+#' @importFrom parallel mclapply
+#'
 #' @inherit as_draws return
-get_jackknife_draws <- function(longdata, method) {
+get_jackknife_draws <- function(longdata, method, mc.cores=1) {
 
     ids <- longdata$ids
-    samples <- vector("list", length = length(ids) + 1)
+    # samples <- vector("list", length = length(ids) + 1)
 
-    samples[[1]] <- get_mmrm_sample(
+    samples1 <- list(get_mmrm_sample(
         ids = ids,
         longdata = longdata,
         method = method,
         optimizer = c("L-BFGS-B", "BFGS")
-    )
+    ))
 
     optimizer <- list(
         "L-BFGS-B" = NULL,
@@ -316,7 +318,8 @@ get_jackknife_draws <- function(longdata, method) {
 
     ids_jack <- lapply(seq_along(ids), function(i) ids[-i])
 
-    for (i in seq_along(ids)) {
+    # for (i in seq_along(ids)) {
+    samples2 = mclapply(seq_along(ids),function(i){
         ids_jack <- ids[-i]
         sample <- get_mmrm_sample(
             ids = ids_jack,
@@ -327,8 +330,12 @@ get_jackknife_draws <- function(longdata, method) {
         if (sample$failed) {
             stop("Jackknife sample failed")
         }
-        samples[[i + 1]] <- sample
-    }
+        # samples[[i + 1]] <- sample
+        sample
+    },mc.cores = mc.cores)
+
+    samples = c(samples1,samples2)
+
     ret <- as_draws(
         method = method,
         samples = as_sample_list(samples),
