@@ -53,7 +53,7 @@ The `draws()` function has 3 input arguments:
 
 - `data`: The primary longitudinal `data.frame` containing the outcome variable and all covariates. The inclusion of time-varying covariates is also possible.
 - `data_ice`: A `data.frame` which specifies the first visit affected by an ICE and the imputation strategy for handling missing outcome data after the ICE.
-- `method`: The selected statistical approaches which may be defined by creating a `method` object using the functions:
+- `method`: The selected statistical approach which is defined by creating a `method` object by using one of:
     - `method_bayes()` for MI based on Bayesian posterior parameter draws from MCMC sampling and inference based on Rubin's rules [@CarpenterEtAl2013].
     - `method_approxbayes()`: as for `method_bayes()` except that  approximate Bayesian posterior draws are obtained via bootstrapping and maximum likelihood estimation (@LittleRubin1992[Section 10.2.3, part 6]).
     - `method_condmean()` for conditional mean imputation based on maximum likelihood estimation. Inference is based on re-sampling techniques (bootstrap or jackknife) as described in @Wolbers2021.
