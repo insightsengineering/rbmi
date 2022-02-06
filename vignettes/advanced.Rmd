@@ -49,24 +49,30 @@ library(dplyr)
 
 set.seed(135)
 n <- 100
-time <- seq(0,12,by=2)
+time <- seq(0, 12, by = 2)
 
 # Mean trajectory control
-muC <- 50+10/12*time
+muC <- 50 + (10 / 12) * time
 
 # Mean trajectory intervention
-muT <- 50+10/12*time-5/12*pmax(time-4,0)
+muT <- 50 + (10 / 12) * time - (5 / 12) * pmax(time - 4, 0)
 
 # Create Sigma
 sd_intercept <- 5
 sd_slope <- 5
 cor_slopeInter <- 0.25
 sd_error <- 2.5
-covRE <- matrix(c(sd_intercept^2,
-                  cor_slopeInter*sd_intercept*sd_slope,
-                  cor_slopeInter*sd_intercept*sd_slope,
-                  sd_slope^2),ncol=2)
-Sigma <- cbind(1,time/12)%*%covRE%*%rbind(1,time/12)+diag(sd_error^2,nrow=length(time))
+covRE <- matrix(
+    c(
+        sd_intercept^2,
+        cor_slopeInter * sd_intercept * sd_slope,
+        cor_slopeInter * sd_intercept * sd_slope,
+        sd_slope^2
+    ),
+    ncol = 2
+)
+
+Sigma <- cbind(1, time / 12) %*% covRE %*% rbind(1, time / 12) + diag(sd_error^2, nrow = length(time))
 
 # Set probability of discontinuation
 probDisc_C <- 0.015
@@ -74,7 +80,7 @@ probDisc_T <- 0.025
 or_outcome <- 1.20 # 1 point increase => +20% probability of discontinuation
 
 # Set drop-out rate following discontinuation
-prob_postDisc_dropout = 0.75
+prob_postDisc_dropout <- 0.75
 
 # Set simulation parameters of the control arm
 parsC <- set_simul_pars(
@@ -96,8 +102,8 @@ post_ice_traj <- "CIR"
 
 # Simulate data
 data <- simulate_data(
-    pars_c = parsC, 
-    pars_t = parsT, 
+    pars_c = parsC,
+    pars_t = parsT,
     post_ice_traj = post_ice_traj
 )
 ```
@@ -135,7 +141,7 @@ data_ice_CIR$strategy <- "CIR"
 data$change <- data$outcome - data$outcome_bl
 
 # Remove rows corresponding to baseline visit
-data <- data[data$visit %in% levels(data$visit)[-1],]
+data <- data[data$visit %in% levels(data$visit)[-1], ]
 data$visit <- factor(data$visit, levels <- unique(data$visit))
 
 vars <- set_vars(
@@ -143,12 +149,12 @@ vars <- set_vars(
     visit = "visit",
     outcome = "change",
     group = "group",
-    covariates = c("visit*outcome_bl","visit*group"),
+    covariates = c("visit*outcome_bl", "visit*group"),
     strategy = "strategy"
     )
 
 vars_an <- vars
-vars_an$covariates = "outcome_bl"
+vars_an$covariates <- "outcome_bl"
 
 ```
 
@@ -208,7 +214,7 @@ vars_tv <- set_vars(
     visit = "visit",
     outcome = "change",
     group = "group",
-    covariates = c("visit*outcome_bl","visit*group", "time_from_ice1*group"),
+    covariates = c("visit*outcome_bl", "visit*group", "time_from_ice1*group"),
     strategy = "strategy"
     )
 ```
@@ -273,7 +279,7 @@ ana_obj_CIR <- analyse(
 
 pool(ana_obj_CIR)
 
-## Now we re-use our draws samples but using the Jump to Reference 
+## Now we re-use our draws samples but using the Jump to Reference
 ## Imputation strategy
 
 data_ice_JR <- data_ice_CIR
@@ -400,25 +406,25 @@ As an example, let's say that the analysis compares the proportion of subjects w
 visit between the groups with baseline outcome as additional covariate. This could then lead to the following (naive) analysis function:
 
 ```{r}
-compare_prop_lastvisit <- function(data,...){
-  
-  fit <- summary(
-    glm(
-      I(outcome > 60) ~ group + outcome_bl,
-      family = binomial(),
-      data = data[data[["visit"]] == "6", ]
+compare_prop_lastvisit <- function(data, ...) {
+
+    fit <- summary(
+        glm(
+            I(outcome > 60) ~ group + outcome_bl,
+            family = binomial(),
+            data = data[data[["visit"]] == "6", ]
+        )
     )
-  )
-  
-  res <- list(
-    trt = list( 
-      est = fit$coefficients["groupIntervention", "Estimate"],
-      se = fit$coefficients["groupIntervention", "Std. Error"],
-      df = Inf
+
+    res <- list(
+        trt = list(
+            est = fit$coefficients["groupIntervention", "Estimate"],
+            se = fit$coefficients["groupIntervention", "Std. Error"],
+            df = Inf
+        )
     )
-  )
-  
-  return(res)
+
+    return(res)
 }
 ```
 
@@ -469,7 +475,7 @@ Note that `na.rm = TRUE` is used to ignore the missing data.
 Suppose that we want to apply a delta equal to the $20\%$ of the mean change from baseline, i.e.: 
 ```{r} 
 deltas <- mean_chg
-deltas$delta = 0.2*mean_chg$delta
+deltas$delta <- 0.2 * mean_chg$delta
 deltas
 ```
 
@@ -481,8 +487,8 @@ Let's include this amount of delta in the `delta_template()` dataset:
 index_delta <- dat_delta$is_missing & dat_delta$is_post_ice
 
 # Include the value of delta from "mean_chg" to "dat_delta" by joining the two data.frames
-dat_delta[index_delta,] <- dat_delta %>% 
-  filter(is_missing & is_post_ice) %>% 
+dat_delta[index_delta, ] <- dat_delta %>%
+  filter(is_missing & is_post_ice) %>%
   select(-delta) %>%
   left_join(deltas, by = "visit")
 ```
@@ -507,30 +513,30 @@ Let's start by writing a function that performs a delta-adjustment based on a pr
 
 ```{r}
 delta_adj <- function(impute_obj, mean_chg, prop) {
-  
-  # Get delta template dataset
-  dat_delta <- delta_template(imputations = impute_obj)
-  
-  # Estimate delta values
-  mean_chg$delta = prop*mean_chg$delta
-  
-  # Select observations corresponding to missing values after the ICE
-  index_delta <- dat_delta$is_missing & dat_delta$is_post_ice
-  
-  # Include the value of delta from "mean_chg" to "dat_delta" by joining the two data.frames
-  dat_delta[index_delta,] <- dat_delta %>% 
-    filter(is_missing & is_post_ice) %>% 
-    select(-delta) %>%
-    left_join(mean_chg, by = "visit")
-  
-  # Repeat analyses with the delta-adjusted values and pool together the results
-  anl_delta <- analyse(impute_obj, delta = dat_delta, vars = vars_an)
-  pool_obj <- pool(anl_delta)
 
-  # Return the results together with the proportion used and the delta values
-  pool_obj$prop <- prop
-  pool_obj$delta <- mean_chg
-  return(pool_obj)
+    # Get delta template dataset
+    dat_delta <- delta_template(imputations = impute_obj)
+
+    # Estimate delta values
+    mean_chg$delta <- prop * mean_chg$delta
+
+    # Select observations corresponding to missing values after the ICE
+    index_delta <- dat_delta$is_missing & dat_delta$is_post_ice
+
+    # Include the value of delta from "mean_chg" to "dat_delta" by joining the two data.frames
+    dat_delta[index_delta, ] <- dat_delta %>%
+        filter(is_missing & is_post_ice) %>%
+        select(-delta) %>%
+        left_join(mean_chg, by = "visit")
+
+    # Repeat analyses with the delta-adjusted values and pool together the results
+    anl_delta <- analyse(impute_obj, delta = dat_delta, vars = vars_an)
+    pool_obj <- pool(anl_delta)
+
+    # Return the results together with the proportion used and the delta values
+    pool_obj$prop <- prop
+    pool_obj$delta <- mean_chg
+    return(pool_obj)
 }
 
 ```
@@ -542,15 +548,15 @@ prop <- seq(from = 0.1, to = 1, by = 0.1)
 
 iter <- 1
 p_val <- 0
-while(p_val <= 0.05 & iter <= length(prop)) {
-  
-  # Perform analysis with current "prop"
-  curr_res <- delta_adj(impute_obj, mean_chg, prop = prop[iter])
-  
-  # Extract p-value
-  p_val <- curr_res$pars$trt_6$pvalue
+while (p_val <= 0.05 & iter <= length(prop)) {
 
-  iter <- iter + 1
+    # Perform analysis with current "prop"
+    curr_res <- delta_adj(impute_obj, mean_chg, prop = prop[iter])
+
+    # Extract p-value
+    p_val <- curr_res$pars$trt_6$pvalue
+
+    iter <- iter + 1
 }
 
 curr_res$prop
@@ -559,7 +565,7 @@ curr_res$delta
 
 The p-value is estimated to be above the significance level when a delta equal to the
 ```{r, echo=FALSE, results='asis'} 
-cat(curr_res$prop*100)
+cat(curr_res$prop * 100)
 ```
 % of the mean change from baseline is applied. This correspond to a delta applied at the last visit equal to 
 ```{r, echo=FALSE, results='asis'} 
@@ -567,21 +573,21 @@ cat(round(curr_res$delta$delta[curr_res$delta$visit == "6"], 3))
 ```
 . Thus the "tipping point" happened somewhere between a delta equal to the 
 ```{r, echo=FALSE, results='asis'} 
-cat(prop[iter - 2]*100)
+cat(prop[iter - 2] * 100)
 ```
 % and the 
 ```{r, echo=FALSE, results='asis'} 
-cat(prop[iter - 1]*100)
+cat(prop[iter - 1] * 100)
 ```
 % of the mean change from baseline.
 
 To get a more precise tipping point, one could repeat the tipping point analysis varying the proportion parameter from 
 ```{r, echo=FALSE, results='asis'} 
-cat(prop[iter - 2]*100)
+cat(prop[iter - 2] * 100)
 ```
 % and the 
 ```{r, echo=FALSE, results='asis'} 
-cat(prop[iter - 1]*100)
+cat(prop[iter - 1] * 100)
 ```
 %.
 
@@ -684,9 +690,9 @@ First use the `delta` and `dlag` arguments of `delta_template()` to setup a temp
 in which every unobserved post-ICE visit has a delta of 2:
 ```{r}
 delta_df <- delta_template(
-    impute_obj_CIR, 
-    delta = c(2, 2, 2, 2, 2, 2), 
-    dlag = c(1, 0, 0, 0, 0 ,0)
+    impute_obj_CIR,
+    delta = c(2, 2, 2, 2, 2, 2),
+    dlag = c(1, 0, 0, 0, 0, 0)
 )
 
 as_tibble(delta_df)
@@ -695,7 +701,7 @@ as_tibble(delta_df)
 Next we can use the additional metadata variables provided by `delta_template()` to  manually 
 reset the delta values for the control group back to 0:
 ```{r}
-delta_df2 <- delta_df %>% 
+delta_df2 <- delta_df %>%
     mutate(delta = if_else(group == "Control", 0, delta))
 
 as_tibble(delta_df2)
@@ -704,7 +710,7 @@ as_tibble(delta_df2)
 Finally we can now use our delta `data.frame` to apply our desired delta offset to our analysis:
 ```{r}
 anl_delta <- analyse(impute_obj_CIR, delta = delta_df2, vars = vars_an)
-pool(anl_delta)  
+pool(anl_delta)
 ```
 
 # References
