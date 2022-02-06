@@ -137,8 +137,8 @@ For details on the basic set-up to call the key rbmi functions, please refer to 
 data_ice_CIR <- data %>%
     group_by(id = factor(id, levels = unique(id))) %>%
     mutate(
-      is_interv = group == "Intervention",
-      has_ice = any(ind_ice1 == 1)
+        is_interv = group == "Intervention",
+        has_ice = any(ind_ice1 == 1)
     ) %>%
     filter(is_interv & has_ice) %>% # Select pts in active arm that disc from treatment
     summarise(
@@ -160,7 +160,7 @@ vars <- set_vars(
     group = "group",
     covariates = c("visit*outcome_bl", "visit*group"),
     strategy = "strategy"
-    )
+)
 
 vars_an <- vars
 vars_an$covariates <- "outcome_bl"
@@ -215,8 +215,8 @@ Let's first compute the time-varying covariate:
 
 ```{r}
 data <- data %>%
-  group_by(id) %>%
-  mutate(time_from_ice1 = cumsum(ind_ice1))
+    group_by(id) %>%
+    mutate(time_from_ice1 = cumsum(ind_ice1))
 ```
 
 and include it in the imputation model, crossed with the `group` variable:
@@ -229,7 +229,7 @@ vars_tv <- set_vars(
     group = "group",
     covariates = c("visit*outcome_bl", "visit*group", "time_from_ice1*group"),
     strategy = "strategy"
-    )
+)
 ```
 
 We can now call sequentially the 4 key `rbmi` functions:
@@ -495,8 +495,8 @@ Let's first determine the observed mean change from baseline at each visit:
 ```{r}
 # Estimate mean change from baseline at each visit
 mean_chg <- data %>%
-  group_by(visit) %>%
-  summarise(delta = mean(change, na.rm = TRUE))
+    group_by(visit) %>%
+    summarise(delta = mean(change, na.rm = TRUE))
 mean_chg
 ```
 Note that `na.rm = TRUE` is used to ignore the missing data.
@@ -517,9 +517,9 @@ index_delta <- dat_delta$is_missing & dat_delta$is_post_ice
 
 # Include the value of delta from "mean_chg" to "dat_delta" by joining the two data.frames
 dat_delta[index_delta, ] <- dat_delta %>%
-  filter(is_missing & is_post_ice) %>%
-  select(-delta) %>%
-  left_join(deltas, by = "visit")
+    filter(is_missing & is_post_ice) %>%
+    select(-delta) %>%
+    left_join(deltas, by = "visit")
 ```
 
 Note that the delta is applied only to observations that were missing and that were after the ICE "treatment discontinuation". 
