@@ -31,7 +31,13 @@ features of the `rbmi` package.
 
 # Data simulation {#sec:dataSimul}
 
-In order to demonstrate the advanced functions we will first create a simulated dataset with the `rbmi` function `simulate_data()`. A reader interested in other sections of the vignette must not necessarly read through this section. The `simulate_data()` function generates data for a two-arms clinical trial with longitudinal continuous outcome and two intercurrent events (ICEs). One intercurrent event (ICE1) may be thought of as a discontinuation from study treatment due to study drug or condition related (SDCR) reasons. The other one (ICE2) may be thought of as discontinuation from study treatment due to uninformative study drop-out. For the purposes of this vignette we consider the following scenario which is similar to the simulation study used in @Wolbers2021. It is a trial of an active drug versus placebo with 100 subjects per group and 6 post-baseline assessments (bi-monthly visits until 12 months):
+In order to demonstrate the advanced functions we will first create a simulated dataset with the `rbmi` function `simulate_data()`.
+A reader interested in other sections of the vignette must not necessarly read through this section.
+The `simulate_data()` function generates data for a two-arms clinical trial with longitudinal continuous outcome and two intercurrent events (ICEs).
+One intercurrent event (ICE1) may be thought of as a discontinuation from study treatment due to study drug or condition related (SDCR) reasons.
+The other one (ICE2) may be thought of as discontinuation from study treatment due to uninformative study drop-out.
+For the purposes of this vignette we consider the following scenario which is similar to the simulation study used in @Wolbers2021.
+It is a trial of an active drug versus placebo with 100 subjects per group and 6 post-baseline assessments (bi-monthly visits until 12 months):
 
 - The mean outcome trajectory in the placebo group (and in the active group under the null hypothesis) increased linearly from 50 at baseline to 60 at visit 6.
 - The mean outcome trajectory in the active group was identical to the placebo group up to visit 2. From visit 2 onward, the slope decreased by 50% to 5 points/year.
@@ -118,9 +124,12 @@ For more information about this function, please refer to the function documenta
 
 # Management of post-ICE observed values handled with a reference-based assumption {#sec:postICEobs}
 
-The simulated trial explained in section \@ref(sec:dataSimul) assumes that outcomes in the active arm observed after the ICE "treatment discontinuation" follow the increments observed in the control arm. Thus the imputation of missing data in the active arm after treatment discontinuation might be performed under the CIR assumption. How `rbmi` deals with observed values after an ICE handled using a reference-based method, is to include them in the analysis model but exclude them from the imputation model.
+The simulated trial explained in section \@ref(sec:dataSimul) assumes that outcomes in the active arm observed after the ICE "treatment discontinuation" follow the increments observed in the control arm.
+Thus the imputation of missing data in the active arm after treatment discontinuation might be performed under the CIR assumption. How `rbmi` deals with observed values after an ICE handled using a reference-based method, is to include them in the analysis model but exclude them from the imputation model.
 
-Let's first set-up the estimator: Suppose that imputation model has the mean change from baseline as the outcome, includes the treatment group, the (categorical) visit, treatment-by-visit interactions, the baseline outcome, and baseline outcome-by-visit interactions as covariates, and assumes a common unstructured covariance matrix in both groups. The analysis model is ANCOVA that also adjusts for the baseline outcome value. Below we report the code to set the variables of the imputation and analysis models. For details on the basic set-up to call the key rbmi functions, please refer to the "quickstart" vignette (`vignette("quickstart")`).
+Let's first set-up the estimator: Suppose that imputation model has the mean change from baseline as the outcome, includes the treatment group, the (categorical) visit, treatment-by-visit interactions, the baseline outcome, and baseline outcome-by-visit interactions as covariates, and assumes a common unstructured covariance matrix in both groups.
+The analysis model is ANCOVA that also adjusts for the baseline outcome value. Below we report the code to set the variables of the imputation and analysis models.
+For details on the basic set-up to call the key rbmi functions, please refer to the "quickstart" vignette (`vignette("quickstart")`).
 
 ```{r}
 
@@ -164,7 +173,10 @@ Let's assume that the chosen multiple imputation (MI) method is the approximate 
 method <- method_approxbayes(n_sample = 10)
 ```
 
-We can now call sequentially the 4 key functions of `rbmi` to perform the multiple imputation. Please note that the management of post-discontinuation observed data is performed without additional complexity for the user. `draws()` automatically excludes post-ICE data handled with a reference-based method using information provided by the argument `data_ice`. `impute()` will impute only actual missing data in `data[[vars$outcome]]`.
+We can now call sequentially the 4 key functions of `rbmi` to perform the multiple imputation.
+Please note that the management of post-discontinuation observed data is performed without additional complexity for the user.
+`draws()` automatically excludes post-ICE data handled with a reference-based method using information provided by the argument `data_ice`.
+`impute()` will impute only actual missing data in `data[[vars$outcome]]`.
 
 ```{r}
 set.seed(123)
@@ -190,7 +202,8 @@ pool(ana_obj_CIR)
 
 # Adding time-varying covariates in the imputation model
 
-`rbmi` allows to include time-varying covariates in the imputation model. For example, lets suppose that we want to implement an estimator equivalent to the one described in section \@ref(sec:postICEobs) with the following differences:
+`rbmi` allows to include time-varying covariates in the imputation model.
+For example, lets suppose that we want to implement an estimator equivalent to the one described in section \@ref(sec:postICEobs) with the following differences:
 
 - There is an additional time-varying covariate that represents the number of visits from the ICE treatment discontinuation. This is set equal to 0 up to the treatment discontinuation and to the time from treatment discontinuation
 at subsequent visits. Additionally a treatment by time-varying covariate interaction terms is included in the model. This variable allows to estimate the post-ICE trajectory in each arm directly from the data, without explicitly making apriori any (reference-based) assumption.
@@ -244,18 +257,23 @@ pool(ana_obj_tv)
 
 # Efficiently Changing Imputation Strategies
 
-The `draws()` function is by far the most computationally intensive function in `rbmi`. 
-In some settings, it may be important to explore the impact of a different 
-reference-based imputation strategy than the one chosen for the main analysis. 
-This change in the imputation strategy does not affect the imputation model but it does 
+The `draws()` function is by far the most computationally intensive function in `rbmi`.
+In some settings, it may be important to explore the impact of a different
+reference-based imputation strategy than the one chosen for the main analysis.
+This change in the imputation strategy does not affect the imputation model but it does
 affect the subsequent imputation step. 
 In order to allow changes in the imputation strategy without having to re-run the 
-`draws()` function, the function `impute()` has an additional argument `update_strategies`.  
+`draws()` function, the function `impute()` has an additional argument `update_strategies`.
 
 Please note though that this functionality comes with a some key limitations:
-From a theoretical point of view, such updates are only sensible if the base imputation model and the data to which it is fitted are also applicable to the revised imputation strategy. For example, as described in `help("draws", "rbmi")`, observed post-ICE data are included in the imputation model for the MAR strategy but excluded for non-MAR strategies. For this reason, the imputation strategy cannot be changed from MAR to a non-MAR strategy in the presence of observed data after the ICE. Likewise, a change from a non-MAR to MAR in the presence of observed data after the ICE triggers a warning because the imputation model was not fitted to all relevant data and may be inefficient. Similarly, it is not possible to change the first visit which is affected by an ICE via argument `update_strategies`. 
+From a theoretical point of view, such updates are only sensible if the base imputation model and the data to which it is fitted are also applicable to the revised imputation strategy.
+For example, as described in `help("draws", "rbmi")`, observed post-ICE data are included in the imputation model for the MAR strategy but excluded for non-MAR strategies.
+For this reason, the imputation strategy cannot be changed from MAR to a non-MAR strategy in the presence of observed data after the ICE.
+Likewise, a change from a non-MAR to MAR in the presence of observed data after the ICE triggers a warning because the imputation model was not fitted to all relevant data and may be inefficient.
+Similarly, it is not possible to change the first visit which is affected by an ICE via argument `update_strategies`. 
 
-As an example, let's assume we adopt the copy increments from reference strategy for the main analysis and explore the jump to reference imputation strategy as a sensitivity analysis. If we use approximate Bayesian multiple imputation with 10 random imputation, this could be implemented as follows:
+As an example, let's assume we adopt the copy increments from reference strategy for the main analysis and explore the jump to reference imputation strategy as a sensitivity analysis.
+If we use approximate Bayesian multiple imputation with 10 random imputation, this could be implemented as follows:
 
 ```{r}
 
@@ -319,13 +337,17 @@ To do this there are three things which the user needs to do:
 3. Provide the imputation strategy function to `impute()`.
 
 The imputation strategy function must take 3 arguments (`pars_group`, `pars_ref`, and `index_mar`) and calculates the marginal mean trajectory and covariance matrix of a subject's marginal imputation distribution which will then be applied to subjects to which the strategy applies. 
-Here, `pars_group` contains the predicted mean trajectory (`pars_group$mu`, a numeric vector) and covariance matrix (`pars_group$sigma`) for a subject conditional on their assigned treatment group and covariates. `pars_ref` contains the corresponding mean trajectory and covariance matrix conditional on the reference group and the subject's covariates. `index_mar` is a logical vector which specifies for each visit whether the visit is unaffected by an ICE handled using reference-based methods or not. As an example, the user can check how the CIR strategy was implemented by looking at function `strategy_CIR()`.
+Here, `pars_group` contains the predicted mean trajectory (`pars_group$mu`, a numeric vector) and covariance matrix (`pars_group$sigma`) for a subject conditional on their assigned treatment group and covariates.
+`pars_ref` contains the corresponding mean trajectory and covariance matrix conditional on the reference group and the subject's covariates.
+`index_mar` is a logical vector which specifies for each visit whether the visit is unaffected by an ICE handled using reference-based methods or not.
+As an example, the user can check how the CIR strategy was implemented by looking at function `strategy_CIR()`.
 
 ```{r}
 strategy_CIR
 ```
 
-To further illustrate this for a simple example, assume that a strategy is to be implemented according to which the marginal mean of the imputation distribution is equal to the marginal mean trajectory for the subject according to their assigned group and covariates up to the ICE and equal to the average of the visit-wise marginal means based on the subjects covariates and the assigned group or the reference group, respectively. For the covariance matrix of the marginal imputation distribution, the covariance matrix from the assigned group is taken. 
+To further illustrate this for a simple example, assume that a strategy is to be implemented according to which the marginal mean of the imputation distribution is equal to the marginal mean trajectory for the subject according to their assigned group and covariates up to the ICE and equal to the average of the visit-wise marginal means based on the subjects covariates and the assigned group or the reference group, respectively.
+For the covariance matrix of the marginal imputation distribution, the covariance matrix from the assigned group is taken. 
 
 
 To do this, we first need to define the imputation function which for this example could be coded as: 
@@ -428,7 +450,9 @@ compare_prop_lastvisit <- function(data, ...) {
 }
 ```
 
-The user should be aware that according to Rubin's rules, if the degrees of freedom from the complete-data analysis model is infinite, this does not imply that the pooled degrees of freedom is also infinite. It can be proven that in this case the pooled degrees of freedom is `(M-1)/lambda^2`, where `M` is the number of imputations and `lambda` is the fraction of missing information. Please see @Barnard1999 for details. If you want to force the pooled degrees of freedom to be `Inf`, please set `df = NA` as returned value from the analysis function.
+The user should be aware that according to Rubin's rules, if the degrees of freedom from the complete-data analysis model is infinite, this does not imply that the pooled degrees of freedom is also infinite.
+It can be proven that in this case the pooled degrees of freedom is `(M-1)/lambda^2`, where `M` is the number of imputations and `lambda` is the fraction of missing information.
+Please see @Barnard1999 for details. If you want to force the pooled degrees of freedom to be `Inf`, please set `df = NA` as returned value from the analysis function.
 
 This analysis function can then be used in combination with `analyse()` as follows:
 
@@ -442,17 +466,19 @@ pool(anl_obj)
 
 # Delta Adjustment
 
-A delta-adjustment refers to a shift in the distribution of the (unobserved) outcome values by a certain amount. This might be used to perform sensitivity analyses. In the context of multiple imputation (MI), this is typically done by adding a fixed amount to the imputed values used in the primary analysis. This implies that the delta-adjustment can be performed prior to the third stage of the MI process: The fit of the analysis model (`analyse()`). That is, there is no additional consistent computational time needed to perform this type of sensitivity analysis since there is no need to re-fit the imputation model. For details, please see @CroEtAlTutorial2020.
+A delta-adjustment refers to a shift in the distribution of the (unobserved) outcome values by a certain amount. This might be used to perform sensitivity analyses.
+In the context of multiple imputation (MI), this is typically done by adding a fixed amount to the imputed values used in the primary analysis.
+This implies that the delta-adjustment can be performed prior to the third stage of the MI process: The fit of the analysis model (`analyse()`).
+That is, there is no additional consistent computational time needed to perform this type of sensitivity analysis since there is no need to re-fit the imputation model.
+For details, please see @CroEtAlTutorial2020.
 
 ## Manually set `delta` {#sec:manualDelta}
 
-The `delta` argument of `analyse()` allows users to modify the outcome variable prior to the analysis. To do 
-this, the user needs to provide a `data.frame` containing a column for the subject
-and visit which identifies the observation to be adjusted, and then a 3rd column
-called `delta` which specifies the value which will be added to the outcome. 
+The `delta` argument of `analyse()` allows users to modify the outcome variable prior to the analysis.
+To do this, the user needs to provide a `data.frame` containing a column for the subject
+and visit which identifies the observation to be adjusted, and then a 3rd column called `delta` which specifies the value which will be added to the outcome. 
 
-The `delta_template()` function helps the user to set the desired delta-adjustment: it creates a skeleton `data.frame` containing
-1 row per subject per visit with the value of delta set to 0 for all observations.
+The `delta_template()` function helps the user to set the desired delta-adjustment: it creates a skeleton `data.frame` containing 1 row per subject per visit with the value of delta set to 0 for all observations.
 
 ```{r}
 dat_delta <- delta_template(imputations = impute_obj_CIR)
@@ -461,7 +487,10 @@ head(dat_delta)
 
 Note that the output of `delta_template()` contains additional information that can be used to properly set the delta.
 
-Using the example described in section \@ref(sec:dataSimul), let's say that we want to perform a delta-strategy where the delta applies to all imputed data after treatment discontinuation (regardless of the treatment arm). Assume that we want to fix `delta` proportional to the unadjusted observed mean change from baseline of the outcome value over all trial population. That is, we add `delta` to an imputed data after treatment discontinuation at a given visit proportional to the observed mean change from baseline at that visit. Let's first determine the observed mean change from baseline at each visit:
+Using the example described in section \@ref(sec:dataSimul), let's say that we want to perform a delta-strategy where the delta applies to all imputed data after treatment discontinuation (regardless of the treatment arm).
+Assume that we want to fix `delta` proportional to the unadjusted observed mean change from baseline of the outcome value over all trial population.
+That is, we add `delta` to an imputed data after treatment discontinuation at a given visit proportional to the observed mean change from baseline at that visit.
+Let's first determine the observed mean change from baseline at each visit:
 
 ```{r}
 # Estimate mean change from baseline at each visit
@@ -495,7 +524,8 @@ dat_delta[index_delta, ] <- dat_delta %>%
 
 Note that the delta is applied only to observations that were missing and that were after the ICE "treatment discontinuation". 
 
-We can now call `analyse()`, that will first add the delta to the corresponding outcomes and then call the analysis model. Be aware that the delta is applied to all imputed datasets:
+We can now call `analyse()`, that will first add the delta to the corresponding outcomes and then call the analysis model.
+Be aware that the delta is applied to all imputed datasets:
 
 ```{r}
 # Repeat analyses with the delta-adjusted values and pool together the results
@@ -507,9 +537,11 @@ pool(anl_delta)
 
 The tipping point analysis is a way of doing sensitivity analysis by repeatedly performing a delta-adjustment with worse and worse value of delta until when the result from the primary analysis is overturned.
 
-In the previous section (\@ref(sec:manualDelta)) we have added a delta to any imputed value after treatment discontinuation proportional to the observed mean change from baseline at the corresponding visit. We have set the proportion equal to 20%. We can vary the proportion up to when the treatment effect estimated at the last visit is not significant anymore.
+In the previous section (\@ref(sec:manualDelta)) we have added a delta to any imputed value after treatment discontinuation proportional to the observed mean change from baseline at the corresponding visit.
+We have set the proportion equal to 20%. We can vary the proportion up to when the treatment effect estimated at the last visit is not significant anymore.
 
-Let's start by writing a function that performs a delta-adjustment based on a proportion of the observed mean change from baseline. This function needs as arguments the object resulting from the imputation phase (`impute_obj`), a data.frame containing the mean change from baseline at each visit (`mean_chg`) and a number indicating the chosen proportion (`prop`):
+Let's start by writing a function that performs a delta-adjustment based on a proportion of the observed mean change from baseline.
+This function needs as arguments the object resulting from the imputation phase (`impute_obj`), a `data.frame` containing the mean change from baseline at each visit (`mean_chg`) and a number indicating the chosen proportion (`prop`):
 
 ```{r}
 delta_adj <- function(impute_obj, mean_chg, prop) {
@@ -563,33 +595,21 @@ curr_res$prop
 curr_res$delta
 ```
 
-The p-value is estimated to be above the significance level when a delta equal to the
-```{r, echo=FALSE, results='asis'} 
-cat(curr_res$prop * 100)
-```
-% of the mean change from baseline is applied. This correspond to a delta applied at the last visit equal to 
-```{r, echo=FALSE, results='asis'} 
-cat(round(curr_res$delta$delta[curr_res$delta$visit == "6"], 3))
-```
-. Thus the "tipping point" happened somewhere between a delta equal to the 
-```{r, echo=FALSE, results='asis'} 
-cat(prop[iter - 2] * 100)
-```
-% and the 
-```{r, echo=FALSE, results='asis'} 
-cat(prop[iter - 1] * 100)
-```
-% of the mean change from baseline.
 
-To get a more precise tipping point, one could repeat the tipping point analysis varying the proportion parameter from 
-```{r, echo=FALSE, results='asis'} 
-cat(prop[iter - 2] * 100)
+```{r, echo=FALSE}
+v1 <- curr_res$prop * 100
+v2 <- round(curr_res$delta$delta[curr_res$delta$visit == "6"], 3)
+v3 <- prop[iter - 2] * 100
+v4 <- prop[iter - 1] * 100
+v5 <- prop[iter - 2] * 100
+v6 <- prop[iter - 1] * 100
 ```
-% and the 
-```{r, echo=FALSE, results='asis'} 
-cat(prop[iter - 1] * 100)
-```
-%.
+
+
+
+The p-value is estimated to be above the significance level when a delta equal to the `r v1`% of the mean change from baseline is applied. This correspond to a delta applied at the last visit equal to `r v2`.
+Thus the "tipping point" happened somewhere between a delta equal to the `r v3`% and the `r v4`% of the mean change from baseline.
+To get a more precise tipping point, one could repeat the tipping point analysis varying the proportion parameter from `r v5`% and the `r v6`%.
 
 ## Usage of `dlag` and `delta` arguments of `delta_template()`
 
