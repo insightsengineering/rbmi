@@ -33,11 +33,11 @@ features of the `rbmi` package.
 
 In order to demonstrate the advanced functions we will first create a simulated dataset with the `rbmi` function `simulate_data()`.
 A reader interested in other sections of the vignette must not necessarly read through this section.
-The `simulate_data()` function generates data for a two-arms clinical trial with longitudinal continuous outcome and two intercurrent events (ICEs).
+The `simulate_data()` function generates data for a two-arms clinical trial with longitudinal continuous outcome and up to two intercurrent events (ICEs) per subject.
 One intercurrent event (ICE1) may be thought of as a discontinuation from study treatment due to study drug or condition related (SDCR) reasons.
 The other one (ICE2) may be thought of as discontinuation from study treatment due to uninformative study drop-out.
 For the purposes of this vignette we consider the following scenario which is similar to the simulation study used in @Wolbers2021.
-It is a trial of an active drug versus placebo with 100 subjects per group and 6 post-baseline assessments (bi-monthly visits until 12 months):
+Let's consider a trial of an active drug versus placebo with 100 subjects per group and 6 post-baseline assessments (bi-monthly visits until 12 months):
 
 - The mean outcome trajectory in the placebo group (and in the active group under the null hypothesis) increased linearly from 50 at baseline to 60 at visit 6.
 - The mean outcome trajectory in the active group was identical to the placebo group up to visit 2. From visit 2 onward, the slope decreased by 50% to 5 points/year.
@@ -117,9 +117,12 @@ For more information about this function, please refer to the function documenta
 # Management of post-ICE observed values handled with a reference-based assumption {#sec:postICEobs}
 
 The simulated trial explained in section \@ref(sec:dataSimul) assumes that outcomes in the active arm observed after the ICE "treatment discontinuation" follow the increments observed in the control arm.
-Thus the imputation of missing data in the active arm after treatment discontinuation might be performed under the CIR assumption. How `rbmi` deals with observed values after an ICE handled using a reference-based method, is to include them in the analysis model but exclude them from the imputation model.
+Thus we impute missing data in the active arm after treatment discontinuation under the CIR assumption. How `rbmi` deals with observed values after an ICE handled using a reference-based method, is to include them in the analysis model but exclude them from the imputation model.
 
-Let's first set-up the estimator: Suppose that imputation model has the mean change from baseline as the outcome, includes the treatment group, the (categorical) visit, treatment-by-visit interactions, the baseline outcome, and baseline outcome-by-visit interactions as covariates, and assumes a common unstructured covariance matrix in both groups.
+Let's first set-up the estimator: Suppose that imputation model has:
+- The mean change from baseline as the outcome
+- Includes the treatment group, the (categorical) visit, treatment-by-visit interactions, the baseline outcome, and baseline outcome-by-visit interactions as covariates
+- Assumes a common unstructured covariance matrix in both groups.
 The analysis model is ANCOVA that also adjusts for the baseline outcome value. Below we report the code to set the variables of the imputation and analysis models.
 For details on the basic set-up to call the key rbmi functions, please refer to the "quickstart" vignette (`vignette("quickstart")`).
 
@@ -127,12 +130,12 @@ For details on the basic set-up to call the key rbmi functions, please refer to 
 
 # Create data_ice: CIR strategy for each patient in the active arm who stops the treatment
 data_ice_CIR <- data %>%
-    group_by(id = factor(id, levels = unique(id))) %>%
+    group_by(id) %>%
     mutate(
         is_interv = group == "Intervention",
         has_ice = any(ind_ice1 == 1)
     ) %>%
-    filter(is_interv & has_ice) %>% # Select pts in active arm that disc from treatment
+    filter(is_interv, has_ice) %>% # Select pts in active arm that disc from treatment
     summarise(
         visit = visit[ind_ice1 == 1][1] # Select first visit affected by the ICE
     )
@@ -159,13 +162,13 @@ vars_an$covariates <- "outcome_bl"
 
 ```
 
-Let's assume that the chosen multiple imputation (MI) method is the approximate Bayesian MI with 10 imputations that can be set with the function `method_approxbayes()` as follows:
+Let's say that the chosen multiple imputation (MI) method is the approximate Bayesian MI with 10 imputations; this can be specified with the function `method_approxbayes()` as follows:
 
 ```{r}
 method <- method_approxbayes(n_sample = 10)
 ```
 
-We can now call sequentially the 4 key functions of `rbmi` to perform the multiple imputation.
+We can now sequentially call the 4 key functions of `rbmi` to perform the multiple imputation.
 Please note that the management of post-discontinuation observed data is performed without additional complexity for the user.
 `draws()` automatically excludes post-ICE data handled with a reference-based method using information provided by the argument `data_ice`.
 `impute()` will impute only actual missing data in `data[[vars$outcome]]`.
@@ -194,11 +197,12 @@ pool(ana_obj_CIR)
 
 # Adding time-varying covariates in the imputation model
 
-`rbmi` allows to include time-varying covariates in the imputation model.
+`rbmi` allows for the inclusion of time-varying covariates in the imputation model.
 For example, lets suppose that we want to implement an estimator equivalent to the one described in section \@ref(sec:postICEobs) with the following differences:
 
 - There is an additional time-varying covariate that represents the number of visits from the ICE treatment discontinuation. This is set equal to 0 up to the treatment discontinuation and to the time from treatment discontinuation
-at subsequent visits. Additionally a treatment by time-varying covariate interaction terms is included in the model. This variable allows to estimate the post-ICE trajectory in each arm directly from the data, without explicitly making apriori any (reference-based) assumption.
+at subsequent visits. 
+- Additionally a treatment by time-varying covariate interaction terms is included in the model. This variable allows to estimate the post-ICE trajectory in each arm directly from the data, without explicitly making apriori any (reference-based) assumption.
 - The imputation is performed under MAR.
 
 Indeed, one could assume that post-ICE data are missing-at-random after taking into account baseline characteristics, observed outcomes and additional information regarding the time of the ICE. For a precise description of this approach, we refer to @Guizzaro2021.
@@ -224,7 +228,7 @@ vars_tv <- set_vars(
 )
 ```
 
-We can now call sequentially the 4 key `rbmi` functions:
+We now sequentially call the 4 key `rbmi` functions:
 
 ```{r}
 draw_obj <- draws(
@@ -458,16 +462,16 @@ pool(anl_obj)
 
 # Delta Adjustment
 
-A delta-adjustment refers to a shift in the distribution of the (unobserved) outcome values by a certain amount. This might be used to perform sensitivity analyses.
+A delta-adjustment refers to a shift in the distribution of the (imputed) outcome values by a certain amount. This can be used to perform sensitivity analyses.
 In the context of multiple imputation (MI), this is typically done by adding a fixed amount to the imputed values used in the primary analysis.
 This implies that the delta-adjustment can be performed prior to the third stage of the MI process: The fit of the analysis model (`analyse()`).
-That is, there is no additional consistent computational time needed to perform this type of sensitivity analysis since there is no need to re-fit the imputation model.
+This means this type of sensitivity analysis can be perforemed without having to re-fit the imputation model
 For details, please see @CroEtAlTutorial2020.
 
 ## Manually set `delta` {#sec:manualDelta}
 
 The `delta` argument of `analyse()` allows users to modify the outcome variable prior to the analysis.
-To do this, the user needs to provide a `data.frame` containing a column for the subject
+To do this, the user needs to provide a `data.frame` containing columns for both the subject
 and visit which identifies the observation to be adjusted, and then a 3rd column called `delta` which specifies the value which will be added to the outcome. 
 
 The `delta_template()` function helps the user to set the desired delta-adjustment: it creates a skeleton `data.frame` containing 1 row per subject per visit with the value of delta set to 0 for all observations.
