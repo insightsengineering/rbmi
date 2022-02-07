@@ -45,7 +45,8 @@ test_that("rbmi can handle 'grouped' dplyr data", {
         data = dplyr::group_by(dat, id),
         data_ice = dplyr::group_by(dat_ice, id),
         vars = vars,
-        method = method
+        method = method,
+        quiet = TRUE
     )
 
     imputeObj <- impute(drawObj, references = c("A" = "A", "B" = "A"))
@@ -71,7 +72,8 @@ test_that("rbmi can handle 'grouped' dplyr data", {
         data = dat,
         data_ice = dat_ice,
         vars = vars,
-        method = method
+        method = method,
+        quiet = TRUE
     )
 
     imputeObj <- impute(drawObj, references = c("A" = "A", "B" = "A"))
@@ -83,6 +85,7 @@ test_that("rbmi can handle 'grouped' dplyr data", {
 
     expect_equal(poolObj_1, poolObj_2)
 })
+
 
 
 

@@ -257,7 +257,13 @@ test_that("extract_imputed_dfs + delta", {
         outcome = "outcome"
     )
 
-    dobj <- draws(dat, dat_ice, vars = vars, method = method_approxbayes(n_samples = 5))
+    dobj <- draws(
+        dat, 
+        dat_ice,
+        vars = vars, 
+        method = method_approxbayes(n_samples = 5),
+        quiet = TRUE
+    )
     iobj <- impute(dobj, c("A" = "B", "B" = "B"))
 
     delta <- tibble(

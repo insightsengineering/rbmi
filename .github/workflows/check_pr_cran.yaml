@@ -5,10 +5,9 @@ on:
     paths-ignore:
       - 'misc/**'
     branches:
-      - main
-      - master
+      - cran
 
-name: Check Pull Requests (Master)
+name: Check Pull Requests (CRAN)
 
 jobs:
 

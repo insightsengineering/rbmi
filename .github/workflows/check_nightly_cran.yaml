@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '0 4 * * 1'
 
-name: Check Nightly (master)
+name: Check Nightly (CRAN)
 
 jobs:
 
@@ -31,7 +31,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: master
+          ref: cran
 
       - name: Check
         run: |

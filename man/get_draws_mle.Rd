@@ -12,7 +12,8 @@ get_draws_mle(
   first_sample_orig,
   use_samp_ids,
   failure_limit = 0,
-  ncores = 1
+  ncores = 1,
+  quiet = FALSE
 )
 }
 \arguments{
@@ -38,6 +39,9 @@ what subjects should be used to derive the imputed dataset.}
 \item{failure_limit}{Number of failed samples that are allowed before throwing an error}
 
 \item{ncores}{Number of processes to parallise the job over}
+
+\item{quiet}{Logical, If true will suppress printing of progress information that is printed to
+the console}
 }
 \value{
 A \code{draws} object which is a named list containing the following:

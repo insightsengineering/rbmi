@@ -44,9 +44,6 @@
 #' @param type a character string that specifies the method to use when calculating
 #' confidence intervals. Must be one of `"bootstrap"` (default) or `"percentile"`.
 #'
-#' @param verbose a logical, if `TRUE` (default) Stan's sampling log information will
-#' be printed to the console, if `FALSE` this information will be suppressed.
-#'
 #' @param seed a numeric that specifies a seed to be used in the call to Stan. This
 #' argument is forward on the the `seed` argument of [rstan::sampling()]. Note that
 #' this is only required for `method_bayes()`, for all other methods you can achieve
@@ -96,7 +93,6 @@ method_bayes <- function(
     burn_between = 50,
     same_cov = TRUE,
     n_samples = 20,
-    verbose = TRUE,
     seed = NA
 ) {
     x <- list(
@@ -104,7 +100,6 @@ method_bayes <- function(
         burn_between = burn_between,
         same_cov = same_cov,
         n_samples = n_samples,
-        verbose = verbose,
         seed = seed
     )
     return(as_class(x, c("method", "bayes")))

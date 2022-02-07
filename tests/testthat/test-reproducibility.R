@@ -41,7 +41,8 @@ test_that("Results are Reproducible", {
                 data = dat,
                 data_ice = dat_ice,
                 vars = vars,
-                method = method
+                method = method,
+                quiet = TRUE
             )
         })
         imputeobj <- impute( draws = drawobj, references = c("A" = "B", "B" = "B"))
@@ -55,7 +56,8 @@ test_that("Results are Reproducible", {
                 data = dat,
                 data_ice = dat_ice,
                 vars = vars,
-                method = method
+                method = method,
+                quiet = TRUE
             )
         })
         imputeobj2 <- impute(draws = drawobj2, references = c("A" = "B", "B" = "B"))
@@ -78,7 +80,7 @@ test_that("Results are Reproducible", {
 
     run_test(method_approxbayes(n_samples = 5))
     run_test(method_condmean(n_samples = 5))
-    run_test(method_bayes(n_samples = 5, verbose = FALSE))
+    run_test(method_bayes(n_samples = 5))
     run_test(method_condmean(type = "jackknife"))
 })
 
@@ -110,17 +112,16 @@ test_that("bayes - seed argument works without set.seed",{
     meth <- method_bayes(
         seed = 1482,
         burn_between = 5,
-        burn_in = 200,
-        verbose = FALSE
+        burn_in = 200
     )
 
     set.seed(49812)
     x <- suppressWarnings({
-        draws(dat, dat_ice, vars, meth)
+        draws(dat, dat_ice, vars, meth, quiet = TRUE)
     })
     set.seed(2414)
     y <- suppressWarnings({
-        draws(dat, dat_ice, vars, meth)
+        draws(dat, dat_ice, vars, meth, quiet = TRUE)
     })
     expect_equal(x$samples, y$samples)
 })
