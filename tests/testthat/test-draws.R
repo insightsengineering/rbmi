@@ -62,7 +62,7 @@ test_that("approxbayes", {
     set.seed(40123)
     d <- get_data(40)
     meth <- method_approxbayes(n_samples = 6)
-    dobj <- draws(d$dat, d$dat_ice, d$vars, meth)
+    dobj <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
     standard_checks(dobj, d, meth)
 
     expect_length(dobj$samples, 6)
@@ -77,7 +77,7 @@ test_that("condmean - bootstrap", {
     set.seed(40123)
     d <- get_data(40)
     meth <- method_condmean(n_samples = 5)
-    dobj <- draws(d$dat, d$dat_ice, d$vars, meth)
+    dobj <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
     standard_checks(dobj, d, meth)
 
     expect_length(dobj$samples, 6)
@@ -90,7 +90,7 @@ test_that("condmean - bootstrap", {
 
     set.seed(623)
     meth <- method_condmean(n_samples = 5)
-    dobj2 <- draws(d$dat, d$dat_ice, d$vars, meth)
+    dobj2 <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
     standard_checks(dobj2, d, meth)
 
     expect_length(dobj2$samples, 6)
@@ -105,7 +105,7 @@ test_that("condmean - jackknife", {
     set.seed(40123)
     d <- get_data(20)
     meth <- method_condmean(type = "jackknife")
-    dobj <- draws(d$dat, d$dat_ice, d$vars, meth)
+    dobj <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
     standard_checks(dobj, d, meth)
 
     expect_length(dobj$samples, 21)
@@ -116,7 +116,7 @@ test_that("condmean - jackknife", {
     }
 
     set.seed(123)
-    dobj2 <- draws(d$dat, d$dat_ice, d$vars, meth)
+    dobj2 <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
     expect_equal(dobj[c("samples", "data")], dobj2[c("samples", "data")])
 })
 
@@ -126,9 +126,9 @@ test_that("condmean - jackknife", {
 test_that("bayes", {
     set.seed(40123)
     d <- get_data(40)
-    meth <- method_bayes(n_samples = 7, burn_in = 200, burn_between = 2, verbose = FALSE)
+    meth <- method_bayes(n_samples = 7, burn_in = 200, burn_between = 2)
     dobj <- suppressWarnings({
-        draws(d$dat, d$dat_ice, d$vars, meth)
+        draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
     })
     standard_checks(dobj, d, meth)
 
@@ -176,8 +176,8 @@ test_that("nmar data is removed as expected", {
     )
 
     method <- method_condmean(type = "jackknife")
-    d1 <- draws(dat, dat_ice, vars, method)
-    d2 <- draws(dat2, dat_ice, vars, method)
+    d1 <- draws(dat, dat_ice, vars, method, quiet = TRUE)
+    d2 <- draws(dat2, dat_ice, vars, method, quiet = TRUE)
     expect_equal(d1$samples, d2$samples)
 
 })
@@ -194,6 +194,7 @@ test_that("NULL data_ice works uses MAR by default", {
     dobj <- draws(
         dat2,
         method = method_condmean(n_samples = 5),
+        quiet = TRUE,
         vars = set_vars(
             outcome = "outcome",
             visit = "visit",
@@ -284,6 +285,7 @@ test_that("Failure is handled properly", {
         use_samp_ids = FALSE,
         ncores = 1,
         first_sample_orig = FALSE,
+        quiet = TRUE,
         sample_stack = stack
     )
     expect_equal(x$n_failures, 4)
@@ -303,6 +305,7 @@ test_that("Failure is handled properly", {
             failure_limit = (method$threshold * method$n_samples),
             use_samp_ids = FALSE,
             ncores = 1,
+            quiet = TRUE,
             first_sample_orig = FALSE,
             sample_stack = stack
         )
@@ -327,6 +330,7 @@ test_that("Failure is handled properly", {
         failure_limit = (method$threshold * method$n_samples),
         use_samp_ids = FALSE,
         ncores = 2,
+        quiet = TRUE,
         first_sample_orig = FALSE,
         sample_stack = stack
     )
@@ -348,6 +352,7 @@ test_that("Failure is handled properly", {
             failure_limit = (method$threshold * method$n_samples),
             use_samp_ids = FALSE,
             ncores = 2,
+            quiet = TRUE,
             first_sample_orig = FALSE,
             sample_stack = stack
         )
@@ -375,7 +380,8 @@ test_that("Failure is handled properly", {
             use_samp_ids = FALSE,
             ncores = 1,
             first_sample_orig = FALSE,
-            sample_stack = stack
+            sample_stack = stack,
+            quiet = TRUE
         ),
         regexp = "after removing subject '3'"
     )
@@ -396,7 +402,8 @@ test_that("Failure is handled properly", {
             use_samp_ids = FALSE,
             ncores = 2,
             first_sample_orig = FALSE,
-            sample_stack = stack
+            sample_stack = stack,
+            quiet = TRUE
         ),
         regex = "after removing subject '4'"
     )
@@ -452,7 +459,7 @@ test_that("draws is calling get_mmrm_sample properly", {
     method <- method_condmean(n_samples = 2)
     ld <- longDataConstructor$new(dat, vars)
     ld$set_strategies(dat_ice)
-    x <- draws(dat, dat_ice, vars, method)
+    x <- draws(dat, dat_ice, vars, method, quiet = TRUE)
 
     s1 <- get_mmrm_sample(
         ids = ld$ids,
@@ -489,7 +496,7 @@ test_that("draws is calling get_mmrm_sample properly", {
     method <- method_approxbayes(n_samples = 2)
     ld <- longDataConstructor$new(dat, vars)
     ld$set_strategies(dat_ice)
-    x <- draws(dat, dat_ice, vars, method)
+    x <- draws(dat, dat_ice, vars, method, quiet = TRUE)
 
     s0 <- get_mmrm_sample(
         ids = ld$ids,
@@ -569,6 +576,7 @@ test_that("draws.bmlmi works as expected", {
 
     set.seed(3013)
     x1 <- draws(
+        quiet = TRUE,
         dat,
         dat_ice,
         vars,
@@ -578,6 +586,7 @@ test_that("draws.bmlmi works as expected", {
 
     set.seed(3013)
     x2 <- draws(
+        quiet = TRUE,
         dat,
         dat_ice,
         vars,
@@ -598,3 +607,64 @@ test_that("draws.bmlmi works as expected", {
 })
 
 
+
+
+test_that("quiet supress progress messages", {
+    
+    bign <- 60
+    sigma <- as_vcov(
+        c(2, 1, 0.7),
+        c(
+            0.3,
+            0.4, 0.2
+        )
+    )
+
+    dat <- get_sim_data(bign, sigma, trt = 8) %>%
+        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
+        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        select(-is_miss)
+
+    dat_ice <- dat %>%
+        group_by(id) %>%
+        arrange(id, visit) %>%
+        filter(is.na(outcome)) %>%
+        slice(1) %>%
+        ungroup() %>%
+        select(id, visit) %>%
+        mutate(strategy = "JR")
+
+    vars <- set_vars(
+        outcome = "outcome",
+        group = "group",
+        strategy = "strategy",
+        subjid = "id",
+        visit = "visit",
+        covariates = c("age", "sex", "visit * group")
+    )
+
+    set.seed(3013)
+    x <- capture.output({
+        dobj <- draws(
+            data = dat,
+            data_ice = dat_ice,
+            vars = vars,
+            method = method_approxbayes(n_samples = 3)
+        )
+    })
+    expect_true(any(grepl("Estimated running time", x)))
+    expect_true(any(grepl("Progress: ", x)))
+
+
+    set.seed(3013)
+    x <- capture.output({
+        dobj <- draws(
+            data = dat,
+            quiet = TRUE,
+            data_ice = dat_ice,
+            vars = vars,
+            method = method_approxbayes(n_samples = 3)
+        )
+    })
+    expect_true(length(x) == 0 & is.character(x))
+})

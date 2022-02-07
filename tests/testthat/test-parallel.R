@@ -54,7 +54,8 @@ test_that("Parallisation works as expected", {
                 data_ice = dat_ice,
                 vars = vars,
                 method = method,
-                ncores = 1
+                ncores = 1,
+                quiet = TRUE
             )
         })
 
@@ -65,7 +66,8 @@ test_that("Parallisation works as expected", {
                 data_ice = dat_ice,
                 vars = vars,
                 method = method,
-                ncores = ncores
+                ncores = ncores,
+                quiet = TRUE
             )
         })
 

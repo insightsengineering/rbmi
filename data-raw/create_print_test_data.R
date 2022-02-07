@@ -58,8 +58,8 @@ get_data <- function(n) {
 #
 
 
-dobj <- get_data(40)
 set.seed(3123)
+dobj <- get_data(40)
 
 drawobj_ab <- draws(
     data = dobj$dat,
@@ -106,8 +106,8 @@ pool_ab <- pool(analysis_ab, conf.level = 0.9, alternative = "less")
 #
 
 
-dobj <- get_data(40)
 set.seed(413)
+dobj <- get_data(40)
 
 suppressWarnings({
     drawobj_b <- draws(
@@ -157,8 +157,8 @@ pool_b <- pool(analysis_b)
 #
 #
 
-dobj <- get_data(40)
 set.seed(313)
+dobj <- get_data(40)
 
 drawobj_cmb <- draws(
     data = dobj$dat,
@@ -210,9 +210,8 @@ pool_cmb_n <- pool(analysis_cmb, alternative = "greater", type = "normal")
 #
 #
 
-dobj <- get_data(35)
 set.seed(89513)
-
+dobj <- get_data(35)
 drawobj_cmj <- draws(
     data = dobj$dat,
     data_ice = dobj$dat_ice,
@@ -258,8 +257,8 @@ pool_cmj <- pool(analysis_cmj, conf.level = 0.9)
 #
 
 
+set.seed(2413)
 dobj <- get_data(40)
-set.seed(89513)
 
 drawobj_bml <- draws(
     ncores = 1,
@@ -291,7 +290,6 @@ analysis_bml <- analyse(
 )
 
 pool_bml <- pool(analysis_bml, conf.level = 0.9)
-
 
 .test_print$bmlmi <- list(
     draws = drawobj_bml,

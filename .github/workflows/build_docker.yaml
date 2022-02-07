@@ -6,12 +6,12 @@ env:
 on:
   push:
     branches:
-      - develop
+      - main
     paths:
       - 'misc/docker/**'
   pull_request:
     branches:
-      - develop
+      - main
     paths:
       - 'misc/docker/**'
   workflow_dispatch:
