@@ -55,29 +55,19 @@ library(dplyr)
 
 set.seed(135)
 n <- 100
-time <- seq(0, 12, by = 2)
+time <- c(0, 2, 4, 6, 8, 10, 12)
 
 # Mean trajectory control
-muC <- 50 + (10 / 12) * time
+muC <- c(50.0, 51.66667, 53.33333, 55.0, 56.66667, 58.33333, 60.0)
 
 # Mean trajectory intervention
-muT <- 50 + (10 / 12) * time - (5 / 12) * pmax(time - 4, 0)
+muT <- c(50.0, 51.66667, 53.33333, 54.16667, 55.0, 55.83333, 56.66667)
 
 # Create Sigma
-sd_intercept <- 5
-sd_slope <- 5
-cor_slopeInter <- 0.25
-sd_error <- 2.5
-covRE <- matrix(
-    c(
-        sd_intercept^2,
-        cor_slopeInter * sd_intercept * sd_slope,
-        cor_slopeInter * sd_intercept * sd_slope,
-        sd_slope^2
-    ),
-    ncol = 2
+covRE <- rbind(
+  c(25.0, 6.25),
+  c(6.25, 25.0)
 )
-
 Sigma <- cbind(1, time / 12) %*% covRE %*% rbind(1, time / 12) + diag(sd_error^2, nrow = length(time))
 
 # Set probability of discontinuation
