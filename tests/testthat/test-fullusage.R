@@ -666,7 +666,7 @@ test_that("rbmi works for one arm trials", {
 
         data_anal <- data[data[[vars$visit]] == "visit_3",][[vars$outcome]]
         res <- list(
-            trt = list(
+            mean = list(
                 est = mean(data_anal),
                 se = sd(data_anal)/sqrt(length(data_anal)),
                 df = length(data_anal) - 1
