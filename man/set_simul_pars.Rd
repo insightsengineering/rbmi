@@ -11,7 +11,7 @@ set_simul_pars(
   prob_ice1 = 0,
   or_outcome_ice1 = 1,
   prob_post_ice1_dropout = 0,
-  prob_dropout = 0,
+  prob_ice2 = 0,
   prob_miss = 0
 )
 }
@@ -35,13 +35,15 @@ each visit corresponding to a +1 higher value of the observed outcome at that vi
 drop-out following ICE1. If a subject is simulated to drop-out after ICE1, all outcomes after
 ICE1 are set to missing.}
 
-\item{prob_dropout}{Numeric that specifies an additional probability that a post-baseline
+\item{prob_ice2}{Numeric that specifies an additional probability that a post-baseline
 visit is affected by study drop-out. Outcome data at the subject's first simulated visit
-affected by study drop-out and all subsequent visits are set to missing.
-In case the subject's first simulated visit affected by study drop-out is prior to ICE1
-(i.e. in case the subject is still on study treatment), then it is assumed that the study
-drop-out also triggers discontinuation due the NSDRC reasons
-and a corresponding intercurrent event ICE2 is generated.}
+affected by study drop-out and all subsequent visits are set to missing. This generates
+a second intercurrent event ICE2, which may be thought as treatment discontinuation due to
+NSDRC reasons with subsequent drop-out.
+If for a subject, both ICE1 and ICE2 are simulated to occur,
+then it is assumed that only the earlier of them counts.
+In case both ICEs are simulated to occur at the same time, it is assumed that ICE1 counts.
+This means that a single subject can experience either ICE1 or ICE2, but not both of them.}
 
 \item{prob_miss}{Numeric value that specifies an additional probability for a given
 post-baseline observation to be missing. This can be used to produce
