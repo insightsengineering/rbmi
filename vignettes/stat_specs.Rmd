@@ -108,11 +108,11 @@ The **conventional MI** approaches includes the following steps:
 
   + Take a single sample $m$ ($m\in 1,\ldots, M)$ from the posterior distribution of the imputation model parameters.
 
-  + For each subject, use the sampled parameters and the defined strategy for dealing with their ICEs to determine the mean and covariance matrix describing the subject's marginal outcome distribution for all longitudinal outcome assessments (i.e. observed and missing outcomes). 
+  + For each subject, use the sampled parameters and the defined imputation strategy to determine the mean and covariance matrix describing the subject's marginal outcome distribution for all longitudinal outcome assessments (i.e. observed and missing outcomes). 
 
-  + For each subjects, construct the conditional multivariate normal distribution of their missing outcomes given their observed outcomes (including observed outcomes after ICEs for which reference-based missing data imputation is desired). 
+  + For each subjects, construct the conditional multivariate normal distribution of their missing outcomes given their observed outcomes (including observed outcomes after ICEs for which a reference-based assumption is desired). 
   
-  + For each subject, draw a single sample from this conditional distributions to impute their missing outcomes leading to a complete imputed dataset.
+  + For each subject, draw a single sample from this conditional distribution to impute their missing outcomes leading to a complete imputed dataset.
   
   + For sensitivity analyses, a pre-defined $\delta$-adjustment may be applied to the imputed data prior to the analysis step. (Section \@ref(sec:deltaAdjustment)).
 
@@ -134,7 +134,7 @@ The **conditional mean imputation** approach includes the following steps:
 
   + For each subject, use the fitted parameters from step 1. to construct the conditional distribution of missing outcomes given observed outcomes (including observed outcomes after ICEs for which reference-based missing data imputation is desired) as described above.
   
-  + For each subject, impute their missing data deterministically by the conditional mean of this conditional distribution leading to a complete imputed dataset.
+  + For each subject, impute their missing data deterministically by the mean of this conditional distribution leading to a complete imputed dataset.
   
   + For sensitivity analyses, a pre-defined $\delta$-adjustment may be applied to the imputed data prior to the analysis step. (Section \@ref(sec:deltaAdjustment)).
   
@@ -144,7 +144,7 @@ The **conditional mean imputation** approach includes the following steps:
   
 4. **Jackknife or bootstrap inference step** (Section \@ref(sec:bootInference))
 
-  + Inference for the treatment effect estimate from 3. is based on re-sampling techniques. Both the jackknife and the bootstrap are supported. Importantly, these methods require repeating all steps of the imputation procedure (i.e. imputation, conditional mean imputation, and analysis steps) on each of the resampled data sets.
+  + Inference for the treatment effect estimate from 3. is based on re-sampling techniques. Both the jackknife and the bootstrap are supported. Importantly, these methods require repeating all steps of the imputation procedure (i.e. imputation, conditional mean imputation, and analysis steps) on each of the resampled datasets.
   
 The **bootstrapped MI** approach includes the following steps:
 
@@ -167,11 +167,11 @@ The **bootstrapped MI** approach includes the following steps:
 
 3. **Analysis step** (Section \@ref(sec:analysis))
 
-  + Analyze the imputed dataset using an analysis model (e.g. ANCOVA) resulting in a point estimate of the treatment effect.
+  + Analyze each of the $B*D$ imputed datasets using an analysis model (e.g. ANCOVA) resulting in $B*D$ point estimates of the treatment effect.
   
 4. **Pooling step for inference** (Section \@ref(sec:poolbmlmi))
 
-  + Repeat steps 2. and 3. for each bootstrap sample $b$, resulting in $B*D$ complete datasets and $B*D$ point estimates of the treatment effect. Pool the $B*D$ treatment effect estimates as described in @vonHippelBartlett2021 to obtain the final pooled treatment effect estimate, standard error, and degrees of freedom.
+  + Pool the $B*D$ treatment effect estimates as described in @vonHippelBartlett2021 to obtain the final pooled treatment effect estimate, standard error, and degrees of freedom.
 
 ## Setting, notation, and missing data assumptions
 
@@ -179,7 +179,7 @@ Assume that the data are from a study with $n$ subjects in total and that each s
 In most applications, the data will be from a randomized trial of an intervention vs a control group and the treatment effect of interest is a comparison in outcomes at a specific visit between these randomized groups. However, single-arm trials or multi-arm trials are in principle also supported by the implementation. 
 
 Denote the observed outcome vector of length $J$ for subject $i$ by $Y_i$ (with missing assessments coded as NA (not available)) and its non-missing and missing components by $Y_{i!}$ and $Y_{i?}$, respectively. 
-By default, imputation of all outcomes in $Y_{i}$ is performed under a MAR assumption. Therefore, if missing data following an ICE are to be handled using MAR imputation, this is compatible with the default assumption. As discussed in the Section \@ref(sec:intro), the MAR assumption is often a good starting point for implementing a hypothetical strategy. But also note that observed outcome data after an ICE handled using a hypothetical strategy is not compatible with this strategy. Therefore, we assume that all post ICE data after ICEs handled using a hypothetical strategy are already set to NA in $Y_i$. However, any observed outcomes after ICEs handled using a treatment policy strategy should be included in $Y_i$ as they are compatible with this strategy. 
+By default, in `rbmi` imputation of all outcomes in $Y_{i}$ is performed under a MAR assumption. Therefore, if missing data following an ICE are to be handled using MAR imputation, this is compatible with the default assumption. As discussed in the Section \@ref(sec:intro), the MAR assumption is often a good starting point for implementing a hypothetical strategy. But also note that observed outcome data after an ICE handled using a hypothetical strategy is not compatible with this strategy. Therefore, we assume that all post ICE data after ICEs handled using a hypothetical strategy are already set to NA in $Y_i$ prior to the start of any methodology implemented in `rbmi`. However, any observed outcomes after ICEs handled using a treatment policy strategy should be included in $Y_i$ as they are compatible with this strategy. 
 
 Subjects may also experience up to one ICE after which missing data imputation according to a reference-based imputation method is foreseen. For a subject $i$ with such an ICE, denote their first visit which is affected by the ICE by $\tilde{t}_i \in \{1,\ldots,J\}$. For all other subjects, set $\tilde{t}_i=\infty$. A subject's outcome vector after setting observed outcomes from visit $\tilde{t}_i$ onwards to missing (i.e. NA) is denoted as $Y'_i$ and the corresponding data vector after removal of NA elements as $Y'_{i!}$.
 
@@ -193,13 +193,13 @@ The purpose of the imputation model is to estimate (covariate-dependent) mean tr
 publications on reference-based imputation methods have implicitly assumed that the corresponding post-ICE
 data is missing for all subjects (@CarpenterEtAl2013). We also allow the situation where post-ICE data
 is available for some subjects but needs to be imputed using reference-based methods for others. However,
-any observed data after ICEs for which reference-based imputation methods are specified are not compatible
+any observed data after ICEs for which reference-based imputation methods are specified is not compatible
 with the imputation model described below and they are therefore removed and considered as missing for
-the purpose of estimating the imputation model, and for this purpose only. 
+the purpose of estimating the imputation model, and for this purpose only. For example, if a patient has an ICE addressed with a reference-based method but outcomes after the ICE are collected, these post-ICE outcomes will be excluded when fitting the base imputation model (but they will be included again in the following steps).
 That is, the base imputation model is fitted to $Y'_{i!}$ and not to $Y_{i!}$. 
 If we did not exclude these data, then the imputation model would mistakenly estimate mean trajectories based on a mixture of observed pre- and post-ICE data which are not relevant for reference-based imputations.
 
-The base imputation model of the longitudinal outcomes $Y'_i$ assumes that the mean structure is a linear function of covariates. Full flexibility for the specification of the linear predictor of the model is supported. At a minimum, the covariates should include the treatment group, the (categorical) visit, and treatment-by-visit interactions. Typically, other covariates including the baseline outcome are also included.
+The base imputation model of the longitudinal outcomes $Y'_i$ assumes that the mean structure is a linear function of covariates. Full flexibility for the specification of the linear predictor of the model is supported. At a minimum the covariates should include the treatment group, the (categorical) visit, and treatment-by-visit interactions. Typically, other covariates including the baseline outcome are also included.
 External time-varying covariates (e.g. calendar time of the visit) as well as internal time-varying (e.g. time-varying indicators of treatment discontinuation or initiation of rescue treatment) may in principle also be included if indicated (@Guizzaro2021). Missing covariate values are not allowed. This means that the values of time-varying covariates must be non-missing at every visit regardless of whether the outcome is measured or missing. 
 
 Denote the $J\times p$ design matrix for subject $i$ corresponding to the mean structure model by $X_i$ and the same matrix after removal of rows corresponding to missing outcomes in $Y'_{i!}$ by $X'_{i!}$. 
@@ -208,11 +208,11 @@ The base imputation model for the observed outcomes is defined as:
 $$ Y'_{i!} = X'_{i!}\beta + \epsilon_{i!} \mbox{ with } \epsilon_{i!}\sim N(0,\Sigma_{i!!})$$
 where $\beta$ is the vector of regression coefficients and $\Sigma_{i!!}$ is a covariance matrix which is obtained from the complete-data $J\times J$-covariance matrix $\Sigma$ by omitting rows and columns corresponding to missing outcome assessments for subject $i$. 
 
-Typically, a common unstructured covariance matrix for all subjects is assumed for $\Sigma$ but separate covariate matrices per treatment group are also supported. Indeed, the implementation also supports the specification of separate covariate matrices according to an arbitrarily defined categorical variable which groups the subjects into disjoint subset. For example, this could be useful if different covariance matrices are suspected in different subject strata. Finally, for all imputation methods described below that do not rely on Bayesian model fitting, there is further flexibility in the choice of the covariance structure, i.e. unstructured (default), heterogeneous Toeplitz, heterogeneous compound symmetry, and AR(1) covariance structures are supported. 
+Typically, a common unstructured covariance matrix for all subjects is assumed for $\Sigma$ but separate covariate matrices per treatment group are also supported. Indeed, the implementation also supports the specification of separate covariate matrices according to an arbitrarily defined categorical variable which groups the subjects into disjoint subset. For example, this could be useful if different covariance matrices are suspected in different subject strata. Finally, for all imputation methods described below that do not rely on Bayesian model fitting through MCMC, there is further flexibility in the choice of the covariance structure, i.e. unstructured (default), heterogeneous Toeplitz, heterogeneous compound symmetry, and AR(1) covariance structures are supported. 
 
 ### Restricted maximum likelihood estimation (REML) {#sec:imputationModelREML}
 
-Frequentist parameter estimation for the base imputation is based on REML. The use of REML as an improved alternative to maximum likelihood for covariance parameter estimation was originally proposed by @Patterson1971. Since then, it has become the default method for parameter estimation in linear mixed effects models.
+Frequentist parameter estimation for the base imputation is based on REML. The use of REML as an improved alternative to maximum likelihood (ML) for covariance parameter estimation was originally proposed by @Patterson1971. Since then, it has become the default method for parameter estimation in linear mixed effects models. `rbmi` allows to choose between ML and REML methods to estimate the model parameters, with REML being the default option.
 
 ### Bayesian model fitting {#sec:imputationModelBayes}
 
@@ -232,7 +232,7 @@ As in the "five macros", the MCMC algorithm is initialized at the parameters fro
 
 ### Approximate Bayesian posterior draws via the bootstrap {#sec:imputationModelBoot}
 
-Several authors have suggested that a faster and stabler way to get Bayesian posterior draws from the imputation model is to bootstrap the incomplete data and to calculate REML estimates for each bootstrap sample (@LittleRubin1992, @Efron1994, @Honaker2010, @vonHippelBartlett2021). This method is proper in that the REML estimates from the bootstrap samples are asymptotically equivalent to a sample from the posterior distribution and may provide additional robustness to model misspecification (@LittleRubin1992 [Section 10.2.3, part 6], @Honaker2010). In order to retain balance between treatment groups and stratification factors across bootstrap samples, the user is able to provide stratification variables for the bootstrap in the `rbmi` implementation.
+Several authors have suggested that a stabler way to get Bayesian posterior draws from the imputation model is to bootstrap the incomplete data and to calculate REML estimates for each bootstrap sample (@LittleRubin1992, @Efron1994, @Honaker2010, @vonHippelBartlett2021). This method is proper in that the REML estimates from the bootstrap samples are asymptotically equivalent to a sample from the posterior distribution and may provide additional robustness to model misspecification (@LittleRubin1992 [Section 10.2.3, part 6], @Honaker2010). In order to retain balance between treatment groups and stratification factors across bootstrap samples, the user is able to provide stratification variables for the bootstrap in the `rbmi` implementation.
 
 ## Imputation step {#sec:imputationStep}
 
@@ -274,8 +274,10 @@ $$
 
 2. Copy increments in reference (CIR): the patient's outcome distribution is normally distributed with the following mean:
 $$
-\tilde{\mu}_i = (\mu_i[1], \dots, \mu_i[\tilde{t}_i-1], \mu_i[\tilde{t}_i-1] + (\mu_{ref,i}[\tilde{t}_i] - \mu_{ref,i}[\tilde{t}_i-1]), \dots,
+\begin{split}
+\tilde{\mu}_i =& (\mu_i[1], \dots, \mu_i[\tilde{t}_i-1], \mu_i[\tilde{t}_i-1] + (\mu_{ref,i}[\tilde{t}_i] - \mu_{ref,i}[\tilde{t}_i-1]), \dots,\\ &
 \mu_i[\tilde{t}_i-1]+(\mu_{ref,i}[J] - \mu_{ref,i}[\tilde{t}_i-1]))^T.
+\end{split}
 $$
 The covariance matrix is derived as in the JR method.
 
