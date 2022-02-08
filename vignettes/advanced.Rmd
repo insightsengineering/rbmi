@@ -102,7 +102,7 @@ post_ice_traj <- "CIR"
 data <- simulate_data(
     pars_c = parsC,
     pars_t = parsT,
-    post_ice_traj = post_ice_traj
+    post_ice1_traj = post_ice_traj
 )
 ```
 
@@ -110,7 +110,7 @@ Note that `simulate_data()` requires 3 arguments:
 
 - `pars_c`: The simulation parameters of the control arm
 - `pars_t`: The simulation parameters of the intervention arm
-- `post_ice_traj`: Specify how observed outcomes occurring after ICE1 are simulated
+- `post_ice1_traj`: Specify how observed outcomes occurring after ICE1 are simulated
 
 For more information about this function, please refer to the function documentation `help(simulate_data)`.
 
