@@ -33,8 +33,8 @@ It specifies the multiple imputation methodology to be used. See details.}
 \item{ncores}{A single numeric specifying the number of cores to use in creating the draws object.
 Note that this parameter is ignored for \code{\link[=method_bayes]{method_bayes()}} (Default = 1).}
 
-\item{quiet}{Logical, If true will suppress printing of progress information that is printed to
-the console}
+\item{quiet}{Logical, If \code{TRUE} will suppress printing of progress information that is printed to
+the console.}
 }
 \value{
 A \code{draws} object which is a named list containing the following:

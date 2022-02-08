@@ -37,8 +37,6 @@ no ICEs.
 affected by ICE1 and \code{0} otherwise.
 \item \code{dropout_ice1}: Binary variable that takes value \code{1} if the corresponding visit is
 affected by the drop-out following ICE1 and \code{0} otherwise.
-\item \code{dropout2}: Binary variable that takes value \code{1} if the corresponding visit is affected
-by the uninformative study drop-out.
 \item \code{ind_ice2}: Binary variable that takes value \code{1} if the corresponding visit is affected
 by ICE2.
 \item \code{outcome}: Numeric variable that specifies the longitudinal outcome including ICE1, ICE2

@@ -41,7 +41,7 @@ outcome value.
 The corresponding regression coefficients of the logistic model are defined as follows:
 The intercept is set to 0, the coefficients corresponding to discontinuation after each visit
 for a subject with outcome equal to
-the mean at baseline are set according to parameter \code{or_outcome_ice1},
+the mean at baseline are set according to parameter \code{or_outcome_ice},
 and the regression coefficient associated with the covariate \code{I((x-alpha))} is set to
 \code{log(or_outcome_ice)}.
 }
