@@ -22,7 +22,7 @@ generating a prediction from the model using an hypothetical observation
 that is constructed by averaging the data. See details for more information.
 }
 \details{
-The lsmeans are calculated by calculating hypothetical patients
+The lsmeans are obtained by calculating hypothetical patients
 and predicting their expected values. These hypothetical patients
 are constructed by expanding out all possible combinations of each
 categorical covariate and by setting any numerical covariates equal
