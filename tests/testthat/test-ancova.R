@@ -396,3 +396,45 @@ test_that("Least square means works as expected - Part 2", {
 })
 
 
+test_that("LSmeans (proportional) from rbmi equals means of average prediction", {
+    set.seed(124)
+
+    # simulate data
+    n <- 40
+
+    mu <- c(5, rep(0,3))
+
+    sigma <- matrix(rep(0.6,16), ncol = 4)
+    diag(sigma) <- 1
+
+    d <- as.data.frame(t(replicate(n, sample_mvnorm(mu = mu, sigma = sigma), simplify = "matrix")))
+    colnames(d) <- paste("x", 1:4, sep = "")
+
+    d$x2 <- cut(d$x2,breaks=c(-Inf, -1, 0, 1, Inf))
+    d$x3 <- cut(d$x3,breaks=c(-Inf, 0.5, Inf))
+    d$x4 <- cut(d$x4,breaks=c(-Inf, -1, 0, 1, Inf))
+
+    d$trt <- factor(rep(c("Control", "Intervention"), c(10, n - 10)))
+
+    d$y <- 1 * d$x1 + 2 * (d$x2 == "(-1,0]") + 3 * (d$trt == "Intervention") + rnorm(n)
+
+    # LSmeans by hand (predict -> average)
+    fit <- lm(y ~ trt + x1 + x2 + x3 + x4, data = d)
+
+    d_ctrl <- d
+    d_ctrl$trt <- "Control"
+    lsmeans_ctrl <- mean(predict(fit, newdata = d_ctrl))
+
+    d_interv <- d
+    d_interv$trt <- "Intervention"
+    lsmeans_interv <- mean(predict(fit, newdata = d_interv))
+
+
+    # LSmeans using rbmi (average -> predict)
+
+    lsmeans_ctrl2 <- lsmeans(fit, trt = "Control")$est
+    lsmeans_interv2 <- lsmeans(fit, trt = "Intervention")$est
+
+    expect_equal(lsmeans_ctrl2, lsmeans_ctrl)
+    expect_equal(lsmeans_interv2, lsmeans_interv)
+})
