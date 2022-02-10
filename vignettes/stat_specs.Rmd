@@ -193,7 +193,7 @@ MNAR $\delta$-adjustments are added to the imputed datasets after the formal imp
 
 ## The base imputation model {#sec:imputationModel}
 
-### Model specification {#sec:imputationModelSpecs}
+### Included data and model specification {#sec:imputationModelSpecs}
 
 The purpose of the imputation model is to estimate (covariate-dependent) mean trajectories and covariance matrices for each group in the absence of ICEs handled using reference-based imputation methods. Conventionally,
 publications on reference-based imputation methods have implicitly assumed that the corresponding post-ICE
@@ -204,6 +204,8 @@ with the imputation model described below and they are therefore removed and con
 the purpose of estimating the imputation model, and for this purpose only. For example, if a patient has an ICE addressed with a reference-based method but outcomes after the ICE are collected, these post-ICE outcomes will be excluded when fitting the base imputation model (but they will be included again in the following steps).
 That is, the base imputation model is fitted to $Y'_{i!}$ and not to $Y_{i!}$. 
 If we did not exclude these data, then the imputation model would mistakenly estimate mean trajectories based on a mixture of observed pre- and post-ICE data which are not relevant for reference-based imputations.
+
+Observed post-ICE outcomes in the control or reference group are also excluded from the base imputation model if the user specifies a reference-based imputation strategy for such ICEs. This ensures that an ICE has the same impact on the data included in the imputation model regardless whether the ICE occurred in the control or the intervention group. On the other hand, imputation in the reference group is based on a MAR assumption even for reference-based imputation methods and it may be preferable in some settings to include post-ICE data from the control group in the base imputation model. This can be implemented by specifying a `MAR` strategy for the ICE in the control group and a reference-based strategy for the same ICE in the intervention group.
 
 The base imputation model of the longitudinal outcomes $Y'_i$ assumes that the mean structure is a linear function of covariates. Full flexibility for the specification of the linear predictor of the model is supported. At a minimum the covariates should include the treatment group, the (categorical) visit, and treatment-by-visit interactions. Typically, other covariates including the baseline outcome are also included.
 External time-varying covariates (e.g. calendar time of the visit) as well as internal time-varying (e.g. time-varying indicators of treatment discontinuation or initiation of rescue treatment) may in principle also be included if indicated (@Guizzaro2021). Missing covariate values are not allowed. This means that the values of time-varying covariates must be non-missing at every visit regardless of whether the outcome is measured or missing. 
@@ -244,7 +246,7 @@ Several authors have suggested that a stabler way to get Bayesian posterior draw
 
 ### Marginal imputation distribution for a subject - MAR case  {#sec:imputatioMNAR}
 
-For each subject $i$, the marginal distribution of the complete $J$-dimensional outcome vector from all assessment visits according to the imputation model is a multivariate normal distribution. Its mean $\tilde{\mu}_i$ is given by the predicted mean from the imputation model conditional on the subject's baseline characteristics, group, and, optionally, time-varying covariates. Its covariance matrix $\tilde{\Sigma}_i$ is given by the overall estimated covariance matrix or, if different covariance matrices are assumed for different groups, the covariance matrix corresponding to the subject $i$'s group.  
+For each subject $i$, the marginal distribution of the complete $J$-dimensional outcome vector from all assessment visits according to the imputation model is a multivariate normal distribution. Its mean $\tilde{\mu}_i$ is given by the predicted mean from the imputation model conditional on the subject's baseline characteristics, group, and, optionally, time-varying covariates. Its covariance matrix $\tilde{\Sigma}_i$ is given by the overall estimated covariance matrix or, if different covariance matrices are assumed for different groups, the covariance matrix corresponding to subject $i$'s group.  
 
 ### Marginal imputation distribution for a subject - reference-based imputation methods {#sec:imputationRefBased}
 
@@ -285,7 +287,7 @@ $$
 \mu_i[\tilde{t}_i-1]+(\mu_{ref,i}[J] - \mu_{ref,i}[\tilde{t}_i-1]))^T.
 \end{split}
 $$
-The covariance matrix is derived as in the JR method.
+The covariance matrix is derived as for the JR method.
 
 3. Copy reference (CR): the patient's outcome distribution is normally distributed with mean and covariance matrix taken from the reference group:
 $$
@@ -327,7 +329,7 @@ Conventional random imputation consists in sampling from this conditional multiv
 A *marginal* $\delta$-adjustment approach similar to the "five macros" in SAS is implemented (@FiveMacros), i.e. fixed non-stochastic values are added after the multivariate normal imputation step and prior to the analysis.
 This is relevant for sensitivity analyses in order to make imputed data systematically worse or better, respectively, than observed data. In addition, some authors have suggested $\delta$-type adjustments to implement a composite strategy for continuous outcomes (@Darken2020).
 
-The implementation provides full flexibility regarding the specific implementation of the $\delta$-adjustment, i.e. the value that is added may depend on the randomized treatment arm, the timing of the subject's ICE, and other factors. For suggestions and case studies regarding this topic, we refer to @CroEtAlTutorial2020.
+The implementation provides full flexibility regarding the specific implementation of the $\delta$-adjustment, i.e. the value that is added may depend on the randomized treatment group, the timing of the subject's ICE, and other factors. For suggestions and case studies regarding this topic, we refer to @CroEtAlTutorial2020.
 
 
 ## Analysis step {#sec:analysis}
@@ -360,7 +362,7 @@ with
 $$
 \nu_{old} = \frac{M-1}{\lambda^2} \quad\mbox{and}\quad \nu_{obs} = \frac{\nu_{com} + 1}{\nu_{com} + 3} \nu_{com} (1 - \lambda)
 $$
-where $\lambda = \frac{(1 + \frac{1}{M})V_B}{V(\hat{\theta})}$ is the fraction of missing information.
+where $\lambda = \frac{(1 + \frac{1}{M})V_B(\hat{\theta})}{V(\hat{\theta})}$ is the fraction of missing information.
 
 ## Boostrap and jackknife inference for conditional mean imputation {#sec:bootInference}
 
@@ -392,7 +394,7 @@ compute than the bootstrap.
 
 ## Pooling step for inference of the bootstrapped MI methods {#sec:poolbmlmi}
 
-Assume that the analysis model has been applied to $B*D$ multiple imputed random datasets which resulted in $B*D$ treatment effect estimates $\hat{\theta}_{bd}$ ($b=1,\ldots,B$; $d=1,\ldots,D$).
+Assume that the analysis model has been applied to $B\times D$ multiple imputed random datasets which resulted in $B\times D$ treatment effect estimates $\hat{\theta}_{bd}$ ($b=1,\ldots,B$; $d=1,\ldots,D$).
 
 The final estimate of the treatment effect is calculated as the sample mean over the $B*D$ treatment effect estimates:
 $$
@@ -416,14 +418,13 @@ where $\bar{\theta_{b}}$ is the mean across the $D$ estimates obtained from rand
 The degrees of freedom are estimated with the following formula (@vonHippelBartlett2021, formula 8.6):
 
 $$
-\nu = \frac{(MSB*(B+1) - MSW*B)^2}{\frac{MSB^2*(B+1)^2}{B-1} + \frac{MSW^2*B}{D-1}}
+\nu = \frac{(MSB\cdot (B+1) - MSW\cdot B)^2}{\frac{MSB^2\cdot (B+1)^2}{B-1} + \frac{MSW^2\cdot B}{D-1}}
 $$
 
 Confidence intervals and tests of the null hypothesis $H_0: \theta=\theta_0$ are based on the $t$-statistics $T$:
 
 $$ T= (\hat{\theta}-\theta_0)/\sqrt{V(\hat{\theta})}. $$
 Under the null hypothesis, $T$ has an approximate $t$-distribution with $\nu$ degrees of freedom.
-
 
 ## Comparison between the implemented approaches  {#sec:methodsComparison}
 
