@@ -1,6 +1,6 @@
 ---
 title: "rbmi: Statistical Specifications"
-author: Alessandro Noci and Marcel Wolbers
+author: Alessandro Noci, Craig Gower-Page, and Marcel Wolbers
 output: 
   bookdown::html_document2:
     toc: true
@@ -51,7 +51,7 @@ For the composite strategy, the ICE itself is included as a component of the end
 
 ## Alignment between the estimand and the estimation method 
 
-The ICH E9(R1) addendum distinguishes between ICEs and missing data (@iche9r1). Whereas ICEs such as treatment discontinuations reflect clinical practice, the amount of missing data can be minimized in the conduct of a clinical trial. However, there are many connections between missing data and ICEs. For example, it is often difficult to retain subjects in a clinical trial after treatment discontinuation and a subject's withdrawal from the trial leads to missing data. As another example, for an ICE handled by a hypothetical strategy, outcome values after the ICE are not directly observable under the hypothetical scenario. Consequently, any observed outcome values after such ICEs are typically discarded and treated as missing data. 
+The ICH E9(R1) addendum distinguishes between ICEs and missing data (@iche9r1). Whereas ICEs such as treatment discontinuations reflect clinical practice, the amount of missing data can be minimized in the conduct of a clinical trial. However, there are many connections between missing data and ICEs. For example, it is often difficult to retain subjects in a clinical trial after treatment discontinuation and a subject's dropout from the trial leads to missing data. As another example, outcome values after ICEs addressed using a hypothetical strateg are not directly observable under the hypothetical scenario. Consequently, any observed outcome values after such ICEs are typically discarded and treated as missing data. 
 
 The addendum proposes that estimation methods to address the problem presented by missing data should be selected to align with the estimand. A recent overview of methods to align the estimator with the estimand is @Mallinckrodt2020. A short introduction on estimation methods for studies with longitudinal endpoints can also be found in @Wolbers2021. One prominent statistical method for this purpose is multiple imputation (MI), which is the target of the `rbmi` package. 
 
@@ -63,7 +63,7 @@ Missing data may occur in subjects without an ICE or prior to the occurrence of 
 
 The MAR imputation model described above is often also a good starting point for imputing data after an ICE handled using a hypothetical strategy (@Mallinckrodt2020). 
 Informally, this assumes that unobserved values after the ICE would have been similar to the observed data from subjects who did not have the ICE and remained under follow-up.
-However, in some situations, it may be more reasonable to assume that missingness is "informative" and indicates a systematically better or worse outcome than in observed subjects. In such situations, MNAR imputation with a $\delta$-adjustment could be explored as a sensitivity analysis. $\delta$-adjustments add a fixed or random quantity to the imputations in order to make the imputed outcomes systematically worse or better than those observed as described in @CroEtAlTutorial2020.
+However, in some situations, it may be more reasonable to assume that missingness is "informative" and indicates a systematically better or worse outcome than in observed subjects. In such situations, MNAR imputation with a $\delta$-adjustment could be explored as a sensitivity analysis. $\delta$-adjustments add a fixed or random quantity to the imputations in order to make the imputed outcomes systematically worse or better than those observed as described in @CroEtAlTutorial2020. In `rbmi` only fixed $\delta$-adjustments are implemented.
 
 ### Implementation of the treatment policy strategy
 
@@ -74,13 +74,13 @@ However, despite best efforts, missing data after an ICE such as study treatment
 For ICEs which are thought to have a negligible effect on efficacy outcomes, standard MAR-based imputation may be appropriate. In contrast, an ICE such as treatment discontinuation may be expected to have a more substantial impact on efficacy outcomes. In such settings, the MAR assumption may still be plausible after conditioning on the subject's time-varying treatment status (@Guizzaro2021). In this case, one option is to impute missing post-discontinuation data based on subjects who also discontinued treatment but continued to be followed up (@PolverejanDragalin2020). Another option which may require somewhat less post-discontinuation data is to include all subjects in the imputation procedure but to model post-discontinuation data by using a time-varying treatment status indicators (e.g. time-varying indicators of treatment compliance, discontinuation, or initiation of rescue
 treatment) (@Guizzaro2021). In this approach, post-ICE outcomes are included
 in every step of the analysis, including in the fitting of the imputation model. 
-It assumes that ICEs may impact post-ICE outcomes but that otherwise missingness is non-informative. The approach also assumes that the time-varying covariates do not contain missing values, deviations in outcomes after the ICE are correctly modeled by these time varying covariates, and that sufficient post-ICE data are available to reliably estimate the effect of ICEs on outcome data. These proposals are relatively recent and there remain open questions regarding the appropriate trade-off between model complexity (e.g. to account for a differential effect depending on the timing of the treatment discontinuation) and the variance in the resulting treatment effect estimate. More generally, it is not yet established how much post-discontinuation data is required to implement such methods robustly and without the risk of substantial inflation of variance.    
+It assumes that ICEs may impact post-ICE outcomes but that otherwise missingness is non-informative. The approach also assumes that the time-varying covariates do not contain missing values, deviations in outcomes after the ICE are correctly modeled by these time-varying covariates, and that sufficient post-ICE data are available to inform the regression coefficients of the time-varying covariates. These proposals are relatively recent and there remain open questions regarding the appropriate trade-off between model complexity (e.g. should the model account for a potentially differential effect on post-ICE outcomes depending on the timing of the ICE?) and the variance in the resulting treatment effect estimate. More generally, it is not yet established how much post-discontinuation data is required to implement such methods robustly and without the risk of substantial inflation of variance.    
 
 In some trial settings, only few subjects discontinue the randomized treatment. In other settings, treatment discontinuation rates are higher but it is difficult to retain subjects in the trial after treatment discontinuation leading to sparse data collection after treatment discontinuation. In both settings, the amount of available data after treatment discontinuation may be insufficient to inform an imputation model which explicitly models post-discontinuation data. Depending on the disease area and the anticipated mechanism of action of the intervention, it may be plausible to assume that subjects in the intervention group behave similarly to subjects in the control group after the ICE treatment discontinuation. In this case, reference-based imputation methods are an option (@Mallinckrodt2020). Reference-based imputation methods formalize the idea to impute missing data in the intervention group based on data from a control or reference group. For a general description and review of reference-based imputation methods, we refer to @CarpenterEtAl2013, @CroEtAlTutorial2020, @White2020causal and @Wolbers2021. For a technical description of the implemented statistical methodology for reference-based imputation, we refer to section \@ref(sec:statsMethods) (in particular section \@ref(sec:imputationStep)). 
 
 ### Implementation of the composite strategy
 
-The composite strategy is typically applied to binary outcomes but it can also be used for continuous outcomes by ascribing a suitably unfavorable value to patients who experience ICEs for which a composite strategy has been defined. One possibility to implement this is to use MI with a $\delta$-adjustment for post-ICE data as described in @Darken2020.
+The composite strategy is typically applied to binary or time-to-event outcomes but it can also be used for continuous outcomes by ascribing a suitably unfavorable value to patients who experience ICEs for which a composite strategy has been defined. One possibility to implement this is to use MI with a $\delta$-adjustment for post-ICE data as described in @Darken2020.
 
 # Statistical methodology {#sec:statsMethods}
 
@@ -96,11 +96,13 @@ Three general imputation approaches are implemented in `rbmi`:
 
 3. **Bootstrapped MI** methods based on REML estimates of the imputation model as described in @vonHippelBartlett2021.
 
-The **conventional MI** approaches includes the following steps:
+### Conventional MI  
+
+Conventional MI approaches include the following steps:
 
 1. **Base imputation model fitting step** (Section \@ref(sec:imputationModel))
 
-  + Fit a Bayesian multivariate normal mixed model for repeated measures (MMRM) model to the observed longitudinal outcomes after exclusion of data after ICEs for which reference-based missing data imputation is desired (Section \@ref(sec:imputationModelBayes)). Draw $M$ posterior samples of the estimated parameters (regression coefficients and covariance matrices) from this model. 
+  + Fit a Bayesian multivariate normal mixed model for repeated measures (MMRM) to the observed longitudinal outcomes after exclusion of data after ICEs for which reference-based missing data imputation is desired (Section \@ref(sec:imputationModelBayes)). Draw $M$ posterior samples of the estimated parameters (regression coefficients and covariance matrices) from this model. 
   
   + Alternatively, $M$ approximate posterior draws from the posterior distribution can be sampled by repeatedly applying conventional restricted maximum-likelihood (REML) parameter estimation of the MMRM model to nonparametric bootstrap samples from the original dataset (Section \@ref(sec:imputationModelBoot)). 
   
@@ -124,7 +126,9 @@ The **conventional MI** approaches includes the following steps:
 
   + Repeat steps 2. and 3. for each posterior sample $m$, resulting in $M$ complete datasets, $M$ point estimates of the treatment effect, and $M$ standard errors (with corresponding degrees of freedom). Pool the $M$ treatment effect estimates, standard errors, and degrees of freedom using the rules by Barnard and Rubin to obtain the final pooled treatment effect estimator, standard error, and degrees of freedom. 
 
-The **conditional mean imputation** approach includes the following steps:
+### Conditional mean imputation 
+
+The conditional mean imputation approach includes the following steps:
 
 1. **Base imputation model fitting step** (Section \@ref(sec:imputationModel))
 
@@ -145,8 +149,10 @@ The **conditional mean imputation** approach includes the following steps:
 4. **Jackknife or bootstrap inference step** (Section \@ref(sec:bootInference))
 
   + Inference for the treatment effect estimate from 3. is based on re-sampling techniques. Both the jackknife and the bootstrap are supported. Importantly, these methods require repeating all steps of the imputation procedure (i.e. imputation, conditional mean imputation, and analysis steps) on each of the resampled datasets.
-  
-The **bootstrapped MI** approach includes the following steps:
+ 
+### Bootstrapped MI 
+
+The bootstrapped MI approach includes the following steps:
 
 1. **Base imputation model fitting step** (Section \@ref(sec:imputationModel))
 
@@ -167,23 +173,23 @@ The **bootstrapped MI** approach includes the following steps:
 
 3. **Analysis step** (Section \@ref(sec:analysis))
 
-  + Analyze each of the $B*D$ imputed datasets using an analysis model (e.g. ANCOVA) resulting in $B*D$ point estimates of the treatment effect.
+  + Analyze each of the $B\times D$ imputed datasets using an analysis model (e.g. ANCOVA) resulting in $B\times D$ point estimates of the treatment effect.
   
 4. **Pooling step for inference** (Section \@ref(sec:poolbmlmi))
 
-  + Pool the $B*D$ treatment effect estimates as described in @vonHippelBartlett2021 to obtain the final pooled treatment effect estimate, standard error, and degrees of freedom.
+  + Pool the $B\times D$ treatment effect estimates as described in @vonHippelBartlett2021 to obtain the final pooled treatment effect estimate, standard error, and degrees of freedom.
 
 ## Setting, notation, and missing data assumptions
 
 Assume that the data are from a study with $n$ subjects in total and that each subject $i$ ($i=1,\ldots,n$) has $J$ scheduled follow-up visits at which the outcome of interest is assessed. 
-In most applications, the data will be from a randomized trial of an intervention vs a control group and the treatment effect of interest is a comparison in outcomes at a specific visit between these randomized groups. However, single-arm trials or multi-arm trials are in principle also supported by the implementation. 
+In most applications, the data will be from a randomized trial of an intervention vs a control group and the treatment effect of interest is a comparison in outcomes at a specific visit between these randomized groups. However, single-arm trials or multi-arm trials are in principle also supported by the `rbmi` implementation. 
 
 Denote the observed outcome vector of length $J$ for subject $i$ by $Y_i$ (with missing assessments coded as NA (not available)) and its non-missing and missing components by $Y_{i!}$ and $Y_{i?}$, respectively. 
-By default, in `rbmi` imputation of all outcomes in $Y_{i}$ is performed under a MAR assumption. Therefore, if missing data following an ICE are to be handled using MAR imputation, this is compatible with the default assumption. As discussed in the Section \@ref(sec:intro), the MAR assumption is often a good starting point for implementing a hypothetical strategy. But also note that observed outcome data after an ICE handled using a hypothetical strategy is not compatible with this strategy. Therefore, we assume that all post ICE data after ICEs handled using a hypothetical strategy are already set to NA in $Y_i$ prior to the start of any methodology implemented in `rbmi`. However, any observed outcomes after ICEs handled using a treatment policy strategy should be included in $Y_i$ as they are compatible with this strategy. 
+By default, imputation of missing outcomes in $Y_{i}$ is performed under a MAR assumption in `rbmi`. Therefore, if missing data following an ICE are to be handled using MAR imputation, this is compatible with the default assumption. As discussed in Section \@ref(sec:intro), the MAR assumption is often a good starting point for implementing a hypothetical strategy. But also note that observed outcome data after an ICE handled using a hypothetical strategy is not compatible with this strategy. Therefore, we assume that all post-ICE data after ICEs handled using a hypothetical strategy are already set to NA in $Y_i$ prior calling any `rbmi` functions. However, any observed outcomes after ICEs handled using a treatment policy strategy should be included in $Y_i$ as they are compatible with this strategy. 
 
 Subjects may also experience up to one ICE after which missing data imputation according to a reference-based imputation method is foreseen. For a subject $i$ with such an ICE, denote their first visit which is affected by the ICE by $\tilde{t}_i \in \{1,\ldots,J\}$. For all other subjects, set $\tilde{t}_i=\infty$. A subject's outcome vector after setting observed outcomes from visit $\tilde{t}_i$ onwards to missing (i.e. NA) is denoted as $Y'_i$ and the corresponding data vector after removal of NA elements as $Y'_{i!}$.
 
-MNAR $\delta$-adjustments are added to the imputed datasets after the formal imputation steps and is covered in a separate section (Section \@ref(sec:deltaAdjustment)).
+MNAR $\delta$-adjustments are added to the imputed datasets after the formal imputation steps. This is covered in a separate section (Section \@ref(sec:deltaAdjustment)).
 
 ## The base imputation model {#sec:imputationModel}
 
