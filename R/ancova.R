@@ -12,8 +12,9 @@
 #' fit the ancova model at. If `NULL`, a separate ancova model will be fit to the
 #' outcomes from each visits (as determined by `unique(data[[vars$visit]])`).
 #' See details.
-#' @param weights Character, specifies wether to use "proportional" or "equal" weighting for each
-#' categorical covariate combination when calculating the lsmeans.
+#' @param weights Character, either "proportional" (default) or "equal". Specifies the
+#' weighting strategy to be used for categorical covariates when calculating the lsmeans.
+#' See details.
 #'
 #' @details
 #' The function works as follows:
@@ -44,6 +45,25 @@
 #' If you want to include interaction terms in your model this can be done
 #' by providing them to the `covariates` argument of [set_vars()]
 #' e.g. `set_vars(covariates = c("sex*age"))`.
+#'
+#'
+#' ## Weighting
+#'
+#' "proportional" is the default scheme that is used. This is equivalent to standardization,
+#' i.e. the lsmeans in
+#' each group are equal to the predicted mean outcome from the ancova model for
+#' that group based on baseline characteristics of all subjects regardless of
+#' their assigned group. The alternative weighting scheme, "equal", creates hypothetical
+#' patients by expanding out all combinations of the models categorical covariates. The
+#' lsmean is then calculated as the average of
+#' the predicted mean outcome for these patients assuming they come from each
+#' of the groups in turn.
+#'
+#' In short:
+#'   - "equal" weights categorical covariates equally across all theoretical combinations
+#'   - "proportional" weights categorical covariates based upon their frequency of occourance
+#' in the data
+#'
 #' @seealso [analyse()]
 #' @seealso [stats::lm()]
 #' @seealso [set_vars()]
