@@ -117,6 +117,17 @@ validate_datalong_types <- function(data, vars) {
                 msg = sprintf("Variable `%s` should be of type numeric, factor or character", var)
             )
         }
+        for (var in covars) {
+            if (is_char_fact(data[[var]])) {
+                assert_that(
+                    length(unique(data[[var]])) >= 2,
+                    msg = sprintf(
+                        "Covariate `%s` only has 1 level, categorical covariates must have at least 2 levels",
+                        var
+                    )
+                )
+            }
+        }
     }
     return(invisible(TRUE))
 }

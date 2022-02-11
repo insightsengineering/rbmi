@@ -189,6 +189,32 @@ test_that("validate_datalong_types",{
     dat2$visit <- as.character(dat$visit)
     expect_error(validate_datalong_types(dat2, vars))
 
+    # Show that we can catch covariates that only have 1 level
+    dat2 <- dat
+    dat2$sex <- factor("M")
+    expect_error(validate_datalong_types(dat2, vars), "`sex`")
+
+    # Show that covariate 1 level checks only apply to covariates
+    dat2 <- dat
+    dat2$group <- factor("A")
+    expect_true(validate_datalong_types(dat2, vars))
+
+    # But then show that it will catch group if it is listed as a covariate
+    dat2 <- dat
+    dat2$group <- factor("A")
+    vars2 <- vars
+    vars2$covariates <- c(vars2$covariates, "group*sex")
+    expect_error(validate_datalong_types(dat2, vars2), "`group`")
+
+    # Show that stratification variables are not affected by this
+    dat2 <- dat
+    dat2$strata <- factor("A")
+    expect_true(validate_datalong_types(dat2, vars))
+
+    # Show that the visit variable is not affected by this
+    dat2 <- dat
+    dat2$visit <- factor("A")
+    expect_true(validate_datalong_types(dat2, vars))
 })
 
 

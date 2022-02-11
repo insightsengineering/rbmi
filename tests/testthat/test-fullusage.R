@@ -662,13 +662,13 @@ test_that("rbmi works for one arm trials", {
     skip_if_not(is_nightly())
 
     # ancova cannot be applied for 1 arm trial. Use a custom analysis function
-    myanalysis <- function(data,...) {
+    myanalysis <- function(data, ...) {
 
         data_anal <- data[data[[vars$visit]] == "visit_3",][[vars$outcome]]
         res <- list(
             trt = list(
                 est = mean(data_anal),
-                se = sd(data_anal)/sqrt(length(data_anal)),
+                se = sd(data_anal) / sqrt(length(data_anal)),
                 df = length(data_anal) - 1
             )
         )
@@ -691,25 +691,23 @@ test_that("rbmi works for one arm trials", {
     vars_wrong2$covariates <- c("age", "sex", "group", "visit")
 
     set.seed(169)
-    dat_full <- simulate_data(n = 100, sd = 1e-1*c(3,5,7)) %>% as_tibble()
+    dat_full <- simulate_data(n = 100, sd = 0.1 * c(3, 5, 7)) %>% as_tibble()
 
     ## Introduce missingness
-    dat <- dat_full
-    missing_index_vis2 <- rbinom(nrow(dat), 1, 0.3) == 1 & dat$visit == "visit_2"
-    missing_index_vis3 <- rbinom(nrow(dat), 1, 0.4) == 1 & dat$visit == "visit_3"
-    dat[missing_index_vis2, "outcome"] <- NA_real_
-    dat[missing_index_vis3, "outcome"] <- NA_real_
+    missing_index_vis2 <- rbinom(nrow(dat_full), 1, 0.3) == 1 & dat_full$visit == "visit_2"
+    missing_index_vis3 <- rbinom(nrow(dat_full), 1, 0.4) == 1 & dat_full$visit == "visit_3"
 
     # select subjects belonging to one group only
-    dat <- dat[dat$group == "A",]
-
-    # re-factor
-    dat$group_wrong <- dat$group # 2 levels factor with only "A" observed
-    dat$id <- factor(dat$id, levels = unique(dat$id))
-    dat$group <- factor(dat$group, levels = unique(dat$group))
+    dat <- dat_full %>%
+        mutate(outcome = if_else(missing_index_vis2 | missing_index_vis3, NA_real_, outcome)) %>%
+        filter(group == "A") %>%
+        mutate(group_wrong = group) %>%
+        mutate(id = factor(id, levels = unique(id))) %>%
+        mutate(group = factor(group, unique(group)))
 
     vars_wrong3 <- vars
-    vars_wrong3$group <- vars_wrong3$strata <- "group_wrong"
+    vars_wrong3$group <- "group_wrong"
+    vars_wrong3$strata <- "group_wrong"
 
     dat_ice <- dat %>%
         arrange(id, visit) %>%
@@ -728,26 +726,35 @@ test_that("rbmi works for one arm trials", {
             method = method
         )
 
-        expect_error(draws(
-            data = dat,
-            data_ice = dat_ice,
-            vars = vars_wrong,
-            method = method
-        ))
+        expect_error(
+            draws(
+                data = dat,
+                data_ice = dat_ice,
+                vars = vars_wrong,
+                method = method
+            ),
+            "`group`"
+        )
 
-        expect_error(draws(
-            data = dat,
-            data_ice = dat_ice,
-            vars = vars_wrong2,
-            method = method
-        ))
+        expect_error(
+            draws(
+                data = dat,
+                data_ice = dat_ice,
+                vars = vars_wrong2,
+                method = method
+            ),
+            "`group`"
+        )
 
-        expect_error(draws(
-            data = dat,
-            data_ice = dat_ice,
-            vars = vars_wrong3,
-            method = method
-        ))
+        expect_error(
+            draws(
+                data = dat,
+                data_ice = dat_ice,
+                vars = vars_wrong3,
+                method = method
+            ),
+            "`group`"
+        )
 
         impute_obj <- impute(
             draw_obj,
@@ -761,11 +768,14 @@ test_that("rbmi works for one arm trials", {
             fun = myanalysis
         )
 
-        expect_error(analyse(
-            imputations = impute_obj,
-            vars = vars_anal,
-            fun = ancova
-        ))
+        expect_error(
+            analyse(
+                imputations = impute_obj,
+                vars = vars,
+                fun = ancova
+            ),
+            "`data[[vars$group]]`"
+        )
 
         if(class(anl_obj$method)[2] == "condmean") {
             pooled <- pool(anl_obj, type = "normal")
@@ -776,7 +786,6 @@ test_that("rbmi works for one arm trials", {
         expect_true(all(!is.null(unlist(pooled$pars$trt))))
         expect_true(all(!is.na(unlist(pooled$pars$trt))))
         expect_true(all(is.double(unlist(pooled$pars$trt))))
-
     }
 
     method <- method_condmean(type = "jackknife")
