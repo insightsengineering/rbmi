@@ -62,14 +62,14 @@ each group are equal to the predicted mean outcome from the ancova model for
 that group based on baseline characteristics of all subjects regardless of
 their assigned group. The alternative weighting scheme, "equal", creates hypothetical
 patients by expanding out all combinations of the models categorical covariates. The
-lsmean is then calculated as the average of
-the predicted mean outcome for these patients assuming they come from each
-of the groups in turn.
+lsmeans are then calculated as the average of
+the predicted mean outcome for these hypothetical patients assuming they come from each
+group in turn.
 
 In short:
 \itemize{
 \item "equal" weights categorical covariates equally across all theoretical combinations
-\item "proportional" weights categorical covariates based upon their frequency of occourance
+\item "proportional" weights categorical covariates based upon their frequency of occurrence
 in the data
 }
 }
