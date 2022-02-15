@@ -165,12 +165,14 @@ data_ice_CIR <- data %>%
     visit = visit[1], # Select first visit affected by the ICE
     strategy = strategy[1])
 
-# Compute endpoint of interest: change from baseline
-data$change <- data$outcome - data$outcome_bl
-
-# Remove rows corresponding to baseline visits
-data <- data %>% filter(visit!="0")
-data$visit <- factor(data$visit, levels = unique(data$visit))
+# Compute endpoint of interest: change from baseline and
+# remove rows corresponding to baseline visits
+data <- data %>% 
+    filter(visit != 0) %>% 
+    mutate(
+        change = outcome - outcome_bl,
+        visit = factor(visit, levels = unique(visit))
+    )
 
 # Define key variables for the imputation and analysis models
 vars <- set_vars(
