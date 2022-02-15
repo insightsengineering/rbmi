@@ -224,8 +224,7 @@ This last output gives an estimated difference of
 `r paste(formatC(pool_obj_CIR$pars$trt_6$est,format="f",digits=3)," (95% CI ", 
          formatC(pool_obj_CIR$pars$trt_6$ci[1],format="f",digits=3), " to ",
          formatC(pool_obj_CIR$pars$trt_6$ci[2],format="f",digits=3),")",sep="")`
-between the two groups at the last visit with an associated p-value of 
-`r ifelse(pool_obj_CIR$pars$trt_6$pval<0.001,"<0.001",formatC(pool_obj_CIR$pars$trt_6$pval,format="f",digits=3))`.
+between the two groups at the last visit with an associated p-value `r ifelse(pool_obj_CIR$pars$trt_6$pval<0.001,"lower than 0.001", paste("of", formatC(pool_obj_CIR$pars$trt_6$pval,format="f",digits=3)))`.
 
 # Efficiently changing reference-based imputation strategies
 
