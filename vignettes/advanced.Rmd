@@ -350,8 +350,10 @@ As an example, the user can check how the CIR strategy was implemented by lookin
 strategy_CIR
 ```
 
-To further illustrate this for a simple example, assume that a strategy is to be implemented according to which the marginal mean of the imputation distribution is equal to the marginal mean trajectory for the subject according to their assigned group and covariates up to the ICE and equal to the average of the visit-wise marginal means based on the subjects covariates and the assigned group or the reference group, respectively.
-For the covariance matrix of the marginal imputation distribution, the covariance matrix from the assigned group is taken. 
+To further illustrate this for a simple example, assume that a new strategy is to be implemented as follows:
+- The marginal mean of the imputation distribution is equal to the marginal mean trajectory for the subject according to their assigned group and covariates up to the ICE.
+- After the ICE the marginal mean of the imputation distribution is equal to the average of the visit-wise marginal means based on the subjects covariates and the assigned group or the reference group, respectively.
+- For the covariance matrix of the marginal imputation distribution, the covariance matrix from the assigned group is taken. 
 
 
 To do this, we first need to define the imputation function which for this example could be coded as follows: 
