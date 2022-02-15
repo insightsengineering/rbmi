@@ -160,7 +160,7 @@ We first report the code to set the variables of the imputation and analysis mod
 data_ice_CIR <- data %>%
   group_by(id) %>%
   filter(ind_ice1==1) %>% # select visits with ICEs
-  mutate(strategy = ifelse(group == "Intervention","CIR","MAR")) %>%
+  mutate(strategy = ifelse(group == "Intervention", "CIR", "MAR")) %>%
   summarise(
     visit = visit[1], # Select first visit affected by the ICE
     strategy = strategy[1])
@@ -237,7 +237,7 @@ In order to allow changes in the imputation strategy without having to re-run th
 `draws()` function, the function `impute()` has an additional argument `update_strategies`.
 
 However, please note that this functionality comes with some important limitations:
-As described at the beginning of Section \@ref(sec:postICEobs), post-ICE outcomes are included in the input dataset  for the base imputation model if the imputation method is `MAR` but they are excluded for  reference-based imputation methods (such as `CIR`, `CR`, and `JR`).
+As described at the beginning of Section \@ref(sec:postICEobs), post-ICE outcomes are included in the input dataset for the base imputation model if the imputation method is `MAR` but they are excluded for reference-based imputation methods (such as `CIR`, `CR`, and `JR`).
 Therefore, `updata_strategies` cannot be applied if the imputation strategy is changed from a MAR to a non-MAR strategy in the presence of observed post-ICE outcomes. Similarly, a change from a non-MAR strategy to MAR triggers a warning in the presence of observed post-ICE outcomes because the base imputation model was not fitted to all relevant data under MAR.
 Finally, `update_strategies` cannot be applied if the timing of any of the ICEs is changed (in argument `data_ice`) in addition to the imputation strategy.  
 
@@ -245,8 +245,8 @@ As an example, we described an analysis under a copy increments in reference (CI
 
 ```{r}
 # Change ICE strategy from CIR to JR
-data_ice_JR <- data_ice_CIR
-data_ice_JR$strategy[data_ice_JR$strategy=="CIR"] <- "JR"
+data_ice_JR <- data_ice_CIR %>% 
+    mutate(strategy = ifelse(strategy == "CIR", "JR", strategy))
 
 impute_obj_JR <- impute(
     draw_obj,
@@ -386,8 +386,8 @@ To incorporate this into `rbmi`, `data_ice` needs to be updated such that the st
 to be provided to `impute()` via the `getStrategies()` function as shown below:
 
 ```{r}
-data_ice_AVG <- data_ice_CIR
-data_ice_AVG$strategy[data_ice_AVG$strategy=="CIR"] <- "AVG"
+data_ice_AVG <- data_ice_CIR %>% 
+    mutate(strategy = ifelse(strategy == "CIR", "AVG", strategy))
 
 
 draw_obj <- draws(
@@ -473,7 +473,7 @@ pool_obj_prop
 # convert treatment effect estimate from log-OR to OR scale
 tmp <- as.data.frame(pool_obj_prop)
 tmp$OR <- exp(tmp$est); tmp$OR.lci <- exp(tmp$lci); tmp$OR.uci <- exp(tmp$uci)
-tmp[,c("parameter","OR","OR.lci","OR.uci")]
+tmp[, c("parameter", "OR", "OR.lci", "OR.uci")]
 ```
 
 Note that if the user wants `rbmi` to use a normal approximation to the pooled test statistics, then the degrees of freedom need to be set to `df = NA` (as per the above example). If the degrees of freedom of the complete data test statistics are known or if the degrees of freedom are set to `df = Inf`, then `rbmi` pools the degrees of freedom accross imputed datasets according to the rule by Barnard and Rubin (see the "Statistical Specifications" vignette (`vignette("stat_specs", package = "rbmi")` for details). According to this rule, infinite degrees of freedom for the complete data analysis do not imply that the pooled degrees of freedom are also infinite.
