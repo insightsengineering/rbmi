@@ -120,13 +120,13 @@ str(data)
 data %>%
   group_by(id) %>%
   summarise(
-    group=group[1],
-    any_ICE=(any(ind_ice1==1)),
+    group = group[1],
+    any_ICE = (any(ind_ice1 == 1)),
     any_NA = any(is.na(outcome))) %>%
   group_by(group) %>%
   summarise(
-      subjects_with_ICE=sum(any_ICE),
-      subjects_with_missings=sum(any_NA)
+      subjects_with_ICE = sum(any_ICE),
+      subjects_with_missings = sum(any_NA)
   )
 ```
 
@@ -159,11 +159,12 @@ We first report the code to set the variables of the imputation and analysis mod
 #  because imputation of missing data under MAR is the default)
 data_ice_CIR <- data %>%
   group_by(id) %>%
-  filter(ind_ice1==1) %>% # select visits with ICEs
+  filter(ind_ice1 == 1) %>% # select visits with ICEs
   mutate(strategy = ifelse(group == "Intervention", "CIR", "MAR")) %>%
   summarise(
     visit = visit[1], # Select first visit affected by the ICE
-    strategy = strategy[1])
+    strategy = strategy[1]
+  )
 
 # Compute endpoint of interest: change from baseline and
 # remove rows corresponding to baseline visits
@@ -358,7 +359,7 @@ To do this, we first need to define the imputation function which for this examp
 
 ```{r}
 strategy_AVG <- function(pars_group, pars_ref, index_mar) {
-    mu_mean <- (pars_group$mu+pars_ref$mu)/2
+    mu_mean <- (pars_group$mu + pars_ref$mu)/2
     x <- pars_group
     x$mu[!index_mar] <- mu_mean[!index_mar]
     return(x)
@@ -428,7 +429,7 @@ As a simple example, we replicate the ANCOVA analysis at the last visit for the 
 ```{r}
 # Basic analysis function
 compare_change_lastvisit <- function(data, ...) {
-    fit <- lm(change ~ group + outcome_bl, data = data, subset=(visit==6) )
+    fit <- lm(change ~ group + outcome_bl, data = data, subset = (visit == 6) )
     res <- list(
         trt = list(
             est = coef(fit)["groupIntervention"],
@@ -440,7 +441,11 @@ compare_change_lastvisit <- function(data, ...) {
 }
 
 # analyse
-ana_obj_CIR6 <- analyse(impute_obj_CIR, vars = vars_an, fun = compare_change_lastvisit)
+ana_obj_CIR6 <- analyse(
+  impute_obj_CIR,
+  fun = compare_change_lastvisit,
+  vars = vars_an
+)
 
 # pool
 pool(ana_obj_CIR6)
@@ -452,7 +457,7 @@ visit between the treatment groups with the baseline outcome as an additional co
 ```{r}
 # Basic analysis function
 compare_prop_lastvisit <- function(data, ...) {
-    fit <- glm(I(change>10) ~ group + outcome_bl, family=binomial(), data = data, subset=(visit==6) )
+    fit <- glm(I(change>10) ~ group + outcome_bl, family=binomial(), data = data, subset = (visit == 6) )
     res <- list(
         trt = list(
             est = coef(fit)["groupIntervention"],
@@ -464,7 +469,11 @@ compare_prop_lastvisit <- function(data, ...) {
 }
     
 # analyse
-ana_obj_prop <- analyse(impute_obj_CIR, vars = vars_an, fun = compare_prop_lastvisit)
+ana_obj_prop <- analyse(
+  impute_obj_CIR,
+  fun = compare_prop_lastvisit,
+  vars = vars_an
+)
 
 # pool
 pool_obj_prop <- pool(ana_obj_prop)
@@ -517,32 +526,53 @@ pool(ana_delta)
 
 The same approach can be used to implement a tipping point analysis. Here, we apply different delta-adjustments to imputed data from the control and the intervention group, respectively. Assume that delta-adjustments by less then -5 points or by more than +15 points are considered implausible from a clinical perspective. Therefore, we vary the delta-values in each group between -5 to +15 points to investigate which delta combinations lead to a "tipping" of the primary analysis result, defined here as an analysis p-value $\geq 0.05$.
 
-
+ 
 ```{r fig.width=5, fig.height=4}
-tipp_frame <- expand.grid(delta_control=seq(-5,15,by=1), delta_intervention=seq(-5,15,by=1))
+tipp_frame <- expand.grid(
+  delta_control = seq(-5, 15, by = 1),
+  delta_intervention = seq(-5, 15, by = 1))
 tipp_frame$pval_6 <- tipp_frame$trt_effect_6 <- NA
 
 for (i in (1:nrow(tipp_frame))){
   # Create delta-adjustment 
-  dat_delta$delta <- (dat_delta$group=="Control")*(dat_delta$is_missing)*(tipp_frame$delta_control[i])+
-                     (dat_delta$group=="Intervention")*(dat_delta$is_missing)*(tipp_frame$delta_intervention[i])
+  delta_control <- (dat_delta$group == "Control")*
+    (dat_delta$is_missing)*
+    (tipp_frame$delta_control[i])
+  
+  delta_interv <- (dat_delta$group == "Intervention")*
+    (dat_delta$is_missing)*
+    (tipp_frame$delta_intervention[i])
+  
+  dat_delta$delta <- delta_control + delta_interv
+  
   # Analyse (using simplified analysis function) & pool 
-  ana_delta <- analyse(impute_obj_CIR, delta = dat_delta, vars = vars_an, fun = compare_change_lastvisit)
+  ana_delta <- analyse(
+    impute_obj_CIR,
+    fun = compare_change_lastvisit,
+    vars = vars_an,
+    delta = dat_delta,
+  )
+  
   pool_delta <- as.data.frame(pool(ana_delta))
   tipp_frame$trt_effect_6[i] <- pool_delta[["est"]]
   tipp_frame$pval_6[i] <- pool_delta[["pval"]]
 }
 
 # Show delta values which lead to non-significant analysis results
-subset(tipp_frame,pval_6>=0.05)
+subset(tipp_frame, pval_6 >= 0.05)
 
 
 # Plot results
-tipp_frame$pval <- cut(tipp_frame$pval,c(0,0.001,0.01,0.05,0.2,1),right=F,
-                       labels=c("<0.001","0.001 - <0.01", "0.01- <0.05", "0.05 - <0.20",">= 0.20"))
+tipp_frame$pval <- cut(
+  tipp_frame$pval,
+  c(0, 0.001, 0.01, 0.05, 0.2, 1),
+  right = FALSE,
+  labels = c("<0.001","0.001 - <0.01", "0.01- <0.05", "0.05 - <0.20",">= 0.20")
+)
 
 ggplot(tipp_frame, aes(delta_control, delta_intervention, fill = pval)) +
-    geom_raster()+scale_fill_manual(values=c("darkgreen","lightgreen","lightyellow","orange","red"))
+    geom_raster() +
+  scale_fill_manual(values = c("darkgreen", "lightgreen", "lightyellow", "orange", "red"))
 ```
 
 According to this analysis, the significant test result from the primary analysis under CIR could only be tipped to a non-significant result for rather extreme delta-adjustments. 
