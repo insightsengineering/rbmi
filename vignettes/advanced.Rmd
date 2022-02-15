@@ -114,7 +114,7 @@ data <- simulate_data(
     post_ice1_traj = post_ice_traj
 )
 
-str(data)
+head(data)
 
 # As a simple descriptive of the simulated data, summarize the number of subjects with ICEs and missing data 
 data %>%
