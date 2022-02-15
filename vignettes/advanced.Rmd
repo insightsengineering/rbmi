@@ -130,7 +130,7 @@ data %>%
   )
 ```
 
-# Handling of observed post-ICE data in `rbmi` and imputation under CIR {#sec:postICEobs} 
+# Handling of observed post-ICE data in `rbmi` under reference-based imputation {#sec:postICEobs} 
 
 `rbmi` always uses all non-missing outcome data from the input data set, i.e. such data are never overwritten during the imputation step or removed from the analysis step. This implies that if there are data which are considered to be irrelevant for treatment effect estimation (e.g. data after an ICE for which the estimand specified a hypothetical strategy), then such data need to be removed from the input data set by the user prior to calling the `rbmi` functions.
 
