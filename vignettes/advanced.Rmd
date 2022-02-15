@@ -35,7 +35,7 @@ In order to demonstrate the advanced functions we will first create a simulated 
 The `simulate_data()` function generates data from a randomized clinical trial with longitudinal continuous outcomes and up to two different types of intercurrent events (ICEs).
 One intercurrent event (ICE1) may be thought of as a discontinuation from study treatment due to study drug or condition related (SDCR) reasons.
 The other event (ICE2) may be thought of as discontinuation from study treatment due to not study drug or condition related (NSDCR) reasons. 
-For the purpose of this vignette, we simulate data similarly to the simulation study reported in @Wolbers2021 (though we change some of the simulation parameters) and include only one  ICE type (ICE1).
+For the purpose of this vignette, we simulate data similarly to the simulation study reported in @Wolbers2021 (though we change some of the simulation parameters) and include only one ICE type (ICE1).
 
 Specifically, we simulate a 1:1 randomized trial of an active drug (intervention) versus placebo (control) with 100 subjects per group and 6 post-baseline assessments (bi-monthly visits until 12 months) under the following assumptions:
 
