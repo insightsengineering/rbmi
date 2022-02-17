@@ -215,6 +215,18 @@ test_that("validate_datalong_types",{
     dat2 <- dat
     dat2$visit <- factor("A")
     expect_true(validate_datalong_types(dat2, vars))
+
+    # Test that if group or visit variables have unobserved levels return error
+    dat2 <- dat[dat$visit != "Visit 1",]
+    expect_error(
+        validate_datalong_types(dat2, vars),
+        "`visit`"
+    )
+    dat2 <- dat[dat$group == "B",]
+    expect_error(
+        validate_datalong_types(dat2, vars),
+        "`group`"
+    )
 })
 
 

@@ -99,8 +99,24 @@ validate_datalong_types <- function(data, vars) {
     )
 
     assert_that(
+        length(unique(data[[vars$group]])) == nlevels(data[[vars$group]]),
+        msg = sprintf(
+            "The number of levels in variable `%s` is different than the number of observed levels",
+            vars$group
+        )
+    )
+
+    assert_that(
         is.factor(data[[vars$visit]]),
         msg = sprintf("Variable `%s` should be of type factor", vars$visit)
+    )
+
+    assert_that(
+        length(unique(data[[vars$visit]])) == nlevels(data[[vars$visit]]),
+        msg = sprintf(
+            "The number of levels in variable `%s` is different than the number of observed levels",
+            vars$visit
+        )
     )
 
     assert_that(
