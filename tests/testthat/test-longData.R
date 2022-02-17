@@ -122,6 +122,7 @@ get_data <- function(n) {
 
 test_that("longData - Basics", {
 
+    set.seed(123)
     dobj <- get_ld()
     ld <- dobj$ld
     dat <- dobj$dat
@@ -150,6 +151,7 @@ test_that("longData - Basics", {
 
 test_that("longData - Sampling", {
 
+    set.seed(145)
     dobj <- get_ld()
     ld <- dobj$ld
     dat <- dobj$dat
@@ -345,6 +347,7 @@ test_that("Group is a stratification variable by default", {
 
 test_that("Strategies", {
 
+    set.seed(178)
     dobj <- get_ld()
     ld <- dobj$ld
     dat <- dobj$dat
@@ -461,6 +464,7 @@ test_that("strategies part 2", {
     # Here we check to see that using `update_strategies` only updates the strategy and not
     # the visits (or anything else for that matter)
 
+    set.seed(987)
     dobj <- get_ld()
     ld <- dobj$ld
     dat <- dobj$dat
@@ -585,6 +589,7 @@ test_that("as_strata", {
 
 test_that("idmap", {
     # The idmap option provides a mapping vectoring linking new_ids to old_ids
+    set.seed(654)
     dobj <- get_ld()
     ld <- dobj$ld
     dat <- dobj$dat
