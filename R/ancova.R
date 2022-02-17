@@ -186,7 +186,7 @@ ancova_single <- function(data, outcome, group, covariates, weights = c("proport
 
     data2 <- data[, c(extract_covariates(covariates), outcome, group)]
 
-    frm <- as_simple_formula(list(group = group, outcome = outcome, covariates = covariates))
+    frm <- as_simple_formula(outcome, c(group, covariates))
 
     mod <- lm(formula = frm, data = data2)
 

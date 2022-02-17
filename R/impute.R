@@ -517,8 +517,8 @@ impute_data_individual <- function(
     dat_ref <- dat_pt
     dat_ref[, vars$group] <- factor(group_ref, levels = levels(id_data$group))
 
-    dat_pt_mod <- as_model_df(dat_pt, as_simple_formula(vars))
-    dat_ref_mod <- as_model_df(dat_ref, as_simple_formula(vars))
+    dat_pt_mod <- as_model_df(dat_pt, data$formula)
+    dat_ref_mod <- as_model_df(dat_ref, data$formula)
 
     parameters_group <- get_visit_distribution_parameters(
         dat = dat_pt_mod[-1],  # -1 as first col from as_model_df is the outcome variable

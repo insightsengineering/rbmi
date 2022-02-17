@@ -384,7 +384,7 @@ get_draws_mle <- function(
         method = method,
         samples = sample_list(samples),
         data = longdata,
-        formula = as_simple_formula(longdata$vars),
+        formula = longdata$formula,
         n_failures = n_failed_samples
     )
     return(ret)
@@ -411,7 +411,10 @@ get_mmrm_sample <- function(ids, longdata, method, optimizer) {
 
     vars <- longdata$vars
     dat <- longdata$get_data(ids, nmar.rm = TRUE, na.rm = TRUE)
-    model_df <- as_model_df(dat, as_simple_formula(vars))
+    model_df <- as_model_df(
+        dat = dat,
+        frm = longdata$formula
+    )
 
     sample <- fit_mmrm_multiopt(
         designmat = model_df[, -1, drop = FALSE],
@@ -474,8 +477,10 @@ draws.bayes <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet =
     data2 <- extract_data_nmar_as_na(longdata)
 
     # compute design matrix
-    frm <- as_simple_formula(vars)
-    model_df <- as_model_df(data2, frm)
+    model_df <- as_model_df(
+        dat = data2,
+        frm = longdata$formula
+    )
 
     # scale input data
     scaler <- scalerConstructor$new(model_df)
@@ -531,7 +536,7 @@ draws.bayes <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet =
         samples = sample_list(samples),
         data = longdata,
         fit = fit$fit,
-        formula = frm,
+        formula = longdata$formula,
         n_failures = 0
     )
 
