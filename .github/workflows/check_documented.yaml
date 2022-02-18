@@ -4,9 +4,6 @@ on:
   push:
     paths-ignore:
       - 'misc/**'
-  pull_request:
-    paths-ignore:
-      - 'misc/**'
 
 name: Check is Documented
 
@@ -31,7 +28,7 @@ jobs:
       
       - name: Check Is Clean
         shell: bash
-        run:
+        run: |
           git status
           if [ -z "$(git status --porcelain)" ]; then
             echo "Is Clean"
