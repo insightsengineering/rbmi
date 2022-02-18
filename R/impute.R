@@ -16,7 +16,7 @@
 #' imputation methods. Should be of the form `c("Group1" = "Reference1", "Group2" = "Reference2")`.
 #' If `NULL` (default), the references are assumed to be of the form
 #' `c("Group1" = "Group1", "Group2" = "Group2")`. This argument cannot be `NULL` if
-#' an imputation strategy different from `MAR` is set.
+#' an imputation strategy (as defined by `data_ice[[vars$strategy]]` in the call to [draws]) other than `MAR` is set.
 #'
 #' @param update_strategy an optional `data.frame`. Updates the imputation method that was
 #' originally set via the `data_ice` option in [draws()]. See the details section for more
