@@ -176,7 +176,7 @@ analyse <- function(imputations, fun = ancova, delta = NULL, ...) {
 
 
 
-#' Extract imputed datasets
+#' Extract imputed dataset
 #'
 #' @description
 #' Extracts the imputed datasets contained within an imputations object generated
