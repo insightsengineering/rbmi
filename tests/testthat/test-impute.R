@@ -169,7 +169,7 @@ test_that("`references` is handled as expected", {
     method <- method_condmean(type = "bootstrap", n_samples = 0)
 
     data_ice <- data.frame(
-        subjid = data$subjid[c(1,10)],
+        subjid = dat$subjid[c(1,10)],
         visit = c("2", "3"),
         strategy = "MAR"
     )
