@@ -178,15 +178,15 @@ test_that("`references` is handled as expected", {
     drawsObj <- draws(dat, data_ice, vars, method, quiet = TRUE)
     imputeObj <- impute(drawsObj)
 
-    expected_ref <- c(
+    references <- c(
         "Control" = "Control",
         "Intervention" = "Intervention"
     )
-    expected_ref <- add_class(expected_ref, "references")
+    imputeObj_expected <- impute(drawsObj, references = references)
 
     expect_equal(
-        imputeObj$references,
-        expected_ref
+        imputeObj,
+        imputeObj_expected
     )
 
     data_ice$strategy[1] <- "JR"
