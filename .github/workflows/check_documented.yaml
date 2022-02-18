@@ -20,6 +20,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       
+      - name: Build src
+        uses: ./.github/actions/build-src
       
       - name: Document Code
         run: |
@@ -28,8 +30,10 @@ jobs:
         shell: Rscript {0}
       
       - name: Check Is Clean
+        shell: bash
         run:
-          if [ -z "$(git status --porcelain)" ]; then 
+          git status
+          if [ -z "$(git status --porcelain)" ]; then
             echo "Is Clean"
           else
             echo "Changed Detected"
