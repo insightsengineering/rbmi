@@ -53,7 +53,13 @@ See the user level function <code><a href="impute.html">impute()</a></code> for 
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">impute_internal</span><span class="op">(</span><span class="va">draws</span>, <span class="va">references</span>, <span class="va">update_strategy</span>, <span class="va">strategies</span>, <span class="va">condmean</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">impute_internal</span><span class="op">(</span>
+  <span class="va">draws</span>,
+  references <span class="op">=</span> <span class="cn">NULL</span>,
+  <span class="va">update_strategy</span>,
+  <span class="va">strategies</span>,
+  <span class="va">condmean</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -62,7 +68,10 @@ See the user level function <code><a href="impute.html">impute()</a></code> for 
 <dd><p>A <code>draws</code> object created by <code><a href="draws.html">draws()</a></code>.</p></dd>
 <dt>references</dt>
 <dd><p>a named vector. Identifies the references to be used for reference-based
-imputation methods. Should be of the form <code>c("Group1" = "Reference1", "Group2" = "Reference2")</code>.</p></dd>
+imputation methods. Should be of the form <code>c("Group1" = "Reference1", "Group2" = "Reference2")</code>.
+If <code>NULL</code> (default), the references are assumed to be of the form
+<code>c("Group1" = "Group1", "Group2" = "Group2")</code>. This argument cannot be <code>NULL</code> if
+an imputation strategy (as defined by <code>data_ice[[vars$strategy]]</code> in the call to <a href="draws.html">draws</a>) other than <code>MAR</code> is set.</p></dd>
 <dt>update_strategy</dt>
 <dd><p>an optional <code>data.frame</code>. Updates the imputation method that was
 originally set via the <code>data_ice</code> option in <code><a href="draws.html">draws()</a></code>. See the details section for more

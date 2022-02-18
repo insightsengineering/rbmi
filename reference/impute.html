@@ -56,13 +56,28 @@ the call to <code><a href="draws.html">draws()</a></code>. One imputed dataset i
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">impute</span><span class="op">(</span><span class="va">draws</span>, <span class="va">references</span>, update_strategy <span class="op">=</span> <span class="cn">NULL</span>, strategies <span class="op">=</span> <span class="fu"><a href="getStrategies.html">getStrategies</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">impute</span><span class="op">(</span>
+  <span class="va">draws</span>,
+  references <span class="op">=</span> <span class="cn">NULL</span>,
+  update_strategy <span class="op">=</span> <span class="cn">NULL</span>,
+  strategies <span class="op">=</span> <span class="fu"><a href="getStrategies.html">getStrategies</a></span><span class="op">(</span><span class="op">)</span>
+<span class="op">)</span>
 
 <span class="co"># S3 method for random</span>
-<span class="fu">impute</span><span class="op">(</span><span class="va">draws</span>, <span class="va">references</span>, update_strategy <span class="op">=</span> <span class="cn">NULL</span>, strategies <span class="op">=</span> <span class="fu"><a href="getStrategies.html">getStrategies</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="fu">impute</span><span class="op">(</span>
+  <span class="va">draws</span>,
+  references <span class="op">=</span> <span class="cn">NULL</span>,
+  update_strategy <span class="op">=</span> <span class="cn">NULL</span>,
+  strategies <span class="op">=</span> <span class="fu"><a href="getStrategies.html">getStrategies</a></span><span class="op">(</span><span class="op">)</span>
+<span class="op">)</span>
 
 <span class="co"># S3 method for condmean</span>
-<span class="fu">impute</span><span class="op">(</span><span class="va">draws</span>, <span class="va">references</span>, update_strategy <span class="op">=</span> <span class="cn">NULL</span>, strategies <span class="op">=</span> <span class="fu"><a href="getStrategies.html">getStrategies</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu">impute</span><span class="op">(</span>
+  <span class="va">draws</span>,
+  references <span class="op">=</span> <span class="cn">NULL</span>,
+  update_strategy <span class="op">=</span> <span class="cn">NULL</span>,
+  strategies <span class="op">=</span> <span class="fu"><a href="getStrategies.html">getStrategies</a></span><span class="op">(</span><span class="op">)</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -71,7 +86,10 @@ the call to <code><a href="draws.html">draws()</a></code>. One imputed dataset i
 <dd><p>A <code>draws</code> object created by <code><a href="draws.html">draws()</a></code>.</p></dd>
 <dt>references</dt>
 <dd><p>a named vector. Identifies the references to be used for reference-based
-imputation methods. Should be of the form <code>c("Group1" = "Reference1", "Group2" = "Reference2")</code>.</p></dd>
+imputation methods. Should be of the form <code>c("Group1" = "Reference1", "Group2" = "Reference2")</code>.
+If <code>NULL</code> (default), the references are assumed to be of the form
+<code>c("Group1" = "Group1", "Group2" = "Group2")</code>. This argument cannot be <code>NULL</code> if
+an imputation strategy (as defined by <code>data_ice[[vars$strategy]]</code> in the call to <a href="draws.html">draws</a>) other than <code>MAR</code> is set.</p></dd>
 <dt>update_strategy</dt>
 <dd><p>an optional <code>data.frame</code>. Updates the imputation method that was
 originally set via the <code>data_ice</code> option in <code><a href="draws.html">draws()</a></code>. See the details section for more
