@@ -1,0 +1,58 @@
+
+
+on:
+  push:
+    paths-ignore:
+      - 'misc/**'
+
+name: On Push
+
+jobs:
+  
+  testthat:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/rbmi:r404
+    steps:
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Build src
+        uses: ./.github/actions/build-src
+      
+      - name: testthat
+        run: |
+          options(crayon.enabled = TRUE, cli.dynamic = FALSE)
+          devtools::test(stop_on_failure = TRUE, reporter = testthat::CheckReporter)
+        shell: Rscript {0}
+  
+  document:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/rbmi:r404
+    steps:
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Build src
+        uses: ./.github/actions/build-src
+      
+      - name: Document Code
+        run: |
+          options(crayon.enabled = TRUE, cli.dynamic = FALSE)
+          devtools::document()
+        shell: Rscript {0}
+      
+      - name: Check Is Clean
+        shell: bash
+        run: |
+          git status
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Is Clean"
+          else
+            echo "Changed Detected"
+            exit 2
+          fi
+
