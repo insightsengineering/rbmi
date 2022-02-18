@@ -104,7 +104,7 @@
 #' }
 #'
 #' @export
-impute <- function(draws, references, update_strategy = NULL, strategies = getStrategies()) {
+impute <- function(draws, references = NULL, update_strategy = NULL, strategies = getStrategies()) {
     UseMethod("impute")
 }
 

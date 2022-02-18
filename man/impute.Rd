@@ -6,7 +6,12 @@
 \alias{impute.condmean}
 \title{Create imputed datasets}
 \usage{
-impute(draws, references, update_strategy = NULL, strategies = getStrategies())
+impute(
+  draws,
+  references = NULL,
+  update_strategy = NULL,
+  strategies = getStrategies()
+)
 
 \method{impute}{random}(
   draws,
