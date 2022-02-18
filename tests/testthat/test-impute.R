@@ -141,6 +141,75 @@ test_that("Basic Usage", {
 })
 
 
+test_that("`references` is handled as expected", {
+
+    set.seed(123)
+    n <- 8
+    nv <- 3
+    muT <- c(1,2,3)
+    muC <- c(1,3,5)
+    covC <- rbind(
+        c(2, 0.9, 0.8),
+        c(0.9, 2, 0.9),
+        c(0.8, 0.9, 2)
+    )
+    covT <- covC
+
+    dat <- data.frame(
+        subjid = factor(rep(1:(2*n), each = nv), levels = 1:(2*n)),
+        group = factor(rep(c("Control", "Intervention"), each = nv*n), levels = c("Control", "Intervention")),
+        visit = factor(rep(c("1", "2", "3"), 2*n), levels = c("1", "2", "3")),
+        outcome = c(
+            replicate(n, sample_mvnorm(muC, covC)),
+            replicate(n, sample_mvnorm(muT, covT))
+        )
+    )
+    dat$outcome[2:3] <- NA
+
+    method <- method_condmean(type = "bootstrap", n_samples = 0)
+
+    data_ice <- data.frame(
+        subjid = data$subjid[c(1,10)],
+        visit = c("2", "3"),
+        strategy = "MAR"
+    )
+    vars <- set_vars()
+
+    drawsObj <- draws(dat, data_ice, vars, method, quiet = TRUE)
+    imputeObj <- impute(drawsObj)
+
+    expected_ref <- c(
+        "Control" = "Control",
+        "Intervention" = "Intervention"
+    )
+    expected_ref <- add_class(expected_ref, "references")
+
+    expect_equal(
+        imputeObj$references,
+        expected_ref
+    )
+
+    data_ice$strategy[1] <- "JR"
+    drawsObj <- draws(dat, data_ice, vars, method, quiet = TRUE)
+    expect_error(
+        impute(drawsObj),
+        "`references`"
+    )
+
+    references <- c(
+        "Control" = "Control",
+        "Intervention" = "Control"
+    )
+    imputeObj <- impute(drawsObj, references)
+    references <- add_class(references, "references")
+    expect_equal(
+        references,
+        imputeObj$references
+    )
+
+})
+
+
 
 
 
@@ -1009,7 +1078,7 @@ test_that("method_bmlmi is working as expected in combination with impute", {
         sample_mvnorm = function(mu, sigma) as.vector(mu),
         where = environment(impute)
     )
-    
+
     expect_equal(x$imputations, expected_output)
 })
 

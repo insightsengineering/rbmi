@@ -14,6 +14,9 @@
 #'
 #' @param references a named vector. Identifies the references to be used for reference-based
 #' imputation methods. Should be of the form `c("Group1" = "Reference1", "Group2" = "Reference2")`.
+#' If `NULL` (default), the references are assumed to be of the form
+#' `c("Group1" = "Group1", "Group2" = "Group2")`. This argument cannot be `NULL` if
+#' an imputation strategy different from `MAR` is set.
 #'
 #' @param update_strategy an optional `data.frame`. Updates the imputation method that was
 #' originally set via the `data_ice` option in [draws()]. See the details section for more
@@ -109,7 +112,7 @@ impute <- function(draws, references, update_strategy = NULL, strategies = getSt
 
 #' @rdname impute
 #' @export
-impute.random <- function(draws, references, update_strategy = NULL, strategies = getStrategies()) {
+impute.random <- function(draws, references = NULL, update_strategy = NULL, strategies = getStrategies()) {
     result <- impute_internal(
         draws = draws,
         update_strategy = update_strategy,
@@ -125,7 +128,7 @@ impute.random <- function(draws, references, update_strategy = NULL, strategies 
 
 #' @rdname impute
 #' @export
-impute.condmean <- function(draws, references, update_strategy = NULL, strategies = getStrategies()) {
+impute.condmean <- function(draws, references = NULL, update_strategy = NULL, strategies = getStrategies()) {
     result <- impute_internal(
         draws = draws,
         update_strategy = update_strategy,
@@ -147,18 +150,27 @@ impute.condmean <- function(draws, references, update_strategy = NULL, strategie
 #'
 #' @param condmean logical. If TRUE will impute using the conditional mean values, if values
 #' will impute by taking a random draw from the multivariate normal distribution.
-impute_internal <- function(draws, references, update_strategy, strategies, condmean) {
-    references <- add_class(references, "references")
+impute_internal <- function(draws, references = NULL, update_strategy, strategies, condmean) {
     validate(draws)
+
     data <- draws$data$clone(deep = TRUE)
-    validate(references, data$data[[data$vars$group]])
+
     validate_strategies(strategies, data$strategies)
-
-
-
     if (!is.null(update_strategy)) {
         data$update_strategies(update_strategy)
     }
+
+    if(is.null(references)) {
+        assert_that(
+            all(data$strategies == "MAR"),
+            msg = "You have set a non-MAR imputation strategy. Please specify the references using the argument `references`"
+        )
+        references <- levels(data$data[[data$vars$group]])
+        names(references) <- references
+    }
+    references <- add_class(references, "references")
+    validate(references, data$data[[data$vars$group]])
+
 
     validate(draws$samples)
     samples_grouped <- transpose_samples(draws$samples)
