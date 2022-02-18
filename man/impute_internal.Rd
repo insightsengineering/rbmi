@@ -19,7 +19,7 @@ impute_internal(
 imputation methods. Should be of the form \code{c("Group1" = "Reference1", "Group2" = "Reference2")}.
 If \code{NULL} (default), the references are assumed to be of the form
 \code{c("Group1" = "Group1", "Group2" = "Group2")}. This argument cannot be \code{NULL} if
-an imputation strategy different from \code{MAR} is set.}
+an imputation strategy (as defined by \code{data_ice[[vars$strategy]]} in the call to \link{draws}) other than \code{MAR} is set.}
 
 \item{update_strategy}{an optional \code{data.frame}. Updates the imputation method that was
 originally set via the \code{data_ice} option in \code{\link[=draws]{draws()}}. See the details section for more
