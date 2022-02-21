@@ -141,6 +141,7 @@ simulate_test_data <- function(
 
 
 #' @rdname simulate_test_data
+#' @export
 as_vcov <- function(sd, cor) {
     x <- diag(rep(1, length(sd)))
     x[upper.tri(x)] <- cor
