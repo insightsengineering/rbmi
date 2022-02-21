@@ -604,3 +604,98 @@ adjust_trajectories_single <- function(
     outcome[is_post_ice] <- impute_outcome(conditional_parameters)[[1]]
     return(outcome)
 }
+
+
+#' Simulate a realistic example dataset
+#'
+#' @description
+#' Simulate a realistic example dataset using [simulate_data()] with hard-coded
+#' values of all the input arguments.
+#'
+#' @details
+#' [get_example_data()] simulates a 1:1 randomized trial of
+#' an active drug (intervention) versus placebo (control) with 100 subjects per
+#' group and 6 post-baseline assessments (bi-monthly visits until 12 months).
+#' One intercurrent event corresponding to treatment discontinuation is also simulated.
+#' Specifically, data are simulated under the following assumptions:
+#'
+#'- The mean outcome trajectory in the placebo group increases linearly from
+#' 50 at baseline (visit 0) to 60 at visit 6, i.e. the slope is 10 points/year.
+#'- The mean outcome trajectory in the intervention group is identical to the
+#' placebo group up to visit 2. From visit 2 onward, the slope decreases by 50% to 5 points/year.
+#'- The covariance structure of the baseline and follow-up values in both groups
+#' is implied by a random intercept and slope model with a standard deviation of 5
+#' for both the intercept and the slope, and a correlation of 0.25.
+#' In addition, an independent residual error with standard deviation 2.5 is added
+#' to each assessment.
+#'- The probability of study drug discontinuation after each visit is calculated
+#' according to a logistic model which depends on the observed outcome at that visit.
+#' Specifically, a visit-wise discontinuation probability of 2% and 3% in the control
+#' and intervention group, respectively, is specified in case the observed outcome is
+#' equal to 50 (the mean value at baseline). The odds of a discontinuation is simulated
+#' to increase by +10% for each +1 point increase of the observed outcome.
+#'- Study drug discontinuation is simulated to have no effect on the mean trajectory in
+#' the placebo group. In the intervention group, subjects who discontinue follow
+#' the slope of the mean trajectory from the placebo group from that time point onward.
+#' This is compatible with a copy increments in reference (CIR) assumption.
+#'- Study drop-out at the study drug discontinuation visit occurs with a probability
+#' of 50% leading to missing outcome data from that time point onward.
+#'
+#' @seealso [simulate_data()], [set_simul_pars()]
+#'
+#' @export
+get_example_data <- function() {
+
+    n <- 100
+    time <- c(0, 2, 4, 6, 8, 10, 12)
+
+    # Mean trajectory control
+    muC <- c(50.0, 51.66667, 53.33333, 55.0, 56.66667, 58.33333, 60.0)
+
+    # Mean trajectory intervention
+    muT <- c(50.0, 51.66667, 53.33333, 54.16667, 55.0, 55.83333, 56.66667)
+
+    # Create Sigma
+    sd_error <- 2.5
+    covRE <- rbind(
+        c(25.0, 6.25),
+        c(6.25, 25.0)
+    )
+
+    Sigma <- cbind(1, time / 12) %*% covRE %*% rbind(1, time / 12) + diag(sd_error^2, nrow = length(time))
+
+    # Set probability of discontinuation
+    probDisc_C <- 0.02
+    probDisc_T <- 0.03
+    or_outcome <- 1.10 # +1 point increase => +10% odds of discontinuation
+
+    # Set drop-out rate following discontinuation
+    prob_dropout <- 0.5
+
+    # Set simulation parameters of the control group
+    parsC <- set_simul_pars(
+        mu = muC,
+        sigma = Sigma,
+        n = n,
+        prob_ice1 = probDisc_C,
+        or_outcome_ice1 = or_outcome,
+        prob_post_ice1_dropout = prob_dropout
+    )
+
+    # Set simulation parameters of the intervention group
+    parsT <- parsC
+    parsT$mu <- muT
+    parsT$prob_ice1 <- probDisc_T
+
+    # Set assumption about post-ice trajectory
+    post_ice_traj <- "CIR"
+
+    # Simulate data
+    data <- simulate_data(
+        pars_c = parsC,
+        pars_t = parsT,
+        post_ice1_traj = post_ice_traj
+    )
+
+    return(data)
+}
