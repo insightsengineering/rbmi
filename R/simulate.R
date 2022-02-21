@@ -53,6 +53,7 @@
 #' be a named list with elements `int`, `age`, `sex`, `trt` & `visit`. See details.
 #'
 #' @name simulate_test_data
+#' @export
 simulate_test_data <- function(
     n = 200,
     sd = c(3, 5, 7),
@@ -141,6 +142,7 @@ simulate_test_data <- function(
 
 
 #' @rdname simulate_test_data
+#' @export
 as_vcov <- function(sd, cor) {
     x <- diag(rep(1, length(sd)))
     x[upper.tri(x)] <- cor
