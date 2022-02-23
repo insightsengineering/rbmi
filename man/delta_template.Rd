@@ -2,7 +2,7 @@
 % Please edit documentation in R/delta.R
 \name{delta_template}
 \alias{delta_template}
-\title{Create a delta data.frame template}
+\title{Create a delta \code{data.frame} template}
 \usage{
 delta_template(imputations, delta = NULL, dlag = NULL, missing_only = TRUE)
 }
@@ -24,18 +24,18 @@ first and then overwritten with 0's at the end (i.e. the delta values for missin
 post-ICE visits will stay the same regardless of this option).}
 }
 \description{
-Creates a data.frame in the format required by \code{\link[=analyse]{analyse()}} for the use
+Creates a \code{data.frame} in the format required by \code{\link[=analyse]{analyse()}} for the use
 of applying a delta adjustment.
 }
 \details{
 To apply a delta adjustment the \code{\link[=analyse]{analyse()}} function expects
-a delta data.frame with 3 variables: \code{vars$subjid}, \code{vars$visit} and \code{delta}
+a delta \code{data.frame} with 3 variables: \code{vars$subjid}, \code{vars$visit} and \code{delta}
 (where \code{vars} is the object supplied in the original call to \code{\link[=draws]{draws()}}
 as created by the \code{\link[=set_vars]{set_vars()}} function).
 
-This function will return a \code{data.frame} with the aforementioned variables with 1
+This function will return a \code{data.frame} with the aforementioned variables with one
 row per subject per visit. If the \code{delta} argument to this function is \code{NULL}
-then the \code{delta} column in the returned data.frame will be 0 for all observations.
+then the \code{delta} column in the returned \code{data.frame} will be 0 for all observations.
 If the \code{delta} argument is not \code{NULL} then \code{delta} will be calculated separately
 for each subject as the accumulative sum of \code{delta} multiplied by the scaling
 coefficient \code{dlag} based upon how many visits after the subject's intercurrent
@@ -102,10 +102,10 @@ Please note that this function also returns several utility variables so that
 the user can create their own custom logic for defining what \code{delta}
 should be set to. These additional variables include:
 \itemize{
-\item \code{is_mar} - If the observation was missing would it be regarded as MAR ? This variable
-is set to \code{FALSE} if it occurred after a non-MAR ICE, otherwise it is set to \code{TRUE}.
+\item \code{is_mar} - If the observation was missing would it be regarded as MAR? This variable
+is set to \code{FALSE} for observations occurred after a non-MAR ICE, otherwise it is set to \code{TRUE}.
 \item \code{is_missing} - Is the outcome variable for this observation missing.
-\item \code{is_post_ice} - Does the observation occur after the patients ICE as defined by the
+\item \code{is_post_ice} - Does the observation occur after the patient's ICE as defined by the
 \code{data_ice} dataset supplied to \code{\link[=draws]{draws()}}.
 \item \code{strategy} - What imputation strategy was assigned to for this subject.
 }
@@ -116,7 +116,7 @@ as implemented in the so called "five marcos" by James Roger. See Roger (2021).
 \examples{
 \dontrun{
 delta_template(imputeObj)
-delta_template(imputeObj, delta = c(5,6,7,8), dlag=c(1,2,3,4))
+delta_template(imputeObj, delta = c(5,6,7,8), dlag = c(1,2,3,4))
 }
 }
 \references{

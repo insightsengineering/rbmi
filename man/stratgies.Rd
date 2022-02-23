@@ -25,21 +25,21 @@ strategy_LMCF(pars_group, pars_ref, index_mar)
 \item{pars_ref}{A list of parameters for the subject's reference group. See details.}
 
 \item{index_mar}{A logical vector indicating which visits meet the MAR assumption
-for the subject. I.e. this identifies the observations that after a non-MAR
+for the subject. I.e. this identifies the observations after a non-MAR
 intercurrent event (ICE).}
 }
 \description{
 These functions are used to implement various reference based imputation
 strategies by combining a subjects own distribution with that of
 a reference distribution based upon which of their visits failed to meet
-the MAR assumption
+the Missing-at-Random (MAR) assumption.
 }
 \details{
 \code{pars_group} and \code{pars_ref} both must be a list containing elements \code{mu} and \code{sigma}.
 \code{mu} must be a numeric vector and \code{sigma} must be a square matrix symmetric covariance
 matrix with dimensions equal to the length of \code{mu} and \code{index_mar}. e.g.\preformatted{list(
     mu = c(1,2,3),
-    sigma = matrix(c(1,2,3,4,5,6,7,8,9), nrow = 3, ncol = 3)
+    sigma = matrix(c(4,3,2,3,5,4,2,4,6), nrow = 3, ncol = 3)
 )
 }
 
@@ -50,7 +50,7 @@ strategies are available "out the box":
 \item Missing at Random (MAR)
 \item Jump to Reference (JR)
 \item Copy Reference (CR)
-\item Copy Increments from Reference (CIR)
+\item Copy Increments in Reference (CIR)
 \item Last Mean Carried Forward (LMCF)
 }
 }

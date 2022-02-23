@@ -2,7 +2,7 @@
 % Please edit documentation in R/strategies.R
 \name{getStrategies}
 \alias{getStrategies}
-\title{Get Imputation Strategies}
+\title{Get imputation strategies}
 \usage{
 getStrategies(...)
 }
@@ -16,7 +16,7 @@ multivariate normal distribution parameters by merging those of the source
 group and reference group per patient.
 }
 \details{
-By default Jump to Reference (JR), Copy Reference (CR), Copy Increments from
+By default Jump to Reference (JR), Copy Reference (CR), Copy Increments in
 Reference (CIR), Last Mean Carried Forward (LMCF) and Missing at Random (MAR)
 are defined.
 

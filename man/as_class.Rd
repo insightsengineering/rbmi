@@ -7,9 +7,9 @@
 as_class(x, cls)
 }
 \arguments{
-\item{x}{Object to set the class of}
+\item{x}{object to set the class of.}
 
-\item{cls}{The class to be set}
+\item{cls}{the class to be set.}
 }
 \description{
 Utility function to set an objects class.

@@ -7,9 +7,9 @@
 apply_delta(data, delta = NULL, group = NULL, outcome = NULL)
 }
 \arguments{
-\item{data}{data.frame which will have its \code{outcome} column adjusted.}
+\item{data}{\code{data.frame} which will have its \code{outcome} column adjusted.}
 
-\item{delta}{data.frame (must contain a column called \code{delta}).}
+\item{delta}{\code{data.frame} (must contain a column called \code{delta}).}
 
 \item{group}{character vector of variables in both \code{data} and \code{delta} that will be used
 to merge the 2 data.frames together by.}

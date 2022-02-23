@@ -1,20 +1,20 @@
 
 
-#' Create a delta data.frame template
+#' Create a delta `data.frame` template
 #'
 #' @description
-#' Creates a data.frame in the format required by [analyse()] for the use
+#' Creates a `data.frame` in the format required by [analyse()] for the use
 #' of applying a delta adjustment.
 #'
 #' @details
 #' To apply a delta adjustment the [analyse()] function expects
-#' a delta data.frame with 3 variables: `vars$subjid`, `vars$visit` and `delta`
+#' a delta `data.frame` with 3 variables: `vars$subjid`, `vars$visit` and `delta`
 #' (where `vars` is the object supplied in the original call to [draws()]
 #' as created by the [set_vars()] function).
 #'
-#' This function will return a `data.frame` with the aforementioned variables with 1
+#' This function will return a `data.frame` with the aforementioned variables with one
 #' row per subject per visit. If the `delta` argument to this function is `NULL`
-#' then the `delta` column in the returned data.frame will be 0 for all observations.
+#' then the `delta` column in the returned `data.frame` will be 0 for all observations.
 #' If the `delta` argument is not `NULL` then `delta` will be calculated separately
 #' for each subject as the accumulative sum of `delta` multiplied by the scaling
 #' coefficient `dlag` based upon how many visits after the subject's intercurrent
@@ -94,10 +94,10 @@
 #' the user can create their own custom logic for defining what `delta`
 #' should be set to. These additional variables include:
 #'
-#' - `is_mar` - If the observation was missing would it be regarded as MAR ? This variable
-#' is set to `FALSE` if it occurred after a non-MAR ICE, otherwise it is set to `TRUE`.
+#' - `is_mar` - If the observation was missing would it be regarded as MAR? This variable
+#' is set to `FALSE` for observations occurred after a non-MAR ICE, otherwise it is set to `TRUE`.
 #' - `is_missing` - Is the outcome variable for this observation missing.
-#' - `is_post_ice` - Does the observation occur after the patients ICE as defined by the
+#' - `is_post_ice` - Does the observation occur after the patient's ICE as defined by the
 #' `data_ice` dataset supplied to [draws()].
 #' - `strategy` - What imputation strategy was assigned to for this subject.
 #'
@@ -129,7 +129,7 @@
 #' @examples
 #' \dontrun{
 #' delta_template(imputeObj)
-#' delta_template(imputeObj, delta = c(5,6,7,8), dlag=c(1,2,3,4))
+#' delta_template(imputeObj, delta = c(5,6,7,8), dlag = c(1,2,3,4))
 #' }
 #' @seealso [analyse()]
 #' @export
@@ -284,8 +284,8 @@ d_lagscale <- function(delta, dlag, is_post_ice) {
 #' Takes a delta dataset and adjusts the outcome variable by adding the
 #' corresponding delta.
 #'
-#' @param data data.frame which will have its `outcome` column adjusted.
-#' @param delta data.frame (must contain a column called `delta`).
+#' @param data `data.frame` which will have its `outcome` column adjusted.
+#' @param delta `data.frame` (must contain a column called `delta`).
 #' @param group character vector of variables in both `data` and `delta` that will be used
 #' to merge the 2 data.frames together by.
 #' @param outcome character, name of the outcome variable in `data`.
@@ -333,7 +333,7 @@ apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL) {
 
     delta_min <- delta[, c(group, "delta")]
 
-    # We insert a variable in order to recover the original sort order of our data.frame
+    # We insert a variable in order to recover the original sort order of our `data.frame`
     # We use a obfuscated name in order to prevent variable overwriting
     sort_var <- "sort_variable_awdji394thgmngrq2rqb2"
     data[[sort_var]] <- seq_len(nrow(data))
