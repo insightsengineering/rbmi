@@ -46,7 +46,7 @@ The package supports both standard imputation under a missing-at-random assumpti
 `rbmi` is a flexible `R` package designed to support the analysis of randomized clinical trials with continuous longitudinal endpoints. 
 Both conventional MI methods based on Bayesian posterior draws and novel methods based on maximum likelihood estimation and re-sampling (as decribed in @vanHippelBartlett2021 and @Wolbers2021) are implemented. `rbmi` was designed for statisticians from both academic clinical research units and pharmaceutical industry. To our knowledge, a comprehensive and fully validated `R` implementation of such approaches is still lacking. An established software implementation of reference-based imputation in SAS are the so-called "five macros" [@FiveMacros]. An alternative `R` implementation which is currently under development is the R package `RefBasedMI`[@RefbasedMIpackage].
 
-# Implementation 
+# `rbmi` workflow
 
 All approaches implemented in `rbmi` follow a common workflow based on 4 core functions which are called sequentially: 
 
