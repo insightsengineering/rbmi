@@ -70,7 +70,7 @@ The `draws()` function has 3 input arguments:
 
 In addition to detailed help files for all functions, the package contains three vignettes: a `quickstart` vignette which describes the basic functionality, an `advanced` vignette which describes some of the advanced features, and a `stat_specs` vignette which describes the statistical methodology in detail. 
 
-# Development and Implementation 
+# Development and implementation 
 
 `rbmi` is developed open source on https://github.com/insightsengineering/rbmi and major releases will also be uploaded to [CRAN](https://cran.r-project.org/).
 All production code is required to have been reviewed by an independent programmer as well as pass a  suite of automated unit tests which both define and document the expected input and output of each function.
