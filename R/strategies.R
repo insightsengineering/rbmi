@@ -101,7 +101,7 @@ compute_sigma <- function(sigma_group, sigma_ref, index_mar) {
 #' - Copy Increments in Reference (CIR)
 #' - Last Mean Carried Forward (LMCF)
 #'
-#' @name stratgies
+#' @name strategies
 #' @export
 strategy_MAR <- function(pars_group, pars_ref, index_mar) {
     return(pars_group)
@@ -109,7 +109,7 @@ strategy_MAR <- function(pars_group, pars_ref, index_mar) {
 
 
 
-#' @rdname stratgies
+#' @rdname strategies
 #' @export
 strategy_JR <- function(pars_group, pars_ref, index_mar) {
 
@@ -137,7 +137,7 @@ strategy_JR <- function(pars_group, pars_ref, index_mar) {
 }
 
 
-#' @rdname stratgies
+#' @rdname strategies
 #' @export
 strategy_CR <- function(pars_group, pars_ref, index_mar) {
     return(pars_ref)
@@ -145,7 +145,7 @@ strategy_CR <- function(pars_group, pars_ref, index_mar) {
 
 
 
-#' @rdname stratgies
+#' @rdname strategies
 #' @export
 strategy_CIR <- function(pars_group, pars_ref, index_mar) {
 
@@ -175,7 +175,7 @@ strategy_CIR <- function(pars_group, pars_ref, index_mar) {
 }
 
 
-#' @rdname stratgies
+#' @rdname strategies
 #' @export
 strategy_LMCF <- function(pars_group, pars_ref, index_mar) {
     if (all(index_mar)) {
