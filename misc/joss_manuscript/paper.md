@@ -19,7 +19,7 @@ authors:
 affiliations:
  - name: Data and Statistical Sciences, Pharma Development, Roche, Welwyn Garden City, UK
    index: 1
- - name: Data & Statistical Sciences, Pharma Development, Roche, Basel, Switzerland
+ - name: Data and Statistical Sciences, Pharma Development, Roche, Basel, Switzerland
    index: 2
 citation_author: Gower-Page, Noci, and Wolbers
 date: \today
