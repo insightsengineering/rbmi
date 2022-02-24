@@ -99,16 +99,24 @@ as_model_df <- function(dat, frm) {
 
 
 
-#' Character 2 Factor
+#' Convert character variables to factor
 #'
-#' Converts all character variables within a `data.frame` to factor.
-#' Determines character variables by `is.character()`
-#'
-#' @param data A `data.frame`
-char2fct <- function(data) {
-    for (v in colnames(data)) {
-        if (is.character(data[[v]])) {
-            data[[v]] <- factor(data[[v]])
+#' Provided a vector of variable names this function converts any
+#' character variables into factors. Has no affect on numeric or existing
+#' factor variables
+#' @param data A data.frame
+#' @param vars a character vector of variables in `data`
+char2fct <- function(data, vars = NULL) {
+    if (is.null(vars)) {
+        vars <- colnames(data)
+    }
+    for (var in vars) {
+        assert_that(
+            var %in% colnames(data),
+            msg = sprintf("Variable %s is not in data", var)
+        )
+        if (is.character(data[[var]])) {
+            data[[var]] <- factor(data[[var]])
         }
     }
     return(data)

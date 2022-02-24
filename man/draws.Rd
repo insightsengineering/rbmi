@@ -121,7 +121,8 @@ Additional baseline or time-varying covariates must be included in \code{data}.
 
 \code{data} must have one row per visit per subject. This means that incomplete
 outcome data must be set as \code{NA} instead of having the related row missing. Missing values
-in the covariates are not allowed. If \code{data} is incomplete
+in the covariates are not allowed.
+If \code{data} is incomplete
 then the \code{\link[=expand_locf]{expand_locf()}} helper function can be used to insert any missing rows using
 Last Observation Carried Forward (LOCF) imputation to impute the covariates values.
 Note that LOCF is generally not a principled imputation method and should only be used when appropriate
@@ -131,6 +132,11 @@ Please note that there is no special provisioning for the baseline outcome value
 observations to be included in the model as part of the response variable then these should be removed in advance
 from the outcome variable in \code{data}. At the same time if you want to include the baseline outcome as covariate in
 the model, then this should be included as a separate column of \code{data} (as any other covariate).
+
+Character covariates will be explicitly
+cast to factors. If you use a custom analysis function that requires specific reference
+levels for the character covariates (for example for LSmeans) then you are advised
+to manually cast your character covariates to factor in advance of running \code{\link[=draws]{draws()}}.
 
 The argument \code{data_ice} contains information about the occurrence of ICEs. It is a
 \code{data.frame} with 3 columns:
