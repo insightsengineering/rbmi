@@ -55,7 +55,7 @@ All approaches implemented in `rbmi` follow a common workflow based on 4 core fu
 - `analyse()` - analyses each of the multiple imputed datasets
 - `pool()` - combines the analysis results across imputed datasets into a single statistic
 
-This modular design creates a user-friendly and extensible environment that allow the user to have a direct control on all the phases of the estimation process. 
+This modular design creates a user-friendly and extensible environment that allows the user to have a direct control on all the phases of the estimation process. 
 In addition, a variety of helper functions have been implemented to further support the user.
 
 The `draws()` function has 3 input arguments: 
