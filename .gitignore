@@ -49,6 +49,8 @@ src/*
 
 .DS_store
 
+nul
+
 !.gitkeep
 inst/doc
 docs

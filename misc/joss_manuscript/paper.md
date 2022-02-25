@@ -19,7 +19,7 @@ authors:
 affiliations:
  - name: Data and Statistical Sciences, Pharma Development, Roche, Welwyn Garden City, UK
    index: 1
- - name: Data & Statistical Sciences, Pharma Development, Roche, Basel, Switzerland
+ - name: Data and Statistical Sciences, Pharma Development, Roche, Basel, Switzerland
    index: 2
 citation_author: Gower-Page, Noci, and Wolbers
 date: \today
@@ -44,9 +44,9 @@ The package supports both standard imputation under a missing-at-random assumpti
 # Statement of need 
 
 `rbmi` is a flexible `R` package designed to support the analysis of randomized clinical trials with continuous longitudinal endpoints. 
-Both conventional MI methods based on Bayesian posterior draws and novel methods based on maximum likelihood estimation and re-sampling (as decribed in @vanHippelBartlett2021 and @Wolbers2021) are implemented. `rbmi` was designed for statisticians from both academic clinical research units and pharmaceutical industry. To our knowledge, a comprehensive and fully validated `R` implementation of such approaches is still lacking. An established software implementation of reference-based imputation in SAS are the so-called "five macros" [@FiveMacros]. An alternative `R` implementation which is currently under development is the R package `RefBasedMI`[@RefbasedMIpackage].
+Both conventional MI methods based on Bayesian posterior draws and novel methods based on maximum likelihood estimation and re-sampling (as described in @vanHippelBartlett2021 and @Wolbers2021) are implemented. `rbmi` was designed for statisticians from both academic clinical research units and pharmaceutical industry. To our knowledge, a comprehensive and fully validated `R` implementation of such approaches is still lacking. An established software implementation of reference-based imputation in SAS are the so-called "five macros" [@FiveMacros]. An alternative `R` implementation which is currently under development is the R package `RefBasedMI`[@RefbasedMIpackage].
 
-# Implementation 
+# `rbmi` workflow
 
 All approaches implemented in `rbmi` follow a common workflow based on 4 core functions which are called sequentially: 
 
@@ -55,7 +55,7 @@ All approaches implemented in `rbmi` follow a common workflow based on 4 core fu
 - `analyse()` - analyses each of the multiple imputed datasets
 - `pool()` - combines the analysis results across imputed datasets into a single statistic
 
-This modular design creates a user-friendly and extensible environment that allow the user to have a direct control on all the phases of the estimation process. 
+This modular design creates a user-friendly and extensible environment that allows the user to have a direct control on all the phases of the estimation process. 
 In addition, a variety of helper functions have been implemented to further support the user.
 
 The `draws()` function has 3 input arguments: 
@@ -70,7 +70,7 @@ The `draws()` function has 3 input arguments:
 
 In addition to detailed help files for all functions, the package contains three vignettes: a `quickstart` vignette which describes the basic functionality, an `advanced` vignette which describes some of the advanced features, and a `stat_specs` vignette which describes the statistical methodology in detail. 
 
-# Development and Implementation 
+# Development and implementation 
 
 `rbmi` is developed open source on https://github.com/insightsengineering/rbmi and major releases will also be uploaded to [CRAN](https://cran.r-project.org/).
 All production code is required to have been reviewed by an independent programmer as well as pass a  suite of automated unit tests which both define and document the expected input and output of each function.

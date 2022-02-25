@@ -7,16 +7,16 @@
 has_class(x, cls)
 }
 \arguments{
-\item{x}{The object we want to check the class of}
+\item{x}{the object we want to check the class of.}
 
-\item{cls}{The class we want to know if it has or not}
+\item{cls}{the class we want to know if it has or not.}
 }
 \value{
-True if the object has the class
-False if the object does not have the class
+\code{TRUE} if the object has the class.
+\code{FALSE} if the object does not have the class.
 }
 \description{
 Utility function to see if an object has a particular class.
 Useful when we don't know how many other classes the object may
-have
+have.
 }

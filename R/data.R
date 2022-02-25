@@ -11,7 +11,7 @@
 #' Study drug discontinuation occurred in 24% subjects from the active drug and 26% from placebo.
 #' All data after study drug discontinuation are missing and there is a single additional intermittent missing observation.
 #'
-#' @format A data frame with 608 rows and 11 variables:
+#' @format A `data.frame` with 608 rows and 11 variables:
 #'   - `PATIENT`: patients IDs.
 #'   - `HAMATOTL`: total score Hamilton Anxiety Rating Scale.
 #'   - `PGIIMP`: patient's Global Impression of Improvement Rating Scale.

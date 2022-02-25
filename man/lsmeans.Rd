@@ -7,11 +7,11 @@
 lsmeans(model, ..., .weights = c("proportional", "equal"))
 }
 \arguments{
-\item{model}{A model created by lm}
+\item{model}{A model created by \code{lm}.}
 
 \item{...}{Fixes specific variables to specific values i.e.
 \code{trt = 1} or \code{age = 50}. The name of the argument must be the name
-of the variable within the dataset}
+of the variable within the dataset.}
 
 \item{.weights}{Character, specifies wether to use "proportional" or "equal" weighting for each
 categorical covariate combination when calculating the lsmeans.}
@@ -29,17 +29,17 @@ categorical covariate and by setting any numerical covariates equal
 to the mean.
 
 A final lsmean value is calculating by averaging these hypothetical
-patients. If \code{.weights} equals "proportional" then the values are weighted
+patients. If \code{.weights} equals \code{"proportional"} then the values are weighted
 by the frequency in which they occour in the full dataset. If \code{.weights}
-equals "equal" then each hypothetical patient is given an equal weight
+equals \code{"equal"} then each hypothetical patient is given an equal weight
 regardless of what actually occours in the dataset.
 
 Use the \code{...} argument to fix specific variables to specific values.
 
 See the references for identical implementations as done in SAS and
-in R via the emmeans package. This function attempts to re-implement the
-emmeans derivation for standard linear models but without having to include
-all of it's dependencies
+in R via the \code{emmeans} package. This function attempts to re-implement the
+\code{emmeans} derivation for standard linear models but without having to include
+all of it's dependencies.
 }
 \examples{
 \dontrun{

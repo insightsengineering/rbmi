@@ -1,10 +1,10 @@
 
 
 
-#' Create Simulated Datasets
+#' Create simulated datasets
 #'
 #' @description
-#' Creates a longitudinal dataset in the format that rbmi was
+#' Creates a longitudinal dataset in the format that `rbmi` was
 #' designed to analyse.
 #'
 #' @details

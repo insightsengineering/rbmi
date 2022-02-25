@@ -3,7 +3,7 @@
 \name{simulate_test_data}
 \alias{simulate_test_data}
 \alias{as_vcov}
-\title{Create Simulated Datasets}
+\title{Create simulated datasets}
 \usage{
 simulate_test_data(
   n = 200,
@@ -28,7 +28,7 @@ See details.}
 be a named list with elements \code{int}, \code{age}, \code{sex}, \code{trt} & \code{visit}. See details.}
 }
 \description{
-Creates a longitudinal dataset in the format that rbmi was
+Creates a longitudinal dataset in the format that \code{rbmi} was
 designed to analyse.
 }
 \details{
