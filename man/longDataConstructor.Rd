@@ -9,7 +9,7 @@ bootstrap sampling. The object works by de-constructing the data into lists base
 thus enabling efficient lookup.
 }
 \details{
-The object also handles multiple other operations specific to rbmi such as defining whether an
+The object also handles multiple other operations specific to \code{rbmi} such as defining whether an
 outcome value is MAR / Missing or not as well as tracking which imputation strategy is assigned
 to each subject.
 
@@ -265,7 +265,7 @@ kept for legacy reasons.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat_ice}}{A data.frame containing ICE information see \code{\link[=impute]{impute()}} for the format of this dataframe.}
+\item{\code{dat_ice}}{A \code{data.frame} containing ICE information see \code{\link[=impute]{impute()}} for the format of this dataframe.}
 }
 \if{html}{\out{</div>}}
 }

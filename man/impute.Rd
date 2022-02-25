@@ -30,17 +30,17 @@ impute(
 \arguments{
 \item{draws}{A \code{draws} object created by \code{\link[=draws]{draws()}}.}
 
-\item{references}{a named vector. Identifies the references to be used for reference-based
+\item{references}{A named vector. Identifies the references to be used for reference-based
 imputation methods. Should be of the form \code{c("Group1" = "Reference1", "Group2" = "Reference2")}.
 If \code{NULL} (default), the references are assumed to be of the form
 \code{c("Group1" = "Group1", "Group2" = "Group2")}. This argument cannot be \code{NULL} if
 an imputation strategy (as defined by \code{data_ice[[vars$strategy]]} in the call to \link{draws}) other than \code{MAR} is set.}
 
-\item{update_strategy}{an optional \code{data.frame}. Updates the imputation method that was
+\item{update_strategy}{An optional \code{data.frame}. Updates the imputation method that was
 originally set via the \code{data_ice} option in \code{\link[=draws]{draws()}}. See the details section for more
 information.}
 
-\item{strategies}{a named list of functions. Defines the imputation functions to be used.
+\item{strategies}{A named list of functions. Defines the imputation functions to be used.
 The names of the list should mirror the values specified in \code{strategy} column of \code{data_ice}.
 Default = \code{\link[=getStrategies]{getStrategies()}}. See \code{\link[=getStrategies]{getStrategies()}} for more details.}
 }
@@ -62,7 +62,7 @@ their marginal distribution conditional on their observed outcome values.
 One dataset is being generated per set of parameter estimates provided by \code{\link[=draws]{draws()}}.
 
 The exact manner in how missing values are imputed from this conditional imputation distribution depends
-on the method object that was provided to \code{\link[=draws]{draws()}}, in particular:
+on the \code{method} object that was provided to \code{\link[=draws]{draws()}}, in particular:
 \itemize{
 \item Bayes & Approximate Bayes: each imputed dataset contains 1 row per subject & visit
 from the original dataset with missing values imputed by taking a single random sample

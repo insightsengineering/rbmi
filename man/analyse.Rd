@@ -7,12 +7,12 @@
 analyse(imputations, fun = ancova, delta = NULL, ...)
 }
 \arguments{
-\item{imputations}{An imputations object as created by \code{\link[=impute]{impute()}}.}
+\item{imputations}{An \code{imputations} object as created by \code{\link[=impute]{impute()}}.}
 
-\item{fun}{An analysis function to be applied to each imputed datset. See details.}
+\item{fun}{An analysis function to be applied to each imputed dataset. See details.}
 
-\item{delta}{A data.frame containing the delta transformation to be applied to the imputed
-dataset prior to running \code{fun}. See details.}
+\item{delta}{A \code{data.frame} containing the delta transformation to be applied to the imputed
+datasets prior to running \code{fun}. See details.}
 
 \item{...}{Additional arguments passed onto \code{fun}.}
 }
@@ -32,7 +32,7 @@ object.
 \item Collect and return all of the analysis results.
 }
 
-The analysis function \code{fun} must take a data.frame as its first
+The analysis function \code{fun} must take a \code{data.frame} as its first
 argument. All other options to \code{\link[=analyse]{analyse()}} are passed onto \code{fun}
 via \code{...}.
 \code{fun} must return a named list with each element itself being a
@@ -65,7 +65,7 @@ any hard coding of subject ids is strictly to be avoided.
 
 By default \code{fun} is the \code{\link[=ancova]{ancova()}} function.
 Please note that this function
-requires that a vars object, as created by \code{\link[=set_vars]{set_vars()}}, is provided via
+requires that a \code{vars} object, as created by \code{\link[=set_vars]{set_vars()}}, is provided via
 the \code{vars} argument e.g. \code{analyse(imputeObj, vars = set_vars(...))}. Please
 see the documentation for \code{\link[=ancova]{ancova()}} for full details.
 Please also note that the theoretical justification for the conditional mean imputation
@@ -75,11 +75,11 @@ Thus care is required when applying alternative analysis functions in this setti
 
 The \code{delta} argument can be used to specify offsets to be applied
 to the outcome variable in the imputed datasets prior to the analysis.
-This is typically used for sensitivity or tipping point analysis. The
+This is typically used for sensitivity or tipping point analyses. The
 delta dataset must contain columns \code{vars$subjid}, \code{vars$visit} (as specified
-in the original call to \code{\link[=draws]{draws()}}) and \code{delta}. Essentially this data.frame
+in the original call to \code{\link[=draws]{draws()}}) and \code{delta}. Essentially this \code{data.frame}
 is merged onto the imputed dataset by \code{vars$subjid} and \code{vars$visit} and then
-the outcome variable is modified by:\preformatted{imputed_data[[vars$outcome]] <- imputed_data[[vars$outcome]] + imputed_dat[["delta"]]
+the outcome variable is modified by:\preformatted{imputed_data[[vars$outcome]] <- imputed_data[[vars$outcome]] + imputed_data[["delta"]]
 }
 
 Please note that in order to provide maximum flexibility, the \code{delta} argument

@@ -12,17 +12,17 @@
 #'
 #' @param draws A `draws` object created by [draws()].
 #'
-#' @param references a named vector. Identifies the references to be used for reference-based
+#' @param references A named vector. Identifies the references to be used for reference-based
 #' imputation methods. Should be of the form `c("Group1" = "Reference1", "Group2" = "Reference2")`.
 #' If `NULL` (default), the references are assumed to be of the form
 #' `c("Group1" = "Group1", "Group2" = "Group2")`. This argument cannot be `NULL` if
 #' an imputation strategy (as defined by `data_ice[[vars$strategy]]` in the call to [draws]) other than `MAR` is set.
 #'
-#' @param update_strategy an optional `data.frame`. Updates the imputation method that was
+#' @param update_strategy An optional `data.frame`. Updates the imputation method that was
 #' originally set via the `data_ice` option in [draws()]. See the details section for more
 #' information.
 #'
-#' @param strategies a named list of functions. Defines the imputation functions to be used.
+#' @param strategies A named list of functions. Defines the imputation functions to be used.
 #' The names of the list should mirror the values specified in `strategy` column of `data_ice`.
 #' Default = [getStrategies()]. See [getStrategies()] for more details.
 #'
@@ -40,7 +40,7 @@
 #' One dataset is being generated per set of parameter estimates provided by [draws()].
 #'
 #' The exact manner in how missing values are imputed from this conditional imputation distribution depends
-#' on the method object that was provided to [draws()], in particular:
+#' on the `method` object that was provided to [draws()], in particular:
 #'
 #' - Bayes & Approximate Bayes: each imputed dataset contains 1 row per subject & visit
 #' from the original dataset with missing values imputed by taking a single random sample

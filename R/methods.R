@@ -2,7 +2,7 @@
 #'
 #' @description
 #'
-#' These functions determine what methods rbmi should use when creating
+#' These functions determine what methods `rbmi` should use when creating
 #' the imputation models, generating imputed values and pooling the results.
 #'
 #' @name method
@@ -14,9 +14,9 @@
 #'
 #' @param burn_between a numeric that specifies the "thinning" rate i.e. how many
 #' observations should be discarded between each sample. This is used to prevent
-#' issues associated with autocorrelation between samples.
+#' issues associated with autocorrelation between the samples.
 #'
-#' @param same_cov a logical, if `TRUE` the MMRM model will be fitted using a single
+#' @param same_cov a logical, if `TRUE` the imputation model will be fitted using a single
 #' shared covariance matrix for all observations. If `FALSE` a separate covariance
 #' matrix will be fit for each group as determined by the `group` argument of
 #' `set_vars()`.
@@ -28,7 +28,7 @@
 #' @param B a numeric that determines the number of bootstrap samples for `method_bmlmi`.
 #'
 #' @param D a numeric that determines the number of random imputations for each bootstrap sample.
-#' Needed for `method_bmlmi`.
+#' Needed for `method_bmlmi()`.
 #'
 #' @param covariance a character string that specifies the structure of the covariance
 #' matrix to be used in the imputation model. Must be one of `"us"` (default), `"toep"`,
@@ -41,10 +41,10 @@
 #' @param REML a logical indicating whether to use REML estimation rather than maximum
 #' likelihood.
 #'
-#' @param type a character string that specifies the method to use when calculating
-#' confidence intervals. Must be one of `"bootstrap"` (default) or `"percentile"`.
+#' @param type a character string that specifies the resampling method used to perform inference
+#' when a conditional mean imputation approach (set via `method_condmean()`) is used. Must be one of `"bootstrap"` or `"jackknife"`.
 #'
-#' @param seed a numeric that specifies a seed to be used in the call to Stan. This
+#' @param seed a numeric that specifies the seed to be used in the call to Stan. This
 #' argument is forward on the the `seed` argument of [rstan::sampling()]. Note that
 #' this is only required for `method_bayes()`, for all other methods you can achieve
 #' reproducible results by setting the seed via `set.seed()`. See details.
@@ -72,7 +72,7 @@
 #' bootstrap samples of the original dataset are taken with an MMRM fitted to each sample.
 #' Due to the randomness of these sampled datasets, as well as limitations in the optimisers
 #' used to fit the models, it is not uncommon that estimates for a particular dataset can't
-#' be generated. In these instances rbmi is designed to throw out that bootstrapped data
+#' be generated. In these instances `rbmi` is designed to throw out that bootstrapped dataset
 #' and try again with another. However to ensure that these errors are due to chance and
 #' not due to some underlying misspecification in the data and/or model a tolerance limit
 #' is set on how many samples can be discarded. Once the tolerance limit has been reached

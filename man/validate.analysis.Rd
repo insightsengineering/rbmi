@@ -7,7 +7,7 @@
 \method{validate}{analysis}(x, ...)
 }
 \arguments{
-\item{x}{A \code{analysis} results object (of class \code{"jackknife"}, \code{"bootstrap"}, \code{"rubin"}).}
+\item{x}{An \code{analysis} results object (of class \code{"jackknife"}, \code{"bootstrap"}, \code{"rubin"}).}
 
 \item{...}{Not used.}
 }

@@ -25,14 +25,14 @@ pool_internal(results, conf.level, alternative, type, D)
 \method{pool_internal}{rubin}(results, conf.level, alternative, type, D)
 }
 \arguments{
-\item{results}{A list of results i.e. the x$results element of an
-analyse object created by \code{\link[=analyse]{analyse()}}).}
+\item{results}{a list of results i.e. the \code{x$results} element of an
+\code{analyse} object created by \code{\link[=analyse]{analyse()}}).}
 
 \item{conf.level}{confidence level of the returned confidence interval.
 Must be a single number between 0 and 1. Default is 0.95.}
 
 \item{alternative}{a character string specifying the alternative hypothesis,
-must be one of "two.sided" (default), "greater" or "less".}
+must be one of \code{"two.sided"} (default), \code{"greater"} or \code{"less"}.}
 
 \item{type}{a character string of either \code{"percentile"} (default) or
 \code{"normal"}. Determines what method should be used to calculate the bootstrap confidence
