@@ -90,7 +90,7 @@ test_that("rbmi can handle 'grouped' dplyr data", {
 
 
 test_that("`rbmi` can handle character data", {
-    dat <- simulate_data(100) %>%
+    dat <- simulate_test_data(100) %>%
         as_tibble() %>%
         mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 1, NA_real_, outcome)) %>%
         mutate(charvar = sample(c("A", "B", "C"), size = nrow(.), replace = TRUE, prob = c(0.4,0.2,0.1)))
