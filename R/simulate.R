@@ -53,7 +53,6 @@
 #' be a named list with elements `int`, `age`, `sex`, `trt` & `visit`. See details.
 #'
 #' @name simulate_test_data
-#' @export
 simulate_test_data <- function(
     n = 200,
     sd = c(3, 5, 7),
