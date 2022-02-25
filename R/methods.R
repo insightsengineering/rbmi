@@ -41,7 +41,7 @@
 #' @param REML a logical indicating whether to use REML estimation rather than maximum
 #' likelihood.
 #'
-#' @param type a character string that specifies the resampling method to perform inference
+#' @param type a character string that specifies the resampling method used to perform inference
 #' when a conditional mean imputation approach (set via `method_condmean()`) is used. Must be one of `"bootstrap"` or `"jackknife"`.
 #'
 #' @param seed a numeric that specifies the seed to be used in the call to Stan. This
