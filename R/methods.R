@@ -160,9 +160,13 @@ method_condmean <- function(
         threshold = threshold,
         same_cov = same_cov,
         REML = REML,
-        n_samples = n_samples,
         type = type
     )
+
+    if (type == "bootstrap") {
+        x$n_samples <- n_samples
+    }
+    
     return(as_class(x, c("method", "condmean")))
 }
 

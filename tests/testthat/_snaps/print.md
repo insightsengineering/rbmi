@@ -314,8 +314,8 @@
           threshold: 0.2
           same_cov: TRUE
           REML: TRUE
-          n_samples: 0
           type: bootstrap
+          n_samples: 0
       
 
 ---
@@ -377,7 +377,6 @@
           threshold: 0.5
           same_cov: FALSE
           REML: TRUE
-          n_samples: NULL
           type: jackknife
       
 
@@ -441,7 +440,6 @@
           REML: TRUE
           B: 6
           D: 4
-          n_samples: NULL
       
 
 ---

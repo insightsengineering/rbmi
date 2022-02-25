@@ -564,11 +564,6 @@ print.draws <- function(x, ...) {
     )
 
     method <- x$method
-    method$n_samples <- ife(
-        is.null(method$n_samples),
-        "NULL",
-        method$n_samples
-    )
 
     meth_args <- vapply(
         mapply(
