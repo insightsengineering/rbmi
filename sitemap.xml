@@ -34,6 +34,12 @@
     <loc>/reference/add_class.html</loc>
   </url>
   <url>
+    <loc>/reference/adjust_trajectories.html</loc>
+  </url>
+  <url>
+    <loc>/reference/adjust_trajectories_single.html</loc>
+  </url>
+  <url>
     <loc>/reference/analyse.html</loc>
   </url>
   <url>
@@ -157,6 +163,9 @@
     <loc>/reference/fit_mmrm_multiopt.html</loc>
   </url>
   <url>
+    <loc>/reference/generate_data_single.html</loc>
+  </url>
+  <url>
     <loc>/reference/getStrategies.html</loc>
   </url>
   <url>
@@ -179,6 +188,9 @@
   </url>
   <url>
     <loc>/reference/get_ests_bmlmi.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_example_data.html</loc>
   </url>
   <url>
     <loc>/reference/get_jackknife_stack.html</loc>
@@ -334,10 +346,22 @@
     <loc>/reference/scalerConstructor.html</loc>
   </url>
   <url>
+    <loc>/reference/set_simul_pars.html</loc>
+  </url>
+  <url>
     <loc>/reference/set_vars.html</loc>
   </url>
   <url>
     <loc>/reference/simulate_data.html</loc>
+  </url>
+  <url>
+    <loc>/reference/simulate_dropout.html</loc>
+  </url>
+  <url>
+    <loc>/reference/simulate_ice.html</loc>
+  </url>
+  <url>
+    <loc>/reference/simulate_test_data.html</loc>
   </url>
   <url>
     <loc>/reference/sort_by.html</loc>
@@ -352,7 +376,7 @@
     <loc>/reference/str_contains.html</loc>
   </url>
   <url>
-    <loc>/reference/stratgies.html</loc>
+    <loc>/reference/strategies.html</loc>
   </url>
   <url>
     <loc>/reference/string_pad.html</loc>
@@ -389,6 +413,9 @@
   </url>
   <url>
     <loc>/reference/validate.sample_single.html</loc>
+  </url>
+  <url>
+    <loc>/reference/validate.simul_pars.html</loc>
   </url>
   <url>
     <loc>/reference/validate.stan_data.html</loc>

@@ -47,7 +47,7 @@ by impute()."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/lib
     </div>
 
     <div class="ref-description section level2">
-    <p>Extracts the imputed datasets contained within an imputations object generated
+    <p>Extracts the imputed datasets contained within an <code>imputations</code> object generated
 by <code><a href="impute.html">impute()</a></code>.</p>
     </div>
 
@@ -64,15 +64,15 @@ by <code><a href="impute.html">impute()</a></code>.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>imputations</dt>
-<dd><p>An imputations object as created by <code><a href="impute.html">impute()</a></code>.</p></dd>
+<dd><p>An <code>imputations</code> object as created by <code><a href="impute.html">impute()</a></code>.</p></dd>
 <dt>index</dt>
-<dd><p>The indexes of the imputed data.frames to return. By default,
-all data.frames within the imputations object will be returned
-(i.e. use this argument if you just want e.g. the first data.frame only).</p></dd>
+<dd><p>The indexes of the imputed datasets to return. By default,
+all datasets within the <code>imputations</code> object will be returned
+(i.e. use this argument if you just want e.g. the first imputed dataset only).</p></dd>
 <dt>delta</dt>
-<dd><p>A data.frame containing the delta transformation to be
+<dd><p>A <code>data.frame</code> containing the delta transformation to be
 applied to the imputed dataset. See <code><a href="analyse.html">analyse()</a></code> for details on the
-format and specification of this data.frame.</p></dd>
+format and specification of this <code>data.frame</code>.</p></dd>
 <dt>idmap</dt>
 <dd><p>Logical. The subject IDs in the imputed <code>data.frame</code>'s are
 replaced with new IDs to ensure they are unique. Setting this argument to
@@ -106,7 +106,8 @@ that will provide a map from the new subject IDs to the old subject IDs.</p></dd
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer></div>
