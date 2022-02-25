@@ -77,7 +77,7 @@ See details.}
 \item{REML}{a logical indicating whether to use REML estimation rather than maximum
 likelihood.}
 
-\item{type}{a character string that specifies the resampling method to perform inference
+\item{type}{a character string that specifies the resampling method used to perform inference
 when a conditional mean imputation approach (set via \code{method_condmean()}) is used. Must be one of \code{"bootstrap"} or \code{"jackknife"}.}
 
 \item{B}{a numeric that determines the number of bootstrap samples for \code{method_bmlmi}.}

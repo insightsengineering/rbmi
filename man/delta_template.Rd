@@ -103,7 +103,7 @@ the user can create their own custom logic for defining what \code{delta}
 should be set to. These additional variables include:
 \itemize{
 \item \code{is_mar} - If the observation was missing would it be regarded as MAR? This variable
-is set to \code{FALSE} for observations occurred after a non-MAR ICE, otherwise it is set to \code{TRUE}.
+is set to \code{FALSE} for observations that occurred after a non-MAR ICE, otherwise it is set to \code{TRUE}.
 \item \code{is_missing} - Is the outcome variable for this observation missing.
 \item \code{is_post_ice} - Does the observation occur after the patient's ICE as defined by the
 \code{data_ice} dataset supplied to \code{\link[=draws]{draws()}}.
