@@ -135,7 +135,8 @@ the model, then this should be included as a separate column of \code{data} (as 
 
 Character covariates will be explicitly
 cast to factors. If you use a custom analysis function that requires specific reference
-levels for the character covariates (for example for LSmeans) then you are advised
+levels for the character covariates (for example in the computation of the least square means
+computation) then you are advised
 to manually cast your character covariates to factor in advance of running \code{\link[=draws]{draws()}}.
 
 The argument \code{data_ice} contains information about the occurrence of ICEs. It is a
