@@ -7,7 +7,7 @@ test_that("Parallisation works as expected", {
 
     skip_if_not(is_nightly())
 
-    bign <- 100
+    bign <- 150
     sigma <- as_vcov(
         c(2, 1, 0.7, 3, 4),
         c(
@@ -85,10 +85,10 @@ test_that("Parallisation works as expected", {
         return(res)
     }
 
-    x1 <- test_parallel(method_approxbayes(n_samples = 80))
-    x2 <- test_parallel(method_condmean(n_samples = 80))
+    x1 <- test_parallel(method_approxbayes(n_samples = 120))
+    x2 <- test_parallel(method_condmean(n_samples = 120))
     x3 <- test_parallel(method_condmean(type = "jackknife"))
-    x4 <- test_parallel(method_bmlmi(B = 40, D = 10))
+    x4 <- test_parallel(method_bmlmi(B = 70, D = 2))
 
 })
 
