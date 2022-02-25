@@ -46,6 +46,28 @@ test_that("as_model_df", {
 })
 
 
+test_that("as_model_df fails if formula has one factor variable", {
+    cov1 <- rep("A", 10)
+    outcome <- rnorm(10)
+    dat <- data.frame(outcome = outcome, cov1 = cov1)
+    frm <- outcome ~ cov1
+    expect_error(as_model_df(dat = dat, frm = frm))
+})
+
+
+test_that("as_simple_formula", {
+
+    vars <- list(
+        outcome = "outcome",
+        group = "group",
+        visit = "visit"
+    )
+
+    actual <- as_simple_formula(vars$outcome, c(vars$group, vars$visit, vars$covariates))
+    expected <- as.formula(outcome ~ 1 + group + visit)
+
+    expect_true(actual == expected)
+})
 
 
 test_that("sample_mvnorm", {
@@ -178,8 +200,6 @@ test_that("str_contains",{
     )
 
 })
-
-
 
 
 test_that("sort_by", {

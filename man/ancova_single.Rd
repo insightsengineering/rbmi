@@ -4,7 +4,13 @@
 \alias{ancova_single}
 \title{Implements an Analysis of Covariance (ANCOVA)}
 \usage{
-ancova_single(data, outcome, group, covariates)
+ancova_single(
+  data,
+  outcome,
+  group,
+  covariates,
+  weights = c("proportional", "equal")
+)
 }
 \arguments{
 \item{data}{The \code{data.frame} containing all of the data required for the model.}
@@ -15,6 +21,9 @@ ancova_single(data, outcome, group, covariates)
 
 \item{covariates}{Character vector containing the name of any additional covariates
 to be included in the model as well as any interaction terms.}
+
+\item{weights}{Character, specifies wether to use "proportional" or "equal" weighting for each
+categorical covariate combination when calculating the lsmeans.}
 }
 \description{
 Performance analysis of covariance. See \code{\link[=ancova]{ancova()}} for full details.

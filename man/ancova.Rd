@@ -4,7 +4,7 @@
 \alias{ancova}
 \title{Analysis of Covariance}
 \usage{
-ancova(data, vars, visits = NULL)
+ancova(data, vars, visits = NULL, weights = c("proportional", "equal"))
 }
 \arguments{
 \item{data}{A data.frame containing the data to be used in the model}
@@ -15,6 +15,10 @@ ancova(data, vars, visits = NULL)
 \item{visits}{an optional character vector specifying which visits to
 fit the ancova model at. If \code{NULL}, a separate ancova model will be fit to the
 outcomes from each visits (as determined by \code{unique(data[[vars$visit]])}).
+See details.}
+
+\item{weights}{Character, either "proportional" (default) or "equal". Specifies the
+weighting strategy to be used for categorical covariates when calculating the lsmeans.
 See details.}
 }
 \description{
@@ -50,6 +54,25 @@ will be collapsed into a single list prefixed by the visit name e.g.:\preformatt
 If you want to include interaction terms in your model this can be done
 by providing them to the \code{covariates} argument of \code{\link[=set_vars]{set_vars()}}
 e.g. \code{set_vars(covariates = c("sex*age"))}.
+\subsection{Weighting}{
+
+"proportional" is the default scheme that is used. This is equivalent to standardization,
+i.e. the lsmeans in
+each group are equal to the predicted mean outcome from the ancova model for
+that group based on baseline characteristics of all subjects regardless of
+their assigned group. The alternative weighting scheme, "equal", creates hypothetical
+patients by expanding out all combinations of the models categorical covariates. The
+lsmeans are then calculated as the average of
+the predicted mean outcome for these hypothetical patients assuming they come from each
+group in turn.
+
+In short:
+\itemize{
+\item "equal" weights categorical covariates equally across all theoretical combinations
+\item "proportional" weights categorical covariates based upon their frequency of occurrence
+in the data
+}
+}
 }
 \seealso{
 \code{\link[=analyse]{analyse()}}

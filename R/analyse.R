@@ -121,8 +121,6 @@
 #' @export
 analyse <- function(imputations, fun = ancova, delta = NULL, ...) {
 
-    analysis_call <- match.call()
-
     validate(imputations)
 
     assert_that(
@@ -163,9 +161,16 @@ analyse <- function(imputations, fun = ancova, delta = NULL, ...) {
         ...
     )
 
+    fun_name <- deparse(substitute(fun))
+    if (length(fun_name) > 1) {
+        fun_name <- "<Anonymous Function>"
+    } else if (is.null(fun_name)) {
+        fun_name <- "<NULL>"
+    }
+
     ret <- as_analysis(
         results = results,
-        fun_name = capture.output(analysis_call[["fun"]]),
+        fun_name = fun_name,
         delta = delta,
         fun = fun,
         method = imputations$method

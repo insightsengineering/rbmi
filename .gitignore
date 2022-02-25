@@ -52,3 +52,6 @@ src/*
 !.gitkeep
 inst/doc
 docs
+/doc/
+/Meta/
+.github/meta.txt

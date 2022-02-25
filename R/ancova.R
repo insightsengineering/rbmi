@@ -12,6 +12,9 @@
 #' fit the ancova model at. If `NULL`, a separate ancova model will be fit to the
 #' outcomes from each visits (as determined by `unique(data[[vars$visit]])`).
 #' See details.
+#' @param weights Character, either "proportional" (default) or "equal". Specifies the
+#' weighting strategy to be used for categorical covariates when calculating the lsmeans.
+#' See details.
 #'
 #' @details
 #' The function works as follows:
@@ -42,16 +45,36 @@
 #' If you want to include interaction terms in your model this can be done
 #' by providing them to the `covariates` argument of [set_vars()]
 #' e.g. `set_vars(covariates = c("sex*age"))`.
+#'
+#'
+#' ## Weighting
+#'
+#' "proportional" is the default scheme that is used. This is equivalent to standardization,
+#' i.e. the lsmeans in
+#' each group are equal to the predicted mean outcome from the ancova model for
+#' that group based on baseline characteristics of all subjects regardless of
+#' their assigned group. The alternative weighting scheme, "equal", creates hypothetical
+#' patients by expanding out all combinations of the models categorical covariates. The
+#' lsmeans are then calculated as the average of
+#' the predicted mean outcome for these hypothetical patients assuming they come from each
+#' group in turn.
+#'
+#' In short:
+#'   - "equal" weights categorical covariates equally across all theoretical combinations
+#'   - "proportional" weights categorical covariates based upon their frequency of occurrence
+#' in the data
+#'
 #' @seealso [analyse()]
 #' @seealso [stats::lm()]
 #' @seealso [set_vars()]
 #' @export
-ancova <- function(data, vars, visits = NULL) {
+ancova <- function(data, vars, visits = NULL, weights = c("proportional", "equal")) {
 
     outcome <- vars[["outcome"]]
     group <- vars[["group"]]
     covariates <- vars[["covariates"]]
     visit <- vars[["visit"]]
+    weights <- match.arg(weights)
 
     expected_vars <- c(extract_covariates(covariates), outcome, group)
 
@@ -113,7 +136,7 @@ ancova <- function(data, vars, visits = NULL) {
         visits,
         function(x) {
             data2 <- data[data[[visit]] == x, ]
-            res <- ancova_single(data2, outcome, group, covariates)
+            res <- ancova_single(data2, outcome, group, covariates, weights)
             names(res) <- paste0(names(res), "_", x)
             return(res)
         }
@@ -133,6 +156,8 @@ ancova <- function(data, vars, visits = NULL) {
 #' @param group Character, the name of the group variable in `data`.
 #' @param covariates Character vector containing the name of any additional covariates
 #' to be included in the model as well as any interaction terms.
+#' @param weights Character, specifies wether to use "proportional" or "equal" weighting for each
+#' categorical covariate combination when calculating the lsmeans.
 #'
 #' @details
 #' - `group` must be a factor variable with only 2 levels.
@@ -146,8 +171,9 @@ ancova <- function(data, vars, visits = NULL) {
 #' }
 #' @seealso [ancova()]
 #' @importFrom stats lm coef vcov df.residual
-ancova_single <- function(data, outcome, group, covariates) {
+ancova_single <- function(data, outcome, group, covariates, weights = c("proportional", "equal")) {
 
+    weights <- match.arg(weights)
     assert_that(
         is.factor(data[[group]]),
         length(levels(data[[group]])) == 2,
@@ -160,11 +186,11 @@ ancova_single <- function(data, outcome, group, covariates) {
 
     data2 <- data[, c(extract_covariates(covariates), outcome, group)]
 
-    frm <- as_simple_formula(list(group = group, outcome = outcome, covariates = covariates))
+    frm <- as_simple_formula(outcome, c(group, covariates))
 
     mod <- lm(formula = frm, data = data2)
 
-    args <- list(model = mod)
+    args <- list(model = mod, .weights = weights)
     args[[group]] <- 0
     lsm0 <- do.call(lsmeans, args)
 

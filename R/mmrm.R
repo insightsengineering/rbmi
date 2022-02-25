@@ -55,6 +55,7 @@ as_mmrm_df <- function(
     subjid,
     group = NULL
 ) {
+
     if (length(group) == 0) group <- NULL
 
     dmat <- as.data.frame(designmat)

@@ -44,30 +44,23 @@ has_class <- function(x, cls) {
 }
 
 
-#' Convert an `ivars` object into a formula
+#' Creates a simple formula object from a string
 #'
-#' Takes an `ivars` object (as created by [set_vars()]) and converts
-#' it into a formula roughly of the form:
-#' ```
-#' outcome ~ group + visit + covariate1 + covariate2 + ...
-#' ```
+#' Converts a string list of variables into a formula object
 #'
-#' @param vars an `ivars` object as created by [set_vars()]
+#' @param outcome character (length 1 vector). Name of the outcome variable
+#' @param covars character (vector). Name of covariates
 #' @return
 #' A formula
-as_simple_formula <- function(vars) {
-    variables <- c(
-        vars$group,
-        vars$visit,
-        vars$covariates
-    )
+as_simple_formula <- function(outcome, covars) {
     frm <- stats::as.formula(
         paste0(
-            vars$outcome,
+            outcome,
             "~ 1 + ",
-            paste0(variables, collapse = " + ")
+            paste0(covars, collapse = " + ")
         )
     )
+    environment(frm) <- globalenv()
     return(frm)
 }
 

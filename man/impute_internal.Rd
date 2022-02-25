@@ -4,13 +4,22 @@
 \alias{impute_internal}
 \title{Create imputed datasets}
 \usage{
-impute_internal(draws, references, update_strategy, strategies, condmean)
+impute_internal(
+  draws,
+  references = NULL,
+  update_strategy,
+  strategies,
+  condmean
+)
 }
 \arguments{
 \item{draws}{A \code{draws} object created by \code{\link[=draws]{draws()}}.}
 
 \item{references}{a named vector. Identifies the references to be used for reference-based
-imputation methods. Should be of the form \code{c("Group1" = "Reference1", "Group2" = "Reference2")}.}
+imputation methods. Should be of the form \code{c("Group1" = "Reference1", "Group2" = "Reference2")}.
+If \code{NULL} (default), the references are assumed to be of the form
+\code{c("Group1" = "Group1", "Group2" = "Group2")}. This argument cannot be \code{NULL} if
+an imputation strategy (as defined by \code{data_ice[[vars$strategy]]} in the call to \link{draws}) other than \code{MAR} is set.}
 
 \item{update_strategy}{an optional \code{data.frame}. Updates the imputation method that was
 originally set via the \code{data_ice} option in \code{\link[=draws]{draws()}}. See the details section for more

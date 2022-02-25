@@ -446,9 +446,6 @@ test_that("MMRM returns expected estimates under different model specifications"
 
 
 
-
-
-
 test_that("initial values speed up BFGS", {
 
     set.seed(315)
@@ -461,7 +458,7 @@ test_that("initial values speed up BFGS", {
         covariates = c("group", "sex", "visit * group")
     )
 
-    frm <- as_simple_formula(vars)
+    frm <- as_simple_formula(vars$outcome, c(vars$group, vars$visit, vars$covariates))
     model_df <- as_model_df(dat = dat, frm = frm)
 
     x <- time_it({
