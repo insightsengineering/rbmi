@@ -68,11 +68,12 @@
 #' - `visit`: a factor vector containing the visit the outcome was observed on.
 #' - `group`: a factor vector containing the group that the subject belongs to.
 #' - `outcome`: a numeric vector containing the outcome variable. It might contain missing values.
-#' Additional baseline or time-varying covariates must be included in `data`.
+#' Additional baseline or time-varying covariates must be included in `data`. 
 #'
 #' `data` must have one row per visit per subject. This means that incomplete
 #' outcome data must be set as `NA` instead of having the related row missing. Missing values
-#' in the covariates are not allowed. If `data` is incomplete
+#' in the covariates are not allowed.
+#' If `data` is incomplete
 #' then the [expand_locf()] helper function can be used to insert any missing rows using
 #' Last Observation Carried Forward (LOCF) imputation to impute the covariates values.
 #' Note that LOCF is generally not a principled imputation method and should only be used when appropriate
@@ -82,6 +83,12 @@
 #' observations to be included in the model as part of the response variable then these should be removed in advance
 #' from the outcome variable in `data`. At the same time if you want to include the baseline outcome as covariate in
 #' the model, then this should be included as a separate column of `data` (as any other covariate).
+#' 
+#' Character covariates will be explicitly
+#' cast to factors. If you use a custom analysis function that requires specific reference
+#' levels for the character covariates (for example in the computation of the least square means
+#' computation) then you are advised
+#' to manually cast your character covariates to factor in advance of running [draws()].
 #'
 #' The argument `data_ice` contains information about the occurrence of ICEs. It is a
 #' `data.frame` with 3 columns:

@@ -698,7 +698,7 @@ test_that("rbmi works for one arm trials", {
     vars_wrong2$covariates <- c("age", "sex", "group", "visit")
 
     set.seed(169)
-    dat_full <- simulate_data(n = 100, sd = 0.1 * c(3, 5, 7)) %>% as_tibble()
+    dat_full <- simulate_test_data(n = 100, sd = 0.1 * c(3, 5, 7)) %>% as_tibble()
 
     ## Introduce missingness
     missing_index_vis2 <- rbinom(nrow(dat_full), 1, 0.3) == 1 & dat_full$visit == "visit_2"

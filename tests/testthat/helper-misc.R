@@ -29,7 +29,7 @@ trunctate <- function(x, n) {
 
 #
 #         ** DEPRECIATED **
-# please use `simulate_data` instead, this function is left here for compatibility with
+# please use `simulate_test_data` instead, this function is left here for compatibility with
 # tests that have already been defined based upon it
 #
 get_sim_data <- function(n, sigma, trt = 4) {

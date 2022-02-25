@@ -494,15 +494,16 @@ longDataConstructor <- R6::R6Class(
         #' @param data longditudinal dataset.
         #' @param vars an `ivars` object created by [set_vars()].
         initialize = function(data, vars) {
-            data <- as.data.frame(data)
+            data_raw <- as_dataframe(data)
             validate(vars)
-            validate_datalong(data, vars)
-            data_sorted <- sort_by(data, c(vars$subjid, vars$visit))
-            self$data <- as_dataframe(data_sorted)
+            validate_datalong(data_raw, vars)
+            data_nochar <- char2fct(data_raw, extract_covariates(vars$covariates))
+            # rerun as_dataframe to reset the rownames
+            self$data <- as_dataframe(sort_by(data_nochar, c(vars$subjid, vars$visit)))
             self$vars <- vars
             self$visits <- levels(self$data[[self$vars$visit]])
             frmvars <- c(
-                ife(nlevels(data[[vars$group]]) >= 2, vars$group, character()),
+                ife(nlevels(self$data[[vars$group]]) >= 2, vars$group, character()),
                 vars$visit,
                 vars$covariates
             )
