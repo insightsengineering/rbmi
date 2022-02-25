@@ -95,7 +95,7 @@
 #' should be set to. These additional variables include:
 #'
 #' - `is_mar` - If the observation was missing would it be regarded as MAR? This variable
-#' is set to `FALSE` for observations occurred after a non-MAR ICE, otherwise it is set to `TRUE`.
+#' is set to `FALSE` for observations that occurred after a non-MAR ICE, otherwise it is set to `TRUE`.
 #' - `is_missing` - Is the outcome variable for this observation missing.
 #' - `is_post_ice` - Does the observation occur after the patient's ICE as defined by the
 #' `data_ice` dataset supplied to [draws()].
