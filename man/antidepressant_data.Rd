@@ -5,7 +5,7 @@
 \alias{antidepressant_data}
 \title{Antidepressant trial data}
 \format{
-A data frame with 608 rows and 11 variables:
+A \code{data.frame} with 608 rows and 11 variables:
 \itemize{
 \item \code{PATIENT}: patients IDs.
 \item \code{HAMATOTL}: total score Hamilton Anxiety Rating Scale.

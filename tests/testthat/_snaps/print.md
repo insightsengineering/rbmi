@@ -1,63 +1,4 @@
-# print - Bayes
-
-    Code
-      print(.test_print$bayes$draws)
-    Output
-      
-      Draws Object
-      ------------
-      Number of Samples: 50
-      Number of Failed Samples: 0
-      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
-      Imputation Type: random
-      Method:
-          name: Bayes
-          burn_in: 200
-          burn_between: 1
-          same_cov: TRUE
-          n_samples: 50
-          seed: 859
-      
-
----
-
-    Code
-      print(.test_print$bayes$impute)
-    Output
-      
-      Imputation Object
-      -----------------
-      Number of Imputed Datasets: 50
-      Fraction of Missing Data (Original Dataset):
-          visit_1:   0%
-          visit_2:   0%
-          visit_3:  42%
-      References:
-          TRT     -> TRT
-          Placebo -> Placebo
-      
-
----
-
-    Code
-      print(.test_print$bayes$analysis)
-    Output
-      
-      Analysis Object
-      ---------------
-      Number of Results: 50
-      Analysis Function: rbmi::ancova
-      Delta Applied: TRUE
-      Analysis Estimates:
-          trt_visit_1
-          lsm_ref_visit_1
-          lsm_alt_visit_1
-          trt_visit_3
-          lsm_ref_visit_3
-          lsm_alt_visit_3
-      
-
----
+# print - Pool Method
 
     Code
       print(.test_print$bayes$pool)
@@ -82,68 +23,6 @@
          lsm_ref_visit_3  7.074   0.205  6.642   7.505   <0.001 
          lsm_alt_visit_3  15.058  0.164  14.716   15.4   <0.001 
         --------------------------------------------------------
-      
-
-# print - Approx Bayes
-
-    Code
-      print(.test_print$approxbayes$draws)
-    Output
-      
-      Draws Object
-      ------------
-      Number of Samples: 5
-      Number of Failed Samples: 0
-      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
-      Imputation Type: random
-      Method:
-          name: Approximate Bayes
-          covariance: us
-          threshold: 0.5
-          same_cov: TRUE
-          REML: TRUE
-          n_samples: 5
-      
-
----
-
-    Code
-      print(.test_print$approxbayes$impute)
-    Output
-      
-      Imputation Object
-      -----------------
-      Number of Imputed Datasets: 5
-      Fraction of Missing Data (Original Dataset):
-          visit_1:   0%
-          visit_2:   0%
-          visit_3:  42%
-      References:
-          TRT     -> Placebo
-          Placebo -> Placebo
-      
-
----
-
-    Code
-      print(.test_print$approxbayes$analysis)
-    Output
-      
-      Analysis Object
-      ---------------
-      Number of Results: 5
-      Analysis Function: ancova
-      Delta Applied: FALSE
-      Analysis Estimates:
-          trt_visit_1
-          lsm_ref_visit_1
-          lsm_alt_visit_1
-          trt_visit_2
-          lsm_ref_visit_2
-          lsm_alt_visit_2
-          trt_visit_3
-          lsm_ref_visit_3
-          lsm_alt_visit_3
       
 
 ---
@@ -174,69 +53,6 @@
          lsm_ref_visit_3  6.801   0.842  5.693   Inf   1   
          lsm_alt_visit_3  12.16   0.65   11.31   Inf   1   
         ---------------------------------------------------
-      
-
-# print - Condmean Bootstrap
-
-    Code
-      print(.test_print$condmean_boot$draws)
-    Output
-      
-      Draws Object
-      ------------
-      Number of Samples: 1 + 5
-      Number of Failed Samples: 0
-      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
-      Imputation Type: condmean
-      Method:
-          name: Conditional Mean
-          covariance: ar1
-          threshold: 0.2
-          same_cov: TRUE
-          REML: TRUE
-          n_samples: 5
-          type: bootstrap
-      
-
----
-
-    Code
-      print(.test_print$condmean_boot$impute)
-    Output
-      
-      Imputation Object
-      -----------------
-      Number of Imputed Datasets: 1 + 5
-      Fraction of Missing Data (Original Dataset):
-          visit_1:   0%
-          visit_2:   0%
-          visit_3:  42%
-      References:
-          TRT     -> Placebo
-          Placebo -> Placebo
-      
-
----
-
-    Code
-      print(.test_print$condmean_boot$analysis)
-    Output
-      
-      Analysis Object
-      ---------------
-      Number of Results: 1 + 5
-      Analysis Function: ancova
-      Delta Applied: FALSE
-      Analysis Estimates:
-          trt_visit_1
-          lsm_ref_visit_1
-          lsm_alt_visit_1
-          trt_visit_2
-          lsm_ref_visit_2
-          lsm_alt_visit_2
-          trt_visit_3
-          lsm_ref_visit_3
-          lsm_alt_visit_3
       
 
 ---
@@ -299,69 +115,6 @@
         ------------------------------------------------------
       
 
-# print - Condmean Jack
-
-    Code
-      print(.test_print$condmean_jack$draws)
-    Output
-      
-      Draws Object
-      ------------
-      Number of Samples: 1 + 35
-      Number of Failed Samples: 0
-      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
-      Imputation Type: condmean
-      Method:
-          name: Conditional Mean
-          covariance: us
-          threshold: 0.5
-          same_cov: FALSE
-          REML: TRUE
-          n_samples: NULL
-          type: jackknife
-      
-
----
-
-    Code
-      print(.test_print$condmean_jack$impute)
-    Output
-      
-      Imputation Object
-      -----------------
-      Number of Imputed Datasets: 1 + 35
-      Fraction of Missing Data (Original Dataset):
-          visit_1:   0%
-          visit_2:   0%
-          visit_3:  46%
-      References:
-          TRT     -> Placebo
-          Placebo -> Placebo
-      
-
----
-
-    Code
-      print(.test_print$condmean_jack$analysis)
-    Output
-      
-      Analysis Object
-      ---------------
-      Number of Results: 1 + 35
-      Analysis Function: ancova
-      Delta Applied: FALSE
-      Analysis Estimates:
-          trt_visit_1
-          lsm_ref_visit_1
-          lsm_alt_visit_1
-          trt_visit_2
-          lsm_ref_visit_2
-          lsm_alt_visit_2
-          trt_visit_3
-          lsm_ref_visit_3
-          lsm_alt_visit_3
-      
-
 ---
 
     Code
@@ -392,69 +145,6 @@
         --------------------------------------------------------
       
 
-# print - bmlmi
-
-    Code
-      print(.test_print$bmlmi$draws)
-    Output
-      
-      Draws Object
-      ------------
-      Number of Samples: 6
-      Number of Failed Samples: 0
-      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
-      Imputation Type: random
-      Method:
-          covariance: cs
-          threshold: 0.05
-          same_cov: TRUE
-          REML: TRUE
-          B: 6
-          D: 4
-          n_samples: NULL
-      
-
----
-
-    Code
-      print(.test_print$bmlmi$impute)
-    Output
-      
-      Imputation Object
-      -----------------
-      Number of Imputed Datasets: 24
-      Fraction of Missing Data (Original Dataset):
-          visit_1:   0%
-          visit_2:   0%
-          visit_3:  42%
-      References:
-          TRT     -> Placebo
-          Placebo -> Placebo
-      
-
----
-
-    Code
-      print(.test_print$bmlmi$analysis)
-    Output
-      
-      Analysis Object
-      ---------------
-      Number of Results: 24
-      Analysis Function: ancova
-      Delta Applied: FALSE
-      Analysis Estimates:
-          trt_visit_1
-          lsm_ref_visit_1
-          lsm_alt_visit_1
-          trt_visit_2
-          lsm_ref_visit_2
-          lsm_alt_visit_2
-          trt_visit_3
-          lsm_ref_visit_3
-          lsm_alt_visit_3
-      
-
 ---
 
     Code
@@ -483,5 +173,307 @@
          lsm_ref_visit_3  6.743   0.853   5.02   8.465   0.001  
          lsm_alt_visit_3  11.48   1.545  8.365   14.595  0.001  
         --------------------------------------------------------
+      
+
+# print - approx bayes
+
+    Code
+      print(drawobj_ab)
+    Output
+      
+      Draws Object
+      ------------
+      Number of Samples: 3
+      Number of Failed Samples: 0
+      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
+      Imputation Type: random
+      Method:
+          name: Approximate Bayes
+          covariance: ar1
+          threshold: 0.5
+          same_cov: TRUE
+          REML: TRUE
+          n_samples: 3
+      
+
+---
+
+    Code
+      print(impute_ab)
+    Output
+      
+      Imputation Object
+      -----------------
+      Number of Imputed Datasets: 3
+      Fraction of Missing Data (Original Dataset):
+          visit_1:   0%
+          visit_2:   0%
+          visit_3:  42%
+      References:
+          TRT     -> Placebo
+          Placebo -> Placebo
+      
+
+---
+
+    Code
+      print(analysis_ab)
+    Output
+      
+      Analysis Object
+      ---------------
+      Number of Results: 3
+      Analysis Function: ancova
+      Delta Applied: FALSE
+      Analysis Estimates:
+          trt_visit_1
+          lsm_ref_visit_1
+          lsm_alt_visit_1
+          trt_visit_2
+          lsm_ref_visit_2
+          lsm_alt_visit_2
+          trt_visit_3
+          lsm_ref_visit_3
+          lsm_alt_visit_3
+      
+
+# print - bayesian
+
+    Code
+      print(drawobj_b)
+    Output
+      
+      Draws Object
+      ------------
+      Number of Samples: 50
+      Number of Failed Samples: 0
+      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
+      Imputation Type: random
+      Method:
+          name: Bayes
+          burn_in: 200
+          burn_between: 1
+          same_cov: TRUE
+          n_samples: 50
+          seed: 859
+      
+
+---
+
+    Code
+      print(impute_b)
+    Output
+      
+      Imputation Object
+      -----------------
+      Number of Imputed Datasets: 50
+      Fraction of Missing Data (Original Dataset):
+          visit_1:   0%
+          visit_2:   0%
+          visit_3:  42%
+      References:
+          TRT     -> TRT
+          Placebo -> Placebo
+      
+
+---
+
+    Code
+      print(analysis_b)
+    Output
+      
+      Analysis Object
+      ---------------
+      Number of Results: 50
+      Analysis Function: rbmi::ancova
+      Delta Applied: TRUE
+      Analysis Estimates:
+          trt_visit_1
+          lsm_ref_visit_1
+          lsm_alt_visit_1
+          trt_visit_3
+          lsm_ref_visit_3
+          lsm_alt_visit_3
+      
+
+# print - condmean bootstrap
+
+    Code
+      print(drawobj_cmb)
+    Output
+      
+      Draws Object
+      ------------
+      Number of Samples: 1 + 0
+      Number of Failed Samples: 0
+      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
+      Imputation Type: condmean
+      Method:
+          name: Conditional Mean
+          covariance: ar1
+          threshold: 0.2
+          same_cov: TRUE
+          REML: TRUE
+          n_samples: 0
+          type: bootstrap
+      
+
+---
+
+    Code
+      print(impute_cmb)
+    Output
+      
+      Imputation Object
+      -----------------
+      Number of Imputed Datasets: 1 + 0
+      Fraction of Missing Data (Original Dataset):
+          visit_1:   0%
+          visit_2:   0%
+          visit_3:  42%
+      References:
+          TRT     -> TRT
+          Placebo -> Placebo
+      
+
+---
+
+    Code
+      print(analysis_cmb)
+    Output
+      
+      Analysis Object
+      ---------------
+      Number of Results: 1 + 0
+      Analysis Function: ancova
+      Delta Applied: FALSE
+      Analysis Estimates:
+          trt_visit_1
+          lsm_ref_visit_1
+          lsm_alt_visit_1
+          trt_visit_2
+          lsm_ref_visit_2
+          lsm_alt_visit_2
+          trt_visit_3
+          lsm_ref_visit_3
+          lsm_alt_visit_3
+      
+
+# print - condmean jackknife
+
+    Code
+      print(drawobj_cmj)
+    Output
+      
+      Draws Object
+      ------------
+      Number of Samples: 1 + 35
+      Number of Failed Samples: 0
+      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
+      Imputation Type: condmean
+      Method:
+          name: Conditional Mean
+          covariance: us
+          threshold: 0.5
+          same_cov: FALSE
+          REML: TRUE
+          n_samples: NULL
+          type: jackknife
+      
+
+---
+
+    Code
+      print(impute_cmj)
+    Output
+      
+      Imputation Object
+      -----------------
+      Number of Imputed Datasets: 1 + 35
+      Fraction of Missing Data (Original Dataset):
+          visit_1:   0%
+          visit_2:   0%
+          visit_3:  46%
+      References:
+          TRT     -> Placebo
+          Placebo -> Placebo
+      
+
+---
+
+    Code
+      print(analysis_cmj)
+    Output
+      
+      Analysis Object
+      ---------------
+      Number of Results: 1 + 35
+      Analysis Function: ancova
+      Delta Applied: FALSE
+      Analysis Estimates:
+          trt_visit_1
+          lsm_ref_visit_1
+          lsm_alt_visit_1
+          trt_visit_2
+          lsm_ref_visit_2
+          lsm_alt_visit_2
+          trt_visit_3
+          lsm_ref_visit_3
+          lsm_alt_visit_3
+      
+
+# print - bmlmi
+
+    Code
+      print(drawobj_bml)
+    Output
+      
+      Draws Object
+      ------------
+      Number of Samples: 6
+      Number of Failed Samples: 0
+      Model Formula: outcome ~ 1 + group + visit + age + sex + visit * group
+      Imputation Type: random
+      Method:
+          covariance: cs
+          threshold: 0.05
+          same_cov: TRUE
+          REML: TRUE
+          B: 6
+          D: 4
+          n_samples: NULL
+      
+
+---
+
+    Code
+      print(impute_bml)
+    Output
+      
+      Imputation Object
+      -----------------
+      Number of Imputed Datasets: 24
+      Fraction of Missing Data (Original Dataset):
+          visit_1:   0%
+          visit_2:   0%
+          visit_3:  42%
+      References:
+          TRT     -> Placebo
+          Placebo -> Placebo
+      
+
+---
+
+    Code
+      print(analysis_bml)
+    Output
+      
+      Analysis Object
+      ---------------
+      Number of Results: 24
+      Analysis Function: compare_prop_lastvisit
+      Delta Applied: FALSE
+      Analysis Estimates:
+          trt
       
 

@@ -90,9 +90,6 @@ analysis_ab <- analyse(
 pool_ab <- pool(analysis_ab, conf.level = 0.9, alternative = "less")
 
 .test_print$approxbayes <- list(
-    draws = drawobj_ab,
-    impute = impute_ab,
-    analysis = analysis_ab,
     pool = pool_ab
 )
 
@@ -142,9 +139,6 @@ pool_b <- pool(analysis_b)
 
 
 .test_print$bayes <- list(
-    draws = drawobj_b,
-    impute = impute_b,
-    analysis = analysis_b,
     pool = pool_b
 )
 
@@ -192,9 +186,6 @@ pool_cmb_n <- pool(analysis_cmb, alternative = "greater", type = "normal")
 
 
 .test_print$condmean_boot <- list(
-    draws = drawobj_cmb,
-    impute = impute_cmb,
-    analysis = analysis_cmb,
     pool = list(
         percentile = pool_cmb_p,
         normal = pool_cmb_n
@@ -243,9 +234,6 @@ pool_cmj <- pool(analysis_cmj, conf.level = 0.9)
 
 
 .test_print$condmean_jack <- list(
-    draws = drawobj_cmj,
-    impute = impute_cmj,
-    analysis = analysis_cmj,
     pool = pool_cmj
 )
 
@@ -292,9 +280,6 @@ analysis_bml <- analyse(
 pool_bml <- pool(analysis_bml, conf.level = 0.9)
 
 .test_print$bmlmi <- list(
-    draws = drawobj_bml,
-    impute = impute_bml,
-    analysis = analysis_bml,
     pool = pool_bml
 )
 

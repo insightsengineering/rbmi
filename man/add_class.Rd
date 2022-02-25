@@ -7,9 +7,9 @@
 add_class(x, cls)
 }
 \arguments{
-\item{x}{Object to add a class to}
+\item{x}{object to add a class to.}
 
-\item{cls}{the class to be added}
+\item{cls}{the class to be added.}
 }
 \description{
 Utility function to add a class to an object. Adds the new class

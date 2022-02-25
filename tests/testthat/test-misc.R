@@ -6,7 +6,7 @@
 
 test_that("rbmi can handle 'grouped' dplyr data", {
 
-    dat <- simulate_data(100) %>%
+    dat <- simulate_test_data(100) %>%
         as_tibble() %>%
         mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 1, NA_real_, outcome))
 

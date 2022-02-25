@@ -13,7 +13,7 @@ fill_locf(data, vars, group = NULL, order = NULL)
 expand_locf(data, ..., vars, group, order)
 }
 \arguments{
-\item{data}{Dataset to expand or fill in.}
+\item{data}{dataset to expand or fill in.}
 
 \item{...}{variables and the levels that should be expanded out (note that duplicate entries of
 levels will result in multiple rows for that level).}

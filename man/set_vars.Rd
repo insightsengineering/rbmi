@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{set_vars}
 \alias{set_vars}
-\title{Set Key Variables}
+\title{Set key variables}
 \usage{
 set_vars(
   subjid = "subjid",
@@ -15,18 +15,18 @@ set_vars(
 )
 }
 \arguments{
-\item{subjid}{The name of the "subject ID" variable. A length 1 character vector.}
+\item{subjid}{The name of the "Subject ID" variable. A length 1 character vector.}
 
 \item{visit}{The name of the "Visit" variable. A length 1 character vector.}
 
 \item{outcome}{The name of the "Outcome" variable. A length 1 character vector.}
 
-\item{group}{The name of the "group" variable. A length 1 character vector.}
+\item{group}{The name of the "Group" variable. A length 1 character vector.}
 
-\item{covariates}{The name of any covariates to be used in the context of modelling.
+\item{covariates}{The name of any covariates to be used in the context of modeling.
 See details.}
 
-\item{strata}{The name of the any stratification models to be used in the context of bootstrap
+\item{strata}{The name of the any stratification variable to be used in the context of bootstrap
 sampling. See details.}
 
 \item{strategy}{The name of the "strategy" variable. A length 1 character vector.}
@@ -45,7 +45,7 @@ inhibit the interpretation/conversion of objects is not supported.
 Currently \code{strata} is only used by \code{\link[=draws]{draws()}} in combination with \code{method_condmean(type = "bootstrap")}
 and \code{method_approxbayes()} in order to allow for the specification of stratified bootstrap sampling.
 By default \code{strata} is set equal to the value of \code{group} as it is assumed most users will want to
-preserver the group size between samples. See \code{\link[=draws]{draws()}} for more details.
+preserve the group size between samples. See \code{\link[=draws]{draws()}} for more details.
 
 Likewise, currently the \code{strategy} argument is only used by \code{\link[=draws]{draws()}} to specify the name of the
 strategy variable within the \code{data_ice} data.frame. See \code{\link[=draws]{draws()}} for more details.

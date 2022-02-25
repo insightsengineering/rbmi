@@ -3,8 +3,8 @@
 #'
 #' Utility function to set an objects class.
 #'
-#' @param x Object to set the class of
-#' @param cls The class to be set
+#' @param x object to set the class of.
+#' @param cls the class to be set.
 #' @export
 as_class <- function(x, cls) {
     class(x) <- cls
@@ -17,8 +17,8 @@ as_class <- function(x, cls) {
 #' Utility function to add a class to an object. Adds the new class
 #' after any existing classes.
 #'
-#' @param x Object to add a class to
-#' @param cls the class to be added
+#' @param x object to add a class to.
+#' @param cls the class to be added.
 #' @export
 add_class <- function(x, cls) {
     class(x) <- c(class(x), cls)
@@ -30,14 +30,14 @@ add_class <- function(x, cls) {
 #'
 #' Utility function to see if an object has a particular class.
 #' Useful when we don't know how many other classes the object may
-#' have
+#' have.
 #'
 #' @return
-#' True if the object has the class
-#' False if the object does not have the class
+#' `TRUE` if the object has the class.
+#' `FALSE` if the object does not have the class.
 #'
-#' @param x The object we want to check the class of
-#' @param cls The class we want to know if it has or not
+#' @param x the object we want to check the class of.
+#' @param cls the class we want to know if it has or not.
 #' @export
 has_class <- function(x, cls) {
     cls %in% class(x)
@@ -340,24 +340,24 @@ sort_by <- function(df, vars = NULL, decreasing = FALSE) {
 
 
 
-#' Set Key Variables
+#' Set key variables
 #'
 #' @description
 #' This function is used to define the names of key variables within the `data.frame`'s
 #' that are provided as input arguments to [draws()] and [ancova()].
 #'
-#' @param subjid The name of the "subject ID" variable. A length 1 character vector.
+#' @param subjid The name of the "Subject ID" variable. A length 1 character vector.
 #'
 #' @param visit The name of the "Visit" variable. A length 1 character vector.
 #'
 #' @param outcome The name of the "Outcome" variable. A length 1 character vector.
 #'
-#' @param group The name of the "group" variable. A length 1 character vector.
+#' @param group The name of the "Group" variable. A length 1 character vector.
 #'
-#' @param covariates The name of any covariates to be used in the context of modelling.
+#' @param covariates The name of any covariates to be used in the context of modeling.
 #' See details.
 #'
-#' @param strata The name of the any stratification models to be used in the context of bootstrap
+#' @param strata The name of the any stratification variable to be used in the context of bootstrap
 #' sampling. See details.
 #'
 #' @param strategy The name of the "strategy" variable. A length 1 character vector.
@@ -373,7 +373,7 @@ sort_by <- function(df, vars = NULL, decreasing = FALSE) {
 #' Currently `strata` is only used by [draws()] in combination with `method_condmean(type = "bootstrap")`
 #' and `method_approxbayes()` in order to allow for the specification of stratified bootstrap sampling.
 #' By default `strata` is set equal to the value of `group` as it is assumed most users will want to
-#' preserver the group size between samples. See [draws()] for more details.
+#' preserve the group size between samples. See [draws()] for more details.
 #'
 #' Likewise, currently the `strategy` argument is only used by [draws()] to specify the name of the
 #' strategy variable within the `data_ice` data.frame. See [draws()] for more details.

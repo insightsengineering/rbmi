@@ -9,7 +9,7 @@
 #'
 #' @details
 #'
-#' The object also handles multiple other operations specific to rbmi such as defining whether an
+#' The object also handles multiple other operations specific to `rbmi` such as defining whether an
 #' outcome value is MAR / Missing or not as well as tracking which imputation strategy is assigned
 #' to each subject.
 #'
@@ -347,7 +347,7 @@ longDataConstructor <- R6::R6Class(
         #' @description
         #' Convenience function to run self$set_strategies(dat_ice, update=TRUE)
         #' kept for legacy reasons.
-        #' @param dat_ice A data.frame containing ICE information see [impute()] for the format of this dataframe.
+        #' @param dat_ice A `data.frame` containing ICE information see [impute()] for the format of this dataframe.
         update_strategies = function(dat_ice) {
             self$set_strategies(dat_ice, update = TRUE)
         },

@@ -536,15 +536,15 @@ test_that("Multiple imputation references / groups work as expected (end to end 
     n <- 100
 
     dat <- bind_rows(
-        simulate_data(n, mu = mcoefs_b, sd = sigma_sd, cor = sigma_cor) %>%
+        simulate_test_data(n, mu = mcoefs_b, sd = sigma_sd, cor = sigma_cor) %>%
             mutate(group2 = if_else(group == "A", "A", "B")) %>%
             mutate(id = paste0(id, "A")),
 
-        simulate_data(n, mu = mcoefs_c, sd = sigma_sd, cor = sigma_cor) %>%
+        simulate_test_data(n, mu = mcoefs_c, sd = sigma_sd, cor = sigma_cor) %>%
             mutate(group2 = if_else(group == "A", "A", "C")) %>%
             mutate(id = paste0(id, "B")),
 
-        simulate_data(n, mu = mcoefs_d, sd = sigma_sd, cor = sigma_cor) %>%
+        simulate_test_data(n, mu = mcoefs_d, sd = sigma_sd, cor = sigma_cor) %>%
             mutate(group2 = if_else(group == "A", "A", "D")) %>%
             mutate(id = paste0(id, "C"))
     ) %>%

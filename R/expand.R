@@ -27,7 +27,7 @@ locf <- function(x) {
 #' combinations of data are inserted into a `data.frame` with imputation/fill methods for updating
 #' covariate values of newly created rows.
 #'
-#' @param data Dataset to expand or fill in.
+#' @param data dataset to expand or fill in.
 #' @param ... variables and the levels that should be expanded out (note that duplicate entries of
 #' levels will result in multiple rows for that level).
 #' @param vars character vector containing the names of variables that need to be filled in.
