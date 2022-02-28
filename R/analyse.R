@@ -189,8 +189,7 @@ analyse <- function(imputations, fun = ancova, delta = NULL, ...) {
 #'
 #' @param imputations An `imputations` object as created by [impute()].
 #' @param index The indexes of the imputed datasets to return. By default,
-#' all datasets within the `imputations` object will be returned
-#' (i.e. use this argument if you just want e.g. the first imputed dataset only).
+#' all datasets within the `imputations` object will be returned.
 #' @param delta A `data.frame` containing the delta transformation to be
 #' applied to the imputed dataset. See [analyse()] for details on the
 #' format and specification of this `data.frame`.

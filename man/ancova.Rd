@@ -14,7 +14,7 @@ ancova(data, vars, visits = NULL, weights = c("proportional", "equal"))
 
 \item{visits}{An optional character vector specifying which visits to
 fit the ancova model at. If \code{NULL}, a separate ancova model will be fit to the
-outcomes from each visits (as determined by \code{unique(data[[vars$visit]])}).
+outcomes for each visit (as determined by \code{unique(data[[vars$visit]])}).
 See details.}
 
 \item{weights}{Character, either \code{"proportional"} (default) or \code{"equal"}. Specifies the
@@ -68,9 +68,9 @@ group in turn.
 
 In short:
 \itemize{
-\item \code{"equal"} weights categorical covariates equally across all theoretical combinations.
 \item \code{"proportional"} weights categorical covariates based upon their frequency of occurrence
 in the data.
+\item \code{"equal"} weights categorical covariates equally across all theoretical combinations.
 }
 }
 }

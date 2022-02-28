@@ -85,8 +85,8 @@ function when changing the imputation strategy in certain circumstances (as deta
 The \code{data.frame} provided to \code{update_strategy} argument must contain two columns,
 one for the subject ID and another for the imputation strategy, whose names are the same as
 those defined in the \code{vars} argument as specified in the call to \code{\link[=draws]{draws()}}. Please note that this
-argument only allows you to update the imputation strategy and not other argument such as the
-time of the first visit affect by the ICE.
+argument only allows you to update the imputation strategy and not other arguments such as the
+time of the first visit affected by the ICE.
 A key limitation of this functionality is
 that one can only switch between a MAR and a non-MAR strategy (or vice versa) for subjects without
 observed post-ICE data. The reason for this is that such a change would affect whether the post-ICE data is included
