@@ -213,8 +213,8 @@ Note that, similar to `draws()`, the `ancova()` function uses the `set_vars()`
 function which determines the names of the key variables within the data and the covariates 
 (in addition to the treatment group) for which the analysis model will be adjusted.
 
-Please also note that the names of the analysis estimates contain "ref" and "alt" to refer to the two treatment arms. In particular "ref" refers to the first level of `vars$group` which not necessarily
-coincides with the control arm. In this example, since `levels(dat[[vars$group]]) = c("DRUG", PLACEBO`), the results associated with "ref" correspond to the intervention arm, while those associated with "alt" correspond to the control arm.
+Please also note that the names of the analysis estimates contain "ref" and "alt" to refer to the two treatment arms. In particular "ref" refers to the first factor level of `vars$group` which does not necessarily
+coincide with the control arm. In this example, since `levels(dat[[vars$group]]) = c("DRUG", PLACEBO`), the results associated with "ref" correspond to the intervention arm, while those associated with "alt" correspond to the control arm.
 
 Additionally, we can use the `delta` argument of `analyse()` to perform a delta adjustments of the imputed datasets prior to the analysis. 
 In brief, this is implemented by specifying a data.frame that contains the amount
