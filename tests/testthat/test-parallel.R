@@ -73,7 +73,7 @@ test_that("Parallisation works as expected", {
 
         results_1$formula <- x ~ a + b + c + d
         results_2$formula <- x ~ a + b + c + d
-        expect_true(time_1_core > (time_2_core * 1.3))
+        # expect_true(time_1_core > (time_2_core * 1.3))
         expect_equal(results_1, results_2)
 
         res <- list(
