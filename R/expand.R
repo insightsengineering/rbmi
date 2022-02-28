@@ -59,7 +59,7 @@ locf <- function(x) {
 #' ## Missing First Values
 #'
 #' The `fill_locf()` function performs last observation carried forward imputation.
-#' A natural consquence of this is that it is unable to impute missing observations if the
+#' A natural consequence of this is that it is unable to impute missing observations if the
 #' observation is the first value.
 #' A common request is for this function to impute the first value if it is missing
 #' however doing so risks silent errors in the case of time varying covariates.
