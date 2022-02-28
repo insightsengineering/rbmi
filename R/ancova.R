@@ -10,7 +10,7 @@
 #' `visit`, `outcome` and `covariates` elements are required. See details.
 #' @param visits An optional character vector specifying which visits to
 #' fit the ancova model at. If `NULL`, a separate ancova model will be fit to the
-#' outcomes from each visits (as determined by `unique(data[[vars$visit]])`).
+#' outcomes for each visit (as determined by `unique(data[[vars$visit]])`).
 #' See details.
 #' @param weights Character, either `"proportional"` (default) or `"equal"`. Specifies the
 #' weighting strategy to be used for categorical covariates when calculating the lsmeans.
@@ -60,9 +60,9 @@
 #' group in turn.
 #'
 #' In short:
-#'   - `"equal"` weights categorical covariates equally across all theoretical combinations.
 #'   - `"proportional"` weights categorical covariates based upon their frequency of occurrence
 #' in the data.
+#'   - `"equal"` weights categorical covariates equally across all theoretical combinations.
 #'
 #' @seealso [analyse()]
 #' @seealso [stats::lm()]

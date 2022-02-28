@@ -15,8 +15,7 @@ extract_imputed_dfs(
 \item{imputations}{An \code{imputations} object as created by \code{\link[=impute]{impute()}}.}
 
 \item{index}{The indexes of the imputed datasets to return. By default,
-all datasets within the \code{imputations} object will be returned
-(i.e. use this argument if you just want e.g. the first imputed dataset only).}
+all datasets within the \code{imputations} object will be returned.}
 
 \item{delta}{A \code{data.frame} containing the delta transformation to be
 applied to the imputed dataset. See \code{\link[=analyse]{analyse()}} for details on the

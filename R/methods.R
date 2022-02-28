@@ -45,7 +45,7 @@
 #' when a conditional mean imputation approach (set via `method_condmean()`) is used. Must be one of `"bootstrap"` or `"jackknife"`.
 #'
 #' @param seed a numeric that specifies the seed to be used in the call to Stan. This
-#' argument is forward on the the `seed` argument of [rstan::sampling()]. Note that
+#' argument is passed onto the `seed` argument of [rstan::sampling()]. Note that
 #' this is only required for `method_bayes()`, for all other methods you can achieve
 #' reproducible results by setting the seed via `set.seed()`. See details.
 #'
@@ -55,7 +55,7 @@
 #' imputation models and datasets generated as the first sample will be based on
 #' the original dataset whilst the other `n_samples` samples will be
 #' bootstrapped datasets. Likewise, for `method_condmean(type = "jackknife")` there will
-#' be `nrow(data) + 1` imputation models and datasets generated. In both cases this is
+#' be `length(unique(data$subjid)) + 1` imputation models and datasets generated. In both cases this is
 #' represented by `n + 1` being displayed in the print message.
 #'
 #' The user is able to specify different covariance structures using the the `covariance`

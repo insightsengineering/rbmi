@@ -62,7 +62,7 @@ In the case of \code{method_condmean(type = "jackknife")} this argument
 must be set to \code{NULL}. See details.}
 
 \item{seed}{a numeric that specifies the seed to be used in the call to Stan. This
-argument is forward on the the \code{seed} argument of \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}. Note that
+argument is passed onto the \code{seed} argument of \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}. Note that
 this is only required for \code{method_bayes()}, for all other methods you can achieve
 reproducible results by setting the seed via \code{set.seed()}. See details.}
 
@@ -94,7 +94,7 @@ In the case of \code{method_condmean(type = "bootstrap")} there will be \code{n_
 imputation models and datasets generated as the first sample will be based on
 the original dataset whilst the other \code{n_samples} samples will be
 bootstrapped datasets. Likewise, for \code{method_condmean(type = "jackknife")} there will
-be \code{nrow(data) + 1} imputation models and datasets generated. In both cases this is
+be \code{length(unique(data$subjid)) + 1} imputation models and datasets generated. In both cases this is
 represented by \code{n + 1} being displayed in the print message.
 
 The user is able to specify different covariance structures using the the \code{covariance}
