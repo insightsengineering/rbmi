@@ -49,6 +49,27 @@ will be returned in the original sort order however.
 
 \code{expand_locf()} a simple composition function of \code{fill_locf()} and \code{expand()} i.e.
 \code{fill_locf(expand(...))}.
+\subsection{Missing First Values}{
+
+The \code{fill_locf()} function performs last observation carried forward imputation.
+A natural consequence of this is that it is unable to impute missing observations if the
+observation is the first value for a given subject / grouping.
+These values are deliberately not imputed as doing so risks silent errors in the case of time
+varying covariates.
+One solution is to first use \code{expand_locf()} on just
+the visit variable and time varying covariates and then merge on the baseline covariates
+afterwards i.e.\preformatted{library(dplyr)
+
+dat_expanded <- expand(
+    data = dat,
+    subject = c("pt1", "pt2", "pt3", "pt4"),
+    visit = c("vis1", "vis2", "vis3")
+)
+
+dat_filled <- dat_expanded \%>\%
+    left_join(baseline_covariates, by = "subject")
+}
+}
 }
 \examples{
 \dontrun{

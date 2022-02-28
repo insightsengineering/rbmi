@@ -74,13 +74,14 @@ test_that("fill_locf", {
         pt = c("a", "a", "a", "a", "b", "b", "b", "b"),
         v2 = c(1:8)
     )
-
-    df_actual <- fill_locf(
-        input_df,
-        vars = c("v1", "v2", "v3"),
-        group = "pt"
+    expect_warning(
+        df_actual <- fill_locf(
+            input_df,
+            vars = c("v1", "v2", "v3"),
+            group = "pt"
+        ),
+        regexp = "`v1`"
     )
-
     df_expected <- dplyr::tibble(
         v1 = c(NA,  1,    2,   2,  NA, 3,  3,   4),
         v3 = c(1, 2, 2, 3, 4, 5, 6, 7),
@@ -90,11 +91,20 @@ test_that("fill_locf", {
     expect_equal(df_actual, df_expected)
 
 
-    df_actual <- fill_locf(
-        input_df,
-        vars = c("v1", "v2", "v3")
-    )
 
+    input_df <- dplyr::tibble(
+        v1 = c(NA,  1,    2,   NA,  NA, 3,  NA,   4),
+        v3 = c(1, 2, NA, 3, 4, 5, 6, 7),
+        pt = c("a", "a", "a", "a", "b", "b", "b", "b"),
+        v2 = c(1:8)
+    )
+    expect_warning(
+        df_actual <- fill_locf(
+            input_df,
+            vars = c("v1", "v2", "v3")
+        ),
+        regexp = "`v1`"
+    )
     df_expected <- dplyr::tibble(
         v1 = c(NA,  1,    2,   2,  2, 3,  3,   4),
         v3 = c(1, 2, 2, 3, 4, 5, 6, 7),
@@ -105,20 +115,19 @@ test_that("fill_locf", {
 
 
 
-
-
     input_df <- dplyr::tibble(
         v1 = c(NA,  1,    2,   NA,  NA, 3,  NA,   4),
         pt = c("b", "b", "a", "a", "a", "a", "b", "b"),
         v2 = c(1:8)
     )
-
-    df_actual <- fill_locf(
-        input_df,
-        vars = c("v1", "v2"),
-        group = "pt"
+    expect_warning(
+        df_actual <- fill_locf(
+            input_df,
+            vars = c("v1", "v2"),
+            group = "pt"
+        ),
+        regexp = "`v1`"
     )
-
     df_expected <- dplyr::tibble(
         v1 = c(NA,  1,    2,   2,  2, 3,  1,   4),
         pt = c("b", "b", "a", "a", "a", "a", "b", "b"),
@@ -138,14 +147,12 @@ test_that("fill_locf", {
         srt2 = c(2,  1,   2,   1,   1,   1,   1,   1),
         v2 = c(1:8)
     )
-
     df_actual <- fill_locf(
         input_df,
         vars = c("v1", "v2"),
         group = "pt",
         order = c("srt1", "srt2")
     )
-
     df_expected <-  dplyr::tibble(
         v1 = c(4,   1,   2,   3,  4,  3,   4,  4),
         pt = c("b", "a", "a", "a", "b", "a", "b", "b"),
@@ -156,21 +163,49 @@ test_that("fill_locf", {
     expect_equal(df_actual, df_expected)
 
 
+
     input_df <- tibble(
         v1 = 1,
         v2 = 3
     )
-
     expect_error(fill_locf(input_df, vars = c("v1", "v2", "v3")), regexp = "`v3`")
     expect_error(fill_locf(input_df, vars = c("v1", "v2"), group = "v3"), regexp = "`v3`")
     expect_error(fill_locf(input_df, vars = c("v1", "v2"), order = "v3"), regexp = "`v3`")
 
+
+
+
+    input_df <- dplyr::tibble(
+        v1 = c(NA,  1,    2,   2,  2, 3,  3,   4),
+        v3 = c(1, 2, 2, 3, 4, 5, 6, 7),
+        pt = c(NA, "a", "a", "a", "b", "b", "b", "b"),
+        c1 = c(NA, 2:8),
+        v2 = c(1:8)
+    )
+    expect_warning(
+        df_actual <- fill_locf(
+            input_df,
+            vars = c("v1", "v2", "c1"),
+            group = "pt",
+            order = c("pt", "c1")
+        ),
+        regexp = "`v1`, `c1`"
+    )
+    df_expected <- dplyr::tibble(
+        v1 = c(NA,  1,    2,   2,  2, 3,  3,   4),
+        v3 = c(1, 2, 2, 3, 4, 5, 6, 7),
+        pt = c(NA, "a", "a", "a", "b", "b", "b", "b"),
+        c1 = c(NA, 2:8),
+        v2 = c(1:8)
+    )
+    expect_equal(df_actual, df_expected)
 })
 
 
 
 
-test_that("expand_locf",{
+test_that("expand_locf", {
+
     input_df <- dplyr::tibble(
         c1 = c("A", "B", "A", "C"),
         c2 = c("A", "A", "B", "B"),
@@ -254,14 +289,18 @@ test_that("fill_locf - works with list columns", {
     input_df <- dplyr::tibble(
         pt = c("a", "a", "b", "b", "b"),
         srt1 = c(1, 2, 1, 2, 3),
-        list_val = list(c(1, 1), NA, NA, c(4, 4,4,4), NA)
+        list_val = list(c(1, 1), NA, NA, c(4, 4, 4, 4), NA)
     )
-    df_actual <- fill_locf(
-        input_df,
-        vars = "list_val",
-        group = "pt",
-        order = "srt1"
+    expect_warning(
+        df_actual <- fill_locf(
+            input_df,
+            vars = "list_val",
+            group = "pt",
+            order = "srt1"
+        ),
+        regexp = "`list_val`"
     )
+
     df_expected <- dplyr::tibble(
         pt = c("a", "a", "b", "b", "b"),
         srt1 = c(1, 2, 1, 2, 3),
@@ -275,7 +314,7 @@ test_that("fill_locf - works with list columns", {
     input_df <- dplyr::tibble(
         pt = c("a", "a", "b", "b", "b", "b", "b"),
         srt1 = c(1, 2, 1, 2, 3, 4, 5),
-        list_val = list(NA, mod1, mod1, NA, iris, NA, NA)
+        list_val = list(mod1, mod1, mod1, NA, iris, NA, NA)
     )
     df_actual <- fill_locf(
         input_df,
@@ -286,7 +325,7 @@ test_that("fill_locf - works with list columns", {
     df_expected <- dplyr::tibble(
         pt = c("a", "a", "b", "b", "b", "b", "b"),
         srt1 = c(1, 2, 1, 2, 3, 4, 5),
-        list_val = list(NA, mod1, mod1, mod1, iris, iris, iris)
+        list_val = list(mod1, mod1, mod1, mod1, iris, iris, iris)
     )
     expect_equal(df_actual, df_expected)
 })
@@ -304,12 +343,16 @@ test_that("fill_locf works with factors", {
         v2 = c(1, 2, 3, 4, NA, 6, NA, 8)
     )
 
-    df_actual <- fill_locf(
-        input_df,
-        vars = c("v1", "myfac1"),
-        group = "pt",
-        order = c("srt1", "srt2")
+    expect_warning(
+        df_actual <- fill_locf(
+            input_df,
+            vars = c("v1", "myfac1"),
+            group = "pt",
+            order = c("srt1", "srt2")
+        ),
+        regexp = "`v1`, `myfac1`"
     )
+
 
     df_expected <- data.frame(
         v1 = c(NA, 1, 2, 2, NA, 3, 3, 4),
@@ -334,11 +377,14 @@ test_that("fill_locf works with factors", {
         v2 = c(1, 2, 3, 4, NA, 6, NA, 8)
     )
 
-    df_actual <- fill_locf(
-        input_df,
-        vars = c("v1", "myfac1"),
-        group = "pt",
-        order = c("srt1", "srt2")
+    expect_warning(
+        df_actual <- fill_locf(
+            input_df,
+            vars = c("v1", "myfac1"),
+            group = "pt",
+            order = c("srt1", "srt2")
+        ),
+        regexp = "`v1`, `myfac1`"
     )
 
     df_expected <- data.frame(
