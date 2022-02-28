@@ -25,7 +25,8 @@ Suggests:
     rmarkdown,
     bookdown,
     lubridate,
-    purrr
+    purrr,
+    ggplot2
 Biarch: true
 Config/testthat/edition: 3
 Imports: 
