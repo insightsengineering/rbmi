@@ -60,11 +60,12 @@ locf <- function(x) {
 #'
 #' The `fill_locf()` function performs last observation carried forward imputation.
 #' A natural consequence of this is that it is unable to impute missing observations if the
-#' observation is the first value.
-#' A common request is for this function to impute the first value if it is missing
-#' however doing so risks silent errors in the case of time varying covariates.
-#' The current recommendation for dealing with this problem is to first use `expand_locf()` on just
-#' the visits and time varying covariates and then merge on the baseline covariates afterwards i.e.
+#' observation is the first value for a given subject / grouping.
+#' These values are deliberately not imputed as doing so risks silent errors in the case of time
+#' varying covariates.
+#' One solution is to first use `expand_locf()` on just
+#' the visit variable and time varying covariates and then merge on the baseline covariates
+#' afterwards i.e.
 #'
 #' ```
 #' library(dplyr)
@@ -75,7 +76,7 @@ locf <- function(x) {
 #'     visit = c("vis1", "vis2", "vis3")
 #' )
 #'
-#' dat_filled %>%
+#' dat_filled <- dat_expanded %>%
 #'     left_join(baseline_covariates, by = "subject")
 #' ```
 #'
