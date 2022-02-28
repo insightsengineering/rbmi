@@ -39,17 +39,21 @@ The function works as follows:
 If no value for \code{visits} is provided then it will be set to
 \code{unique(data[[vars$visit]])}.
 
-In order to meet the formatting standards set by \code{\link[=analyse]{analyse()}} the results
-will be collapsed into a single list prefixed by the visit name e.g.:\preformatted{list(
-    visit_1_trt = list(est = ...),
-    visit_1_lsm_ref = list(est = ...),
-    visit_1_lsm_alt = list(est = ...),
-    visit_2_trt = list(est = ...),
-    visit_2_lsm_ref = list(est = ...),
-    visit_2_lsm_alt = list(est = ...),
-    ...
+In order to meet the formatting standards set by \code{\link[=analyse]{analyse()}} the results will be collapsed
+into a single list suffixed by the visit name, e.g.:\preformatted{list(
+   trt_visit_1 = list(est = ...),
+   lsm_ref_visit_1 = list(est = ...),
+   lsm_alt_visit_1 = list(est = ...),
+   trt_visit_2 = list(est = ...),
+   lsm_ref_visit_2 = list(est = ...),
+   lsm_alt_visit_2 = list(est = ...),
+   ...
 )
 }
+
+Please note that "ref" refers to the first factor level of \code{vars$group} which does not necessarily
+coincide with the control arm. Analogously, "alt" refers to the second factor level of \code{vars$group}.
+"trt" refers to the model contrast translating the mean difference between the second level and first level.
 
 If you want to include interaction terms in your model this can be done
 by providing them to the \code{covariates} argument of \code{\link[=set_vars]{set_vars()}}
