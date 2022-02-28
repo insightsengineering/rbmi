@@ -572,7 +572,7 @@ tipp_frame <- tipp_frame_grid %>%
     select(-results_list) %>%
     mutate(
         pval = cut(
-            pval,
+            pval_6,
             c(0, 0.001, 0.01, 0.05, 0.2, 1),
             right = FALSE,
             labels = c("<0.001", "0.001 - <0.01", "0.01- <0.05", "0.05 - <0.20", ">= 0.20")
