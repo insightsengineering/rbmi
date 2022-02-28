@@ -483,9 +483,9 @@ pool_obj_prop
 
 tmp <- as.data.frame(pool_obj_prop) %>% 
     mutate(
-        OR = exp(tmp$est),
-        OR.lci = exp(tmp$lci),
-        OR.uci = exp(tmp$uci)
+        OR = exp(est),
+        OR.lci = exp(lci),
+        OR.uci = exp(uci)
     ) %>% 
     select(parameter, OR, OR.lci, OR.uci)
 tmp
