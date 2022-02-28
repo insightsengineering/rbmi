@@ -94,7 +94,30 @@ made between existing NAs and newly created NAs). Note that the <code>data.frame
 by <code>c(group, order)</code> before performing the LOCF imputation; the <code>data.frame</code>
 will be returned in the original sort order however.</p>
 <p><code>expand_locf()</code> a simple composition function of <code>fill_locf()</code> and <code>expand()</code> i.e.
-<code>fill_locf(expand(...))</code>.</p>
+<code>fill_locf(expand(...))</code>.</p><div class="section">
+<h3 id="missing-first-values">Missing First Values<a class="anchor" aria-label="anchor" href="#missing-first-values"></a></h3>
+
+
+<p>The <code>fill_locf()</code> function performs last observation carried forward imputation.
+A natural consequence of this is that it is unable to impute missing observations if the
+observation is the first value for a given subject / grouping.
+These values are deliberately not imputed as doing so risks silent errors in the case of time
+varying covariates.
+One solution is to first use <code>expand_locf()</code> on just
+the visit variable and time varying covariates and then merge on the baseline covariates
+afterwards i.e.</p><div class="sourceCode"><pre><code><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>
+
+<span class="va">dat_expanded</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expand.html">expand</a></span><span class="op">(</span>
+    data <span class="op">=</span> <span class="va">dat</span>,
+    subject <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pt1"</span>, <span class="st">"pt2"</span>, <span class="st">"pt3"</span>, <span class="st">"pt4"</span><span class="op">)</span>,
+    visit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vis1"</span>, <span class="st">"vis2"</span>, <span class="st">"vis3"</span><span class="op">)</span>
+<span class="op">)</span>
+
+<span class="va">dat_filled</span> <span class="op">&lt;-</span> <span class="va">dat_expanded</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">baseline_covariates</span>, by <span class="op">=</span> <span class="st">"subject"</span><span class="op">)</span></code></pre></div>
+
+</div>
+
     </div>
 
     <div class="section level2">

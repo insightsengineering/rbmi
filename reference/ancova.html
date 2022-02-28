@@ -69,7 +69,7 @@ the least square means estimates in each group.</p>
 <dt>visits</dt>
 <dd><p>An optional character vector specifying which visits to
 fit the ancova model at. If <code>NULL</code>, a separate ancova model will be fit to the
-outcomes from each visits (as determined by <code>unique(data[[vars$visit]])</code>).
+outcomes for each visit (as determined by <code>unique(data[[vars$visit]])</code>).
 See details.</p></dd>
 <dt>weights</dt>
 <dd><p>Character, either <code>"proportional"</code> (default) or <code>"equal"</code>. Specifies the
@@ -111,9 +111,9 @@ patients by expanding out all combinations of the models categorical covariates.
 lsmeans are then calculated as the average of
 the predicted mean outcome for these hypothetical patients assuming they come from each
 group in turn.</p>
-<p>In short:</p><ul><li><p><code>"equal"</code> weights categorical covariates equally across all theoretical combinations.</p></li>
-<li><p><code>"proportional"</code> weights categorical covariates based upon their frequency of occurrence
+<p>In short:</p><ul><li><p><code>"proportional"</code> weights categorical covariates based upon their frequency of occurrence
 in the data.</p></li>
+<li><p><code>"equal"</code> weights categorical covariates equally across all theoretical combinations.</p></li>
 </ul></div>
 
     </div>

@@ -110,7 +110,7 @@ In the case of <code>method_condmean(type = "jackknife")</code> this argument
 must be set to <code>NULL</code>. See details.</p></dd>
 <dt>seed</dt>
 <dd><p>a numeric that specifies the seed to be used in the call to Stan. This
-argument is forward on the the <code>seed</code> argument of <code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html" class="external-link">rstan::sampling()</a></code>. Note that
+argument is passed onto the <code>seed</code> argument of <code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html" class="external-link">rstan::sampling()</a></code>. Note that
 this is only required for <code>method_bayes()</code>, for all other methods you can achieve
 reproducible results by setting the seed via <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>. See details.</p></dd>
 <dt>covariance</dt>
@@ -139,7 +139,7 @@ Needed for <code>method_bmlmi()</code>.</p></dd>
 imputation models and datasets generated as the first sample will be based on
 the original dataset whilst the other <code>n_samples</code> samples will be
 bootstrapped datasets. Likewise, for <code>method_condmean(type = "jackknife")</code> there will
-be <code>nrow(data) + 1</code> imputation models and datasets generated. In both cases this is
+be <code>length(unique(data$subjid)) + 1</code> imputation models and datasets generated. In both cases this is
 represented by <code>n + 1</code> being displayed in the print message.</p>
 <p>The user is able to specify different covariance structures using the the <code>covariance</code>
 argument. Currently supported structures include:</p><ul><li><p>Unstructured (<code>"us"</code>)</p></li>
