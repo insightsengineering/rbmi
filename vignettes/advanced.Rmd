@@ -481,9 +481,14 @@ ana_obj_prop <- analyse(
 pool_obj_prop <- pool(ana_obj_prop)
 pool_obj_prop
 
-tmp <- as.data.frame(pool_obj_prop)
-tmp$OR <- exp(tmp$est); tmp$OR.lci <- exp(tmp$lci); tmp$OR.uci <- exp(tmp$uci)
-tmp[, c("parameter", "OR", "OR.lci", "OR.uci")]
+tmp <- as.data.frame(pool_obj_prop) %>% 
+    mutate(
+        OR = exp(tmp$est),
+        OR.lci = exp(tmp$lci),
+        OR.uci = exp(tmp$uci)
+    ) %>% 
+    select(parameter, OR, OR.lci, OR.uci)
+tmp
 ```
 
 Note that if the user wants `rbmi` to use a normal approximation to the pooled test statistics, then the degrees of freedom need to be set to `df = NA` (as per the above example). If the degrees of freedom of the complete data test statistics are known or if the degrees of freedom are set to `df = Inf`, then `rbmi` pools the degrees of freedom accross imputed datasets according to the rule by Barnard and Rubin (see the "Statistical Specifications" vignette (`vignette("stat_specs", package = "rbmi")` for details). According to this rule, infinite degrees of freedom for the complete data analysis do not imply that the pooled degrees of freedom are also infinite.
@@ -534,7 +539,8 @@ The same approach can be used to implement a tipping point analysis. Here, we ap
 ```{r fig.width=5, fig.height=4}
 perform_tipp_analysis <- function(delta_control, delta_intervention) {
 
-    delta_df <- delta_template(impute_obj_CIR) %>%
+    # Derive delta offset based on control and intervention specific deltas    
+    delta_df <-  delta_df_init %>%
         mutate(
             delta_ctl = (group == "Control") * is_missing * delta_control,
             delta_int = (group == "Intervention") * is_missing * delta_intervention,
@@ -556,9 +562,12 @@ perform_tipp_analysis <- function(delta_control, delta_intervention) {
     )
 }
 
+# Get initial delta template
+delta_df_init <- delta_template(impute_obj_CIR)
+
 tipp_frame_grid <- expand.grid(
-    delta_control = seq(-5, 15, by = 1),
-    delta_intervention = seq(-5, 15, by = 1)
+    delta_control = seq(-5, 15, by = 2),
+    delta_intervention = seq(-5, 15, by = 2)
 ) %>%
     as_tibble()
 
@@ -588,7 +597,7 @@ ggplot(tipp_frame, aes(delta_control, delta_intervention, fill = pval)) +
     scale_fill_manual(values = c("darkgreen", "lightgreen", "lightyellow", "orange", "red"))
 ```
 
-According to this analysis, the significant test result from the primary analysis under CIR could only be tipped to a non-significant result for rather extreme delta-adjustments. 
+According to this analysis, the significant test result from the primary analysis under CIR could only be tipped to a non-significant result for rather extreme delta-adjustments. Please note that for a real analysis it is recommended to use a smaller step size in the grid than what has been used here.
 
 ## More flexible delta-adjustments using the `dlag` and `delta` arguments of `delta_template()`
 
