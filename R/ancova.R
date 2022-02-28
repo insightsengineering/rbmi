@@ -28,7 +28,7 @@
 #' If no value for `visits` is provided then it will be set to
 #' `unique(data[[vars$visit]])`.
 #'
-#' In order to meet the formatting standards set by [analyse()] the results are collapsed
+#' In order to meet the formatting standards set by [analyse()] the results will be collapsed
 #' into a single list suffixed by the visit name, e.g.:
 #'```
 #'list(
