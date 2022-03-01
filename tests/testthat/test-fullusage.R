@@ -6,8 +6,10 @@ suppressPackageStartupMessages({
     library(tibble)
 })
 
+# Sys.setenv("R_TEST_NIGHTLY" = TRUE)
 # NCORES <- 6
 NCORES <- 2
+
 
 bign <- 700
 sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
@@ -34,7 +36,6 @@ expect_pool_est <- function(po, expected, param = "trt_visit_3") {
         )
     }
 }
-
 
 
 
@@ -204,7 +205,7 @@ test_that("Basic Usage - Bayesian", {
 
 
 
-test_that("Basic Usage - Condmean", {
+test_that("Basic Usage - Condmean", { 
 
     skip_if_not(is_nightly())
 
@@ -737,6 +738,7 @@ test_that("rbmi works for one arm trials", {
         mutate(strategy = "MAR")
 
     runtest <- function(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method) {
+        
         draw_obj <- draws(
             data = dat,
             data_ice = dat_ice,
@@ -813,7 +815,7 @@ test_that("rbmi works for one arm trials", {
     method <- method_condmean(type = "jackknife")
     runtest(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method)
 
-    method <- method_bayes(n_samples = 150, burn_between = 10)
+    method <- method_bayes(n_samples = 250, burn_between = 10)
     runtest(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method)
 
     method <- method_approxbayes(n_samples = 3)
