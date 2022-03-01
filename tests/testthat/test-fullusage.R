@@ -6,6 +6,11 @@ suppressPackageStartupMessages({
     library(tibble)
 })
 
+# Sys.setenv("R_TEST_NIGHTLY" = TRUE)
+# NCORES <- 6
+NCORES <- 2
+
+
 bign <- 700
 sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
 nsamp <- 200
@@ -31,7 +36,6 @@ expect_pool_est <- function(po, expected, param = "trt_visit_3") {
         )
     }
 }
-
 
 
 
@@ -71,7 +75,8 @@ test_that("Basic Usage - Approx Bayes", {
         data_ice = dat_ice,
         vars = vars,
         method = method_approxbayes(n_samples = nsamp),
-        quiet = TRUE
+        quiet = TRUE,
+        ncores = NCORES
     )
 
     imputeobj <- impute(
@@ -144,7 +149,8 @@ test_that("Basic Usage - Bayesian", {
         data_ice = dat_ice,
         vars = vars,
         method = method_bayes(n_samples = nsamp),
-        quiet = TRUE
+        quiet = TRUE,
+        ncores = NCORES
     )
 
     ### Check to see if updating ice works and if it impacts the original values
@@ -199,7 +205,7 @@ test_that("Basic Usage - Bayesian", {
 
 
 
-test_that("Basic Usage - Condmean", {
+test_that("Basic Usage - Condmean", { 
 
     skip_if_not(is_nightly())
 
@@ -235,7 +241,8 @@ test_that("Basic Usage - Condmean", {
         data_ice = dat_ice,
         vars = vars,
         method = method_condmean(n_samples = nsamp),
-        quiet = TRUE
+        quiet = TRUE,
+        ncores = NCORES
     )
 
     ### Check to see if updating ice works and if it impacts the original values
@@ -326,7 +333,8 @@ test_that("Custom Strategies and Custom analysis functions", {
         data_ice = dat_ice,
         vars = vars,
         method = method_condmean(n_samples = nsamp),
-        quiet = TRUE
+        quiet = TRUE,
+        ncores = NCORES
     )
 
 
@@ -469,7 +477,8 @@ test_that("Sorting doesn't change results", {
         data_ice = dat_ice,
         vars = vars,
         method = method,
-        quiet = TRUE
+        quiet = TRUE,
+        ncores = NCORES
     )
     imputeobj <- impute( draws = drawobj, references = c("A" = "B", "B" = "B"))
     anaobj <- analyse( imputeobj, fun = rbmi::ancova, vars = vars2)
@@ -482,7 +491,8 @@ test_that("Sorting doesn't change results", {
         data_ice = dat_ice_2,
         vars = vars,
         method = method,
-        quiet = TRUE
+        quiet = TRUE,
+        ncores = NCORES
     )
     imputeobj2 <- impute( draws = drawobj2, references = c("A" = "B", "B" = "B"))
     anaobj2 <- analyse( imputeobj2, fun = rbmi::ancova, vars = vars2)
@@ -568,6 +578,7 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         select(id, visit) %>%
         mutate(strategy = "JR")
 
+    set.seed(314)
     x <- draws(
         data = dat,
         data_ice = dat_ice,
@@ -575,17 +586,17 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         method = method_bayes(
             same_cov = FALSE,
             burn_between = 4,
-            n_samples = 150,
-            burn_in = 25
+            n_samples = 250,
+            burn_in = 50
         ),
         quiet = TRUE
     )
 
 
-    lm(
-        data = dat %>% filter(visit == "visit_3"),
-        outcome ~ sex + age + group
-    )
+    # lm(
+    #     data = dat %>% filter(visit == "visit_3"),
+    #     outcome ~ sex + age + group
+    # )
 
 
 
@@ -621,8 +632,9 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         vars = vars,
         method = method_condmean(
             same_cov = TRUE,
-            n_samples = 60
-        )
+            n_samples = 80
+        ),
+        ncores = NCORES
     )
 
     expect_true(
@@ -726,11 +738,13 @@ test_that("rbmi works for one arm trials", {
         mutate(strategy = "MAR")
 
     runtest <- function(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method) {
+        
         draw_obj <- draws(
             data = dat,
             data_ice = dat_ice,
             vars = vars,
             method = method,
+            ncores = NCORES,
             quiet = TRUE
         )
 
@@ -801,7 +815,7 @@ test_that("rbmi works for one arm trials", {
     method <- method_condmean(type = "jackknife")
     runtest(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method)
 
-    method <- method_bayes(n_samples = 150, burn_between = 10)
+    method <- method_bayes(n_samples = 250, burn_between = 10)
     runtest(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method)
 
     method <- method_approxbayes(n_samples = 3)
