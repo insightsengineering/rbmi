@@ -429,6 +429,13 @@ function uses the <code><a href="../reference/set_vars.html">set_vars()</a></cod
 names of the key variables within the data and the covariates (in
 addition to the treatment group) for which the analysis model will be
 adjusted.</p>
+<p>Please also note that the names of the analysis estimates contain
+“ref” and “alt” to refer to the two treatment arms. In particular “ref”
+refers to the first factor level of <code>vars$group</code> which does
+not necessarily coincide with the control arm. In this example, since
+<code>levels(dat[[vars$group]]) = c("DRUG", PLACEBO</code>), the results
+associated with “ref” correspond to the intervention arm, while those
+associated with “alt” correspond to the control arm.</p>
 <p>Additionally, we can use the <code>delta</code> argument of
 <code><a href="../reference/analyse.html">analyse()</a></code> to perform a delta adjustments of the imputed
 datasets prior to the analysis. In brief, this is implemented by
