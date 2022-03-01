@@ -791,7 +791,7 @@ test_that("rbmi works for one arm trials", {
         } else {
             pooled <- pool(anl_obj)
         }
-        browser()
+
         expect_length(pooled$pars$mean, 4)
         expect_true(all(!is.null(unlist(pooled$pars$mean))))
         expect_true(all(!is.na(unlist(pooled$pars$mean))))
