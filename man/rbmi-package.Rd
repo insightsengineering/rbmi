@@ -23,11 +23,11 @@ To learn more about rbmi, please see the quickstart vignette:
 \code{vignette(topic= "quickstart", package = "rbmi")}
 }
 \author{
-\strong{Maintainer}: Alessandro Noci \email{alessandro.noci@roche.com}
+\strong{Maintainer}: Craig Gower-Page \email{craig.gower-page@roche.com}
 
 Authors:
 \itemize{
-  \item Craig Gower-Page \email{craig.gower-page@roche.com}
+  \item Alessandro Noci \email{alessandro.noci@roche.com}
 }
 
 Other contributors:

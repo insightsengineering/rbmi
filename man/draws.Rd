@@ -210,7 +210,7 @@ Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing Dat
 Hoboken, New Jersey, 2002. [Section 10.2.3]
 
 Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Reference-based
-imputation methods based on conditional mean imputation. \url{http://arxiv.org/abs/2109.11162}, 2021.
+imputation methods based on conditional mean imputation. \url{https://arxiv.org/abs/2109.11162}, 2021.
 
 Von Hippel, Paul T and Bartlett, Jonathan W.
 Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021.
