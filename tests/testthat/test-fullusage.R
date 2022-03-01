@@ -782,7 +782,8 @@ test_that("rbmi works for one arm trials", {
                 vars = vars,
                 fun = ancova
             ),
-            "factor"
+            regexp = "`data[[vars$group]]`",
+            fixed = TRUE
         )
 
         if(class(anl_obj$method)[2] == "condmean") {
@@ -790,10 +791,11 @@ test_that("rbmi works for one arm trials", {
         } else {
             pooled <- pool(anl_obj)
         }
-        expect_length(pooled$pars$trt, 4)
-        expect_true(all(!is.null(unlist(pooled$pars$trt))))
-        expect_true(all(!is.na(unlist(pooled$pars$trt))))
-        expect_true(all(is.double(unlist(pooled$pars$trt))))
+        browser()
+        expect_length(pooled$pars$mean, 4)
+        expect_true(all(!is.null(unlist(pooled$pars$mean))))
+        expect_true(all(!is.na(unlist(pooled$pars$mean))))
+        expect_true(all(is.double(unlist(pooled$pars$mean))))
     }
 
     method <- method_condmean(type = "jackknife")
