@@ -69,14 +69,14 @@ compute_sigma <- function(sigma_group, sigma_ref, index_mar) {
 #' These functions are used to implement various reference based imputation
 #' strategies by combining a subjects own distribution with that of
 #' a reference distribution based upon which of their visits failed to meet
-#' the MAR assumption
+#' the Missing-at-Random (MAR) assumption.
 #'
 #' @param pars_group A list of parameters for the subject's group. See details.
 #'
 #' @param pars_ref A list of parameters for the subject's reference group. See details.
 #'
 #' @param index_mar A logical vector indicating which visits meet the MAR assumption
-#' for the subject. I.e. this identifies the observations that after a non-MAR
+#' for the subject. I.e. this identifies the observations after a non-MAR
 #' intercurrent event (ICE).
 #'
 #' @details
@@ -87,7 +87,7 @@ compute_sigma <- function(sigma_group, sigma_ref, index_mar) {
 #' ```
 #' list(
 #'     mu = c(1,2,3),
-#'     sigma = matrix(c(1,2,3,4,5,6,7,8,9), nrow = 3, ncol = 3)
+#'     sigma = matrix(c(4,3,2,3,5,4,2,4,6), nrow = 3, ncol = 3)
 #' )
 #' ```
 #'
@@ -98,10 +98,10 @@ compute_sigma <- function(sigma_group, sigma_ref, index_mar) {
 #' - Missing at Random (MAR)
 #' - Jump to Reference (JR)
 #' - Copy Reference (CR)
-#' - Copy Increments from Reference (CIR)
+#' - Copy Increments in Reference (CIR)
 #' - Last Mean Carried Forward (LMCF)
 #'
-#' @name stratgies
+#' @name strategies
 #' @export
 strategy_MAR <- function(pars_group, pars_ref, index_mar) {
     return(pars_group)
@@ -109,7 +109,7 @@ strategy_MAR <- function(pars_group, pars_ref, index_mar) {
 
 
 
-#' @rdname stratgies
+#' @rdname strategies
 #' @export
 strategy_JR <- function(pars_group, pars_ref, index_mar) {
 
@@ -137,7 +137,7 @@ strategy_JR <- function(pars_group, pars_ref, index_mar) {
 }
 
 
-#' @rdname stratgies
+#' @rdname strategies
 #' @export
 strategy_CR <- function(pars_group, pars_ref, index_mar) {
     return(pars_ref)
@@ -145,7 +145,7 @@ strategy_CR <- function(pars_group, pars_ref, index_mar) {
 
 
 
-#' @rdname stratgies
+#' @rdname strategies
 #' @export
 strategy_CIR <- function(pars_group, pars_ref, index_mar) {
 
@@ -175,13 +175,12 @@ strategy_CIR <- function(pars_group, pars_ref, index_mar) {
 }
 
 
-#' @rdname stratgies
+#' @rdname strategies
 #' @export
 strategy_LMCF <- function(pars_group, pars_ref, index_mar) {
-
-    if(all(index_mar)) {
+    if (all(index_mar)) {
         return(pars_group)
-    } else if(all(!index_mar)) {
+    } else if (all(!index_mar)) {
         stop("LMCF cannot be adopted since all outcome values are missing")
     }
 
@@ -199,13 +198,13 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar) {
 
 
 
-#' Get Imputation Strategies
+#' Get imputation strategies
 #'
 #' Returns a list defining the imputation strategies to be used to create the
 #' multivariate normal distribution parameters by merging those of the source
 #' group and reference group per patient.
 #'
-#' By default Jump to Reference (JR), Copy Reference (CR), Copy Increments from
+#' By default Jump to Reference (JR), Copy Reference (CR), Copy Increments in
 #' Reference (CIR), Last Mean Carried Forward (LMCF) and Missing at Random (MAR)
 #' are defined.
 #'
@@ -218,8 +217,8 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar) {
 #' and `sigma` representing the multivariate normal distribution parameters for
 #' the subject's current group and reference group respectively.  `index_mar` will be
 #' a logical vector specifying which visits the subject met the MAR assumption
-#' at. The function must return a list with elements `mu` and `sigma`. See
-#' [strategy_JR()] for an example.
+#' at. The function must return a list with elements `mu` and `sigma`. See the implementation
+#' of `strategy_JR()` for an example.
 #'
 #' @param ... User defined methods to be added to the return list. Input must
 #' be a function.
@@ -228,10 +227,11 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar) {
 #' \dontrun{
 #' getStrategies()
 #' getStrategies(
-#'     NEW = function(pars_group, pars_ref, index_mar) <code>,
-#'     JR = function(pars_group, pars_ref, index_mar) <more code>
+#'     NEW = function(pars_group, pars_ref, index_mar) code ,
+#'     JR = function(pars_group, pars_ref, index_mar)  more_code
 #' )
 #' }
+#'
 #' @export
 getStrategies <- function(...) {
     user_strats <- list(...)

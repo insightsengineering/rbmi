@@ -9,7 +9,7 @@ bootstrap sampling. The object works by de-constructing the data into lists base
 thus enabling efficient lookup.
 }
 \details{
-The object also handles multiple other operations specific to rbmi such as defining whether an
+The object also handles multiple other operations specific to \code{rbmi} such as defining whether an
 outcome value is MAR / Missing or not as well as tracking which imputation strategy is assigned
 to each subject.
 
@@ -27,6 +27,8 @@ to this object should be avoided if possible.
 \item{\code{visits}}{A character vector containing the distinct visit levels}
 
 \item{\code{ids}}{A character vector containing the unique ids of each subject in \code{self$data}}
+
+\item{\code{formula}}{A formula expressing how the design matrix for the data should be constructed}
 
 \item{\code{strata}}{A numeric vector indicating which strata each corresponding value of
 \code{self$ids} belongs to.
@@ -152,12 +154,12 @@ If \code{obj} is a character vector then a new dataset consisting of just those 
 returned; if the character vector contains duplicate entries then that subject will be
 returned multiple times.
 
-If \code{obj} is an \code{imputation_list} object (as created by \code{\link[=as_imputation_list]{as_imputation_list()}}) then the
+If \code{obj} is an \code{imputation_df} object (as created by \code{\link[=imputation_df]{imputation_df()}}) then the
 subject ids specified in the object will be returned and missing values will be filled
-in by those specified in the imputation list object.  i.e.\preformatted{obj <- as_imputation_list(
-  as_imputation_single( id = "pt1", values = c(1,2,3)),
-  as_imputation_single( id = "pt1", values = c(4,5,6)),
-  as_imputation_single( id = "pt3", values = c(7,8))
+in by those specified in the imputation list object.  i.e.\preformatted{obj <- imputation_df(
+  imputation_single( id = "pt1", values = c(1,2,3)),
+  imputation_single( id = "pt1", values = c(4,5,6)),
+  imputation_single( id = "pt3", values = c(7,8))
 )
 longdata$get_data(obj)
 }
@@ -263,7 +265,7 @@ kept for legacy reasons.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dat_ice}}{A data.frame containing ICE information see \code{\link[=impute]{impute()}} for the format of this dataframe.}
+\item{\code{dat_ice}}{A \code{data.frame} containing ICE information see \code{\link[=impute]{impute()}} for the format of this dataframe.}
 }
 \if{html}{\out{</div>}}
 }

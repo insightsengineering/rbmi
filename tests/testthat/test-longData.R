@@ -85,7 +85,7 @@ get_ld <- function() {
 }
 
 
-get_data <- function(n){
+get_data <- function(n) {
     sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
 
     set.seed(1518)
@@ -122,6 +122,7 @@ get_data <- function(n){
 
 test_that("longData - Basics", {
 
+    set.seed(123)
     dobj <- get_ld()
     ld <- dobj$ld
     dat <- dobj$dat
@@ -150,6 +151,7 @@ test_that("longData - Basics", {
 
 test_that("longData - Sampling", {
 
+    set.seed(145)
     dobj <- get_ld()
     ld <- dobj$ld
     dat <- dobj$dat
@@ -190,11 +192,11 @@ test_that("longData - Sampling", {
 
 
 
-    imputes <- as_imputation_list(
-        as_imputation_single(id = "1", values = c(1, 2, 3)),
-        as_imputation_single(id = "4", values = c()),
-        as_imputation_single(id = "1", values = c(4, 5, 6)),
-        as_imputation_single(id = "2", values = c(7, 8))
+    imputes <- imputation_df(
+        imputation_single(id = "1", values = c(1, 2, 3)),
+        imputation_single(id = "4", values = c()),
+        imputation_single(id = "1", values = c(4, 5, 6)),
+        imputation_single(id = "2", values = c(7, 8))
     )
     x <- ld$get_data(imputes)
     pt2_val <- dat %>%
@@ -237,9 +239,9 @@ test_that("longData - Sampling", {
 
 
 
-    ilist <- as_imputation_list(
-        as_imputation_single(id = "1", values = c(1, 2)),
-        as_imputation_single(id = "2", values = c(1, 2, 3))
+    ilist <- imputation_df(
+        imputation_single(id = "1", values = c(1, 2)),
+        imputation_single(id = "2", values = c(1, 2, 3))
     )
 
     expect_error(
@@ -248,12 +250,12 @@ test_that("longData - Sampling", {
     )
 
     expect_error(
-        ld$get_data(as_imputation_list(ilist[1])),
+        ld$get_data(imputation_df(ilist[1])),
         "Number of missing values doesn't equal"
     )
 
     expect_error(
-        ld$get_data(as_imputation_list(ilist[2])),
+        ld$get_data(imputation_df(ilist[2])),
         "Number of missing values doesn't equal"
     )
 })
@@ -286,7 +288,7 @@ test_that("Stratification works as expected", {
 
     real <- dat %>% group_by(group, sex) %>% tally()
 
-    for (i in 1:20){
+    for (i in 1:20) {
         sampled <- ld$get_data(ld$sample_ids()) %>%
             group_by(group, sex) %>%
             tally()
@@ -345,6 +347,7 @@ test_that("Group is a stratification variable by default", {
 
 test_that("Strategies", {
 
+    set.seed(178)
     dobj <- get_ld()
     ld <- dobj$ld
     dat <- dobj$dat
@@ -429,7 +432,31 @@ test_that("Strategies", {
         ld$update_strategies(dat_ice),
         "from non-MAR to MAR"
     )
+
+
+    # Ensure that only 1 warning is issued when converting non-MAR to MAR data
+    dat_ice <- tribble(
+        ~visit, ~subjid, ~strategy,
+        "Visit 1", "1",  "ABC",
+        "Visit 1",  "2",  "ABC",
+        "Visit 3",  "3",  "XYZ"
+    )
+
+    ld$set_strategies(dat_ice)
+
+    upd_dat_ice <- tribble(
+        ~subjid, ~strategy,
+        "2",  "MAR",
+        "3",  "MAR",
+    )
+
+    recorded_result <- record(ld$update_strategies(upd_dat_ice))
+    expect_length(recorded_result$warnings, 1)
+    expect_length(recorded_result$errors, 0)
+    expect_true(grepl("Updating strategies from non-MAR to MAR", recorded_result$warnings))
 })
+
+
 
 
 test_that("strategies part 2", {
@@ -437,6 +464,7 @@ test_that("strategies part 2", {
     # Here we check to see that using `update_strategies` only updates the strategy and not
     # the visits (or anything else for that matter)
 
+    set.seed(987)
     dobj <- get_ld()
     ld <- dobj$ld
     dat <- dobj$dat
@@ -561,6 +589,7 @@ test_that("as_strata", {
 
 test_that("idmap", {
     # The idmap option provides a mapping vectoring linking new_ids to old_ids
+    set.seed(654)
     dobj <- get_ld()
     ld <- dobj$ld
     dat <- dobj$dat
@@ -577,10 +606,10 @@ test_that("idmap", {
         c("new_pt_1" = "1", "new_pt_2" = "1", "new_pt_3" = "3")
     )
 
-    imps <- as_imputation_list(list(
-        as_imputation_single(id = "1", values = c(1, 2, 3)),
-        as_imputation_single(id = "3", values = c(4)),
-        as_imputation_single(id = "3", values = 5)
+    imps <- imputation_df(list(
+        imputation_single(id = "1", values = c(1, 2, 3)),
+        imputation_single(id = "3", values = c(4)),
+        imputation_single(id = "3", values = 5)
     ))
     x <- ld$get_data(imps, idmap = TRUE)
     expect_equal(
@@ -703,3 +732,82 @@ test_that(
     }
 )
 
+
+
+test_that("Formula is created properly", {
+
+    vars <- set_vars(
+        outcome = "outcome",
+        visit = "visit",
+        subjid = "subjid",
+        group = "group",
+        strata = "strata",
+        covariates = c("sex", "age"),
+        strategy = "strategy"
+    )
+
+    dat <- tibble(
+        subjid = factor(rep(c("Tom", "Harry", "Phil", "Ben"), each = 3), levels = c("Tom", "Harry", "Phil", "Ben")),
+        age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
+        group = factor(rep(c("B", "B", "A", "A"), each = 3), levels = c("A", "B")),
+        sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),
+        strata = rep(c("A", "A", "A", "B"), each = 3),
+        visit = factor(rep(c("Visit 1", "Visit 2", "Visit 3"), 4)),
+        outcome = c(
+            NA, NA, NA,
+            NA, 4.14, NA,
+            NA, -1.34, 2.41,
+            -1.53, 1.03, 2.58
+        )
+    )
+    ld <- longDataConstructor$new(
+        data = dat,
+        vars = vars
+    )
+    formula_actual <- outcome ~ 1 + group + visit + sex + age
+    expect_true(formula_actual  == ld$formula)
+
+
+    dat <- tibble(
+        subjid = factor(rep(c("Tom", "Harry", "Phil", "Ben"), each = 3), levels = c("Tom", "Harry", "Phil", "Ben")),
+        age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
+        group = factor(rep(c("B", "B", "B", "B"), each = 3), levels = c("B")),
+        sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),
+        strata = rep(c("A", "A", "A", "B"), each = 3),
+        visit = factor(rep(c("Visit 1", "Visit 2", "Visit 3"), 4)),
+        outcome = c(
+            NA, NA, NA,
+            NA, 4.14, NA,
+            NA, -1.34, 2.41,
+            -1.53, 1.03, 2.58
+        )
+    )
+    ld <- longDataConstructor$new(
+        data = dat,
+        vars = vars
+    )
+    formula_actual <- outcome ~ 1 + visit + sex + age
+    expect_true(formula_actual  == ld$formula)
+
+
+    dat <- tibble(
+        subjid = factor(rep(c("Tom", "Harry", "Phil", "Ben"), each = 3), levels = c("Tom", "Harry", "Phil", "Ben")),
+        age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
+        group = factor(rep(c("A", "B", "C", "D"), each = 3), levels = c("A", "B", "C", "D")),
+        sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),
+        strata = rep(c("A", "A", "A", "B"), each = 3),
+        visit = factor(rep(c("Visit 1", "Visit 2", "Visit 3"), 4)),
+        outcome = c(
+            NA, NA, NA,
+            NA, 4.14, NA,
+            NA, -1.34, 2.41,
+            -1.53, 1.03, 2.58
+        )
+    )
+    ld <- longDataConstructor$new(
+        data = dat,
+        vars = vars
+    )
+    formula_actual <- outcome ~ 1 + group + visit + sex + age
+    expect_true(formula_actual  == ld$formula)
+})

@@ -49,5 +49,11 @@ src/*
 
 .DS_store
 
+nul
+
 !.gitkeep
 inst/doc
+docs
+/doc/
+/Meta/
+.github/meta.txt

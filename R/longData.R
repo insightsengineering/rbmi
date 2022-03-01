@@ -9,7 +9,7 @@
 #'
 #' @details
 #'
-#' The object also handles multiple other operations specific to rbmi such as defining whether an
+#' The object also handles multiple other operations specific to `rbmi` such as defining whether an
 #' outcome value is MAR / Missing or not as well as tracking which imputation strategy is assigned
 #' to each subject.
 #'
@@ -39,6 +39,10 @@ longDataConstructor <- R6::R6Class(
 
         #' @field ids A character vector containing the unique ids of each subject in `self$data`
         ids = NULL,
+
+
+        #' @field formula A formula expressing how the design matrix for the data should be constructed
+        formula = NULL,
 
 
         #' @field strata A numeric vector indicating which strata each corresponding value of
@@ -154,14 +158,14 @@ longDataConstructor <- R6::R6Class(
         #' returned; if the character vector contains duplicate entries then that subject will be
         #' returned multiple times.
         #'
-        #' If `obj` is an `imputation_list` object (as created by [as_imputation_list()]) then the
+        #' If `obj` is an `imputation_df` object (as created by [imputation_df()]) then the
         #' subject ids specified in the object will be returned and missing values will be filled
         #' in by those specified in the imputation list object.  i.e.
         #' ```
-        #' obj <- as_imputation_list(
-        #'   as_imputation_single( id = "pt1", values = c(1,2,3)),
-        #'   as_imputation_single( id = "pt1", values = c(4,5,6)),
-        #'   as_imputation_single( id = "pt3", values = c(7,8))
+        #' obj <- imputation_df(
+        #'   imputation_single( id = "pt1", values = c(1,2,3)),
+        #'   imputation_single( id = "pt1", values = c(4,5,6)),
+        #'   imputation_single( id = "pt3", values = c(7,8))
         #' )
         #' longdata$get_data(obj)
         #' ```
@@ -183,11 +187,11 @@ longDataConstructor <- R6::R6Class(
 
             if (is.null(obj)) return(self$data)
 
-            if (! any(c("imputation_list", "character") %in% class(obj))) {
-                stop("Object must be an imputation_list or a character vector")
+            if (! any(c("imputation_df", "character") %in% class(obj))) {
+                stop("Object must be an imputation_df or a character vector")
             }
 
-            list_flag <- "imputation_list" %in% class(obj)
+            list_flag <- "imputation_df" %in% class(obj)
 
             if (list_flag) {
                 obj_expanded <- transpose_imputations(obj)
@@ -343,7 +347,7 @@ longDataConstructor <- R6::R6Class(
         #' @description
         #' Convenience function to run self$set_strategies(dat_ice, update=TRUE)
         #' kept for legacy reasons.
-        #' @param dat_ice A data.frame containing ICE information see [impute()] for the format of this dataframe.
+        #' @param dat_ice A `data.frame` containing ICE information see [impute()] for the format of this dataframe.
         update_strategies = function(dat_ice) {
             self$set_strategies(dat_ice, update = TRUE)
         },
@@ -384,6 +388,7 @@ longDataConstructor <- R6::R6Class(
 
                 new_strategy <- dat_ice_pt[[self$vars$strategy]]
 
+                has_nonMAR_to_MAR <- FALSE
                 if (!update) {
                     visit <- dat_ice_pt[[self$vars$visit]]
                     self$ice_visit_index[[subject]] <- which(self$visits == visit)
@@ -397,11 +402,7 @@ longDataConstructor <- R6::R6Class(
                             ))
                         }
                         if (current_strategy != "MAR" & new_strategy == "MAR") {
-                            warning(paste(
-                                "Updating strategies from non-MAR to MAR for subjects with post-ICE data means",
-                                "that the imputation model has been fitted without using all of the available data.",
-                                "You are advised to re-run `draws()` applying this update there instead"
-                            ))
+                            has_nonMAR_to_MAR <- TRUE
                         }
                     }
                 }
@@ -428,6 +429,15 @@ longDataConstructor <- R6::R6Class(
 
                 validate(as_class(self$is_mar[[subject]], "is_mar"))
             }
+
+            if(has_nonMAR_to_MAR) {
+                warning(paste(
+                    "Updating strategies from non-MAR to MAR for subjects with post-ICE data means",
+                    "that the imputation model has been fitted without using all of the available data.",
+                    "You are advised to re-run `draws()` applying this update there instead"
+                ))
+            }
+
             self$check_has_data_at_each_visit()
         },
 
@@ -484,13 +494,20 @@ longDataConstructor <- R6::R6Class(
         #' @param data longditudinal dataset.
         #' @param vars an `ivars` object created by [set_vars()].
         initialize = function(data, vars) {
-            data <- as.data.frame(data)
+            data_raw <- as_dataframe(data)
             validate(vars)
-            validate_datalong(data, vars)
-            data_sorted <- sort_by(data, c(vars$subjid, vars$visit))
-            self$data <- as_dataframe(data_sorted)
+            validate_datalong(data_raw, vars)
+            data_nochar <- char2fct(data_raw, extract_covariates(vars$covariates))
+            # rerun as_dataframe to reset the rownames
+            self$data <- as_dataframe(sort_by(data_nochar, c(vars$subjid, vars$visit)))
             self$vars <- vars
             self$visits <- levels(self$data[[self$vars$visit]])
+            frmvars <- c(
+                ife(nlevels(self$data[[vars$group]]) >= 2, vars$group, character()),
+                vars$visit,
+                vars$covariates
+            )
+            self$formula <- as_simple_formula(vars$outcome, frmvars)
             subjects <- levels(self$data[[self$vars$subjid]])
             for (id in subjects) self$add_subject(id)
             self$ids <- subjects
@@ -502,20 +519,13 @@ longDataConstructor <- R6::R6Class(
 )
 
 
-
-
 #' Transpose imputations
 #'
-#' Takes an `imputation_list` object and transposes it e.g.
+#' Takes an `imputation_df` object and transposes it e.g.
 #' ```
 #' list(
-#'     list(
-#'         id = "a",
-#'         values = c(1,2,3)
-#'     ),
-#'     list(
-#'         id = "b",
-#'         values = c(4,5,6)
+#'     list(id = "a", values = c(1,2,3)),
+#'     list(id = "b", values = c(4,5,6)
 #'     )
 #' )
 #' ```
@@ -528,7 +538,7 @@ longDataConstructor <- R6::R6Class(
 #'     values = c(1,2,3,4,5,6)
 #' )
 #' ```
-#' @param imputations An `imputation_list` object created by [as_imputation_list()]
+#' @param imputations An `imputation_df` object created by [imputation_df()]
 transpose_imputations <- function(imputations) {
     len <- length(imputations)
     values <- vector(mode = "list", length = len)
@@ -564,7 +574,6 @@ transpose_imputations <- function(imputations) {
 #' Will error if there is an issue otherwise will return `TRUE`.
 #' @export
 validate.is_mar <- function(x, ...) {
-
     if (all(x) || all(!x)) {
         return(invisible(TRUE))
     }

@@ -13,7 +13,7 @@ pool_bootstrap_percentile(est, conf.level, alternative)
 Must be a single number between 0 and 1. Default is 0.95.}
 
 \item{alternative}{a character string specifying the alternative hypothesis,
-must be one of "two.sided" (default), "greater" or "less".}
+must be one of \code{"two.sided"} (default), \code{"greater"} or \code{"less"}.}
 }
 \description{
 Get point estimate, confidence interval and p-value using

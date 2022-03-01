@@ -4,7 +4,21 @@ suppressPackageStartupMessages({
 })
 
 
-get_data <- function(n) {
+### Pre-recorded print objects
+
+test_that("print - Pool Method", {
+    expect_snapshot(print(.test_print$bayes$pool), cran = TRUE)
+    expect_snapshot(print(.test_print$approxbayes$pool), cran = TRUE)
+    expect_snapshot(print(.test_print$condmean_boot$pool$percentile), cran = TRUE)
+    expect_snapshot(print(.test_print$condmean_boot$pool$normal), cran = TRUE)
+    expect_snapshot(print(.test_print$condmean_jack$pool), cran = TRUE)
+    expect_snapshot(print(.test_print$bmlmi$pool), cran = TRUE)
+})
+
+
+
+
+test_print_get_data <- function(n) {
     sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
 
     set.seed(1518)
@@ -40,26 +54,24 @@ get_data <- function(n) {
 
 
 
-
-test_that("print - Approx Bayes", {
-
-    dobj <- get_data(100)
-    set.seed(3123)
+test_that("print - approx bayes", {
+    set.seed(491)
+    dobj <- test_print_get_data(40)
 
     drawobj_ab <- draws(
         data = dobj$dat,
         data_ice = dobj$dat_ice,
         vars = dobj$vars,
         method = method_approxbayes(
-            n_samples = 5,
+            n_samples = 3,
             threshold = 0.5,
             same_cov = TRUE,
             REML = TRUE,
-            covariance = "us"
-        )
+            covariance = "ar"
+        ),
+        quiet = TRUE
     )
     expect_snapshot(print(drawobj_ab), cran = TRUE)
-
 
     impute_ab <- impute(
         drawobj_ab,
@@ -67,32 +79,23 @@ test_that("print - Approx Bayes", {
     )
     expect_snapshot(print(impute_ab), cran = TRUE)
 
-
     v2 <- dobj$vars
     v2$covariates <- c("sex*age")
     analysis_ab <- analyse(
         impute_ab,
-        fun = ancova,
         vars = v2
     )
+    expect_equal(analysis_ab$fun_name, "ancova")
     expect_snapshot(print(analysis_ab), cran = TRUE)
-
-
-    pool_ab <- pool(analysis_ab, conf.level = 0.9, alternative = "less")
-    expect_snapshot(print(pool_ab), cran = TRUE)
 })
 
 
 
 
 
-test_that("print - Bayes", {
-
-    # Stan seed is not reproducible across different OS's
-    skip_if_not(is_nightly())  
-
-    dobj <- get_data(100)
+test_that("print - bayesian", {
     set.seed(413)
+    dobj <- test_print_get_data(40)
 
     suppressWarnings({
         drawobj_b <- draws(
@@ -100,11 +103,11 @@ test_that("print - Bayes", {
             data_ice = dobj$dat_ice,
             vars = dobj$vars,
             method = method_bayes(
-                n_samples = 11,
-                burn_between = 2,
-                verbose = FALSE,
+                n_samples = 50,
+                burn_between = 1,
                 seed = 859
-            )
+            ),
+            quiet = TRUE
         )
     })
     expect_snapshot(print(drawobj_b), cran = TRUE)
@@ -116,7 +119,6 @@ test_that("print - Bayes", {
     )
     expect_snapshot(print(impute_b), cran = TRUE)
 
-
     v2 <- dobj$vars
     v2$covariates <- c("sex*age")
     analysis_b <- analyse(
@@ -127,41 +129,37 @@ test_that("print - Bayes", {
         vars = v2
     )
     expect_snapshot(print(analysis_b), cran = TRUE)
-
-
-    pool_b <- pool(analysis_b)
-    expect_snapshot(print(pool_b), cran = TRUE)
 })
 
 
 
 
-test_that("print - condmean (bootstrap)", {
-    dobj <- get_data(89)
+
+test_that("print - condmean bootstrap", {
     set.seed(313)
+    dobj <- test_print_get_data(40)
 
     drawobj_cmb <- draws(
         data = dobj$dat,
         data_ice = dobj$dat_ice,
         vars = dobj$vars,
         method = method_condmean(
-            n_samples = 6,
+            n_samples = 0,     # Original dataset only (no samples)
             threshold = 0.2,
             type = "bootstrap",
             same_cov = TRUE,
             REML = TRUE,
-            covariance = "ar1"
-        )
+            covariance = "ar"   # Partial completion of argument name
+        ),
+        quiet = TRUE
     )
     expect_snapshot(print(drawobj_cmb), cran = TRUE)
 
-
     impute_cmb <- impute(
         drawobj_cmb,
-        references = c("TRT" = "Placebo", "Placebo" = "Placebo"),
+        references = c("TRT" = "TRT", "Placebo" = "Placebo"),
     )
     expect_snapshot(print(impute_cmb), cran = TRUE)
-
 
     v2 <- dobj$vars
     v2$covariates <- c("sex")
@@ -172,22 +170,20 @@ test_that("print - condmean (bootstrap)", {
     )
     expect_snapshot(print(analysis_cmb), cran = TRUE)
 
-
-    pool_cmb_p <- pool(analysis_cmb, alternative = "greater")
-    expect_snapshot(print(pool_cmb_p), cran = TRUE)
-
-    pool_cmb_n <- pool(analysis_cmb, alternative = "greater", type = "normal")
-    expect_snapshot(print(pool_cmb_n), cran = TRUE)
+    ## Check that only point estimates are generated
+    pool_ob <- pool(analysis_cmb)
+    expect_true(all(!is.na(as.data.frame(pool_ob)$est)))
+    expect_true(all(is.na(as.data.frame(pool_ob)$se)))
+    expect_true(all(is.na(as.data.frame(pool_ob)$pval)))
 })
 
 
 
 
-test_that("print - Condmean (jackknife)", {
 
-    dobj <- get_data(35)
+test_that("print - condmean jackknife", {
     set.seed(89513)
-
+    dobj <- test_print_get_data(35)
     drawobj_cmj <- draws(
         data = dobj$dat,
         data_ice = dobj$dat_ice,
@@ -198,7 +194,8 @@ test_that("print - Condmean (jackknife)", {
             REML = TRUE,
             type = "jackknife",
             covariance = "us"
-        )
+        ),
+        quiet = TRUE
     )
     expect_snapshot(print(drawobj_cmj), cran = TRUE)
 
@@ -217,8 +214,59 @@ test_that("print - Condmean (jackknife)", {
         vars = v2
     )
     expect_snapshot(print(analysis_cmj), cran = TRUE)
+})
 
 
-    pool_cmj <- pool(analysis_cmj, conf.level = 0.9)
-    expect_snapshot(print(pool_cmj), cran = TRUE)
+
+
+test_that("print - bmlmi", {
+    set.seed(2413)
+    dobj <- test_print_get_data(40)
+
+    drawobj_bml <- draws(
+        ncores = 1,
+        data = dobj$dat,
+        data_ice = dobj$dat_ice,
+        vars = dobj$vars,
+        method = method_bmlmi(
+            covariance = "cs",
+            threshold = 0.05,
+            same_cov = TRUE,
+            REML = TRUE,
+            B = 6,
+            D = 4
+        ),
+        quiet = TRUE
+    )
+    expect_snapshot(print(drawobj_bml), cran = TRUE)
+
+    impute_bml <- impute(
+        drawobj_bml,
+        references = c("TRT" = "Placebo", "Placebo" = "Placebo"),
+    )
+    expect_snapshot(print(impute_bml), cran = TRUE)
+
+    compare_prop_lastvisit <- function(data, ...) {
+        fit <- summary(
+            glm(
+                I(outcome > 10) ~ group,
+                family = binomial(),
+                data = data[data[["visit"]] == "visit_3", ]
+            )
+        )
+        res <- list(
+            trt = list(
+                est = fit$coefficients["groupTRT", "Estimate"],
+                se = fit$coefficients["groupTRT", "Std. Error"],
+                df = Inf
+            )
+        )
+        return(res)
+    }
+    analysis_bml <- analyse(
+        impute_bml,
+        fun = compare_prop_lastvisit
+    )
+    expect_snapshot(print(analysis_bml), cran = TRUE)
+    expect_equal(analysis_bml$fun_name, "compare_prop_lastvisit")
 })

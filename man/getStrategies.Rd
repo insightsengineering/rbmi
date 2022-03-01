@@ -2,7 +2,7 @@
 % Please edit documentation in R/strategies.R
 \name{getStrategies}
 \alias{getStrategies}
-\title{Get Imputation Strategies}
+\title{Get imputation strategies}
 \usage{
 getStrategies(...)
 }
@@ -16,7 +16,7 @@ multivariate normal distribution parameters by merging those of the source
 group and reference group per patient.
 }
 \details{
-By default Jump to Reference (JR), Copy Reference (CR), Copy Increments from
+By default Jump to Reference (JR), Copy Reference (CR), Copy Increments in
 Reference (CIR), Last Mean Carried Forward (LMCF) and Missing at Random (MAR)
 are defined.
 
@@ -29,15 +29,16 @@ All user defined functions must take 3 inputs: \code{pars_group}, \code{pars_ref
 and \code{sigma} representing the multivariate normal distribution parameters for
 the subject's current group and reference group respectively.  \code{index_mar} will be
 a logical vector specifying which visits the subject met the MAR assumption
-at. The function must return a list with elements \code{mu} and \code{sigma}. See
-\code{\link[=strategy_JR]{strategy_JR()}} for an example.
+at. The function must return a list with elements \code{mu} and \code{sigma}. See the implementation
+of \code{strategy_JR()} for an example.
 }
 \examples{
 \dontrun{
 getStrategies()
 getStrategies(
-    NEW = function(pars_group, pars_ref, index_mar) <code>,
-    JR = function(pars_group, pars_ref, index_mar) <more code>
+    NEW = function(pars_group, pars_ref, index_mar) code ,
+    JR = function(pars_group, pars_ref, index_mar)  more_code
 )
 }
+
 }

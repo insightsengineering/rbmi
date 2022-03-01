@@ -6,23 +6,41 @@
 \alias{impute.condmean}
 \title{Create imputed datasets}
 \usage{
-impute(draws, references, update_strategy = NULL, strategies = getStrategies())
+impute(
+  draws,
+  references = NULL,
+  update_strategy = NULL,
+  strategies = getStrategies()
+)
 
-\method{impute}{random}(draws, references, update_strategy = NULL, strategies = getStrategies())
+\method{impute}{random}(
+  draws,
+  references = NULL,
+  update_strategy = NULL,
+  strategies = getStrategies()
+)
 
-\method{impute}{condmean}(draws, references, update_strategy = NULL, strategies = getStrategies())
+\method{impute}{condmean}(
+  draws,
+  references = NULL,
+  update_strategy = NULL,
+  strategies = getStrategies()
+)
 }
 \arguments{
 \item{draws}{A \code{draws} object created by \code{\link[=draws]{draws()}}.}
 
-\item{references}{a named vector. Identifies the references to be used for reference-based
-imputation methods. Should be of the form \code{c("Group1" = "Reference1", "Group2" = "Reference2")}.}
+\item{references}{A named vector. Identifies the references to be used for reference-based
+imputation methods. Should be of the form \code{c("Group1" = "Reference1", "Group2" = "Reference2")}.
+If \code{NULL} (default), the references are assumed to be of the form
+\code{c("Group1" = "Group1", "Group2" = "Group2")}. This argument cannot be \code{NULL} if
+an imputation strategy (as defined by \code{data_ice[[vars$strategy]]} in the call to \link{draws}) other than \code{MAR} is set.}
 
-\item{update_strategy}{an optional \code{data.frame}. Updates the imputation method that was
+\item{update_strategy}{An optional \code{data.frame}. Updates the imputation method that was
 originally set via the \code{data_ice} option in \code{\link[=draws]{draws()}}. See the details section for more
 information.}
 
-\item{strategies}{a named list of functions. Defines the imputation functions to be used.
+\item{strategies}{A named list of functions. Defines the imputation functions to be used.
 The names of the list should mirror the values specified in \code{strategy} column of \code{data_ice}.
 Default = \code{\link[=getStrategies]{getStrategies()}}. See \code{\link[=getStrategies]{getStrategies()}} for more details.}
 }
@@ -44,7 +62,7 @@ their marginal distribution conditional on their observed outcome values.
 One dataset is being generated per set of parameter estimates provided by \code{\link[=draws]{draws()}}.
 
 The exact manner in how missing values are imputed from this conditional imputation distribution depends
-on the method object that was provided to \code{\link[=draws]{draws()}}, in particular:
+on the \code{method} object that was provided to \code{\link[=draws]{draws()}}, in particular:
 \itemize{
 \item Bayes & Approximate Bayes: each imputed dataset contains 1 row per subject & visit
 from the original dataset with missing values imputed by taking a single random sample
@@ -55,6 +73,10 @@ estimates in \code{\link[=draws]{draws()}}. Missing values are imputed by using 
 imputation distribution. Please note that the first imputed dataset refers to the conditional
 mean imputation on the original dataset whereas all subsequent imputed datasets refer to
 conditional mean imputations for bootstrap or jackknife samples, respectively, of the original data.
+\item Bootstrapped Maximum Likelihood MI (BMLMI): it performs \code{D} random imputations of each bootstrapped
+dataset that was used to generate the corresponding parameter estimates in \code{\link[=draws]{draws()}}. A total number of
+\code{B*D} imputed datasets is provided, where \code{B} is the number of bootstrapped datasets. Missing values
+are imputed by taking a random sample from the conditional imputation distribution.
 }
 
 The \code{update_strategy} argument can be used to update the imputation strategy that was
@@ -63,8 +85,8 @@ function when changing the imputation strategy in certain circumstances (as deta
 The \code{data.frame} provided to \code{update_strategy} argument must contain two columns,
 one for the subject ID and another for the imputation strategy, whose names are the same as
 those defined in the \code{vars} argument as specified in the call to \code{\link[=draws]{draws()}}. Please note that this
-argument only allows you to update the imputation strategy and not other argument such as the
-time of the first visit affect by the ICE.
+argument only allows you to update the imputation strategy and not other arguments such as the
+time of the first visit affected by the ICE.
 A key limitation of this functionality is
 that one can only switch between a MAR and a non-MAR strategy (or vice versa) for subjects without
 observed post-ICE data. The reason for this is that such a change would affect whether the post-ICE data is included

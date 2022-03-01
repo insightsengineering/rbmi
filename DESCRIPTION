@@ -1,9 +1,9 @@
 Package: rbmi
 Title: Reference Based Multiple Imputation
-Version: 1.0.2
+Version: 1.1.0
 Authors@R: c(
-    person("Craig", "Gower-Page", email = "craig.gower-page@roche.com", role = "aut"),
-    person("Alessandro", "Noci", email = "alessandro.noci@roche.com", role = c("aut", "cre")),
+    person("Craig", "Gower-Page", email = "craig.gower-page@roche.com", role = c("aut", "cre")),
+    person("Alessandro", "Noci", email = "alessandro.noci@roche.com", role = c("aut")),
     person("Marcel", "Wolbers", email = "marcel.wolbers@roche.com", role = "ctb"),
     person("Roche", role = c("cph", "fnd"))
     )
@@ -11,7 +11,7 @@ Description: Implements reference based multiple imputation allowing for the imp
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Suggests: 
     dplyr,
     covr,
@@ -24,7 +24,9 @@ Suggests:
     knitr,
     rmarkdown,
     bookdown,
-    lubridate
+    lubridate,
+    purrr,
+    ggplot2
 Biarch: true
 Config/testthat/edition: 3
 Imports: 

@@ -9,10 +9,10 @@ test_that("simulate data", {
     # Show that the function respects the seed and that
 
     set.seed(120)
-    x <- simulate_data()
+    x <- simulate_test_data()
 
     set.seed(120)
-    y <- simulate_data(
+    y <- simulate_test_data(
         n = 200,
         sd = c(3, 5, 7),
         cor = c(0.1, 0.7, 0.4),
@@ -26,7 +26,7 @@ test_that("simulate data", {
     )
 
     set.seed(121)
-    z <- simulate_data()
+    z <- simulate_test_data()
 
     expect_true(identical(x,y))
     expect_false(identical(x,z))
@@ -34,7 +34,7 @@ test_that("simulate data", {
 
     # Show that we can recover known values
     set.seed(3918)
-    dat <- simulate_data(
+    dat <- simulate_test_data(
         n = 4000,
         sd = c(1, 2,3),
         cor = c(0, 0, 0.),

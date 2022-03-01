@@ -12,15 +12,14 @@ extract_imputed_dfs(
 )
 }
 \arguments{
-\item{imputations}{An imputations object as created by \code{\link[=impute]{impute()}}.}
+\item{imputations}{An \code{imputations} object as created by \code{\link[=impute]{impute()}}.}
 
-\item{index}{The indexes of the imputed data.frames to return. By default,
-all data.frames within the imputations object will be returned
-(i.e. use this argument if you just want e.g. the first data.frame only).}
+\item{index}{The indexes of the imputed datasets to return. By default,
+all datasets within the \code{imputations} object will be returned.}
 
-\item{delta}{A data.frame containing the delta transformation to be
+\item{delta}{A \code{data.frame} containing the delta transformation to be
 applied to the imputed dataset. See \code{\link[=analyse]{analyse()}} for details on the
-format and specification of this data.frame.}
+format and specification of this \code{data.frame}.}
 
 \item{idmap}{Logical. The subject IDs in the imputed \code{data.frame}'s are
 replaced with new IDs to ensure they are unique. Setting this argument to
@@ -31,7 +30,7 @@ that will provide a map from the new subject IDs to the old subject IDs.}
 A list of data.frames equal in length to the \code{index} argument.
 }
 \description{
-Extracts the imputed datasets contained within an imputations object generated
+Extracts the imputed datasets contained within an \code{imputations} object generated
 by \code{\link[=impute]{impute()}}.
 }
 \examples{

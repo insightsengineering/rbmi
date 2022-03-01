@@ -8,7 +8,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' locf(c(NA, 1,2,3,NA,4)) # Returns c(NA, 1, 2, 3, 3, 4)
+#' locf(c(NA, 1, 2, 3, NA, 4)) # Returns c(NA, 1, 2, 3, 3, 4)
 #' }
 #' @export
 locf <- function(x) {
@@ -27,7 +27,7 @@ locf <- function(x) {
 #' combinations of data are inserted into a `data.frame` with imputation/fill methods for updating
 #' covariate values of newly created rows.
 #'
-#' @param data Dataset to expand or fill in.
+#' @param data dataset to expand or fill in.
 #' @param ... variables and the levels that should be expanded out (note that duplicate entries of
 #' levels will result in multiple rows for that level).
 #' @param vars character vector containing the names of variables that need to be filled in.
@@ -55,6 +55,30 @@ locf <- function(x) {
 #'
 #' `expand_locf()` a simple composition function of `fill_locf()` and `expand()` i.e.
 #' `fill_locf(expand(...))`.
+#'
+#' ## Missing First Values
+#'
+#' The `fill_locf()` function performs last observation carried forward imputation.
+#' A natural consequence of this is that it is unable to impute missing observations if the
+#' observation is the first value for a given subject / grouping.
+#' These values are deliberately not imputed as doing so risks silent errors in the case of time
+#' varying covariates.
+#' One solution is to first use `expand_locf()` on just
+#' the visit variable and time varying covariates and then merge on the baseline covariates
+#' afterwards i.e.
+#'
+#' ```
+#' library(dplyr)
+#' 
+#' dat_expanded <- expand(
+#'     data = dat,
+#'     subject = c("pt1", "pt2", "pt3", "pt4"),
+#'     visit = c("vis1", "vis2", "vis3")
+#' )
+#'
+#' dat_filled <- dat_expanded %>%
+#'     left_join(baseline_covariates, by = "subject")
+#' ```
 #'
 #' @examples
 #' \dontrun{
@@ -164,11 +188,32 @@ fill_locf <- function(data, vars, group = NULL, order = NULL) {
         msg = "Something has gone wrong..."
     )
 
+    warn_vars <- character(0)
     for (var in vars) {
-        new_vals_list <- tapply(data_sorted[[var]], group_index, locf)
+        vals <- data_sorted[[var]]
+        vals_first <- tapply(vals, group_index, function(x) x[1])
+        is_missing <- vapply(vals_first, function(x) any(is.na(x)), logical(1))
+        if (any(is_missing)) {
+            warn_vars <- c(warn_vars, sprintf("`%s`", var))
+        }
+        new_vals_list <- tapply(vals, group_index, locf)
         new_vals <- unlist(new_vals_list, recursive = FALSE, use.names = FALSE)
-        attributes(new_vals) <- attributes(data_sorted[[var]])
+        attributes(new_vals) <- attributes(vals)
         data_sorted[[var]] <- new_vals
+    }
+
+
+    if (length(warn_vars) > 0) {
+        warn <- sprintf(
+                paste(
+                    "The following variables have missing values as their first value in one of more",
+                    "groups: %s\n",
+                    "Please consult the man page for `fill_locf()` for further",
+                    "details / recommendations"
+                ),
+                paste(warn_vars, collapse = ", ")
+            )
+            warning(warn)
     }
 
     ## Restore orginal data sorting

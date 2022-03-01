@@ -46,6 +46,28 @@ test_that("as_model_df", {
 })
 
 
+test_that("as_model_df fails if formula has one factor variable", {
+    cov1 <- rep("A", 10)
+    outcome <- rnorm(10)
+    dat <- data.frame(outcome = outcome, cov1 = cov1)
+    frm <- outcome ~ cov1
+    expect_error(as_model_df(dat = dat, frm = frm))
+})
+
+
+test_that("as_simple_formula", {
+
+    vars <- list(
+        outcome = "outcome",
+        group = "group",
+        visit = "visit"
+    )
+
+    actual <- as_simple_formula(vars$outcome, c(vars$group, vars$visit, vars$covariates))
+    expected <- as.formula(outcome ~ 1 + group + visit)
+
+    expect_true(actual == expected)
+})
 
 
 test_that("sample_mvnorm", {
@@ -180,8 +202,6 @@ test_that("str_contains",{
 })
 
 
-
-
 test_that("sort_by", {
     x <- tibble(
         x = c(1, 1, 2, 2, 3, 3),
@@ -199,4 +219,25 @@ test_that("sort_by", {
 
     expect_equal(arrange(x, desc(z)), sort_by(x, "z", T))
     expect_equal(arrange(x, x, desc(y)), sort_by(x, c("x", "y"), c(F, T)))
+})
+
+
+
+
+test_that("Stack", {
+    mstack <- Stack$new()
+    mstack$add(list(1, 2, 3, 4, 5, 6, 7))
+    expect_equal(mstack$pop(3), list(1, 2, 3))
+    expect_equal(mstack$pop(3), list(4, 5, 6))
+    expect_equal(mstack$pop(3), list(7))
+    expect_error(mstack$pop(1), "items to return")
+
+    mstack <- Stack$new()
+    mstack$add(list(1, 2, 3, 4))
+    expect_equal(mstack$pop(3), list(1, 2, 3))
+    mstack$add(list(5, 6))
+    expect_equal(mstack$pop(3), list(4, 5, 6))
+    mstack$add(list(7))
+    expect_equal(mstack$pop(3), list(7))
+    expect_error(mstack$pop(1), "items to return")
 })
