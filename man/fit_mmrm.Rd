@@ -34,7 +34,7 @@ the same subject.}
 \item{cov_struct}{a character value. Specifies which covariance structure to use. Must be one of
 \code{"us"}, \code{"toep"}, \code{"cs"} or  \code{"ar1"}}
 
-\item{REML}{logical. Specifies whether restricted maximium likelihood should be used}
+\item{REML}{logical. Specifies whether restricted maximum likelihood should be used}
 
 \item{same_cov}{logical. Used to specify if a shared or individual covariance matrix should be used
 per \code{group}}

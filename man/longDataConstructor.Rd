@@ -333,7 +333,7 @@ Constructor function.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{data}}{longditudinal dataset.}
+\item{\code{data}}{longitudinal dataset.}
 
 \item{\code{vars}}{an \code{ivars} object created by \code{\link[=set_vars]{set_vars()}}.}
 }

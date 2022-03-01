@@ -221,7 +221,7 @@ impute_internal <- function(draws, references = NULL, update_strategy, strategie
 #' that are required for that dataset. The total number of ID's must by equal to the
 #' total number of rows within all of `imputes$imputations`
 #'
-#' To accomdate for `method_bmlmi()` the [impute_data_individual()] function returns
+#' To accommodate for `method_bmlmi()` the [impute_data_individual()] function returns
 #' a list of [imputation_list_single()] objects with 1 object per each subject.
 #'
 #' [imputation_list_single()] stores the subjects imputations as a matrix where the columns
@@ -280,7 +280,7 @@ impute_internal <- function(draws, references = NULL, update_strategy, strategie
 #' )
 #' ```
 #'
-#' Note that the different repititions (i.e. the value set for D) are grouped together
+#' Note that the different repetitions (i.e. the value set for D) are grouped together
 #' sequentially.
 #'
 convert_to_imputation_list_df <- function(imputes, sample_ids) {

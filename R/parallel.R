@@ -5,7 +5,7 @@
 #'
 #' This function spawns a PSOCK cluster and exports all of the
 #' rbmi namespace into the the sub processes as well as loading
-#' assertthat and glmmTMB
+#' `assertthat` and `glmmTMB`
 get_cluster <- function(ncores = 1) {
     if (ncores == 1) {
         return(NULL)

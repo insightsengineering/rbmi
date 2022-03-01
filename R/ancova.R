@@ -159,7 +159,7 @@ ancova <- function(data, vars, visits = NULL, weights = c("proportional", "equal
 #' @param group Character, the name of the group variable in `data`.
 #' @param covariates Character vector containing the name of any additional covariates
 #' to be included in the model as well as any interaction terms.
-#' @param weights Character, specifies wether to use "proportional" or "equal" weighting for each
+#' @param weights Character, specifies whether to use "proportional" or "equal" weighting for each
 #' categorical covariate combination when calculating the lsmeans.
 #'
 #' @details

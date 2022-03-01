@@ -13,3 +13,4 @@
 ^pkgdown$
 ^data-raw$
 
+^CRAN-SUBMISSION$

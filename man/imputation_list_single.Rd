@@ -17,7 +17,7 @@ This is a constructor function to create a \code{imputation_list_single} object
 which contains a matrix of \code{\link[=imputation_single]{imputation_single()}} objects grouped by a single \code{id}. The matrix
 is split so that it has D columns (i.e. for non-bmlmi methods this will always be 1)
 
-The \code{id} attribute is deterimined by extracting the \code{id} attribute from the contributing
+The \code{id} attribute is determined by extracting the \code{id} attribute from the contributing
 \code{\link[=imputation_single]{imputation_single()}} objects. An error is throw if multiple \code{id} are detected}
 }
 \description{

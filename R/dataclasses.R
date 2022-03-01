@@ -199,7 +199,7 @@ print.imputation_df <- function(x, ...) {
 #' which contains a matrix of [imputation_single()] objects grouped by a single `id`. The matrix
 #' is split so that it has D columns (i.e. for non-bmlmi methods this will always be 1)
 #'
-#' The `id` attribute is deterimined by extracting the `id` attribute from the contributing
+#' The `id` attribute is determined by extracting the `id` attribute from the contributing
 #' [imputation_single()] objects. An error is throw if multiple `id` are detected
 imputation_list_single <- function(imputations, D = 1) {
 
