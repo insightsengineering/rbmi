@@ -237,9 +237,7 @@ missing data imputed under the MAR assumption even if their strategy is updated.
 <li><p><code>group</code>: name of the column in <code>data</code> which contains the group variable.</p></li>
 <li><p><code>outcome</code>: name of the column in <code>data</code> which contains the outcome variable.</p></li>
 <li><p><code>covariates</code>: vector of characters which contains the covariates to be included
-in the model (including interactions which are specified as "covariateName1*covariateName2").
-If no covariates are provided the default model specification of <code>outcome ~ 1 + visit + group</code> will be used.
-Please note that the <code>group*visit</code> interaction
+in the model (including interactions which are specified as <code>"covariateName1*covariateName2"``). If no covariates are provided the default model specification of </code>outcome ~ 1 + visit + group<code>will be used. Please note that the</code>group*visit` interaction
 is <strong>not</strong> included in the model by default.</p></li>
 <li><p><code>strata</code>: covariates used as stratification variables in the bootstrap sampling.
 By default only the <code>vars$group</code> is set as stratification variable.

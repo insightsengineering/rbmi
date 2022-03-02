@@ -117,7 +117,7 @@ Relevant only for <code>method_condmean(type = "bootstrap")</code>, <code><a hre
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This function takes a <code>Stack</code> object which contains multiple lists of patient ids. The function
 takes this Stack and pulls a set ids and then constructs a dataset just consisting of these
-patients (i.e. potentially a boostrap or a jackknife sample).</p>
+patients (i.e. potentially a bootstrap or a jackknife sample).</p>
 <p>The function then fits a MMRM model to this dataset to create a sample object. The function
 repeats this process until <code>n_target_samples</code> have been reached. If more than <code>failure_limit</code>
 samples fail to converge then the function throws an error.</p>
