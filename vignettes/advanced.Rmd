@@ -9,7 +9,9 @@ output:
     citation_package: natbib
     base_format: rmarkdown::html_vignette
 bibliography: "references.bib"
-link-citations: true   
+link-citations: true
+pkgdown:
+  as_is: true
 linkcolor: blue
 vignette: >
   %\VignetteIndexEntry{rbmi: Advanced Functionality}
