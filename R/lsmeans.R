@@ -31,7 +31,7 @@
 #' @param ... Fixes specific variables to specific values i.e.
 #' `trt = 1` or `age = 50`. The name of the argument must be the name
 #' of the variable within the dataset.
-#' @param .weights Character, specifies wether to use "proportional" or "equal" weighting for each
+#' @param .weights Character, specifies whether to use "proportional" or "equal" weighting for each
 #' categorical covariate combination when calculating the lsmeans.
 #'
 #' @references \url{https://CRAN.R-project.org/package=emmeans}

@@ -11,6 +11,8 @@ output:
 bibliography: "references.bib"
 link-citations: true   
 linkcolor: blue
+pkgdown:
+  as_is: true
 vignette: >
   %\VignetteIndexEntry{rbmi: Quickstart}
   %\VignetteEngine{knitr::rmarkdown}

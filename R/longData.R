@@ -491,7 +491,7 @@ longDataConstructor <- R6::R6Class(
 
         #' @description
         #' Constructor function.
-        #' @param data longditudinal dataset.
+        #' @param data longitudinal dataset.
         #' @param vars an `ivars` object created by [set_vars()].
         initialize = function(data, vars) {
             data_raw <- as_dataframe(data)

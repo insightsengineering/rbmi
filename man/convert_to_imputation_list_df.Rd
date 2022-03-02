@@ -15,7 +15,7 @@ must contain a vector of "ID"'s which correspond to the \code{\link[=imputation_
 that are required for that dataset. The total number of ID's must by equal to the
 total number of rows within all of \code{imputes$imputations}
 
-To accomdate for \code{method_bmlmi()} the \code{\link[=impute_data_individual]{impute_data_individual()}} function returns
+To accommodate for \code{method_bmlmi()} the \code{\link[=impute_data_individual]{impute_data_individual()}} function returns
 a list of \code{\link[=imputation_list_single]{imputation_list_single()}} objects with 1 object per each subject.
 
 \code{\link[=imputation_list_single]{imputation_list_single()}} stores the subjects imputations as a matrix where the columns
@@ -68,7 +68,7 @@ Then \code{convert_to_imputation_df(imputes, sample_ids)} would result in:\prefo
 )
 }
 
-Note that the different repititions (i.e. the value set for D) are grouped together
+Note that the different repetitions (i.e. the value set for D) are grouped together
 sequentially.}
 }
 \description{

@@ -9,7 +9,9 @@ output:
     citation_package: natbib
     base_format: rmarkdown::html_vignette
 bibliography: "references.bib"
-link-citations: true   
+link-citations: true
+pkgdown:
+  as_is: true
 linkcolor: blue
 vignette: >
   %\VignetteIndexEntry{rbmi: Advanced Functionality}
@@ -491,7 +493,7 @@ tmp <- as.data.frame(pool_obj_prop) %>%
 tmp
 ```
 
-Note that if the user wants `rbmi` to use a normal approximation to the pooled test statistics, then the degrees of freedom need to be set to `df = NA` (as per the above example). If the degrees of freedom of the complete data test statistics are known or if the degrees of freedom are set to `df = Inf`, then `rbmi` pools the degrees of freedom accross imputed datasets according to the rule by Barnard and Rubin (see the "Statistical Specifications" vignette (`vignette("stat_specs", package = "rbmi")` for details). According to this rule, infinite degrees of freedom for the complete data analysis do not imply that the pooled degrees of freedom are also infinite.
+Note that if the user wants `rbmi` to use a normal approximation to the pooled test statistics, then the degrees of freedom need to be set to `df = NA` (as per the above example). If the degrees of freedom of the complete data test statistics are known or if the degrees of freedom are set to `df = Inf`, then `rbmi` pools the degrees of freedom across imputed datasets according to the rule by Barnard and Rubin (see the "Statistical Specifications" vignette (`vignette("stat_specs", package = "rbmi")` for details). According to this rule, infinite degrees of freedom for the complete data analysis do not imply that the pooled degrees of freedom are also infinite.
 Rather, in this case the pooled degrees of freedom are `(M-1)/lambda^2`, where `M` is the number of imputations and `lambda` is the fraction of missing information (see @Barnard1999 for details).
 
 # Sensitivity analyses: Delta adjustments and tipping point analyses

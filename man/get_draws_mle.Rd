@@ -72,7 +72,7 @@ specified by \code{method$n_samples}. Returns the parameter estimates from the m
 \details{
 This function takes a \code{Stack} object which contains multiple lists of patient ids. The function
 takes this Stack and pulls a set ids and then constructs a dataset just consisting of these
-patients (i.e. potentially a boostrap or a jackknife sample).
+patients (i.e. potentially a bootstrap or a jackknife sample).
 
 The function then fits a MMRM model to this dataset to create a sample object. The function
 repeats this process until \code{n_target_samples} have been reached. If more than \code{failure_limit}

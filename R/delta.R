@@ -231,7 +231,7 @@ get_delta_template <- function(imputations) {
 }
 
 
-#' Calculate delta from a lagged Sscale coefficient
+#' Calculate delta from a lagged scale coefficient
 #'
 #' @description
 #' Calculates a delta value based upon a baseline delta value and a
