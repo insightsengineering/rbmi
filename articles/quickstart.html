@@ -246,7 +246,15 @@ model are to be created.</p>
     method <span class="op">=</span> <span class="va">method</span>,
     quiet <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span>
-<span class="co">#&gt; Warning in fit_mcmc(designmat = model_df_scaled[, -1, drop = FALSE], outcome = model_df_scaled[, : Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.</span>
+<span class="co">#&gt; Warning in fit_mcmc(designmat = model_df_scaled[, -1, drop = FALSE], outcome = model_df_scaled[, : Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.</span>
+<span class="co">#&gt; Running the chains for more iterations may help. See</span>
+<span class="co">#&gt; https://mc-stan.org/misc/warnings.html#bulk-essTail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.</span>
+<span class="co">#&gt; Running the chains for more iterations may help. See</span>
+<span class="co">#&gt; https://mc-stan.org/misc/warnings.html#tail-ess</span>
+
+<span class="co">#&gt; Warning in fit_mcmc(designmat = model_df_scaled[, -1, drop = FALSE], outcome = model_df_scaled[, : Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.</span>
+<span class="co">#&gt; Running the chains for more iterations may help. See</span>
+<span class="co">#&gt; https://mc-stan.org/misc/warnings.html#bulk-essTail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.</span>
 <span class="co">#&gt; Running the chains for more iterations may help. See</span>
 <span class="co">#&gt; https://mc-stan.org/misc/warnings.html#tail-ess</span>
 <span class="va">drawObj</span>
@@ -556,15 +564,15 @@ the methods described by von Hippel and Bartlett (see the
 <span class="co">#&gt;      trt_4    -0.092  0.683  -1.439  1.256   0.893  </span>
 <span class="co">#&gt;    lsm_ref_4  -1.616  0.486  -2.576  -0.656  0.001  </span>
 <span class="co">#&gt;    lsm_alt_4  -1.708  0.475  -2.645  -0.77   &lt;0.001 </span>
-<span class="co">#&gt;      trt_5    1.323   0.925  -0.503  3.149   0.154  </span>
-<span class="co">#&gt;    lsm_ref_5  -4.143  0.662  -5.449  -2.836  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_5  -2.82   0.646  -4.096  -1.543  &lt;0.001 </span>
-<span class="co">#&gt;      trt_6    1.941   1.003  -0.04   3.922   0.055  </span>
-<span class="co">#&gt;    lsm_ref_6  -6.078  0.724  -7.508  -4.647  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_6  -4.137  0.696  -5.511  -2.763  &lt;0.001 </span>
-<span class="co">#&gt;      trt_7    2.134   1.126  -0.092   4.36    0.06  </span>
-<span class="co">#&gt;    lsm_ref_7  -6.942  0.828  -8.579  -5.304  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_7  -4.808  0.786  -6.362  -3.254  &lt;0.001 </span>
+<span class="co">#&gt;      trt_5    1.334   0.924  -0.492  3.159   0.151  </span>
+<span class="co">#&gt;    lsm_ref_5  -4.154  0.658  -5.454  -2.854  &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_5  -2.82   0.645  -4.095  -1.545  &lt;0.001 </span>
+<span class="co">#&gt;      trt_6    1.947   1.001  -0.032  3.925   0.054  </span>
+<span class="co">#&gt;    lsm_ref_6  -6.091  0.723  -7.52   -4.662  &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_6  -4.144  0.697  -5.522  -2.766  &lt;0.001 </span>
+<span class="co">#&gt;      trt_7    2.156   1.124  -0.066  4.377   0.057  </span>
+<span class="co">#&gt;    lsm_ref_7  -6.97   0.822  -8.595  -5.345  &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_7  -4.814  0.793  -6.383  -3.245  &lt;0.001 </span>
 <span class="co">#&gt;   --------------------------------------------------</span></code></pre></div>
 <p>The table of values shown in the print message for
 <code>poolObj</code> can also be extracted using the
@@ -575,18 +583,18 @@ the methods described by von Hippel and Bartlett (see the
 <span class="co">#&gt; 1      trt_4 -0.09180645 0.6826279 -1.43949684  1.2558839 8.931772e-01</span>
 <span class="co">#&gt; 2  lsm_ref_4 -1.61581996 0.4862316 -2.57577141 -0.6558685 1.093708e-03</span>
 <span class="co">#&gt; 3  lsm_alt_4 -1.70762640 0.4749573 -2.64531931 -0.7699335 4.262148e-04</span>
-<span class="co">#&gt; 4      trt_5  1.32293292 0.9247205 -0.50339333  3.1492592 1.544996e-01</span>
-<span class="co">#&gt; 5  lsm_ref_5 -4.14255973 0.6616548 -5.44943035 -2.8356891 3.485333e-09</span>
-<span class="co">#&gt; 6  lsm_alt_5 -2.81962681 0.6462068 -4.09598170 -1.5432719 2.308532e-05</span>
-<span class="co">#&gt; 7      trt_6  1.94067131 1.0026428 -0.04022019  3.9215628 5.477545e-02</span>
-<span class="co">#&gt; 8  lsm_ref_6 -6.07769081 0.7237810 -7.50800503 -4.6473766 3.470902e-14</span>
-<span class="co">#&gt; 9  lsm_alt_6 -4.13701950 0.6957250 -5.51147432 -2.7625647 1.787955e-08</span>
-<span class="co">#&gt; 10     trt_7  2.13375123 1.1260286 -0.09199779  4.3595002 6.011281e-02</span>
-<span class="co">#&gt; 11 lsm_ref_7 -6.94161940 0.8280453 -8.57948982 -5.3037490 6.556842e-14</span>
-<span class="co">#&gt; 12 lsm_alt_7 -4.80786818 0.7862506 -6.36211290 -3.2536235 8.823627e-09</span></code></pre></div>
-<p>These outputs gives an estimated difference of 2.134 (95% CI -0.092
-to 4.360) between the two groups at the last visit with an associated
-p-value of 0.060.</p>
+<span class="co">#&gt; 4      trt_5  1.33354136 0.9242626 -0.49188980  3.1589725 1.510415e-01</span>
+<span class="co">#&gt; 5  lsm_ref_5 -4.15387840 0.6581768 -5.45378084 -2.8539760 2.639789e-09</span>
+<span class="co">#&gt; 6  lsm_alt_5 -2.82033705 0.6454981 -4.09528556 -1.5453885 2.252897e-05</span>
+<span class="co">#&gt; 7      trt_6  1.94682569 1.0014234 -0.03159561  3.9252470 5.372525e-02</span>
+<span class="co">#&gt; 8  lsm_ref_6 -6.09092698 0.7232527 -7.52016400 -4.6616900 2.971586e-14</span>
+<span class="co">#&gt; 9  lsm_alt_6 -4.14410129 0.6973358 -5.52178478 -2.7664178 1.832587e-08</span>
+<span class="co">#&gt; 10     trt_7  2.15583700 1.1239050 -0.06559703  4.3772710 5.706399e-02</span>
+<span class="co">#&gt; 11 lsm_ref_7 -6.97010370 0.8218751 -8.59547050 -5.3447369 3.404641e-14</span>
+<span class="co">#&gt; 12 lsm_alt_7 -4.81426670 0.7934670 -6.38305355 -3.2454799 1.159881e-08</span></code></pre></div>
+<p>These outputs gives an estimated difference of 2.156 (95% CI -0.066
+to 4.377) between the two groups at the last visit with an associated
+p-value of 0.057.</p>
 </div>
 <div class="section level2">
 <h2 id="code">Code<a class="anchor" aria-label="anchor" href="#code"></a>
