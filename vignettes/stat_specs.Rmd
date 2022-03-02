@@ -11,6 +11,8 @@ output:
 bibliography: "references.bib"
 link-citations: true   
 linkcolor: blue
+pkgdown:
+  as_is: true
 vignette: >
   %\VignetteIndexEntry{rbmi: Statistical Specifications}
   %\VignetteEngine{knitr::rmarkdown}
@@ -364,7 +366,7 @@ $$
 $$
 where $\lambda = \frac{(1 + \frac{1}{M})V_B(\hat{\theta})}{V(\hat{\theta})}$ is the fraction of missing information.
 
-## Boostrap and jackknife inference for conditional mean imputation {#sec:bootInference}
+## Bootstrap and jackknife inference for conditional mean imputation {#sec:bootInference}
 
 ### Point estimate of the treatment effect
 

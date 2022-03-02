@@ -13,7 +13,7 @@ lsmeans(model, ..., .weights = c("proportional", "equal"))
 \code{trt = 1} or \code{age = 50}. The name of the argument must be the name
 of the variable within the dataset.}
 
-\item{.weights}{Character, specifies wether to use "proportional" or "equal" weighting for each
+\item{.weights}{Character, specifies whether to use "proportional" or "equal" weighting for each
 categorical covariate combination when calculating the lsmeans.}
 }
 \description{

@@ -133,7 +133,7 @@
 #' - `group`: name of the column in `data` which contains the group variable.
 #' - `outcome`: name of the column in `data` which contains the outcome variable.
 #' - `covariates`: vector of characters which contains the covariates to be included
-#'   in the model (including interactions which are specified as "covariateName1*covariateName2").
+#'   in the model (including interactions which are specified as `"covariateName1*covariateName2"``).
 #'   If no covariates are provided the default model specification of `outcome ~ 1 + visit + group` will be used.
 #'   Please note that the `group*visit` interaction
 #'   is **not** included in the model by default.
@@ -283,7 +283,7 @@ draws.bmlmi <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet =
 #'
 #' This function takes a `Stack` object which contains multiple lists of patient ids. The function
 #' takes this Stack and pulls a set ids and then constructs a dataset just consisting of these
-#' patients (i.e. potentially a boostrap or a jackknife sample).
+#' patients (i.e. potentially a bootstrap or a jackknife sample).
 #'
 #' The function then fits a MMRM model to this dataset to create a sample object. The function
 #' repeats this process until `n_target_samples` have been reached. If more than `failure_limit`

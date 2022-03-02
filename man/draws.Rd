@@ -187,9 +187,7 @@ The \code{vars} argument is a named list that specifies the names of key variabl
 \item \code{group}: name of the column in \code{data} which contains the group variable.
 \item \code{outcome}: name of the column in \code{data} which contains the outcome variable.
 \item \code{covariates}: vector of characters which contains the covariates to be included
-in the model (including interactions which are specified as "covariateName1*covariateName2").
-If no covariates are provided the default model specification of \code{outcome ~ 1 + visit + group} will be used.
-Please note that the \code{group*visit} interaction
+in the model (including interactions which are specified as \verb{"covariateName1*covariateName2"``). If no covariates are provided the default model specification of }outcome ~ 1 + visit + group\verb{will be used. Please note that the}group*visit` interaction
 is \strong{not} included in the model by default.
 \item \code{strata}: covariates used as stratification variables in the bootstrap sampling.
 By default only the \code{vars$group} is set as stratification variable.

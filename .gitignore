@@ -48,6 +48,7 @@ po/*~
 src/*
 
 .DS_store
+.DS_Store
 
 nul
 

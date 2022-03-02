@@ -2,7 +2,7 @@
 % Please edit documentation in R/delta.R
 \name{d_lagscale}
 \alias{d_lagscale}
-\title{Calculate delta from a lagged Sscale coefficient}
+\title{Calculate delta from a lagged scale coefficient}
 \usage{
 d_lagscale(delta, dlag, is_post_ice)
 }

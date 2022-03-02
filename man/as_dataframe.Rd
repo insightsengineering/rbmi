@@ -10,7 +10,7 @@ as_dataframe(x)
 \item{x}{a data.frame like object
 
 Utility function to convert a "data.frame-like" object to an actual \code{data.frame}
-to avoid issues with inconsitencies on methods (such as  \code{[}() and dplyr's grouped dataframes)}
+to avoid issues with inconsistency on methods (such as  \code{[}() and dplyr's grouped dataframes)}
 }
 \description{
 Convert object to dataframe

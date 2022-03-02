@@ -17,7 +17,8 @@ pkgs <- c(
     "roxygen2",
     "tinytex",
     "bookdown",
-    "RhpcBLASctl"
+    "RhpcBLASctl",
+    "R.rsp"
 )
 
 options(warn = 2)

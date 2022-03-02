@@ -26,6 +26,6 @@ et al. (2013)
 \references{
 Carpenter, James R., James H. Roger, and Michael G. Kenward. "Analysis of longitudinal
 trials with protocol deviation: a framework for relevant, accessible assumptions, and
-inference via multiple imputation." Journal of biopharmaceutical statistics 23.6 (2013):
+inference via multiple imputation." Journal of Biopharmaceutical statistics 23.6 (2013):
 1352-1371.
 }

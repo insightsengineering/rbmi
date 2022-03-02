@@ -22,7 +22,7 @@ ancova_single(
 \item{covariates}{Character vector containing the name of any additional covariates
 to be included in the model as well as any interaction terms.}
 
-\item{weights}{Character, specifies wether to use "proportional" or "equal" weighting for each
+\item{weights}{Character, specifies whether to use "proportional" or "equal" weighting for each
 categorical covariate combination when calculating the lsmeans.}
 }
 \description{
