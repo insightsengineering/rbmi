@@ -14,7 +14,6 @@ runs:
       run: |
         R CMD check --no-manual --no-build-vignettes --no-vignettes --ignore-vignettes ${{ env.PKGBUILD }} 
       shell: bash
-      continue-on-error: true
       env:
         _R_CHECK_CRAN_INCOMING_: false
         _R_CHECK_CRAN_INCOMING_REMOTE_: false
