@@ -32,7 +32,9 @@ jobs:
           ref: cran
 
       - name: Check
-        uses: ./.github/actions/rcmdcheck-slim
+        uses: ./.github/actions/rcmdcheck
+        with:
+          slim: true
   
   
   
@@ -60,5 +62,7 @@ jobs:
           ref: main
 
       - name: Check
-        uses: ./.github/actions/rcmdcheck-slim
+        uses: ./.github/actions/rcmdcheck
+        with:
+          slim: true
 

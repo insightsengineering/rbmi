@@ -4,6 +4,8 @@ on:
   pull_request:
     paths-ignore:
       - 'misc/**'
+    branches:
+      - main
 
 name: On Pull Request
 
@@ -31,7 +33,9 @@ jobs:
         uses: ./.github/actions/build-src
 
       - name: Check
-        uses: ./.github/actions/rcmdcheck-slim
+        uses: ./.github/actions/rcmdcheck
+        with:
+          slim: true
 
 
   vignettes:
