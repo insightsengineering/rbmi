@@ -1,56 +1,64 @@
 
 
 on:
-  pull_request:
-    paths-ignore:
-      - 'misc/**'
+  schedule:
+    - cron: '0 4 * * 1'
 
-name: On Pull Request
+name: On Weekly
 
 jobs:
-
-  rcmdcheck:
-
+  
+  rcmdcheck-cran:
     strategy:
       fail-fast: true
       matrix:
        config:
          - { image: "ghcr.io/${{ github.repository_owner }}/rbmi:r404"}
          - { image: "ghcr.io/${{ github.repository_owner }}/rbmi:r410"}
+
     runs-on: ubuntu-latest
+
     container:
       image: ${{ matrix.config.image }}
+
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_TEST_NIGHTLY: 'FALSE'
+      R_TEST_NIGHTLY: 'TRUE' 
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: cran
 
-      - name: Build src
-        uses: ./.github/actions/build-src
+      - name: Check
+        uses: ./.github/actions/rcmdcheck-slim
+  
+  
+  
+  rcmdcheck-main:
+    strategy:
+      fail-fast: true
+      matrix:
+       config:
+         - { image: "ghcr.io/${{ github.repository_owner }}/rbmi:r404"}
+         - { image: "ghcr.io/${{ github.repository_owner }}/rbmi:r410"}
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: ${{ matrix.config.image }}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_TEST_NIGHTLY: 'TRUE' 
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: main
 
       - name: Check
         uses: ./.github/actions/rcmdcheck-slim
 
-
-  vignettes:
-    strategy:
-      fail-fast: true
-      matrix:
-       config:
-         - { image: "ghcr.io/${{ github.repository_owner }}/rbmi:r404"}
-         - { image: "ghcr.io/${{ github.repository_owner }}/rbmi:r410"}
-    runs-on: ubuntu-latest
-    container:
-      image: ${{ matrix.config.image }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      
-      - name: Build src
-        uses: ./.github/actions/build-src
-      
-      - name: Build Vignettes
-        run: |
-          Rscript ./vignettes/build.R
