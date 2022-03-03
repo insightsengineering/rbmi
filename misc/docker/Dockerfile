@@ -37,6 +37,7 @@ ENV REQD_PKGS="\
     gdebi-core \
     qpdf \
     devscripts \
+    cmake \
     "
 
 RUN apt-get update -y --fix-missing && \
