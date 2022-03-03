@@ -1,4 +1,4 @@
-name: Deploy image to GHCR
+name: Build latest version Docker images
 
 env:
   REGISTRY: ghcr.io

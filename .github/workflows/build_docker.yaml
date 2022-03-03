@@ -1,19 +1,9 @@
-name: Deploy image to GHCR
+name: Build fixed version Docker images
 
 env:
   REGISTRY: ghcr.io
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'misc/docker/**'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'misc/docker/**'
   workflow_dispatch:
 
 
