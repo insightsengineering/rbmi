@@ -6,13 +6,12 @@ runs:
   steps:
     - name: Build R package
       run: |
-        R CMD build ${{ github.event.repository.name }}
-        echo "PKGBUILD=$(echo *.tar.gz)" >> $GITHUB_ENV
+        R CMD build .
       shell: bash
       
     - name: Run R CMD check
       run: |
-        R CMD check --no-manual --no-build-vignettes --no-vignettes --ignore-vignettes ${{ env.PKGBUILD }} 
+        R CMD check --no-manual --no-build-vignettes --no-vignettes --ignore-vignettes *.tar.gz
       shell: bash
       env:
         _R_CHECK_CRAN_INCOMING_: false
