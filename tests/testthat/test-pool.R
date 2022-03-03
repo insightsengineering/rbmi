@@ -99,7 +99,7 @@ test_that("get_ests_bmlmi", {
     res <- get_ests_bmlmi(ests, D)
 
     expect_true(is.list(res))
-    expect_length(length(res), 3)
+    expect_length(res, 3)
     expect_true(all(!is.na(res)))
     expect_true(all(!is.null(res)))
     expect_true(all(sapply(res, is.numeric)))
