@@ -10,9 +10,24 @@ runs:
       shell: bash
       
     - name: Run R CMD check
+      shell: bash
       run: |
         R CMD check --no-manual --no-build-vignettes --no-vignettes --ignore-vignettes *.tar.gz
-      shell: bash
       env:
         _R_CHECK_CRAN_INCOMING_: false
         _R_CHECK_CRAN_INCOMING_REMOTE_: false
+
+    - name: Catch warnings in R CMD check output
+      id: catch-errors
+      shell: Rscript {0}
+      run: |
+        check_dir <- grep("*\\.Rcheck$", list.dirs(), value = TRUE)
+        check_log <- sprintf("%s/00check.log", check_dir)
+        if (file.exists(check_log)) {
+            x <- tail(readLines(check_log), 1)
+            if (!grepl("^Status", x)) stop("No status line found in R CMD check log")
+            if (grepl("ERROR", x)) stop("R CMD check has errors")
+            if (grepl("WARNING", x)) stop("R CMD check has warnings")
+        } else {
+            stop("Could not find check log")
+        }
