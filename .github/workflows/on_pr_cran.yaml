@@ -50,13 +50,11 @@ jobs:
           cache-version: 2
           extra-packages: |
             remotes
-            rcmdcheck
 
       - name: Install Pandoc
         uses: r-lib/actions/setup-pandoc@v1
 
       - name: Check
-        run: |
-          options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning")
-        shell: Rscript {0}
+        uses: ./.github/actions/rcmdcheck
+        with:
+          slim: false
