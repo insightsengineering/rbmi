@@ -1,9 +1,11 @@
-name: Build fixed version Docker images
+name: Build latest version Docker images
 
 env:
   REGISTRY: ghcr.io
 
 on:
+  schedule:
+    - cron: '0 5 1,15 * *'
   workflow_dispatch:
 
 
@@ -18,14 +20,9 @@ jobs:
       matrix:
         config:
           - {
-              src_image: "rocker/r-ver:4.0.4", 
-              cran_url: "https://packagemanager.rstudio.com/cran/2021-04-20",
-              tag: "rbmi:r404"
-            }
-          - {
-              src_image: "rocker/r-ver:4.1.0", 
-              cran_url: "https://packagemanager.rstudio.com/cran/2021-08-04",
-              tag: "rbmi:r410"
+              src_image: "rocker/r-ver:latest", 
+              cran_url: "https://packagemanager.rstudio.com/cran/latest",
+              tag: "rbmi:latest"
             }
 
     # Token permissions

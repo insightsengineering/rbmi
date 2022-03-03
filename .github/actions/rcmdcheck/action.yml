@@ -1,0 +1,42 @@
+
+name: 'Build src'
+description: 'Build src!'
+inputs:
+  slim:
+    description: 'Should the reduced set of checks be run'
+    default: false
+runs:
+  using: "composite"
+  steps:
+    - name: Build R package
+      shell: bash
+      run: |
+        R CMD build .
+      
+    - name: Run R CMD check
+      env:
+        _R_CHECK_CRAN_INCOMING_: false
+        _R_CHECK_CRAN_INCOMING_REMOTE_: false
+      shell: bash
+      run: |
+        echo "inputs.slim = ${{ inputs.slim }}"
+        if ${{ inputs.slim }} ; then
+          R CMD check --no-manual --no-build-vignettes --no-vignettes --ignore-vignettes *.tar.gz
+        else
+          R CMD check --no-manual --as-cran *.tar.gz
+        fi
+
+    - name: Catch warnings in R CMD check output
+      id: catch-errors
+      shell: Rscript {0}
+      run: |
+        check_dir <- grep("*\\.Rcheck$", list.dirs(), value = TRUE)
+        check_log <- sprintf("%s/00check.log", check_dir)
+        if (file.exists(check_log)) {
+            x <- tail(readLines(check_log), 1)
+            if (!grepl("^Status", x)) stop("No status line found in R CMD check log")
+            if (grepl("ERROR", x)) stop("R CMD check has errors")
+            if (grepl("WARNING", x)) stop("R CMD check has warnings")
+        } else {
+            stop("Could not find check log")
+        }

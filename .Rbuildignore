@@ -17,3 +17,7 @@
 ^CRAN-SUBMISSION$
 ^cran-comments\.md$
 ^.vscode$
+
+^.*\.tar\.gz$
+^.*\.Rcheck$
+
