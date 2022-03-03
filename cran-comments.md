@@ -1,13 +1,13 @@
+## Resubmission
+This is a resubmission. In this version I have:
+
+* Fix a floating point issue that caused the Mac M1 CMD CHECK to fail
+
 ## R CMD check results
 
 There were no ERRORs or WARNINGs.
 
-There were 3 NOTEs:
-
-❯ checking CRAN incoming feasibility ... NOTE
-  Maintainer: ‘Craig Gower-Page <craig.gower-page@roche.com>’
-  
-  New submission
+There were 2 NOTEs:
 
 ❯ checking installed package size ... NOTE
     installed size is 57.4Mb
