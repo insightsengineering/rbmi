@@ -40,7 +40,7 @@ jobs:
         run: |
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(
-            args = c("--no-manual", "--no-build-vignettes", "--no-vignettes"),
+            args = c("--no-manual", "--no-build-vignettes", "--no-vignettes", "--ignore-vignettes"),
             error_on = "warning",
             env = c("_R_CHECK_CRAN_INCOMING_" = FALSE, "_R_CHECK_CRAN_INCOMING_REMOTE_" = FALSE)
           )
