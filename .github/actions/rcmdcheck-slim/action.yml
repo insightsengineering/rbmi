@@ -1,0 +1,20 @@
+
+name: 'Build src'
+description: 'Build src!'
+runs:
+  using: "composite"
+  steps:
+    - name: Build R package
+      run: |
+        R CMD build ${{ github.event.repository.name }}
+        echo "PKGBUILD=$(echo *.tar.gz)" >> $GITHUB_ENV
+      shell: bash
+      
+    - name: Run R CMD check
+      run: |
+        R CMD check --no-manual --no-build-vignettes --no-vignettes --ignore-vignettes ${{ env.PKGBUILD }} 
+      shell: bash
+      continue-on-error: true
+      env:
+        _R_CHECK_CRAN_INCOMING_: false
+        _R_CHECK_CRAN_INCOMING_REMOTE_: false
