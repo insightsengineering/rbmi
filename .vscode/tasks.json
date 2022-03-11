@@ -7,7 +7,7 @@
             "label": "Build Vignettes",
             "type": "shell",
             "command": "Rscript vignettes/build.R",
-            "problemMatcher": {},
+            "problemMatcher": [],
             "presentation": {
                 "echo": true,
                 "reveal": "always",
