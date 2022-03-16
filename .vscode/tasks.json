@@ -16,6 +16,45 @@
                 "showReuseMessage": true,
                 "clear": true
             }
+        },
+        {
+            "label": "R - testthat (nightly)",
+            "command": "Rscript",
+            "options": {
+                "env": {
+                    "R_TEST_NIGHTLY" : "TRUE"
+                }
+            },
+            "args": [
+                "-e",
+                "devtools::test()"
+            ],
+            "group": "test",
+            "presentation": {
+                "clear": true,
+                "panel": "dedicated"
+            },
+            "problemMatcher": {
+                "owner": "R-testthat",
+                "severity": "error",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}/tests/testthat"
+                ],
+                "pattern": [
+                    {
+                        "regexp": "^(Failure|Error)\\s\\((.*\\.[Rr]):(\\d+):(\\d+)\\):\\s(.*)",
+                        "file": 2,
+                        "line": 3,
+                        "column": 4,
+                        "message": 5
+                    },
+                    {
+                        "regexp": "^(.*)$",
+                        "message": 1
+                    }
+                ]
+            }
         }
     ]
 }

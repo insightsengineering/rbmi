@@ -554,7 +554,7 @@ get_pattern_groups <- function(ddat) {
 #'
 #' i.e.
 #' ```
-#' patmap(c("1101", "0001"))  ->   list(c(1,2,4,0), c(4,0,0,0))
+#' patmap(c("1101", "0001"))  ->   list(c(1,2,4,999), c(4,999, 999, 999))
 #' ```
 #'
 #' @param x a character vector whose values are all either "0" or "1". All elements of
@@ -565,6 +565,10 @@ as_indices <- function(x) {
         length(unique(nchar(x))) == 1,
         msg = "all values of x must be the same length"
     )
+    assert_that(
+        unique(nchar(x)) < 999,
+        msg = "Number of pattern groups must be < 999"
+    )
 
     len <- max(nchar(x))
     lapply(
@@ -574,7 +578,7 @@ as_indices <- function(x) {
                 all(x %in% c("0", "1")),
                 msg = "All values of x must be 0 or 1"
             )
-            temp <- rep(0, len)
+            temp <- rep(999, len)
             y <- which(x == "1")
             temp[seq_along(y)] <- y
             return(temp)
@@ -633,6 +637,7 @@ validate.stan_data <- function(x, ...) {
         length(x$pat_G) == length(x$pat_sigma_index),
         length(unique(lapply(x$pat_sigma_index, length))) == 1,
         length(x$pat_sigma_index[[1]]) == x$n_visit,
-        all(vapply(x$pat_sigma_index, function(z) all(z %in% c(seq_len(x$n_visit), 0)), logical(1)))
+        all(vapply(x$pat_sigma_index, function(z) all(z %in% c(seq_len(x$n_visit), 999)), logical(1))),
+        msg = "Invalid Stan Data Object"
     )
 }

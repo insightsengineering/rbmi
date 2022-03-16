@@ -35,7 +35,7 @@ data {
     int<lower=1> pat_G[n_pat];              // Index for which Sigma the pat group should use
     int<lower=1> pat_n_pt[n_pat];           // number of patients in each pat group
     int<lower=1> pat_n_visit[n_pat];        // number of non-missing visits in each pat group
-    int<lower=0> pat_sigma_index[n_pat, n_visit];    // rows/cols from sigma to subset on for the pat group
+    int<lower=1> pat_sigma_index[n_pat, n_visit];    // rows/cols from sigma to subset on for the pat group
     
     vector[N] y;                            // outcome variable
     matrix[N,P] Q;                          // design matrix (After QR decomp)
