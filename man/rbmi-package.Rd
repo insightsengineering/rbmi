@@ -22,6 +22,15 @@ To learn more about rbmi, please see the quickstart vignette:
 
 \code{vignette(topic= "quickstart", package = "rbmi")}
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://insightsengineering.github.io/rbmi/}
+  \item \url{https://github.com/insightsengineering/rbmi}
+  \item Report bugs at \url{https://github.com/insightsengineering/rbmi/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Craig Gower-Page \email{craig.gower-page@roche.com}
 

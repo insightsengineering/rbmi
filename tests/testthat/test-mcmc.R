@@ -126,7 +126,7 @@ test_that("Verbose supression works", {
 test_that("as_indicies", {
 
     result_actual <- as_indices(c("1100"))
-    result_expected <- list(c(1, 2, 0, 0))
+    result_expected <- list(c(1, 2, 999, 999))
     expect_equal(result_actual, result_expected)
 
 
@@ -144,19 +144,19 @@ test_that("as_indicies", {
     ))
 
     result_expected <- list(
-        c(1, 3, 5, 0, 0),
-        c(1, 2, 4, 0, 0),
+        c(1, 3, 5, 999, 999),
+        c(1, 2, 4, 999, 999),
 
-        c(0, 0, 0, 0, 0),
+        c(999, 999, 999, 999, 999),
         c(1, 2, 3, 4, 5),
 
-        c(2, 3, 4, 5, 0),
-        c(1, 2, 3, 4, 0),
-        c(1, 3, 4, 5, 0),
+        c(2, 3, 4, 5, 999),
+        c(1, 2, 3, 4, 999),
+        c(1, 3, 4, 5, 999),
 
-        c(1, 0, 0, 0, 0),
-        c(2, 0, 0, 0, 0),
-        c(5, 0, 0, 0, 0)
+        c(1, 999, 999, 999, 999),
+        c(2, 999, 999, 999, 999),
+        c(5, 999, 999, 999, 999)
     )
     expect_equal(result_actual, result_expected)
 
@@ -387,7 +387,8 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         group = dat2$group,
         subjid = dat2$id,
         visit = dat2$visit,
-        method = method
+        method = method,
+        quiet = TRUE
     )
 
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
@@ -575,7 +576,8 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
         group = dat2$group,
         subjid = dat2$id,
         visit = dat2$visit,
-        method = method
+        method = method,
+        quiet = TRUE
     )
 
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
