@@ -60,12 +60,12 @@ standard_checks <- function(dobj, d, meth) {
 test_that("approxbayes", {
 
     set.seed(40123)
-    d <- get_data(40)
-    meth <- method_approxbayes(n_samples = 6)
+    d <- get_data(80)
+    meth <- method_approxbayes(n_samples = 2)
     dobj <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
     standard_checks(dobj, d, meth)
 
-    expect_length(dobj$samples, 6)
+    expect_length(dobj$samples, 2)
     for (samp in dobj$samples) {
         expect_equal(samp$ids, levels(d$dat$id))
     }
@@ -75,12 +75,12 @@ test_that("approxbayes", {
 test_that("condmean - bootstrap", {
 
     set.seed(40123)
-    d <- get_data(40)
-    meth <- method_condmean(n_samples = 5)
+    d <- get_data(70)
+    meth <- method_condmean(n_samples = 1)
     dobj <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
     standard_checks(dobj, d, meth)
 
-    expect_length(dobj$samples, 6)
+    expect_length(dobj$samples, 2)
     expect_equal(dobj$samples[[1]]$ids, levels(d$dat$id))
 
     for (samp in dobj$samples[-1]) {
@@ -89,34 +89,47 @@ test_that("condmean - bootstrap", {
     }
 
     set.seed(623)
-    meth <- method_condmean(n_samples = 5)
+    meth <- method_condmean(n_samples = 1)
     dobj2 <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
     standard_checks(dobj2, d, meth)
 
-    expect_length(dobj2$samples, 6)
+    expect_length(dobj2$samples, 2)
     expect_equal(dobj2$samples[[1]], dobj$samples[[1]])
     expect_true(!identical(dobj$samples[[2]], dobj2$samples[[2]]))
+
+
+    set.seed(623)
+    meth <- method_condmean(n_samples = 1)
+    dobj3 <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
+    standard_checks(dobj3, d, meth)
+
+    expect_length(dobj3$samples, 2)
+    expect_equal(dobj3$samples[[1]], dobj$samples[[1]])
+    expect_true(identical(dobj2$samples, dobj3$samples))
 })
 
 
 
 test_that("condmean - jackknife", {
 
+    skip_if_not(is_nightly())
+
     set.seed(40123)
-    d <- get_data(20)
+    N <- 70
+    d <- get_data(N)
     meth <- method_condmean(type = "jackknife")
-    dobj <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
+    dobj <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE, ncores = 2)
     standard_checks(dobj, d, meth)
 
-    expect_length(dobj$samples, 21)
+    expect_length(dobj$samples, N + 1)
     expect_equal(dobj$samples[[1]]$ids, levels(d$dat$id))
-    expect_true(all(vapply(dobj$samples[-1], function(x) length(x$ids) == 19, logical(1))))
-    for (i in 1:20) {
+    expect_true(all(vapply(dobj$samples[-1], function(x) length(x$ids) == N-1, logical(1))))
+    for (i in seq_len(N)) {
         expect_equal(dobj$samples[-1][[i]]$ids, levels(d$dat$id)[-i])
     }
 
     set.seed(123)
-    dobj2 <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
+    dobj2 <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE, ncores = 2)
     expect_equal(dobj[c("samples", "data")], dobj2[c("samples", "data")])
 })
 
@@ -125,16 +138,15 @@ test_that("condmean - jackknife", {
 
 test_that("bayes", {
     set.seed(40123)
-    d <- get_data(40)
-    meth <- method_bayes(n_samples = 7, burn_in = 200, burn_between = 2)
+    d <- get_data(140)
+    meth <- method_bayes(n_samples = 2, burn_in = 200, burn_between = 2)
     dobj <- suppressWarnings({
         draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
     })
     standard_checks(dobj, d, meth)
 
-    expect_length(dobj$samples, 7)
+    expect_length(dobj$samples, 2)
     expect_true(all(vapply(dobj$samples, function(x) all(x$ids == levels(d$dat$id)), logical(1))))
-
 })
 
 
@@ -146,14 +158,13 @@ test_that("nmar data is removed as expected", {
     # the output of draws on this dataset vs the same dataset after
     # manually removing those observations
 
-    set.seed(101)
-
+    set.seed(301)
     mysig <- as_vcov(
         sd = c(1, 3, 5),
         cor = c(0.3, 0.5, 0.8)
     )
 
-    dat <- get_sim_data(20, mysig)
+    dat <- get_sim_data(120, mysig)
 
     nmar_ids <- sample(unique(dat$id), size = 4)
 
@@ -175,8 +186,11 @@ test_that("nmar data is removed as expected", {
         covariates = c("age", "sex")
     )
 
-    method <- method_condmean(type = "jackknife")
+    method <- method_condmean(type = "bootstrap", n_samples = 2)
+    
+    set.seed(101)
     d1 <- draws(dat, dat_ice, vars, method, quiet = TRUE)
+    set.seed(101)
     d2 <- draws(dat2, dat_ice, vars, method, quiet = TRUE)
     expect_equal(d1$samples, d2$samples)
 
@@ -193,7 +207,7 @@ test_that("NULL data_ice works uses MAR by default", {
 
     dobj <- draws(
         dat2,
-        method = method_condmean(n_samples = 5),
+        method = method_condmean(n_samples = 3),
         quiet = TRUE,
         vars = set_vars(
             outcome = "outcome",
@@ -214,7 +228,8 @@ test_that("NULL data_ice works uses MAR by default", {
 
 test_that("Failure is handled properly", {
 
-    bign <- 75
+    set.seed(521)
+    bign <- 80
     sigma <- as_vcov(
         c(2, 1, 0.7),
         c(
@@ -542,7 +557,7 @@ test_that("draws is calling get_mmrm_sample properly", {
 
 test_that("draws.bmlmi works as expected", {
 
-    bign <- 60
+    bign <- 120
     sigma <- as_vcov(
         c(2, 1, 0.7),
         c(
@@ -580,7 +595,7 @@ test_that("draws.bmlmi works as expected", {
         dat,
         dat_ice,
         vars,
-        method = method_bmlmi(B = 21),
+        method = method_bmlmi(B = 6),
         ncores = 2
     )
 
@@ -590,7 +605,7 @@ test_that("draws.bmlmi works as expected", {
         dat,
         dat_ice,
         vars,
-        method = method_approxbayes(n_samples = 21)
+        method = method_approxbayes(n_samples = 6)
     )
 
     ### BMLMI should be identical to approx bayes within draws except for sample ids
@@ -611,7 +626,7 @@ test_that("draws.bmlmi works as expected", {
 
 test_that("quiet supress progress messages", {
     
-    bign <- 60
+    bign <- 90
     sigma <- as_vcov(
         c(2, 1, 0.7),
         c(
@@ -649,7 +664,7 @@ test_that("quiet supress progress messages", {
             data = dat,
             data_ice = dat_ice,
             vars = vars,
-            method = method_approxbayes(n_samples = 3)
+            method = method_approxbayes(n_samples = 2)
         )
     })
     expect_true(any(grepl("Estimated running time", x)))
@@ -663,7 +678,7 @@ test_that("quiet supress progress messages", {
             quiet = TRUE,
             data_ice = dat_ice,
             vars = vars,
-            method = method_approxbayes(n_samples = 3)
+            method = method_approxbayes(n_samples = 1)
         )
     })
     expect_true(length(x) == 0 & is.character(x))

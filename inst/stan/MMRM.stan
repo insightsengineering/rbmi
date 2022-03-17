@@ -27,7 +27,7 @@ functions {
 
 data {
     int<lower=1> N;                         // number of observations
-    int<lower=0> P;                         // number of covariates (number of columns of design matrix)
+    int<lower=1> P;                         // number of covariates (number of columns of design matrix)
     int<lower=1> G;                         // number of Sigma Groups
     int<lower=1> n_visit;                   // number of visits
     int<lower=1> n_pat;                     // number of pat groups (# missingness patterns * groups)
@@ -35,7 +35,7 @@ data {
     int<lower=1> pat_G[n_pat];              // Index for which Sigma the pat group should use
     int<lower=1> pat_n_pt[n_pat];           // number of patients in each pat group
     int<lower=1> pat_n_visit[n_pat];        // number of non-missing visits in each pat group
-    int pat_sigma_index[n_pat, n_visit];    // rows/cols from sigma to subset on for the pat group
+    int<lower=1> pat_sigma_index[n_pat, n_visit];    // rows/cols from sigma to subset on for the pat group
     
     vector[N] y;                            // outcome variable
     matrix[N,P] Q;                          // design matrix (After QR decomp)
