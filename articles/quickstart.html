@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">rbmi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,7 +51,14 @@
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
 </form>
 
-      <ul class="navbar-nav"></ul>
+      <ul class="navbar-nav">
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/insightsengineering/rbmi/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 
     
@@ -65,7 +72,7 @@
                         <h4 data-toc-skip class="author">Craig Gower-Page, Alessandro Noci, and Marcel Wolbers</h4>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/HEAD/vignettes/quickstart.Rmd" class="external-link"><code>vignettes/quickstart.Rmd</code></a></small>
       <div class="d-none name"><code>quickstart.Rmd</code></div>
     </div>
 
@@ -94,7 +101,7 @@
 </h2>
 <p>We use a publicly available example dataset from an antidepressant clinical trial of an active drug versus placebo. The relevant endpoint is the Hamilton 17-item depression rating scale (HAMD17) which was assessed at baseline and at weeks 1, 2, 4, and 6. Study drug discontinuation occurred in 24% of subjects from the active drug and 26% of subjects from placebo. All data after study drug discontinuation are missing and there is a single additional intermittent missing observation.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">rbmi</span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://insightsengineering.github.io/rbmi/" class="external-link">rbmi</a></span><span class="op">)</span>
 <span class="co">#&gt; Warning in checkMatrixPackageVersion(): Package version inconsistency detected.</span>
 <span class="co">#&gt; TMB was built with Matrix version 1.3.4</span>
 <span class="co">#&gt; Current Matrix version is 1.4.0</span>
@@ -162,7 +169,7 @@ and that 150 multiple imputed datasets using Bayesian posterior draws from the i
 <span class="va">dat_ice</span> <span class="op">&lt;-</span> <span class="va">dat_ice</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">dat_ice</span><span class="op">$</span><span class="va">PATIENT</span> <span class="op">==</span> <span class="fl">3618</span><span class="op">)</span>,<span class="op">]</span>
 
 <span class="va">dat_ice</span>
-<span class="co">#&gt; <span style="color: #949494;"># A tibble: 43 x 3</span></span>
+<span class="co">#&gt; <span style="color: #949494;"># A tibble: 43 × 3</span></span>
 <span class="co">#&gt;    PATIENT VISIT strategy</span>
 <span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   </span>
 <span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1513    5     JR      </span>
@@ -175,7 +182,7 @@ and that 150 multiple imputed datasets using Bayesian posterior draws from the i
 <span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 2230    6     JR      </span>
 <span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 2721    5     JR      </span>
 <span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 2729    5     JR      </span>
-<span class="co">#&gt; <span style="color: #949494;"># ... with 33 more rows</span></span>
+<span class="co">#&gt; <span style="color: #949494;"># … with 33 more rows</span></span>
 
 <span class="co"># Define the names of key variables in our dataset and</span>
 <span class="co"># the covariates included in the imputation model using `set_vars()`</span>
@@ -376,7 +383,7 @@ which were missing in the original dataset) in the drug arm. That could then be 
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># For reference show the additional meta variables provided</span>
 <span class="fu"><a href="../reference/delta_template.html">delta_template</a></span><span class="op">(</span><span class="va">imputeObj</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #949494;"># A tibble: 688 x 8</span></span>
+<span class="co">#&gt; <span style="color: #949494;"># A tibble: 688 × 8</span></span>
 <span class="co">#&gt;    PATIENT VISIT THERAPY is_mar is_missing is_post_ice strategy delta</span>
 <span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1503    4     DRUG    TRUE   FALSE      FALSE       <span style="color: #BB0000;">NA</span>           0</span>
@@ -389,7 +396,7 @@ which were missing in the original dataset) in the drug arm. That could then be 
 <span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 1507    7     PLACEBO TRUE   FALSE      FALSE       <span style="color: #BB0000;">NA</span>           0</span>
 <span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 1509    4     DRUG    TRUE   FALSE      FALSE       <span style="color: #BB0000;">NA</span>           0</span>
 <span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 1509    5     DRUG    TRUE   FALSE      FALSE       <span style="color: #BB0000;">NA</span>           0</span>
-<span class="co">#&gt; <span style="color: #949494;"># ... with 678 more rows</span></span>
+<span class="co">#&gt; <span style="color: #949494;"># … with 678 more rows</span></span>
 
 <span class="va">delta_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/delta_template.html">delta_template</a></span><span class="op">(</span><span class="va">imputeObj</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
     <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
@@ -397,7 +404,7 @@ which were missing in the original dataset) in the drug arm. That could then be 
     <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">PATIENT</span>, <span class="va">VISIT</span>, <span class="va">delta</span><span class="op">)</span>
     
 <span class="va">delta_df</span>
-<span class="co">#&gt; <span style="color: #949494;"># A tibble: 688 x 3</span></span>
+<span class="co">#&gt; <span style="color: #949494;"># A tibble: 688 × 3</span></span>
 <span class="co">#&gt;    PATIENT VISIT delta</span>
 <span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1503    4         0</span>
@@ -410,7 +417,7 @@ which were missing in the original dataset) in the drug arm. That could then be 
 <span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 1507    7         0</span>
 <span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 1509    4         0</span>
 <span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 1509    5         0</span>
-<span class="co">#&gt; <span style="color: #949494;"># ... with 678 more rows</span></span>
+<span class="co">#&gt; <span style="color: #949494;"># … with 678 more rows</span></span>
 
 <span class="va">anaObj_delta</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/analyse.html">analyse</a></span><span class="op">(</span>
     <span class="va">imputeObj</span>,
@@ -464,15 +471,15 @@ in the original call to <code><a href="../reference/draws.html">draws()</a></cod
 <span class="co">#&gt;      trt_4    -0.092  0.683  -1.439  1.256   0.893  </span>
 <span class="co">#&gt;    lsm_ref_4  -1.616  0.486  -2.576  -0.656  0.001  </span>
 <span class="co">#&gt;    lsm_alt_4  -1.708  0.475  -2.645  -0.77   &lt;0.001 </span>
-<span class="co">#&gt;      trt_5    1.334   0.924  -0.492  3.159   0.151  </span>
-<span class="co">#&gt;    lsm_ref_5  -4.154  0.658  -5.454  -2.854  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_5  -2.82   0.645  -4.095  -1.545  &lt;0.001 </span>
-<span class="co">#&gt;      trt_6    1.947   1.001  -0.032  3.925   0.054  </span>
-<span class="co">#&gt;    lsm_ref_6  -6.091  0.723  -7.52   -4.662  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_6  -4.144  0.697  -5.522  -2.766  &lt;0.001 </span>
-<span class="co">#&gt;      trt_7    2.156   1.124  -0.066  4.377   0.057  </span>
-<span class="co">#&gt;    lsm_ref_7  -6.97   0.822  -8.595  -5.345  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_7  -4.814  0.793  -6.383  -3.245  &lt;0.001 </span>
+<span class="co">#&gt;      trt_5    1.323   0.925  -0.503  3.149   0.154  </span>
+<span class="co">#&gt;    lsm_ref_5  -4.143  0.662  -5.449  -2.836  &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_5  -2.82   0.646  -4.096  -1.543  &lt;0.001 </span>
+<span class="co">#&gt;      trt_6    1.941   1.003  -0.04   3.922   0.055  </span>
+<span class="co">#&gt;    lsm_ref_6  -6.078  0.724  -7.508  -4.647  &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_6  -4.137  0.696  -5.511  -2.763  &lt;0.001 </span>
+<span class="co">#&gt;      trt_7    2.134   1.126  -0.092   4.36    0.06  </span>
+<span class="co">#&gt;    lsm_ref_7  -6.942  0.828  -8.579  -5.304  &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_7  -4.808  0.786  -6.362  -3.254  &lt;0.001 </span>
 <span class="co">#&gt;   --------------------------------------------------</span></code></pre></div>
 <p>The table of values shown in the print message for <code>poolObj</code> can also be extracted using the <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> function:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -481,18 +488,18 @@ in the original call to <code><a href="../reference/draws.html">draws()</a></cod
 <span class="co">#&gt; 1      trt_4 -0.09180645 0.6826279 -1.43949684  1.2558839 8.931772e-01</span>
 <span class="co">#&gt; 2  lsm_ref_4 -1.61581996 0.4862316 -2.57577141 -0.6558685 1.093708e-03</span>
 <span class="co">#&gt; 3  lsm_alt_4 -1.70762640 0.4749573 -2.64531931 -0.7699335 4.262148e-04</span>
-<span class="co">#&gt; 4      trt_5  1.33354136 0.9242626 -0.49188980  3.1589725 1.510415e-01</span>
-<span class="co">#&gt; 5  lsm_ref_5 -4.15387840 0.6581768 -5.45378084 -2.8539760 2.639789e-09</span>
-<span class="co">#&gt; 6  lsm_alt_5 -2.82033705 0.6454981 -4.09528556 -1.5453885 2.252897e-05</span>
-<span class="co">#&gt; 7      trt_6  1.94682569 1.0014234 -0.03159561  3.9252470 5.372525e-02</span>
-<span class="co">#&gt; 8  lsm_ref_6 -6.09092698 0.7232527 -7.52016400 -4.6616900 2.971586e-14</span>
-<span class="co">#&gt; 9  lsm_alt_6 -4.14410129 0.6973358 -5.52178478 -2.7664178 1.832587e-08</span>
-<span class="co">#&gt; 10     trt_7  2.15583700 1.1239050 -0.06559703  4.3772710 5.706399e-02</span>
-<span class="co">#&gt; 11 lsm_ref_7 -6.97010370 0.8218751 -8.59547050 -5.3447369 3.404641e-14</span>
-<span class="co">#&gt; 12 lsm_alt_7 -4.81426670 0.7934670 -6.38305355 -3.2454799 1.159881e-08</span></code></pre></div>
+<span class="co">#&gt; 4      trt_5  1.32293292 0.9247205 -0.50339333  3.1492592 1.544996e-01</span>
+<span class="co">#&gt; 5  lsm_ref_5 -4.14255973 0.6616548 -5.44943035 -2.8356891 3.485333e-09</span>
+<span class="co">#&gt; 6  lsm_alt_5 -2.81962681 0.6462068 -4.09598170 -1.5432719 2.308532e-05</span>
+<span class="co">#&gt; 7      trt_6  1.94067131 1.0026428 -0.04022019  3.9215628 5.477545e-02</span>
+<span class="co">#&gt; 8  lsm_ref_6 -6.07769081 0.7237810 -7.50800503 -4.6473766 3.470902e-14</span>
+<span class="co">#&gt; 9  lsm_alt_6 -4.13701950 0.6957250 -5.51147432 -2.7625647 1.787955e-08</span>
+<span class="co">#&gt; 10     trt_7  2.13375123 1.1260286 -0.09199779  4.3595002 6.011281e-02</span>
+<span class="co">#&gt; 11 lsm_ref_7 -6.94161940 0.8280453 -8.57948982 -5.3037490 6.556842e-14</span>
+<span class="co">#&gt; 12 lsm_alt_7 -4.80786818 0.7862506 -6.36211290 -3.2536235 8.823627e-09</span></code></pre></div>
 <p>These outputs gives an estimated difference of
-2.156 (95% CI -0.066 to 4.377)
-between the two groups at the last visit with an associated p-value of 0.057.</p>
+2.134 (95% CI -0.092 to 4.360)
+between the two groups at the last visit with an associated p-value of 0.060.</p>
 </div>
 <div class="section level2" number="7">
 <h2 id="code">
@@ -500,7 +507,7 @@ between the two groups at the last visit with an associated p-value of 0.057.</p
 </h2>
 <p>We report below all the code presented in this vignette.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">rbmi</span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://insightsengineering.github.io/rbmi/" class="external-link">rbmi</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"antidepressant_data"</span><span class="op">)</span>

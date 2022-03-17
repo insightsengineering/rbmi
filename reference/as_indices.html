@@ -12,7 +12,7 @@ padding the results by 0's so they are all the same length"><!-- mathjax --><scr
     
     <a class="navbar-brand me-2" href="../index.html">rbmi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,7 +34,13 @@ padding the results by 0's so they are all the same length"><!-- mathjax --><scr
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
-      <ul class="navbar-nav"></ul></div>
+      <ul class="navbar-nav"><li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/insightsengineering/rbmi/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div>
 
     
   </div>
@@ -42,7 +48,7 @@ padding the results by 0's so they are all the same length"><!-- mathjax --><scr
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Convert indicator to index</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/HEAD/R/mcmc.R" class="external-link"><code>R/mcmc.R</code></a></small>
       <div class="d-none name"><code>as_indices.Rd</code></div>
     </div>
 
@@ -64,7 +70,7 @@ the vector must be the same length</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>i.e.</p><div class="sourceCode"><pre><code><span class="fu">patmap</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1101"</span>, <span class="st">"0001"</span><span class="op">)</span><span class="op">)</span>  <span class="op">-&gt;</span>   <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span>,<span class="fl">4</span>,<span class="fl">0</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <p>i.e.</p><div class="sourceCode"><pre><code><span class="fu">patmap</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1101"</span>, <span class="st">"0001"</span><span class="op">)</span><span class="op">)</span>  <span class="op">-&gt;</span>   <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span>,<span class="fl">4</span>,<span class="fl">999</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>,<span class="fl">999</span>, <span class="fl">999</span>, <span class="fl">999</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
     </div>
 
