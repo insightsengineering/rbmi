@@ -1,10 +1,7 @@
 ## Resubmission
 This is a resubmission. In this version I have:
 
-* Stabilised some of our unit tests to reduce the occurrence of false-positive failures due to random variations from different CPU's/OS's.
-* Added a bug report URL and a support site URL to our DESCRIPTION file
-* Updated STAN code to hopefully fix the clang-UBSAN error. Please note though we were not able
-to reproduce this CRAN error locally so are not 100% if this fix will work.
+* Fixed the clang-UBSAN error
 
 ## R CMD check results
 

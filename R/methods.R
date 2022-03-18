@@ -93,7 +93,7 @@ method_bayes <- function(
     burn_between = 50,
     same_cov = TRUE,
     n_samples = 20,
-    seed = NA
+    seed = sample.int(.Machine$integer.max, 1)
 ) {
     x <- list(
         burn_in = burn_in,
