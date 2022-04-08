@@ -421,7 +421,8 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         group = dat2$group,
         subjid = dat2$id,
         visit = dat2$visit,
-        method = method
+        method = method,
+        quiet = TRUE
     )
 
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
@@ -601,4 +602,39 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
 
 
 
+})
+
+
+test_that("invalid seed throws an error", {
+
+    set.seed(301)
+    sigma <- as_vcov(c(6, 4, 4), c(0.5, 0.2, 0.3))
+    dat <- get_sim_data(50, sigma)
+
+    dat_ice <- dat %>%
+        group_by(id) %>%
+        arrange(desc(visit)) %>%
+        slice(1) %>%
+        ungroup() %>%
+        mutate(strategy = "MAR")
+
+    vars <- set_vars(
+        visit = "visit",
+        subjid = "id",
+        group = "group",
+        covariates = "sex",
+        strategy = "strategy",
+        outcome = "outcome"
+    )
+
+    expect_error(
+        draws(
+            dat,
+            dat_ice,
+            vars,
+            method_bayes(n_samples = 2, seed = NA),
+            quiet = TRUE
+        ),
+        regexp = "mcmc seed is invalid"
+    )
 })

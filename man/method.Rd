@@ -13,7 +13,7 @@ method_bayes(
   burn_between = 50,
   same_cov = TRUE,
   n_samples = 20,
-  seed = NA
+  seed = sample.int(.Machine$integer.max, 1)
 )
 
 method_approxbayes(
