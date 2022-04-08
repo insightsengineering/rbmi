@@ -60,7 +60,7 @@
 #'
 #' Bayesian MI based on MCMC sampling has been proposed in Carpenter, Roger, and Kenward (2013) who first introduced
 #' reference-based imputation methods. Approximate Bayesian MI is discussed in Little and Rubin (2002).
-#' Conditional mean imputation methods are discussed in Wolbers et al (2021).
+#' Conditional mean imputation methods are discussed in Wolbers et al (2022).
 #' Bootstrapped Maximum Likelihood MI is described in Von Hippel & Bartlett (2021).
 #'
 #' The argument `data` contains the longitudinal data. It must have at least the following variables:
@@ -108,10 +108,10 @@
 #'   - `"JR"`: Jump to Reference.
 #'   - `"LMCF"`: Last Mean Carried Forward.
 #' For explanations of these imputation strategies, see Carpenter, Roger, and Kenward (2013), Cro et al (2021),
-#' and Wolbers et al (2021).
+#' and Wolbers et al (2022).
 #' Please note that user-defined imputation strategies can also be set.
 #'
-#' The `data_ice` argument is necessary at this stage since (as explained in Wolbers et al (2021)), the model is fitted
+#' The `data_ice` argument is necessary at this stage since (as explained in Wolbers et al (2022)), the model is fitted
 #' after removing the observations which are incompatible with the imputation model, i.e.
 #' any observed data on or after `data_ice[[vars$visit]]` that are addressed with an imputation
 #' strategy different from MAR are excluded for the model fit. However such observations
@@ -164,8 +164,8 @@
 #' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing Data, Second Edition. John Wiley & Sons,
 #' Hoboken, New Jersey, 2002. \[Section 10.2.3\]
 #'
-#' Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Reference-based
-#' imputation methods based on conditional mean imputation. \url{https://arxiv.org/abs/2109.11162}, 2021.
+#' Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Standard and reference-based 
+#' conditional mean imputation. \url{https://arxiv.org/abs/2109.11162}, 2022.
 #'
 #' Von Hippel, Paul T and Bartlett, Jonathan W.
 #' Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021.
