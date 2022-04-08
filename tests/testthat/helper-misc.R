@@ -77,7 +77,7 @@ expect_contains <- function(x, y) {
 }
 
 
-is_nightly <- function() {
+is_full_test <- function() {
     Sys.getenv("R_TEST_FULL") == "TRUE"
 }
 

@@ -397,7 +397,7 @@ test_that("MMRM returns expected estimates under different model specifications"
     sigma <- as_vcov(c(5, 3, 8), c(0.4, 0.6, 0.3))
 
     dat <- ife(
-        is_nightly(),
+        is_full_test(),
         get_sim_data(n = 150, sigma),
         get_sim_data(n = 50, sigma)
     )
@@ -414,7 +414,7 @@ test_that("MMRM returns expected estimates under different model specifications"
         formula_expr <- "outcome ~ age:sex^2 + sex:age*group + visit*group"
         test_mmrm_numeric(dat, formula_expr, same_cov, scale)
 
-        if (is_nightly()) {
+        if (is_full_test()) {
             formula_expr <- "outcome ~ sex*group + age*group + visit*group"
             test_mmrm_numeric(dat, formula_expr, same_cov, scale)
 
@@ -436,7 +436,7 @@ test_that("MMRM returns expected estimates under different model specifications"
     runtests(TRUE, FALSE)
     runtests(TRUE, TRUE)
 
-    if (is_nightly()) {
+    if (is_full_test()) {
         runtests(FALSE, FALSE)
         runtests(FALSE, TRUE)
     }
