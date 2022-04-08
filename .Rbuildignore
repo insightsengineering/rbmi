@@ -21,3 +21,4 @@
 ^.*\.tar\.gz$
 ^.*\.Rcheck$
 
+^CONTRIBUTING.md$
