@@ -58,3 +58,6 @@ docs
 /doc/
 /Meta/
 .github/meta.txt
+
+
+local/
