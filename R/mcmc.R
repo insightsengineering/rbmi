@@ -115,6 +115,12 @@ fit_mcmc <- function(
         )
     )
 
+    assert_that(
+        !is.na(seed),
+        !is.null(seed),
+        is.numeric(seed),
+        msg = "mcmc seed is invalid"
+    )
     sampling_args$seed <- seed
 
     stan_fit <- record({
