@@ -15,19 +15,6 @@
 
 <title>rbmi: Advanced Functionality</title>
 
-<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
-// be compatible with the behavior of Pandoc < 2.8).
-document.addEventListener('DOMContentLoaded', function(e) {
-  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
-  var i, h, a;
-  for (i = 0; i < hs.length; i++) {
-    h = hs[i];
-    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
-    a = h.attributes;
-    while (a.length > 0) h.removeAttribute(a[0].name);
-  }
-});
-</script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -386,7 +373,7 @@ The sections of the vignette are relatively self-contained, i.e. readers should
 The <code>simulate_data()</code> function generates data from a randomized clinical trial with longitudinal continuous outcomes and up to two different types of intercurrent events (ICEs).
 One intercurrent event (ICE1) may be thought of as a discontinuation from study treatment due to study drug or condition related (SDCR) reasons.
 The other event (ICE2) may be thought of as discontinuation from study treatment due to not study drug or condition related (NSDCR) reasons.
-For the purpose of this vignette, we simulate data similarly to the simulation study reported in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2021</a>)</span> (though we change some of the simulation parameters) and include only one ICE type (ICE1).</p>
+For the purpose of this vignette, we simulate data similarly to the simulation study reported in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span> (though we change some of the simulation parameters) and include only one ICE type (ICE1).</p>
 <p>Specifically, we simulate a 1:1 randomized trial of an active drug (intervention) versus placebo (control) with 100 subjects per group and 6 post-baseline assessments (bi-monthly visits until 12 months) under the following assumptions:</p>
 <ul>
 <li>The mean outcome trajectory in the placebo group increases linearly from 50 at baseline (visit 0) to 60 at visit 6, i.e. the slope is 10 points/year.</li>
@@ -787,7 +774,7 @@ As an example, the user can check how the CIR strategy was implemented by lookin
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     pars &lt;- list(mu = mu, sigma = sigma)</span></span>
 <span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     return(pars)</span></span>
 <span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7f9546ca2148&gt;</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7fbfff38c0b0&gt;</span></span>
 <span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:rbmi&gt;</span></span></code></pre></div>
 <p>To further illustrate this for a simple example, assume that a new strategy is to be implemented as follows:
 - The marginal mean of the imputation distribution is equal to the marginal mean trajectory for the subject according to their assigned group and covariates up to the ICE.
@@ -1216,7 +1203,7 @@ Guizzaro, Lorenzo, Frank Pétavy, Robin Ristl, and Ciro Gallo. 2021. <span>“Th
 Noci, Alessandro, Marcel Wolbers, Markus Abt, Corine Baayen, Hans Ulrich Burger, Man Jin, and Weining Zhao Robieson. 2021. <span>“A Comparison of Estimand and Estimation Strategies for Clinical Trials in Early Parkinson’s Disease.”</span> <a href="https://arxiv.org/abs/2112.03700">https://arxiv.org/abs/2112.03700</a>.
 </div>
 <div id="ref-Wolbers2021" class="csl-entry">
-Wolbers, Marcel, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, and Jonathan W Bartlett. 2021. <span>“Reference-Based Imputation Methods Based on Conditional Mean Imputation.”</span> <a href="https://arxiv.org/abs/2109.11162">https://arxiv.org/abs/2109.11162</a>.
+Wolbers, Marcel, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, and Jonathan W Bartlett. 2022. <span>“Standard and Reference-Based Conditional Mean Imputation.”</span> <a href="https://arxiv.org/abs/2109.11162">https://arxiv.org/abs/2109.11162</a>.
 </div>
 </div>
 </div>
