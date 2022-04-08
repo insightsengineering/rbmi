@@ -181,7 +181,7 @@ a given number of bootstrap samples needed to perform random imputations of the 
 This method can be specified by using <code>method = method_bmlmi()</code>.</p></li>
 </ul><p>Bayesian MI based on MCMC sampling has been proposed in Carpenter, Roger, and Kenward (2013) who first introduced
 reference-based imputation methods. Approximate Bayesian MI is discussed in Little and Rubin (2002).
-Conditional mean imputation methods are discussed in Wolbers et al (2021).
+Conditional mean imputation methods are discussed in Wolbers et al (2022).
 Bootstrapped Maximum Likelihood MI is described in Von Hippel &amp; Bartlett (2021).</p>
 <p>The argument <code>data</code> contains the longitudinal data. It must have at least the following variables:</p><ul><li><p><code>subjid</code>: a factor vector containing the subject ids.</p></li>
 <li><p><code>visit</code>: a factor vector containing the visit the outcome was observed on.</p></li>
@@ -221,10 +221,10 @@ Possible imputation strategies are:</p><ul><li><p><code>"MAR"</code>: Missing At
 <li><p><code>"JR"</code>: Jump to Reference.</p></li>
 <li><p><code>"LMCF"</code>: Last Mean Carried Forward.
 For explanations of these imputation strategies, see Carpenter, Roger, and Kenward (2013), Cro et al (2021),
-and Wolbers et al (2021).
+and Wolbers et al (2022).
 Please note that user-defined imputation strategies can also be set.</p></li>
 </ul></li>
-</ul><p>The <code>data_ice</code> argument is necessary at this stage since (as explained in Wolbers et al (2021)), the model is fitted
+</ul><p>The <code>data_ice</code> argument is necessary at this stage since (as explained in Wolbers et al (2022)), the model is fitted
 after removing the observations which are incompatible with the imputation model, i.e.
 any observed data on or after <code>data_ice[[vars$visit]]</code> that are addressed with an imputation
 strategy different from MAR are excluded for the model fit. However such observations
@@ -260,8 +260,8 @@ missing continuous outcome data using controlled multiple imputation: a practica
 Medicine, 39(21):2815–2842, 2020.</p>
 <p>Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing Data, Second Edition. John Wiley &amp; Sons,
 Hoboken, New Jersey, 2002. [Section 10.2.3]</p>
-<p>Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Reference-based
-imputation methods based on conditional mean imputation. <a href="https://arxiv.org/abs/2109.11162" class="external-link">https://arxiv.org/abs/2109.11162</a>, 2021.</p>
+<p>Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Standard and reference-based
+conditional mean imputation. <a href="https://arxiv.org/abs/2109.11162" class="external-link">https://arxiv.org/abs/2109.11162</a>, 2022.</p>
 <p>Von Hippel, Paul T and Bartlett, Jonathan W.
 Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021.</p>
     </div>
