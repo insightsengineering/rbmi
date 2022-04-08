@@ -112,7 +112,7 @@ test_that("condmean - bootstrap", {
 
 test_that("condmean - jackknife", {
 
-    skip_if_not(is_nightly())
+    skip_if_not(is_full_test())
 
     set.seed(40123)
     N <- 70

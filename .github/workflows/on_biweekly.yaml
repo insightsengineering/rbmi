@@ -1,0 +1,38 @@
+
+
+on:
+  schedule:
+    - cron: '0 4 1,15 * *'
+
+name: Bi-Weekly
+
+jobs:
+  rcmdcheck-main:
+    strategy:
+      fail-fast: true
+      matrix:
+       config:
+         - { image: "ghcr.io/${{ github.repository_owner }}/rbmi:r404"}
+         - { image: "ghcr.io/${{ github.repository_owner }}/rbmi:r410"}
+         - { image: "ghcr.io/${{ github.repository_owner }}/rbmi:latest"}
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: ${{ matrix.config.image }}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_TEST_FULL: 'TRUE' 
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: main
+
+      - name: Check
+        uses: ./.github/actions/rcmdcheck
+        with:
+          slim: true
+

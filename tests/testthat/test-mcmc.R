@@ -325,7 +325,7 @@ test_that("get_pattern_groups_unique", {
 
 test_that("fit_mcmc can recover known values with same_cov = TRUE", {
 
-    skip_if_not(is_nightly())
+    skip_if_not(is_full_test())
 
     set.seed(2151)
 
@@ -501,7 +501,7 @@ test_that("fit_mcmc returns error if mmrm on original sample fails", {
 
 test_that("fit_mcmc can recover known values with same_cov = FALSE", {
 
-    skip_if_not(is_nightly())
+    skip_if_not(is_full_test())
 
     set.seed(151)
 

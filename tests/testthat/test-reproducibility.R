@@ -6,7 +6,7 @@ suppressPackageStartupMessages({
 
 test_that("Results are Reproducible", {
 
-    skip_if_not(is_nightly())
+    skip_if_not(is_full_test())
 
     run_test <- function(method) {
         set.seed(4642)

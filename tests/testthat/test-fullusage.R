@@ -6,7 +6,7 @@ suppressPackageStartupMessages({
     library(tibble)
 })
 
-# Sys.setenv("R_TEST_NIGHTLY" = TRUE)
+# Sys.setenv("R_TEST_FULL" = TRUE)
 # NCORES <- 6
 NCORES <- 2
 
@@ -41,7 +41,7 @@ expect_pool_est <- function(po, expected, param = "trt_visit_3") {
 
 test_that("Basic Usage - Approx Bayes", {
 
-    skip_if_not(is_nightly())
+    skip_if_not(is_full_test())
 
     set.seed(1512)
 
@@ -115,7 +115,7 @@ test_that("Basic Usage - Approx Bayes", {
 
 test_that("Basic Usage - Bayesian", {
 
-    skip_if_not(is_nightly())
+    skip_if_not(is_full_test())
 
     set.seed(5123)
 
@@ -207,7 +207,7 @@ test_that("Basic Usage - Bayesian", {
 
 test_that("Basic Usage - Condmean", { 
 
-    skip_if_not(is_nightly())
+    skip_if_not(is_full_test())
 
     set.seed(4642)
 
@@ -298,7 +298,7 @@ test_that("Basic Usage - Condmean", {
 
 test_that("Custom Strategies and Custom analysis functions", {
 
-    skip_if_not(is_nightly())
+    skip_if_not(is_full_test())
 
     set.seed(8368)
 
@@ -429,7 +429,7 @@ test_that("Custom Strategies and Custom analysis functions", {
 
 test_that("Sorting doesn't change results", {
 
-    skip_if_not(is_nightly())
+    skip_if_not(is_full_test())
 
     set.seed(4642)
 
@@ -518,7 +518,7 @@ test_that("Sorting doesn't change results", {
 
 test_that("Multiple imputation references / groups work as expected (end to end checks)", {
 
-    skip_if_not(is_nightly())
+    skip_if_not(is_full_test())
 
     extract_ci <- function(x, ref) {
         x_imp <- impute(x, ref)
@@ -678,7 +678,7 @@ test_that("Multiple imputation references / groups work as expected (end to end 
 
 test_that("rbmi works for one arm trials", {
 
-    skip_if_not(is_nightly())
+    skip_if_not(is_full_test())
 
     # ancova cannot be applied for 1 arm trial. Use a custom analysis function
     myanalysis <- function(data, ...) {

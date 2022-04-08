@@ -5,7 +5,7 @@ suppressPackageStartupMessages({
 
 test_that("Parallisation works as expected", {
 
-    skip_if_not(is_nightly())
+    skip_if_not(is_full_test())
 
     bign <- 150
     sigma <- as_vcov(

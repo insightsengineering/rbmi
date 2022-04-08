@@ -24,7 +24,7 @@ jobs:
       image: ${{ matrix.config.image }}
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_TEST_NIGHTLY: 'FALSE'
+      R_TEST_FULL: 'FALSE'
     steps:
       - name: Checkout
         uses: actions/checkout@v2

@@ -22,7 +22,7 @@
             "command": "Rscript",
             "options": {
                 "env": {
-                    "R_TEST_NIGHTLY" : "TRUE"
+                    "R_TEST_FULL" : "TRUE"
                 }
             },
             "args": [
