@@ -1,13 +1,9 @@
 
 
 on:
-  pull_request:
-    paths-ignore:
-      - 'misc/**'
-    branches:
-      - cran
+  workflow_dispatch:
 
-name: On Pull Request CRAN
+name: Check for CRAN
 
 jobs:
 
@@ -31,6 +27,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: main
 
       - name: Install R
         uses: r-lib/actions/setup-r@v1
