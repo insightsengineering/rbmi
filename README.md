@@ -16,10 +16,10 @@ approximate Bayesian multiple imputation combined with Rubin's rules for inferen
 
 ## Installation
 
-The package can be installed directly from GitHub via:
+The package can be installed directly from CRAN via:
 
 ```
-devtools::install_github("insightsengineering/rbmi", build_vignettes = TRUE)
+install.packages("rbmi")
 ```
 
 ## Usage
