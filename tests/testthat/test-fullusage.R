@@ -6,7 +6,7 @@ suppressPackageStartupMessages({
     library(tibble)
 })
 
-# Sys.setenv("R_TEST_NIGHTLY" = TRUE)
+# Sys.setenv("R_TEST_FULL" = TRUE)
 # NCORES <- 6
 NCORES <- 2
 

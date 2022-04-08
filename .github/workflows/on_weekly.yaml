@@ -23,7 +23,7 @@ jobs:
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_TEST_NIGHTLY: 'TRUE' 
+      R_TEST_FULL: 'TRUE' 
 
     steps:
       - name: Checkout
@@ -53,7 +53,7 @@ jobs:
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_TEST_NIGHTLY: 'TRUE' 
+      R_TEST_FULL: 'TRUE' 
 
     steps:
       - name: Checkout
