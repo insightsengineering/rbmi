@@ -3,6 +3,14 @@
 This file outlines how to propose and make changes to `rbmi` as well as providing details about more obscure aspects of the package’s development process.
 
 
+## Setup
+
+In order to develop or contribute to `rbmi` you will need to access to a C/C++ compiler. If you are on Windows you should install [rtools](https://cran.r-project.org/bin/windows/Rtools/rtools42/rtools.html) or if you are on macOS you should install [Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12).  Likewise, you will also need to install all of the package's development dependencies. This can be done by launching R from within the project root and executing:
+
+```
+devtools::install_dev_deps()
+```
+
 ## Code changes
 
 If you want to make a code contribution, it's a good idea to first file an issue and make sure someone from the team agrees that it’s needed. 
@@ -89,7 +97,7 @@ The most common issue is a warning that `glmmTMB` has been compiled against a di
 install.packages(c("TMB", "glmmTMB"), type = "source")
 ``` 
 
-Note that you will need to have [rtools](https://cran.r-project.org/bin/windows/Rtools/rtools42/rtools.html) installed if you are on a Windows machine or [Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12) if you are running OSX (or somehow else have access to a C/C++ compiler).
+Note that you will need to have [rtools](https://cran.r-project.org/bin/windows/Rtools/rtools42/rtools.html) installed if you are on a Windows machine or [Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12) if you are running macOS (or somehow else have access to a C/C++ compiler).
 
 A list of common issues with `glmmTMB` can be found [here](http://glmmtmb.github.io/glmmTMB/#complications).
 
@@ -117,4 +125,4 @@ For reference this static vignette process works by using the "asis" vignette en
 The `misc/` folder in this project is used to hold useful scripts, analyses, simulations & infrastructure code that we wish to keep but isn’t essential to the build or deployment of the package. Feel free to store additional stuff in here that you feel is worth keeping.
 
 Likewise, `local/` has been added to the `.gitignore` file meaning anything stored in this folder won't be committed to the repository. For example, you may find this useful for storing personal scripts for testing or more generally exploring the package during development.
-![image](https://user-images.githubusercontent.com/8447209/162782331-1ad0c43f-5f82-4242-8d1c-b1cf7f890f62.png)
+
