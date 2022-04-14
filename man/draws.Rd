@@ -68,9 +68,9 @@ The purpose of the imputation model is to estimate model parameters
 in the absence of intercurrent events (ICEs) handled using reference-based imputation methods.
 For this reason, any observed outcome data after ICEs, for which reference-based imputation methods are
 specified, are removed and considered as missing for the purpose of estimating the imputation model, and for
-this purpose only. The imputation model is a mixed effects model repeated measures (MMRM) model that is valid
+this purpose only. The imputation model is a mixed model for repeated measures (MMRM) that is valid
 under a missing-at-random (MAR) assumption.
-It can be fit using frequentist maximum likelihood (ML) or restricted ML (REML) estimation,
+It can be fit using maximum likelihood (ML) or restricted ML (REML) estimation,
 a Bayesian approach, or an approximate Bayesian approach according to the user's method specification.
 The ML/REML approaches and the approximate Bayesian approach support several possible covariance structures,
 while the Bayesian approach based on MCMC sampling supports only an unstructured covariance structure.
