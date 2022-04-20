@@ -49,15 +49,6 @@
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
-<!-- start_releases -->
-<li class="dropdown">
-	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-Other releases
-<span class="caret"></span></a><ul class="dropdown-menu" role="menu">
-   <li><a href="../index.html">latest</a></li>
-   <li><a href="..//index.html"></a></li>
-</ul></li>
-<!-- end_releases -->
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
@@ -114,10 +105,6 @@ Other releases
 <p>We use a publicly available example dataset from an antidepressant clinical trial of an active drug versus placebo. The relevant endpoint is the Hamilton 17-item depression rating scale (HAMD17) which was assessed at baseline and at weeks 1, 2, 4, and 6. Study drug discontinuation occurred in 24% of subjects from the active drug and 26% of subjects from placebo. All data after study drug discontinuation are missing and there is a single additional intermittent missing observation.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://insightsengineering.github.io/rbmi/" class="external-link">rbmi</a></span><span class="op">)</span>
-<span class="co">#&gt; Warning in checkMatrixPackageVersion(): Package version inconsistency detected.</span>
-<span class="co">#&gt; TMB was built with Matrix version 1.3.4</span>
-<span class="co">#&gt; Current Matrix version is 1.4.1</span>
-<span class="co">#&gt; Please re-install 'TMB' from source using install.packages('TMB', type = 'source') or ask CRAN for a binary version of 'TMB' matching CRAN's 'Matrix' package</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Attaching package: 'dplyr'</span>
@@ -130,7 +117,7 @@ Other releases
 
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"antidepressant_data"</span><span class="op">)</span>
 <span class="va">dat</span> <span class="op">&lt;-</span> <span class="va">antidepressant_data</span></code></pre></div>
-<p>We consider an imputation model with the mean change from baseline in the HAMD17 score as the outcome (variable <code>CHANGE</code> in the dataset). The following covariates are included in the imputation model: the treatment group (<code>THERAPY</code>), the (categorical) visit (<code>VISIT</code>), treatment-by-visit interactions, the baseline HAMD17 score (<code>BASVAL</code>), and baseline HAMD17 score-by-visit interactions. A common unstructured covariance matrix structure is assumed for both groups. The analysis model is an ANCOVA model with the treatment group as the primary covariate and adjustment for the baseline HAMD17 score.</p>
+<p>We consider an imputation model with the mean change from baseline in the HAMD17 score as the outcome (variable <code>CHANGE</code> in the dataset). The following covariates are included in the imputation model: the treatment group (<code>THERAPY</code>), the (categorical) visit (<code>VISIT</code>), treatment-by-visit interactions, the baseline HAMD17 score (<code>BASVAL</code>), and baseline HAMD17 score-by-visit interactions. A common unstructured covariance matrix structure is assumed for both groups. The analysis model is an ANCOVA model with the treatment group as the primary factor and adjustment for the baseline HAMD17 score.</p>
 <p><code>rbmi</code> expects its input dataset to be complete; that is, there must be one row per subject for each visit. Missing outcome values should be coded as <code>NA</code>, while missing covariate values are not allowed. If the dataset is incomplete, then the <code><a href="../reference/expand.html">expand_locf()</a></code> helper function can be used to add any missing rows, using LOCF imputation to carry forward the observed baseline covariate values to visits with missing outcomes. Rows corresponding to missing outcomes are not present in the antidepressant trial dataset. To address this we will therefore use the <code><a href="../reference/expand.html">expand_locf()</a></code> function as follows:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
@@ -237,7 +224,7 @@ and that 150 multiple imputed datasets using Bayesian posterior draws from the i
 <span class="co">#&gt;     burn_between: 5</span>
 <span class="co">#&gt;     same_cov: TRUE</span>
 <span class="co">#&gt;     n_samples: 150</span>
-<span class="co">#&gt;     seed: 1067188501</span></code></pre></div>
+<span class="co">#&gt;     seed: 1935084912</span></code></pre></div>
 <p>Note the use of <code><a href="../reference/set_vars.html">set_vars()</a></code> which specifies the names of the key variables
 within the dataset and the imputation model. Additionally, note that whilst <code>vars$group</code> and <code>vars$visit</code>
 are added as terms to the imputation model by default, their interaction is not,
@@ -483,15 +470,15 @@ in the original call to <code><a href="../reference/draws.html">draws()</a></cod
 <span class="co">#&gt;      trt_4    -0.092  0.683  -1.439  1.256   0.893  </span>
 <span class="co">#&gt;    lsm_ref_4  -1.616  0.486  -2.576  -0.656  0.001  </span>
 <span class="co">#&gt;    lsm_alt_4  -1.708  0.475  -2.645  -0.77   &lt;0.001 </span>
-<span class="co">#&gt;      trt_5    1.306   0.926  -0.523  3.135   0.161  </span>
-<span class="co">#&gt;    lsm_ref_5  -4.131  0.661  -5.436  -2.826  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_5  -2.825  0.65   -4.109  -1.542  &lt;0.001 </span>
-<span class="co">#&gt;      trt_6     1.96   1.003  -0.023  3.942   0.053  </span>
-<span class="co">#&gt;    lsm_ref_6  -6.086  0.731  -7.53   -4.642  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_6  -4.126  0.699  -5.507  -2.746  &lt;0.001 </span>
-<span class="co">#&gt;      trt_7    2.168   1.129  -0.063   4.4    0.057  </span>
-<span class="co">#&gt;    lsm_ref_7  -6.971  0.832  -8.616  -5.325  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_7  -4.803  0.788  -6.36   -3.245  &lt;0.001 </span>
+<span class="co">#&gt;      trt_5    1.331   0.925  -0.496  3.158   0.152  </span>
+<span class="co">#&gt;    lsm_ref_5  -4.153  0.66   -5.457  -2.849  &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_5  -2.822  0.645  -4.095  -1.548  &lt;0.001 </span>
+<span class="co">#&gt;      trt_6    1.949   1.003  -0.034  3.931   0.054  </span>
+<span class="co">#&gt;    lsm_ref_6  -6.107  0.713  -7.516  -4.697  &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_6  -4.158  0.698  -5.538  -2.778  &lt;0.001 </span>
+<span class="co">#&gt;      trt_7    2.143   1.121  -0.072  4.358   0.058  </span>
+<span class="co">#&gt;    lsm_ref_7  -6.974  0.822   -8.6   -5.348  &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_7  -4.831  0.784  -6.38   -3.281  &lt;0.001 </span>
 <span class="co">#&gt;   --------------------------------------------------</span></code></pre></div>
 <p>The table of values shown in the print message for <code>poolObj</code> can also be extracted using the <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> function:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -500,18 +487,18 @@ in the original call to <code><a href="../reference/draws.html">draws()</a></cod
 <span class="co">#&gt; 1      trt_4 -0.09180645 0.6826279 -1.43949684  1.2558839 8.931772e-01</span>
 <span class="co">#&gt; 2  lsm_ref_4 -1.61581996 0.4862316 -2.57577141 -0.6558685 1.093708e-03</span>
 <span class="co">#&gt; 3  lsm_alt_4 -1.70762640 0.4749573 -2.64531931 -0.7699335 4.262148e-04</span>
-<span class="co">#&gt; 4      trt_5  1.30569285 0.9261015 -0.52338247  3.1347682 1.605319e-01</span>
-<span class="co">#&gt; 5  lsm_ref_5 -4.13117962 0.6607307 -5.43617639 -2.8261829 3.606940e-09</span>
-<span class="co">#&gt; 6  lsm_alt_5 -2.82548678 0.6496468 -4.10873665 -1.5422369 2.458229e-05</span>
-<span class="co">#&gt; 7      trt_6  1.95969360 1.0034897 -0.02289120  3.9422784 5.267040e-02</span>
-<span class="co">#&gt; 8  lsm_ref_6 -6.08614891 0.7305816 -7.53016150 -4.6421363 5.671744e-14</span>
-<span class="co">#&gt; 9  lsm_alt_6 -4.12645530 0.6987699 -5.50702878 -2.7458818 2.223611e-08</span>
-<span class="co">#&gt; 10     trt_7  2.16830761 1.1289011 -0.06314888  4.3997641 5.675319e-02</span>
-<span class="co">#&gt; 11 lsm_ref_7 -6.97092408 0.8318543 -8.61642983 -5.3254183 6.917166e-14</span>
-<span class="co">#&gt; 12 lsm_alt_7 -4.80261648 0.7880601 -6.36045109 -3.2447819 9.795612e-09</span></code></pre></div>
+<span class="co">#&gt; 4      trt_5  1.33110299 0.9252311 -0.49626820  3.1584742 1.522154e-01</span>
+<span class="co">#&gt; 5  lsm_ref_5 -4.15288177 0.6603791 -5.45720382 -2.8485597 3.005857e-09</span>
+<span class="co">#&gt; 6  lsm_alt_5 -2.82177877 0.6448603 -4.09544256 -1.5481150 2.190301e-05</span>
+<span class="co">#&gt; 7      trt_6  1.94853566 1.0032428 -0.03369391  3.9307652 5.397215e-02</span>
+<span class="co">#&gt; 8  lsm_ref_6 -6.10676311 0.7133399 -7.51614949 -4.6973767 1.174482e-14</span>
+<span class="co">#&gt; 9  lsm_alt_6 -4.15822744 0.6984259 -5.53820753 -2.7782474 1.773139e-08</span>
+<span class="co">#&gt; 10     trt_7  2.14309809 1.1208518 -0.07216300  4.3583592 5.783906e-02</span>
+<span class="co">#&gt; 11 lsm_ref_7 -6.97367068 0.8222051 -8.59969054 -5.3476508 3.387490e-14</span>
+<span class="co">#&gt; 12 lsm_alt_7 -4.83057259 0.7840978 -6.38043926 -3.2807059 6.903176e-09</span></code></pre></div>
 <p>These outputs gives an estimated difference of
-2.168 (95% CI -0.063 to 4.400)
-between the two groups at the last visit with an associated p-value of 0.057.</p>
+2.143 (95% CI -0.072 to 4.358)
+between the two groups at the last visit with an associated p-value of 0.058.</p>
 </div>
 <div class="section level2" number="7">
 <h2 id="code">
