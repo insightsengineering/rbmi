@@ -513,7 +513,44 @@ as_dataframe <- function(x) {
     return(x2)
 }
 
+#' Change a function
+#'
+#' A wrapper to change function with a modified return value. Specifically change a function returned named element based on given name and method
+#' @param f A function to be changed
+#' @param what A character representing name of the element to be changed from function's return
+#' @param how A function specifying how to change the element
+#' @return A function with modified return value
+#' @example
+#' pool <- change(pool, 'pars', function(...) lst2df(..., 'visit'))
+change <- function(f, what, how) {
+    force(f)
+    function(...) {
+        out <- f(...)
+        tryCatch(
+            expr = {
+                out[[what]] <- how(out[[what]])
+            },
+            error = function(e) {
+                message(paste("Error when changing", what, ':', e))
+            },
+            finally = {
+                return(out)
+            }
+        )
+    }
+}
 
-
-
-
+#' Convert nested list to data frame
+#'
+#' Convert a nested list to a data frame with specified group id and additional processer for the group
+#' @param lst A nested list
+#' @param id A group ID
+#' @param processor A function to process group data
+lst2df <- function(lst, id, processor = function(...) summarise(..., ci = toString(ci), across(), .groups = 'drop')) {
+    out <- bind_rows(lst, .id = id)
+    if (is.null(processor)) out
+    else out %>%
+        group_by(.data[[id]]) %>%
+        processor %>%
+        ungroup()
+}
