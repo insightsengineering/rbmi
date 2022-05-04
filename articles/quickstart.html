@@ -224,7 +224,7 @@ and that 150 multiple imputed datasets using Bayesian posterior draws from the i
 <span class="co">#&gt;     burn_between: 5</span>
 <span class="co">#&gt;     same_cov: TRUE</span>
 <span class="co">#&gt;     n_samples: 150</span>
-<span class="co">#&gt;     seed: 340939529</span></code></pre></div>
+<span class="co">#&gt;     seed: 1682030800</span></code></pre></div>
 <p>Note the use of <code><a href="../reference/set_vars.html">set_vars()</a></code> which specifies the names of the key variables
 within the dataset and the imputation model. Additionally, note that whilst <code>vars$group</code> and <code>vars$visit</code>
 are added as terms to the imputation model by default, their interaction is not,
@@ -470,15 +470,15 @@ in the original call to <code><a href="../reference/draws.html">draws()</a></cod
 <span class="co">#&gt;      trt_4    -0.092  0.683  -1.439  1.256   0.893  </span>
 <span class="co">#&gt;    lsm_ref_4  -1.616  0.486  -2.576  -0.656  0.001  </span>
 <span class="co">#&gt;    lsm_alt_4  -1.708  0.475  -2.645  -0.77   &lt;0.001 </span>
-<span class="co">#&gt;      trt_5    1.299   0.928  -0.534  3.132   0.163  </span>
-<span class="co">#&gt;    lsm_ref_5  -4.134  0.664  -5.445  -2.822  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_5  -2.834  0.645  -4.108  -1.56   &lt;0.001 </span>
-<span class="co">#&gt;      trt_6    1.907     1    -0.068  3.882   0.058  </span>
-<span class="co">#&gt;    lsm_ref_6  -6.092  0.713  -7.501  -4.682  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_6  -4.185  0.702  -5.572  -2.798  &lt;0.001 </span>
-<span class="co">#&gt;      trt_7    2.173   1.121  -0.042  4.388   0.054  </span>
-<span class="co">#&gt;    lsm_ref_7  -7.021  0.819  -8.64   -5.402  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_7  -4.848  0.795  -6.421  -3.275  &lt;0.001 </span>
+<span class="co">#&gt;      trt_5    1.286   0.93   -0.552  3.123   0.169  </span>
+<span class="co">#&gt;    lsm_ref_5  -4.127  0.659  -5.428  -2.827  &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_5  -2.841  0.648  -4.122  -1.561  &lt;0.001 </span>
+<span class="co">#&gt;      trt_6    1.957     1    -0.019  3.933   0.052  </span>
+<span class="co">#&gt;    lsm_ref_6  -6.109  0.716  -7.524  -4.694  &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_6  -4.152  0.703  -5.541  -2.764  &lt;0.001 </span>
+<span class="co">#&gt;      trt_7     2.17   1.13   -0.063  4.403   0.057  </span>
+<span class="co">#&gt;    lsm_ref_7  -6.983  0.835  -8.634  -5.331  &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_7  -4.813   0.8   -6.396  -3.23   &lt;0.001 </span>
 <span class="co">#&gt;   --------------------------------------------------</span></code></pre></div>
 <p>The table of values shown in the print message for <code>poolObj</code> can also be extracted using the <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> function:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -487,18 +487,18 @@ in the original call to <code><a href="../reference/draws.html">draws()</a></cod
 <span class="co">#&gt; 1      trt_4 -0.09180645 0.6826279 -1.43949684  1.2558839 8.931772e-01</span>
 <span class="co">#&gt; 2  lsm_ref_4 -1.61581996 0.4862316 -2.57577141 -0.6558685 1.093708e-03</span>
 <span class="co">#&gt; 3  lsm_alt_4 -1.70762640 0.4749573 -2.64531931 -0.7699335 4.262148e-04</span>
-<span class="co">#&gt; 4      trt_5  1.29923965 0.9280733 -0.53382430  3.1323036 1.634988e-01</span>
-<span class="co">#&gt; 5  lsm_ref_5 -4.13369084 0.6640895 -5.44545646 -2.8219252 4.265138e-09</span>
-<span class="co">#&gt; 6  lsm_alt_5 -2.83445118 0.6450414 -4.10846751 -1.5604349 2.030655e-05</span>
-<span class="co">#&gt; 7      trt_6  1.90663841 0.9996320 -0.06829612  3.8815729 5.835885e-02</span>
-<span class="co">#&gt; 8  lsm_ref_6 -6.09156573 0.7133451 -7.50094207 -4.6821894 1.318040e-14</span>
-<span class="co">#&gt; 9  lsm_alt_6 -4.18492731 0.7020986 -5.57228123 -2.7975734 1.743836e-08</span>
-<span class="co">#&gt; 10     trt_7  2.17271207 1.1206369 -0.04227664  4.3877008 5.447551e-02</span>
-<span class="co">#&gt; 11 lsm_ref_7 -7.02106270 0.8186898 -8.64010685 -5.4020185 1.974966e-14</span>
-<span class="co">#&gt; 12 lsm_alt_7 -4.84835062 0.7954837 -6.42131976 -3.2753815 1.040693e-08</span></code></pre></div>
+<span class="co">#&gt; 4      trt_5  1.28564348 0.9302415 -0.55175713  3.1230441 1.689181e-01</span>
+<span class="co">#&gt; 5  lsm_ref_5 -4.12712927 0.6585098 -5.42767229 -2.8265863 3.298062e-09</span>
+<span class="co">#&gt; 6  lsm_alt_5 -2.84148579 0.6482472 -4.12192938 -1.5610422 2.134584e-05</span>
+<span class="co">#&gt; 7      trt_6  1.95694198 1.0000263 -0.01874989  3.9326339 5.218639e-02</span>
+<span class="co">#&gt; 8  lsm_ref_6 -6.10942780 0.7161570 -7.52443747 -4.6944181 1.436747e-14</span>
+<span class="co">#&gt; 9  lsm_alt_6 -4.15248582 0.7028050 -5.54123606 -2.7637356 2.255007e-08</span>
+<span class="co">#&gt; 10     trt_7  2.16964693 1.1296202 -0.06333620  4.4026301 5.676891e-02</span>
+<span class="co">#&gt; 11 lsm_ref_7 -6.98258169 0.8349520 -8.63442014 -5.3307432 8.172623e-14</span>
+<span class="co">#&gt; 12 lsm_alt_7 -4.81293475 0.8003326 -6.39560700 -3.2302625 1.572793e-08</span></code></pre></div>
 <p>These outputs gives an estimated difference of
-2.173 (95% CI -0.042 to 4.388)
-between the two groups at the last visit with an associated p-value of 0.054.</p>
+2.170 (95% CI -0.063 to 4.403)
+between the two groups at the last visit with an associated p-value of 0.057.</p>
 </div>
 <div class="section level2" number="7">
 <h2 id="code">
@@ -629,8 +629,7 @@ between the two groups at the last visit with an associated p-value of 0.054.</p
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
     </footer>
