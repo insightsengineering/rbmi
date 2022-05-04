@@ -8,12 +8,19 @@ suppressPackageStartupMessages({
 test_that("delta_template & delta_lagscale", {
     set.seed(101)
 
-    n_vis <- 5
+    visits <- c(
+        "week 24",
+        "week 52",
+        "week 104",
+        "week 208",
+        "week 416"
+    )
+    n_vis <- length(visits)
 
     dat <- tibble(
         pt = factor(rep(c("Tom", "Harry"), each = n_vis), levels = c("Tom", "Harry")),
         out = c(1, NA, 3, NA, NA, NA, 5, NA, 6, 7),
-        vis = factor(rep(paste0("visit_", 1:n_vis), 2)),
+        vis = factor(rep(visits, 2), levels = visits),
         grp = factor(rep(c("A", "B"), each = n_vis)),
         cov1 = rnorm(n_vis * 2),
         cov2 = rnorm(n_vis * 2)
@@ -31,7 +38,7 @@ test_that("delta_template & delta_lagscale", {
 
     ices <- data.frame(
         pt = c("Tom", "Harry"),
-        vis = c("visit_4", "visit_2"),
+        vis = c("week 208", "week 52"),
         strategy = c("JTR", "MAR"),
         stringsAsFactors = FALSE
     )
