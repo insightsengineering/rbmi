@@ -451,7 +451,14 @@ longDataConstructor <- R6::R6Class(
             is_not_miss <- !unlist(self$is_missing, use.names = FALSE)
             visits <- rep(self$visits, length(self$ids))
             is_avail <- is_mar & is_not_miss
-            x <- tapply(is_avail, visits, sum)
+            x <- tapply(is_avail, visits, sum)[self$visits]
+            assert_that(
+                identical(names(x), self$visits),
+                msg = paste(
+                    "An unexpected error has occoured in check_has_data_at_each_visit()",
+                    "please report this to the developer"
+                )
+            )
             no_data_visits <- self$visits[x == 0]
             assert_that(
                 length(no_data_visits) == 0,
