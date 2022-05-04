@@ -815,8 +815,92 @@ test_that("Formula is created properly", {
 
 
 
-
 test_that("check_has_data_at_each_visit() catches the correct visit that has no data", {
+
+    visits <- c("V", "I", "S", "T")
+
+    dat <- tibble(
+        pt = factor(c("A", "A", "A", "A", "B", "B", "B", "B"), levels = c("A", "B")),
+        vis = factor(rep(visits, 2), levels = visits),
+        out = c(NA, 4, 5, 3, 6, NA, 1, NA),
+        group = factor(c("G", "G", "G", "G", "F", "F", "F", "F"), levels = c("G", "F")),
+        age = rnorm(8)
+    )
+
+    vars <- set_vars(
+        outcome = "out",
+        visit = "vis",
+        subjid = "pt",
+        group = "group",
+        covariates = c("age"),
+        strategy = "strategy"
+    )
+
+    ld <- longDataConstructor$new(dat, vars)
+
+    dat_ice <- tibble(
+        vis = factor(c("S", "T"), levels = visits),
+        pt = factor(c("A", "B"), levels = c("A", "B")),
+        strategy = c("JR", "JR")
+    )
+
+    expect_error(
+        ld$set_strategies(dat_ice),
+        regexp = "`T` visit"
+    )
+
+
+
+    visits <- c(5, 6, 8, 1)
+
+    dat <- tibble(
+        pt = factor(c("A", "A", "A", "A", "B", "B", "B", "B"), levels = c("A", "B")),
+        vis = factor(rep(visits, 2), levels = visits),
+        out = c(NA, 4, 5, 3, 6, NA, 1, NA),
+        group = factor(c("G", "G", "G", "G", "F", "F", "F", "F"), levels = c("G", "F")),
+        age = rnorm(8)
+    )
+
+    vars <- set_vars(
+        outcome = "out",
+        visit = "vis",
+        subjid = "pt",
+        group = "group",
+        covariates = c("age"),
+        strategy = "strategy"
+    )
+
+    ld <- longDataConstructor$new(dat, vars)
+
+    dat_ice <- tibble(
+        vis = factor(c(8, 1), levels = visits),
+        pt = factor(c("A", "B"), levels = c("A", "B")),
+        strategy = c("JR", "JR")
+    )
+
+    expect_error(
+        ld$set_strategies(dat_ice),
+        regexp = "`1` visit"
+    )
+
+
+
+    ld <- longDataConstructor$new(dat, vars)
+
+    dat_ice <- tibble(
+        vis = factor(c(8, 1), levels = visits),
+        pt = factor(c("B", "A"), levels = c("A", "B")),
+        strategy = c("MAR", "MAR")
+    )
+
+    expect_true(ld$set_strategies(dat_ice))
+
+})
+
+
+
+
+test_that("get_data() uses na.rm and nmar.rm correctly", {
 
     #
     # This test proves that the bug identified in
