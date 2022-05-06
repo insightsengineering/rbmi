@@ -103,7 +103,6 @@ pool <- function(
     return(ret)
 }
 
-pool <- change(pool, 'pars', function(...) lst2df(..., 'visit'))
 
 #' Expected Pool Components
 #'
