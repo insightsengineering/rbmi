@@ -139,8 +139,7 @@ ancova <- function(data, vars, visits = NULL, weights = c("proportional", "equal
         visits,
         function(x) {
             data2 <- data[data[[visit]] == x, ]
-            res <- ancova_single(data2, outcome, group, covariates, weights)
-            names(res) <- paste0(names(res), "_", x)
+            res <- ancova_single(data2, outcome, group, covariates, weights, x)
             return(res)
         }
     )
@@ -174,7 +173,7 @@ ancova <- function(data, vars, visits = NULL, weights = c("proportional", "equal
 #' }
 #' @seealso [ancova()]
 #' @importFrom stats lm coef vcov df.residual
-ancova_single <- function(data, outcome, group, covariates, weights = c("proportional", "equal")) {
+ancova_single <- function(data, outcome, group, covariates, weights = c("proportional", "equal"), ...) {
 
     weights <- match.arg(weights)
     assert_that(
@@ -201,13 +200,15 @@ ancova_single <- function(data, outcome, group, covariates, weights = c("proport
     lsm1 <- do.call(lsmeans, args)
 
     x <- list(
-        trt = list(
+        analysis_result(
+            name = 'trt',
             est = coef(mod)[[group]],
             se = sqrt(vcov(mod)[group, group]),
-            df = df.residual(mod)
+            df = df.residual(mod),
+            meta = add_meta(...)
         ),
-        lsm_ref = lsm0,
-        lsm_alt = lsm1
+        as_analysis_result(lsm0, name = 'lsm_ref'),
+        as_analysis_result(lsm1, name = 'lsm_alt')
     )
     return(x)
 }
