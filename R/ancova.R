@@ -205,10 +205,10 @@ ancova_single <- function(data, outcome, group, covariates, weights = c("proport
             est = coef(mod)[[group]],
             se = sqrt(vcov(mod)[group, group]),
             df = df.residual(mod),
-            meta = add_meta(...)
+            meta = add_meta('visit', ...)
         ),
-        as_analysis_result(lsm0, name = 'lsm_ref'),
-        as_analysis_result(lsm1, name = 'lsm_alt')
+        as_analysis_result(lsm0, name = 'lsm_ref', meta = add_meta('visit', ...)),
+        as_analysis_result(lsm1, name = 'lsm_alt', meta = add_meta('visit', ...))
     )
     return(x)
 }
