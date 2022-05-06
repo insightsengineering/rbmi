@@ -341,6 +341,16 @@ print.analysis <- function(x, ...) {
         n_samp
     )
 
+    info <- function(where, what) {
+        if (all(length(where) != 0,
+                !is.null(where[[1]]),
+                rlang::has_name(where[[1]], what))) {
+            sapply(where, `[[`, what)
+        } else {
+            paste("No", what, "info")
+        }
+    }
+
     string <- c(
         "",
         "Analysis Object",
@@ -349,7 +359,7 @@ print.analysis <- function(x, ...) {
         sprintf("Analysis Function: %s", x$fun_name),
         sprintf("Delta Applied: %s", !is.null(x$delta)),
         "Analysis Estimates:",
-        sprintf("    %s", names(x$results[[1]])),
+        sprintf("    %s", info(x$results[[1]], 'name')),
         ""
     )
 
@@ -440,9 +450,9 @@ validate_analyse_pars <- function(results, pars) {
     )
 
     assert_that(
-        length(names(results[[1]])) != 0,
-        all(vapply(results, function(x) !is.null(names(x)) & all(names(x) != ""), logical(1))),
-        msg = "Individual analysis results must be named lists"
+        length(results[[1]]) != 0,
+        all(vapply(results, function(Xs) all(vapply(Xs, function(X) is.analysis_result(X), logical(1))), logical(1))),
+        msg = "Individual analysis results must be type of analysis_result"
     )
 
     results_names <- lapply(results, function(x) unique(names(x)))
@@ -486,4 +496,181 @@ validate_analyse_pars <- function(results, pars) {
     }
 
     return(invisible(TRUE))
+}
+
+#' Constructor of analysis result
+#'
+#' Construct an analysis result class object whose base type is a list
+#'
+#' @param name A character variable for the group name
+#' @param est A double type numeric variable as the estimate
+#' @param se A double type numeric variable as the standard error
+#' @param df An integer type of numeric variable
+#' @param meta A list type of variable as meta information
+#' @details
+#' - `se` must be numeric values greater or equal to 0
+#' - `meta` is optional
+#' @return An object of "analysis_result" class
+#' @examples
+#' \dontrun{
+#' ana_res_obj <- analysis_result(name = 'trt', est = 1, se = 2, df = as.integer(3), meta = list(visit = 1))
+#' }
+#' @export
+analysis_result <- function (name = character(),
+                             est = double(),
+                             se = double(),
+                             df = integer(),
+                             meta = NULL) {
+
+    # constraints
+    stopifnot(is.character(name))
+    stopifnot(is.double(est))
+    stopifnot(is.double(se))
+    stopifnot(is.integer(df) | is.double(df))
+    stopifnot(is.list(meta) | is.null(meta))
+
+    # validators
+    if (se < 0) stop("SE must great or equal to 0", .call = FALSE)
+
+    value <- list(name = name,
+                  est = est,
+                  se = se,
+                  df = df)
+
+    if (!is.null(meta)) {
+        value[['meta']] <- meta
+    }
+
+    structure(
+        value,
+        meta = meta,
+        class = "analysis_result"
+    )
+}
+
+#' Convert object to analysis result class
+#'
+#' @param x The object to be converted to analysis_result class
+#' @param ... Optional keywords parameters for adding missing elements to the object
+#' @return An "analysis_result" class object with optionally updated elements
+#' @examples
+#' \dontrun{
+#' ana_res_obj <- as_analysis_result(list(est = 1, se = 2, df = 3), name = 'trt')
+#' }
+#' @export
+as_analysis_result <- function(x, ...) {
+    dots <- rlang::enquos(...)
+
+    # coercion with generic function
+    x <- as.list(x)
+
+    present <- ana_name_chker('present')
+
+    names_not_presented <- names(present(x))[!present(x)]
+
+    # update list if required elements are not presented or if the element is 'meta'
+    updated_x <- x
+    for (i in seq_along(dots)) {
+        name <- names(dots)[[i]]
+        dot <- dots[[i]]
+        print(name)
+        print(dot)
+        print('---')
+
+        if (is.element(name, names_not_presented) | name == 'meta') {
+            updated_x[[name]] <- rlang::eval_tidy(dot)
+        }
+    }
+
+    # after updating check if all required elements are presented
+    stopifnot(all(present(updated_x)))
+
+    # keep only required elements and put them in defined order
+    if (length(names(updated_x)) < length(ana_name_chker('all'))) {
+        ordered_x <- updated_x[ana_name_chker('musthave')]
+    } else {
+        ordered_x <- updated_x[ana_name_chker('all')]
+    }
+
+    as_class(ordered_x, "analysis_result")
+}
+
+#' Create name checkers with message passing dispatch
+#'
+#' @param ... Character vectors for the reference to check against
+#' @param optional Character vector of optional name. Default: NULL
+#' @return A constructor to create checker functions with message passing dispatch
+namechecker <- function(..., optional = NULL) {
+
+    # compile the musthave list at the top level so that easier to maintain and update
+    musthave <- c(...)
+
+    # message passing as a dispatch
+    function(msg) {
+
+        # generic function to check if elements in list X exist in Y
+        XsInYs <- function(x, y) vapply(x, purrr::partial(is.element, ... =, y), logical(1))
+
+        # generic wrapper to swap oder of formal parameter of binary function
+        swap <- function(f) {
+            function(x, y) f(y, x)
+        }
+
+        extend <- function(v1, v2) {
+            if(is.null(v2)) v1
+            else append(v1, v2)
+        }
+
+        # higher-order function to create template for checkers/validators
+        chker_template <- function(musthave, wrapper=identity, f = XsInYs, .optional = optional) {
+            function(...) {
+                wrapper(f)(extend(musthave, .optional), names(...))
+            }
+        }
+
+        # checker to check if elements in musthave present in the object's name
+        # checker does not check against optional names. Only names in musthave have to be presented in the object
+        present <- chker_template(musthave, .optional = NULL)
+
+        # validator to validate if object's name belongs to musthave + optional names (simply swap the order of arguments from present)
+        validate <- chker_template(musthave, swap)
+
+        dispatch <- list(
+            present = present,
+            validate  = validate,
+            musthave = musthave,
+            optional = optional,
+            all = append(musthave, optional)
+            )
+
+        dispatch[[msg]]
+    }
+}
+
+#' Name checker for analysis function
+#'
+#' @param msg Character vector representing which checker to return
+ana_name_chker <- namechecker('name', 'est', 'se', 'df', optional = 'meta')
+
+#' Check if an object is in class analysis_result
+#'
+#' @param x Object to be checked
+#' @return Logical value TRUE/FALSE
+#' @details
+#' This function does not only check the class attribute of the object.
+#' It also checks constraints of the names of the elements in the list
+#' @importFrom dplyr %in%
+#' @export
+is.analysis_result <- function(x) {
+
+    has_attribute <- function(x, which){
+        which %in% names(attributes(x))
+    }
+
+    all(
+        has_attribute(x, 'class'),
+        is.object(x),
+        attr(x, 'class') == 'analysis_result',
+        all(ana_name_chker('validate')(x))
+    )
 }
