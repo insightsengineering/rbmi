@@ -343,16 +343,6 @@ print.analysis <- function(x, ...) {
         n_samp
     )
 
-    info <- function(where, what) {
-        if (all(length(where) != 0,
-                !is.null(where[[1]]),
-                rlang::has_name(where[[1]], what))) {
-            sapply(where, `[[`, what)
-        } else {
-            paste("No", what, "info")
-        }
-    }
-
     string <- c(
         "",
         "Analysis Object",
@@ -361,7 +351,7 @@ print.analysis <- function(x, ...) {
         sprintf("Analysis Function: %s", x$fun_name),
         sprintf("Delta Applied: %s", !is.null(x$delta)),
         "Analysis Estimates:",
-        sprintf("    %s", info(x$results[[1]], 'name')),
+        as_ascii_table(analysis_info(x$results[[1]])),
         ""
     )
 
@@ -575,9 +565,6 @@ as_analysis_result <- function(x, ...) {
     for (i in seq_along(dots)) {
         name <- names(dots)[[i]]
         dot <- dots[[i]]
-        print(name)
-        print(dot)
-        print('---')
 
         if (is.element(name, names_not_presented) | name == 'meta') {
             updated_x[[name]] <- rlang::eval_tidy(dot)
@@ -675,4 +662,45 @@ is.analysis_result <- function(x) {
         attr(x, 'class') == 'analysis_result',
         all(ana_name_chker('validate')(x))
     )
+}
+
+#' Get printable analysis information from an example of analysis result
+#'
+#' The example should not be the complete result of analysis object but a subset of it such as anaObj$results[[1]]
+#' @param example A subset of the result of the analysis object for getting enough info to print
+#' @param name_of_meta A character variable for the name of meta data in the result of analysis. Default: 'meta'
+#' @return A data.frame containing the information of the analysis result from the example
+#' @example analysis_info(dat, name_of_meta = 'meta')
+#' @importFrom dplyr bind_cols bind_rows left_join select %>%
+analysis_info <- function(example, name_of_meta = 'meta') {
+
+    pars_no_meta <- list()
+    pars_with_meta <- list()
+    meta <- list()
+    var <- list()
+
+    index <- function(i, body) {
+        list(
+            append(list(index=i), body)
+            )
+    }
+
+    for (i in seq_along(example)) {
+        item <- example[[i]]
+        if (rlang::has_name(item, name_of_meta)){
+            meta <- append(meta, index(i, item[[name_of_meta]]))
+            var <- append(var, list(item['name']))
+            pars_with_meta <- append(pars_with_meta, index(i, item[names(item) != name_of_meta]))
+        } else {
+            pars_no_meta <- append(pars_no_meta, index(i, item))
+        }
+    }
+
+    all_pars <- append(pars_with_meta, pars_no_meta)
+
+    base_df <- bind_rows(all_pars)
+
+    meta_df <- bind_cols(bind_rows(var), bind_rows(meta))
+
+    left_join(base_df, meta_df, by = c('index', 'name')) %>% select(-index)
 }
