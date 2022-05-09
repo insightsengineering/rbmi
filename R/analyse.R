@@ -689,6 +689,9 @@ analysis_info <- function(example, name_of_meta = 'meta') {
 
     for (i in seq_along(example)) {
         item <- example[[i]]
+
+        stopifnot("Object in example is not in analysis_result class" = is.analysis_result(item))
+
         if (rlang::has_name(item, name_of_meta)){
             meta <- append(meta, index(i, item[[name_of_meta]]))
             var <- append(var, list(item['name']))
@@ -704,5 +707,8 @@ analysis_info <- function(example, name_of_meta = 'meta') {
 
     meta_df <- bind_cols(bind_rows(var), bind_rows(meta))
 
-    left_join(base_df, meta_df, by = c('index', 'name')) %>% select(-index)
+    tryCatch(
+        left_join(base_df, meta_df, by = c('index', 'name')) %>% select(-index),
+        error=function(e) base_df
+    ) %>% select(-index)
 }
