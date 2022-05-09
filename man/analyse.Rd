@@ -43,12 +43,14 @@ i.e.:\preformatted{myfun <- function(dat, ...) \{
     mod_1 <- lm(data = dat, outcome ~ group)
     mod_2 <- lm(data = dat, outcome ~ group + covar)
     x <- list(
-        trt_1 = list(
+        analysis_result(
+            name = trt_1,
             est = coef(mod_1)[[group]],
             se = sqrt(vcov(mod_1)[group, group]),
             df = df.residual(mod_1)
         ),
-        trt_2 = list(
+        analysis_result(
+            name = trt_2,
             est = coef(mod_2)[[group]],
             se = sqrt(vcov(mod_2)[group, group]),
             df = df.residual(mod_2)
