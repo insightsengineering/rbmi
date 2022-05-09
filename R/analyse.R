@@ -708,7 +708,7 @@ analysis_info <- function(example, name_of_meta = 'meta') {
     meta_df <- bind_cols(bind_rows(var), bind_rows(meta))
 
     tryCatch(
-        left_join(base_df, meta_df, by = c('index', 'name')) %>% select(-index),
+        left_join(base_df, meta_df, by = c('index', 'name')),
         error=function(e) base_df
     ) %>% select(-index)
 }
