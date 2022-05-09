@@ -648,7 +648,6 @@ ana_name_chker <- namechecker('name', 'est', 'se', 'df', optional = 'meta')
 #' @details
 #' This function does not only check the class attribute of the object.
 #' It also checks constraints of the names of the elements in the list
-#' @importFrom dplyr %in%
 #' @export
 is.analysis_result <- function(x) {
 
@@ -666,11 +665,14 @@ is.analysis_result <- function(x) {
 
 #' Get printable analysis information from an example of analysis result
 #'
-#' The example should not be the complete result of analysis object but a subset of it such as anaObj$results[[1]]
+#' The example should not be the complete result of analysis object but a subset of it such as `anaObj$results[[1]]`
 #' @param example A subset of the result of the analysis object for getting enough info to print
 #' @param name_of_meta A character variable for the name of meta data in the result of analysis. Default: 'meta'
 #' @return A data.frame containing the information of the analysis result from the example
-#' @example analysis_info(dat, name_of_meta = 'meta')
+#' @examples
+#' \dontrun{
+#' analysis_info(dat, name_of_meta = 'meta')
+#' }
 #' @importFrom dplyr bind_cols bind_rows left_join select %>%
 analysis_info <- function(example, name_of_meta = 'meta') {
 
