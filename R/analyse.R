@@ -648,7 +648,6 @@ ana_name_chker <- namechecker('name', 'est', 'se', 'df', optional = 'meta')
 #' @details
 #' This function does not only check the class attribute of the object.
 #' It also checks constraints of the names of the elements in the list
-#' @importFrom dplyr %in%
 #' @export
 is.analysis_result <- function(x) {
 
