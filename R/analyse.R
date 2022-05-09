@@ -670,10 +670,10 @@ is.analysis_result <- function(x) {
 #' @param name_of_meta A character variable for the name of meta data in the result of analysis. Default: 'meta'
 #' @return A data.frame containing the information of the analysis result from the example
 #' @examples
+#' @importFrom assertthat has_attr
 #' \dontrun{
 #' analysis_info(dat, name_of_meta = 'meta')
 #' }
-#' @importFrom dplyr bind_cols bind_rows left_join select %>%
 analysis_info <- function(example, name_of_meta = 'meta') {
 
     pars_no_meta <- list()
@@ -690,9 +690,10 @@ analysis_info <- function(example, name_of_meta = 'meta') {
     for (i in seq_along(example)) {
         item <- example[[i]]
 
-        stopifnot("Object in example is not in analysis_result class" = is.analysis_result(item))
+        assert_that(is.analysis_result(item),
+                    msg = "Object in example is not in analysis_result class")
 
-        if (rlang::has_name(item, name_of_meta)){
+        if (has_attr(item, name_of_meta)){
             meta <- append(meta, index(i, item[[name_of_meta]]))
             var <- append(var, list(item['name']))
             pars_with_meta <- append(pars_with_meta, index(i, item[names(item) != name_of_meta]))
@@ -701,14 +702,19 @@ analysis_info <- function(example, name_of_meta = 'meta') {
         }
     }
 
+    base_bind_rows <- function(L) as.data.frame(do.call(rbind, L))
+    base_left_join <- function(x, y, by) merge(x, y, by = by, all.x=TRUE)
+
     all_pars <- append(pars_with_meta, pars_no_meta)
 
-    base_df <- bind_rows(all_pars)
+    res_df <- base_bind_rows(all_pars)
 
-    meta_df <- bind_cols(bind_rows(var), bind_rows(meta))
+    meta_df <- cbind(base_bind_rows(var), base_bind_rows(meta))
 
-    tryCatch(
-        left_join(base_df, meta_df, by = c('index', 'name')),
-        error=function(e) base_df
-    ) %>% select(-index)
+    info_df <- tryCatch(
+        base_left_join(res_df, meta_df, by = c('index', 'name')),
+        error=function(e) res_df
+    )
+
+    subset(info_df, select = -index)
 }
