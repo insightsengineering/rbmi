@@ -27,8 +27,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        with:
-          ref: main
 
       - name: Install R
         uses: r-lib/actions/setup-r@v1
