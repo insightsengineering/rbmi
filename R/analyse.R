@@ -444,7 +444,7 @@ validate_analyse_pars <- function(results, pars) {
     assert_that(
         length(results[[1]]) != 0,
         all(vapply(results, function(Xs) all(vapply(Xs, function(X) is.analysis_result(X), logical(1))), logical(1))),
-        msg = "Individual analysis results must be type of analysis_result"
+        msg = "Individual analysis result must be type of analysis_result"
     )
 
     results_names <- lapply(results, function(x) unique(names(x)))
@@ -509,26 +509,33 @@ validate_analyse_pars <- function(results, pars) {
 #' }
 #' @export
 analysis_result <- function (name = character(),
-                             est = double(),
-                             se = double(),
-                             df = integer(),
+                             est = numeric(),
+                             se = numeric(),
+                             df = NULL,
                              meta = NULL) {
 
     # constraints
-    stopifnot(is.character(name))
-    stopifnot(is.double(est))
-    stopifnot(is.double(se))
-    stopifnot(is.integer(df) | is.double(df))
-    stopifnot(is.list(meta) | is.null(meta))
+    is.numeric_or_NA <- make_chain(any, is.numeric, anyNA)
+    is.numeric_or_NA_or_NULL <- make_chain(any, is.numeric_or_NA, is.null)
+    is.list_or_null <- make_chain(any, is.list, is.null)
+
+    assert_type(name, is.character)
+    assert_type(est, is.numeric)
+    assert_type(se, is.numeric)
+    assert_type(df, is.numeric_or_NA_or_NULL)
+    assert_type(meta, is.list_or_null)
 
     # validators
-    if (se < 0) stop("SE must great or equal to 0", .call = FALSE)
+    if (se < 0) stop("SE must greater or equal to 0", .call = FALSE)
 
     value <- list(name = name,
                   est = est,
-                  se = se,
-                  df = df)
+                  se = se)
 
+    # optional values
+    if (!is.null(df)) {
+        value[['df']] <- df
+    }
     if (!is.null(meta)) {
         value[['meta']] <- meta
     }
@@ -536,7 +543,7 @@ analysis_result <- function (name = character(),
     structure(
         value,
         meta = meta,
-        class = "analysis_result"
+        class = c("analysis_result", "list")
     )
 }
 
@@ -556,7 +563,7 @@ as_analysis_result <- function(x, ...) {
     # coercion with generic function
     x <- as.list(x)
 
-    present <- ana_name_chker('present')
+    present <- ana_name_chker('musthave_in_objnames')
 
     names_not_presented <- names(present(x))[!present(x)]
 
@@ -574,14 +581,15 @@ as_analysis_result <- function(x, ...) {
     # after updating check if all required elements are presented
     stopifnot(all(present(updated_x)))
 
-    # keep only required elements and put them in defined order
-    if (length(names(updated_x)) < length(ana_name_chker('all'))) {
-        ordered_x <- updated_x[ana_name_chker('musthave')]
-    } else {
-        ordered_x <- updated_x[ana_name_chker('all')]
+    # order the list by names
+    ordered_x <- order_list_by_name(updated_x, ana_name_chker('all'))
+
+    # set attributes: meta & class
+    if ('meta' %in% names(ordered_x)) {
+        attr(ordered_x, 'meta') <- ordered_x[['meta']]
     }
 
-    as_class(ordered_x, "analysis_result")
+    as_class(ordered_x, c("analysis_result", "list"))
 }
 
 #' Create name checkers with message passing dispatch
@@ -605,28 +613,23 @@ namechecker <- function(..., optional = NULL) {
             function(x, y) f(y, x)
         }
 
-        extend <- function(v1, v2) {
-            if(is.null(v2)) v1
-            else append(v1, v2)
-        }
-
         # higher-order function to create template for checkers/validators
         chker_template <- function(musthave, wrapper=identity, f = XsInYs, .optional = optional) {
             function(...) {
-                wrapper(f)(extend(musthave, .optional), names(...))
+                wrapper(f)(append(musthave, .optional), names(...))
             }
         }
 
-        # checker to check if elements in musthave present in the object's name
+        # Validator to check if elements in musthave present in the object's name
         # checker does not check against optional names. Only names in musthave have to be presented in the object
-        present <- chker_template(musthave, .optional = NULL)
+        musthave_in_objnames <- chker_template(musthave, .optional = NULL)
 
-        # validator to validate if object's name belongs to musthave + optional names (simply swap the order of arguments from present)
-        validate <- chker_template(musthave, swap)
+        # Validator to check if object's name belongs to musthave + optional names (simply swap the order of arguments from present)
+        objnames_in_musthave <- chker_template(musthave, swap)
 
         dispatch <- list(
-            present = present,
-            validate  = validate,
+            musthave_in_objnames = musthave_in_objnames,
+            objnames_in_musthave  = objnames_in_musthave,
             musthave = musthave,
             optional = optional,
             all = append(musthave, optional)
@@ -639,7 +642,7 @@ namechecker <- function(..., optional = NULL) {
 #' Name checker for analysis function
 #'
 #' @param msg Character vector representing which checker to return
-ana_name_chker <- namechecker('name', 'est', 'se', 'df', optional = 'meta')
+ana_name_chker <- namechecker('name', 'est', 'se', optional = c('df', 'meta'))
 
 #' Check if an object is in class analysis_result
 #'
@@ -649,31 +652,30 @@ ana_name_chker <- namechecker('name', 'est', 'se', 'df', optional = 'meta')
 #' This function does not only check the class attribute of the object.
 #' It also checks constraints of the names of the elements in the list
 #' @export
+#' @importFrom assertthat has_attr
 is.analysis_result <- function(x) {
 
-    has_attribute <- function(x, which){
-        which %in% names(attributes(x))
-    }
-
     all(
-        has_attribute(x, 'class'),
+        has_attr(x, 'class'),
         is.object(x),
-        attr(x, 'class') == 'analysis_result',
-        all(ana_name_chker('validate')(x))
+        'analysis_result' %in% attr(x, 'class'),
+        typeof(x) == 'list',
+        all(ana_name_chker('objnames_in_musthave')(x)),
+        all(ana_name_chker('musthave_in_objnames')(x))
     )
 }
 
 #' Get printable analysis information from an example of analysis result
 #'
 #' The example should not be the complete result of analysis object but a subset of it such as `anaObj$results[[1]]`
-#' @param example A subset of the result of the analysis object for getting enough info to print
+#' @param example A list of analysis result A subset of the result of the analysis object for getting enough info to print
 #' @param name_of_meta A character variable for the name of meta data in the result of analysis. Default: 'meta'
 #' @return A data.frame containing the information of the analysis result from the example
 #' @examples
-#' @importFrom assertthat has_attr
 #' \dontrun{
 #' analysis_info(dat, name_of_meta = 'meta')
 #' }
+#' @importFrom assertthat has_attr
 analysis_info <- function(example, name_of_meta = 'meta') {
 
     pars_no_meta <- list()
