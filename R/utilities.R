@@ -528,3 +528,55 @@ add_meta <- function (var_names, var_values) {
     names(out) <- var_names
     out
 }
+
+#' Assert variable's type
+#'
+#' @param what Variable to be asserted
+#' @param how Type asserting functions: is.character, is.numeric, is.list, is.logic
+#' @examples
+#' \dontrun{
+#' assert_type(est, is.numeric)
+#' }
+assert_type <- function(what,
+                        how,
+                        whatname = deparse(substitute(what)),
+                        howname = deparse(substitute(how))) {
+
+    prettier <- function(...) gsub("_", " ", as.character(...))
+
+    type <- (function(s) sub(".*\\.", "", s))(howname)
+    assert_that(how(what),
+                msg = sprintf("%s of analysis_result `%s` is not %s", whatname, what, prettier(type))
+    )
+}
+
+#' Make a chain of function calls with certain relation function
+#' @param relation A relation function: `any` or `all`
+#' @param ... Functions to be chained
+#' @return A function taking arguments that are feed into chained functions
+#' @examples
+#' \dontrun{
+#' is.numeric_or_na <- make_chain(any, is.numeric, is.na)
+#' is.numeric_or_na(NA) # returns TRUE
+#' is.numeric_or_na(15) # returns TRUE
+#' is.numeric_or_na('a') # returns FALSE
+#' }
+make_chain <- function(relation, ...) {
+    fs <- c(...)
+    function(...) relation(sapply(fs, function(f) f(...)))
+}
+
+#' Order a named list by its names according to given character vector
+#' @param L A list to be ordered
+#' @param v A character contains the names in order
+#' @return A list with names in order
+#' \dontrun{
+#' L_ordered <- order_list_by_name(list(a=1,b='x',c=TRUE), c("c", "a", "d", "x", "b", "t"))
+#' # returns a list `list(c=TRUE, a=1, b='x)`
+#'
+#' }
+order_list_by_name <- function(L, v) {
+    ordered_pos <- match(v, names(L))
+    ordered_pos <- ordered_pos[!is.na(ordered_pos)]
+    L[ordered_pos]
+}
