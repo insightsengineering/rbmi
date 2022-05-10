@@ -1,7 +1,7 @@
 ## Resubmission
 This is a resubmission. In this version I have:
 
-* Fixed the clang-UBSAN error
+* Implemented minor bug fixes
 
 ## R CMD check results
 
