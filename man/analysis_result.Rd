@@ -6,9 +6,9 @@
 \usage{
 analysis_result(
   name = character(),
-  est = double(),
-  se = double(),
-  df = integer(),
+  est = numeric(),
+  se = numeric(),
+  df = NULL,
   meta = NULL
 )
 }

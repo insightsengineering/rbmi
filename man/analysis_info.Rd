@@ -7,7 +7,7 @@
 analysis_info(example, name_of_meta = "meta")
 }
 \arguments{
-\item{example}{A subset of the result of the analysis object for getting enough info to print}
+\item{example}{A list of analysis result A subset of the result of the analysis object for getting enough info to print}
 
 \item{name_of_meta}{A character variable for the name of meta data in the result of analysis. Default: 'meta'}
 }
