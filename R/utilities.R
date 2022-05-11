@@ -593,3 +593,50 @@ base_bind_rows <- function(nestlist) {
 
     do.call(rbind, lapply(nestlist, function(x) do.call(make_df, x)))
 }
+
+#' Create name checkers for object with message passing dispatch
+#'
+#' @param ... Character vectors for the reference to check against
+#' @param optional Character vector of optional name. Default: NULL
+#' @return A constructor to create checker functions with message passing dispatch
+namechecker <- function(..., optional = NULL) {
+
+    # compile the musthave list at the top level so that easier to maintain and update
+    musthave <- c(...)
+
+    # message passing as a dispatch
+    function(msg) {
+
+        # function to check if elements in list X exist in Y
+        XsInYs <- function(x, y) vapply(x, purrr::partial(is.element, ... =, y), logical(1))
+
+        # wrapper to swap order of formal parameter of binary function
+        swap <- function(f) {
+            function(x, y) f(y, x)
+        }
+
+        # higher-order function to create template for validators
+        chker_template <- function(musthave, wrapper=identity, f = XsInYs, .optional = optional) {
+            function(...) {
+                wrapper(f)(append(musthave, .optional), names(...))
+            }
+        }
+
+        # Validator to check if elements in musthave present in the object's name
+        # checker does not check against optional names. Only names in musthave have to be presented in the object
+        musthave_in_objnames <- chker_template(musthave, .optional = NULL)
+
+        # Validator to check if object's name belongs to musthave + optional names (simply swap the order of arguments from present)
+        objnames_in_musthave <- chker_template(musthave, swap)
+
+        dispatch <- list(
+            musthave_in_objnames = musthave_in_objnames,
+            objnames_in_musthave  = objnames_in_musthave,
+            musthave = musthave,
+            optional = optional,
+            all = append(musthave, optional)
+            )
+
+        dispatch[[msg]]
+    }
+}

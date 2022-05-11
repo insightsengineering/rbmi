@@ -592,56 +592,17 @@ as_analysis_result <- function(x, ...) {
     as_class(ordered_x, c("analysis_result", "list"))
 }
 
-#' Create name checkers with message passing dispatch
-#'
-#' @param ... Character vectors for the reference to check against
-#' @param optional Character vector of optional name. Default: NULL
-#' @return A constructor to create checker functions with message passing dispatch
-namechecker <- function(..., optional = NULL) {
-
-    # compile the musthave list at the top level so that easier to maintain and update
-    musthave <- c(...)
-
-    # message passing as a dispatch
-    function(msg) {
-
-        # generic function to check if elements in list X exist in Y
-        XsInYs <- function(x, y) vapply(x, purrr::partial(is.element, ... =, y), logical(1))
-
-        # generic wrapper to swap oder of formal parameter of binary function
-        swap <- function(f) {
-            function(x, y) f(y, x)
-        }
-
-        # higher-order function to create template for checkers/validators
-        chker_template <- function(musthave, wrapper=identity, f = XsInYs, .optional = optional) {
-            function(...) {
-                wrapper(f)(append(musthave, .optional), names(...))
-            }
-        }
-
-        # Validator to check if elements in musthave present in the object's name
-        # checker does not check against optional names. Only names in musthave have to be presented in the object
-        musthave_in_objnames <- chker_template(musthave, .optional = NULL)
-
-        # Validator to check if object's name belongs to musthave + optional names (simply swap the order of arguments from present)
-        objnames_in_musthave <- chker_template(musthave, swap)
-
-        dispatch <- list(
-            musthave_in_objnames = musthave_in_objnames,
-            objnames_in_musthave  = objnames_in_musthave,
-            musthave = musthave,
-            optional = optional,
-            all = append(musthave, optional)
-            )
-
-        dispatch[[msg]]
-    }
-}
-
-#' Name checker for analysis function
+#' Name checker for analysis_result object
 #'
 #' @param msg Character vector representing which checker to return
+#' @example
+#' \dontrun{
+#' anares_names_in_musthave <- ana_name_chker('objnames_in_musthave')
+#' musthave_in_anares_names <- ana_name_chker('musthave_in_objnames')
+#' musthave_names <- ana_name_chker('musthave')
+#' optional_names <- ana_name_chker('optional')
+#' all_names <- ana_name_chker('all')
+#' }
 ana_name_chker <- namechecker('name', 'est', 'se', optional = c('df', 'meta'))
 
 #' Check if an object is in class analysis_result
