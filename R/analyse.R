@@ -508,9 +508,9 @@ validate_analyse_pars <- function(results, pars) {
 #' ana_res_obj <- analysis_result(name = 'trt', est = 1, se = 2, df = as.integer(3), meta = list(visit = 1))
 #' }
 #' @export
-analysis_result <- function (name = character(),
-                             est = numeric(),
-                             se = numeric(),
+analysis_result <- function (name,
+                             est,
+                             se,
                              df = NULL,
                              meta = NULL) {
 
