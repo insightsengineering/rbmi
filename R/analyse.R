@@ -563,7 +563,7 @@ as_analysis_result <- function(x, ...) {
     # coercion with generic function
     x <- as.list(x)
 
-    present <- ana_name_chker('musthave_in_objnames')
+    present <- ana_name_chker()('musthave_in_objnames')
 
     names_not_presented <- names(present(x))[!present(x)]
 
@@ -583,7 +583,7 @@ as_analysis_result <- function(x, ...) {
                 msg = "Required parameters are not presented after updating")
 
     # order the list by names
-    ordered_x <- order_list_by_name(updated_x, ana_name_chker('all'))
+    ordered_x <- order_list_by_name(updated_x, ana_name_chker()('all'))
 
     # set attributes: meta & class
     if ('meta' %in% names(ordered_x)) {
@@ -595,16 +595,18 @@ as_analysis_result <- function(x, ...) {
 
 #' Name checker for analysis_result object
 #'
-#' @param msg Character vector representing which checker to return
+#' A higher order function returns an analysis name checker which is again a higher order function takes character vector as
+#' type of dispatch message and returns selected check function or properties.
+#' This function takes no argument. The point is to delay the evaluation and evaluate only when it is needed, similar idea as shiny ractive
 #' @example
 #' \dontrun{
-#' anares_names_in_musthave <- ana_name_chker('objnames_in_musthave')
-#' musthave_in_anares_names <- ana_name_chker('musthave_in_objnames')
-#' musthave_names <- ana_name_chker('musthave')
-#' optional_names <- ana_name_chker('optional')
+#' anares_names_in_musthave <- ana_name_chker()('objnames_in_musthave')
+#' musthave_in_anares_names <- ana_name_chker()('musthave_in_objnames')
+#' musthave_names <- ana_name_chker()('musthave')
+#' optional_names <- ana_name_chker()('optional')
 #' all_names <- ana_name_chker('all')
 #' }
-ana_name_chker <- namechecker('name', 'est', 'se', optional = c('df', 'meta'))
+ana_name_chker <- function() namechecker('name', 'est', 'se', optional = c('df', 'meta'))
 
 #' Check if an object is in class analysis_result
 #'
@@ -622,8 +624,8 @@ is.analysis_result <- function(x) {
         is.object(x),
         'analysis_result' %in% attr(x, 'class'),
         typeof(x) == 'list',
-        all(ana_name_chker('objnames_in_musthave')(x)),
-        all(ana_name_chker('musthave_in_objnames')(x))
+        all(ana_name_chker()('objnames_in_musthave')(x)),
+        all(ana_name_chker()('musthave_in_objnames')(x))
     )
 }
 
