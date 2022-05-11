@@ -570,6 +570,7 @@ make_chain <- function(relation, ...) {
 #' @param L A list to be ordered
 #' @param v A character contains the names in order
 #' @return A list with names in order
+#' @examples
 #' \dontrun{
 #' L_ordered <- order_list_by_name(list(a=1,b='x',c=TRUE), c("c", "a", "d", "x", "b", "t"))
 #' # returns a list `list(c=TRUE, a=1, b='x)`
