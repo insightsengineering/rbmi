@@ -526,7 +526,17 @@ analysis_result <- function (name = character(),
     assert_type(meta, is.list_or_null)
 
     # validators
-    if (se < 0) stop("SE must greater or equal to 0", .call = FALSE)
+    assert_that(
+        se >= 0,
+        msg = "SE must be greater or equal to 0"
+    )
+
+    if (!is.null(df) & !is.na(df)) {
+        assert_that(
+            df >= 0,
+            msg = "DF must be greater or equal to 0"
+        )
+    }
 
     value <- list(name = name,
                   est = est,
@@ -558,7 +568,7 @@ analysis_result <- function (name = character(),
 #' }
 #' @export
 as_analysis_result <- function(x, ...) {
-    dots <- rlang::enquos(...)
+    new_pars <- list(...)
 
     # coercion with generic function
     x <- as.list(x)
@@ -569,12 +579,9 @@ as_analysis_result <- function(x, ...) {
 
     # update list if required elements are not presented or if the element is 'meta'
     updated_x <- x
-    for (i in seq_along(dots)) {
-        name <- names(dots)[[i]]
-        dot <- dots[[i]]
-
-        if (is.element(name, names_not_presented) | name == 'meta') {
-            updated_x[[name]] <- rlang::eval_tidy(dot)
+    for (name in names(new_pars)) {
+        if (name %in% names_not_presented | name %in% ana_name_chker()('optional')) {
+            updated_x[[name]] <- new_pars[[name]]
         }
     }
 
@@ -598,7 +605,7 @@ as_analysis_result <- function(x, ...) {
 #' A higher order function returns an analysis name checker which is again a higher order function takes character vector as
 #' type of dispatch message and returns selected check function or properties.
 #' This function takes no argument. The point is to delay the evaluation and evaluate only when it is needed, similar idea as shiny ractive
-#' @example
+#' @examples
 #' \dontrun{
 #' anares_names_in_musthave <- ana_name_chker()('objnames_in_musthave')
 #' musthave_in_anares_names <- ana_name_chker()('musthave_in_objnames')
@@ -633,14 +640,15 @@ is.analysis_result <- function(x) {
 #'
 #' The example should not be the complete result of analysis object but a subset of it such as `anaObj$results[[1]]`
 #' @param example A list of analysis result A subset of the result of the analysis object for getting enough info to print
-#' @param name_of_meta A character variable for the name of meta data in the result of analysis. Default: 'meta'
+#' @param example A character variable for the name of var in result of analysis which is defined from `analysis_result`. Default: 'name'
+#' @param name_of_meta A character variable for the name of meta data in the result of analysis which is defined from `analysis_result`. Default: 'meta'
 #' @return A data.frame containing the information of the analysis result from the example
 #' @examples
 #' \dontrun{
-#' analysis_info(dat, name_of_meta = 'meta')
+#' analysis_info(dat, name_of_var = 'name', name_of_meta = 'meta')
 #' }
 #' @importFrom assertthat has_attr
-analysis_info <- function(example, name_of_meta = 'meta') {
+analysis_info <- function(example, name_of_var = 'name', name_of_meta = 'meta') {
 
     pars_no_meta <- list()
     pars_with_meta <- list()
@@ -661,7 +669,7 @@ analysis_info <- function(example, name_of_meta = 'meta') {
 
         if (has_attr(item, name_of_meta)){
             meta <- append(meta, index(i, item[[name_of_meta]]))
-            var <- append(var, list(item['name']))
+            var <- append(var, list(item[name_of_var]))
             pars_with_meta <- append(pars_with_meta, index(i, item[names(item) != name_of_meta]))
         } else {
             pars_no_meta <- append(pars_no_meta, index(i, item))
@@ -677,7 +685,7 @@ analysis_info <- function(example, name_of_meta = 'meta') {
     meta_df <- cbind(base_bind_rows(var), base_bind_rows(meta))
 
     info_df <- tryCatch(
-        base_left_join(res_df, meta_df, by = c('index', 'name')),
+        base_left_join(res_df, meta_df, by = c('index', name_of_var)),
         error=function(e) res_df
     )
 
