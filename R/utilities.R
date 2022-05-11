@@ -609,7 +609,7 @@ namechecker <- function(..., optional = NULL) {
     function(msg) {
 
         # function to check if elements in list X exist in Y
-        XsInYs <- function(x, y) vapply(x, purrr::partial(is.element, ... =, y), logical(1))
+        XsInYs <- function(x, y) vapply(x, function(.x) .x %in% y, logical(1))
 
         # wrapper to swap order of formal parameter of binary function
         swap <- function(f) {
