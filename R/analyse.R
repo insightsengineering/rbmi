@@ -579,7 +579,8 @@ as_analysis_result <- function(x, ...) {
     }
 
     # after updating check if all required elements are presented
-    stopifnot(all(present(updated_x)))
+    assert_that(all(present(updated_x)),
+                msg = "Required parameters are not presented after updating")
 
     # order the list by names
     ordered_x <- order_list_by_name(updated_x, ana_name_chker('all'))
