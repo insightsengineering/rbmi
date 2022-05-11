@@ -577,7 +577,7 @@ as_analysis_result <- function(x, ...) {
 
     names_not_presented <- names(present(x))[!present(x)]
 
-    # update list if required elements are not presented or if the element is 'meta'
+    # update list if required elements are not presented or if the provided name is an optional element of analysis_result object
     updated_x <- x
     for (name in names(new_pars)) {
         if (name %in% names_not_presented | name %in% ana_name_chker()('optional')) {
@@ -611,7 +611,7 @@ as_analysis_result <- function(x, ...) {
 #' musthave_in_anares_names <- ana_name_chker()('musthave_in_objnames')
 #' musthave_names <- ana_name_chker()('musthave')
 #' optional_names <- ana_name_chker()('optional')
-#' all_names <- ana_name_chker('all')
+#' all_names <- ana_name_chker()('all')
 #' }
 ana_name_chker <- function() namechecker('name', 'est', 'se', optional = c('df', 'meta'))
 
