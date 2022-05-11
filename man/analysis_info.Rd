@@ -4,12 +4,12 @@
 \alias{analysis_info}
 \title{Get printable analysis information from an example of analysis result}
 \usage{
-analysis_info(example, name_of_meta = "meta")
+analysis_info(example, name_of_var = "name", name_of_meta = "meta")
 }
 \arguments{
-\item{example}{A list of analysis result A subset of the result of the analysis object for getting enough info to print}
+\item{example}{A character variable for the name of var in result of analysis which is defined from \code{analysis_result}. Default: 'name'}
 
-\item{name_of_meta}{A character variable for the name of meta data in the result of analysis. Default: 'meta'}
+\item{name_of_meta}{A character variable for the name of meta data in the result of analysis which is defined from \code{analysis_result}. Default: 'meta'}
 }
 \value{
 A data.frame containing the information of the analysis result from the example
@@ -19,6 +19,6 @@ The example should not be the complete result of analysis object but a subset of
 }
 \examples{
 \dontrun{
-analysis_info(dat, name_of_meta = 'meta')
+analysis_info(dat, name_of_var = 'name', name_of_meta = 'meta')
 }
 }

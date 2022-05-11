@@ -2,13 +2,21 @@
 % Please edit documentation in R/analyse.R
 \name{ana_name_chker}
 \alias{ana_name_chker}
-\title{Name checker for analysis function}
+\title{Name checker for analysis_result object}
 \usage{
-ana_name_chker(msg)
-}
-\arguments{
-\item{msg}{Character vector representing which checker to return}
+ana_name_chker()
 }
 \description{
-Name checker for analysis function
+A higher order function returns an analysis name checker which is again a higher order function takes character vector as
+type of dispatch message and returns selected check function or properties.
+This function takes no argument. The point is to delay the evaluation and evaluate only when it is needed, similar idea as shiny ractive
+}
+\examples{
+\dontrun{
+anares_names_in_musthave <- ana_name_chker()('objnames_in_musthave')
+musthave_in_anares_names <- ana_name_chker()('musthave_in_objnames')
+musthave_names <- ana_name_chker()('musthave')
+optional_names <- ana_name_chker()('optional')
+all_names <- ana_name_chker('all')
+}
 }

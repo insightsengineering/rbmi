@@ -13,12 +13,14 @@ order_list_by_name(L, v)
 }
 \value{
 A list with names in order
+}
+\description{
+Order a named list by its names according to given character vector
+}
+\examples{
 \dontrun{
 L_ordered <- order_list_by_name(list(a=1,b='x',c=TRUE), c("c", "a", "d", "x", "b", "t"))
 # returns a list `list(c=TRUE, a=1, b='x)`
 
 }
-}
-\description{
-Order a named list by its names according to given character vector
 }
