@@ -546,9 +546,36 @@ assert_type <- function(what,
 
     type <- (function(s) sub(".*\\.", "", s))(howname)
     assert_that(how(what),
-                msg = sprintf("%s of analysis_result `%s` is not %s", whatname, what, prettier(type))
+                msg = sprintf("%s of analysis_result is not %s", whatname, prettier(type))
     )
 }
+
+#' Create assert function comparing value
+#'
+#' @param how A function to generate value from the object to be asserted
+#' @param where A character variable indicating the origin of the object to be asserted. Default: `NULL`
+#' @param howname A character variable indicating the name of the how function. Default: `deparse(substitute(how))`
+assert_value <- function(how, where = NULL, howname = deparse(substitute(how))) {
+    inwhere <- ''
+    if (!is.null(where)) inwhere <- paste(' in', where)
+    function(what,
+             should,
+             whatname = deparse(substitute(what))) {
+
+        prettier <- function(x) paste(x, collapse = " ")
+
+        assert_that(how(what) == should,
+                    msg = sprintf("%s of %s%s `%s` is not %s", howname, whatname, inwhere, prettier(how(what)), prettier(should))
+                    )
+    }
+}
+
+#' Assert length of the element in analysis_result
+#'
+#' @param what The element to be asserted
+#' @param should The length expected
+#' @param whatname The name of the element. Default: `deparse(substitute(what))`
+assert_anares_length <- assert_value(length, where = 'analysis_result')
 
 #' Make a chain of function calls with certain relation function
 #' @param relation A relation function: `any` or `all`
