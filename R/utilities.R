@@ -580,3 +580,16 @@ order_list_by_name <- function(L, v) {
     ordered_pos <- ordered_pos[!is.na(ordered_pos)]
     L[ordered_pos]
 }
+
+#' Convert nested list to data.frame
+#'
+#' @param nestlist A nested list to be converted to data.frame
+#' @return A data.frame binding each sublist as row in the data.frame and with NA filled for missing values
+base_bind_rows <- function(nestlist) {
+    nms     <- unique(unlist(lapply(nestlist, names)))
+    frmls   <- as.list(setNames(rep(NA, length(nms)), nms))
+    dflst   <- setNames(lapply(nms, function(x) call("unlist", as.symbol(x))), nms)
+    make_df <- as.function(c(frmls, call("do.call", "data.frame", dflst)))
+
+    do.call(rbind, lapply(nestlist, function(x) do.call(make_df, x)))
+}

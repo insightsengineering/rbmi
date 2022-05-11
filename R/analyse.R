@@ -704,7 +704,6 @@ analysis_info <- function(example, name_of_meta = 'meta') {
         }
     }
 
-    base_bind_rows <- function(L) as.data.frame(do.call(rbind, L))
     base_left_join <- function(x, y, by) merge(x, y, by = by, all.x=TRUE)
 
     all_pars <- append(pars_with_meta, pars_no_meta)
