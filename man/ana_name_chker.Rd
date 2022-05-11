@@ -17,6 +17,6 @@ anares_names_in_musthave <- ana_name_chker()('objnames_in_musthave')
 musthave_in_anares_names <- ana_name_chker()('musthave_in_objnames')
 musthave_names <- ana_name_chker()('musthave')
 optional_names <- ana_name_chker()('optional')
-all_names <- ana_name_chker('all')
+all_names <- ana_name_chker()('all')
 }
 }

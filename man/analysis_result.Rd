@@ -4,13 +4,7 @@
 \alias{analysis_result}
 \title{Constructor of analysis result}
 \usage{
-analysis_result(
-  name = character(),
-  est = numeric(),
-  se = numeric(),
-  df = NULL,
-  meta = NULL
-)
+analysis_result(name, est, se, df = NULL, meta = NULL)
 }
 \arguments{
 \item{name}{A character variable for the group name}
