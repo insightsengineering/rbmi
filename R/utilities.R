@@ -517,11 +517,12 @@ as_dataframe <- function(x) {
 #'
 #' @param name The name of the element to be added to meta
 #' @param ... The values of the element to be added to meta
-#' This function used only internally for ancova
+#' This function is used only internally for ancova
 add_meta <- function (var_names, var_values) {
+    prettier <- function(x) paste(x, collapse = ' ')
     assert_that(
         !is.null(var_names) & !is.null(var_values) & length(var_names) == length(var_values),
-        msg = paste("Invalid parameters:", var_names, var_values)
+        msg = sprintf("Invalid parameters: `%s`, `%s`", prettier(var_names), prettier(var_values))
     )
 
     out <- as.list(as.character(var_values))
@@ -564,7 +565,7 @@ assert_value <- function(how, where = NULL, howname = deparse(substitute(how))) 
 
         prettier <- function(x) paste(x, collapse = " ")
 
-        assert_that(how(what) == should,
+        assert_that(all(how(what) == should),
                     msg = sprintf("%s of %s%s `%s` is not %s", howname, whatname, inwhere, prettier(how(what)), prettier(should))
                     )
     }
@@ -590,7 +591,7 @@ assert_anares_length <- assert_value(length, where = 'analysis_result')
 #' }
 make_chain <- function(relation, ...) {
     fs <- c(...)
-    function(...) relation(sapply(fs, function(f) f(...)))
+    function(...) relation(sapply(fs, function(f) isTRUE(f(...))))
 }
 
 #' Order a named list by its names according to given character vector

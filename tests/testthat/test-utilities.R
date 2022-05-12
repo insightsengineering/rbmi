@@ -241,3 +241,71 @@ test_that("Stack", {
     expect_equal(mstack$pop(3), list(7))
     expect_error(mstack$pop(1), "items to return")
 })
+
+
+test_that("add_meta", {
+    expect_equal(add_meta('a', 1), list(a='1'))
+    expect_equal(add_meta(c('a','b','c'), c(1,2,3)), list(a='1', b='2',c='3'))
+    expect_error(add_meta(c('a','b','c'), 1))
+    expect_error(add_meta('a', character()))
+})
+
+
+test_that("assert_type", {
+    expect_true(assert_type('a', is.character))
+    expect_true(assert_type(c('a', 'b', 'c'), is.character))
+    expect_true(assert_type(1, is.numeric))
+    expect_true(assert_type(c(1,2,3), is.numeric))
+    expect_true(assert_type(NA, is.na))
+    expect_true(assert_type(NULL, is.null))
+    expect_true(assert_type(list(), is.list))
+    expect_true(assert_type(data.frame(), is.data.frame))
+    expect_true(assert_type(environment(), is.environment))
+    expect_true(assert_type(function() NULL, is.function))
+    expect_true(assert_type(factor(), is.factor))
+    expect_error(assert_type(factor('a'), is.character))
+    expect_error(assert_type('a', is.numeric))
+    expect_error(assert_type(1, is.null))
+    v1 <- NULL
+    expect_error(assert_type(v1, is.character))
+    v2 <- NA
+    expect_error(assert_type(v2, is.numeric))
+    expect_error(assert_type(1, length))
+})
+
+
+test_that("assert_value", {
+    expect_true(assert_value(max)(c(1,2,3), 3))
+    expect_true(assert_value(length)(list(1,2), 2))
+    expect_true(assert_value(names)(list(a=1,b=2,c=3), c('a', 'b', 'c')))
+    expect_true(assert_value(mean)(c(a=1,b=2,c=3), 2))
+    expect_true(assert_value(abs)(c(a=-1,b=2,c=-3), c(1,2,3)))
+    f <- function(x) x * 5
+    expect_true(assert_value(f)(c(a=1,b=2,c=3), c(a=5,b=10,c=15)))
+    expect_error(assert_value(identity)(list(a=1,b=2,c=3), list(a=1,b=2,c=3)))
+    expect_error(assert_value(min)(c(a=1,b=2,c=3), 7))
+    expect_error(assert_value(median)(c(a=1,b=2,c=3), 1))
+})
+
+test_that("assert_anares_length", {
+    expect_true(assert_anares_length('a', 1))
+    expect_true(assert_anares_length(c(1,2), 2))
+    expect_true(assert_anares_length(list(a=1,b=2), 2))
+    expect_true(assert_anares_length(data.frame(a=1, b=2), 2))
+    expect_true(assert_anares_length(list(), 0))
+    expect_true(assert_anares_length(NULL, 0))
+    expect_error(assert_anares_length(c('a', 'b', 'c'), 2))
+    expect_error(assert_anares_length(c(1,2,3), 2))
+    expect_error(assert_anares_length(list(), 2))
+    expect_error(assert_anares_length(1, 2))
+    expect_error(assert_anares_length(NA, 2))
+})
+
+test_that("make_chain", {
+    is.numeric_or_na <- make_chain(any, is.numeric, is.na)
+    expect_true(is.numeric_or_na(NA))
+    expect_true(is.numeric_or_na(1))
+    expect_false(is.numeric_or_na('a'))
+    expect_false(is.numeric_or_na(list()))
+    expect_error(make_chain(any, is.numeric, 'a')(1))
+})
