@@ -4,14 +4,13 @@
 \alias{add_meta}
 \title{Add meta information to customerize analysis function}
 \usage{
-add_meta(var_names, var_values)
+add_meta(var_names, ...)
 }
 \arguments{
-\item{name}{The name of the element to be added to meta}
+\item{...}{The values of the element to be added to meta. The number of items should be equal  to the length of the name parameter}
 
-\item{...}{The values of the element to be added to meta
-This function used only internally for ancova}
+\item{var_name}{A character variable of the names of the elements to be added to meta}
 }
 \description{
-Add meta information to customerize analysis function
+This function is used only internally for ancova
 }

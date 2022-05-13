@@ -244,10 +244,14 @@ test_that("Stack", {
 
 
 test_that("add_meta", {
-    expect_equal(add_meta('a', 1), list(a='1'))
-    expect_equal(add_meta(c('a','b','c'), c(1,2,3)), list(a='1', b='2',c='3'))
-    expect_error(add_meta(c('a','b','c'), 1))
-    expect_error(add_meta('a', character()))
+    expect_equal(add_meta('a', 1), list(a=1))
+    expect_equal(add_meta(c('a','b','c'), '1','2',3), list(a='1', b='2',c=3))
+    expect_equal(add_meta(list('a'), 1), list(a=1))
+    expect_error(add_meta(c('a','b','c'), 1, 'c'))
+    expect_error(add_meta(c('a','b','c')))
+    expect_error(add_meta(NULL, 'a'))
+    expect_error(add_meta(NA, 'a'))
+    expect_error(add_meta(c('a', NA), 1, 2))
 })
 
 

@@ -515,19 +515,23 @@ as_dataframe <- function(x) {
 
 #' Add meta information to customerize analysis function
 #'
-#' @param name The name of the element to be added to meta
-#' @param ... The values of the element to be added to meta
 #' This function is used only internally for ancova
-add_meta <- function (var_names, var_values) {
+#'
+#' @param var_name A character variable of the names of the elements to be added to meta
+#' @param ... The values of the element to be added to meta. The number of items should be equal  to the length of the name parameter
+add_meta <- function (var_names, ...) {
+    var_values <- list(...)
     prettier <- function(x) paste(x, collapse = ' ')
     assert_that(
-        !is.null(var_names) & !is.null(var_values) & length(var_names) == length(var_values),
+        all(!is.null(var_names),
+            !is.null(var_values),
+            all(Vectorize(isTRUE)(!is.na(var_names))),
+            length(var_names) == length(var_values)),
         msg = sprintf("Invalid parameters: `%s`, `%s`", prettier(var_names), prettier(var_values))
     )
 
-    out <- as.list(as.character(var_values))
-    names(out) <- var_names
-    out
+    names(var_values) <- var_names
+    var_values
 }
 
 #' Assert variable's type
