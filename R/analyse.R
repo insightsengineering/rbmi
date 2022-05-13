@@ -521,19 +521,21 @@ analysis_result <- function (name,
 
     assert_type(name, is.character)
     assert_type(est, is.numeric)
-    assert_type(se, is.numeric)
+    assert_type(se, is.numeric_or_NA)
     assert_type(df, is.numeric_or_NA_or_NULL)
     assert_type(meta, is.list_or_null)
     assert_anares_length(name, 1)
     assert_anares_length(est, 1)
     assert_anares_length(se, 1)
 
-    assert_that(
+    if (!anyNA(se)) {
+        assert_that(
         se >= 0,
         msg = "SE must be greater or equal to 0"
     )
+    }
 
-    if (!is.null(df) & !is.na(df)) {
+    if (!is.null(df) & !anyNA(df)) {
         assert_that(
             df >= 0,
             msg = "DF must be greater or equal to 0"
