@@ -500,12 +500,12 @@ validate_analyse_pars <- function(results, pars) {
 #' @param df An integer type of numeric variable
 #' @param meta A list type of variable as meta information
 #' @details
-#' - `se` must be numeric values greater or equal to 0
-#' - `meta` is optional
+#' - `se`, `df` and `meta` is optional
+#' - `se` and `df` if given must be numeric values greater or equal to 0
 #' @return An object of "analysis_result" class
 #' @examples
 #' \dontrun{
-#' ana_res_obj <- analysis_result(name = 'trt', est = 1, se = 2, df = as.integer(3), meta = list(visit = 1))
+#' ana_res_obj <- analysis_result(name = 'trt', est = 1, se = 2, df = 3, meta = list(visit = 1))
 #' }
 #' @export
 analysis_result <- function (name,

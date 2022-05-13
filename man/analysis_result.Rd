@@ -4,7 +4,7 @@
 \alias{analysis_result}
 \title{Constructor of analysis result}
 \usage{
-analysis_result(name, est, se, df = NULL, meta = NULL)
+analysis_result(name, est, se = NULL, df = NULL, meta = NULL)
 }
 \arguments{
 \item{name}{A character variable for the group name}
@@ -25,12 +25,12 @@ Construct an analysis result class object whose base type is a list
 }
 \details{
 \itemize{
-\item \code{se} must be numeric values greater or equal to 0
-\item \code{meta} is optional
+\item \code{se}, \code{df} and \code{meta} is optional
+\item \code{se} and \code{df} if given must be numeric values greater or equal to 0
 }
 }
 \examples{
 \dontrun{
-ana_res_obj <- analysis_result(name = 'trt', est = 1, se = 2, df = as.integer(3), meta = list(visit = 1))
+ana_res_obj <- analysis_result(name = 'trt', est = 1, se = 2, df = 3, meta = list(visit = 1))
 }
 }
