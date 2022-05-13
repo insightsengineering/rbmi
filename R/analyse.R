@@ -510,25 +510,32 @@ validate_analyse_pars <- function(results, pars) {
 #' @export
 analysis_result <- function (name,
                              est,
-                             se,
+                             se = NULL,
                              df = NULL,
                              meta = NULL) {
 
     # constraints
     is.numeric_or_NA <- make_chain(any, is.numeric, anyNA)
     is.numeric_or_NA_or_NULL <- make_chain(any, is.numeric_or_NA, is.null)
-    is.list_or_null <- make_chain(any, is.list, is.null)
+    is.list_or_NULL <- make_chain(any, is.list, is.null)
 
+    # asssert type for required parameter (directly assert type)
     assert_type(name, is.character)
     assert_type(est, is.numeric)
-    assert_type(se, is.numeric_or_NA)
+
+    # assert type for optional parameter (always include NULL)
+    assert_type(se, is.numeric_or_NA_or_NULL)
     assert_type(df, is.numeric_or_NA_or_NULL)
-    assert_type(meta, is.list_or_null)
+    assert_type(meta, is.list_or_NULL)
+
+    # assert length for required parameter
     assert_anares_length(name, 1)
     assert_anares_length(est, 1)
-    assert_anares_length(se, 1)
 
-    if (!anyNA(se)) {
+    # assert properties of optional parameters
+    if (!is.null(se) & !anyNA(se)) {
+        assert_anares_length(se, 1)
+
         assert_that(
         se >= 0,
         msg = "SE must be greater or equal to 0"
@@ -536,6 +543,8 @@ analysis_result <- function (name,
     }
 
     if (!is.null(df) & !anyNA(df)) {
+        assert_anares_length(df, 1)
+
         assert_that(
             df >= 0,
             msg = "DF must be greater or equal to 0"
@@ -543,13 +552,17 @@ analysis_result <- function (name,
     }
 
     value <- list(name = name,
-                  est = est,
-                  se = se)
+                  est = est)
 
-    # optional values
+    # optional parameters
+    if (!is.null(se)) {
+        value[['se']] <- se
+    }
+
     if (!is.null(df)) {
         value[['df']] <- df
     }
+
     if (!is.null(meta)) {
         value[['meta']] <- meta
     }
@@ -617,7 +630,7 @@ as_analysis_result <- function(x, ...) {
 #' optional_names <- ana_name_chker()('optional')
 #' all_names <- ana_name_chker()('all')
 #' }
-ana_name_chker <- function() namechecker('name', 'est', 'se', optional = c('df', 'meta'))
+ana_name_chker <- function() namechecker('name', 'est', optional = c('se', 'df', 'meta'))
 
 #' Check if an object is in class analysis_result
 #'
