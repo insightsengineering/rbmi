@@ -640,17 +640,16 @@ is.analysis_result <- function(x) {
 
 #' Get printable analysis information from an example of analysis result
 #'
-#' The example should not be the complete result of analysis object but a subset of it such as `anaObj$results[[1]]`
-#' @param example A list of analysis result A subset of the result of the analysis object for getting enough info to print
-#' @param example A character variable for the name of var in result of analysis which is defined from `analysis_result`. Default: 'name'
+#' @param example A subset of the result of the analysis object for getting enough info to print. It should not be the complete result of analysis object but a subset of it such as `anaObj$results[[1]]`
+#' @param name_of_group A character variable for the name of group variable in the result of analysis which is defined from `analysis_result`. Default: `'name'`
 #' @param name_of_meta A character variable for the name of meta data in the result of analysis which is defined from `analysis_result`. Default: 'meta'
 #' @return A data.frame containing the information of the analysis result from the example
 #' @examples
 #' \dontrun{
-#' analysis_info(dat, name_of_var = 'name', name_of_meta = 'meta')
+#' analysis_info(dat, name_of_group = 'name', name_of_meta = 'meta')
 #' }
 #' @importFrom assertthat has_attr
-analysis_info <- function(example, name_of_var = 'name', name_of_meta = 'meta') {
+analysis_info <- function(example, name_of_group = 'name', name_of_meta = 'meta') {
 
     pars_no_meta <- list()
     pars_with_meta <- list()
@@ -671,7 +670,7 @@ analysis_info <- function(example, name_of_var = 'name', name_of_meta = 'meta') 
 
         if (has_attr(item, name_of_meta)){
             meta <- append(meta, index(i, item[[name_of_meta]]))
-            var <- append(var, list(item[name_of_var]))
+            var <- append(var, list(item[name_of_group]))
             pars_with_meta <- append(pars_with_meta, index(i, item[names(item) != name_of_meta]))
         } else {
             pars_no_meta <- append(pars_no_meta, index(i, item))
@@ -687,7 +686,7 @@ analysis_info <- function(example, name_of_var = 'name', name_of_meta = 'meta') 
     meta_df <- cbind(base_bind_rows(var), base_bind_rows(meta))
 
     info_df <- tryCatch(
-        base_left_join(res_df, meta_df, by = c('index', name_of_var)),
+        base_left_join(res_df, meta_df, by = c('index', name_of_group)),
         error=function(e) res_df
     )
 
