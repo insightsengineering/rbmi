@@ -40,12 +40,12 @@ jobs:
         run: |
           echo 'options(install.packages.check.source = "no")' >>  .Rprofile
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        name: Install R package dependencies
-        with:
-          cache-version: 2
-          extra-packages: |
-            remotes
+      - name: Install R package dependencies
+        shell: Rscript {0}
+        run: |
+          options("repos" = list("CRAN" = "https://packagemanager.rstudio.com/cran/latest"))
+          install.packages("devtools")
+          devtools::install_dev_deps()
 
       - name: Install Pandoc
         uses: r-lib/actions/setup-pandoc@v2
