@@ -583,7 +583,6 @@ analysis_result <- function (name,
 #' \dontrun{
 #' ana_res_obj <- as_analysis_result(list(est = 1, se = 2, df = 3), name = 'trt')
 #' }
-#' @export
 as_analysis_result <- function(x, ...) {
     new_pars <- list(...)
 
