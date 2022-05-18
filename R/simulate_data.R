@@ -119,7 +119,7 @@ validate.simul_pars <- function(x, ...) {
     assert_that(
         is.numeric(x$prob_ice2),
         (x$prob_ice2 >= 0 && x$prob_ice2 <= 1),
-        msg = "`prob_dropout` must be a number in [0,1]"
+        msg = "`prob_ice2` must be a number in [0,1]"
     )
     assert_that(
         is.numeric(x$prob_miss),
@@ -170,15 +170,16 @@ validate.simul_pars <- function(x, ...) {
 #' treatment arm, respectively.
 #' - Simulate drop-out following ICE1 according to `pars_c$prob_post_ice1_dropout` and
 #' `pars_t$prob_post_ice1_dropout`.
-#' - Simulate an additional uninformative study drop-out with probabilities `pars_c$prob_dropout`
-#' and `pars_t$prob_dropout` at each visit.
-#'   The simulated time of drop-out is the subject's first visit which is affected by
+#' - Simulate an additional uninformative study drop-out with probabilities `pars_c$prob_ice2`
+#' and `pars_t$prob_ice2` at each visit. This generates a second intercurrent event ICE2, which
+#' may be thought as treatment discontinuation due to NSDRC reasons with subsequent drop-out.
+#' The simulated time of drop-out is the subject's first visit which is affected by
 #' drop-out and data from this visit and all subsequent visits are consequently set to missing.
-#'   In addition, in case the subject is still on treatment at the subject's (first)
-#' visit affected by drop-out (i.e. if this occurs prior to ICE1),
-#'   then dropout also triggers discontinuation of study drug and a corresponding ICE2
-#' (study treatment discontinuation due to NSDCR reasons) is generated.
-#' - Adjust trajectories after ICE according to the given assumption expressed with
+#' If for a subject, both ICE1 and ICE2 are simulated to occur,
+#' then it is assumed that only the earlier of them counts.
+#' In case both ICEs are simulated to occur at the same time, it is assumed that ICE1 counts.
+#' This means that a single subject can experience either ICE1 or ICE2, but not both of them.
+#' - Adjust trajectories after ICE1 according to the given assumption expressed with
 #' the `post_ice1_traj` argument. Note that only post-ICE1 outcomes in the intervention arm can be
 #' adjusted. Post-ICE1 outcomes from the control arm  are not adjusted.
 #' - Simulate additional intermittent missing outcome data as per arguments `pars_c$prob_miss`
