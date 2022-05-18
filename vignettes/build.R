@@ -4,7 +4,7 @@
 # This is because pkgdown only supports ".Rmd" https://github.com/r-lib/pkgdown/issues/781
 
 
-devtools::install()
+devtools::install(dependencies = FALSE)
 
 
 rmarkdown::render(
