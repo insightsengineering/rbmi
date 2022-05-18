@@ -1,6 +1,10 @@
 
 name: 'Build src'
 description: 'Build src!'
+inputs:
+  refresh:
+    description: 'Should the R/stanmodels.R file be refreshed'
+    default: true
 runs:
   using: "composite"
   steps:
@@ -21,9 +25,12 @@ runs:
     # but as we are using cached models we are preventing compilation
     # and thus need to manually refresh the file
     - name: Refresh rstantools config files
+      shell: bash
       run: |
-        rstantools::rstan_config()
-      shell: Rscript {0}
+        echo "inputs.refresh = ${{ inputs.refresh }}"
+        if ${{ inputs.refresh }} ; then
+          Rscript -e "rstantools::rstan_config()"
+        fi
     
     - name: Cache Compiled Stan Code
       id: cache-pkgs
