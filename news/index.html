@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">rbmi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,15 +32,6 @@
 <li class="active nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
-<!-- start_releases -->
-<li class="dropdown">
-	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-Other releases
-<span class="caret"></span></a><ul class="dropdown-menu" role="menu">
-   <li><a href="../index.html">latest</a></li>
-   <li><a href="..//index.html"></a></li>
-</ul></li>
-<!-- end_releases -->
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -63,12 +54,22 @@ Other releases
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="rbmi-development-version">rbmi (development version)<a class="anchor" aria-label="anchor" href="#rbmi-development-version"></a></h2>
-<ul><li>Updated reference urls</li>
+<ul><li>No changes</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1.4" id="rbmi-114">rbmi 1.1.4<a class="anchor" aria-label="anchor" href="#rbmi-114"></a></h2>
+<ul><li>Updated urls for references in vignettes</li>
+<li>Fixed a bug where visit factor levels were re-constructed incorrectly in <code><a href="../reference/delta_template.html">delta_template()</a></code>
+</li>
+<li>Fixed a bug where the wrong visit was displayed in the error message for when a specific visit doesn’t have any data in <code><a href="../reference/draws.html">draws()</a></code>
+</li>
+<li>Fixed a bug where the wrong input parameter was displayed in an error message in <code><a href="../reference/simulate_data.html">simulate_data()</a></code>
+</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.1" id="rbmi-111--113">rbmi 1.1.1 &amp; 1.1.3<a class="anchor" aria-label="anchor" href="#rbmi-111--113"></a></h2><p class="text-muted">CRAN release: 2022-03-08</p>
-<ul><li>Various minor tweaks to address CRAN checks</li>
-<li>Otherwise no change in functionality from 1.1.0</li>
+<ul><li>No change in functionality from 1.1.0</li>
+<li>Various minor tweaks to address CRAN checks messages</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.0" id="rbmi-110">rbmi 1.1.0<a class="anchor" aria-label="anchor" href="#rbmi-110"></a></h2><p class="text-muted">CRAN release: 2022-03-02</p>
