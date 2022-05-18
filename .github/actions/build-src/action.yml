@@ -13,8 +13,17 @@ runs:
                 pkgs = installed.packages()[c("Rcpp", "rstan", "rstantools"), c("Version", "Package")]
             )
         sink()
-      shell: Rscript {0}
+    - shell: Rscript {0}
     
+    # The default R/stanmodels.R was updated in v2.2.0 (11Apr2022)
+    # Normally for older versions it would change itself on the fly
+    # when it compiles the stan model
+    # but as we are using cached models we are preventing compilation
+    # and thus need to manually refresh the file
+    - name: Refresh rstantools config files
+      run: |
+        rstantools::rstan_config()
+      shell: Rscript {0}
     
     - name: Cache Compiled Stan Code
       id: cache-pkgs
