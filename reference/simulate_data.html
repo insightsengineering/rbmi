@@ -44,15 +44,6 @@ condition related (NSDRC) reasons and outcome data after ICE2 is always missing.
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
-<!-- start_releases -->
-<li class="dropdown">
-	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-Other releases
-<span class="caret"></span></a><ul class="dropdown-menu" role="menu">
-   <li><a href="../index.html">latest</a></li>
-   <li><a href="..//index.html"></a></li>
-</ul></li>
-<!-- end_releases -->
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -142,15 +133,16 @@ for the control arm and <code>pars_t$prob_ice1</code> and <code>pars_t$or_outcom
 treatment arm, respectively.</p></li>
 <li><p>Simulate drop-out following ICE1 according to <code>pars_c$prob_post_ice1_dropout</code> and
 <code>pars_t$prob_post_ice1_dropout</code>.</p></li>
-<li><p>Simulate an additional uninformative study drop-out with probabilities <code>pars_c$prob_dropout</code>
-and <code>pars_t$prob_dropout</code> at each visit.
+<li><p>Simulate an additional uninformative study drop-out with probabilities <code>pars_c$prob_ice2</code>
+and <code>pars_t$prob_ice2</code> at each visit. This generates a second intercurrent event ICE2, which
+may be thought as treatment discontinuation due to NSDRC reasons with subsequent drop-out.
 The simulated time of drop-out is the subject's first visit which is affected by
 drop-out and data from this visit and all subsequent visits are consequently set to missing.
-In addition, in case the subject is still on treatment at the subject's (first)
-visit affected by drop-out (i.e. if this occurs prior to ICE1),
-then dropout also triggers discontinuation of study drug and a corresponding ICE2
-(study treatment discontinuation due to NSDCR reasons) is generated.</p></li>
-<li><p>Adjust trajectories after ICE according to the given assumption expressed with
+If for a subject, both ICE1 and ICE2 are simulated to occur,
+then it is assumed that only the earlier of them counts.
+In case both ICEs are simulated to occur at the same time, it is assumed that ICE1 counts.
+This means that a single subject can experience either ICE1 or ICE2, but not both of them.</p></li>
+<li><p>Adjust trajectories after ICE1 according to the given assumption expressed with
 the <code>post_ice1_traj</code> argument. Note that only post-ICE1 outcomes in the intervention arm can be
 adjusted. Post-ICE1 outcomes from the control arm  are not adjusted.</p></li>
 <li><p>Simulate additional intermittent missing outcome data as per arguments <code>pars_c$prob_miss</code>
