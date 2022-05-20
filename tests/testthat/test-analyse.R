@@ -162,16 +162,16 @@ test_that("incorrect constructions of as_analysis fail", {
 
 
     ### Inconsistent analysis parameters  ## Not sure what this is supposed to test
-    # expect_error(
-    #     as_analysis(
-    #         results = list(
-    #             list(p1 = list("est" = 1)),
-    #             list(p2 = list("est" = 2))
-    #         ),
-    #         method = method_condmean(n_sample = 1)
-    #     ),
-    #     "identically named elements"
-    # )
+    expect_error(
+         as_analysis(
+             results = list(
+                 list(analysis_result(name = 'p1', est = 1)), # 1st imputation contains one analysis with name "p1"
+                 list(analysis_result(name = 'p2', est = 2))  # 2nd imputation contains one analysis with name "p2"
+             ),
+             method = method_condmean(n_sample = 1)
+         ),
+         "identically named elements"
+     )
 
     expect_error(
         as_analysis(
