@@ -449,7 +449,7 @@ validate_analyse_pars <- function(results, pars) {
     )
 
     results_names <- back_apply_at(results, function(x) x[['name']], 2) # get the "name" element of 2nd deepest level list which corresponds to analysis_result
-    results_names_flat <- unique(unlist(results_names, use.names = FALSE))
+    results_names_flat <- unlist(results_names, use.names = FALSE)
     results_names_count <- table(results_names_flat)
 
     assert_that(
