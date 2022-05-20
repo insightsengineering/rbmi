@@ -443,12 +443,13 @@ validate_analyse_pars <- function(results, pars) {
 
     assert_that(
         length(results[[1]]) != 0,
-        all(vapply(results, function(Xs) all(vapply(Xs, function(X) is.analysis_result(X), logical(1))), logical(1))),
+        all(vapply(results, function(Xs)
+            all(vapply(Xs, function(X) is.analysis_result(X), logical(1))), logical(1))),
         msg = "Individual analysis result must be type of analysis_result"
     )
 
-    results_names <- lapply(results, function(x) unique(names(x)))
-    results_names_flat <- unlist(results_names, use.names = FALSE)
+    results_names <- back_apply_at(results, function(x) x[['name']], 2) # get the "name" element of 2nd deepest level list which corresponds to analysis_result
+    results_names_flat <- unique(unlist(results_names, use.names = FALSE))
     results_names_count <- table(results_names_flat)
 
     assert_that(
