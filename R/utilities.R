@@ -673,3 +673,55 @@ namechecker <- function(..., optional = NULL) {
         dispatch[[msg]]
     }
 }
+
+#' Higher-order function to compose function n-times
+#'
+#' Taking a function as f argument, this function convert it to another function apply this function n-times:
+#' n = 1: f(x) ==> f(x)
+#' n = 2: f(x) ==> f(f(x))
+#' n = 4: f(x) ==> f(f(f(f(x)))
+#' @param f function to be converted to composed version
+#' @param n times to be composed
+#' @examples
+#' \dontrun{
+#' add_one <- function (x) x + 1
+#' add_two <- compose_n(add_one, 2)
+#' add_two(5) # This equivalents to add_one(add_one(5)) and returns 7
+#'
+#' }
+compose_n <- function(f, n) {
+    function(x) {
+        if (n <= 0) x
+        else f(compose_n(f, n-1)(x))
+    }
+}
+
+#' Apply function at last N levels of a nested list
+#'
+#' Recursively traverse a nested list and apply a function at the Nth level backward counting from deepest level
+#' @param lst a list to be applied by the function
+#' @param f a function to apply on `lst`
+#' @param n a numeric value indicating the nth level to be applied backward counting from deepest level
+#' @examples
+#' \dontrun{
+#' dt <- list(a1=list(
+#'                b11=list(c111=1, c112=2,c113=3),
+#'                b12=list(c121=4, c122=5,c123=6)),
+#'            a2=list(
+#'                b21=list(c211=7, c212=8,c213=9),
+#'                b22=list(c221=10, c222=11,c223=12))
+#'                )
+#'       )
+#'
+#' back_apply_at(dt, function(x) x+1, 1) # This will apply `function(x) x+1` to the deepest level of `dt`, i.e. 1st level counting backward from deepest level
+#'
+#'}
+back_apply_at <- function(lst, f, n) {
+    lapply(lst,
+           function(sublst) {
+               nextNlevel <- compose_n(function(x) x[[1]], n-1)
+               if (!is.list(nextNlevel(sublst))) f(sublst)
+               else back_apply_at(sublst, f, n)
+           }
+    )
+}
