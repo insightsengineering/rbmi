@@ -29,16 +29,20 @@ test_that("ancova", {
     mod <- lm(out ~ age1 + age2 + grp, data = dat)
 
     result_expected <- list(
-        "trt_vis1" = list(
-            "est" = mod$coefficients[[4]],
-            "se" = sqrt(vcov(mod)[4, 4]),
-            "df" = df.residual(mod)
+        analysis_result(
+            name = 'trt',
+            est = mod$coefficients[[4]],
+            se = sqrt(vcov(mod)[4, 4]),
+            df = df.residual(mod),
+            meta = list(visit = 'vis1')
         )
     )
-    result_actual <- ancova(
+    results_actual <- ancova(
         dat,
         list(outcome = "out", group = "grp", covariates = c("age1", "age2"), visit = "visit")
-    )["trt_vis1"]
+    )
+
+    result_actual <- extract_analysis_result(results_actual, name = 'trt', meta = list(visit = 'vis1'))
 
     expect_equal(result_expected, result_actual)
 
