@@ -350,3 +350,49 @@ test_that("namechecker", {
     expect_true(all(chker('objnames_in_musthave')(list(f = 1, x = list(a=2))) == list(f=TRUE, x=FALSE)))
     expect_true(all(chker('objnames_in_musthave')(list(y = 1, x = list(a=2))) == list(y=FALSE, x=FALSE)))
 })
+
+test_that("compose_n", {
+    # addition
+    add_one <- function (x) x + 1
+    add_five <- compose_n(add_one, 5)
+    expect_equal(add_five(3), 8)
+
+    # yin yang
+    flip <- function(x) -x
+    odd_numbers <- seq(1, 99, 2)
+    even_numbers <- seq(2, 100, 2)
+    yin <- sapply(odd_numbers, function(x) compose_n(flip, x))
+    yang <- sapply(even_numbers, function(x) compose_n(flip, x))
+    expect_true(all(sapply(yin, do.call, list(100)) < 0))
+    expect_true(all(sapply(yang, do.call, list(100)) > 0))
+
+    # base case
+    expect_equal(compose_n(abs, 0)(-5), -5)
+})
+
+test_that("back_apply_at", {
+    x <- list(
+        a1=list(
+            b11=list(c111=1, c112=2,c113=3),
+            b12=list(c121=4, c122=5,c123=6)),
+        a2=list(
+            b21=list(c211=7, c212=8,c213=9),
+            b22=list(c221=10, c222=11,c223=12))
+        )
+
+    y <- back_apply_at(x, function(x) x+1, 1)
+    expect_equal(y$a2$b22$c221, 11)
+    expect_equal(y$a1$b11$c113, 4)
+    expect_identical(y$a1$b12, list(c121=5, c122=6,c123=7))
+
+    z <- back_apply_at(x, class, 2)
+    expect_equal(z$a1$b11, "list")
+    expect_equal(z$a2$b21, "list")
+    expect_error(z$a1$b11$c111)
+
+    zz <- back_apply_at(x, length, 3)
+    expect_equal(zz$a1, 2)
+    expect_equal(zz$a2, 2)
+    expect_error(zz$a2$b21)
+    expect_error(zz$a1$b12$c121)
+})
