@@ -707,3 +707,69 @@ analysis_info <- function(example, name_of_group = 'name', name_of_meta = 'meta'
 
     subset(info_df, select = -index)
 }
+
+#' Extract analysis_result from a list of analysis_results by matching names and values
+#'
+#' The function returns a list of all analysis_results in the input list that match the values with names specified via keywords parameters of the function.
+#' If no value matches the specified name in any analysis_result containing in the given list or
+#' the specified name does not existed in any analysis_result, the function returns an empty list `list()`.
+#'
+#' @param results A list of analysis_result
+#' @param ... Keywords parameters with the name and value matching the element in analysis result to be extracted
+#' @return A list of matched analysis results
+#' @examples
+#' \dontrun{
+#' results <- list(
+#'     analysis_result(
+#'         name = 'trt',
+#'         est = 1,
+#'         se = 2,
+#'         df = 3,
+#'         meta = list(visit = 'vis1')
+#'     )
+#' )
+#'
+#' extract_analysis_result(results, name = 'trt')
+#' extract_analysis_result(results, est = 1)
+#' extract_analysis_result(results, name = 'trt', meta = list(visit = 'vis1'))
+#' extract_analysis_result(results, name = 'trt2')
+#
+#' }
+extract_analysis_result <- function(results, ...){
+    dots <- list(...)
+    meta <- list()
+    has_meta <- FALSE
+    if ('meta' %in% names(dots)) {
+        meta <- dots[['meta']]
+        dots[['meta']] <- NULL
+        has_meta <- TRUE
+    }
+
+    names_match_values <- function(obj, named_values=dots) {
+        mapply(function(label, value) obj[[label]] == value,
+            names(named_values), named_values, SIMPLIFY = TRUE, USE.NAMES = FALSE)
+    }
+
+    extract_match <- function(obj, named_values=dots, constrain = identity) {
+        Filter(function(item) all(
+            names_match_values(constrain(item), named_values)),
+            obj)
+    }
+
+    search_in_meta <- function(obj) obj[['meta']]
+
+    extract_meta <- function(obj) extract_match(obj, named_values = meta, constrain = search_in_meta)
+
+    tryCatch({
+            matches_except_meta <- extract_match(results)
+
+            if (has_meta) {
+                extract_meta(matches_except_meta)
+            } else {
+                matches_except_meta
+            }
+        },
+        warning = function(w) {
+            list()
+        })
+}
