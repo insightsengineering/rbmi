@@ -49,15 +49,6 @@
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
-<!-- start_releases -->
-<li class="dropdown">
-	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-Other releases
-<span class="caret"></span></a><ul class="dropdown-menu" role="menu">
-   <li><a href="../index.html">latest</a></li>
-   <li><a href="..//index.html"></a></li>
-</ul></li>
-<!-- end_releases -->
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
@@ -328,7 +319,7 @@ For the purpose of this vignette, we simulate data similarly to the simulation s
 <span class="co">#&gt;    lsm_alt_5   5.9    0.608  4.699   7.101   &lt;0.001 </span>
 <span class="co">#&gt;      trt_6    -4.537  0.954  -6.42   -2.655  &lt;0.001 </span>
 <span class="co">#&gt;    lsm_ref_6  11.049  0.666  9.735   12.362  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_6  6.511   0.674  5.181   7.842   &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_6  6.511   0.674  5.181   7.841   &lt;0.001 </span>
 <span class="co">#&gt;   --------------------------------------------------</span></code></pre></div>
 <p>This last output gives an estimated difference of
 -4.537 (95% CI -6.420 to -2.655)
@@ -392,13 +383,13 @@ Finally, <code>update_strategies</code> cannot be applied if the timing of any o
 <span class="co">#&gt;    lsm_alt_3  4.077   0.432  3.225    4.93   &lt;0.001 </span>
 <span class="co">#&gt;      trt_4    -2.529  0.686  -3.883  -1.175  &lt;0.001 </span>
 <span class="co">#&gt;    lsm_ref_4  7.637   0.495  6.659   8.614   &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_4  5.108   0.492  4.138   6.078   &lt;0.001 </span>
-<span class="co">#&gt;      trt_5    -3.523  0.856  -5.212  -1.833  &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_4  5.108   0.491  4.138   6.078   &lt;0.001 </span>
+<span class="co">#&gt;      trt_5    -3.523  0.856  -5.213  -1.833  &lt;0.001 </span>
 <span class="co">#&gt;    lsm_ref_5  9.554   0.61   8.351   10.758  &lt;0.001 </span>
 <span class="co">#&gt;    lsm_alt_5  6.032   0.611  4.827   7.237   &lt;0.001 </span>
 <span class="co">#&gt;      trt_6    -4.36   0.952  -6.238  -2.482  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_ref_6  11.003  0.676  9.669   12.338  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_6  6.643   0.687  5.287     8     &lt;0.001 </span>
+<span class="co">#&gt;    lsm_ref_6  11.003  0.676  9.669   12.337  &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_6  6.643   0.687  5.286     8     &lt;0.001 </span>
 <span class="co">#&gt;   --------------------------------------------------</span></code></pre></div>
 <p>For imputations under a jump to reference assumption, we get an estimated difference of
 -4.360 (95% CI -6.238 to -2.482)
@@ -465,7 +456,7 @@ A case study which implements this proposal and compares it to reference-based i
 <span class="co">#&gt;      trt_1    -0.491  0.515  -1.507  0.524   0.341  </span>
 <span class="co">#&gt;    lsm_ref_1  2.623   0.362  1.908   3.338   &lt;0.001 </span>
 <span class="co">#&gt;    lsm_alt_1  2.131   0.366  1.409   2.854   &lt;0.001 </span>
-<span class="co">#&gt;      trt_2    0.018   0.55   -1.066  1.103   0.974  </span>
+<span class="co">#&gt;      trt_2    0.018   0.55   -1.067  1.103   0.974  </span>
 <span class="co">#&gt;    lsm_ref_2  3.697   0.382  2.943    4.45   &lt;0.001 </span>
 <span class="co">#&gt;    lsm_alt_2  3.715   0.394  2.936   4.493   &lt;0.001 </span>
 <span class="co">#&gt;      trt_3    -1.802  0.614  -3.014  -0.59   0.004  </span>
@@ -474,10 +465,10 @@ A case study which implements this proposal and compares it to reference-based i
 <span class="co">#&gt;      trt_4    -2.543  0.704  -3.932  -1.154  &lt;0.001 </span>
 <span class="co">#&gt;    lsm_ref_4  7.609   0.486   6.65   8.568   &lt;0.001 </span>
 <span class="co">#&gt;    lsm_alt_4  5.066   0.516  4.046   6.086   &lt;0.001 </span>
-<span class="co">#&gt;      trt_5    -3.739  0.879  -5.475  -2.003  &lt;0.001 </span>
+<span class="co">#&gt;      trt_5    -3.739  0.879  -5.475  -2.004  &lt;0.001 </span>
 <span class="co">#&gt;    lsm_ref_5  9.499   0.606  8.302   10.695  &lt;0.001 </span>
 <span class="co">#&gt;    lsm_alt_5   5.76   0.636  4.502   7.017   &lt;0.001 </span>
-<span class="co">#&gt;      trt_6    -4.685  0.98   -6.621  -2.748  &lt;0.001 </span>
+<span class="co">#&gt;      trt_6    -4.685  0.98   -6.622  -2.748  &lt;0.001 </span>
 <span class="co">#&gt;    lsm_ref_6  10.988  0.667   9.67   12.305  &lt;0.001 </span>
 <span class="co">#&gt;    lsm_alt_6  6.303   0.712  4.894   7.711   &lt;0.001 </span>
 <span class="co">#&gt;   --------------------------------------------------</span></code></pre></div>
@@ -526,7 +517,7 @@ As an example, the user can check how the CIR strategy was implemented by lookin
 <span class="co">#&gt;     pars &lt;- list(mu = mu, sigma = sigma)</span>
 <span class="co">#&gt;     return(pars)</span>
 <span class="co">#&gt; }</span>
-<span class="co">#&gt; &lt;bytecode: 0x558d8b3884d8&gt;</span>
+<span class="co">#&gt; &lt;bytecode: 0x560d49588020&gt;</span>
 <span class="co">#&gt; &lt;environment: namespace:rbmi&gt;</span></code></pre></div>
 <p>To further illustrate this for a simple example, assume that a new strategy is to be implemented as follows:
 - The marginal mean of the imputation distribution is equal to the marginal mean trajectory for the subject according to their assigned group and covariates up to the ICE.
@@ -749,19 +740,19 @@ Specifically, assume that a fixed “worsening adjustment” of +5 points is app
 <span class="co">#&gt;      trt_1    -0.482  0.524  -1.516  0.552   0.359  </span>
 <span class="co">#&gt;    lsm_ref_1  2.718   0.37   1.987   3.448   &lt;0.001 </span>
 <span class="co">#&gt;    lsm_alt_1  2.235   0.37   1.505   2.966   &lt;0.001 </span>
-<span class="co">#&gt;      trt_2    -0.016  0.56   -1.12   1.089   0.978  </span>
+<span class="co">#&gt;      trt_2    -0.016  0.56   -1.12   1.088   0.978  </span>
 <span class="co">#&gt;    lsm_ref_2  3.907   0.396  3.125   4.688   &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_2  3.891   0.396  3.111   4.671   &lt;0.001 </span>
-<span class="co">#&gt;      trt_3    -1.684  0.641  -2.949  -0.42   0.009  </span>
+<span class="co">#&gt;    lsm_alt_2  3.891   0.395  3.111   4.671   &lt;0.001 </span>
+<span class="co">#&gt;      trt_3    -1.684  0.641  -2.948  -0.42   0.009  </span>
 <span class="co">#&gt;    lsm_ref_3  6.092   0.452  5.201   6.983   &lt;0.001 </span>
 <span class="co">#&gt;    lsm_alt_3  4.408   0.452  3.515    5.3    &lt;0.001 </span>
 <span class="co">#&gt;      trt_4    -2.359  0.741  -3.821  -0.897  0.002  </span>
 <span class="co">#&gt;    lsm_ref_4  7.951   0.526  6.913    8.99   &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_4  5.593   0.522  4.563   6.623   &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_4  5.593   0.522  4.563   6.622   &lt;0.001 </span>
 <span class="co">#&gt;      trt_5    -3.34   0.919  -5.153  -1.526  &lt;0.001 </span>
 <span class="co">#&gt;    lsm_ref_5  9.899   0.643  8.631   11.168  &lt;0.001 </span>
 <span class="co">#&gt;    lsm_alt_5  6.559   0.653  5.271   7.848   &lt;0.001 </span>
-<span class="co">#&gt;      trt_6    -4.21   1.026  -6.236  -2.184  &lt;0.001 </span>
+<span class="co">#&gt;      trt_6    -4.21   1.026  -6.236  -2.185  &lt;0.001 </span>
 <span class="co">#&gt;    lsm_ref_6  11.435  0.718  10.019  12.851  &lt;0.001 </span>
 <span class="co">#&gt;    lsm_alt_6  7.225   0.725  5.793   8.656   &lt;0.001 </span>
 <span class="co">#&gt;   --------------------------------------------------</span></code></pre></div>
@@ -825,7 +816,7 @@ Specifically, assume that a fixed “worsening adjustment” of +5 points is app
 <span class="co">#&gt;   delta_control delta_intervention trt_effect_6 pval_6 pval        </span>
 <span class="co">#&gt;           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>       </span>
 <span class="co">#&gt; <span style="color: #BCBCBC;">1</span>            -<span style="color: #BB0000;">5</span>                 15        -<span style="color: #BB0000;">1.99</span> 0.093<span style="text-decoration: underline;">5</span> 0.05 - &lt;0.20</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">2</span>            -<span style="color: #BB0000;">3</span>                 15        -<span style="color: #BB0000;">2.15</span> 0.070<span style="text-decoration: underline;">4</span> 0.05 - &lt;0.20</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">2</span>            -<span style="color: #BB0000;">3</span>                 15        -<span style="color: #BB0000;">2.15</span> 0.070<span style="text-decoration: underline;">3</span> 0.05 - &lt;0.20</span>
 <span class="co">#&gt; <span style="color: #BCBCBC;">3</span>            -<span style="color: #BB0000;">1</span>                 15        -<span style="color: #BB0000;">2.31</span> 0.052<span style="text-decoration: underline;">6</span> 0.05 - &lt;0.20</span>
 
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">tipp_frame</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">delta_control</span>, <span class="va">delta_intervention</span>, fill <span class="op">=</span> <span class="va">pval</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -942,7 +933,7 @@ reset the delta values for the control group back to 0:</p>
 <span class="co">#&gt;    lsm_alt_1  2.173   0.363  1.458   2.889   &lt;0.001 </span>
 <span class="co">#&gt;      trt_2    0.072   0.546  -1.006   1.15   0.896  </span>
 <span class="co">#&gt;    lsm_ref_2  3.708   0.387  2.945   4.471   &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_2   3.78   0.386  3.018   4.542   &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_2   3.78   0.386  3.018   4.541   &lt;0.001 </span>
 <span class="co">#&gt;      trt_3    -1.507  0.626  -2.743  -0.272  0.017  </span>
 <span class="co">#&gt;    lsm_ref_3  5.844   0.441  4.973   6.714   &lt;0.001 </span>
 <span class="co">#&gt;    lsm_alt_3  4.336   0.442  3.464   5.209   &lt;0.001 </span>
@@ -952,9 +943,9 @@ reset the delta values for the control group back to 0:</p>
 <span class="co">#&gt;      trt_5    -2.938  0.916  -4.746  -1.13   0.002  </span>
 <span class="co">#&gt;    lsm_ref_5  9.558   0.641  8.293   10.823  &lt;0.001 </span>
 <span class="co">#&gt;    lsm_alt_5   6.62   0.651  5.335   7.905   &lt;0.001 </span>
-<span class="co">#&gt;      trt_6    -3.53   1.045  -5.592  -1.469  0.001  </span>
+<span class="co">#&gt;      trt_6    -3.53   1.044  -5.591  -1.469  0.001  </span>
 <span class="co">#&gt;    lsm_ref_6  11.045  0.73   9.604   12.486  &lt;0.001 </span>
-<span class="co">#&gt;    lsm_alt_6  7.515   0.738  6.058   8.972   &lt;0.001 </span>
+<span class="co">#&gt;    lsm_alt_6  7.515   0.738  6.058   8.971   &lt;0.001 </span>
 <span class="co">#&gt;   --------------------------------------------------</span></code></pre></div>
 </div>
 </div>
@@ -975,7 +966,7 @@ Guizzaro, Lorenzo, Frank Pétavy, Robin Ristl, and Ciro Gallo. 2021. <span>“Th
 Noci, Alessandro, Marcel Wolbers, Markus Abt, Corine Baayen, Hans Ulrich Burger, Man Jin, and Weining Zhao Robieson. 2021. <span>“A Comparison of Estimand and Estimation Strategies for Clinical Trials in Early Parkinson’s Disease.”</span> <a href="https://arxiv.org/abs/2112.03700" class="external-link">https://arxiv.org/abs/2112.03700</a>.
 </div>
 <div id="ref-Wolbers2021" class="csl-entry">
-Wolbers, Marcel, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, and Jonathan W Bartlett. 2022. <span>“Standard and Reference-Based Conditional Mean Imputation.”</span> <a href="https://arxiv.org/abs/2109.11162" class="external-link">https://arxiv.org/abs/2109.11162</a>.
+Wolbers, Marcel, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, and Jonathan W. Bartlett. 2022. <span>“Standard and Reference-Based Conditional Mean Imputation.”</span> <em>Pharmaceutical Statistics</em>. <a href="https://doi.org/10.1002/pst.2234" class="external-link">https://doi.org/10.1002/pst.2234</a>.
 </div>
 </div>
 </div>
