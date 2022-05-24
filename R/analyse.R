@@ -737,23 +737,53 @@ analysis_info <- function(example, name_of_group = 'name', name_of_meta = 'meta'
 #' }
 extract_analysis_result <- function(results, ...){
     dots <- list(...)
-    assert_that(all(!is.null(names(dots)),
-                    length(names(dots)) > 0,
-                    !any(grepl("^$", names(dots)))),
-                msg = "Invalide parameters. Only key-word parameters are valide.")
+
+    assert_keyword <- function(obj, msg) {
+        assert_that(all(!is.null(names(obj)),
+                        length(names(obj)) > 0,
+                        !any(grepl("^$", names(dots)))),
+                    msg = msg)
+    }
+
+    assert_keyword(dots, "Invalide parameters. Only key-word parameters are valide. -- EXTRACT_ANALYSIS_RESULT")
 
     meta <- list()
     has_meta <- FALSE
-    if ('meta' %in% names(dots)) {
+    if (('meta' %in% names(dots)) & is.list(dots[['meta']])) {
+        assert_keyword(dots[['meta']],
+                       "Invalide parameters. When `meta` specified as a list, it must be a named list -- EXTRACT_ANALYSIS_RESULT")
         meta <- dots[['meta']]
         dots[['meta']] <- NULL
         has_meta <- TRUE
     }
 
+    # decorator to make a high-order function returns TRUE/FALSE instead of logical(0)
+    logical0_to_TrueFalse <- function(f) {
+        function(...) {
+            g <- f(...)
+            function(...) isTRUE(g(...))
+        }
+    }
+
+    # check if object's element with given name matches to specified value
+    objname_match_value <- function(obj) {
+        function(name, value) {
+            if (is.null(value)) {
+                is.null(obj[[name]])
+            } else if (is.na(value)){
+                is.na(obj[[name]])
+            } else {
+                obj[[name]] == value
+            }
+        }
+    }
+
+    # decorated version of objname_match_value
+    is_objname_match_value <- logical0_to_TrueFalse(objname_match_value)
+
     names_match_values <- function(obj, named_values=dots) {
-        mapply(function(label, value) isTRUE(obj[[label]] == value),
-            names(named_values), named_values, SIMPLIFY = TRUE, USE.NAMES = FALSE)
-    } # When SIMPLIFY = TRUE, coercion can happen on logical(0) which generates WARNINGS. isTRUE is used to avoid coercion and make the code more robust
+        mapply(is_objname_match_value(obj), names(named_values), named_values, SIMPLIFY = TRUE, USE.NAMES = FALSE)
+    } # When SIMPLIFY = TRUE, coercion can happen on logical(0) which generates WARNINGS. is_objname_match_value is decorated with isTRUE to be more robust
 
     extract_match <- function(obj, named_values=dots, constrain = identity) {
         Filter(function(item) all(
@@ -772,9 +802,10 @@ extract_analysis_result <- function(results, ...){
                 extract_meta(matches_except_meta)
             } else {
                 matches_except_meta
-            }
+           }
         },
         warning = function(w) {
+            message(w)
             list()
         })
 }
