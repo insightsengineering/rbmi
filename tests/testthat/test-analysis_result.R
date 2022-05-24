@@ -229,3 +229,185 @@ test_that("analysis_info works as expected", {
     expect_true(is.na(x[[4, 4]]))
     expect_true(is.na(x[[1, 5]]))
 })
+
+test_that("extract_analysis_result works as expected", {
+
+    x1 <- analysis_result(name ='a', est =  1, se = 2)
+    x2 <- analysis_result(name ='b', est =  2)
+    x3 <- analysis_result(name ='c', est =  3, se = NA, meta = list(visit = 5))
+    x4 <- analysis_result(name ='d', est =  4, se = 3, meta = list(visit = 15))
+    x5 <- analysis_result(name ='e', est =  5, se = 4, df = 1, meta = list(visit = 20, abc = 7))
+    x6 <- analysis_result(name ='f', est =  6, se = 5, df = 2, meta = list(visit = 25, abc = 14))
+    x7 <- analysis_result(name ='g', est =  7, se = 5, df = 3, meta = list(visit = 30, abc = 14))
+    x8 <- analysis_result(name ='h', est =  8, se = 5, df = 3, meta = list(abc = 21, efg = 8))
+    x9 <- analysis_result(name ='i', est =  8, se = 5, df = 3, meta = list(visit = 20, abc = 28, efg = 16))
+    x10 <- analysis_result(name ='a', est = 8, meta = list(mfn = 1, klt = 's'))
+    x11 <- analysis_result(name ='b', est = 9, meta = list(mfn = 2, klt = 's1'))
+    x12 <- analysis_result(name ='m', est = 10, meta = list(mfn = 2, klt = 's2'))
+
+    x <-list(x1, x2, x3,
+             x4, x5, x6,
+             x7, x8, x9,
+             x10, x11, x12)
+
+    # single match
+    actual <- extract_analysis_result(x, name = 'a')
+    expect <- list(x1, x10)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, name = 'd')
+    expect <- list(x4)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, est = 2)
+    expect <- list(x2)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, est = 7)
+    expect <- list(x7)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, est = 8)
+    expect <- list(x8, x9, x10)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, se = 3)
+    expect <- list(x4)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, se = 5)
+    expect <- list(x6, x7, x8, x9)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, df = 1)
+    expect <- list(x5)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, df = 3)
+    expect <- list(x7, x8, x9)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, meta = list(visit = 5))
+    expect <- list(x3)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, meta = list(visit = 15))
+    expect <- list(x4)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, meta = list(visit = 20))
+    expect <- list(x5, x9)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, meta = list(abc = 28))
+    expect <- list(x9)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, meta = list(abc = 14))
+    expect <- list(x6, x7)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, name = 'g', meta = list(abc = 14))
+    expect <- list(x7)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, meta = list(efg = 16))
+    expect <- list(x9)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, meta = list(mfn = 1))
+    expect <- list(x10)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, meta = list(mfn = 2))
+    expect <- list(x11, x12)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, meta = list(klt = 's1'))
+    expect <- list(x11)
+    expect_equal(actual, expect)
+
+    # multiple match
+    actual <- extract_analysis_result(x, name = 'a', se = 2)
+    expect <- list(x1)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, name = 'a', meta = list(klt = 's'))
+    expect <- list(x10)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, name = 'a', est = 1, meta = list(klt = 's'))
+    expect <- list()
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, se = 5, df = 3)
+    expect <- list(x7, x8, x9)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, se = 5, df = 3, meta = list(abc = 28))
+    expect <- list(x9)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, name = 'b', meta = list(mfn = 2))
+    expect <- list(x11)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, est = 9, se = 5, df = 2, meta = list(visit = 25))
+    expect <- list()
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, meta = list(visit = 30, abc = 14))
+    expect <- list(x7)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, se = NA, meta = list(visit = 5))
+    expect <- list(x3)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, se = NA, meta = list(visit = 5, abc = 'q'))
+    expect <- list()
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, name ='a', est = 8, meta = list(klt = 's'))
+    expect <- list(x10)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, name ='a', est = 8, meta = list(klt = 's1'))
+    expect <- list()
+    expect_equal(actual, expect)
+
+    # Special input
+    actual <- extract_analysis_result(x, se = NA)
+    expect <- list(x3)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, se = NULL)
+    expect <- list(x2, x10, x11, x12)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, se = NULL, df = NULL)
+    expect <- list(x2, x10, x11, x12)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, meta = NULL)
+    expect <- list(x1, x2)
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, meta = NA)
+    expect <- list()
+    expect_equal(actual, expect)
+
+    actual <- extract_analysis_result(x, meta = 'abc')
+    expect <- list()
+    expect_equal(actual, expect)
+
+    expect_error(extract_analysis_result(x, meta = list('abc')),
+                 "Invalide parameters")
+
+    expect_error(extract_analysis_result(x, meta = list(NULL)),
+                 "Invalide parameters")
+
+    expect_error(extract_analysis_result(x, meta = list(NA)),
+                 "Invalide parameters")
+    }
+)
