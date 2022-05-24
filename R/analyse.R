@@ -742,7 +742,8 @@ extract_analysis_result <- function(results, ...){
         assert_that(all(!is.null(names(obj)),
                         length(names(obj)) > 0,
                         !any(grepl("^$", names(dots)))),
-                    msg = msg)
+                    msg = msg
+                    )
     }
 
     assert_keyword(dots, "Invalide parameters. Only key-word parameters are valide. -- EXTRACT_ANALYSIS_RESULT")
@@ -782,13 +783,18 @@ extract_analysis_result <- function(results, ...){
     is_objname_match_value <- logical0_to_TrueFalse(objname_match_value)
 
     names_match_values <- function(obj, named_values=dots) {
-        mapply(is_objname_match_value(obj), names(named_values), named_values, SIMPLIFY = TRUE, USE.NAMES = FALSE)
-    } # When SIMPLIFY = TRUE, coercion can happen on logical(0) which generates WARNINGS. is_objname_match_value is decorated with isTRUE to be more robust
+        mapply(
+            is_objname_match_value(obj),
+            names(named_values),
+            named_values,
+            SIMPLIFY = TRUE, USE.NAMES = FALSE)
+    } # When SIMPLIFY = TRUE, coercion can happen on logical(0) which generates WARNINGS. `is_objname_match_value` is decorated with `isTRUE` to be more robust
 
     extract_match <- function(obj, named_values=dots, constrain = identity) {
-        Filter(function(item) all(
-            names_match_values(constrain(item), named_values)),
-            obj)
+        Filter(
+            function(item) all(names_match_values(constrain(item), named_values)),
+            obj
+        )
     }
 
     search_in_meta <- function(obj) obj[['meta']]
