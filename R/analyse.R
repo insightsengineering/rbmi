@@ -741,7 +741,7 @@ extract_analysis_result <- function(results, ...){
     assert_keyword <- function(obj, msg) {
         assert_that(all(!is.null(names(obj)),
                         length(names(obj)) > 0,
-                        !any(grepl("^$", names(dots)))),
+                        !any(grepl("^$", names(obj)))),
                     msg = msg
                     )
     }
