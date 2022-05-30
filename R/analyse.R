@@ -448,7 +448,15 @@ validate_analyse_pars <- function(results, pars) {
         msg = "Individual analysis result must be type of analysis_result"
     )
 
-    results_names <- back_apply_at(results, function(x) x[['name']], 2) # get the "name" element of 2nd deepest level list which corresponds to analysis_result
+    compose <- function(f, g) function(...) f(g(...))
+
+    process_2nd_last_level <- function(process) function (nestlst) back_apply_at(nestlst, process, 2)
+    get_names <- process_2nd_last_level(function(x) x [['name']])
+    dedup <- process_2nd_last_level(unique)
+
+    get_unique_names <- compose(dedup, get_names)
+
+    results_names <- get_unique_names(results)
     results_names_flat <- unlist(results_names, use.names = FALSE)
     results_names_count <- table(results_names_flat)
 
