@@ -4,13 +4,13 @@
 \alias{transpose_results}
 \title{Transpose results object}
 \usage{
-transpose_results(results, components)
+transpose_results(results, non_group_keys = c("est", "se", "df"))
 }
 \arguments{
 \item{results}{A list of results.}
 
-\item{components}{a character vector of components to extract
-(i.e. \verb{"est", "se"}).}
+\item{non_group_keys}{a character vector of variables that are not used to group results usually variables of the numeric analysis results
+(Default: \verb{"est", "se", "df}).}
 }
 \description{
 Transposes a Results object (as created by \code{\link[=analyse]{analyse()}}) in order to group

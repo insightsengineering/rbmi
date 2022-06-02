@@ -72,10 +72,7 @@ pool <- function(
 
     pool_type <- class(results$results)[[1]]
 
-    results_transpose <- transpose_results(
-        results$results,
-        get_pool_components(pool_type)
-    )
+    results_transpose <- transpose_results(results$results)
 
     pars <- lapply(
         results_transpose,
@@ -608,8 +605,8 @@ parametric_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
 #' the same estimates together into vectors.
 #'
 #' @param results A list of results.
-#' @param components a character vector of components to extract
-#' (i.e. `"est", "se"`).
+#' @param non_group_keys a character vector of variables that are not used to group results usually variables of the numeric analysis results
+#' (Default: `"est", "se", "df`).
 #'
 #' @details
 #'
@@ -666,12 +663,12 @@ parametric_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
 #'      )
 #' )
 #' ```
-transpose_results <- function(results, components) {
+transpose_results <- function(results, non_group_keys=c("est", "se", "df")) {
     lsts2df <- function(lsts) base_bind_rows(lapply(lsts, analysis_info))
     results_df <- lsts2df(results)
-    keys <- setdiff(names(results_df), components)
+    group_keys <- setdiff(names(results_df), non_group_keys)
     vec2form <- function(vec) eval(parse(text = paste("~", paste(vec, collapse = ' + '))))
-    split(results_df, vec2form(keys))
+    split(results_df, vec2form(group_keys))
 }
 
 
