@@ -618,23 +618,31 @@ parametric_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
 #' ```
 #' x <- list(
 #'     list(
-#'         "trt1" = list(
+#'      analysis_result(
+#'             name = 'trt',
 #'             est = 1,
-#'             se  = 2
+#'             se  = 2,
+#'             meta = list(visit = 1)
 #'         ),
-#'         "trt2" = list(
+#'      analysis_result(
+#'             name = 'trt',
 #'             est = 3,
-#'             se  = 4
+#'             se  = 4,
+#'             meta = list(visit = 2)
 #'         )
 #'     ),
 #'     list(
-#'         "trt1" = list(
+#'      analysis_result(
+#'             name = 'trt',
 #'             est = 5,
-#'             se  = 6
+#'             se  = 6,
+#'             meta = list(visit = 1)
 #'         ),
-#'         "trt2" = list(
-#'             est = 7,
-#'             se  = 8
+#'      analysis_result(
+#'            name = 'trt',
+#'            est = 7,
+#'            se  = 8,
+#'            meta = list(visit = 2)
 #'         )
 #'     )
 #' )
@@ -644,30 +652,26 @@ parametric_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
 #'
 #' ```
 #' list(
-#'     trt1 = list(
+#'     trt.1 = data.frame(
+#'      list(
 #'         est = c(1,5),
 #'         se = c(2,6)
+#'         ),
 #'     ),
-#'     trt2 = list(
+#'     trt.2 = data.frame(
+#'      list(
 #'         est = c(3,7),
 #'         se = c(4,8)
-#'     )
+#'         )
+#'      )
 #' )
 #' ```
 transpose_results <- function(results, components) {
-    elements <- names(results[[1]])
-    results_transpose <- list()
-    for (element in elements) {
-        results_transpose[[element]] <- list()
-        for (comp in components) {
-            results_transpose[[element]][[comp]] <- vapply(
-                results,
-                function(x) x[[element]][[comp]],
-                numeric(1)
-            )
-        }
-    }
-    return(results_transpose)
+    lsts2df <- function(lsts) base_bind_rows(lapply(lsts, analysis_info))
+    results_df <- lsts2df(results)
+    keys <- setdiff(names(results_df), components)
+    vec2form <- function(vec) eval(parse(text = paste("~", paste(vec, collapse = ' + '))))
+    split(results_df, vec2form(keys))
 }
 
 
