@@ -659,7 +659,7 @@ namechecker <- function(..., optional = NULL) {
         # checker does not check against optional names. Only names in musthave have to be presented in the object
         musthave_in_objnames <- chker_template(musthave, .optional = NULL)
 
-        # Validator to check if object's name belongs to musthave + optional names (simply swap the order of arguments from present)
+        # Validator to check if object's name belongs to musthave + optional names (simply swap the order of arguments in musthave_in_objnames: B_in_A = swap(A_in_B))
         objnames_in_musthave <- chker_template(musthave, swap)
 
         dispatch <- list(
