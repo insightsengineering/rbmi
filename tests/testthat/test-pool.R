@@ -179,7 +179,7 @@ test_that("pool", {
     vals <- rnorm(n, mu, sd)
 
     runanalysis <- function(x) {
-        list("p1" = list(est = mean(x), se = sqrt(var(x) / length(x)), df = NA))
+        list(analysis_result(name = "p1", est = mean(x), se = sqrt(var(x) / length(x)), df = NA))
     }
 
 
@@ -247,7 +247,7 @@ test_that("pool", {
 
 test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     set.seed(101)
-  
+
     mu <- 0
     sd <- 1
     n <- 2000
@@ -255,7 +255,7 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     real_mu <- mean(vals)
 
     runanalysis <- function(x) {
-        list("p1" = list(est = mean(x), se = NA, df = NA))
+        list(analysis_result(name = "p1", est = mean(x), se = NA, df = NA))
     }
 
     results_bayes <- as_analysis(
@@ -298,7 +298,7 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     )
 
     runanalysis <- function(x) {
-        list("p1" = list(est = mean(x), se = NA, df = Inf))
+        list(analysis_result(name = "p1", est = mean(x), se = NA, df = Inf))
     }
 
     results_bayes <- as_analysis(
@@ -340,7 +340,7 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
         tolerance = 1e-2
     )
 })
-  
+
   test_that("pool BMLMI estimates", {
     set.seed(100)
 
@@ -366,7 +366,7 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     ), recursive = FALSE)
 
     runanalysis <- function(x) {
-        list("p1" = list(est = mean(x), se = sqrt(var(x) / length(x)), df = NA))
+        list(analysis_result(name = "p1", est = mean(x), se = sqrt(var(x) / length(x)), df = NA))
     }
 
 
@@ -830,7 +830,7 @@ test_that("condmean doesn't use first element in CI", {
     n <- 200
 
     runanalysis <- function(x) {
-        list("p1" = list(est = mean(x)))
+        list(analysis_result(name = "p1", est = mean(x)))
     }
 
     set.seed(2040)
@@ -845,12 +845,12 @@ test_that("condmean doesn't use first element in CI", {
 
 
     pooled_1 <- pool(x)
-    expect_equal(pooled_1$pars$p1$est, x$results[[1]]$p1$est)
+    expect_equal(pooled_1$pars$p1$est, extract_analysis_result(x$results[[1]], name = 'p1')[[1]]$est)
 
-    x$results[[1]]$p1$est <- 9999
+    x$results[[1]][[1]]$est <- 9999
 
     pooled_2 <- pool(x)
-    expect_equal(pooled_2$pars$p1$est, x$results[[1]]$p1$est)
+    expect_equal(pooled_2$pars$p1$est, extract_analysis_result(x$results[[1]], name = 'p1')[[1]]$est)
 
     pooled_1$pars$p1$est <- NULL
     pooled_2$pars$p1$est <- NULL
