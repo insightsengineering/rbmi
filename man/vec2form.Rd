@@ -9,11 +9,11 @@ vec2form(chr, bothside = FALSE)
 \arguments{
 \item{chr}{character vector to be converted}
 
-\item{bothside}{A logical variable indicating whether to generate fomula with both right and left side. Default: FALSE - only right side formula will be generated}
+\item{bothside}{A logical variable indicating whether to generate fomula with both right and left side. Default: \code{FALSE} - only right side formula will be generated}
 }
 \value{
-an object of formula class representing formula ~ chr[\link{1}] + chr[\link{2}] + ...
+an object of formula class representing formula \code{~ chr[[1]] + chr[[2]] + ...}
 }
 \description{
-Convert character vector c('a1', 'a2') to formula ~ a1 + a2
+Convert character vector \code{c('a1', 'a2')} to formula \code{~ a1 + a2}
 }
