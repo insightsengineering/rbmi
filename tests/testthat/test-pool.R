@@ -272,7 +272,8 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
 
     expect_equal(
         bayes$pars$p1,
-        list(est = real_mu,
+        list(name = 'p1',
+             est = real_mu,
              ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
              pvalue = as.numeric(NA)),
@@ -281,7 +282,8 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
 
     expect_equal(
         bayes2$pars$p1,
-        list(est = real_mu,
+        list(name = 'p1',
+             est = real_mu,
              ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
              pvalue = as.numeric(NA)),
@@ -290,7 +292,8 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
 
     expect_equal(
         bayes3$pars$p1,
-        list(est = real_mu,
+        list(name = 'p1',
+             est = real_mu,
              ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
              pvalue = as.numeric(NA)),
@@ -315,7 +318,8 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
 
     expect_equal(
         bayes$pars$p1,
-        list(est = real_mu,
+        list(name = 'p1',
+             est = real_mu,
              ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
              pvalue = as.numeric(NA)),
@@ -324,7 +328,8 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
 
     expect_equal(
         bayes2$pars$p1,
-        list(est = real_mu,
+        list(name = 'p1',
+             est = real_mu,
              ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
              pvalue = as.numeric(NA)),
@@ -333,7 +338,8 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
 
     expect_equal(
         bayes3$pars$p1,
-        list(est = real_mu,
+        list(name = 'p1',
+             est = real_mu,
              ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
              pvalue = as.numeric(NA)),
