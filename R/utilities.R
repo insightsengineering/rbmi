@@ -725,3 +725,36 @@ back_apply_at <- function(lst, f, n) {
            }
     )
 }
+
+#' Convert vector to formula
+#'
+#' Convert character vector c('a1', 'a2') to formula ~ a1 + a2
+#'
+#' @param chr character vector to be converted
+#' @param bothside A logical variable indicating whether to generate fomula with both right and left side. Default: FALSE - only right side formula will be generated
+#' @return an object of formula class representing formula ~ chr[[1]] + chr[[2]] + ...
+vec2form <- function(chr, bothside = FALSE) {
+    prefix = '~'
+    if (bothside) prefix = paste('.', prefix)
+    eval(parse(text = paste(prefix, paste(chr, collapse = ' + '))))
+}
+
+
+#' Reduce a dataframe
+#'
+#' Reduce a data.frame row-wisely by concatenating values within group to list or multiple columns
+#'
+#' @param df A data frame to be reduced
+#' @param keys A character vectors of the group keys when reducing
+#' @param split A logical variable indicating whether to concatenate row-wise information to a list in single column or create multiple columns for each individual rows within group
+#' @return A data frame with reduced information
+reduce_df <- function(df, keys, split = FALSE) {
+    make_concat <- function(f) function(x) f(unique(x))
+    concat <- ife(split, make_concat(c), make_concat(list))
+    pos_process <- ife(split, function(x) do.call(data.frame, x), identity)
+    pos_process(
+        aggregate(vec2form(keys, bothside = TRUE), data = df, FUN =  concat)
+    )
+}
+
+
