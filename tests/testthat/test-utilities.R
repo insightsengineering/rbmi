@@ -396,3 +396,38 @@ test_that("back_apply_at", {
     expect_error(zz$a2$b21)
     expect_error(zz$a1$b12$c121)
 })
+
+
+test_that("vec2form", {
+    x <- vec2form(c('a1', 'a2'))
+    expect_equal(class(x), 'formula')
+    expect_true(is.call(x[2]))
+    expect_equal(deparse(x), "~a1 + a2")
+    }
+)
+
+test_that("reduce_df", {
+    x <- data.frame(a=1, b=c(1,2,3), c=5)
+
+    # concatenate rows to vector
+    y <- reduce_df(x, keys = 'a')
+    expect_equal(y$a, 1)
+    expect_equal(y$b[[1]], c(1,2,3))
+    expect_equal(y$c[[1]], 5)
+
+    y <- reduce_df(x, keys = 'b')
+    expect_equal(y$a, list(1,1,1))
+    expect_equal(y$b, c(1,2,3))
+    expect_equal(y$c, list(5,5,5))
+
+    # split rows to columns
+    y <- reduce_df(x, keys = 'a', split = TRUE)
+    expect_equal(ncol(y), 5)
+    expect_length(grep('b', names(y)), 3)
+    expect_equal(names(y), c('a', 'b.1', 'b.2', 'b.3', 'c'))
+    expect_equal(y$a, 1)
+    expect_equal(y$b.1, 1)
+    expect_equal(y$b.2, 2)
+    expect_equal(y$b.3, 3)
+    expect_equal(y$c, 5)
+})
