@@ -648,8 +648,8 @@ parametric_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
 #' )
 #' ```
 #'
-#' to the following format and stored in the `$$results` element of the poolable object. The element `$meta` contains meta information.
-#' The element `$metakey` contains the column names of the meta information as a character vector
+#' to the following format and stored in the `$results` element of the poolable object. The element `$meta` contains meta information.
+#' The element `$metakeys` contains the names of the meta information as a character vector
 #'
 #' ```
 #' list(
