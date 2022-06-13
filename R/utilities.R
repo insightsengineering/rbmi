@@ -728,11 +728,11 @@ back_apply_at <- function(lst, f, n) {
 
 #' Convert vector to formula
 #'
-#' Convert character vector c('a1', 'a2') to formula ~ a1 + a2
+#' Convert character vector `c('a1', 'a2')` to formula `~ a1 + a2`
 #'
 #' @param chr character vector to be converted
-#' @param bothside A logical variable indicating whether to generate fomula with both right and left side. Default: FALSE - only right side formula will be generated
-#' @return an object of formula class representing formula ~ chr[[1]] + chr[[2]] + ...
+#' @param bothside A logical variable indicating whether to generate fomula with both right and left side. Default: `FALSE` - only right side formula will be generated
+#' @return an object of formula class representing formula `~ chr[[1]] + chr[[2]] + ...`
 vec2form <- function(chr, bothside = FALSE) {
     prefix = '~'
     if (bothside) prefix = paste('.', prefix)
