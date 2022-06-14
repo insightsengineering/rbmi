@@ -16,7 +16,7 @@ sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
 nsamp <- 200
 
 
-expect_pool_est <- function(po, expected, param = "trt_visit_3") {
+expect_pool_est <- function(po, expected, param = "trt.visit_3") {
     expect_contains(
         po$pars[[param]]$ci,
         expected
@@ -27,8 +27,8 @@ expect_pool_est <- function(po, expected, param = "trt_visit_3") {
         po$pars[[param]]$est
     )
 
-    if ("lsm_alt_visit_3" %in% names(po$pars)) {
-        lsm_trt <- (po$pars$lsm_alt_visit_3$est - po$pars$lsm_ref_visit_3$est)
+    if ("lsm_alt.visit_3" %in% names(po$pars)) {
+        lsm_trt <- (po$pars$lsm_alt.visit_3$est - po$pars$lsm_ref.visit_3$est)
 
         expect_within(
             lsm_trt - po$pars[[param]]$est,
@@ -205,7 +205,7 @@ test_that("Basic Usage - Bayesian", {
 
 
 
-test_that("Basic Usage - Condmean", { 
+test_that("Basic Usage - Condmean", {
 
     skip_if_not(is_full_test())
 
@@ -348,10 +348,11 @@ test_that("Custom Strategies and Custom analysis functions", {
         dat <- dat %>% filter(visit == "visit_3")
         mod <- lm(data = dat, outcome ~ group + age + sex)
         list(
-            "treatment_effect" = list(
-                "est" = coef(mod)[[2]],
-                "se" = sqrt(vcov(mod)[2,2]),
-                "df" = df.residual(mod)
+             analysis_result(
+                name = "treatment_effect",
+                est = coef(mod)[[2]],
+                se = sqrt(vcov(mod)[2,2]),
+                df = df.residual(mod)
             )
         )
     }
@@ -527,7 +528,7 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         vars2$group <- "group"
         x_ana <- analyse(x_imp, ancova, vars = vars2)
         x_pl <- pool(x_ana, conf.level = 0.98)
-        x_pl$pars$trt_visit_3$ci
+        x_pl$pars$trt.visit_3$ci
     }
 
     set.seed(2351)
@@ -685,7 +686,8 @@ test_that("rbmi works for one arm trials", {
 
         data_anal <- data[data[[vars$visit]] == "visit_3",][[vars$outcome]]
         res <- list(
-            mean = list(
+            analysis_result(
+                name = 'mean',
                 est = mean(data_anal),
                 se = sd(data_anal) / sqrt(length(data_anal)),
                 df = length(data_anal) - 1
@@ -738,7 +740,7 @@ test_that("rbmi works for one arm trials", {
         mutate(strategy = "MAR")
 
     runtest <- function(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method) {
-        
+
         draw_obj <- draws(
             data = dat,
             data_ice = dat_ice,
@@ -806,10 +808,10 @@ test_that("rbmi works for one arm trials", {
             pooled <- pool(anl_obj)
         }
 
-        expect_length(pooled$pars$mean, 4)
+        expect_length(pooled$pars$mean, 5)
         expect_true(all(!is.null(unlist(pooled$pars$mean))))
         expect_true(all(!is.na(unlist(pooled$pars$mean))))
-        expect_true(all(is.double(unlist(pooled$pars$mean))))
+        expect_true(all(is.double(unlist(pooled$pars$mean[names(pooled$pars$mean) != 'name']))))
     }
 
     method <- method_condmean(type = "jackknife")
@@ -848,10 +850,11 @@ test_that("Three arms trial runs smoothly and gives expected results", {
         data_temp$group <- factor(data_temp$group, levels = c("A", "C"))
         resC <- ancova(data_temp, ...)
 
-        ret_obj <- list(
-            trtB = resB$trt_visit_3,
-            trtC = resC$trt_visit_3
-        )
+        trtB <- extract_analysis_result(resB, name = 'trt', meta = list(visit = 'visit_3'))[[1]]
+
+        trtC <- extract_analysis_result(resC, name = 'trt', meta = list(visit = 'visit_3'))[[1]]
+
+        ret_obj <- list(trtB, trtC)
 
         return(ret_obj)
 
