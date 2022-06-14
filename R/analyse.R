@@ -725,6 +725,7 @@ analysis_info <- function(example, name_of_group = 'name', name_of_meta = 'meta'
 #' @param results A list of analysis_result
 #' @param ... Keywords parameters with the name and value matching the element in analysis result to be extracted
 #' @return A list of matched analysis results
+#' @export
 #' @examples
 #' \dontrun{
 #' results <- list(
@@ -754,20 +755,20 @@ extract_analysis_result <- function(results, ...){
                     )
     }
 
-    assert_keyword(dots, "Invalide parameters. Only key-word parameters are valide. -- EXTRACT_ANALYSIS_RESULT")
+    assert_keyword(dots, "Invalid parameters. Only key-word parameters are valide. -- EXTRACT_ANALYSIS_RESULT")
 
     meta <- list()
     has_meta <- FALSE
     if (('meta' %in% names(dots)) & is.list(dots[['meta']])) {
         assert_keyword(dots[['meta']],
-                       "Invalide parameters. When `meta` specified as a list, it must be a named list -- EXTRACT_ANALYSIS_RESULT")
+                       "Invalid parameters. When `meta` specified as a list, it must be a named list -- EXTRACT_ANALYSIS_RESULT")
         meta <- dots[['meta']]
         dots[['meta']] <- NULL
         has_meta <- TRUE
     }
 
-    # decorator to make a high-order function returns TRUE/FALSE instead of logical(0)
-    logical0_to_TrueFalse <- function(f) {
+    # decorator to make a high-order function returns TRUE/FALSE instead of logical(0) or other types of logical value
+    TRUE_or_FALSE <- function(f) {
         function(...) {
             g <- f(...)
             function(...) isTRUE(g(...))
@@ -788,7 +789,7 @@ extract_analysis_result <- function(results, ...){
     }
 
     # decorated version of objname_match_value
-    is_objname_match_value <- logical0_to_TrueFalse(objname_match_value)
+    is_objname_match_value <- TRUE_or_FALSE(objname_match_value)
 
     names_match_values <- function(obj, named_values=dots) {
         mapply(
