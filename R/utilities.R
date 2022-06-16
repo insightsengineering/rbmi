@@ -753,8 +753,6 @@ reduce_df <- function(df, keys, split = FALSE) {
     concat <- ife(split, make_concat(c), make_concat(list))
     pos_process <- ife(split, function(x) do.call(data.frame, x), identity)
     pos_process(
-        aggregate(vec2form(keys, bothside = TRUE), data = df, FUN =  concat)
+        aggregate(vec2form(keys, bothside = TRUE), data = df, FUN =  concat, na.action=na.pass)
     )
 }
-
-
