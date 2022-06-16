@@ -684,11 +684,10 @@ make_poolable <- function(results, non_group_keys=c("est", "se", "df")) {
     extract_aggregate <- function(lst, keys) unique(lst[keys])
     extract_aggragates <- assert_map(extract_aggregate, function(x) nrow(x) == 1)
 
-    lsts2df <- function(lsts) base_bind_rows(lapply(lsts, analysis_info))
-    results_df <- lsts2df(results)
+    results_df <- analst2df(results)
     group_keys <- setdiff(names(results_df), non_group_keys)
 
-    results <- split(results_df, vec2form(group_keys))
+    results <- unname(split(results_df, vec2form(group_keys)))
     meta <- extract_aggragates(results, group_keys)
 
     structure(list(results = results,
