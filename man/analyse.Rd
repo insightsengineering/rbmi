@@ -2,9 +2,12 @@
 % Please edit documentation in R/analyse.R
 \name{analyse}
 \alias{analyse}
+\alias{as.data.frame.analysis}
 \title{Analyse Multiple Imputed Datasets}
 \usage{
 analyse(imputations, fun = ancova, delta = NULL, ...)
+
+\method{as.data.frame}{analysis}(x, ...)
 }
 \arguments{
 \item{imputations}{An \code{imputations} object as created by \code{\link[=impute]{impute()}}.}

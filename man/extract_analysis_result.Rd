@@ -2,22 +2,24 @@
 % Please edit documentation in R/analyse.R
 \name{extract_analysis_result}
 \alias{extract_analysis_result}
-\title{Extract analysis_result from a list of analysis_results by matching names and values}
+\title{Extract analysis results from a list of analysis_results by matching names and values}
 \usage{
 extract_analysis_result(results, ...)
 }
 \arguments{
-\item{results}{A list of analysis_result}
+\item{results}{A list of analysis results. It can be a list of \code{analysis_result} objects or more generally a nested list with named sublists which can be treated as analysis result such \code{poolObj$pars}}
 
-\item{...}{Keywords parameters with the name and value matching the element in analysis result to be extracted}
+\item{...}{Keywords parameters with the name and value matching the element of the \code{analysis_result} objects inside the \code{results}}
 }
 \value{
 A list of matched analysis results
 }
 \description{
-The function returns a list of all analysis_results in the input list that match the values with names specified via keywords parameters of the function.
-If no value matches the specified name in any analysis_result containing in the given list or
-the specified name does not existed in any analysis_result, the function returns an empty list \code{list()}.
+The function returns a list of all analysis results in the input list that match the values with names specified via keywords parameters of the function.
+If no value matches the specified name in any sub list of analysis result or
+the specified name does not existed, the function returns an empty list \code{list()}.
+This function has general application for any type of nested list with named sublist that can be treated as analysis result.
+For example, \code{extract_analysis_result(poolObj$pars, name = 'p1', visit = 1)} would extract the result from the parameters of the pool object with \code{name} as \code{'p1'} and \code{visit} as \code{1}.
 }
 \examples{
 \dontrun{
@@ -28,6 +30,13 @@ results <- list(
         se = 2,
         df = 3,
         meta = list(visit = 'vis1')
+    ),
+    analysis_result(
+        name = 'trt2',
+        est = 3,
+        se = 4,
+        df = 5,
+        meta = list(visit = 'vis2')
     )
 )
 

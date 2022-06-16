@@ -2,22 +2,22 @@
 % Please edit documentation in R/analyse.R
 \name{analysis_info}
 \alias{analysis_info}
-\title{Get printable analysis information from an example of analysis result}
+\title{Convert a list of analysis_result objects to data.frame}
 \usage{
-analysis_info(example, name_of_group = "name", name_of_meta = "meta")
+analysis_info(analst, name_of_group = "name", name_of_meta = "meta")
 }
 \arguments{
-\item{example}{A subset of the result of the analysis object for getting enough info to print. It should not be the complete result of analysis object but a subset of it such as \code{anaObj$results[[1]]}}
+\item{analst}{A list of \code{analysis_result} objects. It should not be the complete result of analysis object but a subset of it such as \code{anaObj$results[[1]]}}
 
-\item{name_of_group}{A character variable for the name of group variable in the result of analysis which is defined from \code{analysis_result}. Default: \code{'name'}}
+\item{name_of_group}{A \code{character} variable for the name of group variable in the result of analysis which is defined from \code{analysis_result}. Default: \code{'name'}}
 
-\item{name_of_meta}{A character variable for the name of meta data in the result of analysis which is defined from \code{analysis_result}. Default: 'meta'}
+\item{name_of_meta}{A \code{character} variable for the name of meta data in the result of analysis which is defined from \code{analysis_result}. Default: \code{'meta'}}
 }
 \value{
-A data.frame containing the information of the analysis result from the example
+A \code{data.frame} containing the information of the analysis result from the \code{analst}
 }
 \description{
-Get printable analysis information from an example of analysis result
+Convert a list of analysis_result objects to data.frame
 }
 \examples{
 \dontrun{
