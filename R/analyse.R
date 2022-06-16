@@ -661,18 +661,18 @@ is.analysis_result <- function(x) {
     )
 }
 
-#' Get printable analysis information from an example of analysis result
+#' Convert a list of analysis_result objects to data.frame
 #'
-#' @param example A subset of the result of the analysis object for getting enough info to print. It should not be the complete result of analysis object but a subset of it such as `anaObj$results[[1]]`
-#' @param name_of_group A character variable for the name of group variable in the result of analysis which is defined from `analysis_result`. Default: `'name'`
-#' @param name_of_meta A character variable for the name of meta data in the result of analysis which is defined from `analysis_result`. Default: 'meta'
-#' @return A data.frame containing the information of the analysis result from the example
+#' @param analst A list of `analysis_result` objects. It should not be the complete result of analysis object but a subset of it such as `anaObj$results[[1]]`
+#' @param name_of_group A `character` variable for the name of group variable in the result of analysis which is defined from `analysis_result`. Default: `'name'`
+#' @param name_of_meta A `character` variable for the name of meta data in the result of analysis which is defined from `analysis_result`. Default: `'meta'`
+#' @return A `data.frame` containing the information of the analysis result from the `analst`
 #' @examples
 #' \dontrun{
 #' analysis_info(dat, name_of_group = 'name', name_of_meta = 'meta')
 #' }
 #' @importFrom assertthat has_attr
-analysis_info <- function(example, name_of_group = 'name', name_of_meta = 'meta') {
+analysis_info <- function(analst, name_of_group = 'name', name_of_meta = 'meta') {
 
     pars_no_meta <- list()
     pars_with_meta <- list()
@@ -685,11 +685,11 @@ analysis_info <- function(example, name_of_group = 'name', name_of_meta = 'meta'
             )
     }
 
-    for (i in seq_along(example)) {
-        item <- example[[i]]
+    for (i in seq_along(analst)) {
+        item <- analst[[i]]
 
         assert_that(is.analysis_result(item),
-                    msg = "Object in example is not in analysis_result class")
+                    msg = "Object in `analst` is not in `analysis_result` class")
 
         if (has_attr(item, name_of_meta)){
             meta <- append(meta, index(i, item[[name_of_meta]]))
@@ -716,14 +716,50 @@ analysis_info <- function(example, name_of_group = 'name', name_of_meta = 'meta'
     subset(info_df, select = -index)
 }
 
-#' Extract analysis_result from a list of analysis_results by matching names and values
+#' Convert analysis results to a data.frame
 #'
-#' The function returns a list of all analysis_results in the input list that match the values with names specified via keywords parameters of the function.
-#' If no value matches the specified name in any analysis_result containing in the given list or
-#' the specified name does not existed in any analysis_result, the function returns an empty list `list()`.
+#' @param analst Results of analysis object (`anaObj$results`)
+#' @param index logical variable indicating whether to add index column for imputation dataset. Default: `FALSE` - no index column will be added.
+#' @return A data frame each row of which corresponds to a analysis result
+analst2df <- function(analst, index = FALSE) {
+
+    add_index <- function(dt, i) cbind(dt, 'dt_num' = i)
+
+    binarize <- function(f, side = 'left') {
+        laze <- function(x) function() x
+        trivial <- function(x, y) list(left=x, right=y)[[side]]
+        function(g = trivial) {
+            function(x, y) {
+                list(
+                    left = laze(g(f(x), y)),
+                    right = laze(g(x, f(y)))
+                )[[side]]()
+            }
+        }
+    }
+
+    anainfo <- binarize(analysis_info)
+    ana2df <- ife(index, anainfo(add_index), anainfo())
+
+    base_bind_rows(mapply(ana2df, analst, seq_along(analst), SIMPLIFY = FALSE))
+}
+
+#' @rdname analyse
+#' @export
+as.data.frame.analysis <- function(x, ...) {
+    analst2df(x$results, index = TRUE)
+}
+
+#' Extract analysis results from a list of analysis_results by matching names and values
 #'
-#' @param results A list of analysis_result
-#' @param ... Keywords parameters with the name and value matching the element in analysis result to be extracted
+#' The function returns a list of all analysis results in the input list that match the values with names specified via keywords parameters of the function.
+#' If no value matches the specified name in any sub list of analysis result or
+#' the specified name does not existed, the function returns an empty list `list()`.
+#' This function has general application for any type of nested list with named sublist that can be treated as analysis result.
+#' For example, `extract_analysis_result(poolObj$pars, name = 'p1', visit = 1)` would extract the result from the parameters of the pool object with `name` as `'p1'` and `visit` as `1`.
+#'
+#' @param results A list of analysis results. It can be a list of `analysis_result` objects or more generally a nested list with named sublists which can be treated as analysis result such `poolObj$pars`
+#' @param ... Keywords parameters with the name and value matching the element of the `analysis_result` objects inside the `results`
 #' @return A list of matched analysis results
 #' @export
 #' @examples
@@ -735,6 +771,13 @@ analysis_info <- function(example, name_of_group = 'name', name_of_meta = 'meta'
 #'         se = 2,
 #'         df = 3,
 #'         meta = list(visit = 'vis1')
+#'     ),
+#'     analysis_result(
+#'         name = 'trt2',
+#'         est = 3,
+#'         se = 4,
+#'         df = 5,
+#'         meta = list(visit = 'vis2')
 #'     )
 #' )
 #'
