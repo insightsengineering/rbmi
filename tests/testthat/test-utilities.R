@@ -241,3 +241,226 @@ test_that("Stack", {
     expect_equal(mstack$pop(3), list(7))
     expect_error(mstack$pop(1), "items to return")
 })
+
+
+test_that("add_meta", {
+
+    skip_if_not(is_full_test())
+
+    expect_equal(add_meta('a', 1), list(a=1))
+    expect_equal(add_meta(c('a','b','c'), '1','2',3), list(a='1', b='2',c=3))
+    expect_equal(add_meta(list('a'), 1), list(a=1))
+    expect_error(add_meta(c('a','b','c'), 1, 'c'))
+    expect_error(add_meta(c('a','b','c')))
+    expect_error(add_meta(NULL, 'a'))
+    expect_error(add_meta(NA, 'a'))
+    expect_error(add_meta(c('a', NA), 1, 2))
+})
+
+
+test_that("assert_type", {
+
+    skip_if_not(is_full_test())
+
+    expect_true(assert_type('a', is.character))
+    expect_true(assert_type(c('a', 'b', 'c'), is.character))
+    expect_true(assert_type(1, is.numeric))
+    expect_true(assert_type(c(1,2,3), is.numeric))
+    expect_true(assert_type(NA, is.na))
+    expect_true(assert_type(NULL, is.null))
+    expect_true(assert_type(list(), is.list))
+    expect_true(assert_type(data.frame(), is.data.frame))
+    expect_true(assert_type(environment(), is.environment))
+    expect_true(assert_type(function() NULL, is.function))
+    expect_true(assert_type(factor(), is.factor))
+    expect_error(assert_type(factor('a'), is.character))
+    expect_error(assert_type('a', is.numeric))
+    expect_error(assert_type(1, is.null))
+    v1 <- NULL
+    expect_error(assert_type(v1, is.character))
+    v2 <- NA
+    expect_error(assert_type(v2, is.numeric))
+    expect_error(assert_type(1, length))
+})
+
+
+test_that("assert_value", {
+
+    skip_if_not(is_full_test())
+
+    expect_true(assert_value(max)(c(1,2,3), 3))
+    expect_true(assert_value(length)(list(1,2), 2))
+    expect_true(assert_value(names)(list(a=1,b=2,c=3), c('a', 'b', 'c')))
+    expect_true(assert_value(mean)(c(a=1,b=2,c=3), 2))
+    expect_true(assert_value(abs)(c(a=-1,b=2,c=-3), c(1,2,3)))
+    f <- function(x) x * 5
+    expect_true(assert_value(f)(c(a=1,b=2,c=3), c(a=5,b=10,c=15)))
+    expect_error(assert_value(identity)(list(a=1,b=2,c=3), list(a=1,b=2,c=3)))
+    expect_error(assert_value(min)(c(a=1,b=2,c=3), 7))
+    expect_error(assert_value(median)(c(a=1,b=2,c=3), 1))
+})
+
+test_that("assert_anares_length", {
+
+    skip_if_not(is_full_test())
+
+    expect_true(assert_anares_length('a', 1))
+    expect_true(assert_anares_length(c(1,2), 2))
+    expect_true(assert_anares_length(list(a=1,b=2), 2))
+    expect_true(assert_anares_length(data.frame(a=1, b=2), 2))
+    expect_true(assert_anares_length(list(), 0))
+    expect_true(assert_anares_length(NULL, 0))
+    expect_error(assert_anares_length(c('a', 'b', 'c'), 2))
+    expect_error(assert_anares_length(c(1,2,3), 2))
+    expect_error(assert_anares_length(list(), 2))
+    expect_error(assert_anares_length(1, 2))
+    expect_error(assert_anares_length(NA, 2))
+})
+
+test_that("make_chain", {
+
+    skip_if_not(is_full_test())
+
+    is.numeric_or_na <- make_chain(any, is.numeric, is.na)
+    expect_true(is.numeric_or_na(NA))
+    expect_true(is.numeric_or_na(1))
+    expect_false(is.numeric_or_na('a'))
+    expect_false(is.numeric_or_na(list()))
+    expect_error(make_chain(any, is.numeric, 'a')(1))
+})
+
+test_that("order_list_by_name", {
+
+    skip_if_not(is_full_test())
+
+    expect_equal(order_list_by_name(list(a=1,b='x',c=TRUE), c("c", "a", "d", "x", "b", "t"))[[3]], 'x')
+    expect_true(names(order_list_by_name(list(t=1,v='x'), c("c", "a", "d", "x", "b", "t"))) == 't')
+    expect_true(all(names(order_list_by_name(list(t=1,v='x',z=2,m=list(), q='t', w=data.frame()), c("z", "t","q", "m"))) ==  c("z", "t","q", "m")))
+    expect_length(order_list_by_name(list(u=1,v='x'), c("c", "a", "d", "x", "b", "t")), 0)
+    expect_length(order_list_by_name(list(u=1,v='x'), c("c")), 0)
+})
+
+test_that("base_bind_rows", {
+    l1 <- list(list(a=1,b=2), list(b=3, c=4))
+    expect_equal(nrow(base_bind_rows(l1)), 2)
+    expect_equal(ncol(base_bind_rows(l1)), 3)
+    expect_equal(base_bind_rows(l1)[1, 2], 2)
+    l2 <- list(list(a=1,b=2, c=3), list(a=1, b=3, c=4), list(a=9, b=10, c=12))
+    expect_equal(nrow(base_bind_rows(l2)), 3)
+    expect_equal(base_bind_rows(l2)[2,3], 4)
+    expect_true(is.na(base_bind_rows(l1)[3,1]))
+    expect_error(base_bind_rows(list(list(a=1,b=2), list(b=3, c=data.frame()))))
+    l3 <- list(c(a=1,b=2), c(a=3, c=4))
+    expect_error(base_bind_rows(l3))
+})
+
+test_that("namechecker", {
+
+    skip_if_not(is_full_test())
+
+    chker <- namechecker('a', 'b', 'c', optional = c('d', 'e', 'f'))
+    expect_type(chker, "closure")
+    expect_equal(chker('musthave'), c('a', 'b', 'c'))
+    expect_equal(chker('optional'), c('d', 'e', 'f'))
+    expect_equal(chker('all'), c('a', 'b', 'c', 'd', 'e', 'f'))
+    expect_type(chker('musthave_in_objnames'), "closure")
+    expect_type(chker('objnames_in_musthave'), "closure")
+    expect_true(all(chker('musthave_in_objnames')(list(a=1)) == list(a=TRUE, b=FALSE, c=FALSE)))
+    expect_true(all(chker('musthave_in_objnames')(list(a=1, b = 2, c = 3, d = 4)) == list(a=TRUE, b=TRUE, c=TRUE)))
+    expect_true(all(chker('objnames_in_musthave')(list(b=2, a = 1, d = 2, e = 4, x = 5)) == list(b=TRUE, a=TRUE, d=TRUE, e = TRUE, x = FALSE)))
+    expect_true(all(chker('objnames_in_musthave')(list(f = 1, x = list(a=2))) == list(f=TRUE, x=FALSE)))
+    expect_true(all(chker('objnames_in_musthave')(list(y = 1, x = list(a=2))) == list(y=FALSE, x=FALSE)))
+})
+
+test_that("compose_n", {
+
+    skip_if_not(is_full_test())
+
+    # addition
+    add_one <- function (x) x + 1
+    add_five <- compose_n(add_one, 5)
+    expect_equal(add_five(3), 8)
+
+    # yin yang
+    flip <- function(x) -x
+    odd_numbers <- seq(1, 99, 2)
+    even_numbers <- seq(2, 100, 2)
+    yin <- sapply(odd_numbers, function(x) compose_n(flip, x))
+    yang <- sapply(even_numbers, function(x) compose_n(flip, x))
+    expect_true(all(sapply(yin, do.call, list(100)) < 0))
+    expect_true(all(sapply(yang, do.call, list(100)) > 0))
+
+    # base case
+    expect_equal(compose_n(abs, 0)(-5), -5)
+})
+
+test_that("back_apply_at", {
+
+    skip_if_not(is_full_test())
+
+    x <- list(
+        a1=list(
+            b11=list(c111=1, c112=2,c113=3),
+            b12=list(c121=4, c122=5,c123=6)),
+        a2=list(
+            b21=list(c211=7, c212=8,c213=9),
+            b22=list(c221=10, c222=11,c223=12))
+        )
+
+    y <- back_apply_at(x, function(x) x+1, 1)
+    expect_equal(y$a2$b22$c221, 11)
+    expect_equal(y$a1$b11$c113, 4)
+    expect_identical(y$a1$b12, list(c121=5, c122=6,c123=7))
+
+    z <- back_apply_at(x, class, 2)
+    expect_equal(z$a1$b11, "list")
+    expect_equal(z$a2$b21, "list")
+    expect_error(z$a1$b11$c111)
+
+    zz <- back_apply_at(x, length, 3)
+    expect_equal(zz$a1, 2)
+    expect_equal(zz$a2, 2)
+    expect_error(zz$a2$b21)
+    expect_error(zz$a1$b12$c121)
+})
+
+
+test_that("vec2form", {
+
+    skip_if_not(is_full_test())
+
+    x <- vec2form(c('a1', 'a2'))
+    expect_equal(class(x), 'formula')
+    expect_true(is.call(x[2]))
+    expect_equal(deparse(x), "~a1 + a2")
+    }
+)
+
+test_that("reduce_df", {
+
+    skip_if_not(is_full_test())
+
+    x <- data.frame(a=1, b=c(1,2,3), c=5)
+
+    # concatenate rows to vector
+    y <- reduce_df(x, keys = 'a')
+    expect_equal(y$a, 1)
+    expect_equal(y$b[[1]], c(1,2,3))
+    expect_equal(y$c[[1]], 5)
+
+    y <- reduce_df(x, keys = 'b')
+    expect_equal(y$a, list(1,1,1))
+    expect_equal(y$b, c(1,2,3))
+    expect_equal(y$c, list(5,5,5))
+
+    # split rows to columns
+    y <- reduce_df(x, keys = 'a', split = TRUE)
+    expect_equal(ncol(y), 5)
+    expect_length(grep('b', names(y)), 3)
+    expect_equal(names(y), c('a', 'b.1', 'b.2', 'b.3', 'c'))
+    expect_equal(y$a, 1)
+    expect_equal(y$b.1, 1)
+    expect_equal(y$b.2, 2)
+    expect_equal(y$b.3, 3)
+    expect_equal(y$c, 5)
+})

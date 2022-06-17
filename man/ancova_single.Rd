@@ -9,7 +9,8 @@ ancova_single(
   outcome,
   group,
   covariates,
-  weights = c("proportional", "equal")
+  weights = c("proportional", "equal"),
+  ...
 )
 }
 \arguments{

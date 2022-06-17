@@ -28,16 +28,28 @@
 #' If no value for `visits` is provided then it will be set to
 #' `unique(data[[vars$visit]])`.
 #'
-#' In order to meet the formatting standards set by [analyse()] the results will be collapsed
-#' into a single list suffixed by the visit name, e.g.:
+#' Visits as part of the meta information of the `analysis_result` object from results of [analyse()] can be accessed individually and are
+#' are displayed in a column from the `print.analysis` output such like
+#' ```
+#'  =====================================
+#'    name     est     se     df   visit
+#'  -------------------------------------
+#'     trt    -0.513  0.505   197    1
+#'     trt    -2.366  0.675   197    4
+#'   lsm_ref   7.51   0.477   197    4
+#'   lsm_alt  5.144   0.477   197    4
+#'  -------------------------------------
+#'
+#' ```
+#' Then list in analysis results has structure such as following. Each individual result is in class `analysis_result`
 #'```
 #'list(
-#'    trt_visit_1 = list(est = ...),
-#'    lsm_ref_visit_1 = list(est = ...),
-#'    lsm_alt_visit_1 = list(est = ...),
-#'    trt_visit_2 = list(est = ...),
-#'    lsm_ref_visit_2 = list(est = ...),
-#'    lsm_alt_visit_2 = list(est = ...),
+#'    trt = analysis_result(name =, est = ..., meta = list(visit=1, ...)),
+#'    lsm_ref = analysis_result(name =, est = ..., meta = list(visit=1, ...)),
+#'    lsm_alt = analysis_result(name =, est = ..., meta = list(visit=1, ...)),
+#'    trt = analysis_result(name =, est = ..., meta = list(visit=2, ...)),
+#'    lsm_ref = analysis_result(name =, est = ..., meta = list(visit=2, ...)),
+#'    lsm_alt = analysis_result(name =, est = ..., meta = list(visit=2, ...)),
 #'    ...
 #')
 #'```
@@ -139,8 +151,7 @@ ancova <- function(data, vars, visits = NULL, weights = c("proportional", "equal
         visits,
         function(x) {
             data2 <- data[data[[visit]] == x, ]
-            res <- ancova_single(data2, outcome, group, covariates, weights)
-            names(res) <- paste0(names(res), "_", x)
+            res <- ancova_single(data2, outcome, group, covariates, weights, x)
             return(res)
         }
     )
@@ -174,7 +185,7 @@ ancova <- function(data, vars, visits = NULL, weights = c("proportional", "equal
 #' }
 #' @seealso [ancova()]
 #' @importFrom stats lm coef vcov df.residual
-ancova_single <- function(data, outcome, group, covariates, weights = c("proportional", "equal")) {
+ancova_single <- function(data, outcome, group, covariates, weights = c("proportional", "equal"), ...) {
 
     weights <- match.arg(weights)
     assert_that(
@@ -201,13 +212,15 @@ ancova_single <- function(data, outcome, group, covariates, weights = c("proport
     lsm1 <- do.call(lsmeans, args)
 
     x <- list(
-        trt = list(
+        analysis_result(
+            name = 'trt',
             est = coef(mod)[[group]],
             se = sqrt(vcov(mod)[group, group]),
-            df = df.residual(mod)
+            df = df.residual(mod),
+            meta = add_meta('visit', ...)
         ),
-        lsm_ref = lsm0,
-        lsm_alt = lsm1
+        as_analysis_result(lsm0, name = 'lsm_ref', meta = add_meta('visit', ...)),
+        as_analysis_result(lsm1, name = 'lsm_alt', meta = add_meta('visit', ...))
     )
     return(x)
 }

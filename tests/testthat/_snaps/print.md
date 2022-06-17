@@ -13,16 +13,16 @@
       
       Results:
       
-        ========================================================
-            parameter      est     se     lci     uci     pval  
-        --------------------------------------------------------
-           trt_visit_1    7.253   0.781  5.665   8.842   <0.001 
-         lsm_ref_visit_1  7.254   0.566  6.102   8.406   <0.001 
-         lsm_alt_visit_1  14.507  0.479  13.533  15.481  <0.001 
-           trt_visit_3    7.984   0.258  7.448    8.52   <0.001 
-         lsm_ref_visit_3  7.005   0.205  6.575   7.436   <0.001 
-         lsm_alt_visit_3  14.989  0.167  14.641  15.338  <0.001 
-        --------------------------------------------------------
+        =========================================================
+          name     visit    est     lci     uci     se    pvalue 
+        ---------------------------------------------------------
+         lsm_alt  visit_1  14.507  13.533  15.481  0.479  <0.001 
+         lsm_ref  visit_1  7.254   6.102   8.406   0.566  <0.001 
+           trt    visit_1  7.253   5.665   8.842   0.781  <0.001 
+         lsm_alt  visit_3    15    14.671  15.328  0.158  <0.001 
+         lsm_ref  visit_3  7.005   6.579   7.431   0.202  <0.001 
+           trt    visit_3  7.995   7.451   8.538   0.261  <0.001 
+        ---------------------------------------------------------
       
 
 ---
@@ -40,19 +40,19 @@
       
       Results:
       
-        ===================================================
-            parameter      est     se     lci    uci  pval 
-        ---------------------------------------------------
-           trt_visit_1    7.253   0.781  6.232   Inf   1   
-         lsm_ref_visit_1  7.254   0.566  6.513   Inf   1   
-         lsm_alt_visit_1  14.507  0.479  13.881  Inf   1   
-           trt_visit_2    7.406   0.388  6.898   Inf   1   
-         lsm_ref_visit_2  7.011   0.282  6.643   Inf   1   
-         lsm_alt_visit_2  14.417  0.238  14.106  Inf   1   
-           trt_visit_3    5.359   1.092  3.929   Inf   1   
-         lsm_ref_visit_3  6.723   0.835  5.624   Inf   1   
-         lsm_alt_visit_3  12.082  0.658  11.222  Inf   1   
-        ---------------------------------------------------
+        ======================================================
+          name     visit    est     lci    uci   se    pvalue 
+        ------------------------------------------------------
+         lsm_alt  visit_1  14.507  13.881  Inf  0.479    1    
+         lsm_ref  visit_1  7.254   6.513   Inf  0.566    1    
+           trt    visit_1  7.253   6.232   Inf  0.781    1    
+         lsm_alt  visit_2  14.417  14.106  Inf  0.238    1    
+         lsm_ref  visit_2  7.011   6.643   Inf  0.282    1    
+           trt    visit_2  7.406   6.898   Inf  0.388    1    
+         lsm_alt  visit_3  12.082  11.222  Inf  0.658    1    
+         lsm_ref  visit_3  6.723   5.624   Inf  0.835    1    
+           trt    visit_3  5.359   3.929   Inf  1.092    1    
+        ------------------------------------------------------
       
 
 ---
@@ -70,19 +70,19 @@
       
       Results:
       
-        =====================================================
-            parameter      est     se   lci    uci     pval  
-        -----------------------------------------------------
-           trt_visit_1    6.643   <NA>  -Inf  7.383   <0.001 
-         lsm_ref_visit_1  7.605   <NA>  -Inf  8.126   <0.001 
-         lsm_alt_visit_1  14.248  <NA>  -Inf  15.088  <0.001 
-           trt_visit_2    6.906   <NA>  -Inf  7.944   <0.001 
-         lsm_ref_visit_2  7.299   <NA>  -Inf  7.666   <0.001 
-         lsm_alt_visit_2  14.205  <NA>  -Inf  14.977  <0.001 
-           trt_visit_3    4.118   <NA>  -Inf  4.257   <0.001 
-         lsm_ref_visit_3  7.514   <NA>  -Inf  8.083   <0.001 
-         lsm_alt_visit_3  11.632  <NA>  -Inf  11.837  <0.001 
-        -----------------------------------------------------
+        ======================================================
+          name     visit    est    lci    uci     se   pvalue 
+        ------------------------------------------------------
+         lsm_alt  visit_1  14.248  -Inf  15.088  <NA>  <0.001 
+         lsm_ref  visit_1  7.605   -Inf  8.126   <NA>  <0.001 
+           trt    visit_1  6.643   -Inf  7.383   <NA>  <0.001 
+         lsm_alt  visit_2  14.205  -Inf  14.977  <NA>  <0.001 
+         lsm_ref  visit_2  7.299   -Inf  7.666   <NA>  <0.001 
+           trt    visit_2  6.906   -Inf  7.944   <NA>  <0.001 
+         lsm_alt  visit_3  11.632  -Inf  11.837  <NA>  <0.001 
+         lsm_ref  visit_3  7.514   -Inf  8.083   <NA>  <0.001 
+           trt    visit_3  4.118   -Inf  4.257   <NA>  <0.001 
+        ------------------------------------------------------
       
 
 ---
@@ -100,19 +100,19 @@
       
       Results:
       
-        ======================================================
-            parameter      est     se    lci    uci     pval  
-        ------------------------------------------------------
-           trt_visit_1    6.643   0.561  -Inf  7.565   <0.001 
-         lsm_ref_visit_1  7.605   1.057  -Inf  9.343   <0.001 
-         lsm_alt_visit_1  14.248  1.163  -Inf  16.161  <0.001 
-           trt_visit_2    6.906   0.852  -Inf  8.308   <0.001 
-         lsm_ref_visit_2  7.299   1.114  -Inf   9.13   <0.001 
-         lsm_alt_visit_2  14.205  0.984  -Inf  15.823  <0.001 
-           trt_visit_3    4.118   0.663  -Inf  5.208   <0.001 
-         lsm_ref_visit_3  7.514   1.003  -Inf  9.165   <0.001 
-         lsm_alt_visit_3  11.632  1.339  -Inf  13.834  <0.001 
-        ------------------------------------------------------
+        =======================================================
+          name     visit    est    lci    uci     se    pvalue 
+        -------------------------------------------------------
+         lsm_alt  visit_1  14.248  -Inf  16.161  1.163  <0.001 
+         lsm_ref  visit_1  7.605   -Inf  9.343   1.057  <0.001 
+           trt    visit_1  6.643   -Inf  7.565   0.561  <0.001 
+         lsm_alt  visit_2  14.205  -Inf  15.823  0.984  <0.001 
+         lsm_ref  visit_2  7.299   -Inf   9.13   1.114  <0.001 
+           trt    visit_2  6.906   -Inf  8.308   0.852  <0.001 
+         lsm_alt  visit_3  11.632  -Inf  13.834  1.339  <0.001 
+         lsm_ref  visit_3  7.514   -Inf  9.165   1.003  <0.001 
+           trt    visit_3  4.118   -Inf  5.208   0.663  <0.001 
+        -------------------------------------------------------
       
 
 ---
@@ -130,19 +130,19 @@
       
       Results:
       
-        ========================================================
-            parameter      est     se     lci     uci     pval  
-        --------------------------------------------------------
-           trt_visit_1    7.296   0.784  6.006   8.587   <0.001 
-         lsm_ref_visit_1  7.051   0.766  5.792   8.311   <0.001 
-         lsm_alt_visit_1  14.348  0.74   13.131  15.564  <0.001 
-           trt_visit_2    7.363   0.373  6.749   7.977   <0.001 
-         lsm_ref_visit_2  7.085   0.555  6.173   7.997   <0.001 
-         lsm_alt_visit_2  14.448  0.599  13.463  15.433  <0.001 
-           trt_visit_3    4.593   1.063  2.844   6.342   <0.001 
-         lsm_ref_visit_3  6.469   0.815  5.129   7.809   <0.001 
-         lsm_alt_visit_3  11.062  0.929  9.534   12.59   <0.001 
-        --------------------------------------------------------
+        =========================================================
+          name     visit    est     lci     uci     se    pvalue 
+        ---------------------------------------------------------
+         lsm_alt  visit_1  14.348  13.131  15.564  0.74   <0.001 
+         lsm_ref  visit_1  7.051   5.792   8.311   0.766  <0.001 
+           trt    visit_1  7.296   6.006   8.587   0.784  <0.001 
+         lsm_alt  visit_2  14.448  13.463  15.433  0.599  <0.001 
+         lsm_ref  visit_2  7.085   6.173   7.997   0.555  <0.001 
+           trt    visit_2  7.363   6.749   7.977   0.373  <0.001 
+         lsm_alt  visit_3  11.062  9.534   12.59   0.929  <0.001 
+         lsm_ref  visit_3  6.469   5.129   7.809   0.815  <0.001 
+           trt    visit_3  4.593   2.844   6.342   1.063  <0.001 
+        ---------------------------------------------------------
       
 
 ---
@@ -160,19 +160,19 @@
       
       Results:
       
-        ========================================================
-            parameter      est     se     lci     uci     pval  
-        --------------------------------------------------------
-           trt_visit_1    7.039    0.5   6.032   8.047   <0.001 
-         lsm_ref_visit_1  6.993   1.38   4.212   9.773   0.004  
-         lsm_alt_visit_1  14.032  1.178  11.658  16.406  <0.001 
-           trt_visit_2    7.494   0.403  6.681   8.306   <0.001 
-         lsm_ref_visit_2  6.694   1.278  4.119    9.27   0.003  
-         lsm_alt_visit_2  14.188  1.013  12.146  16.23   <0.001 
-           trt_visit_3    4.737   1.142   2.43   7.044   0.009  
-         lsm_ref_visit_3   6.53   1.097  4.318   8.742   0.002  
-         lsm_alt_visit_3  11.267  1.753  7.734    14.8   0.001  
-        --------------------------------------------------------
+        =========================================================
+          name     visit    est     lci     uci     se    pvalue 
+        ---------------------------------------------------------
+         lsm_alt  visit_1  14.032  11.658  16.406  1.178  <0.001 
+         lsm_ref  visit_1  6.993   4.212   9.773   1.38   0.004  
+           trt    visit_1  7.039   6.032   8.047    0.5   <0.001 
+         lsm_alt  visit_2  14.188  12.146  16.23   1.013  <0.001 
+         lsm_ref  visit_2  6.694   4.119    9.27   1.278  0.003  
+           trt    visit_2  7.494   6.681   8.306   0.403  <0.001 
+         lsm_alt  visit_3  11.267  7.734    14.8   1.753  0.001  
+         lsm_ref  visit_3   6.53   4.318   8.742   1.097  0.002  
+           trt    visit_3  4.737    2.43   7.044   1.142  0.009  
+        ---------------------------------------------------------
       
 
 # print - approx bayes
@@ -226,15 +226,20 @@
       Analysis Function: ancova
       Delta Applied: FALSE
       Analysis Estimates:
-          trt_visit_1
-          lsm_ref_visit_1
-          lsm_alt_visit_1
-          trt_visit_2
-          lsm_ref_visit_2
-          lsm_alt_visit_2
-          trt_visit_3
-          lsm_ref_visit_3
-          lsm_alt_visit_3
+      
+        =====================================
+          name     est     se    df   visit  
+        -------------------------------------
+           trt    7.253   0.781  35  visit_1 
+         lsm_ref  7.254   0.566  35  visit_1 
+         lsm_alt  14.507  0.479  35  visit_1 
+           trt    7.406   0.388  35  visit_2 
+         lsm_ref  7.011   0.282  35  visit_2 
+         lsm_alt  14.417  0.238  35  visit_2 
+           trt    5.037   1.128  35  visit_3 
+         lsm_ref  6.942   0.818  35  visit_3 
+         lsm_alt  11.978  0.692  35  visit_3 
+        -------------------------------------
       
 
 # print - bayesian
@@ -288,12 +293,17 @@
       Analysis Function: rbmi::ancova
       Delta Applied: TRUE
       Analysis Estimates:
-          trt_visit_1
-          lsm_ref_visit_1
-          lsm_alt_visit_1
-          trt_visit_3
-          lsm_ref_visit_3
-          lsm_alt_visit_3
+      
+        =====================================
+          name     est     se    df   visit  
+        -------------------------------------
+           trt    7.253   0.781  35  visit_1 
+         lsm_ref  7.254   0.566  35  visit_1 
+         lsm_alt  14.507  0.479  35  visit_1 
+           trt    7.929   0.184  35  visit_3 
+         lsm_ref  6.966   0.134  35  visit_3 
+         lsm_alt  14.895  0.113  35  visit_3 
+        -------------------------------------
       
 
 # print - condmean bootstrap
@@ -348,15 +358,20 @@
       Analysis Function: ancova
       Delta Applied: FALSE
       Analysis Estimates:
-          trt_visit_1
-          lsm_ref_visit_1
-          lsm_alt_visit_1
-          trt_visit_2
-          lsm_ref_visit_2
-          lsm_alt_visit_2
-          trt_visit_3
-          lsm_ref_visit_3
-          lsm_alt_visit_3
+      
+        =====================================
+          name     est     se    df   visit  
+        -------------------------------------
+           trt    6.643   1.26   37  visit_1 
+         lsm_ref  7.605   0.955  37  visit_1 
+         lsm_alt  14.248  0.821  37  visit_1 
+           trt    6.906   0.941  37  visit_2 
+         lsm_ref  7.299   0.713  37  visit_2 
+         lsm_alt  14.205  0.613  37  visit_2 
+           trt    7.181   0.917  37  visit_3 
+         lsm_ref   7.51   0.696  37  visit_3 
+         lsm_alt  14.691  0.598  37  visit_3 
+        -------------------------------------
       
 
 # print - condmean jackknife
@@ -410,15 +425,20 @@
       Analysis Function: ancova
       Delta Applied: FALSE
       Analysis Estimates:
-          trt_visit_1
-          lsm_ref_visit_1
-          lsm_alt_visit_1
-          trt_visit_2
-          lsm_ref_visit_2
-          lsm_alt_visit_2
-          trt_visit_3
-          lsm_ref_visit_3
-          lsm_alt_visit_3
+      
+        =====================================
+          name     est     se    df   visit  
+        -------------------------------------
+           trt    7.296   0.657  30  visit_1 
+         lsm_ref  7.051   0.501  30  visit_1 
+         lsm_alt  14.348  0.406  30  visit_1 
+           trt    7.363   0.37   30  visit_2 
+         lsm_ref  7.085   0.282  30  visit_2 
+         lsm_alt  14.448  0.229  30  visit_2 
+           trt    4.593   1.169  30  visit_3 
+         lsm_ref  6.469   0.892  30  visit_3 
+         lsm_alt  11.062  0.722  30  visit_3 
+        -------------------------------------
       
 
 # print - bmlmi
@@ -472,6 +492,11 @@
       Analysis Function: compare_prop_lastvisit
       Delta Applied: FALSE
       Analysis Estimates:
-          trt
+      
+        ========================
+         name   est    se   df  
+        ------------------------
+         trt   2.005  0.73  Inf 
+        ------------------------
       
 

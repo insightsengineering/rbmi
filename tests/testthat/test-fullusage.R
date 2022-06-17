@@ -16,28 +16,39 @@ sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
 nsamp <- 200
 
 
-expect_pool_est <- function(po, expected, param = "trt_visit_3") {
+expect_pool_ests <- function(po, expected, ...) {
+    actuallst <- extract_analysis_result(po$pars, ...)
+
+    assert_that(!!length(actuallst),
+                msg = sprintf("No matches for condition: %s ",
+                              mapply(function(var, value) paste(paste0("`",var,"`"), value, sep = ' == '),
+                                     names(list(...)), list(...)) %>% paste(collapse = ' & ')))
+
+    actual <- actuallst[[1]]
+
     expect_contains(
-        po$pars[[param]]$ci,
+        actual$ci,
         expected
     )
 
     expect_contains(
-        po$pars[[param]]$ci,
-        po$pars[[param]]$est
+        actual$ci,
+        actual$est
     )
 
-    if ("lsm_alt_visit_3" %in% names(po$pars)) {
-        lsm_trt <- (po$pars$lsm_alt_visit_3$est - po$pars$lsm_ref_visit_3$est)
+    lsm_alt_visit_3 <- extract_analysis_result(po$pars, name = "lsm_alt", visit = "visit_3")
+    lsm_ref_visit_3 <- extract_analysis_result(po$pars, name = "lsm_ref", visit = "visit_3")
+    if (!!length(lsm_alt_visit_3) & !!length(lsm_ref_visit_3)) {
+        lsm_trt <- (lsm_alt_visit_3[[1]]$est - lsm_ref_visit_3[[1]]$est)
 
         expect_within(
-            lsm_trt - po$pars[[param]]$est,
+            lsm_trt - actual$est,
             c(-0.005, 0.005)
         )
     }
 }
 
-
+expect_pool_est <- function(po, expected) expect_pool_ests(po, expected, name = 'trt', visit = 'visit_3')
 
 test_that("Basic Usage - Approx Bayes", {
 
@@ -205,7 +216,7 @@ test_that("Basic Usage - Bayesian", {
 
 
 
-test_that("Basic Usage - Condmean", { 
+test_that("Basic Usage - Condmean", {
 
     skip_if_not(is_full_test())
 
@@ -348,10 +359,11 @@ test_that("Custom Strategies and Custom analysis functions", {
         dat <- dat %>% filter(visit == "visit_3")
         mod <- lm(data = dat, outcome ~ group + age + sex)
         list(
-            "treatment_effect" = list(
-                "est" = coef(mod)[[2]],
-                "se" = sqrt(vcov(mod)[2,2]),
-                "df" = df.residual(mod)
+             analysis_result(
+                name = "treatment_effect",
+                est = coef(mod)[[2]],
+                se = sqrt(vcov(mod)[2,2]),
+                df = df.residual(mod)
             )
         )
     }
@@ -364,7 +376,7 @@ test_that("Custom Strategies and Custom analysis functions", {
     poolobj <- pool(anaobj)
 
     expect_within(
-        poolobj$pars$treatment_effect$est,
+        extract_analysis_result(poolobj$pars, name = 'treatment_effect')[[1]]$est,
         4 + c(-0.3, 0.3)
     )
 
@@ -382,7 +394,7 @@ test_that("Custom Strategies and Custom analysis functions", {
 
     poolobj_delta <- pool(anaobj_delta)
 
-    expect_pool_est(poolobj_delta, 14, "treatment_effect")
+    expect_pool_ests(poolobj_delta, 14, name = "treatment_effect")
 
 
 
@@ -399,7 +411,7 @@ test_that("Custom Strategies and Custom analysis functions", {
 
     poolobj_delta <- pool(anaobj_delta)
 
-    expect_pool_est(poolobj_delta, 24, "treatment_effect")
+    expect_pool_ests(poolobj_delta, 24, name = "treatment_effect")
 
 
 
@@ -527,7 +539,7 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         vars2$group <- "group"
         x_ana <- analyse(x_imp, ancova, vars = vars2)
         x_pl <- pool(x_ana, conf.level = 0.98)
-        x_pl$pars$trt_visit_3$ci
+        extract_analysis_result(x_pl$pars, name = 'trt', visit = 'visit_3')[[1]]$ci
     }
 
     set.seed(2351)
@@ -685,7 +697,8 @@ test_that("rbmi works for one arm trials", {
 
         data_anal <- data[data[[vars$visit]] == "visit_3",][[vars$outcome]]
         res <- list(
-            mean = list(
+            analysis_result(
+                name = 'mean',
                 est = mean(data_anal),
                 se = sd(data_anal) / sqrt(length(data_anal)),
                 df = length(data_anal) - 1
@@ -738,7 +751,7 @@ test_that("rbmi works for one arm trials", {
         mutate(strategy = "MAR")
 
     runtest <- function(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method) {
-        
+
         draw_obj <- draws(
             data = dat,
             data_ice = dat_ice,
@@ -805,11 +818,11 @@ test_that("rbmi works for one arm trials", {
         } else {
             pooled <- pool(anl_obj)
         }
-
-        expect_length(pooled$pars$mean, 4)
-        expect_true(all(!is.null(unlist(pooled$pars$mean))))
-        expect_true(all(!is.na(unlist(pooled$pars$mean))))
-        expect_true(all(is.double(unlist(pooled$pars$mean))))
+        pooled_mean <- extract_analysis_result(pooled$pars, name = 'mean')[[1]]
+        expect_length(pooled_mean, 5)
+        expect_true(all(!is.null(unlist(pooled_mean))))
+        expect_true(all(!is.na(unlist(pooled_mean))))
+        expect_true(all(is.double(unlist(pooled_mean[names(pooled_mean) != 'name']))))
     }
 
     method <- method_condmean(type = "jackknife")
@@ -848,10 +861,11 @@ test_that("Three arms trial runs smoothly and gives expected results", {
         data_temp$group <- factor(data_temp$group, levels = c("A", "C"))
         resC <- ancova(data_temp, ...)
 
-        ret_obj <- list(
-            trtB = resB$trt_visit_3,
-            trtC = resC$trt_visit_3
-        )
+        trtB <- extract_analysis_result(resB, name = 'trt', meta = list(visit = 'visit_3'))[[1]]
+
+        trtC <- extract_analysis_result(resC, name = 'trt', meta = list(visit = 'visit_3'))[[1]]
+
+        ret_obj <- list(trtB, trtC)
 
         return(ret_obj)
 
@@ -919,7 +933,7 @@ test_that("Three arms trial runs smoothly and gives expected results", {
     imp_dat <- extract_imputed_dfs(imputeobj)[[1]]
     expect_equal(imp_dat$outcome[imp_dat$group == "B"], imp_dat$outcome[imp_dat$group == "C"])
     expect_equal(anaobj$results[[1]]$trtB, anaobj$results[[1]]$trtC)
-    expect_equal(pooled$pars$trtB, pooled$pars$trtC)
+    expect_equal(extract_analysis_result(pooled$pars, name = 'trtB'), extract_analysis_result(pooled$pars, name = 'trtC'))
 
 
     ########## same_cov = FALSE
@@ -948,6 +962,6 @@ test_that("Three arms trial runs smoothly and gives expected results", {
     imp_dat <- extract_imputed_dfs(imputeobj)[[1]]
     expect_equal(imp_dat$outcome[imp_dat$group == "B"], imp_dat$outcome[imp_dat$group == "C"])
     expect_equal(anaobj$results[[1]]$trtB, anaobj$results[[1]]$trtC)
-    expect_equal(pooled$pars$trtB, pooled$pars$trtC)
+    expect_equal(extract_analysis_result(pooled$pars, name = 'trtB'), extract_analysis_result(pooled$pars, name = 'trtC'))
 })
 

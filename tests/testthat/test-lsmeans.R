@@ -28,7 +28,8 @@ test_that("Least square means works as expected - Part 1", {
 
     expect_equal(
         coef(mod)[["grpB"]],
-        mod2$lsm_alt_1$est - mod2$lsm_ref_1$est
+        extract_analysis_result(mod2, name = 'lsm_alt', meta = list(visit = 1))[[1]]$est -
+        extract_analysis_result(mod2, name = 'lsm_ref', meta = list(visit = 1))[[1]]$est
     )
 
 
@@ -116,11 +117,18 @@ test_that("Least square means works as expected - Part 2", {
             outcome = "outcome",
             group = "trt"
         )
-    )[c("lsm_ref_vis1", "lsm_alt_vis1")]
-    result_expected <- list(
-        "lsm_ref_vis1" = lsm1,
-        "lsm_alt_vis1" = lsm2
     )
+
+    result_actual <- append(
+        extract_analysis_result(result_actual, name = 'lsm_ref', meta = list(visit = 'vis1')),
+        extract_analysis_result(result_actual, name = 'lsm_alt', meta = list(visit = 'vis1'))
+    )
+
+    result_expected <- list(
+        as_analysis_result(lsm1, name = 'lsm_ref', meta = add_meta('visit', 'vis1')),
+        as_analysis_result(lsm2, name = 'lsm_alt', meta = add_meta('visit', 'vis1'))
+    )
+
     expect_equal(result_actual, result_expected)
 
 
@@ -155,10 +163,16 @@ test_that("Least square means works as expected - Part 2", {
             group = "trt"
         ),
         weights = "equal"
-    )[c("lsm_ref_vis1", "lsm_alt_vis1")]
+    )
+
+    result_actual <- append(
+        extract_analysis_result(result_actual, name = 'lsm_ref', meta = list(visit = 'vis1')),
+        extract_analysis_result(result_actual, name = 'lsm_alt', meta = list(visit = 'vis1'))
+    )
+
     result_expected <- list(
-        "lsm_ref_vis1" = lsm1,
-        "lsm_alt_vis1" = lsm2
+        as_analysis_result(lsm1, name = 'lsm_ref', meta = add_meta('visit', 'vis1')),
+        as_analysis_result(lsm2, name = 'lsm_alt', meta = add_meta('visit', 'vis1'))
     )
     expect_equal(result_actual, result_expected)
 })

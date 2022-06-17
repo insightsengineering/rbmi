@@ -29,16 +29,20 @@ test_that("ancova", {
     mod <- lm(out ~ age1 + age2 + grp, data = dat)
 
     result_expected <- list(
-        "trt_vis1" = list(
-            "est" = mod$coefficients[[4]],
-            "se" = sqrt(vcov(mod)[4, 4]),
-            "df" = df.residual(mod)
+        analysis_result(
+            name = 'trt',
+            est = mod$coefficients[[4]],
+            se = sqrt(vcov(mod)[4, 4]),
+            df = df.residual(mod),
+            meta = list(visit = 'vis1')
         )
     )
-    result_actual <- ancova(
+    results_actual <- ancova(
         dat,
         list(outcome = "out", group = "grp", covariates = c("age1", "age2"), visit = "visit")
-    )["trt_vis1"]
+    )
+
+    result_actual <- extract_analysis_result(results_actual, name = 'trt', meta = list(visit = 'vis1'))
 
     expect_equal(result_expected, result_actual)
 
@@ -63,13 +67,17 @@ test_that("ancova", {
     mod <- lm(out ~ grp, data = dat)
 
     result_expected <- list(
-        "trt_ 1" = list(
-            "est" = mod$coefficients[[2]],
-            "se" = sqrt(vcov(mod)[2, 2]),
-            "df" = df.residual(mod)
+        analysis_result(
+            name = "trt",
+            est = mod$coefficients[[2]],
+            se = sqrt(vcov(mod)[2, 2]),
+            df = df.residual(mod),
+            meta = list(visit = " 1")
         )
     )
-    result_actual <- ancova(dat, list(outcome = "out", group = "grp", visit = "ivis"))["trt_ 1"]
+    results_actual <- ancova(dat, list(outcome = "out", group = "grp", visit = "ivis"))
+
+    result_actual <- extract_analysis_result(results_actual, name = "trt", meta = list(visit = " 1"))
 
     expect_equal(result_expected, result_actual)
 
@@ -93,14 +101,16 @@ test_that("ancova", {
     mod <- lm(out ~ age1 + age2 + grp, data = dat)
 
     result_expected <- list(
-        "trt_visit 1" = list(
-            "est" = mod$coefficients[[4]],
-            "se" = sqrt(vcov(mod)[4, 4]),
-            "df" = df.residual(mod)
+        analysis_result(
+            name = "trt",
+            est = mod$coefficients[[4]],
+            se = sqrt(vcov(mod)[4, 4]),
+            df = df.residual(mod),
+            meta = list(visit = "visit 1")
         )
     )
 
-    result_actual <- ancova(
+    results_actual <- ancova(
         dat,
         list(
             outcome = "out",
@@ -109,7 +119,9 @@ test_that("ancova", {
             visit = "vis"
         ),
         visits = "visit 1"
-    )["trt_visit 1"]
+    )
+
+    result_actual <- extract_analysis_result(results_actual, name = "trt", meta = list(visit = "visit 1"))
 
     expect_equal(result_expected, result_actual)
 
@@ -132,14 +144,16 @@ test_that("ancova", {
     mod <- lm(out ~ age1 + age2 + grp, data = filter(dat, vis == "visit 1"))
 
     result_expected <- list(
-        "trt_visit 1" = list(
-            "est" = mod$coefficients[[4]],
-            "se" = sqrt(vcov(mod)[4, 4]),
-            "df" = df.residual(mod)
+        analysis_result(
+            name = 'trt',
+            est = mod$coefficients[[4]],
+            se = sqrt(vcov(mod)[4, 4]),
+            df = df.residual(mod),
+            meta = list(visit = 'visit 1')
         )
     )
 
-    result_actual <- ancova(
+    results_actual <- ancova(
         dat,
         list(
             outcome = "out",
@@ -148,11 +162,13 @@ test_that("ancova", {
             visit = "vis"
         ),
         visits = "visit 1"
-    )["trt_visit 1"]
+    )
+
+    result_actual <- extract_analysis_result(results_actual, name = "trt", meta = list(visit = "visit 1"))
 
     expect_equal(result_expected, result_actual)
 
-    result_actual <- ancova(
+    result_actuals <- ancova(
         dat,
         list(
             outcome = "out",
@@ -161,11 +177,13 @@ test_that("ancova", {
             visit = "vis"
         ),
         visits = c("visit 1", "visit 2")
-    )["trt_visit 1"]
+    )
+
+    result_actual <- extract_analysis_result(results_actual, name = "trt", meta = list(visit = "visit 1"))
 
     expect_equal(result_expected, result_actual)
 
-    result_actual <- ancova(
+    results_actual <- ancova(
         dat,
         list(
             outcome = "out",
@@ -179,22 +197,27 @@ test_that("ancova", {
     mod <- lm(out ~ age1 + age2 + grp, data = filter(dat, vis == "visit 2"))
 
     result_expected <- list(
-        "trt_visit 2" = list(
-            "est" = mod$coefficients[[4]],
-            "se" = sqrt(vcov(mod)[4, 4]),
-            "df" = df.residual(mod)
+        analysis_result(
+            name = "trt",
+            est = mod$coefficients[[4]],
+            se = sqrt(vcov(mod)[4, 4]),
+            df = df.residual(mod),
+            meta = list(visit = "visit 2")
         )
     )
 
-    expect_equal(result_expected, result_actual["trt_visit 2"])
+    result_actual <- extract_analysis_result(results_actual, name = "trt", meta = list(visit = "visit 2"))
 
-    expect_equal(
-        names(result_actual),
-        c(
-            "trt_visit 1", "lsm_ref_visit 1", "lsm_alt_visit 1",
-            "trt_visit 2", "lsm_ref_visit 2", "lsm_alt_visit 2"
-        )
-    )
+    expect_equal(result_expected, result_actual)
+
+    expect_equal(sapply(results_actual, function(x) x[['name']]),
+                 c("trt","lsm_ref", "lsm_alt","trt","lsm_ref","lsm_alt"))
+
+    expect_equal(sapply(results_actual, function(x) x[['meta']]),
+                 list(visit = "visit 1", visit = "visit 1", visit = "visit 1", visit = "visit 2", visit ="visit 2", visit ="visit 2"))
+
+    expect_equal(sapply(results_actual, function(x) attr(x, 'meta')),
+                 list(visit = "visit 1", visit = "visit 1", visit = "visit 1", visit = "visit 2", visit ="visit 2", visit ="visit 2"))
 
     ##################
     #

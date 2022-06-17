@@ -513,7 +513,246 @@ as_dataframe <- function(x) {
     return(x2)
 }
 
+#' Add meta information to customerize analysis function
+#'
+#' This function is used only internally for ancova
+#'
+#' @param var_name A character variable of the names of the elements to be added to meta
+#' @param ... The values of the element to be added to meta. The number of items should be equal  to the length of the name parameter
+add_meta <- function (var_names, ...) {
+    var_values <- list(...)
+    prettier <- function(x) paste(x, collapse = ' ')
+    assert_that(
+        all(!is.null(var_names),
+            !is.null(var_values),
+            all(Vectorize(isTRUE)(!is.na(var_names))),
+            length(var_names) == length(var_values)),
+        msg = sprintf("Invalid parameters: `%s`, `%s`", prettier(var_names), prettier(var_values))
+    )
+
+    names(var_values) <- var_names
+    var_values
+}
+
+#' Assert variable's type
+#'
+#' @param what Variable to be asserted
+#' @param how Type asserting functions: is.character, is.numeric, is.list, is.logic
+#' @examples
+#' \dontrun{
+#' assert_type(est, is.numeric)
+#' }
+assert_type <- function(what,
+                        how,
+                        whatname = deparse(substitute(what)),
+                        howname = deparse(substitute(how))) {
+
+    prettier <- function(...) gsub("_", " ", as.character(...))
+
+    type <- (function(s) sub(".*\\.", "", s))(howname)
+    assert_that(how(what),
+                msg = sprintf("%s of analysis_result is not %s", whatname, prettier(type))
+    )
+}
+
+#' Create assert function comparing value
+#'
+#' @param how A function to generate value from the object to be asserted
+#' @param where A character variable indicating the origin of the object to be asserted. Default: `NULL`
+#' @param howname A character variable indicating the name of the how function. Default: `deparse(substitute(how))`
+assert_value <- function(how, where = NULL, howname = deparse(substitute(how))) {
+    inwhere <- ''
+    if (!is.null(where)) inwhere <- paste(' in', where)
+    function(what,
+             should,
+             whatname = deparse(substitute(what))) {
+
+        prettier <- function(x) paste(x, collapse = " ")
+
+        assert_that(all(how(what) == should),
+                    msg = sprintf("%s of %s%s `%s` is not %s", howname, whatname, inwhere, prettier(how(what)), prettier(should))
+                    )
+    }
+}
+
+#' Assert length of the element in analysis_result
+#'
+#' @param what The element to be asserted
+#' @param should The length expected
+#' @param whatname The name of the element. Default: `deparse(substitute(what))`
+assert_anares_length <- assert_value(length, where = 'analysis_result')
+
+#' Make a chain of function calls with certain relation function
+#' @param relation A relation function: `any` or `all`
+#' @param ... Functions to be chained
+#' @return A function taking arguments that are feed into chained functions
+#' @examples
+#' \dontrun{
+#' is.numeric_or_na <- make_chain(any, is.numeric, is.na)
+#' is.numeric_or_na(NA) # returns TRUE
+#' is.numeric_or_na(15) # returns TRUE
+#' is.numeric_or_na('a') # returns FALSE
+#' }
+make_chain <- function(relation, ...) {
+    fs <- c(...)
+    function(...) relation(sapply(fs, function(f) isTRUE(f(...))))
+}
+
+#' Order a named list by its names according to given character vector
+#' @param L A list to be ordered
+#' @param v A character contains the names in order
+#' @return A list with names in order
+#' @examples
+#' \dontrun{
+#' L_ordered <- order_list_by_name(list(a=1,b='x',c=TRUE), c("c", "a", "d", "x", "b", "t"))
+#' # returns a list `list(c=TRUE, a=1, b='x)`
+#'
+#' }
+order_list_by_name <- function(L, v) {
+    ordered_pos <- match(v, names(L))
+    ordered_pos <- ordered_pos[!is.na(ordered_pos)]
+    L[ordered_pos]
+}
+
+#' Convert nested list to data.frame
+#'
+#' @param nestlist A nested list to be converted to data.frame
+#' @return A data.frame binding each sublist as row in the data.frame and with NA filled for missing values
+base_bind_rows <- function(nestlist) {
+    nms     <- unique(unlist(lapply(nestlist, names)))
+    frmls   <- as.list(setNames(rep(NA, length(nms)), nms))
+    dflst   <- setNames(lapply(nms, function(x) call("unlist", as.symbol(x))), nms)
+    make_df <- as.function(c(frmls, call("do.call", "data.frame", dflst)))
+
+    do.call(rbind, lapply(nestlist, function(x) do.call(make_df, x)))
+}
+
+#' Create name checkers for object with message passing dispatch
+#'
+#' @param ... Character vectors for the reference to check against
+#' @param optional Character vector of optional name. Default: NULL
+#' @return A constructor to create checker functions with message passing dispatch
+namechecker <- function(..., optional = NULL) {
+
+    # compile the musthave list at the top level so that easier to maintain and update
+    musthave <- c(...)
+
+    # message passing as a dispatch
+    function(msg) {
+
+        # function to check if elements in list X exist in Y
+        XsInYs <- function(x, y) vapply(x, function(.x) .x %in% y, logical(1))
+
+        # wrapper to swap order of formal parameter of binary function
+        swap <- function(f) {
+            function(x, y) f(y, x)
+        }
+
+        # higher-order function to create template for validators
+        chker_template <- function(musthave, wrapper=identity, f = XsInYs, .optional = optional) {
+            function(...) {
+                wrapper(f)(append(musthave, .optional), names(...))
+            }
+        }
+
+        # Validator to check if elements in musthave present in the object's name
+        # checker does not check against optional names. Only names in musthave have to be presented in the object
+        musthave_in_objnames <- chker_template(musthave, .optional = NULL)
+
+        # Validator to check if object's name belongs to musthave + optional names (simply swap the order of arguments in musthave_in_objnames: B_in_A = swap(A_in_B))
+        objnames_in_musthave <- chker_template(musthave, swap)
+
+        dispatch <- list(
+            musthave_in_objnames = musthave_in_objnames,
+            objnames_in_musthave  = objnames_in_musthave,
+            musthave = musthave,
+            optional = optional,
+            all = append(musthave, optional)
+            )
+
+        dispatch[[msg]]
+    }
+}
+
+#' Higher-order function to compose function n-times
+#'
+#' Taking a function as f argument, this function convert it to another function apply this function n-times:
+#' n = 1: f(x) ==> f(x)
+#' n = 2: f(x) ==> f(f(x))
+#' n = 4: f(x) ==> f(f(f(f(x)))
+#' @param f function to be converted to composed version
+#' @param n times to be composed
+#' @examples
+#' \dontrun{
+#' add_one <- function (x) x + 1
+#' add_two <- compose_n(add_one, 2)
+#' add_two(5) # This equivalents to add_one(add_one(5)) and returns 7
+#'
+#' }
+compose_n <- function(f, n) {
+    function(x) {
+        if (n <= 0) x
+        else f(compose_n(f, n-1)(x))
+    }
+}
+
+#' Apply function at last N levels of a nested list
+#'
+#' Recursively traverse a nested list and apply a function at the Nth level backward counting from deepest level
+#' @param lst a list to be applied by the function
+#' @param f a function to apply on `lst`
+#' @param n a numeric value indicating the nth level to be applied backward counting from deepest level
+#' @examples
+#' \dontrun{
+#' dt <- list(a1=list(
+#'                b11=list(c111=1, c112=2,c113=3),
+#'                b12=list(c121=4, c122=5,c123=6)),
+#'            a2=list(
+#'                b21=list(c211=7, c212=8,c213=9),
+#'                b22=list(c221=10, c222=11,c223=12))
+#'                )
+#'       )
+#'
+#' back_apply_at(dt, function(x) x+1, 1) # This will apply `function(x) x+1` to the deepest level of `dt`, i.e. 1st level counting backward from deepest level
+#'
+#'}
+back_apply_at <- function(lst, f, n) {
+    lapply(lst,
+           function(sublst) {
+               nextNlevel <- compose_n(function(x) x[[1]], n-1)
+               if (!is.list(nextNlevel(sublst))) f(sublst)
+               else back_apply_at(sublst, f, n)
+           }
+    )
+}
+
+#' Convert vector to formula
+#'
+#' Convert character vector `c('a1', 'a2')` to formula `~ a1 + a2`
+#'
+#' @param chr character vector to be converted
+#' @param bothside A logical variable indicating whether to generate fomula with both right and left side. Default: `FALSE` - only right side formula will be generated
+#' @return an object of formula class representing formula `~ chr[[1]] + chr[[2]] + ...`
+vec2form <- function(chr, bothside = FALSE) {
+    prefix = '~'
+    if (bothside) prefix = paste('.', prefix)
+    eval(parse(text = paste(prefix, paste(chr, collapse = ' + '))))
+}
 
 
-
-
+#' Reduce a dataframe
+#'
+#' Reduce a data.frame row-wisely by concatenating values within group to list or multiple columns
+#'
+#' @param df A data frame to be reduced
+#' @param keys A character vectors of the group keys when reducing
+#' @param split A logical variable indicating whether to concatenate row-wise information to a list in single column or create multiple columns for each individual rows within group
+#' @return A data frame with reduced information
+reduce_df <- function(df, keys, split = FALSE) {
+    make_concat <- function(f) function(x) f(unique(x))
+    concat <- ife(split, make_concat(c), make_concat(list))
+    pos_process <- ife(split, function(x) do.call(data.frame, x), identity)
+    pos_process(
+        aggregate(vec2form(keys, bothside = TRUE), data = df, FUN =  concat, na.action=na.pass)
+    )
+}

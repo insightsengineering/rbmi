@@ -255,7 +255,8 @@ test_that("print - bmlmi", {
             )
         )
         res <- list(
-            trt = list(
+            analysis_result(
+                name = 'trt',
                 est = fit$coefficients["groupTRT", "Estimate"],
                 se = fit$coefficients["groupTRT", "Std. Error"],
                 df = Inf
