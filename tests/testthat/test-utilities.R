@@ -244,6 +244,9 @@ test_that("Stack", {
 
 
 test_that("add_meta", {
+
+    skip_if_not(is_full_test())
+
     expect_equal(add_meta('a', 1), list(a=1))
     expect_equal(add_meta(c('a','b','c'), '1','2',3), list(a='1', b='2',c=3))
     expect_equal(add_meta(list('a'), 1), list(a=1))
@@ -256,6 +259,9 @@ test_that("add_meta", {
 
 
 test_that("assert_type", {
+
+    skip_if_not(is_full_test())
+
     expect_true(assert_type('a', is.character))
     expect_true(assert_type(c('a', 'b', 'c'), is.character))
     expect_true(assert_type(1, is.numeric))
@@ -279,6 +285,9 @@ test_that("assert_type", {
 
 
 test_that("assert_value", {
+
+    skip_if_not(is_full_test())
+
     expect_true(assert_value(max)(c(1,2,3), 3))
     expect_true(assert_value(length)(list(1,2), 2))
     expect_true(assert_value(names)(list(a=1,b=2,c=3), c('a', 'b', 'c')))
@@ -292,6 +301,9 @@ test_that("assert_value", {
 })
 
 test_that("assert_anares_length", {
+
+    skip_if_not(is_full_test())
+
     expect_true(assert_anares_length('a', 1))
     expect_true(assert_anares_length(c(1,2), 2))
     expect_true(assert_anares_length(list(a=1,b=2), 2))
@@ -306,6 +318,9 @@ test_that("assert_anares_length", {
 })
 
 test_that("make_chain", {
+
+    skip_if_not(is_full_test())
+
     is.numeric_or_na <- make_chain(any, is.numeric, is.na)
     expect_true(is.numeric_or_na(NA))
     expect_true(is.numeric_or_na(1))
@@ -315,6 +330,9 @@ test_that("make_chain", {
 })
 
 test_that("order_list_by_name", {
+
+    skip_if_not(is_full_test())
+
     expect_equal(order_list_by_name(list(a=1,b='x',c=TRUE), c("c", "a", "d", "x", "b", "t"))[[3]], 'x')
     expect_true(names(order_list_by_name(list(t=1,v='x'), c("c", "a", "d", "x", "b", "t"))) == 't')
     expect_true(all(names(order_list_by_name(list(t=1,v='x',z=2,m=list(), q='t', w=data.frame()), c("z", "t","q", "m"))) ==  c("z", "t","q", "m")))
@@ -337,6 +355,9 @@ test_that("base_bind_rows", {
 })
 
 test_that("namechecker", {
+
+    skip_if_not(is_full_test())
+
     chker <- namechecker('a', 'b', 'c', optional = c('d', 'e', 'f'))
     expect_type(chker, "closure")
     expect_equal(chker('musthave'), c('a', 'b', 'c'))
@@ -352,6 +373,9 @@ test_that("namechecker", {
 })
 
 test_that("compose_n", {
+
+    skip_if_not(is_full_test())
+
     # addition
     add_one <- function (x) x + 1
     add_five <- compose_n(add_one, 5)
@@ -371,6 +395,9 @@ test_that("compose_n", {
 })
 
 test_that("back_apply_at", {
+
+    skip_if_not(is_full_test())
+
     x <- list(
         a1=list(
             b11=list(c111=1, c112=2,c113=3),
@@ -399,6 +426,9 @@ test_that("back_apply_at", {
 
 
 test_that("vec2form", {
+
+    skip_if_not(is_full_test())
+
     x <- vec2form(c('a1', 'a2'))
     expect_equal(class(x), 'formula')
     expect_true(is.call(x[2]))
@@ -407,6 +437,9 @@ test_that("vec2form", {
 )
 
 test_that("reduce_df", {
+
+    skip_if_not(is_full_test())
+
     x <- data.frame(a=1, b=c(1,2,3), c=5)
 
     # concatenate rows to vector

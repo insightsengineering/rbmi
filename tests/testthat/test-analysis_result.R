@@ -155,6 +155,9 @@ test_that("incorrect constructions of analysis_result fail", {
 # Test for as_analysis_result
 # This test needs to be updated accordingly if ana_name_chker has been udpated
 test_that("as_analysis_result works as expected", {
+
+    skip_if_not(is_full_test())
+
     expect_general <- function(x) {
         expect_s3_class(x, c("analysis_result", "list"))
         expect_equal(typeof(x), "list")
@@ -178,6 +181,9 @@ test_that("as_analysis_result works as expected", {
 
 
 test_that("ana_name_chker works as expected", {
+
+    skip_if_not(is_full_test())
+
     f <- ana_name_chker()
     expect_equal(class(f), "function")
     expect_equal(class(f('musthave_in_objnames')), 'function')
@@ -198,6 +204,8 @@ test_that("is.analysis_result works as expected", {
 })
 
 test_that("analysis_info works as expected", {
+
+    skip_if_not(is_full_test())
 
     # check for normal input
     test_names <- c('a', 'b', 'c', 'd', 'e', 'f', 'g')
@@ -231,6 +239,8 @@ test_that("analysis_info works as expected", {
 })
 
 test_that("extract_analysis_result works as expected", {
+
+    skip_if_not(is_full_test())
 
     x1 <- analysis_result(name ='a', est =  1, se = 2)
     x2 <- analysis_result(name ='b', est =  2)
@@ -402,12 +412,53 @@ test_that("extract_analysis_result works as expected", {
     expect_equal(actual, expect)
 
     expect_error(extract_analysis_result(x, meta = list('abc')),
-                 "Invalide parameters")
+                 "Invalid parameters")
 
     expect_error(extract_analysis_result(x, meta = list(NULL)),
-                 "Invalide parameters")
+                 "Invalid parameters")
 
     expect_error(extract_analysis_result(x, meta = list(NA)),
-                 "Invalide parameters")
+                 "Invalid parameters")
     }
 )
+
+test_that("analst2df works as expected", {
+
+    skip_if_not(is_full_test())
+
+    ana_list <- list(
+        list(
+            analysis_result(name = 'trt', est = 1, meta = list(visit = 1)),
+            analysis_result(name = 'ref1', est = 2, se = 2, meta = list(visit = 2, abc = 'm')),
+            analysis_result(name = 'ref2', est = 3, df = 5, meta = list(efg = 'q'))
+        ),
+        list(
+            analysis_result(name = 'trt_a', est = 9, meta = list(visit = 7)),
+            analysis_result(name = 'ref2', est = 10, se = NA, df = 15, meta = list(abc = 't', kkkk = NA)),
+            analysis_result(name = 'ref_a', est = 11, df = NA, meta = list(efg = NA, uut = 21))
+        )
+    )
+
+    expect_s3_class(analst2df(ana_list), 'data.frame')
+    expect_named(analst2df(ana_list))
+    expect_equal(names(analst2df(ana_list)), c('name', 'est', 'se', 'df', 'visit', 'abc', 'efg', 'kkkk', 'uut'))
+    expect_equal(analst2df(ana_list)$name[[4]], 'trt_a')
+    expect_equal(analst2df(ana_list)$est[[6]], 11)
+    expect_equal(analst2df(ana_list)$se[[2]], 2)
+    expect_true(is.na(analst2df(ana_list)$se[[3]]))
+    expect_equal(analst2df(ana_list)$df[[3]], 5)
+    expect_equal(analst2df(ana_list)$df[[5]], 15)
+    expect_true(is.na(analst2df(ana_list)$df[[4]]))
+    expect_equal(analst2df(ana_list)$visit[[4]], 7)
+    expect_equal(analst2df(ana_list)$visit[[2]], 2)
+    expect_true(is.na(analst2df(ana_list)$visit[[5]]))
+    expect_equal(analst2df(ana_list)$abc[[2]], 'm')
+    expect_equal(analst2df(ana_list)$abc[[5]], 't')
+    expect_equal(analst2df(ana_list)$abc[[1]], as.character(NA))
+    expect_true(is.na(analst2df(ana_list)$abc[[1]]))
+    expect_equal(analst2df(ana_list)$efg[[3]], 'q')
+    expect_true(is.na(analst2df(ana_list)$efg[[6]]))
+    expect_true(all(is.na(analst2df(ana_list)$kkkk)))
+    expect_true(is.na(analst2df(ana_list)$uut[[1]]))
+    expect_equal(analst2df(ana_list)$uut[[6]], 21)
+})
