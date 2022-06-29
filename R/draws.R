@@ -68,7 +68,7 @@
 #' - `visit`: a factor vector containing the visit the outcome was observed on.
 #' - `group`: a factor vector containing the group that the subject belongs to.
 #' - `outcome`: a numeric vector containing the outcome variable. It might contain missing values.
-#' Additional baseline or time-varying covariates must be included in `data`. 
+#' Additional baseline or time-varying covariates must be included in `data`.
 #'
 #' `data` must have one row per visit per subject. This means that incomplete
 #' outcome data must be set as `NA` instead of having the related row missing. Missing values
@@ -83,7 +83,7 @@
 #' observations to be included in the model as part of the response variable then these should be removed in advance
 #' from the outcome variable in `data`. At the same time if you want to include the baseline outcome as covariate in
 #' the model, then this should be included as a separate column of `data` (as any other covariate).
-#' 
+#'
 #' Character covariates will be explicitly
 #' cast to factors. If you use a custom analysis function that requires specific reference
 #' levels for the character covariates (for example in the computation of the least square means
@@ -164,7 +164,7 @@
 #' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing Data, Second Edition. John Wiley & Sons,
 #' Hoboken, New Jersey, 2002. \[Section 10.2.3\]
 #'
-#' Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Standard and reference-based 
+#' Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Standard and reference-based
 #' conditional mean imputation. \url{https://arxiv.org/abs/2109.11162}, 2022.
 #'
 #' Von Hippel, Paul T and Bartlett, Jonathan W.
@@ -190,7 +190,7 @@ draws.approxbayes <- function(data, data_ice = NULL, vars, method, ncores = 1, q
         ncores = ncores,
         n_target_samples = method$n_samples,
         failure_limit = ceiling(method$threshold * method$n_samples),
-        quiet = quiet
+        quiet = quiet,
     )
     return(x)
 }
@@ -209,7 +209,8 @@ draws.condmean <- function(data, data_ice = NULL, vars, method, ncores = 1, quie
         ncores = ncores,
         first_sample_orig = TRUE,
         use_samp_ids = TRUE,
-        quiet = quiet
+        quiet = quiet,
+        fetch_model = TRUE
     )
 
     if (method$type == "bootstrap") {
@@ -229,6 +230,7 @@ draws.condmean <- function(data, data_ice = NULL, vars, method, ncores = 1, quie
     }
     sample_opts <- append(sample_opts, extra_opts)
     x <- do.call(get_draws_mle, sample_opts)
+    attr(x, 'model') <- attr(x$samples[[1]], 'model')
     return(x)
 }
 
@@ -301,7 +303,8 @@ get_draws_mle <- function(
     use_samp_ids,
     failure_limit = 0,
     ncores = 1,
-    quiet = FALSE
+    quiet = FALSE,
+    fetch_model = FALSE
 ) {
 
     max_sample_attempts <- n_target_samples + failure_limit
@@ -319,7 +322,8 @@ get_draws_mle <- function(
             ids = longdata$ids,
             longdata = longdata,
             method = method,
-            optimizer = c("L-BFGS-B", "BFGS")
+            optimizer = c("L-BFGS-B", "BFGS"),
+            fetch_model = fetch_model
         )
     })
 
@@ -414,7 +418,7 @@ get_draws_mle <- function(
 #' optimizers are `r sapply(formals(fun = stats::optim)$method, function(x) paste0(x, ","))[-1]`.
 #'
 #' @inherit sample_single return
-get_mmrm_sample <- function(ids, longdata, method, optimizer) {
+get_mmrm_sample <- function(ids, longdata, method, optimizer, fetch_model = FALSE) {
 
     vars <- longdata$vars
     dat <- longdata$get_data(ids, nmar.rm = TRUE, na.rm = TRUE)
@@ -432,7 +436,8 @@ get_mmrm_sample <- function(ids, longdata, method, optimizer) {
         cov_struct = method$covariance,
         REML = method$REML,
         same_cov = method$same_cov,
-        optimizer = optimizer
+        optimizer = optimizer,
+        fetch_model = fetch_model
     )
 
     if (sample$failed) {
@@ -449,7 +454,18 @@ get_mmrm_sample <- function(ids, longdata, method, optimizer) {
             theta = sample$theta
         )
     }
-    return(ret)
+
+    tryCatch({
+        if (fetch_model) {
+            attr(ret, 'model') <- attr(sample, 'model')
+        }},
+        error=function(e) {
+            message(e)
+        },
+        finally={
+            return(ret)
+        }
+    )
 }
 
 

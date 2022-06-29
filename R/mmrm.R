@@ -197,7 +197,8 @@ fit_mmrm <- function(
     REML = TRUE,
     same_cov = TRUE,
     initial_values = NULL,
-    optimizer = "L-BFGS-B"
+    optimizer = "L-BFGS-B",
+    fetch_model = FALSE
 ) {
 
     # check that optimizer is one among the optimizers from optim
@@ -250,6 +251,10 @@ fit_mmrm <- function(
     }
     names(params$sigma) <- levels(group)
 
+    if (fetch_model) {
+        attr(params, 'model') <- fit
+    }
+
     return(params)
 }
 
@@ -282,7 +287,7 @@ fit_mmrm <- function(
 #' @param optimizer A character vector or a named list. See details.
 #' @param ... Additional arguments passed onto [fit_mmrm()]
 #' @seealso [fit_mmrm()]
-fit_mmrm_multiopt <- function(..., optimizer) {
+fit_mmrm_multiopt <- function(..., optimizer, fetch_model = FALSE) {
 
     assert_that(
         is.character(optimizer) | is.list(optimizer),
@@ -310,7 +315,7 @@ fit_mmrm_multiopt <- function(..., optimizer) {
     for (i in seq_len(length(initial_values))) {
         opt <- names(initial_values)[[i]]
         init_vals <- initial_values[[i]]
-        fit <- fit_mmrm(..., initial_values = init_vals, optimizer = opt)
+        fit <- fit_mmrm(..., initial_values = init_vals, optimizer = opt, fetch_model = fetch_model)
         if (!fit$failed) break
     }
 
