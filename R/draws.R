@@ -391,16 +391,10 @@ get_draws_mle <- function(
         }
     }
 
-    ret <- as_draws(
-        method = method,
-        samples = sample_list(samples),
-        data = longdata,
-        formula = longdata$formula,
-        n_failures = n_failed_samples
-    )
-    return(ret)
-}
+    args$samples <- sample_list(samples)
 
+    return(do.call(as_draws, args))
+}
 
 
 #' Fit MMRM and returns parameter estimates
