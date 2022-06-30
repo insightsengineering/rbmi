@@ -381,7 +381,17 @@ get_draws_mle <- function(
         msg = "Incorrect number of samples were produced"
     )
 
+    args <- list(
+        method = method,
+        samples = NULL,
+        data = longdata,
+        formula = longdata$formula,
+        n_failures = n_failed_samples
+    )
+
     if (first_sample_orig) {
+        args[['fit']] <- attr(initial_sample, 'model')
+        attr(initial_sample, 'model') <- NULL
         samples <- append(list(initial_sample), samples)
     }
 
