@@ -190,7 +190,7 @@ draws.approxbayes <- function(data, data_ice = NULL, vars, method, ncores = 1, q
         ncores = ncores,
         n_target_samples = method$n_samples,
         failure_limit = ceiling(method$threshold * method$n_samples),
-        quiet = quiet,
+        quiet = quiet
     )
     return(x)
 }
