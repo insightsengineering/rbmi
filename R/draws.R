@@ -209,8 +209,7 @@ draws.condmean <- function(data, data_ice = NULL, vars, method, ncores = 1, quie
         ncores = ncores,
         first_sample_orig = TRUE,
         use_samp_ids = TRUE,
-        quiet = quiet,
-        fetch_model = TRUE
+        quiet = quiet
     )
 
     if (method$type == "bootstrap") {
@@ -229,9 +228,7 @@ draws.condmean <- function(data, data_ice = NULL, vars, method, ncores = 1, quie
         stop("Invalid Method type")
     }
     sample_opts <- append(sample_opts, extra_opts)
-    x <- do.call(get_draws_mle, sample_opts)
-    attr(x, 'model') <- attr(x$samples[[1]], 'model')
-    return(x)
+    return(do.call(get_draws_mle, sample_opts))
 }
 
 
@@ -303,8 +300,7 @@ get_draws_mle <- function(
     use_samp_ids,
     failure_limit = 0,
     ncores = 1,
-    quiet = FALSE,
-    fetch_model = FALSE
+    quiet = FALSE
 ) {
 
     max_sample_attempts <- n_target_samples + failure_limit
@@ -323,7 +319,7 @@ get_draws_mle <- function(
             longdata = longdata,
             method = method,
             optimizer = c("L-BFGS-B", "BFGS"),
-            fetch_model = fetch_model
+            fetch_model = first_sample_orig
         )
     })
 
