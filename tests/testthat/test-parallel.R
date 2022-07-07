@@ -4,6 +4,7 @@ suppressPackageStartupMessages({
 
 
 test_that("Parallisation works as expected", {
+    local_edition(2)
 
     skip_if_not(is_full_test())
 
