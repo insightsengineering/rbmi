@@ -699,7 +699,7 @@ validate.draws <- function(x, ...) {
         has_class(x$samples, "sample_list"),
         validate(x$samples),
         is.null(x$n_failures) | is.numeric(x$n_failures),
-        is.null(x$fit) | has_class(x$fit, "stanfit"),
+        is.null(x$fit) | has_class(x$fit, "stanfit") | has_class(x$fit, 'glmmTMB'),
         has_class(x$formula, "formula")
     )
 }
