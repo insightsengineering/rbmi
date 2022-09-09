@@ -13,7 +13,7 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 URL: https://insightsengineering.github.io/rbmi/, https://github.com/insightsengineering/rbmi
 BugReports: https://github.com/insightsengineering/rbmi/issues
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 Suggests: 
     dplyr,
     covr,

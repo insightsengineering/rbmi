@@ -17,7 +17,9 @@ Covert Results object (as created by \code{\link[=analyse]{analyse()}}) in order
 the same estimates together into vectors. The return object is in poolable class containing the results, meta information and the key names for the mata information
 }
 \details{
-The format of analysis results are converted from:\preformatted{x <- list(
+The format of analysis results are converted from:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{x <- list(
     list(
      analysis_result(
             name = 'trt',
@@ -47,10 +49,12 @@ The format of analysis results are converted from:\preformatted{x <- list(
         )
     )
 )
-}
+}\if{html}{\out{</div>}}
 
 to the following format and stored in the \verb{$results} element of the poolable object. The element \verb{$meta} contains meta information.
-The element \verb{$metakeys} contains the names of the meta information as a character vector\preformatted{list(
+The element \verb{$metakeys} contains the names of the meta information as a character vector
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{list(
     trt.1 = data.frame(
      list(
         name = 'trt',
@@ -68,5 +72,5 @@ The element \verb{$metakeys} contains the names of the meta information as a cha
         )
      )
 )
-}
+}\if{html}{\out{</div>}}
 }

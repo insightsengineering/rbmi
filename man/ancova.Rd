@@ -40,7 +40,9 @@ If no value for \code{visits} is provided then it will be set to
 \code{unique(data[[vars$visit]])}.
 
 Visits as part of the meta information of the \code{analysis_result} object from results of \code{\link[=analyse]{analyse()}} can be accessed individually and are
-are displayed in a column from the \code{print.analysis} output such like\preformatted{ =====================================
+are displayed in a column from the \code{print.analysis} output such like
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{ =====================================
    name     est     se     df   visit
  -------------------------------------
     trt    -0.513  0.505   197    1
@@ -49,9 +51,11 @@ are displayed in a column from the \code{print.analysis} output such like\prefor
   lsm_alt  5.144   0.477   197    4
  -------------------------------------
 
-}
+}\if{html}{\out{</div>}}
 
-Then list in analysis results has structure such as following. Each individual result is in class \code{analysis_result}\preformatted{list(
+Then list in analysis results has structure such as following. Each individual result is in class \code{analysis_result}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{list(
    trt = analysis_result(name =, est = ..., meta = list(visit=1, ...)),
    lsm_ref = analysis_result(name =, est = ..., meta = list(visit=1, ...)),
    lsm_alt = analysis_result(name =, est = ..., meta = list(visit=1, ...)),
@@ -60,7 +64,7 @@ Then list in analysis results has structure such as following. Each individual r
    lsm_alt = analysis_result(name =, est = ..., meta = list(visit=2, ...)),
    ...
 )
-}
+}\if{html}{\out{</div>}}
 
 Please note that "ref" refers to the first factor level of \code{vars$group} which does not necessarily
 coincide with the control arm. Analogously, "alt" refers to the second factor level of \code{vars$group}.

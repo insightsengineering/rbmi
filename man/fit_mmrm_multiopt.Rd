@@ -21,14 +21,16 @@ try again.
 If \code{optimizer} is a list then the names of the list will be taken to be the required \code{optimizer}
 with the contents of that element being used as the initial values.  This functionality
 can be used to try and fit the model using the same optimizer at multiple different starting
-values e.g.:\preformatted{fit_mmrm_multiopt(
+values e.g.:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{fit_mmrm_multiopt(
     ...,
     optimizer = list(
         "L-BFGS-B" = list(beta = c(1,2,3), theta = c(9,8,7)),
         "L-BFGS-B" = list(beta = c(5,6,7), theta = c(10,11,12)),
     )
 )
-}
+}\if{html}{\out{</div>}}
 
 See \code{\link[stats:optim]{stats::optim()}} for a list of the available optimizers that can be used
 }

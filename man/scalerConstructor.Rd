@@ -32,16 +32,16 @@ variable, all other variables are the predictors.}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{scalerConstructor$new()}}
-\item \href{#method-scale}{\code{scalerConstructor$scale()}}
-\item \href{#method-unscale_sigma}{\code{scalerConstructor$unscale_sigma()}}
-\item \href{#method-unscale_beta}{\code{scalerConstructor$unscale_beta()}}
-\item \href{#method-clone}{\code{scalerConstructor$clone()}}
+\item \href{#method-scaler-new}{\code{scalerConstructor$new()}}
+\item \href{#method-scaler-scale}{\code{scalerConstructor$scale()}}
+\item \href{#method-scaler-unscale_sigma}{\code{scalerConstructor$unscale_sigma()}}
+\item \href{#method-scaler-unscale_beta}{\code{scalerConstructor$unscale_beta()}}
+\item \href{#method-scaler-clone}{\code{scalerConstructor$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-scaler-new"></a>}}
+\if{latex}{\out{\hypertarget{method-scaler-new}{}}}
 \subsection{Method \code{new()}}{
 Uses \code{dat} to determine the relevant column means and standard deviations to use
 when scaling and un-scaling future datasets. Implicitly assumes that new datasets
@@ -66,8 +66,8 @@ to \code{0} and scale to \code{1}.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-scale"></a>}}
-\if{latex}{\out{\hypertarget{method-scale}{}}}
+\if{html}{\out{<a id="method-scaler-scale"></a>}}
+\if{latex}{\out{\hypertarget{method-scaler-scale}{}}}
 \subsection{Method \code{scale()}}{
 Scales a dataset so that all continuous variables have a mean of 0 and a
 standard deviation of 1.
@@ -86,8 +86,8 @@ order as the dataset used in the initialization function.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-unscale_sigma"></a>}}
-\if{latex}{\out{\hypertarget{method-unscale_sigma}{}}}
+\if{html}{\out{<a id="method-scaler-unscale_sigma"></a>}}
+\if{latex}{\out{\hypertarget{method-scaler-unscale_sigma}{}}}
 \subsection{Method \code{unscale_sigma()}}{
 Unscales a sigma value (or matrix) as estimated by a linear model
 using a design matrix scaled by this object. This function only
@@ -109,8 +109,8 @@ A numeric value or matrix
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-unscale_beta"></a>}}
-\if{latex}{\out{\hypertarget{method-unscale_beta}{}}}
+\if{html}{\out{<a id="method-scaler-unscale_beta"></a>}}
+\if{latex}{\out{\hypertarget{method-scaler-unscale_beta}{}}}
 \subsection{Method \code{unscale_beta()}}{
 Unscales a beta value (or vector) as estimated by a linear model
 using a design matrix scaled by this object. This function only
@@ -132,8 +132,8 @@ A numeric vector.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-scaler-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-scaler-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

@@ -16,12 +16,7 @@ get_mmrm_sample(ids, longdata, method, optimizer)
 
 \item{optimizer}{vector of characters defining the optimizer to be used.
 Every optimizer must be one of the \code{\link[stats:optim]{stats::optim()}} function. The list of possible
-optimizers are Nelder-Mead,
-BFGS,
-CG,
-L-BFGS-B,
-SANN,
-Brent,.}
+optimizers are Nelder-Mead,, BFGS,, CG,, L-BFGS-B,, SANN,, Brent,.}
 }
 \value{
 A named list of class \code{sample_single}. It contains the following:

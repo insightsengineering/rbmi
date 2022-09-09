@@ -12,7 +12,7 @@ See \code{\link[=analyse]{analyse()}} for details on what this object should loo
 
 \item{method}{The method object as specified in \code{\link[=draws]{draws()}}.}
 
-\item{delta}{The delta dataset used. See \code{\link[=analyse]{analyse()}} for details on how this
+\item{delta}{The delta dataset or function used. See \code{\link[=analyse]{analyse()}} for details on how this
 should be specified.}
 
 \item{fun}{The analysis function that was used.}

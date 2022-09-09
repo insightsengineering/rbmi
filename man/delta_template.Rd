@@ -44,7 +44,9 @@ This is best illustrated with an example:
 
 Let \code{delta = c(5,6,7,8)} and \code{dlag=c(1,2,3,4)} (i.e. assuming there are 4 visits)
 and lets say that the subject had an ICE on visit 2. The calculation would then be
-as follows:\preformatted{v1  v2  v3  v4
+as follows:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{v1  v2  v3  v4
 --------------
  5   6   7   8  # delta assigned to each visit
  0   1   2   3  # lagged scaling starting from the first visit after the subjects ICE
@@ -52,11 +54,13 @@ as follows:\preformatted{v1  v2  v3  v4
  0   6  14  24  # delta * lagged scaling
 --------------
  0   6  20  44  # accumulative sum of delta to be applied to each visit
-}
+}\if{html}{\out{</div>}}
 
 That is to say the subject would have a delta offset of 0 applied for visit-1, 6
 for visit-2, 20 for visit-3 and 44 for visit-4. As a comparison, lets say that the
-subject instead had their ICE on visit 3, the calculation would then be as follows:\preformatted{v1  v2  v3  v4
+subject instead had their ICE on visit 3, the calculation would then be as follows:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{v1  v2  v3  v4
 --------------
  5   6   7   8  # delta assigned to each visit
  0   0   1   2  # lagged scaling starting from the first visit after the subjects ICE
@@ -64,12 +68,14 @@ subject instead had their ICE on visit 3, the calculation would then be as follo
  0   0   7  16  # delta * lagged scaling
 --------------
  0   0   7  23  # accumulative sum of delta to be applied to each visit
-}
+}\if{html}{\out{</div>}}
 
 In terms of practical usage, lets say that you wanted a delta of 5 to be used for all post ICE visits
 regardless of their proximity to the ICE visit. This can be achieved by setting
 \code{delta = c(5,5,5,5)} and \code{dlag = c(1,0,0,0)}. For example lets say a subject had their
-ICE on visit-1, then the calculation would be as follows:\preformatted{v1  v2  v3  v4
+ICE on visit-1, then the calculation would be as follows:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{v1  v2  v3  v4
 --------------
  5   5   5   5  # delta assigned to each visit
  1   0   0   0  # lagged scaling starting from the first visit after the subjects ICE
@@ -77,7 +83,7 @@ ICE on visit-1, then the calculation would be as follows:\preformatted{v1  v2  v
  5   0   0  0  # delta * lagged scaling
 --------------
  5   5   5  5  # accumulative sum of delta to be applied to each visit
-}
+}\if{html}{\out{</div>}}
 
 Another way of using these arguments
 is to set \code{delta} to be the difference in time between visits and \code{dlag} to be the
@@ -85,7 +91,9 @@ amount of delta per unit of time. For example lets say that we have a visit on w
 1, 5, 6 & 9 and that we want a delta of 3 to be applied for each week after an ICE. This
 can be achieved by setting \code{delta = c(0,4,1,3)} (the difference in weeks between each visit)
 and \code{dlag = c(3, 3, 3, 3)}. For example lets say we have a subject who had their ICE on week-5
-(i.e. visit-2) then the calculation would be:\preformatted{v1  v2  v3  v4
+(i.e. visit-2) then the calculation would be:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{v1  v2  v3  v4
 --------------
  0   4   1   3  # delta assigned to each visit
  0   0   3   3  # lagged scaling starting from the first visit after the subjects ICE
@@ -93,7 +101,7 @@ and \code{dlag = c(3, 3, 3, 3)}. For example lets say we have a subject who had 
  0   0   3   9  # delta * lagged scaling
 --------------
  0   0   3  12  # accumulative sum of delta to be applied to each visit
-}
+}\if{html}{\out{</div>}}
 
 i.e. on week-6 (1 week after the ICE) they have a delta of 3 and on week-9 (4 weeks after the ICE)
 they have a delta of 12.

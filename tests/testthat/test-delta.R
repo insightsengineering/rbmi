@@ -150,11 +150,11 @@ test_that("apply_delta", {
         v2 = c(1, 2, 3),
         id = c("c", "b", "a")
     )
-    output_actual <- apply_delta(d1, group = "id", outcome = "out")
+    output_actual <- apply_delta(d1, "a", group = "id", outcome = "out")
     expect_equal(d1, output_actual)
 
     delta <- tibble()
-    output_actual <- apply_delta(d1, delta, group = "id", outcome = "out")
+    output_actual <- apply_delta(d1, "a", delta, group = "id", outcome = "out")
     expect_equal(d1, output_actual)
 
 
@@ -165,7 +165,7 @@ test_that("apply_delta", {
     )
     output_expected <- d1
     output_expected$out <- c(1, 3, 5)
-    output_actual <- apply_delta(d1, delta, group = "id", outcome = "out")
+    output_actual <- apply_delta(d1,  "a", delta, group = "id", outcome = "out")
     expect_equal(output_expected, output_actual, ignore_attr = TRUE)
 
 
@@ -177,7 +177,7 @@ test_that("apply_delta", {
     )
     output_expected <- d1
     output_expected$out <- c(1, 3, 3)
-    output_actual <- apply_delta(d1, delta, group = c("id", "v1"), outcome = "out")
+    output_actual <- apply_delta(d1, "a", delta, group = c("id", "v1"), outcome = "out")
     expect_equal(output_expected, output_actual, ignore_attr = TRUE)
 
 
@@ -194,10 +194,10 @@ test_that("apply_delta", {
     )
     output_expected <- d1
     output_expected$out <- c(1, 3, 5, 5)
-    output_actual <- apply_delta(d1, delta, group = c("id"), outcome = "out")
+    output_actual <- apply_delta(d1, "a", delta, group = c("id"), outcome = "out")
     expect_equal(output_expected, output_actual, ignore_attr = TRUE)
     expect_error(
-        apply_delta(d1, delta, group = c("id", "v1"), outcome = "out"),
+        apply_delta(d1, "a", delta, group = c("id", "v1"), outcome = "out"),
         regexp = "`v1` is not in `delta`"
     )
 
@@ -208,7 +208,7 @@ test_that("apply_delta", {
     )
     output_expected <- d1
     output_expected$out <- c(1, 3, 3, 4)
-    output_actual <- apply_delta(d1, delta, group = c("id", "v1"), outcome = "out")
+    output_actual <- apply_delta(d1, "a", delta, group = c("id", "v1"), outcome = "out")
     expect_equal(output_expected, output_actual, ignore_attr = TRUE)
 
     delta <- tibble(
@@ -218,7 +218,7 @@ test_that("apply_delta", {
     )
     output_expected <- d1
     output_expected$out <- c(1, 11, 3, 5)
-    output_actual <- apply_delta(d1, delta, group = c("id", "v1"), outcome = "out")
+    output_actual <- apply_delta(d1, "a", delta, group = c("id", "v1"), outcome = "out")
     expect_equal(output_expected, output_actual, ignore_attr = TRUE)
 
 
@@ -228,7 +228,7 @@ test_that("apply_delta", {
         delta = c(1, 2, 3, 4)
     )
     expect_error(
-        apply_delta(d1, delta, group = "id", outcome = "out"),
+        apply_delta(d1, "a", delta, group = "id", outcome = "out"),
         "whilst applying delta"
     )
 })
@@ -258,9 +258,9 @@ test_that("extract_imputed_dfs + delta", {
     )
 
     dobj <- draws(
-        dat, 
+        dat,
         dat_ice,
-        vars = vars, 
+        vars = vars,
         method = method_approxbayes(n_samples = 5),
         quiet = TRUE
     )
@@ -284,5 +284,25 @@ test_that("extract_imputed_dfs + delta", {
 
     expect_equal(d1, select(dat, -id) %>%  as.data.frame)
 
+})
+
+test_that('delta2df', {
+    delta <- tibble(
+        id = c("b", "a", "d"),
+        v1 = c(1, 2, 2),
+        delta = c(1, 2, 3)
+    )
+
+    d1 <- tibble(
+        out = c(1, 2, 3, 4),
+        v1 = c(1, 1, 1, 2),
+        v2 = c(1, 2, 3, 4),
+        id = c("c", "b", "a", "b")
+    )
+
+    delta_fun <- function(df) mutate(df, out + 1)
+
+    expect_equal(delta2df(delta, d1), delta)
+    expect_equal(delta2df(delta_fun, d1), delta_fun(d1))
 })
 

@@ -17,9 +17,13 @@ the indexes of which original elements it occurred in.
 \details{
 This functions purpose is best illustrated by an example:
 
-input:\preformatted{list( c("A", "B", "C"), c("A", "A", "B"))\}
-}
+input:
 
-becomes:\preformatted{list( "A" = c(1,2,2), "B" = c(1,2), "C" = 1 )
-}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{list( c("A", "B", "C"), c("A", "A", "B"))\}
+}\if{html}{\out{</div>}}
+
+becomes:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{list( "A" = c(1,2,2), "B" = c(1,2), "C" = 1 )
+}\if{html}{\out{</div>}}
 }

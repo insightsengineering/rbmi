@@ -18,10 +18,14 @@ for fitting a MMRM for subject by visit in the format required for glmmTMB.
 }
 \details{
 For example assuming the user specified a covariance structure of "us" and that no groups
-were provided this will return\preformatted{us(0 + visit | subjid)
-}
+were provided this will return
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{us(0 + visit | subjid)
+}\if{html}{\out{</div>}}
 
 If \code{group} is provided then this indicates that separate covariance matrices
-are required per group and as such the following will be returned:\preformatted{us( 0 + group1:visit | subjid) + us(0 + group2:visit | subjid) + ...
-}
+are required per group and as such the following will be returned:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{us( 0 + group1:visit | subjid) + us(0 + group2:visit | subjid) + ...
+}\if{html}{\out{</div>}}
 }

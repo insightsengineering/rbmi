@@ -285,11 +285,14 @@ d_lagscale <- function(delta, dlag, is_post_ice) {
 #' corresponding delta.
 #'
 #' @param data `data.frame` which will have its `outcome` column adjusted.
+#' @param subjid character vector of subject id
 #' @param delta `data.frame` (must contain a column called `delta`).
 #' @param group character vector of variables in both `data` and `delta` that will be used
 #' to merge the 2 data.frames together by.
 #' @param outcome character, name of the outcome variable in `data`.
-apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL) {
+#' @param oldvar character vector for dummy variable name to avoid collision. It should be same as the one used in [extract_imputed_df()].
+apply_delta <- function(data, subjid, delta = NULL, group = NULL, outcome = NULL,
+                        oldvar = "old_subject_variable_zkfed1fgkadwni6g4oajd2aw") {
 
     assert_that(
         is.character(group),
@@ -301,21 +304,27 @@ apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL) {
 
     assert_that(
         is.data.frame(data),
-        is.data.frame(delta) | is.null(delta),
+        is.data.frame(delta) | is.null(delta) | is.function(delta),
         msg = "`dat` and `delta` must be data.frames"
     )
 
     assert_that(
-        !"delta" %in% names(data),
-        msg = " `delta` is a reserved variable name should not be already defined in `data`"
+            !"delta" %in% names(data),
+            msg = " `delta` is a reserved variable name should not be already defined in `data`"
     )
 
     if (is.null(delta)) {
         return(data)
     }
-    if (nrow(delta) == 0) {
-        return(data)
+
+    delta_df <- delta2df(delta, data)
+
+
+    if (nrow(delta_df) == 0) {
+            return(data)
     }
+
+    delta_df[[oldvar]] <- delta_df[[subjid]]
 
     for (var in c(group, outcome)) {
         assert_that(
@@ -326,12 +335,12 @@ apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL) {
 
     for (var in c(group, "delta")) {
         assert_that(
-            var %in% names(delta),
+            var %in% names(delta_df),
             msg = sprintf("Variable `%s` is not in `delta`", var)
         )
     }
 
-    delta_min <- delta[, c(group, "delta")]
+    delta_min <- delta_df[, c(group, "delta")]
 
     # We insert a variable in order to recover the original sort order of our `data.frame`
     # We use a obfuscated name in order to prevent variable overwriting
@@ -365,4 +374,23 @@ apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL) {
     )
     class(data3) <- class(data)
     return(data3)
+}
+
+
+#' Dispatch on delta
+#'
+#' If delta is a data.frame, return delta. If delta is function apply it to the remaining arguments and return
+#'
+#' @param delta The delta object
+#' @param ... Potential arguments for delta function
+#' @return A delta data.frame
+delta2df <- function(delta, ...) {
+    assert_that(is.data.frame(delta) | is.function(delta),
+        msg = '`delta` must be data.frame or function'
+    )
+    if (is.data.frame(delta)) {
+        delta
+    } else {
+        delta(...)
+    }
 }
