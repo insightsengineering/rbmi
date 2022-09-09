@@ -179,7 +179,7 @@ test_that("pool", {
     vals <- rnorm(n, mu, sd)
 
     runanalysis <- function(x) {
-        list("p1" = list(est = mean(x), se = sqrt(var(x) / length(x)), df = NA))
+        list(analysis_result(name = "p1", est = mean(x), se = sqrt(var(x) / length(x)), df = NA))
     }
 
 
@@ -247,7 +247,7 @@ test_that("pool", {
 
 test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     set.seed(101)
-  
+
     mu <- 0
     sd <- 1
     n <- 2000
@@ -255,7 +255,7 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     real_mu <- mean(vals)
 
     runanalysis <- function(x) {
-        list("p1" = list(est = mean(x), se = NA, df = NA))
+        list(analysis_result(name = "p1", est = mean(x), se = NA, df = NA))
     }
 
     results_bayes <- as_analysis(
@@ -271,8 +271,9 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     bayes3 <- pool(results_bayes, alternative = "greater")
 
     expect_equal(
-        bayes$pars$p1,
-        list(est = real_mu,
+        extract_analysis_result(bayes$pars, name = 'p1')[[1]],
+        list(name = 'p1',
+             est = real_mu,
              ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
              pvalue = as.numeric(NA)),
@@ -280,8 +281,9 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     )
 
     expect_equal(
-        bayes2$pars$p1,
-        list(est = real_mu,
+        extract_analysis_result(bayes2$pars, name = 'p1')[[1]],
+        list(name = 'p1',
+             est = real_mu,
              ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
              pvalue = as.numeric(NA)),
@@ -289,8 +291,9 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     )
 
     expect_equal(
-        bayes3$pars$p1,
-        list(est = real_mu,
+        extract_analysis_result(bayes3$pars, name = 'p1')[[1]],
+        list(name = 'p1',
+             est = real_mu,
              ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
              pvalue = as.numeric(NA)),
@@ -298,7 +301,7 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     )
 
     runanalysis <- function(x) {
-        list("p1" = list(est = mean(x), se = NA, df = Inf))
+        list(analysis_result(name = "p1", est = mean(x), se = NA, df = Inf))
     }
 
     results_bayes <- as_analysis(
@@ -314,8 +317,9 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     bayes3 <- pool(results_bayes, alternative = "greater")
 
     expect_equal(
-        bayes$pars$p1,
-        list(est = real_mu,
+        extract_analysis_result(bayes$pars, name = 'p1')[[1]],
+        list(name = 'p1',
+             est = real_mu,
              ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
              pvalue = as.numeric(NA)),
@@ -323,8 +327,9 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     )
 
     expect_equal(
-        bayes2$pars$p1,
-        list(est = real_mu,
+        extract_analysis_result(bayes2$pars, name = 'p1')[[1]],
+        list(name = 'p1',
+             est = real_mu,
              ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
              pvalue = as.numeric(NA)),
@@ -332,15 +337,16 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     )
 
     expect_equal(
-        bayes3$pars$p1,
-        list(est = real_mu,
+        extract_analysis_result(bayes3$pars, name = 'p1')[[1]],
+        list(name = 'p1',
+             est = real_mu,
              ci = as.numeric(c(NA, NA)),
              se = as.numeric(NA),
              pvalue = as.numeric(NA)),
         tolerance = 1e-2
     )
 })
-  
+
   test_that("pool BMLMI estimates", {
     set.seed(100)
 
@@ -366,7 +372,7 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     ), recursive = FALSE)
 
     runanalysis <- function(x) {
-        list("p1" = list(est = mean(x), se = sqrt(var(x) / length(x)), df = NA))
+        list(analysis_result(name = "p1", est = mean(x), se = sqrt(var(x) / length(x)), df = NA))
     }
 
 
@@ -448,7 +454,7 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     pooled_res <- pool(results_bmlmi)
 
     expect_results(pooled_res, real_mu = real_mu, real_se = real_se)
-    expect_true(sd/sqrt(n) < pooled_res$pars$p1$se)
+    expect_true(sd/sqrt(n) < extract_analysis_result(pooled_res$pars, name = 'p1')[[1]]$se)
 
 })
 
@@ -830,7 +836,7 @@ test_that("condmean doesn't use first element in CI", {
     n <- 200
 
     runanalysis <- function(x) {
-        list("p1" = list(est = mean(x)))
+        list(analysis_result(name = "p1", est = mean(x)))
     }
 
     set.seed(2040)
@@ -845,14 +851,16 @@ test_that("condmean doesn't use first element in CI", {
 
 
     pooled_1 <- pool(x)
-    expect_equal(pooled_1$pars$p1$est, x$results[[1]]$p1$est)
+    expect_equal(extract_analysis_result(pooled_1$pars, name = 'p1')[[1]]$est, extract_analysis_result(x$results[[1]], name = 'p1')[[1]]$est)
 
-    x$results[[1]]$p1$est <- 9999
+    x$results[[1]][[1]]$est <- 9999
 
     pooled_2 <- pool(x)
-    expect_equal(pooled_2$pars$p1$est, x$results[[1]]$p1$est)
+    expect_equal(extract_analysis_result(pooled_2$pars, name = 'p1')[[1]]$est, extract_analysis_result(x$results[[1]], name = 'p1')[[1]]$est)
 
-    pooled_1$pars$p1$est <- NULL
-    pooled_2$pars$p1$est <- NULL
-    expect_equal(pooled_1, pooled_2)
+    pooled_1_copy <- extract_analysis_result(pooled_1$pars, name = 'p1')[[1]]
+    pooled_2_copy <- extract_analysis_result(pooled_2$pars, name = 'p1')[[1]]
+    pooled_1_copy$est <- NULL
+    pooled_2_copy$est <- NULL
+    expect_equal(pooled_1_copy, pooled_2_copy)
 })

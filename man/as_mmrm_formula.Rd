@@ -17,6 +17,6 @@ Derives the MMRM model formula from the structure of mmrm_df.
 returns a formula object of the form:
 }
 \details{
-\preformatted{outcome ~ 0 + V1 + V2 + V4 + ... + us(0 + group1:visit | subjid) + us(0 + group2:visit | subjid) + ...
-}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{outcome ~ 0 + V1 + V2 + V4 + ... + us(0 + group1:visit | subjid) + us(0 + group2:visit | subjid) + ...
+}\if{html}{\out{</div>}}
 }

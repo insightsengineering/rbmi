@@ -4,10 +4,19 @@
 \alias{apply_delta}
 \title{Applies delta adjustment}
 \usage{
-apply_delta(data, delta = NULL, group = NULL, outcome = NULL)
+apply_delta(
+  data,
+  subjid,
+  delta = NULL,
+  group = NULL,
+  outcome = NULL,
+  oldvar = "old_subject_variable_zkfed1fgkadwni6g4oajd2aw"
+)
 }
 \arguments{
 \item{data}{\code{data.frame} which will have its \code{outcome} column adjusted.}
+
+\item{subjid}{character vector of subject id}
 
 \item{delta}{\code{data.frame} (must contain a column called \code{delta}).}
 
@@ -15,6 +24,8 @@ apply_delta(data, delta = NULL, group = NULL, outcome = NULL)
 to merge the 2 data.frames together by.}
 
 \item{outcome}{character, name of the outcome variable in \code{data}.}
+
+\item{oldvar}{character vector for dummy variable name to avoid collision. It should be same as the one used in \code{\link[=extract_imputed_df]{extract_imputed_df()}}.}
 }
 \description{
 Takes a delta dataset and adjusts the outcome variable by adding the
