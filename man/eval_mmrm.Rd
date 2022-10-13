@@ -2,30 +2,32 @@
 % Please edit documentation in R/mmrm.R
 \name{eval_mmrm}
 \alias{eval_mmrm}
-\title{Evaluate a call to glmmTMB # TODO - Documentation}
+\title{Evaluate a call to mmrm}
 \usage{
 eval_mmrm(expr)
 }
 \arguments{
-\item{expr}{An expression to be evaluated. Should be a call to glmmTMB-glmmTMB.}
+\item{expr}{An expression to be evaluated. Should be a call to \code{\link[mmrm:mmrm]{mmrm::mmrm()}}.}
 }
 \description{
-This is a utility function that attempts to evaluate a call to glmmTMB
+This is a utility function that attempts to evaluate a call to mmrm
 managing any warnings or errors that are thrown. In particular
 this function attempts to catch any warnings or errors and instead
 of surfacing them it will simply add an additional element \code{failed}
-with a value of TRUE.  This allows for multiple calls to be made
-without the program exiting. Additionally this function will suppress
-known spurious warnings associated with glmmTMB, namely:
+with a value of TRUE. This allows for multiple calls to be made
+without the program exiting.
 }
 \details{
-\itemize{
-\item https://stackoverflow.com/questions/67040472/warning-in-every-model-of-glmmtmb-givecsparse
-}
+This function was originally developed for use with glmmTMB which needed
+more hand-holding and dropping of false-positive warnings. It is not
+as important now but is kept around encase we need to catch
+false-postive warnings again in the future.
 }
 \examples{
 \dontrun{
-    eval_glmmtmb({glmmTMB::glmmTMB(formula, data)})
+eval_mmrm({
+    mmrm::mmrm(formula, data)
+})
 }
 }
 \seealso{

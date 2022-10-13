@@ -1,25 +1,27 @@
 
 
 
-#' Construct random effects formula - TODO DESCRIPTION
+#' Construct random effects formula
 #'
 #' Constructs a character representation of the random effects formula
-#' for fitting a MMRM for subject by visit in the format required for glmmTMB.
+#' for fitting a MMRM for subject by visit in the format required for [mmrm::mmrm()].
 #'
 #' For example assuming the user specified a covariance structure of "us" and that no groups
 #' were provided this will return
 #'
 #' ```
-#' us(0 + visit | subjid)
+#' us(visit | subjid)
 #' ```
 #'
-#' If `group` is provided then this indicates that separate covariance matrices
+#' If `cov_by_group` is set to `FALSE` then this indicates that separate covariance matrices
 #' are required per group and as such the following will be returned:
 #'
 #' ```
-#' us( 0 + group1:visit | subjid) + us(0 + group2:visit | subjid) + ...
+#' us( visit | group / subjid )
 #' ```
-#' @inheritParams fit_mmrm
+#' @param cov_struct Character - The covariance structure to be used, must be one of `"us"`,
+#' `"toep"`, `"cs"`, `"ar1"`
+#' @param cov_by_group Boolean - Whenever or not to use separate covariances per each group level
 random_effects_expr <- function(
     cov_struct = c("us", "toep", "cs", "ar1"),
     cov_by_group = FALSE
@@ -34,26 +36,22 @@ random_effects_expr <- function(
 }
 
 
-#' Creates a "MMRM" ready dataset - TODO DOCUMENTATION
+#' Creates a "MMRM" ready dataset
 #'
-#' Converts a design matrix + key variables into a command format
+#' Converts a design matrix + key variables into a common format
 #' In particular this function does the following:
 #' - Renames all covariates as `V1`, `V2`, etc to avoid issues of special characters in variable names
 #' - Ensures all key variables are of the right type
 #' - Inserts the outcome, visit and subjid variables into the `data.frame`
 #' naming them as `outcome`, `visit` and `subjid`
-#' - Splits a grouping variable out into separate columns, i.e. if `group` has 3 levels then the
-#' output `data.frame` will have dummy indicator variables `G1`, `G2` & `G3`
+#' - If provided will also insert the group variable into the `data.frame` named as `group`
 #'
 #' @inheritParams fit_mmrm
-as_mmrm_df <- function(
-    designmat,
-    outcome,
-    visit,
-    subjid,
-    group = NULL
-) {
-
+as_mmrm_df <- function(designmat,
+                       outcome,
+                       visit,
+                       subjid,
+                       group = NULL) {
     if (length(group) == 0) group <- NULL
 
     dmat <- as.data.frame(designmat)
@@ -80,17 +78,18 @@ as_mmrm_df <- function(
 }
 
 
-#' Create MMRM formula - TODO Documentation
+#' Create MMRM formula
 #'
 #'
 #' Derives the MMRM model formula from the structure of mmrm_df.
 #' returns a formula object of the form:
 #'
 #' ```
-#' outcome ~ 0 + V1 + V2 + V4 + ... + us(0 + group1:visit | subjid) + us(0 + group2:visit | subjid) + ...
+#' outcome ~ 0 + V1 + V2 + V4 + ... + us(visit | group / subjid)
 #' ```
 #' @param mmrm_df an mmrm `data.frame` as created by [as_mmrm_df()]
-#' @inheritParams fit_mmrm
+#' @param cov_struct Character - The covariance structure to be used, must be one of `"us"`,
+#' `"toep"`, `"cs"`, `"ar1"`
 #' @importFrom stats as.formula
 as_mmrm_formula <- function(mmrm_df, cov_struct) {
     dfnames <- names(mmrm_df)
@@ -116,13 +115,12 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
 }
 
 
-#' TODO - Documentation
+#' Extract parameters from a MMRM model
 #'
 #' Extracts the beta and sigma coefficients from an MMRM model created
-#' by glmmTMB-glmmTMB.
-#' Also returns theta for use in providing initial values to subsequent calls.
+#' by [mmrm::mmrm()].
 #'
-#' @param fit an object created by glmmTMB-glmmTMB
+#' @param fit an object created by [mmrm::mmrm()]
 #'
 extract_params <- function(fit) {
     beta <- coef(fit)
@@ -148,32 +146,28 @@ extract_params <- function(fit) {
 
 
 
-#' Fit a MMRM model - TODO Documentation
+#' Fit a MMRM model
 #'
 #' @description
-#' Fits a MMRM model allowing for different covariance structures using glmmTMB-glmmTMB.
-#' Returns a glmmTMB fit object with an additional element `failed` indicating whether or not
-#' the fit failed to converge.
+#' Fits a MMRM model allowing for different covariance structures using [mmrm::mmrm()].
+#' Returns a `list` of key model parameters `beta`, `sigma` and an additional element `failed`
+#' indicating whether or not the fit failed to converge. If the fit did fail to converge
+#' `beta` and `sigma` will not be present.
 #'
 #'
 #' @param designmat a `data.frame` or `matrix` containing the covariates to use in the MMRM model.
 #' Dummy variables must already be expanded out, i.e. via [stats::model.matrix()]. Cannot contain
 #' any missing values
 #' @param outcome a numeric vector. The outcome value to be regressed on in the MMRM model.
-#' @param subjid a character / factor vector. The subject identifier used to link separate visits that belong to
-#' the same subject.
+#' @param subjid a character / factor vector. The subject identifier used to link separate visits
+#' that belong to the same subject.
 #' @param visit a character / factor vector. Indicates which visit the outcome value occoured on.
 #' @param group a character / factor vector. Indicates which treatment group the patient belongs to.
 #' @param cov_struct a character value. Specifies which covariance structure to use. Must be one of
 #' `"us"`, `"toep"`, `"cs"` or  `"ar1"`
 #' @param REML logical. Specifies whether restricted maximum likelihood should be used
-#' @param same_cov logical. Used to specify if a shared or individual covariance matrix should be used
-#' per `group`
-#' @param initial_values a list with names `beta` and `theta`. Specifies the initial values to start
-#' the optimizer for glmmTMB-glmmTMB at.
-#' @param optimizer a character value. Specifies the optimizer to be used in glmmTMB-glmmTMB. See
-#' [stats::optim()] for the available options
-#' @importFrom stats  model.matrix
+#' @param same_cov logical. Used to specify if a shared or individual covariance matrix should be
+#' used per `group`
 #' @name fit_mmrm
 #'
 #'
@@ -222,7 +216,7 @@ fit_mmrm <- function(designmat,
             simplify = FALSE
         )
     }
-    names(params$sigma) <- levels(group) # TODO test this assumption is violated
+    names(params$sigma) <- levels(group)
 
     return(params)
 }

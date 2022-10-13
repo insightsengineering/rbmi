@@ -2,7 +2,7 @@
 % Please edit documentation in R/mmrm.R
 \name{random_effects_expr}
 \alias{random_effects_expr}
-\title{Construct random effects formula - TODO DESCRIPTION}
+\title{Construct random effects formula}
 \usage{
 random_effects_expr(
   cov_struct = c("us", "toep", "cs", "ar1"),
@@ -10,23 +10,25 @@ random_effects_expr(
 )
 }
 \arguments{
-\item{cov_struct}{a character value. Specifies which covariance structure to use. Must be one of
-\code{"us"}, \code{"toep"}, \code{"cs"} or  \code{"ar1"}}
+\item{cov_struct}{Character - The covariance structure to be used, must be one of \code{"us"},
+\code{"toep"}, \code{"cs"}, \code{"ar1"}}
+
+\item{cov_by_group}{Boolean - Whenever or not to use separate covariances per each group level}
 }
 \description{
 Constructs a character representation of the random effects formula
-for fitting a MMRM for subject by visit in the format required for glmmTMB.
+for fitting a MMRM for subject by visit in the format required for \code{\link[mmrm:mmrm]{mmrm::mmrm()}}.
 }
 \details{
 For example assuming the user specified a covariance structure of "us" and that no groups
 were provided this will return
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{us(0 + visit | subjid)
+\if{html}{\out{<div class="sourceCode">}}\preformatted{us(visit | subjid)
 }\if{html}{\out{</div>}}
 
-If \code{group} is provided then this indicates that separate covariance matrices
+If \code{cov_by_group} is set to \code{FALSE} then this indicates that separate covariance matrices
 are required per group and as such the following will be returned:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{us( 0 + group1:visit | subjid) + us(0 + group2:visit | subjid) + ...
+\if{html}{\out{<div class="sourceCode">}}\preformatted{us( visit | group / subjid )
 }\if{html}{\out{</div>}}
 }

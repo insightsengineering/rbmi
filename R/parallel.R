@@ -68,7 +68,6 @@ is_in_rbmi_development <- function() {
 #' @param cl Either a cluster from [get_cluster()] or `NULL`
 #' @param longdata A longdata object from `longDataConstructor$new()`
 #' @param method A method object
-#' @param optimizer an optimizer list
 encap_get_mmrm_sample <- function(cl, longdata, method) {
     fun <- function(ids) {
         get_mmrm_sample(

@@ -438,3 +438,60 @@ test_that("MMRM returns expected estimates under different model specifications"
 
 
 
+
+test_that("visit & group factor levels / order doesn't break model extraction", {
+    set.seed(3812)
+    bign <- 120
+    sigma <- as_vcov(
+        c(2, 1, 0.7),
+        c(
+            0.3,
+            0.4, 0.2
+        )
+    )
+
+    dat <- get_sim_data(bign, sigma, trt = 8) %>%
+        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
+        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        select(-is_miss)
+
+    mod <- mmrm::mmrm(
+        formula = outcome ~ age + group + sex + visit + us(visit | group / id),
+        data = dat
+    )
+    expected <- mod$cov[["A"]]
+    rownames(expected) <- NULL
+    colnames(expected) <- NULL
+    expect_equal(expected, extract_params(mod)$sigma$A)
+
+
+
+    dat_modified <- dat |>
+        mutate(group = relevel(group, "B"))
+
+    mod <- mmrm::mmrm(
+        formula = outcome ~ age + group + sex + visit + us(visit | group / id),
+        data = dat_modified
+    )
+    expected <- mod$cov[["A"]]
+    rownames(expected) <- NULL
+    colnames(expected) <- NULL
+    expect_equal(expected, extract_params(mod)$sigma$A)
+
+
+
+
+    dat_modified <- dat |>
+        mutate(visit = relevel(visit, "visit_3"))
+
+    mod <- mmrm::mmrm(
+        formula = outcome ~ age + group + sex + visit + us(visit | group / id),
+        data = dat_modified
+    )
+    expected <- mod$cov[["A"]]
+    rownames(expected) <- NULL
+    colnames(expected) <- NULL
+    expect_equal(expected, extract_params(mod)$sigma$A)
+
+})
+

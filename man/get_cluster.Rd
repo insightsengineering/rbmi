@@ -9,9 +9,10 @@ get_cluster(ncores = 1)
 \arguments{
 \item{ncores}{Number of parallel processes to use
 
-This function spawns a PSOCK cluster and exports all of the
-rbmi namespace into the the sub processes as well as loading
-\code{assertthat}}
+If \code{ncores} is \code{1} this function will return NULL
+This function spawns a PSOCK cluster.
+Ensures that \code{rbmi} and \code{assert_that} have been loaded
+on the sub-processes}
 }
 \description{
 Create cluster

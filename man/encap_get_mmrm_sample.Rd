@@ -12,8 +12,6 @@ encap_get_mmrm_sample(cl, longdata, method)
 \item{longdata}{A longdata object from \code{longDataConstructor$new()}}
 
 \item{method}{A method object}
-
-\item{optimizer}{an optimizer list}
 }
 \description{
 Function creates a new wrapper function around \code{\link[=get_mmrm_sample]{get_mmrm_sample()}}
