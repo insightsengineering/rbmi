@@ -89,10 +89,19 @@ This issue surfaces itself when testing the print messages of the `pool` object 
 
 ## Fitting MMRM's
 
-This package currently uses the mmrm package to fit MMRM models. This package is still fairly
+This package currently uses the `mmrm` package to fit MMRM models. This package is still fairly
 new but has so far proven to be very stable, fast and reliable. If you do spot any issues
 with the MMRM package please do raise them in the corresponding GitHub Repository - [link](https://github.com/openpharma/mmrm/issues)
 
+As the `mmrm` package uses `TMB` it is not uncommon to see warnings about either inconsistent
+versions between what `TMB` and the `Matrix` package were compiled as. In order to resolve this
+you may wish to re-compile these packages from source using:
+
+```
+install.packages(c("TMB", "mmrm"), type = "source")
+``` 
+
+Note that you will need to have [rtools](https://cran.r-project.org/bin/windows/Rtools/rtools42/rtools.html) installed if you are on a Windows machine or [Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12) if you are running macOS (or somehow else have access to a C/C++ compiler).
 
 
 ## rstan
