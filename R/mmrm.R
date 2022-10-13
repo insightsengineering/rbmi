@@ -1,7 +1,7 @@
 
 
 
-#' Construct random effects formula
+#' Construct random effects formula - TODO DESCRIPTION
 #'
 #' Constructs a character representation of the random effects formula
 #' for fitting a MMRM for subject by visit in the format required for glmmTMB.
@@ -22,21 +22,19 @@
 #' @inheritParams fit_mmrm
 random_effects_expr <- function(
     cov_struct = c("us", "toep", "cs", "ar1"),
-    group = NULL
+    cov_by_group = FALSE
 ) {
     match.arg(cov_struct)
-    if (length(group) == 0) group <- NULL
-    ugroup <- unique(group)
-    grp_expr <- ife(is.null(ugroup), "", paste0(ugroup, ":"))
-    expr <- paste0(
-        sprintf("%s(0 + %svisit | subjid)", cov_struct, grp_expr),
-        collapse = " + "
-    )
-    return(paste0(expr))
+    if (cov_by_group) {
+        frm <- sprintf("%s( visit | group / subjid)", cov_struct)
+    } else {
+        frm <- sprintf("%s( visit | subjid)", cov_struct)
+    }
+    return(frm)
 }
 
 
-#' Creates a "MMRM" ready dataset
+#' Creates a "MMRM" ready dataset - TODO DOCUMENTATION
 #'
 #' Converts a design matrix + key variables into a command format
 #' In particular this function does the following:
@@ -76,17 +74,13 @@ as_mmrm_df <- function(
     dmat[["subjid"]] <- subjid
 
     if (!is.null(group)) {
-        # create dummy variables for each arm (needed when same_cov = FALSE)
-        group_mat <- stats::model.matrix(~ 0 + group)
-        for (i in seq_len(ncol(group_mat))) {
-            dmat[[paste0("G", i)]] <- group_mat[, i]
-        }
+        dmat[["group"]] <- group
     }
     return(dmat)
 }
 
 
-#' Create MMRM formula
+#' Create MMRM formula - TODO Documentation
 #'
 #'
 #' Derives the MMRM model formula from the structure of mmrm_df.
@@ -99,10 +93,9 @@ as_mmrm_df <- function(
 #' @inheritParams fit_mmrm
 #' @importFrom stats as.formula
 as_mmrm_formula <- function(mmrm_df, cov_struct) {
-
     dfnames <- names(mmrm_df)
 
-    g_names <- grep("^G", dfnames, value = TRUE)
+    g_names <- grep("^group$", dfnames, value = TRUE)
     v_names <- grep("^V", dfnames, value = TRUE)
 
     assert_that(all(dfnames %in% c("outcome", "visit", "subjid", g_names, v_names)))
@@ -110,7 +103,7 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
 
     # random effects for covariance structure
     expr_randeff <- random_effects_expr(
-        group = g_names,
+        cov_by_group = length(g_names) > 0,
         cov_struct = cov_struct
     )
 
@@ -123,33 +116,31 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
 }
 
 
-#' Extract glmmTMB model parameters
+#' TODO - Documentation
 #'
 #' Extracts the beta and sigma coefficients from an MMRM model created
-#' by [glmmTMB::glmmTMB()].
+#' by glmmTMB-glmmTMB.
 #' Also returns theta for use in providing initial values to subsequent calls.
 #'
-#' @param fit an object created by [glmmTMB::glmmTMB()]
-#' @importFrom glmmTMB fixef VarCorr getME
+#' @param fit an object created by glmmTMB-glmmTMB
 #'
 extract_params <- function(fit) {
-    beta <- fixef(fit)$cond
+    beta <- coef(fit)
     names(beta) <- NULL
 
-    sigma <- VarCorr(fit)$cond
-    sigma <- lapply(sigma, function(x) {
-        x <- as.matrix(as.data.frame(x))
-        colnames(x) <- NULL
-        rownames(x) <- NULL
-        return(x)
+    sigma <- fit$cov
+    if (!is.list(sigma)) {
+        sigma <- list(sigma)
+    }
+    sigma <- lapply(sigma, function(mat) {
+        colnames(mat) <- NULL
+        rownames(mat) <- NULL
+        return(mat)
     })
-
-    theta <- getME(fit, name = "theta") # needed for initialization
 
     params <- list(
         beta = beta,
-        sigma = sigma,
-        theta = theta
+        sigma = sigma
     )
     return(params)
 }
@@ -157,10 +148,10 @@ extract_params <- function(fit) {
 
 
 
-#' Fit a MMRM model
+#' Fit a MMRM model - TODO Documentation
 #'
 #' @description
-#' Fits a MMRM model allowing for different covariance structures using [glmmTMB::glmmTMB()].
+#' Fits a MMRM model allowing for different covariance structures using glmmTMB-glmmTMB.
 #' Returns a glmmTMB fit object with an additional element `failed` indicating whether or not
 #' the fit failed to converge.
 #'
@@ -179,33 +170,21 @@ extract_params <- function(fit) {
 #' @param same_cov logical. Used to specify if a shared or individual covariance matrix should be used
 #' per `group`
 #' @param initial_values a list with names `beta` and `theta`. Specifies the initial values to start
-#' the optimizer for [glmmTMB::glmmTMB()] at.
-#' @param optimizer a character value. Specifies the optimizer to be used in [glmmTMB::glmmTMB()]. See
+#' the optimizer for glmmTMB-glmmTMB at.
+#' @param optimizer a character value. Specifies the optimizer to be used in glmmTMB-glmmTMB. See
 #' [stats::optim()] for the available options
-#' @importFrom glmmTMB glmmTMB glmmTMBControl
-#' @importFrom stats optim model.matrix
+#' @importFrom stats  model.matrix
 #' @name fit_mmrm
 #'
 #'
-fit_mmrm <- function(
-    designmat,
-    outcome,
-    subjid,
-    visit,
-    group,
-    cov_struct = c("us", "toep", "cs", "ar1"),
-    REML = TRUE,
-    same_cov = TRUE,
-    initial_values = NULL,
-    optimizer = "L-BFGS-B"
-) {
-
-    # check that optimizer is one among the optimizers from optim
-    match.arg(
-        arg = optimizer,
-        choices = formals(fun = stats::optim)$method
-    )
-
+fit_mmrm <- function(designmat,
+                     outcome,
+                     subjid,
+                     visit,
+                     group,
+                     cov_struct = c("us", "toep", "cs", "ar1"),
+                     REML = TRUE,
+                     same_cov = TRUE) {
     dat_mmrm <- as_mmrm_df(
         designmat = designmat,
         outcome = outcome,
@@ -216,18 +195,13 @@ fit_mmrm <- function(
 
     frm_mmrm <- as_mmrm_formula(dat_mmrm, cov_struct)
 
-    fit <- eval_glmmtmb({
-        glmmTMB(
+    fit <- eval_mmrm({
+        mmrm::mmrm(
             formula = frm_mmrm,
             data = dat_mmrm,
-            dispformula = ~0,
-            REML = REML,
-            start = initial_values,
-            control = glmmTMBControl(
-                optimizer = optim,
-                optArgs = list(method = optimizer),
-                parallel = 1
-            )
+            reml = REML,
+            n_cores = 1,
+            accept_singular = FALSE
         )
     })
 
@@ -248,117 +222,52 @@ fit_mmrm <- function(
             simplify = FALSE
         )
     }
-    names(params$sigma) <- levels(group)
+    names(params$sigma) <- levels(group) # TODO test this assumption is violated
 
     return(params)
 }
 
 
 
-#' Fit an MMRM model via multiple optimizers
+
+#' Evaluate a call to mmrm
 #'
-#'
-#' The function attempts to fit a MMRM model using the optimizer as specified in `optimizer`
-#' If `optimizer` is of length > 1 then it will loop through all the values until one of them is able
-#' to converge. That is to say if a fit fails to converge it will move onto the next value of `optimizer` and
-#' try again.
-#'
-#' If `optimizer` is a list then the names of the list will be taken to be the required `optimizer`
-#' with the contents of that element being used as the initial values.  This functionality
-#' can be used to try and fit the model using the same optimizer at multiple different starting
-#' values e.g.:
-#'
-#' ```
-#' fit_mmrm_multiopt(
-#'     ...,
-#'     optimizer = list(
-#'         "L-BFGS-B" = list(beta = c(1,2,3), theta = c(9,8,7)),
-#'         "L-BFGS-B" = list(beta = c(5,6,7), theta = c(10,11,12)),
-#'     )
-#' )
-#' ```
-#'
-#' See [stats::optim()] for a list of the available optimizers that can be used
-#' @param optimizer A character vector or a named list. See details.
-#' @param ... Additional arguments passed onto [fit_mmrm()]
-#' @seealso [fit_mmrm()]
-fit_mmrm_multiopt <- function(..., optimizer) {
-
-    assert_that(
-        is.character(optimizer) | is.list(optimizer),
-        length(optimizer) >= 1
-    )
-
-    if (is.list(optimizer)) {
-        for (i in seq_len(length(optimizer))) {
-            if (!is.null(optimizer[[i]])) {
-                assert_that(
-                    all(c("beta", "theta") %in% names(optimizer[[i]]))
-                )
-                optimizer[[i]] <- optimizer[[i]][c("beta", "theta")]
-            }
-        }
-    }
-
-    if (is.character(optimizer)) {
-        initial_values <- lapply(optimizer, function(x) NULL)
-        names(initial_values) <- optimizer
-    } else {
-        initial_values <- optimizer
-    }
-
-    for (i in seq_len(length(initial_values))) {
-        opt <- names(initial_values)[[i]]
-        init_vals <- initial_values[[i]]
-        fit <- fit_mmrm(..., initial_values = init_vals, optimizer = opt)
-        if (!fit$failed) break
-    }
-
-    return(fit)
-}
-
-
-#' Evaluate a call to glmmTMB
-#'
-#' This is a utility function that attempts to evaluate a call to glmmTMB
+#' This is a utility function that attempts to evaluate a call to mmrm
 #' managing any warnings or errors that are thrown. In particular
 #' this function attempts to catch any warnings or errors and instead
 #' of surfacing them it will simply add an additional element `failed`
-#' with a value of TRUE.  This allows for multiple calls to be made
-#' without the program exiting. Additionally this function will suppress
-#' known spurious warnings associated with glmmTMB, namely:
+#' with a value of TRUE. This allows for multiple calls to be made
+#' without the program exiting.
 #'
-#' - https://stackoverflow.com/questions/67040472/warning-in-every-model-of-glmmtmb-givecsparse
+#' This function was originally developed for use with glmmTMB which needed
+#' more hand-holding and dropping of false-positive warnings. It is not
+#' as important now but is kept around encase we need to catch
+#' false-postive warnings again in the future.
 #'
 #' @examples
 #' \dontrun{
-#'     eval_glmmtmb({glmmTMB::glmmTMB(formula, data)})
+#' eval_mmrm({
+#'     mmrm::mmrm(formula, data)
+#' })
 #' }
-#' @param expr An expression to be evaluated. Should be a call to [glmmTMB::glmmTMB()].
-#' @seealso [glmmTMB::glmmTMB()]
+#' @param expr An expression to be evaluated. Should be a call to [mmrm::mmrm()].
 #' @seealso [record()]
 #'
-eval_glmmtmb <- function(expr) {
+eval_mmrm <- function(expr) {
 
     default <- list(failed = TRUE)
 
-       ###################### fit mmrm
     fit_record <- record(expr)
 
-    ignorable_warnings <- c(
-        "OpenMP not supported.",
-        "'giveCsparse' has been deprecated; setting 'repr = \"T\"' for you"
-    )
-    warnings <- fit_record$warnings
-    warnings_to_ignore <- str_contains(warnings, ignorable_warnings)
-    fit_record$warnings <- warnings[!warnings_to_ignore]
-
-
-    if (length(fit_record$warnings) > 0  | length(fit_record$errors) > 0) {
+    if (length(fit_record$warnings) > 0 || length(fit_record$errors) > 0) {
         return(default)
     }
 
-    if (fit_record$results$fit$convergence != 0) {
+    converged <- attributes(fit_record$results)$converged
+    if (is.null(converged)) {
+        return(default)
+    }
+    if (!converged) {
         return(default)
     }
 

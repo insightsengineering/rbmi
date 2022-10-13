@@ -11,7 +11,7 @@ get_cluster(ncores = 1)
 
 This function spawns a PSOCK cluster and exports all of the
 rbmi namespace into the the sub processes as well as loading
-\code{assertthat} and \code{glmmTMB}}
+\code{assertthat}}
 }
 \description{
 Create cluster

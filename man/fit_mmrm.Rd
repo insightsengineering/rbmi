@@ -2,7 +2,7 @@
 % Please edit documentation in R/mmrm.R
 \name{fit_mmrm}
 \alias{fit_mmrm}
-\title{Fit a MMRM model}
+\title{Fit a MMRM model - TODO Documentation}
 \usage{
 fit_mmrm(
   designmat,
@@ -12,9 +12,7 @@ fit_mmrm(
   group,
   cov_struct = c("us", "toep", "cs", "ar1"),
   REML = TRUE,
-  same_cov = TRUE,
-  initial_values = NULL,
-  optimizer = "L-BFGS-B"
+  same_cov = TRUE
 )
 }
 \arguments{
@@ -40,13 +38,13 @@ the same subject.}
 per \code{group}}
 
 \item{initial_values}{a list with names \code{beta} and \code{theta}. Specifies the initial values to start
-the optimizer for \code{\link[glmmTMB:glmmTMB]{glmmTMB::glmmTMB()}} at.}
+the optimizer for glmmTMB-glmmTMB at.}
 
-\item{optimizer}{a character value. Specifies the optimizer to be used in \code{\link[glmmTMB:glmmTMB]{glmmTMB::glmmTMB()}}. See
+\item{optimizer}{a character value. Specifies the optimizer to be used in glmmTMB-glmmTMB. See
 \code{\link[stats:optim]{stats::optim()}} for the available options}
 }
 \description{
-Fits a MMRM model allowing for different covariance structures using \code{\link[glmmTMB:glmmTMB]{glmmTMB::glmmTMB()}}.
+Fits a MMRM model allowing for different covariance structures using glmmTMB-glmmTMB.
 Returns a glmmTMB fit object with an additional element \code{failed} indicating whether or not
 the fit failed to converge.
 }

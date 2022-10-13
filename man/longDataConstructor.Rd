@@ -80,9 +80,11 @@ original dataset belong to this subject i.e. to recover the full data
 for subject "pt3" you can use
 \code{self$data[self$indexes[["pt3"]],]}. This may seem redundant over filtering
 the data directly
-however it enables efficient bootstrap sampling of the data i.e.\preformatted{indexes <- unlist(self$indexes[c("pt3", "pt3")])
+however it enables efficient bootstrap sampling of the data i.e.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{indexes <- unlist(self$indexes[c("pt3", "pt3")])
 self$data[indexes,]
-}
+}\if{html}{\out{</div>}}
 
 This list is populated during the object initialisation.}
 
@@ -102,22 +104,22 @@ for all observations. This list is populated by a call to \code{self$set_strateg
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-get_data}{\code{longDataConstructor$get_data()}}
-\item \href{#method-add_subject}{\code{longDataConstructor$add_subject()}}
-\item \href{#method-validate_ids}{\code{longDataConstructor$validate_ids()}}
-\item \href{#method-sample_ids}{\code{longDataConstructor$sample_ids()}}
-\item \href{#method-extract_by_id}{\code{longDataConstructor$extract_by_id()}}
-\item \href{#method-update_strategies}{\code{longDataConstructor$update_strategies()}}
-\item \href{#method-set_strategies}{\code{longDataConstructor$set_strategies()}}
-\item \href{#method-check_has_data_at_each_visit}{\code{longDataConstructor$check_has_data_at_each_visit()}}
-\item \href{#method-set_strata}{\code{longDataConstructor$set_strata()}}
-\item \href{#method-new}{\code{longDataConstructor$new()}}
-\item \href{#method-clone}{\code{longDataConstructor$clone()}}
+\item \href{#method-longdata-get_data}{\code{longDataConstructor$get_data()}}
+\item \href{#method-longdata-add_subject}{\code{longDataConstructor$add_subject()}}
+\item \href{#method-longdata-validate_ids}{\code{longDataConstructor$validate_ids()}}
+\item \href{#method-longdata-sample_ids}{\code{longDataConstructor$sample_ids()}}
+\item \href{#method-longdata-extract_by_id}{\code{longDataConstructor$extract_by_id()}}
+\item \href{#method-longdata-update_strategies}{\code{longDataConstructor$update_strategies()}}
+\item \href{#method-longdata-set_strategies}{\code{longDataConstructor$set_strategies()}}
+\item \href{#method-longdata-check_has_data_at_each_visit}{\code{longDataConstructor$check_has_data_at_each_visit()}}
+\item \href{#method-longdata-set_strata}{\code{longDataConstructor$set_strata()}}
+\item \href{#method-longdata-new}{\code{longDataConstructor$new()}}
+\item \href{#method-longdata-clone}{\code{longDataConstructor$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_data"></a>}}
-\if{latex}{\out{\hypertarget{method-get_data}{}}}
+\if{html}{\out{<a id="method-longdata-get_data"></a>}}
+\if{latex}{\out{\hypertarget{method-longdata-get_data}{}}}
 \subsection{Method \code{get_data()}}{
 Returns a \code{data.frame} based upon required subject IDs. Replaces missing
 values with new ones if provided.
@@ -156,13 +158,15 @@ returned multiple times.
 
 If \code{obj} is an \code{imputation_df} object (as created by \code{\link[=imputation_df]{imputation_df()}}) then the
 subject ids specified in the object will be returned and missing values will be filled
-in by those specified in the imputation list object.  i.e.\preformatted{obj <- imputation_df(
+in by those specified in the imputation list object.  i.e.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{obj <- imputation_df(
   imputation_single( id = "pt1", values = c(1,2,3)),
   imputation_single( id = "pt1", values = c(4,5,6)),
   imputation_single( id = "pt3", values = c(7,8))
 )
 longdata$get_data(obj)
-}
+}\if{html}{\out{</div>}}
 
 Will return a \code{data.frame} consisting of all observations for \code{pt1} twice and all of the
 observations for \code{pt3} once. The first set of observations for \code{pt1} will have missing
@@ -181,8 +185,8 @@ A \code{data.frame}.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-add_subject"></a>}}
-\if{latex}{\out{\hypertarget{method-add_subject}{}}}
+\if{html}{\out{<a id="method-longdata-add_subject"></a>}}
+\if{latex}{\out{\hypertarget{method-longdata-add_subject}{}}}
 \subsection{Method \code{add_subject()}}{
 This function decomposes a patient data from \code{self$data} and populates
 all the corresponding lists i.e. \code{self$is_missing}, \code{self$values}, \code{self$group}, etc.
@@ -200,8 +204,8 @@ This function is only called upon the objects initialization.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-validate_ids"></a>}}
-\if{latex}{\out{\hypertarget{method-validate_ids}{}}}
+\if{html}{\out{<a id="method-longdata-validate_ids"></a>}}
+\if{latex}{\out{\hypertarget{method-longdata-validate_ids}{}}}
 \subsection{Method \code{validate_ids()}}{
 Throws an error if any element of \code{ids} is not within the source data \code{self$data}.
 \subsection{Usage}{
@@ -220,8 +224,8 @@ TRUE
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-sample_ids"></a>}}
-\if{latex}{\out{\hypertarget{method-sample_ids}{}}}
+\if{html}{\out{<a id="method-longdata-sample_ids"></a>}}
+\if{latex}{\out{\hypertarget{method-longdata-sample_ids}{}}}
 \subsection{Method \code{sample_ids()}}{
 Performs random stratified sampling of patient ids (with replacement)
 Each patient has an equal weight of being picked within their strata (i.e is not dependent on
@@ -235,8 +239,8 @@ Character vector of ids.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-extract_by_id"></a>}}
-\if{latex}{\out{\hypertarget{method-extract_by_id}{}}}
+\if{html}{\out{<a id="method-longdata-extract_by_id"></a>}}
+\if{latex}{\out{\hypertarget{method-longdata-extract_by_id}{}}}
 \subsection{Method \code{extract_by_id()}}{
 Returns a list of key information for a given subject. Is a convenience wrapper
 to save having to manually grab each element.
@@ -253,8 +257,8 @@ to save having to manually grab each element.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-update_strategies"></a>}}
-\if{latex}{\out{\hypertarget{method-update_strategies}{}}}
+\if{html}{\out{<a id="method-longdata-update_strategies"></a>}}
+\if{latex}{\out{\hypertarget{method-longdata-update_strategies}{}}}
 \subsection{Method \code{update_strategies()}}{
 Convenience function to run self$set_strategies(dat_ice, update=TRUE)
 kept for legacy reasons.
@@ -271,8 +275,8 @@ kept for legacy reasons.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_strategies"></a>}}
-\if{latex}{\out{\hypertarget{method-set_strategies}{}}}
+\if{html}{\out{<a id="method-longdata-set_strategies"></a>}}
+\if{latex}{\out{\hypertarget{method-longdata-set_strategies}{}}}
 \subsection{Method \code{set_strategies()}}{
 Updates the \code{self$strategies}, \code{self$is_mar}, \code{self$is_post_ice} variables based upon the provided ICE
 information.
@@ -298,8 +302,8 @@ of post-ICE observations.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-check_has_data_at_each_visit"></a>}}
-\if{latex}{\out{\hypertarget{method-check_has_data_at_each_visit}{}}}
+\if{html}{\out{<a id="method-longdata-check_has_data_at_each_visit"></a>}}
+\if{latex}{\out{\hypertarget{method-longdata-check_has_data_at_each_visit}{}}}
 \subsection{Method \code{check_has_data_at_each_visit()}}{
 Ensures that all visits have at least 1 observed "MAR" observation. Throws
 an error if this criteria is not met. This is to ensure that the initial
@@ -310,8 +314,8 @@ MMRM can be resolved.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_strata"></a>}}
-\if{latex}{\out{\hypertarget{method-set_strata}{}}}
+\if{html}{\out{<a id="method-longdata-set_strata"></a>}}
+\if{latex}{\out{\hypertarget{method-longdata-set_strata}{}}}
 \subsection{Method \code{set_strata()}}{
 Populates the \code{self$strata} variable. If the user has specified stratification variables
 The first visit is used to determine the value of those variables. If no stratification variables
@@ -322,8 +326,8 @@ have been specified then everyone is defined as being in strata 1.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-longdata-new"></a>}}
+\if{latex}{\out{\hypertarget{method-longdata-new}{}}}
 \subsection{Method \code{new()}}{
 Constructor function.
 \subsection{Usage}{
@@ -341,8 +345,8 @@ Constructor function.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-longdata-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-longdata-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

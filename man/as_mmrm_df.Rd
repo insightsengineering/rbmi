@@ -2,7 +2,7 @@
 % Please edit documentation in R/mmrm.R
 \name{as_mmrm_df}
 \alias{as_mmrm_df}
-\title{Creates a "MMRM" ready dataset}
+\title{Creates a "MMRM" ready dataset - TODO DOCUMENTATION}
 \usage{
 as_mmrm_df(designmat, outcome, visit, subjid, group = NULL)
 }

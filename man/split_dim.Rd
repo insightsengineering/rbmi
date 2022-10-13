@@ -29,21 +29,25 @@ Example:
 
 inputs:
 \code{a <- array( c(1,2,3,4,5,6,7,8,9,10,11,12), dim = c(3,2,2))},
-which means that:\preformatted{a[1,,]     a[2,,]     a[3,,]
+which means that:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{a[1,,]     a[2,,]     a[3,,]
 
 [,1] [,2]  [,1] [,2]  [,1] [,2]
 ---------  ---------  ---------
  1    7     2    8     3    9
  4    10    5    11    6    12
-}
+}\if{html}{\out{</div>}}
 
 \code{n <- 1}
 
-output of \code{res <- split_dim(a,n)} is a list of 3 elements:\preformatted{res[[1]]   res[[2]]   res[[3]]
+output of \code{res <- split_dim(a,n)} is a list of 3 elements:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{res[[1]]   res[[2]]   res[[3]]
 
 [,1] [,2]  [,1] [,2]  [,1] [,2]
 ---------  ---------  ---------
  1    7     2    8     3    9
  4    10    5    11    6    12
-}
+}\if{html}{\out{</div>}}
 }

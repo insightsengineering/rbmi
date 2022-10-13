@@ -2,15 +2,16 @@
 % Please edit documentation in R/mmrm.R
 \name{random_effects_expr}
 \alias{random_effects_expr}
-\title{Construct random effects formula}
+\title{Construct random effects formula - TODO DESCRIPTION}
 \usage{
-random_effects_expr(cov_struct = c("us", "toep", "cs", "ar1"), group = NULL)
+random_effects_expr(
+  cov_struct = c("us", "toep", "cs", "ar1"),
+  cov_by_group = FALSE
+)
 }
 \arguments{
 \item{cov_struct}{a character value. Specifies which covariance structure to use. Must be one of
 \code{"us"}, \code{"toep"}, \code{"cs"} or  \code{"ar1"}}
-
-\item{group}{a character / factor vector. Indicates which treatment group the patient belongs to.}
 }
 \description{
 Constructs a character representation of the random effects formula
@@ -18,10 +19,14 @@ for fitting a MMRM for subject by visit in the format required for glmmTMB.
 }
 \details{
 For example assuming the user specified a covariance structure of "us" and that no groups
-were provided this will return\preformatted{us(0 + visit | subjid)
-}
+were provided this will return
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{us(0 + visit | subjid)
+}\if{html}{\out{</div>}}
 
 If \code{group} is provided then this indicates that separate covariance matrices
-are required per group and as such the following will be returned:\preformatted{us( 0 + group1:visit | subjid) + us(0 + group2:visit | subjid) + ...
-}
+are required per group and as such the following will be returned:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{us( 0 + group1:visit | subjid) + us(0 + group2:visit | subjid) + ...
+}\if{html}{\out{</div>}}
 }

@@ -4,7 +4,7 @@
 \alias{encap_get_mmrm_sample}
 \title{Encapsulate get_mmrm_sample}
 \usage{
-encap_get_mmrm_sample(cl, longdata, method, optimizer)
+encap_get_mmrm_sample(cl, longdata, method)
 }
 \arguments{
 \item{cl}{Either a cluster from \code{\link[=get_cluster]{get_cluster()}} or \code{NULL}}
