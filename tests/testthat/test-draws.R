@@ -595,9 +595,6 @@ test_that("draws.bmlmi works as expected", {
         method = method_approxbayes(n_samples = 6)
     )
 
-    x1$samples[[1]]$sigma$A
-    x2$samples[[1]]$sigma$A
-
     ### BMLMI should be identical to approx bayes within draws except for sample ids
     expect_equal(
         lapply(x1$samples, function(x) x[c("beta", "sigma", "theta", "failed")]),

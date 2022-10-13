@@ -2,7 +2,7 @@
 
 # rbmi 1.2.0
 
-* Replaced our `glmmTMB` dependency with the `mmrm` package. This has resulted in the package being more stable (less model fitting convergance issues) as well as reducing run times to by about 2/3rds. 
+* Replaced our `glmmTMB` dependency with the `mmrm` package. This has resulted in the package being more stable (less model fitting convergence issues) as well as speeding up run times 3-fold. 
 
 # rbmi 1.1.4
 

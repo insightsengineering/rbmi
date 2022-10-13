@@ -126,7 +126,7 @@ extract_params <- function(fit) {
     beta <- coef(fit)
     names(beta) <- NULL
 
-    sigma <- fit$cov
+    sigma <- VarCorr(fit)
     if (!is.list(sigma)) {
         sigma <- list(sigma)
     }
