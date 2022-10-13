@@ -117,7 +117,8 @@ vars <- set_vars(
 method <- method_bayes(
     burn_in = 200,
     burn_between = 5,
-    n_samples = 150
+    n_samples = 150,
+    seed = 675442751
 )
 
 # Create samples for the imputation parameters by running the draws() function
@@ -346,7 +347,8 @@ vars <- set_vars(
 method <- method_bayes(
     burn_in = 200,
     burn_between = 5,
-    n_samples = 150
+    n_samples = 150,
+    seed = 675442751
 )
 
 
