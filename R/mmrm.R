@@ -120,6 +120,7 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
 #' Extracts the beta and sigma coefficients from an MMRM model created
 #' by [mmrm::mmrm()].
 #'
+#' @importFrom mmrm VarCorr
 #' @param fit an object created by [mmrm::mmrm()]
 #'
 extract_params <- function(fit) {
