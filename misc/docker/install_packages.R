@@ -13,7 +13,7 @@ mmrm_version <- Sys.getenv("MMRM_VERSION")
 if (mmrm_version == "latest") {
     install.packages("mmrm", repos = Sys.getenv("CRANURL"), dependencies = TRUE)
 } else {
-    remotes::install_git("https://github.com/openpharma/mmrm.git", ref = mmrm_version)
+    remotes::install_git("https://github.com/openpharma/mmrm.git", ref = mmrm_version, upgrade = FALSE)
 }
 
 pkgs <- c(

@@ -23,7 +23,7 @@ jobs:
               src_image: "rocker/r-ver:latest", 
               cran_url: "https://packagemanager.rstudio.com/cran/latest",
               tag: "rbmi:latest",
-              mmrm_version : "latest"
+              mmrm_version : "v0.1.3"
             }
 
     # Token permissions
