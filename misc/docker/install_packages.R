@@ -18,7 +18,8 @@ pkgs <- c(
     "tinytex",
     "bookdown",
     "RhpcBLASctl",
-    "R.rsp"
+    "R.rsp",
+    "mmrm"
 )
 
 options(warn = 2)
