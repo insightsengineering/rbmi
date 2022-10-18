@@ -22,7 +22,8 @@ jobs:
           - {
               src_image: "rocker/r-ver:latest", 
               cran_url: "https://packagemanager.rstudio.com/cran/latest",
-              tag: "rbmi:latest"
+              tag: "rbmi:latest",
+              mmrm_version : "latest"
             }
 
     # Token permissions
@@ -71,6 +72,7 @@ jobs:
           build-args: |
             IMAGE=${{ matrix.config.src_image }}
             CRANURL=${{ matrix.config.cran_url }}
+            MMRM_VERSION=${{ matrix.config.mmrm_version }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
