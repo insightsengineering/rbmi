@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="index.html">rbmi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,12 +32,6 @@
 <li class="nav-item">
   <a class="nav-link" href="news/index.html">Changelog</a>
 </li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a> </div></li>
-<!-- end dropdown for versions -->
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -64,7 +58,7 @@
 <div class="section level2">
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a></h2>
 <p>In order to develop or contribute to <code>rbmi</code> you will need to access to a C/C++ compiler. If you are on Windows you should install <a href="https://cran.r-project.org/bin/windows/Rtools/rtools42/rtools.html" class="external-link">rtools</a> or if you are on macOS you should install <a href="https://apps.apple.com/us/app/xcode/id497799835?mt=12" class="external-link">Xcode</a>. Likewise, you will also need to install all of the package’s development dependencies. This can be done by launching R from within the project root and executing:</p>
-<pre><code><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/install_deps.html" class="external-link">install_dev_deps</a></span><span class="op">(</span><span class="op">)</span></span></code></pre>
+<pre><code><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install_deps.html" class="external-link">install_dev_deps</a></span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="code-changes">Code changes<a class="anchor" aria-label="anchor" href="#code-changes"></a></h2>
@@ -128,7 +122,7 @@
 </div>
 <div class="section level2">
 <h2 id="rstan">rstan<a class="anchor" aria-label="anchor" href="#rstan"></a></h2>
-<p>The Bayesian models fitted by this package are implemented via <a href="https://mc-stan.org/users/interfaces/rstan" class="external-link">stan/rstan</a>. The code for this can be found in <code>inst/stan/MMRM.stan</code>. Note that the package will automatically take care of compiling this code when you install it or run <code><a href="https://rdrr.io/pkg/devtools/man/load_all.html" class="external-link">devtools::load_all()</a></code>. Please note that the package won’t recompile the code unless you have changed the source code or you delete the <code>src</code> directory.</p>
+<p>The Bayesian models fitted by this package are implemented via <a href="https://mc-stan.org/users/interfaces/rstan" class="external-link">stan/rstan</a>. The code for this can be found in <code>inst/stan/MMRM.stan</code>. Note that the package will automatically take care of compiling this code when you install it or run <code><a href="https://devtools.r-lib.org/reference/load_all.html" class="external-link">devtools::load_all()</a></code>. Please note that the package won’t recompile the code unless you have changed the source code or you delete the <code>src</code> directory.</p>
 </div>
 <div class="section level2">
 <h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a></h2>

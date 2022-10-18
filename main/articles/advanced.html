@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">rbmi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,12 +49,6 @@
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a> </div></li>
-<!-- end dropdown for versions -->
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
@@ -199,13 +193,13 @@ For the purpose of this vignette, we simulate data similarly to the simulation s
 <span><span class="co">#&gt; 6       NA</span></span>
 <span></span>
 <span><span class="co"># As a simple descriptive of the simulated data, summarize the number of subjects with ICEs and missing data </span></span>
-<span><span class="va">data</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span></span>
 <span>    group <span class="op">=</span> <span class="va">group</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
 <span>    any_ICE <span class="op">=</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">ind_ice1</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    any_NA <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">outcome</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    any_NA <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">outcome</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span></span>
 <span>      subjects_with_ICE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">any_ICE</span><span class="op">)</span>,</span>
 <span>      subjects_with_missings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">any_NA</span><span class="op">)</span></span>
@@ -239,10 +233,10 @@ For the purpose of this vignette, we simulate data similarly to the simulation s
 <span><span class="co"># Imputation strategy for post-ICE data is CIR in the intervention group and MAR for the control group </span></span>
 <span><span class="co"># (note that ICEs which are handled using MAR are optional and do not impact the analysis</span></span>
 <span><span class="co">#  because imputation of missing data under MAR is the default)</span></span>
-<span><span class="va">data_ice_CIR</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">ind_ice1</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span> <span class="co"># select visits with ICEs</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>strategy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">group</span> <span class="op">==</span> <span class="st">"Intervention"</span>, <span class="st">"CIR"</span>, <span class="st">"MAR"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">data_ice_CIR</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">ind_ice1</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="co"># select visits with ICEs</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>strategy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">group</span> <span class="op">==</span> <span class="st">"Intervention"</span>, <span class="st">"CIR"</span>, <span class="st">"MAR"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span></span>
 <span>        visit <span class="op">=</span> <span class="va">visit</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="co"># Select first visit affected by the ICE</span></span>
 <span>        strategy <span class="op">=</span> <span class="va">strategy</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
@@ -250,8 +244,8 @@ For the purpose of this vignette, we simulate data similarly to the simulation s
 <span></span>
 <span><span class="co"># Compute endpoint of interest: change from baseline and</span></span>
 <span><span class="co"># remove rows corresponding to baseline visits</span></span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">visit</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">visit</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>        change <span class="op">=</span> <span class="va">outcome</span> <span class="op">-</span> <span class="va">outcome_bl</span>,</span>
 <span>        visit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">visit</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">visit</span><span class="op">)</span><span class="op">)</span></span>
@@ -349,7 +343,7 @@ Finally, <code>update_strategies</code> cannot be applied if the timing of any o
 <p>As an example, we described an analysis under a copy increments in reference (CIR) assumption in the previous section. Let’s assume we want to change this strategy to a jump to reference imputation strategy for a sensitivity analysis. This can be efficiently implemented using <code>update_strategies</code> as follows:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Change ICE strategy from CIR to JR</span></span>
-<span><span class="va">data_ice_JR</span> <span class="op">&lt;-</span> <span class="va">data_ice_CIR</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span><span class="va">data_ice_JR</span> <span class="op">&lt;-</span> <span class="va">data_ice_CIR</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>strategy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">strategy</span> <span class="op">==</span> <span class="st">"CIR"</span>, <span class="st">"JR"</span>, <span class="va">strategy</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">impute_obj_JR</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/impute.html">impute</a></span><span class="op">(</span></span>
@@ -412,8 +406,8 @@ A case study which implements this proposal and compares it to reference-based i
 <p>In some settings, this may be carried out by including a binary time-varying indicator of the subject’s ICE status at each visit (defined as 0 for pre-ICE visits and as 1 for post-ICE visits) to the imputation model. However, for the simulated data introduced in section <a href="#sec:dataSimul">2</a>, it may be more plausible to assume that treatment discontinuation leads to a change in the “slope” of the mean outcome trajectory. This can be implemented by including a time-varying covariate which is equal to 0 for visits prior to the treatment discontinuation and equal to the time from the treatment discontinuation for subsequent visits. The regression coefficient of the corresponding change in the post-ICE “slope” should then be allowed to depend on the assigned treatment group, i.e. the imputation model should include an interaction between the time-varying covariate and the treatment group.</p>
 <p>Let’s first define the time-varying covariate:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>time_from_ice1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="va">ind_ice1</span><span class="op">)</span><span class="op">*</span><span class="fl">2</span><span class="op">/</span><span class="fl">12</span> <span class="op">)</span> <span class="co"># multiplication by 2/12 because visits are bi-monthly</span></span></code></pre></div>
 <p>We can then include the time-varying covariate in the imputation model, crossed with the <code>group</code> variable:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -523,7 +517,7 @@ As an example, the user can check how the CIR strategy was implemented by lookin
 <span><span class="co">#&gt;     pars &lt;- list(mu = mu, sigma = sigma)</span></span>
 <span><span class="co">#&gt;     return(pars)</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x5609282ed000&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x562a0a4ccb20&gt;</span></span>
 <span><span class="co">#&gt; &lt;environment: namespace:rbmi&gt;</span></span></code></pre></div>
 <p>To further illustrate this for a simple example, assume that a new strategy is to be implemented as follows:
 - The marginal mean of the imputation distribution is equal to the marginal mean trajectory for the subject according to their assigned group and covariates up to the ICE.
@@ -563,7 +557,7 @@ As an example, the user can check how the CIR strategy was implemented by lookin
 <p>To incorporate this into <code>rbmi</code>, <code>data_ice</code> needs to be updated such that the strategy <code>AVG</code> is specified for visits affected by the ICE. Additionally, the function needs
 to be provided to <code><a href="../reference/impute.html">impute()</a></code> via the <code><a href="../reference/getStrategies.html">getStrategies()</a></code> function as shown below:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data_ice_AVG</span> <span class="op">&lt;-</span> <span class="va">data_ice_CIR</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<code class="sourceCode R"><span><span class="va">data_ice_AVG</span> <span class="op">&lt;-</span> <span class="va">data_ice_CIR</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>strategy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">strategy</span> <span class="op">==</span> <span class="st">"CIR"</span>, <span class="st">"AVG"</span>, <span class="va">strategy</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span></span>
@@ -678,12 +672,12 @@ visit between the treatment groups with the baseline outcome as an additional co
 <span><span class="co">#&gt;       trt     -1.052  0.314  -1.667  -0.438  0.001 </span></span>
 <span><span class="co">#&gt;   -------------------------------------------------</span></span>
 <span></span>
-<span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">pool_obj_prop</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">pool_obj_prop</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>        OR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span>,</span>
 <span>        OR.lci <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">lci</span><span class="op">)</span>,</span>
 <span>        OR.uci <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">uci</span><span class="op">)</span></span>
-<span>    <span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>    <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">parameter</span>, <span class="va">OR</span>, <span class="va">OR.lci</span>, <span class="va">OR.uci</span><span class="op">)</span></span>
 <span><span class="va">tmp</span></span>
 <span><span class="co">#&gt;   parameter        OR   OR.lci    OR.uci</span></span>
@@ -720,7 +714,7 @@ To do this, the user needs to provide a <code>data.frame</code> which contains c
 Specifically, assume that a fixed “worsening adjustment” of +5 points is applied to all imputed values regardless of the treatment group. This could be programmed as follows:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Set delta-value to 5 for all imputed (previously missing) outcomes and 0 for all other outcomes</span></span>
-<span><span class="va">dat_delta</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/delta_template.html">delta_template</a></span><span class="op">(</span>imputations <span class="op">=</span> <span class="va">impute_obj_CIR</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">dat_delta</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/delta_template.html">delta_template</a></span><span class="op">(</span>imputations <span class="op">=</span> <span class="va">impute_obj_CIR</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>delta <span class="op">=</span> <span class="va">is_missing</span> <span class="op">*</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Repeat the analyses with the delta-adjusted values and pool results</span></span>
@@ -767,7 +761,7 @@ Specifically, assume that a fixed “worsening adjustment” of +5 points is app
 <code class="sourceCode R"><span><span class="va">perform_tipp_analysis</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">delta_control</span>, <span class="va">delta_intervention</span><span class="op">)</span> <span class="op">{</span></span>
 <span></span>
 <span>    <span class="co"># Derive delta offset based on control and intervention specific deltas    </span></span>
-<span>    <span class="va">delta_df</span> <span class="op">&lt;-</span>  <span class="va">delta_df_init</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="va">delta_df</span> <span class="op">&lt;-</span>  <span class="va">delta_df_init</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>        <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>            delta_ctl <span class="op">=</span> <span class="op">(</span><span class="va">group</span> <span class="op">==</span> <span class="st">"Control"</span><span class="op">)</span> <span class="op">*</span> <span class="va">is_missing</span> <span class="op">*</span> <span class="va">delta_control</span>,</span>
 <span>            delta_int <span class="op">=</span> <span class="op">(</span><span class="va">group</span> <span class="op">==</span> <span class="st">"Intervention"</span><span class="op">)</span> <span class="op">*</span> <span class="va">is_missing</span> <span class="op">*</span> <span class="va">delta_intervention</span>,</span>
@@ -795,17 +789,17 @@ Specifically, assume that a fixed “worsening adjustment” of +5 points is app
 <span><span class="va">tipp_frame_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span></span>
 <span>    delta_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">5</span>, <span class="fl">15</span>, by <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
 <span>    delta_intervention <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">5</span>, <span class="fl">15</span>, by <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span></span>
-<span><span class="va">tipp_frame</span> <span class="op">&lt;-</span> <span class="va">tipp_frame_grid</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">tipp_frame</span> <span class="op">&lt;-</span> <span class="va">tipp_frame_grid</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>        results_list <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">map2</a></span><span class="op">(</span><span class="va">delta_control</span>, <span class="va">delta_intervention</span>, <span class="va">perform_tipp_analysis</span><span class="op">)</span>,</span>
 <span>        trt_effect_6 <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_dbl</a></span><span class="op">(</span><span class="va">results_list</span>, <span class="st">"trt_effect_6"</span><span class="op">)</span>,</span>
 <span>        pval_6 <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_dbl</a></span><span class="op">(</span><span class="va">results_list</span>, <span class="st">"pval_6"</span><span class="op">)</span></span>
-<span>    <span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">results_list</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">results_list</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>        pval <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cut.html" class="external-link">cut</a></span><span class="op">(</span></span>
 <span>            <span class="va">pval_6</span>,</span>
@@ -816,7 +810,7 @@ Specifically, assume that a fixed “worsening adjustment” of +5 points is app
 <span>    <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Show delta values which lead to non-significant analysis results</span></span>
-<span><span class="va">tipp_frame</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">tipp_frame</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">pval_6</span> <span class="op">&gt;=</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
 <span><span class="co">#&gt;   delta_control delta_intervention trt_effect_6 pval_6 pval        </span></span>
@@ -825,9 +819,9 @@ Specifically, assume that a fixed “worsening adjustment” of +5 points is app
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>            -<span style="color: #BB0000;">3</span>                 15        -<span style="color: #BB0000;">2.15</span> 0.070<span style="text-decoration: underline;">4</span> 0.05 - &lt;0.20</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>            -<span style="color: #BB0000;">1</span>                 15        -<span style="color: #BB0000;">2.31</span> 0.052<span style="text-decoration: underline;">7</span> 0.05 - &lt;0.20</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">tipp_frame</span>, <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">delta_control</span>, <span class="va">delta_intervention</span>, fill <span class="op">=</span> <span class="va">pval</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/geom_tile.html" class="external-link">geom_raster</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"darkgreen"</span>, <span class="st">"lightgreen"</span>, <span class="st">"lightyellow"</span>, <span class="st">"orange"</span>, <span class="st">"red"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">tipp_frame</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">delta_control</span>, <span class="va">delta_intervention</span>, fill <span class="op">=</span> <span class="va">pval</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_raster</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"darkgreen"</span>, <span class="st">"lightgreen"</span>, <span class="st">"lightyellow"</span>, <span class="st">"orange"</span>, <span class="st">"red"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="advanced_files/figure-html/unnamed-chunk-18-1.png"><!-- --></p>
 <p>According to this analysis, the significant test result from the primary analysis under CIR could only be tipped to a non-significant result for rather extreme delta-adjustments. Please note that for a real analysis it is recommended to use a smaller step size in the grid than what has been used here.</p>
 </div>
@@ -906,7 +900,7 @@ Assume that we want to apply a delta-adjustment of 1 for every month after an IC
 <p>Next, we can use the additional metadata variables provided by <code><a href="../reference/delta_template.html">delta_template()</a></code> to manually
 reset the delta values for the control group back to 0:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">delta_df2</span> <span class="op">&lt;-</span> <span class="va">delta_df</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
+<code class="sourceCode R"><span><span class="va">delta_df2</span> <span class="op">&lt;-</span> <span class="va">delta_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>delta <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">group</span> <span class="op">==</span> <span class="st">"Control"</span>, <span class="fl">0</span>, <span class="va">delta</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">delta_df2</span><span class="op">)</span></span>
