@@ -466,7 +466,7 @@ test_that("visit & group factor levels / order doesn't break model extraction", 
 
 
 
-    dat_modified <- dat |>
+    dat_modified <- dat %>%
         mutate(group = relevel(group, "B"))
 
     mod <- mmrm::mmrm(
@@ -481,7 +481,7 @@ test_that("visit & group factor levels / order doesn't break model extraction", 
 
 
 
-    dat_modified <- dat |>
+    dat_modified <- dat %>%
         mutate(visit = relevel(visit, "visit_3"))
 
     mod <- mmrm::mmrm(

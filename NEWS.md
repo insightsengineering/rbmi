@@ -1,6 +1,9 @@
 # rbmi (development version)
 
-* No updates yet
+
+# rbmi 1.2.1
+
+* Removed native pipes `|>` in testing code so package is backwards compatible with older servers
 
 # rbmi 1.2.0
 
