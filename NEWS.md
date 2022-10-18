@@ -1,5 +1,6 @@
 # rbmi (development version)
 
+* No updates yet
 
 # rbmi 1.2.1
 
