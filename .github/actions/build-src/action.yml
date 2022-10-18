@@ -34,7 +34,7 @@ runs:
     
     - name: Cache Compiled Stan Code
       id: cache-pkgs
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: src/*
         key: ${{ hashFiles('.github/meta.txt') }}-${{ hashFiles('inst/stan/MMRM.stan') }}
