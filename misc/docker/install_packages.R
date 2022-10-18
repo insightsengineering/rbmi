@@ -3,7 +3,7 @@
 
 options(warn = 2)
 
-install.packages(remotes, repos = Sys.getenv("CRANURL"))
+install.packages("remotes", repos = Sys.getenv("CRANURL"))
 
 # mmrm wasn't available when in-house servers locked their package versions
 # and instead had v0.13 of mmrm patched in after the fact
@@ -11,7 +11,7 @@ install.packages(remotes, repos = Sys.getenv("CRANURL"))
 # or a specific named version from github
 mmrm_version <- Sys.getenv("MMRM_VERSION")
 if (mmrm_version == "latest") {
-    install.packages(mmrm, repos = Sys.getenv("CRANURL"), dependencies = TRUE)
+    install.packages("mmrm", repos = Sys.getenv("CRANURL"), dependencies = TRUE)
 } else {
     remotes::install_git("https://github.com/openpharma/mmrm.git", ref = mmrm_version)
 }
