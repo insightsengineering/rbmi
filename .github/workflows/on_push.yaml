@@ -50,6 +50,7 @@ jobs:
       - name: Check Is Clean
         shell: bash
         run: |
+          git config --global --add safe.directory /__w/rbmi/rbmi
           git status
           if [ -z "$(git status --porcelain)" ]; then
             echo "Is Clean"
