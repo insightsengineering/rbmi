@@ -58,7 +58,9 @@ These values are deliberately not imputed as doing so risks silent errors in the
 varying covariates.
 One solution is to first use \code{expand_locf()} on just
 the visit variable and time varying covariates and then merge on the baseline covariates
-afterwards i.e.\preformatted{library(dplyr)
+afterwards i.e.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{library(dplyr)
 
 dat_expanded <- expand(
     data = dat,
@@ -68,7 +70,7 @@ dat_expanded <- expand(
 
 dat_filled <- dat_expanded \%>\%
     left_join(baseline_covariates, by = "subject")
-}
+}\if{html}{\out{</div>}}
 }
 }
 \examples{

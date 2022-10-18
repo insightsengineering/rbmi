@@ -25,7 +25,9 @@ matrix varies for each subject and is equal to the number of times the patient w
 for imputation (for non-conditional mean methods this should be 1 per subject per imputed
 dataset).
 
-This function is best illustrated by an example:\preformatted{imputes = list(
+This function is best illustrated by an example:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{imputes = list(
     imputation_list_single(
         id = "Tom",
         imputations = matrix(
@@ -46,9 +48,11 @@ sample_ids <- list(
     c("Tom", "Harry", "Tom"),
     c("Tom")
 )
-}
+}\if{html}{\out{</div>}}
 
-Then \code{convert_to_imputation_df(imputes, sample_ids)} would result in:\preformatted{imputation_list_df(
+Then \code{convert_to_imputation_df(imputes, sample_ids)} would result in:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{imputation_list_df(
     imputation_df(
         imputation_single_t_1_1,
         imputation_single_h_1_1,
@@ -66,7 +70,7 @@ Then \code{convert_to_imputation_df(imputes, sample_ids)} would result in:\prefo
         imputation_single_t_3_2
     )
 )
-}
+}\if{html}{\out{</div>}}
 
 Note that the different repetitions (i.e. the value set for D) are grouped together
 sequentially.}

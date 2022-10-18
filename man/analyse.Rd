@@ -39,7 +39,9 @@ via \code{...}.
 list containing a single
 numeric element called \code{est} (or additionally \code{se} and \code{df} if
 you had originally specified \code{\link[=method_bayes]{method_bayes()}} or \code{\link[=method_approxbayes]{method_approxbayes()}})
-i.e.:\preformatted{myfun <- function(dat, ...) \{
+i.e.:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{myfun <- function(dat, ...) \{
     mod_1 <- lm(data = dat, outcome ~ group)
     mod_2 <- lm(data = dat, outcome ~ group + covar)
     x <- list(
@@ -56,7 +58,7 @@ i.e.:\preformatted{myfun <- function(dat, ...) \{
      )
      return(x)
  \}
-}
+}\if{html}{\out{</div>}}
 
 Please note that the \code{vars$subjid} column (as defined in the original call to
 \code{\link[=draws]{draws()}}) will be scrambled in the data.frames that are provided to \code{fun}.
@@ -79,8 +81,10 @@ This is typically used for sensitivity or tipping point analyses. The
 delta dataset must contain columns \code{vars$subjid}, \code{vars$visit} (as specified
 in the original call to \code{\link[=draws]{draws()}}) and \code{delta}. Essentially this \code{data.frame}
 is merged onto the imputed dataset by \code{vars$subjid} and \code{vars$visit} and then
-the outcome variable is modified by:\preformatted{imputed_data[[vars$outcome]] <- imputed_data[[vars$outcome]] + imputed_data[["delta"]]
-}
+the outcome variable is modified by:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{imputed_data[[vars$outcome]] <- imputed_data[[vars$outcome]] + imputed_data[["delta"]]
+}\if{html}{\out{</div>}}
 
 Please note that in order to provide maximum flexibility, the \code{delta} argument
 can be used to modify any/all outcome values including those that were not

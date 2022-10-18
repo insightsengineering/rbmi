@@ -17,7 +17,9 @@ Transposes a Results object (as created by \code{\link[=analyse]{analyse()}}) in
 the same estimates together into vectors.
 }
 \details{
-Essentially this function takes an object of the format:\preformatted{x <- list(
+Essentially this function takes an object of the format:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{x <- list(
     list(
         "trt1" = list(
             est = 1,
@@ -39,9 +41,11 @@ Essentially this function takes an object of the format:\preformatted{x <- list(
         )
     )
 )
-}
+}\if{html}{\out{</div>}}
 
-and produces:\preformatted{list(
+and produces:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{list(
     trt1 = list(
         est = c(1,5),
         se = c(2,6)
@@ -51,5 +55,5 @@ and produces:\preformatted{list(
         se = c(4,8)
     )
 )
-}
+}\if{html}{\out{</div>}}
 }

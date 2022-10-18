@@ -2,7 +2,6 @@ suppressPackageStartupMessages({
     library(dplyr)
     library(testthat)
     library(tibble)
-    library(glmmTMB)
 })
 
 

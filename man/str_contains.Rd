@@ -15,7 +15,9 @@ str_contains(x, subs)
 Returns a vector of \code{TRUE}/\code{FALSE} for each element of x
 if it contains any element in \code{subs}
 
-i.e.\preformatted{str_contains( c("ben", "tom", "harry"), c("e", "y"))
+i.e.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{str_contains( c("ben", "tom", "harry"), c("e", "y"))
 [1] TRUE FALSE TRUE
-}
+}\if{html}{\out{</div>}}
 }

@@ -187,7 +187,7 @@ test_that("nmar data is removed as expected", {
     )
 
     method <- method_condmean(type = "bootstrap", n_samples = 2)
-    
+
     set.seed(101)
     d1 <- draws(dat, dat_ice, vars, method, quiet = TRUE)
     set.seed(101)
@@ -479,8 +479,7 @@ test_that("draws is calling get_mmrm_sample properly", {
     s1 <- get_mmrm_sample(
         ids = ld$ids,
         longdata = ld,
-        method = method,
-        optimizer = c("L-BFGS-B", "BFGS")
+        method = method
     )
     expect_equal(ld$ids, x$samples[[1]]$ids)
     expect_equal(s1, x$samples[[1]])
@@ -489,11 +488,7 @@ test_that("draws is calling get_mmrm_sample properly", {
     s2 <- get_mmrm_sample(
         ids = x$samples[[2]]$ids,
         longdata = ld,
-        method = method,
-        optimizer = optimizer <- list(
-            "L-BFGS-B" = NULL,
-            "BFGS" = s1[c("beta", "theta")]
-        )
+        method = method
     )
     expect_true(!all(ld$ids %in% x$samples[[2]]$ids))
     expect_true(length(ld$ids) == length(x$samples[[2]]$ids))
@@ -516,18 +511,13 @@ test_that("draws is calling get_mmrm_sample properly", {
     s0 <- get_mmrm_sample(
         ids = ld$ids,
         longdata = ld,
-        method = method,
-        optimizer = c("L-BFGS-B", "BFGS")
+        method = method
     )
 
     s1 <- get_mmrm_sample(
         ids = x$samples[[1]]$ids_samp,
         longdata = ld,
-        method = method,
-        optimizer = optimizer <- list(
-            "L-BFGS-B" = NULL,
-            "BFGS" = s0[c("beta", "theta")]
-        )
+        method = method
     )
     s1$ids <- ld$ids
     expect_true(!all(ld$ids %in% x$samples[[1]]$ids_samp))
@@ -540,11 +530,7 @@ test_that("draws is calling get_mmrm_sample properly", {
     s2 <- get_mmrm_sample(
         ids = x$samples[[2]]$ids_samp,
         longdata = ld,
-        method = method,
-        optimizer = optimizer <- list(
-            "L-BFGS-B" = NULL,
-            "BFGS" = s0[c("beta", "theta")]
-        )
+        method = method
     )
     s2$ids <- ld$ids
     expect_true(!all(ld$ids %in% x$samples[[2]]$ids_samp))
@@ -557,6 +543,7 @@ test_that("draws is calling get_mmrm_sample properly", {
 
 test_that("draws.bmlmi works as expected", {
 
+    set.seed(3812)
     bign <- 120
     sigma <- as_vcov(
         c(2, 1, 0.7),
@@ -625,7 +612,7 @@ test_that("draws.bmlmi works as expected", {
 
 
 test_that("quiet supress progress messages", {
-    
+
     bign <- 90
     sigma <- as_vcov(
         c(2, 1, 0.7),
@@ -683,3 +670,6 @@ test_that("quiet supress progress messages", {
     })
     expect_true(length(x) == 0 & is.character(x))
 })
+
+
+

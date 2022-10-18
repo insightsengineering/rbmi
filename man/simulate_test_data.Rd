@@ -45,8 +45,10 @@ The covariates in the simulated dataset are produced as follows:
 for details
 }
 
-The mean for the outcome variable is derived as:\preformatted{outcome = Intercept + age + sex + visit + treatment
-}
+The mean for the outcome variable is derived as:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{outcome = Intercept + age + sex + visit + treatment
+}\if{html}{\out{</div>}}
 
 The coefficients for the intercept, age and sex are taken from \code{mu$int},
 \code{mu$age} and \code{mu$sex} respectively, all of which must be a length 1 numeric.
@@ -54,13 +56,17 @@ The coefficients for the intercept, age and sex are taken from \code{mu$int},
 Treatment and visit coefficients are taken from \code{mu$trt} and \code{mu$visit} respectively
 and must either be of length 1 (i.e. a constant affect across all visits) or equal to the
 number of visits (as determined by the length of \code{sd}). I.e. if you wanted a treatment
-slope of 5 and a visit slope of 1 you could specify:\preformatted{mu = list(..., "trt" = c(0,5,10), "visit" = c(0,1,2))
-}
+slope of 5 and a visit slope of 1 you could specify:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{mu = list(..., "trt" = c(0,5,10), "visit" = c(0,1,2))
+}\if{html}{\out{</div>}}
 
 The correlation matrix is constructed from \code{cor} as follows.
-Let \code{cor = c(a, b, c, d, e, f)} then the correlation matrix would be:\preformatted{1  a  b  d
+Let \code{cor = c(a, b, c, d, e, f)} then the correlation matrix would be:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{1  a  b  d
 a  1  c  e
 b  c  1  f
 d  e  f  1
-}
+}\if{html}{\out{</div>}}
 }

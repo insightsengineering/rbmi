@@ -15,20 +15,19 @@ any missing values}
 
 \item{visit}{a character / factor vector. Indicates which visit the outcome value occoured on.}
 
-\item{subjid}{a character / factor vector. The subject identifier used to link separate visits that belong to
-the same subject.}
+\item{subjid}{a character / factor vector. The subject identifier used to link separate visits
+that belong to the same subject.}
 
 \item{group}{a character / factor vector. Indicates which treatment group the patient belongs to.}
 }
 \description{
-Converts a design matrix + key variables into a command format
+Converts a design matrix + key variables into a common format
 In particular this function does the following:
 \itemize{
 \item Renames all covariates as \code{V1}, \code{V2}, etc to avoid issues of special characters in variable names
 \item Ensures all key variables are of the right type
 \item Inserts the outcome, visit and subjid variables into the \code{data.frame}
 naming them as \code{outcome}, \code{visit} and \code{subjid}
-\item Splits a grouping variable out into separate columns, i.e. if \code{group} has 3 levels then the
-output \code{data.frame} will have dummy indicator variables \code{G1}, \code{G2} & \code{G3}
+\item If provided will also insert the group variable into the \code{data.frame} named as \code{group}
 }
 }

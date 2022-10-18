@@ -31,15 +31,15 @@ acts as the denominator for calculating progress percentages}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{progressLogger$new()}}
-\item \href{#method-add}{\code{progressLogger$add()}}
-\item \href{#method-print_progress}{\code{progressLogger$print_progress()}}
-\item \href{#method-clone}{\code{progressLogger$clone()}}
+\item \href{#method-progressLogger-new}{\code{progressLogger$new()}}
+\item \href{#method-progressLogger-add}{\code{progressLogger$add()}}
+\item \href{#method-progressLogger-print_progress}{\code{progressLogger$print_progress()}}
+\item \href{#method-progressLogger-clone}{\code{progressLogger$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-progressLogger-new"></a>}}
+\if{latex}{\out{\hypertarget{method-progressLogger-new}{}}}
 \subsection{Method \code{new()}}{
 Create progressLogger object
 \subsection{Usage}{
@@ -59,8 +59,8 @@ Create progressLogger object
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-add"></a>}}
-\if{latex}{\out{\hypertarget{method-add}{}}}
+\if{html}{\out{<a id="method-progressLogger-add"></a>}}
+\if{latex}{\out{\hypertarget{method-progressLogger-add}{}}}
 \subsection{Method \code{add()}}{
 Records that \code{n} more iterations have been completed
 this will add that number to the current step count (\code{step_current}) and will
@@ -79,8 +79,8 @@ This function will do nothing if \code{quiet} has been set to \code{TRUE}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print_progress"></a>}}
-\if{latex}{\out{\hypertarget{method-print_progress}{}}}
+\if{html}{\out{<a id="method-progressLogger-print_progress"></a>}}
+\if{latex}{\out{\hypertarget{method-progressLogger-print_progress}{}}}
 \subsection{Method \code{print_progress()}}{
 method to print the current state of progress
 \subsection{Usage}{
@@ -89,8 +89,8 @@ method to print the current state of progress
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-progressLogger-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-progressLogger-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

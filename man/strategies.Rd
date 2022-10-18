@@ -37,11 +37,13 @@ the Missing-at-Random (MAR) assumption.
 \details{
 \code{pars_group} and \code{pars_ref} both must be a list containing elements \code{mu} and \code{sigma}.
 \code{mu} must be a numeric vector and \code{sigma} must be a square matrix symmetric covariance
-matrix with dimensions equal to the length of \code{mu} and \code{index_mar}. e.g.\preformatted{list(
+matrix with dimensions equal to the length of \code{mu} and \code{index_mar}. e.g.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{list(
     mu = c(1,2,3),
     sigma = matrix(c(4,3,2,3,5,4,2,4,6), nrow = 3, ncol = 3)
 )
-}
+}\if{html}{\out{</div>}}
 
 Users can define their own strategy functions and include them via the \code{strategies}
 argument to \code{\link[=impute]{impute()}} using \code{\link[=getStrategies]{getStrategies()}}. That being said the following
