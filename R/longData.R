@@ -185,27 +185,39 @@ longDataConstructor <- R6::R6Class(
         #' A `data.frame`.
         get_data = function(obj = NULL, nmar.rm = FALSE, na.rm = FALSE, idmap = FALSE) {
 
-            if (is.null(obj)) return(self$data)
+            if (is.null(obj)) {
+                if (nmar.rm == FALSE & na.rm == FALSE) {
+                    return(self$data)
+                } else {
+                    ids <- self$ids
+                    list_flag <- FALSE
+                    orig_data_flag <- TRUE
+                }
 
-            if (! any(c("imputation_df", "character") %in% class(obj))) {
-                stop("Object must be an imputation_df or a character vector")
-            }
-
-            list_flag <- "imputation_df" %in% class(obj)
-
-            if (list_flag) {
-                obj_expanded <- transpose_imputations(obj)
-                ids <- obj_expanded$ids
-                values <- obj_expanded$values
-
-                n_miss <- vapply(self$is_missing[ids], function(x) sum(x), numeric(1))
-                n_values <- vapply(obj, function(x) length(x$values), numeric(1))
-                assert_that(
-                    all(n_miss == n_values),
-                    msg = "Number of missing values doesn't equal number of imputed values"
-                )
             } else {
-                ids <- obj
+
+                orig_data_flag <- FALSE
+
+                if (! any(c("imputation_df", "character") %in% class(obj))) {
+                    stop("Object must be an imputation_df or a character vector")
+                }
+
+                list_flag <- "imputation_df" %in% class(obj)
+
+                if (list_flag) {
+                    obj_expanded <- transpose_imputations(obj)
+                    ids <- obj_expanded$ids
+                    values <- obj_expanded$values
+
+                    n_miss <- vapply(self$is_missing[ids], function(x) sum(x), numeric(1))
+                    n_values <- vapply(obj, function(x) length(x$values), numeric(1))
+                    assert_that(
+                        all(n_miss == n_values),
+                        msg = "Number of missing values doesn't equal number of imputed values"
+                    )
+                } else {
+                    ids <- obj
+                }
             }
 
             self$validate_ids(ids)
@@ -216,31 +228,39 @@ longDataConstructor <- R6::R6Class(
                 is_mar <- unlist(self$is_mar[ids], use.names = FALSE)
             }
 
-            new_ids_full <- mapply(
-                function(x, y) rep(paste0("new_pt_", x), times = length(y)),
-                seq_along(indexes),
-                indexes,
-                SIMPLIFY = FALSE
-            )
 
-            new_ids_full <- unlist(new_ids_full, use.names = FALSE)
             indexes_vec <- unlist(indexes, use.names = FALSE)
 
             new_data <- self$data[indexes_vec, ]
 
-            new_data[[self$vars$subjid]] <- new_ids_full
+            if (!orig_data_flag) {
+                new_ids_full <- mapply(
+                    function(x, y) rep(paste0("new_pt_", x), times = length(y)),
+                    seq_along(indexes),
+                    indexes,
+                    SIMPLIFY = FALSE
+                )
+                new_ids_full <- unlist(new_ids_full, use.names = FALSE)
+                new_data[[self$vars$subjid]] <- new_ids_full
+            }
 
             if (list_flag) {
                 new_data[is_miss, self$vars$outcome] <- values
             }
 
             if (nmar.rm | na.rm) {
-                keep <- (is_mar | (!nmar.rm)) & (!is_miss | (!na.rm))
+                remove_nmar <- !is_mar & nmar.rm
+                remove_na <- is_miss & na.rm
+                keep <-  !remove_nmar & !remove_na
                 new_data <- new_data[keep, ]
             }
 
-            if (idmap) {
-                new_ids_single <- vapply(seq_along(indexes), function(x) paste0("new_pt_", x), character(1))
+            if (idmap & !orig_data_flag) {
+                new_ids_single <- vapply(
+                    seq_along(indexes), 
+                    function(x) paste0("new_pt_", x),
+                    character(1)
+                )
                 id_map <- ids
                 names(id_map) <- new_ids_single
                 attr(new_data, "idmap") <- id_map
@@ -451,7 +471,14 @@ longDataConstructor <- R6::R6Class(
             is_not_miss <- !unlist(self$is_missing, use.names = FALSE)
             visits <- rep(self$visits, length(self$ids))
             is_avail <- is_mar & is_not_miss
-            x <- tapply(is_avail, visits, sum)
+            x <- tapply(is_avail, visits, sum)[self$visits]
+            assert_that(
+                identical(names(x), self$visits),
+                msg = paste(
+                    "An unexpected error has occoured in check_has_data_at_each_visit()",
+                    "please report this to the developer"
+                )
+            )
             no_data_visits <- self$visits[x == 0]
             assert_that(
                 length(no_data_visits) == 0,

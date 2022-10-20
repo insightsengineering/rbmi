@@ -92,6 +92,64 @@ test_that("Parallisation works as expected", {
 
 })
 
+
+test_that("Basic parallisation works as expected", {
+    set.seed(3812)
+    bign <- 100
+    sigma <- as_vcov(
+        c(2, 1, 0.7),
+        c(
+            0.3,
+            0.4, 0.2
+        )
+    )
+    dat <- get_sim_data(bign, sigma, trt = 8) %>%
+        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
+        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        select(-is_miss)
+
+    dat_ice <- dat %>%
+        group_by(id) %>%
+        arrange(id, visit) %>%
+        filter(is.na(outcome)) %>%
+        slice(1) %>%
+        ungroup() %>%
+        select(id, visit) %>%
+        mutate(strategy = "JR")
+
+    vars <- set_vars(
+        outcome = "outcome",
+        group = "group",
+        strategy = "strategy",
+        subjid = "id",
+        visit = "visit",
+        covariates = c("age", "sex", "visit * group")
+    )
+
+    set.seed(3013)
+    x1 <- draws(
+        quiet = TRUE,
+        dat,
+        dat_ice,
+        vars,
+        method = method_approxbayes(n_samples = 10)
+    )
+
+    set.seed(3013)
+    x2 <- draws(
+        quiet = TRUE,
+        dat,
+        dat_ice,
+        vars,
+        ncores = 2,
+        method = method_approxbayes(n_samples = 10)
+    )
+
+    expect_equal(x1, x2)
+
+})
+
+
 ###########################
 #
 #  Manual time testing

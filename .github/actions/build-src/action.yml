@@ -1,6 +1,10 @@
 
 name: 'Build src'
 description: 'Build src!'
+inputs:
+  refresh:
+    description: 'Should the R/stanmodels.R file be refreshed'
+    default: true
 runs:
   using: "composite"
   steps:
@@ -15,10 +19,22 @@ runs:
         sink()
       shell: Rscript {0}
     
+    # The default R/stanmodels.R was updated in v2.2.0 (11Apr2022)
+    # Normally for older versions it would change itself on the fly
+    # when it compiles the stan model
+    # but as we are using cached models we are preventing compilation
+    # and thus need to manually refresh the file
+    - name: Refresh rstantools config files
+      shell: bash
+      run: |
+        echo "inputs.refresh = ${{ inputs.refresh }}"
+        if ${{ inputs.refresh }} ; then
+          Rscript -e "rstantools::rstan_config()"
+        fi
     
     - name: Cache Compiled Stan Code
       id: cache-pkgs
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: src/*
         key: ${{ hashFiles('.github/meta.txt') }}-${{ hashFiles('inst/stan/MMRM.stan') }}

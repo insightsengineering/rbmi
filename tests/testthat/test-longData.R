@@ -811,3 +811,255 @@ test_that("Formula is created properly", {
     formula_actual <- outcome ~ 1 + group + visit + sex + age
     expect_true(formula_actual  == ld$formula)
 })
+
+
+
+
+test_that("check_has_data_at_each_visit() catches the correct visit that has no data", {
+
+    visits <- c("V", "I", "S", "T")
+
+    dat <- tibble(
+        pt = factor(c("A", "A", "A", "A", "B", "B", "B", "B"), levels = c("A", "B")),
+        vis = factor(rep(visits, 2), levels = visits),
+        out = c(NA, 4, 5, 3, 6, NA, 1, NA),
+        group = factor(c("G", "G", "G", "G", "F", "F", "F", "F"), levels = c("G", "F")),
+        age = rnorm(8)
+    )
+
+    vars <- set_vars(
+        outcome = "out",
+        visit = "vis",
+        subjid = "pt",
+        group = "group",
+        covariates = c("age"),
+        strategy = "strategy"
+    )
+
+    ld <- longDataConstructor$new(dat, vars)
+
+    dat_ice <- tibble(
+        vis = factor(c("S", "T"), levels = visits),
+        pt = factor(c("A", "B"), levels = c("A", "B")),
+        strategy = c("JR", "JR")
+    )
+
+    expect_error(
+        ld$set_strategies(dat_ice),
+        regexp = "`T` visit"
+    )
+
+
+
+    visits <- c(5, 6, 8, 1)
+
+    dat <- tibble(
+        pt = factor(c("A", "A", "A", "A", "B", "B", "B", "B"), levels = c("A", "B")),
+        vis = factor(rep(visits, 2), levels = visits),
+        out = c(NA, 4, 5, 3, 6, NA, 1, NA),
+        group = factor(c("G", "G", "G", "G", "F", "F", "F", "F"), levels = c("G", "F")),
+        age = rnorm(8)
+    )
+
+    vars <- set_vars(
+        outcome = "out",
+        visit = "vis",
+        subjid = "pt",
+        group = "group",
+        covariates = c("age"),
+        strategy = "strategy"
+    )
+
+    ld <- longDataConstructor$new(dat, vars)
+
+    dat_ice <- tibble(
+        vis = factor(c(8, 1), levels = visits),
+        pt = factor(c("A", "B"), levels = c("A", "B")),
+        strategy = c("JR", "JR")
+    )
+
+    expect_error(
+        ld$set_strategies(dat_ice),
+        regexp = "`1` visit"
+    )
+
+
+
+    ld <- longDataConstructor$new(dat, vars)
+
+    dat_ice <- tibble(
+        vis = factor(c(8, 1), levels = visits),
+        pt = factor(c("B", "A"), levels = c("A", "B")),
+        strategy = c("MAR", "MAR")
+    )
+
+    expect_true(ld$set_strategies(dat_ice))
+
+})
+
+
+
+
+test_that("get_data() uses na.rm and nmar.rm correctly", {
+
+    #
+    # This test proves that the bug identified in
+    # https://github.com/insightsengineering/rbmi/issues/347
+    # has been resolved.
+    # This was where `na.rm` and `nmar.rm` in `longdata$get_data()` only worked if IDs
+    # were passed to the function
+    #
+
+    visits <- c("V", "I", "S", "T")
+
+    dat <- tibble(
+        pt = factor(c("B", "B", "A", "A", "B", "B", "A", "A"), levels = c("A", "B")),
+        vis = factor(c("V", "T", "T", "S", "I", "S", "I", "V"), levels = visits),
+        out = c(NA, 4,    5, NA,     6, 5,     5, 5),
+        group = factor(c("G", "G", "F", "F", "G", "G", "F", "F"), levels = c("G", "F")),
+        age = rnorm(8)
+    )
+
+    IDS <- c("A", "B", "A")
+    # Dataset to represent what the data should look like if the above IDs are specified
+    dat2 <- bind_rows(
+        dat %>% arrange(pt, vis),
+        dat %>% arrange(pt, vis) %>% filter(pt == "A")
+    ) %>%
+        mutate(pt = rep(paste0("new_pt_", 1:3), each = 4))
+
+
+    vars <- set_vars(
+        outcome = "out",
+        visit = "vis",
+        subjid = "pt",
+        group = "group",
+        covariates = c("age"),
+        strategy = "strategy"
+    )
+
+    ld <- longDataConstructor$new(dat, vars)
+
+    ### Pre-strategies (no ids) (everything is MAR atm)
+
+    expect_equal(
+        ld$get_data(),
+        dat %>% arrange(pt, vis) %>% as.data.frame()
+    )
+
+    expect_equal(
+        ld$get_data(na.rm = TRUE),
+        dat %>% filter(!is.na(out)) %>% arrange(pt, vis) %>% as.data.frame()
+    )
+
+    expect_equal(
+        ld$get_data(na.rm = TRUE, nmar.rm = TRUE),
+        dat %>% filter(!is.na(out)) %>% arrange(pt, vis) %>% as.data.frame()
+    )
+
+    expect_equal(
+        ld$get_data(nmar.rm = TRUE),
+        dat %>% arrange(pt, vis) %>% as.data.frame()
+    )
+
+    ### Pre-strategies (with ids) (everything is MAR atm)
+
+
+    expect_equal(
+        ld$get_data(IDS),
+        dat2 %>% as.data.frame()
+    )
+
+    expect_equal(
+        ld$get_data(IDS, na.rm = TRUE),
+        dat2 %>% filter(!is.na(out)) %>% as.data.frame()
+    )
+
+    expect_equal(
+        ld$get_data(IDS, nmar.rm = TRUE),
+        dat2 %>% as.data.frame()
+    )
+
+    expect_equal(
+        ld$get_data(IDS, na.rm = TRUE, nmar.rm = TRUE),
+        dat2 %>% filter(!is.na(out)) %>% as.data.frame()
+    )
+
+    ############
+    #
+    #  Set strategies and test again....
+    #
+
+    dat_ice <- tibble(
+        vis = factor(c("I", "S"), levels = visits),
+        pt = factor(c("A", "B"), levels = c("A", "B")),
+        strategy = c("JR", "MAR")
+    )
+    ld$set_strategies(dat_ice)
+
+
+    ### Post-strategies (without ids)
+
+    expect_equal(
+        ld$get_data(),
+        dat %>%
+            arrange(pt, vis) %>%
+            as.data.frame()
+    )
+
+    expect_equal(
+        ld$get_data(na.rm = TRUE),
+        dat %>%
+            filter(!is.na(out)) %>%
+            arrange(pt, vis) %>%
+            as.data.frame()
+    )
+
+    expect_equal(
+        ld$get_data(nmar.rm = TRUE),
+        dat %>%
+            filter(!(as.numeric(vis) >= 2 & pt == "A")) %>%
+            arrange(pt, vis) %>%
+            as.data.frame()
+    )
+
+    expect_equal(
+        ld$get_data(na.rm = TRUE, nmar.rm = TRUE),
+        dat %>%
+            filter(!is.na(out)) %>%
+            filter(!(as.numeric(vis) >= 2 & pt == "A")) %>%
+            arrange(pt, vis) %>%
+            as.data.frame()
+    )
+
+    ### Post-strategies (with ids)
+
+    expect_equal(
+        ld$get_data(IDS),
+        dat2 %>%
+            as.data.frame()
+    )
+
+    expect_equal(
+        ld$get_data(IDS, na.rm = TRUE),
+        dat2 %>%
+            filter(!is.na(out)) %>%
+            as.data.frame()
+    )
+
+    expect_equal(
+        ld$get_data(IDS, nmar.rm = TRUE),
+        dat2 %>%
+            filter(!(as.numeric(vis) >= 2 & pt %in% c("new_pt_1", "new_pt_3"))) %>%
+            as.data.frame()
+    )
+
+    expect_equal(
+        ld$get_data(IDS, na.rm = TRUE, nmar.rm = TRUE),
+        dat2 %>%
+            filter(!is.na(out)) %>%
+            filter(!(as.numeric(vis) >= 2 & pt %in% c("new_pt_1", "new_pt_3"))) %>%
+            as.data.frame()
+    )
+
+})

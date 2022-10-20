@@ -69,6 +69,13 @@ test_that("set_simul_pars", {
     expect_error(validate(pars))
 
     pars$prob_dropout <- NULL
+    pars$prob_ice2 <- 2
+    expect_error(
+        validate(pars),
+        regexp = "`prob_ice2`"
+    )
+    
+    pars$prob_ice2 <- 0.5
     pars$sigma[1,1] <- NA
     expect_error(validate(pars))
 

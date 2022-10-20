@@ -1,7 +1,9 @@
-## Resubmission
-This is a resubmission. In this version I have:
+## Summary of Submission
 
-* Fixed the clang-UBSAN error
+In this version I have:
+
+* Implemented minor bug fixes
+* Cleaned up documentation
 
 ## R CMD check results
 
@@ -21,12 +23,12 @@ Both of the above notes are a consequence of using rstan in the package followin
 
 ## Test environments
 
-The package was tested in the following environments (in GitHub actions):
+The package was tested in the following environments:
 
-- Ubuntu 20.04, R release
-- Windows latest, R release
-- Mac OS latest, R release
-- Ubuntu 20.04, R devel
+- Ubuntu 20.04, R release (GitHub Actions)
+- Windows latest, R release (Local Machine)
+- Mac OS latest, R release (Local Machine + GitHub Actions)
+- Ubuntu 20.04, R devel (GitHub Actions)
 
 
 ## Downstream dependencies

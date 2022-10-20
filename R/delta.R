@@ -210,7 +210,7 @@ get_delta_template <- function(imputations) {
                 stringsAsFactors = FALSE
             )
             df[[ld$vars$subjid]] <- factor(id, levels = ld$ids)
-            df[[ld$vars$visit]] <- factor(ld$visits, labels = ld$visits)
+            df[[ld$vars$visit]] <- factor(ld$visits, levels = ld$visits)
             df[[ld$vars$group]] <- ld$group[[id]]
 
             vars <- c(

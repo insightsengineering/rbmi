@@ -16,14 +16,14 @@ This is a simple stack object offering add / pop functionality
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-add}{\code{Stack$add()}}
-\item \href{#method-pop}{\code{Stack$pop()}}
-\item \href{#method-clone}{\code{Stack$clone()}}
+\item \href{#method-Stack-add}{\code{Stack$add()}}
+\item \href{#method-Stack-pop}{\code{Stack$pop()}}
+\item \href{#method-Stack-clone}{\code{Stack$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-add"></a>}}
-\if{latex}{\out{\hypertarget{method-add}{}}}
+\if{html}{\out{<a id="method-Stack-add"></a>}}
+\if{latex}{\out{\hypertarget{method-Stack-add}{}}}
 \subsection{Method \code{add()}}{
 Adds content to the end of the stack (must be a list)
 \subsection{Usage}{
@@ -39,8 +39,8 @@ Adds content to the end of the stack (must be a list)
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-pop"></a>}}
-\if{latex}{\out{\hypertarget{method-pop}{}}}
+\if{html}{\out{<a id="method-Stack-pop"></a>}}
+\if{latex}{\out{\hypertarget{method-Stack-pop}{}}}
 \subsection{Method \code{pop()}}{
 Retrieve content from the stack
 \subsection{Usage}{
@@ -57,8 +57,8 @@ items left on the stack it will just return everything that is left.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-Stack-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-Stack-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

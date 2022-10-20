@@ -21,14 +21,11 @@ affiliations:
    index: 1
  - name: Data and Statistical Sciences, Pharma Development, Roche, Basel, Switzerland
    index: 2
-citation_author: Gower-Page, Noci, and Wolbers
 date: \today
 bibliography: references.bib
 output: rticles::joss_article
 journal: JOSS
 ---
-
-
 
 # Summary 
 
@@ -44,7 +41,7 @@ The package supports both standard imputation under a missing-at-random assumpti
 # Statement of need 
 
 `rbmi` is a flexible `R` package designed to support the analysis of randomized clinical trials with continuous longitudinal endpoints. 
-Both conventional MI methods based on Bayesian posterior draws and novel methods based on maximum likelihood estimation and re-sampling (as described in @vanHippelBartlett2021 and @Wolbers2021) are implemented. `rbmi` was designed for statisticians from both academic clinical research units and pharmaceutical industry. To our knowledge, a comprehensive and fully unit-tested `R` implementation of such approaches is still lacking. An established software implementation of reference-based imputation in SAS are the so-called "five macros" [@FiveMacros]. An alternative `R` implementation which is currently under development is the R package `RefBasedMI`[@RefbasedMIpackage].
+Both conventional MI methods based on Bayesian posterior draws and novel methods based on maximum likelihood estimation and re-sampling (as described in @vanHippelBartlett2021 and @Wolbers2021) are implemented. `rbmi` was designed for statisticians from both academic clinical research units and pharmaceutical industry. To our knowledge, a comprehensive and fully unit-tested `R` implementation of such approaches is still lacking. An established software implementation of reference-based imputation in SAS are the so-called "five macros" [@FiveMacros]. An alternative `R` implementation which is currently under development is the R package `RefBasedMI` [@RefbasedMIpackage].
 
 # `rbmi` workflow
 
@@ -76,7 +73,6 @@ In addition to detailed help files for all functions, the package contains three
 All production code is required to have been reviewed by an independent programmer as well as pass a  suite of automated unit tests which both define and document the expected input and output of each function.
 Additionally comparisons are made to similar software (namely the so-called "five macros" [@FiveMacros] SAS implementation) to ensure consistency of results as well as to simulated datasets with known values.
 To date, `rbmi` has been used in two simulation studies reported in @Wolbers2021 and @Noci2021.
-
 
 # Author contributions and acknowledgements
 
