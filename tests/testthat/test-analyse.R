@@ -8,8 +8,8 @@ test_that("basic constructions of `analysis` work as expected",{
 
     x <- as_analysis(
         results = list(
-            list(p1 = list("est" = 1)),
-            list(p1 = list("est" = 2))
+            list(analysis_result(name = 'p1', est = 1)), # A nested structure is necessary here. The top level is a full result list. The 2nd level is each imputation. The 3rd level is each individual analysis result inside each imputation.
+            list(analysis_result(name = 'p1', est = 2))
         ),
         method = method_condmean(n_samples = 1)
     )
@@ -18,8 +18,8 @@ test_that("basic constructions of `analysis` work as expected",{
 
     x <- as_analysis(
         results = list(
-            list(p1 = list("est" = 1)),
-            list(p1 = list("est" = 2))
+            list(analysis_result(name = 'p1', est = 1)),
+            list(analysis_result(name = 'p1', est = 2))
         ),
         method = method_condmean(type = "jackknife")
     )
@@ -28,8 +28,8 @@ test_that("basic constructions of `analysis` work as expected",{
 
     x <- as_analysis(
         results = list(
-            list(p1 = list("est" = 1, "df" = 4, "se" = 1)),
-            list(p1 = list("est" = 2, "df" = 3, "se" = 3))
+            list(analysis_result(name = 'p1', est = 1, df = 4, se = 1)),
+            list(analysis_result(name = 'p1', est = 2, df = 3, se = 3))
         ),
         method = method_bayes(n_samples = 2)
     )
@@ -38,8 +38,8 @@ test_that("basic constructions of `analysis` work as expected",{
 
     x <- as_analysis(
         results = list(
-            list(p1 = list("est" = 1, "df" = 4, "se" = 1)),
-            list(p1 = list("est" = 2, "df" = 3, "se" = 3))
+            list(analysis_result(name = 'p1', est = 1, df = 4, se = 1)),
+            list(analysis_result(name = 'p1', est = 2, df = 3, se = 3))
         ),
         method = method_approxbayes(n_samples = 2)
     )
@@ -48,8 +48,8 @@ test_that("basic constructions of `analysis` work as expected",{
 
     x <- as_analysis(
         results = list(
-            list(p1 = list("est" = 1, "df" = 4, "se" = NA)),
-            list(p1 = list("est" = 2, "df" = 3, "se" = NA))
+            list(analysis_result(name = 'p1',  est = 1,  df = 4, se = NA)),
+            list(analysis_result(name = 'p1',  est = 2,  df = 3, se = NA))
         ),
         method = method_bayes(n_samples = 2)
     )
@@ -58,13 +58,12 @@ test_that("basic constructions of `analysis` work as expected",{
 
     x <- as_analysis(
         results = list(
-            list(p1 = list("est" = 1, "df" = 4, "se" = NA)),
-            list(p1 = list("est" = 2, "df" = 3, "se" = NA))
+            list(analysis_result(name = 'p1', est = 1, df = 4, se = NA)),
+            list(analysis_result(name = 'p1', est = 2,  df = 3, se = NA))
         ),
         method = method_approxbayes(n_samples = 2)
     )
     expect_true(validate(x))
-
 })
 
 
@@ -74,8 +73,7 @@ test_that("incorrect constructions of as_analysis fail", {
     expect_error(
         as_analysis(
             results = list(
-                list(p1 = list("est" = 1)),
-                list(p1 = list("est" = 2))
+                list(analysis_result(name = 'p1', est = 1), analysis_result(name = 'p1', est = 2))
             ),
             method = method_condmean(n_samples = 2)
         ),
@@ -85,8 +83,8 @@ test_that("incorrect constructions of as_analysis fail", {
     expect_error(
         as_analysis(
             results = list(
-                list(p1 = list("est" = 1, "df" = 4, "se" = 1)),
-                list(p1 = list("est" = 2, "df" = 3, "se" = 3))
+                list(analysis_result(name = 'p1', est = 1, df = 4, se = 1)),
+                list(analysis_result(name = 'p1', est = 2, df = 3, se = 3))
             ),
             method = method_bayes(n_samples = 3)
         ),
@@ -96,8 +94,8 @@ test_that("incorrect constructions of as_analysis fail", {
     expect_error(
         as_analysis(
             results = list(
-                list(p1 = list("est" = 1, "df" = 4, "se" = 1)),
-                list(p1 = list("est" = 2, "df" = 3, "se" = 3))
+                list(analysis_result(name = 'p1', est = 1, df = 4, se = 1)),
+                list(analysis_result(name = 'p1', est = 2, df = 3, se = 3))
             ),
             method = method_approxbayes(n_samples = 3)
         ),
@@ -109,80 +107,79 @@ test_that("incorrect constructions of as_analysis fail", {
     expect_error(
         as_analysis(
             results = list(
-                list(p1 = list("est1" = 1)),
-                list(p1 = list("est1" = 2))
+                list(analysis_result(name = 'p1', est1 = 1), analysis_result(name = 'p1', est1 = 2)),
             ),
             method = method_condmean(n_samples = 1)
         ),
-        "`est`"
+        "unused argument \\(est1 = 1\\)"
     )
 
     expect_error(
         as_analysis(
             results = list(
-                list(p1 = list("est" = 1, "df1" = 4, "se" = 1)),
-                list(p1 = list("est" = 2, "df1" = 3, "se" = 3))
+                list(analysis_result(name = 'p1', est = 1, df1 = 4, se = 1)),
+                list(analysis_result(name = 'p1', est = 2, df1 = 3, se = 3))
             ),
             method = method_approxbayes(n_samples = 2)
         ),
-        "`df`"
+        "unused argument \\(df1 = 4\\)"
     )
 
     expect_error(
         as_analysis(
             results = list(
-                list(p1 = list("est" = 1, "df1" = 4, "se" = 1)),
-                list(p1 = list("est" = 2, "df1" = 3, "se" = 3))
+                list(analysis_result(name = 'p1', est = 1, df1 = 4, se = 1)),
+                list(analysis_result(name = 'p1', est = 2, df1 = 3, se = 3))
             ),
             method = method_bayes(n_samples = 2)
         ),
-        "`df`"
+        "unused argument \\(df1 = 4\\)"
     )
 
     expect_error(
         as_analysis(
             results = list(
-                list(p1 = list("est" = 1, "df" = 4, "se1" = 1)),
-                list(p1 = list("est" = 2, "df" = 3, "se1" = 3))
+                list(analysis_result(name = 'p1',  est = 1, df = 4, se1 = 1)),
+                list(analysis_result(name = 'p1',  est = 2, df = 3, se1 = 3))
             ),
             method = method_bayes(n_samples = 2)
         ),
-        "`se`"
+        "unused argument \\(se1 = 1\\)"
     )
 
     expect_error(
         as_analysis(
             results = list(
-                list(p1 = list("est" = 1, "df" = 4, "se1" = 1)),
-                list(p1 = list("est1" = 2, "df" = 3, "se1" = 3))
+                list(analysis_result(name = 'p1', est = 1, df = 4, se1 = 1)),
+                list(analysis_result(name = 'p1', est1 = 2, df = 3, se1 = 3))
             ),
             method = method_condmean(type = "jackknife")
         ),
-        "`est`"
+        "unused argument \\(se1 = 1\\)"
     )
 
 
-    ### Inconsistent analysis parameters
+    ### Inconsistent analysis parameters  ## Not sure what this is supposed to test
     expect_error(
-        as_analysis(
-            results = list(
-                list(p1 = list("est" = 1)),
-                list(p2 = list("est" = 2))
-            ),
-            method = method_condmean(n_sample = 1)
-        ),
-        "identically named elements"
-    )
+         as_analysis(
+             results = list(
+                 list(analysis_result(name = 'p1', est = 1)), # 1st imputation contains one analysis with name "p1"
+                 list(analysis_result(name = 'p2', est = 2))  # 2nd imputation contains one analysis with name "p2"
+             ),
+             method = method_condmean(n_sample = 1)
+         ),
+         "identically named elements"
+     )
 
     expect_error(
         as_analysis(
             results = list(
                 list(list("est" = 1)),
-                list(p1 = list("est" = 2))
+                list(analysis_result(name = 'p1', est = 2))
             ),
             method = method_condmean(n_sample = 1)
         ),
-        "results must be named lists"
+        "Individual analysis result must be type of analysis_result"
     )
 
     expect_error(
@@ -193,37 +190,37 @@ test_that("incorrect constructions of as_analysis fail", {
             ),
             method = method_condmean(n_sample = 1)
         ),
-        "results must be named lists"
+        "Individual analysis result must be type of analysis_result"
     )
 
     ### Invalid values
     expect_error(
         as_analysis(
             results = list(
-                list(p1 = list("est" = NA)),
-                list(p1 = list("est" = 2))
+                list(analysis_result(name = 'p1',  est = NA)),
+                list(analysis_result(name = 'p1',  est = 2))
             ),
             method = method_condmean(n_sample = 1)
         ),
-        "`est` contains missing values"
+        "est of analysis_result is not numeric"
     )
 
     expect_error(
         as_analysis(
             results = list(
-                list(p1 = list("est" = "a")),
-                list(p1 = list("est" = 2))
+                list(analysis_result(name = 'p1',  est = 'a')),
+                list(analysis_result(name = 'p1',  est = 2))
             ),
             method = method_condmean(n_sample = 1)
         ),
-        "result is type 'character'"
+        "est of analysis_result is not numeric"
     )
 
     expect_error(
         as_analysis(
             results = list(
-                list(p1 = list("est" = 1, "df" = 4, "se" = NA)),
-                list(p1 = list("est" = 2, "df" = 3, "se" = 3))
+                list(analysis_result(name = 'p1',  est = 1, df = 4, se = NA)),
+                list(analysis_result(name = 'p1',  est = 2, df = 3, se = 3))
             ),
             method = method_bayes(n_sample = 2)
         ),
@@ -232,8 +229,8 @@ test_that("incorrect constructions of as_analysis fail", {
 
     x <- as_analysis(
         results = list(
-            list(p1 = list("est" = 1, "df" = 4, "se" = NA)),
-            list(p1 = list("est" = 2, "df" = 3, "se" = 3))
+            list(analysis_result(name = 'p1',  est = 1, df = 4, se = NA)),
+            list(analysis_result(name = 'p1',  est = 2, df = 3, se = 3))
         ),
         method = method_condmean(n_sample = 1)
     )

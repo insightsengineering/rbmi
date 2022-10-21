@@ -72,19 +72,18 @@ pool <- function(
 
     pool_type <- class(results$results)[[1]]
 
-    results_transpose <- transpose_results(
-        results$results,
-        get_pool_components(pool_type)
-    )
+    prepool <- make_poolable(results$results)
 
-    pars <- lapply(
-        results_transpose,
+    par_values <- lapply(
+        prepool$results,
         function(x, ...) pool_internal(as_class(x, pool_type), ...),
         conf.level = conf.level,
         alternative = alternative,
         type = type,
         D = results$method$D
     )
+
+    pars <- mapply(function(x, y) append(x, y), prepool$meta, par_values, SIMPLIFY = FALSE)
 
     if (pool_type == "bootstrap") {
         method <- sprintf("%s (%s)", pool_type, type)
@@ -97,7 +96,8 @@ pool <- function(
         conf.level = conf.level,
         alternative = alternative,
         N = length(results$results),
-        method = method
+        method = method,
+        metakeys = prepool$metakeys
     )
     class(ret) <- "pool"
     return(ret)
@@ -602,88 +602,111 @@ parametric_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
 
 
 
-#' Transpose results object
+#' Convert analysis results to a poolable object
 #'
-#' Transposes a Results object (as created by [analyse()]) in order to group
-#' the same estimates together into vectors.
+#' Covert Results object (as created by [analyse()]) in order to group
+#' the same estimates together into vectors. The return object is in poolable class containing the results, meta information and the key names for the mata information
 #'
 #' @param results A list of results.
-#' @param components a character vector of components to extract
-#' (i.e. `"est", "se"`).
+#' @param non_group_keys a character vector of variables that are not used to group results usually variables of the numeric analysis results
+#' (Default: `"est", "se", "df`).
 #'
 #' @details
 #'
-#' Essentially this function takes an object of the format:
+#' The format of analysis results are converted from:
 #'
 #' ```
 #' x <- list(
 #'     list(
-#'         "trt1" = list(
+#'      analysis_result(
+#'             name = 'trt',
 #'             est = 1,
-#'             se  = 2
+#'             se  = 2,
+#'             meta = list(visit = 1)
 #'         ),
-#'         "trt2" = list(
+#'      analysis_result(
+#'             name = 'trt',
 #'             est = 3,
-#'             se  = 4
+#'             se  = 4,
+#'             meta = list(visit = 2)
 #'         )
 #'     ),
 #'     list(
-#'         "trt1" = list(
+#'      analysis_result(
+#'             name = 'trt',
 #'             est = 5,
-#'             se  = 6
+#'             se  = 6,
+#'             meta = list(visit = 1)
 #'         ),
-#'         "trt2" = list(
-#'             est = 7,
-#'             se  = 8
+#'      analysis_result(
+#'            name = 'trt',
+#'            est = 7,
+#'            se  = 8,
+#'            meta = list(visit = 2)
 #'         )
 #'     )
 #' )
 #' ```
 #'
-#' and produces:
+#' to the following format and stored in the `$results` element of the poolable object. The element `$meta` contains meta information.
+#' The element `$metakeys` contains the names of the meta information as a character vector
 #'
 #' ```
 #' list(
-#'     trt1 = list(
+#'     trt.1 = data.frame(
+#'      list(
+#'         name = 'trt',
 #'         est = c(1,5),
-#'         se = c(2,6)
+#'         se = c(2,6),
+#'         visit = c(1,1)
+#'         ),
 #'     ),
-#'     trt2 = list(
+#'     trt.2 = data.frame(
+#'      list(
+#'         name = 'trt',
 #'         est = c(3,7),
-#'         se = c(4,8)
-#'     )
+#'         se = c(4,8),
+#'         visit = c(2,2)
+#'         )
+#'      )
 #' )
 #' ```
-transpose_results <- function(results, components) {
-    elements <- names(results[[1]])
-    results_transpose <- list()
-    for (element in elements) {
-        results_transpose[[element]] <- list()
-        for (comp in components) {
-            results_transpose[[element]][[comp]] <- vapply(
-                results,
-                function(x) x[[element]][[comp]],
-                numeric(1)
-            )
+make_poolable <- function(results, non_group_keys=c("est", "se", "df")) {
+    assert_map <- function(f, assert_f, logic = all) {
+        function(lst, ...) {
+            out <- lapply(lst, f, ...)
+            conds <- lapply(out, assert_f)
+            assert_that(logic(unlist(conds)))
+            out
         }
     }
-    return(results_transpose)
+
+    extract_aggregate <- function(lst, keys) unique(lst[keys])
+    extract_aggragates <- assert_map(extract_aggregate, function(x) nrow(x) == 1)
+
+    results_df <- analst2df(results)
+    group_keys <- setdiff(names(results_df), non_group_keys)
+
+    results <- unname(split(results_df, vec2form(group_keys)))
+    meta <- extract_aggragates(results, group_keys)
+
+    structure(list(results = results,
+                   meta = meta,
+                   metakeys = group_keys),
+              class = 'poolable')
 }
 
 
 #' @rdname pool
 #' @export
 as.data.frame.pool <- function(x, ...) {
-    data.frame(
-        parameter = names(x$pars),
-        est = vapply(x$pars, function(x) x$est, numeric(1)),
-        se = vapply(x$pars, function(x) x$se, numeric(1)),
-        lci = vapply(x$pars, function(x) x$ci[[1]], numeric(1)),
-        uci = vapply(x$pars, function(x) x$ci[[2]], numeric(1)),
-        pval = vapply(x$pars, function(x) x$pvalue, numeric(1)),
-        stringsAsFactors = FALSE,
-        row.names = NULL
-    )
+    pars_df <- reduce_df(base_bind_rows(x$pars), keys = x$metakeys, split = TRUE)
+    assert_that(any(grepl('ci', tolower(names(pars_df)))))
+
+    names(pars_df)[tolower(names(pars_df)) == "ci.1"] <- "lci"
+    names(pars_df)[tolower(names(pars_df)) == "ci.2"] <- "uci"
+    row.names(pars_df) <- NULL
+    pars_df
 }
 
 
@@ -707,7 +730,7 @@ print.pool <- function(x, ...) {
         sprintf("Alternative: %s", x$alternative),
         "",
         "Results:",
-        as_ascii_table(as.data.frame(x), pcol = "pval"),
+        as_ascii_table(as.data.frame(x), pcol = "pvalue"),
         ""
     )
 

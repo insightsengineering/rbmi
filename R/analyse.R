@@ -32,12 +32,14 @@
 #'     mod_1 <- lm(data = dat, outcome ~ group)
 #'     mod_2 <- lm(data = dat, outcome ~ group + covar)
 #'     x <- list(
-#'         trt_1 = list(
+#'         analysis_result(
+#'             name = trt_1,
 #'             est = coef(mod_1)[[group]],
 #'             se = sqrt(vcov(mod_1)[group, group]),
 #'             df = df.residual(mod_1)
 #'         ),
-#'         trt_2 = list(
+#'         analysis_result(
+#'             name = trt_2,
 #'             est = coef(mod_2)[[group]],
 #'             se = sqrt(vcov(mod_2)[group, group]),
 #'             df = df.residual(mod_2)
@@ -349,7 +351,7 @@ print.analysis <- function(x, ...) {
         sprintf("Analysis Function: %s", x$fun_name),
         sprintf("Delta Applied: %s", !is.null(x$delta)),
         "Analysis Estimates:",
-        sprintf("    %s", names(x$results[[1]])),
+        as_ascii_table(analysis_info(x$results[[1]])),
         ""
     )
 
@@ -440,12 +442,21 @@ validate_analyse_pars <- function(results, pars) {
     )
 
     assert_that(
-        length(names(results[[1]])) != 0,
-        all(vapply(results, function(x) !is.null(names(x)) & all(names(x) != ""), logical(1))),
-        msg = "Individual analysis results must be named lists"
+        length(results[[1]]) != 0,
+        all(vapply(results, function(Xs)
+            all(vapply(Xs, function(X) is.analysis_result(X), logical(1))), logical(1))),
+        msg = "Individual analysis result must be type of analysis_result"
     )
 
-    results_names <- lapply(results, function(x) unique(names(x)))
+    compose <- function(f, g) function(...) f(g(...))
+
+    process_2nd_last_level <- function(process) function (nestlst) back_apply_at(nestlst, process, 2)
+    get_names <- process_2nd_last_level(function(x) x [['name']])
+    dedup <- process_2nd_last_level(unique)
+
+    get_unique_names <- compose(dedup, get_names)
+
+    results_names <- get_unique_names(results)
     results_names_flat <- unlist(results_names, use.names = FALSE)
     results_names_count <- table(results_names_flat)
 
@@ -486,4 +497,373 @@ validate_analyse_pars <- function(results, pars) {
     }
 
     return(invisible(TRUE))
+}
+
+#' Constructor of analysis result
+#'
+#' Construct an analysis result class object whose base type is a list
+#'
+#' @param name A character variable for the group name
+#' @param est A double type numeric variable as the estimate
+#' @param se A double type numeric variable as the standard error
+#' @param df An integer type of numeric variable
+#' @param meta A list type of variable as meta information
+#' @details
+#' - `se`, `df` and `meta` is optional
+#' - `se` and `df` if given must be numeric values greater or equal to 0
+#' @return An object of "analysis_result" class
+#' @examples
+#' \dontrun{
+#' ana_res_obj <- analysis_result(name = 'trt', est = 1, se = 2, df = 3, meta = list(visit = 1))
+#' }
+#' @export
+analysis_result <- function (name,
+                             est,
+                             se = NULL,
+                             df = NULL,
+                             meta = NULL) {
+
+    # constraints
+    is.numeric_or_NA <- make_chain(any, is.numeric, anyNA)
+    is.numeric_or_NA_or_NULL <- make_chain(any, is.numeric_or_NA, is.null)
+    is.list_or_NULL <- make_chain(any, is.list, is.null)
+
+    # asssert type for required parameter (directly assert type)
+    assert_type(name, is.character)
+    assert_type(est, is.numeric)
+
+    # assert type for optional parameter (always include NULL)
+    assert_type(se, is.numeric_or_NA_or_NULL)
+    assert_type(df, is.numeric_or_NA_or_NULL)
+    assert_type(meta, is.list_or_NULL)
+
+    # assert length for required parameter
+    assert_anares_length(name, 1)
+    assert_anares_length(est, 1)
+
+    # assert properties of optional parameters
+    if (!is.null(se) & !anyNA(se)) {
+        assert_anares_length(se, 1)
+
+        assert_that(
+        se >= 0,
+        msg = "SE must be greater or equal to 0"
+    )
+    }
+
+    if (!is.null(df) & !anyNA(df)) {
+        assert_anares_length(df, 1)
+
+        assert_that(
+            df >= 0,
+            msg = "DF must be greater or equal to 0"
+        )
+    }
+
+    value <- list(name = name,
+                  est = est)
+
+    # optional parameters
+    if (!is.null(se)) {
+        value[['se']] <- se
+    }
+
+    if (!is.null(df)) {
+        value[['df']] <- df
+    }
+
+    if (!is.null(meta)) {
+        value[['meta']] <- meta
+    }
+
+    structure(
+        value,
+        meta = meta,
+        class = c("analysis_result", "list")
+    )
+}
+
+#' Convert object to analysis result class
+#'
+#' @param x The object to be converted to analysis_result class
+#' @param ... Optional keywords parameters for adding missing elements to the object
+#' @return An "analysis_result" class object with optionally updated elements
+#' @examples
+#' \dontrun{
+#' ana_res_obj <- as_analysis_result(list(est = 1, se = 2, df = 3), name = 'trt')
+#' }
+as_analysis_result <- function(x, ...) {
+    new_pars <- list(...)
+
+    # coercion with generic function
+    x <- as.list(x)
+
+    present <- ana_name_chker()('musthave_in_objnames')
+
+    names_not_presented <- names(present(x))[!present(x)]
+
+    # update list if required elements are not presented or if the provided name is an optional element of analysis_result object
+    updated_x <- x
+    for (name in names(new_pars)) {
+        if (name %in% names_not_presented | name %in% ana_name_chker()('optional')) {
+            updated_x[[name]] <- new_pars[[name]]
+        }
+    }
+
+    # after updating check if all required elements are presented
+    assert_that(all(present(updated_x)),
+                msg = "Required parameters are not presented after updating")
+
+    # order the list by names
+    ordered_x <- order_list_by_name(updated_x, ana_name_chker()('all'))
+
+    # set attributes: meta & class
+    if ('meta' %in% names(ordered_x)) {
+        attr(ordered_x, 'meta') <- ordered_x[['meta']]
+    }
+
+    as_class(ordered_x, c("analysis_result", "list"))
+}
+
+#' Name checker for analysis_result object
+#'
+#' A higher order function returns an analysis name checker which is again a higher order function takes character vector as
+#' type of dispatch message and returns selected check function or properties.
+#' This function takes no argument. The point is to delay the evaluation and evaluate only when it is needed, similar idea as shiny ractive
+#' @examples
+#' \dontrun{
+#' anares_names_in_musthave <- ana_name_chker()('objnames_in_musthave')
+#' musthave_in_anares_names <- ana_name_chker()('musthave_in_objnames')
+#' musthave_names <- ana_name_chker()('musthave')
+#' optional_names <- ana_name_chker()('optional')
+#' all_names <- ana_name_chker()('all')
+#' }
+ana_name_chker <- function() namechecker('name', 'est', optional = c('se', 'df', 'meta'))
+
+#' Check if an object is in class analysis_result
+#'
+#' @param x Object to be checked
+#' @return Logical value TRUE/FALSE
+#' @details
+#' This function does not only check the class attribute of the object.
+#' It also checks constraints of the names of the elements in the list
+#' @export
+#' @importFrom assertthat has_attr
+is.analysis_result <- function(x) {
+
+    all(
+        has_attr(x, 'class'),
+        is.object(x),
+        'analysis_result' %in% attr(x, 'class'),
+        typeof(x) == 'list',
+        all(ana_name_chker()('objnames_in_musthave')(x)),
+        all(ana_name_chker()('musthave_in_objnames')(x))
+    )
+}
+
+#' Convert a list of analysis_result objects to data.frame
+#'
+#' @param analst A list of `analysis_result` objects. It should not be the complete result of analysis object but a subset of it such as `anaObj$results[[1]]`
+#' @param name_of_group A `character` variable for the name of group variable in the result of analysis which is defined from `analysis_result`. Default: `'name'`
+#' @param name_of_meta A `character` variable for the name of meta data in the result of analysis which is defined from `analysis_result`. Default: `'meta'`
+#' @return A `data.frame` containing the information of the analysis result from the `analst`
+#' @examples
+#' \dontrun{
+#' analysis_info(dat, name_of_group = 'name', name_of_meta = 'meta')
+#' }
+#' @importFrom assertthat has_attr
+analysis_info <- function(analst, name_of_group = 'name', name_of_meta = 'meta') {
+
+    pars_no_meta <- list()
+    pars_with_meta <- list()
+    meta <- list()
+    var <- list()
+
+    index <- function(i, body) {
+        list(
+            append(list(index=i), body)
+            )
+    }
+
+    for (i in seq_along(analst)) {
+        item <- analst[[i]]
+
+        assert_that(is.analysis_result(item),
+                    msg = "Object in `analst` is not in `analysis_result` class")
+
+        if (has_attr(item, name_of_meta)){
+            meta <- append(meta, index(i, item[[name_of_meta]]))
+            var <- append(var, list(item[name_of_group]))
+            pars_with_meta <- append(pars_with_meta, index(i, item[names(item) != name_of_meta]))
+        } else {
+            pars_no_meta <- append(pars_no_meta, index(i, item))
+        }
+    }
+
+    base_left_join <- function(x, y, by) merge(x, y, by = by, all.x=TRUE)
+
+    all_pars <- append(pars_with_meta, pars_no_meta)
+
+    res_df <- base_bind_rows(all_pars)
+
+    meta_df <- cbind(base_bind_rows(var), base_bind_rows(meta))
+
+    info_df <- tryCatch(
+        base_left_join(res_df, meta_df, by = c('index', name_of_group)),
+        error=function(e) res_df
+    )
+
+    subset(info_df, select = -index)
+}
+
+#' Convert analysis results to a data.frame
+#'
+#' @param analst Results of analysis object (`anaObj$results`)
+#' @param index logical variable indicating whether to add index column for imputation dataset. Default: `FALSE` - no index column will be added.
+#' @return A data frame each row of which corresponds to a analysis result
+analst2df <- function(analst, index = FALSE) {
+
+    add_index <- function(dt, i) cbind(dt, 'dt_num' = i)
+
+    binarize <- function(f, side = 'left') {
+        laze <- function(x) function() x
+        trivial <- function(x, y) list(left=x, right=y)[[side]]
+        function(g = trivial) {
+            function(x, y) {
+                list(
+                    left = laze(g(f(x), y)),
+                    right = laze(g(x, f(y)))
+                )[[side]]()
+            }
+        }
+    }
+
+    anainfo <- binarize(analysis_info)
+    ana2df <- ife(index, anainfo(add_index), anainfo())
+
+    base_bind_rows(mapply(ana2df, analst, seq_along(analst), SIMPLIFY = FALSE))
+}
+
+#' @rdname analyse
+#' @export
+as.data.frame.analysis <- function(x, ...) {
+    analst2df(x$results, index = TRUE)
+}
+
+#' Extract analysis results from a list of analysis_results by matching names and values
+#'
+#' The function returns a list of all analysis results in the input list that match the values with names specified via keywords parameters of the function.
+#' If no value matches the specified name in any sub list of analysis result or
+#' the specified name does not existed, the function returns an empty list `list()`.
+#' This function has general application for any type of nested list with named sublist that can be treated as analysis result.
+#' For example, `extract_analysis_result(poolObj$pars, name = 'p1', visit = 1)` would extract the result from the parameters of the pool object with `name` as `'p1'` and `visit` as `1`.
+#'
+#' @param results A list of analysis results. It can be a list of `analysis_result` objects or more generally a nested list with named sublists which can be treated as analysis result such `poolObj$pars`
+#' @param ... Keywords parameters with the name and value matching the element of the `analysis_result` objects inside the `results`
+#' @return A list of matched analysis results
+#' @export
+#' @examples
+#' \dontrun{
+#' results <- list(
+#'     analysis_result(
+#'         name = 'trt',
+#'         est = 1,
+#'         se = 2,
+#'         df = 3,
+#'         meta = list(visit = 'vis1')
+#'     ),
+#'     analysis_result(
+#'         name = 'trt2',
+#'         est = 3,
+#'         se = 4,
+#'         df = 5,
+#'         meta = list(visit = 'vis2')
+#'     )
+#' )
+#'
+#' extract_analysis_result(results, name = 'trt')
+#' extract_analysis_result(results, est = 1)
+#' extract_analysis_result(results, name = 'trt', meta = list(visit = 'vis1'))
+#' extract_analysis_result(results, name = 'trt2')
+#
+#' }
+extract_analysis_result <- function(results, ...){
+    dots <- list(...)
+
+    assert_keyword <- function(obj, msg) {
+        assert_that(all(!is.null(names(obj)),
+                        length(names(obj)) > 0,
+                        !any(grepl("^$", names(obj)))),
+                    msg = msg
+                    )
+    }
+
+    assert_keyword(dots, "Invalid parameters. Only key-word parameters are valide. -- EXTRACT_ANALYSIS_RESULT")
+
+    meta <- list()
+    has_meta <- FALSE
+    if (('meta' %in% names(dots)) & is.list(dots[['meta']])) {
+        assert_keyword(dots[['meta']],
+                       "Invalid parameters. When `meta` specified as a list, it must be a named list -- EXTRACT_ANALYSIS_RESULT")
+        meta <- dots[['meta']]
+        dots[['meta']] <- NULL
+        has_meta <- TRUE
+    }
+
+    # decorator to make a high-order function returns TRUE/FALSE instead of logical(0) or other types of logical value
+    TRUE_or_FALSE <- function(f) {
+        function(...) {
+            g <- f(...)
+            function(...) isTRUE(g(...))
+        }
+    }
+
+    # check if object's element with given name matches to specified value
+    objname_match_value <- function(obj) {
+        function(name, value) {
+            if (is.null(value)) {
+                is.null(obj[[name]])
+            } else if (is.na(value)){
+                is.na(obj[[name]])
+            } else {
+                obj[[name]] == value
+            }
+        }
+    }
+
+    # decorated version of objname_match_value
+    is_objname_match_value <- TRUE_or_FALSE(objname_match_value)
+
+    names_match_values <- function(obj, named_values=dots) {
+        mapply(
+            is_objname_match_value(obj),
+            names(named_values),
+            named_values,
+            SIMPLIFY = TRUE, USE.NAMES = FALSE)
+    } # When SIMPLIFY = TRUE, coercion can happen on logical(0) which generates WARNINGS. `is_objname_match_value` is decorated with `isTRUE` to be more robust
+
+    extract_match <- function(obj, named_values=dots, constrain = identity) {
+        Filter(
+            function(item) all(names_match_values(constrain(item), named_values)),
+            obj
+        )
+    }
+
+    search_in_meta <- function(obj) obj[['meta']]
+
+    extract_meta <- function(obj) extract_match(obj, named_values = meta, constrain = search_in_meta)
+
+    tryCatch({
+            matches_except_meta <- extract_match(results)
+
+            if (has_meta) {
+                extract_meta(matches_except_meta)
+            } else {
+                matches_except_meta
+           }
+        },
+        warning = function(w) {
+            message(w)
+            list()
+        })
 }

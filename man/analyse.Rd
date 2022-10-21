@@ -2,9 +2,12 @@
 % Please edit documentation in R/analyse.R
 \name{analyse}
 \alias{analyse}
+\alias{as.data.frame.analysis}
 \title{Analyse Multiple Imputed Datasets}
 \usage{
 analyse(imputations, fun = ancova, delta = NULL, ...)
+
+\method{as.data.frame}{analysis}(x, ...)
 }
 \arguments{
 \item{imputations}{An \code{imputations} object as created by \code{\link[=impute]{impute()}}.}
@@ -45,12 +48,14 @@ i.e.:
     mod_1 <- lm(data = dat, outcome ~ group)
     mod_2 <- lm(data = dat, outcome ~ group + covar)
     x <- list(
-        trt_1 = list(
+        analysis_result(
+            name = trt_1,
             est = coef(mod_1)[[group]],
             se = sqrt(vcov(mod_1)[group, group]),
             df = df.residual(mod_1)
         ),
-        trt_2 = list(
+        analysis_result(
+            name = trt_2,
             est = coef(mod_2)[[group]],
             se = sqrt(vcov(mod_2)[group, group]),
             df = df.residual(mod_2)
