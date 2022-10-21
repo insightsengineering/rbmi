@@ -12,7 +12,8 @@ fit_mmrm(
   group,
   cov_struct = c("us", "toep", "cs", "ar1"),
   REML = TRUE,
-  same_cov = TRUE
+  same_cov = TRUE,
+  model_env = NULL
 )
 }
 \arguments{
@@ -34,8 +35,11 @@ that belong to the same subject.}
 
 \item{REML}{logical. Specifies whether restricted maximum likelihood should be used}
 
-\item{same_cov}{logical. Used to specify if a shared or individual covariance matrix should be
-used per \code{group}}
+\item{same_cov}{logical. Used to specify if a shared or individual covariance matrix should be used
+per \code{group}}
+
+\item{model_env}{an environment or NULL. If an environment is provided then the model fit object
+will be recorded into it.}
 }
 \description{
 Fits a MMRM model allowing for different covariance structures using \code{\link[mmrm:mmrm]{mmrm::mmrm()}}.
