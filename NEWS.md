@@ -1,6 +1,14 @@
 # rbmi (development version)
 
-* No changes
+* No updates yet
+
+# rbmi 1.2.1
+
+* Removed native pipes `|>` in testing code so package is backwards compatible with older servers
+
+# rbmi 1.2.0
+
+* Replaced our `glmmTMB` dependency with the `mmrm` package. This has resulted in the package being more stable (less model fitting convergence issues) as well as speeding up run times 3-fold. 
 
 # rbmi 1.1.4
 

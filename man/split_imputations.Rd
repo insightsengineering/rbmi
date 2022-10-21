@@ -19,7 +19,9 @@ Split a flat list of \code{\link[=imputation_single]{imputation_single()}} into 
 }
 \details{
 This function converts a list of imputations from being structured per patient
-to being structured per sample i.e. it converts\preformatted{obj <- list(
+to being structured per sample i.e. it converts
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{obj <- list(
     imputation_single("Ben", numeric(0)),
     imputation_single("Ben", numeric(0)),
     imputation_single("Ben", numeric(0)),
@@ -33,9 +35,11 @@ index <- list(
     c("Ben", "Harry", "Phil", "Tom"),
     c("Ben", "Ben", "Phil")
 )
-}
+}\if{html}{\out{</div>}}
 
-Into:\preformatted{output <- list(
+Into:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{output <- list(
     imputation_df(
         imputation_single(id = "Ben", values = numeric(0)),
         imputation_single(id = "Harry", values = c(1, 2)),
@@ -48,5 +52,5 @@ Into:\preformatted{output <- list(
         imputation_single(id = "Phil", values = c(5, 6))
     )
 )
-}
+}\if{html}{\out{</div>}}
 }

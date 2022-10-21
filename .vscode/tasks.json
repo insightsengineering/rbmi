@@ -18,7 +18,7 @@
             }
         },
         {
-            "label": "R - testthat (nightly)",
+            "label": "R - testthat (FULL)",
             "command": "Rscript",
             "options": {
                 "env": {

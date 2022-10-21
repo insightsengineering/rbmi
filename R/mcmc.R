@@ -66,7 +66,7 @@ fit_mcmc <- function(
     same_cov <- method$same_cov
 
     # fit MMRM (needed for initial values)
-    mmrm_initial <- fit_mmrm_multiopt(
+    mmrm_initial <- fit_mmrm(
         designmat = designmat,
         outcome = outcome,
         subjid = subjid,
@@ -74,8 +74,7 @@ fit_mcmc <- function(
         group = group,
         cov_struct = "us",
         REML = TRUE,
-        same_cov = same_cov,
-        optimizer = c("L-BFGS-B", "BFGS")
+        same_cov = same_cov
     )
 
     if (mmrm_initial$failed) {

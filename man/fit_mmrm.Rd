@@ -12,9 +12,7 @@ fit_mmrm(
   group,
   cov_struct = c("us", "toep", "cs", "ar1"),
   REML = TRUE,
-  same_cov = TRUE,
-  initial_values = NULL,
-  optimizer = "L-BFGS-B"
+  same_cov = TRUE
 )
 }
 \arguments{
@@ -24,8 +22,8 @@ any missing values}
 
 \item{outcome}{a numeric vector. The outcome value to be regressed on in the MMRM model.}
 
-\item{subjid}{a character / factor vector. The subject identifier used to link separate visits that belong to
-the same subject.}
+\item{subjid}{a character / factor vector. The subject identifier used to link separate visits
+that belong to the same subject.}
 
 \item{visit}{a character / factor vector. Indicates which visit the outcome value occoured on.}
 
@@ -36,17 +34,12 @@ the same subject.}
 
 \item{REML}{logical. Specifies whether restricted maximum likelihood should be used}
 
-\item{same_cov}{logical. Used to specify if a shared or individual covariance matrix should be used
-per \code{group}}
-
-\item{initial_values}{a list with names \code{beta} and \code{theta}. Specifies the initial values to start
-the optimizer for \code{\link[glmmTMB:glmmTMB]{glmmTMB::glmmTMB()}} at.}
-
-\item{optimizer}{a character value. Specifies the optimizer to be used in \code{\link[glmmTMB:glmmTMB]{glmmTMB::glmmTMB()}}. See
-\code{\link[stats:optim]{stats::optim()}} for the available options}
+\item{same_cov}{logical. Used to specify if a shared or individual covariance matrix should be
+used per \code{group}}
 }
 \description{
-Fits a MMRM model allowing for different covariance structures using \code{\link[glmmTMB:glmmTMB]{glmmTMB::glmmTMB()}}.
-Returns a glmmTMB fit object with an additional element \code{failed} indicating whether or not
-the fit failed to converge.
+Fits a MMRM model allowing for different covariance structures using \code{\link[mmrm:mmrm]{mmrm::mmrm()}}.
+Returns a \code{list} of key model parameters \code{beta}, \code{sigma} and an additional element \code{failed}
+indicating whether or not the fit failed to converge. If the fit did fail to converge
+\code{beta} and \code{sigma} will not be present.
 }

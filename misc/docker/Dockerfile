@@ -3,6 +3,7 @@ ARG IMAGE
 FROM ${IMAGE}
 
 ARG CRANURL
+ARG MMRM_VERSION
 
 ENV REQD_PKGS="\
     libicu-dev \

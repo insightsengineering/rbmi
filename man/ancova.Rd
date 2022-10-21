@@ -40,7 +40,9 @@ If no value for \code{visits} is provided then it will be set to
 \code{unique(data[[vars$visit]])}.
 
 In order to meet the formatting standards set by \code{\link[=analyse]{analyse()}} the results will be collapsed
-into a single list suffixed by the visit name, e.g.:\preformatted{list(
+into a single list suffixed by the visit name, e.g.:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{list(
    trt_visit_1 = list(est = ...),
    lsm_ref_visit_1 = list(est = ...),
    lsm_alt_visit_1 = list(est = ...),
@@ -49,7 +51,7 @@ into a single list suffixed by the visit name, e.g.:\preformatted{list(
    lsm_alt_visit_2 = list(est = ...),
    ...
 )
-}
+}\if{html}{\out{</div>}}
 
 Please note that "ref" refers to the first factor level of \code{vars$group} which does not necessarily
 coincide with the control arm. Analogously, "alt" refers to the second factor level of \code{vars$group}.

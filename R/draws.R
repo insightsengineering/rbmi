@@ -327,7 +327,6 @@ get_draws_mle <- function(
             ids = longdata$ids,
             longdata = longdata,
             method = method,
-            optimizer = c("L-BFGS-B", "BFGS"),
             model_env = model_env
         )
     })
@@ -345,13 +344,9 @@ get_draws_mle <- function(
         )
     }
 
-    optimizer <- list(
-        "L-BFGS-B" = NULL,
-        "BFGS" = initial_sample[c("beta", "theta")]
-    )
-
     cl <- get_cluster(ncores)
-    mmrm_sample <- encap_get_mmrm_sample(cl, longdata, method, optimizer)
+    mmrm_sample <- encap_get_mmrm_sample(cl, longdata, method)
+
     samples <- list()
     n_failed_samples <- 0
     logger <- progressLogger$new(n_target_samples, quiet = quiet)
@@ -423,7 +418,6 @@ get_draws_mle <- function(
 #'
 #' @inherit sample_single return
 get_mmrm_sample <- function(ids, longdata, method, ...) {
-
     vars <- longdata$vars
     dat <- longdata$get_data(ids, nmar.rm = TRUE, na.rm = TRUE)
     model_df <- as_model_df(
@@ -431,7 +425,7 @@ get_mmrm_sample <- function(ids, longdata, method, ...) {
         frm = longdata$formula
     )
 
-    sample <- fit_mmrm_multiopt(
+    sample <- fit_mmrm(
         designmat = model_df[, -1, drop = FALSE],
         outcome = as.data.frame(model_df)[, 1],
         subjid = dat[[vars$subjid]],

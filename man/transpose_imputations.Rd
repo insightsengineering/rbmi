@@ -10,17 +10,21 @@ transpose_imputations(imputations)
 \item{imputations}{An \code{imputation_df} object created by \code{\link[=imputation_df]{imputation_df()}}}
 }
 \description{
-Takes an \code{imputation_df} object and transposes it e.g.\preformatted{list(
+Takes an \code{imputation_df} object and transposes it e.g.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{list(
     list(id = "a", values = c(1,2,3)),
     list(id = "b", values = c(4,5,6)
     )
 )
-}
+}\if{html}{\out{</div>}}
 }
 \details{
-becomes\preformatted{list(
+becomes
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{list(
     ids = c("a", "b"),
     values = c(1,2,3,4,5,6)
 )
-}
+}\if{html}{\out{</div>}}
 }

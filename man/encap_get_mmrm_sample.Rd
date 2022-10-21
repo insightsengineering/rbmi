@@ -4,7 +4,7 @@
 \alias{encap_get_mmrm_sample}
 \title{Encapsulate get_mmrm_sample}
 \usage{
-encap_get_mmrm_sample(cl, longdata, method, optimizer)
+encap_get_mmrm_sample(cl, longdata, method)
 }
 \arguments{
 \item{cl}{Either a cluster from \code{\link[=get_cluster]{get_cluster()}} or \code{NULL}}
@@ -12,8 +12,6 @@ encap_get_mmrm_sample(cl, longdata, method, optimizer)
 \item{longdata}{A longdata object from \code{longDataConstructor$new()}}
 
 \item{method}{A method object}
-
-\item{optimizer}{an optimizer list}
 }
 \description{
 Function creates a new wrapper function around \code{\link[=get_mmrm_sample]{get_mmrm_sample()}}
