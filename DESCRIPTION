@@ -16,7 +16,6 @@ BugReports: https://github.com/insightsengineering/rbmi/issues
 RoxygenNote: 7.2.1
 Suggests: 
     dplyr,
-    covr,
     tidyr,
     nlme,
     testthat,
