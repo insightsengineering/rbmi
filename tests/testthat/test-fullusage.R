@@ -428,7 +428,6 @@ test_that("Custom Strategies and Custom analysis functions", {
 
 
 test_that("Sorting doesn't change results", {
-    local_edition(2) # ignore pointers address and function env
 
     skip_if_not(is_full_test())
 
@@ -739,7 +738,7 @@ test_that("rbmi works for one arm trials", {
         mutate(strategy = "MAR")
 
     runtest <- function(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method) {
-
+        
         draw_obj <- draws(
             data = dat,
             data_ice = dat_ice,

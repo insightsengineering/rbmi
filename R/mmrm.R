@@ -182,6 +182,8 @@ extract_params <- function(fit) {
 #' the optimizer for [glmmTMB::glmmTMB()] at.
 #' @param optimizer a character value. Specifies the optimizer to be used in [glmmTMB::glmmTMB()]. See
 #' [stats::optim()] for the available options
+#' @param model_env an environment or NULL. If an environment is provided then the model fit object
+#' will be recorded into it. 
 #' @importFrom glmmTMB glmmTMB glmmTMBControl
 #' @importFrom stats optim model.matrix
 #' @name fit_mmrm
@@ -198,7 +200,7 @@ fit_mmrm <- function(
     same_cov = TRUE,
     initial_values = NULL,
     optimizer = "L-BFGS-B",
-    fetch_model = FALSE
+    model_env = NULL
 ) {
 
     # check that optimizer is one among the optimizers from optim
@@ -235,6 +237,11 @@ fit_mmrm <- function(
     if (fit$failed) {
         return(fit)
     }
+    
+    # If the user provided an environment to record the model in then provide them the model
+    if (is.environment(model_env)) {
+        model_env$model <- fit
+    }
 
     # extract regression coefficients and covariance matrices
     params <- extract_params(fit)
@@ -250,10 +257,6 @@ fit_mmrm <- function(
         )
     }
     names(params$sigma) <- levels(group)
-
-    if (fetch_model) {
-        attr(params, 'model') <- fit
-    }
 
     return(params)
 }
@@ -287,7 +290,7 @@ fit_mmrm <- function(
 #' @param optimizer A character vector or a named list. See details.
 #' @param ... Additional arguments passed onto [fit_mmrm()]
 #' @seealso [fit_mmrm()]
-fit_mmrm_multiopt <- function(..., optimizer, fetch_model = FALSE) {
+fit_mmrm_multiopt <- function(..., optimizer) {
 
     assert_that(
         is.character(optimizer) | is.list(optimizer),
@@ -315,7 +318,7 @@ fit_mmrm_multiopt <- function(..., optimizer, fetch_model = FALSE) {
     for (i in seq_len(length(initial_values))) {
         opt <- names(initial_values)[[i]]
         init_vals <- initial_values[[i]]
-        fit <- fit_mmrm(..., initial_values = init_vals, optimizer = opt, fetch_model = fetch_model)
+        fit <- fit_mmrm(..., initial_values = init_vals, optimizer = opt)
         if (!fit$failed) break
     }
 
