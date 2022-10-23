@@ -170,7 +170,7 @@ extract_params <- function(fit) {
 #' @param same_cov logical. Used to specify if a shared or individual covariance matrix should be used
 #' per `group`
 #' @param model_env an environment or NULL. If an environment is provided then the model fit object
-#' will be recorded into it. 
+#' will be recorded into it under `model_env$model`.
 #' @name fit_mmrm
 #'
 fit_mmrm <- function(

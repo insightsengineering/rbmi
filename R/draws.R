@@ -639,7 +639,9 @@ print.draws <- function(x, ...) {
 #'   - `theta`: numeric vector of transformed covariances.
 #'   - `failed`: Logical. `TRUE` if the model fit failed.
 #'   - `ids_samp`: vector of characters containing the ids of the subjects included in the given sample.
-#' - `fit`: if `method_bayes()` is chosen, returns the MCMC Stan fit object. Otherwise `NULL`.
+#' - `fit`: If `method_bayes()` is chosen, returns the MCMC Stan fit object. If `method_condmean()`
+#' is chosen, returns the fit object created by [mmrm::mmrm()] applied to the original
+#' dataset after removing observations that occurred after a non-MAR ICE. Otherwise `NULL`.
 #' - `n_failures`: absolute number of failures of the model fit.
 #' Relevant only for `method_condmean(type = "bootstrap")`, `method_approxbayes()` and `method_bmlmi()`.
 #' - `formula`: fixed effects formula object used for the model specification.

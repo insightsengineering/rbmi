@@ -39,7 +39,7 @@ that belong to the same subject.}
 per \code{group}}
 
 \item{model_env}{an environment or NULL. If an environment is provided then the model fit object
-will be recorded into it.}
+will be recorded into it under \code{model_env$model}.}
 }
 \description{
 Fits a MMRM model allowing for different covariance structures using \code{\link[mmrm:mmrm]{mmrm::mmrm()}}.
