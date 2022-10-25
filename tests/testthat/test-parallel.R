@@ -145,7 +145,12 @@ test_that("Basic parallisation works as expected", {
         method = method_approxbayes(n_samples = 10)
     )
 
-    expect_equal(x1, x2)
+    # Tolerance is set here to address mmrm issue where the first optimiser fails when run
+    # in parallel and moves onto the second optimiser, where as in sequence the first
+    # optimiser works fine. i.e. results are slightly different due to different optimisers
+    # being used
+    # https://github.com/openpharma/mmrm/issues/151
+    expect_equal(x1, x2, tolerance = 0.0001)
 
 })
 

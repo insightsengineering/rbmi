@@ -596,9 +596,15 @@ test_that("draws.bmlmi works as expected", {
     )
 
     ### BMLMI should be identical to approx bayes within draws except for sample ids
+    # Tolerance is set here to address mmrm issue where the first optimiser fails when run
+    # in parallel and moves onto the second optimiser, where as in sequence the first
+    # optimiser works fine. i.e. results are slightly different due to different optimisers
+    # being used
+    # https://github.com/openpharma/mmrm/issues/151
     expect_equal(
         lapply(x1$samples, function(x) x[c("beta", "sigma", "theta", "failed")]),
-        lapply(x2$samples, function(x) x[c("beta", "sigma", "theta", "failed")])
+        lapply(x2$samples, function(x) x[c("beta", "sigma", "theta", "failed")]),
+        tolerance = 0.0001
     )
 
     ### Bootstrapped sample ids should have the same subject appearing multiple times
