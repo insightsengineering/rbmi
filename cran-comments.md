@@ -1,5 +1,7 @@
 ## Summary of Submission
 
+This is a re-submission to ensure that our unit tests do not fail on CRANs servers. The original uploads notes are as follows:
+
 In this version I have:
 
 * Replaced our dependencies from glmmTMB to mmrm to improve package performance and stability
