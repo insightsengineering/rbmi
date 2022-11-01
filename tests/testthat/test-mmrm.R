@@ -376,6 +376,8 @@ test_that("MMRM returns expected estimates under different model specifications"
 
     runtests(TRUE, FALSE)
     runtests(TRUE, TRUE)
+    
+    testthat::skip_on_cran()
     runtests(FALSE, FALSE)
     runtests(FALSE, TRUE)
 

@@ -2,6 +2,11 @@
 
 * No updates yet
 
+
+# rbmi 1.2.2
+
+* Updated unit tests to avoid spurious errors on CRAN
+
 # rbmi 1.2.1
 
 * Removed native pipes `|>` in testing code so package is backwards compatible with older servers
