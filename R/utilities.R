@@ -515,5 +515,18 @@ as_dataframe <- function(x) {
 
 
 
-
+#' Do not run this function
+#' 
+#' This function only exists to supress the false positive
+#' from R CMD Check about unused libraries
+#' 
+#' Both rstantools and RcppParallel are required but are only used at
+#' installation time. In the case of RcppParallel it is used in the
+#' `src/Makevars` file which is created on the fly during installation
+#' by rstantools. rstantools is used in the `configure` file.
+#' 
+do_not_run <- function() {
+    rstantools::use_rstan()
+    RcppParallel::CxxFlags()
+}
 
