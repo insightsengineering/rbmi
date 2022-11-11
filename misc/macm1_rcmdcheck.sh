@@ -31,9 +31,8 @@ export WNHOME /usr/local/wordnet-3.1
 
 
 temp_dir=$(mktemp -d)
-mkdir $temp_dir
 R CMD BUILD .
-mv rbmi*.tar.gz $temp_dir
-R CMD CHECK --output=$temp_dir $temp_dir/rbmi*.tar.gz
+mv *.tar.gz $temp_dir/
+R CMD CHECK --as-cran --output=$temp_dir $temp_dir/*.tar.gz
 
 rm -rf $temp_dir

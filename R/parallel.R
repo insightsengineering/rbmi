@@ -21,10 +21,20 @@ get_cluster <- function(ncores = 1) {
         library(assertthat)
     })
 
-    if(is_in_rbmi_development()){
+    if (is_in_rbmi_development()) {
         devnull <- parallel::clusterEvalQ(cl, pkgload::load_all())
     } else {
-        devnull <- parallel::clusterEvalQ(cl, {attach(getNamespace("rbmi"))})
+        devnull <- parallel::clusterEvalQ(
+            cl,
+            {
+                # Here we "export" both exported and non-exported functions
+                # from the package to the global environment of our subprocesses
+                .namespace <- getNamespace("rbmi")
+                for (.nsfun in ls(.namespace)) {
+                    assign(.nsfun, get(.nsfun, envir = .namespace))
+                }
+            }
+        )
     }
     return(cl)
 }
