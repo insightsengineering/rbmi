@@ -205,7 +205,7 @@ test_that("Basic Usage - Bayesian", {
 
 
 
-test_that("Basic Usage - Condmean", { 
+test_that("Basic Usage - Condmean", {
 
     skip_if_not(is_full_test())
 

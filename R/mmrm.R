@@ -167,19 +167,23 @@ extract_params <- function(fit) {
 #' @param cov_struct a character value. Specifies which covariance structure to use. Must be one of
 #' `"us"`, `"toep"`, `"cs"` or  `"ar1"`
 #' @param REML logical. Specifies whether restricted maximum likelihood should be used
-#' @param same_cov logical. Used to specify if a shared or individual covariance matrix should be
-#' used per `group`
+#' @param same_cov logical. Used to specify if a shared or individual covariance matrix should be used
+#' per `group`
+#' @param model_env an environment or NULL. If an environment is provided then the model fit object
+#' will be recorded into it under `model_env$model`.
 #' @name fit_mmrm
 #'
-#'
-fit_mmrm <- function(designmat,
-                     outcome,
-                     subjid,
-                     visit,
-                     group,
-                     cov_struct = c("us", "toep", "cs", "ar1"),
-                     REML = TRUE,
-                     same_cov = TRUE) {
+fit_mmrm <- function(
+    designmat,
+    outcome,
+    subjid,
+    visit,
+    group,
+    cov_struct = c("us", "toep", "cs", "ar1"),
+    REML = TRUE,
+    same_cov = TRUE,
+    model_env = NULL
+) {
     dat_mmrm <- as_mmrm_df(
         designmat = designmat,
         outcome = outcome,
@@ -202,6 +206,11 @@ fit_mmrm <- function(designmat,
 
     if (fit$failed) {
         return(fit)
+    }
+    
+    # If the user provided an environment to record the model in then provide them the model
+    if (is.environment(model_env)) {
+        model_env$model <- fit
     }
 
     # extract regression coefficients and covariance matrices

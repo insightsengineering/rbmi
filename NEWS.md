@@ -1,6 +1,8 @@
 # rbmi (development version)
 
-* No updates yet
+* `draws()` will now return the `mmrm` model fit object for the model fitted to the original
+full dataset (after removing observations after a non-MAR ICE) if `method_condmean()` is used 
+(Thank you @pengguanya)
 
 # rbmi 1.2.3
 
