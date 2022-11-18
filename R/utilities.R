@@ -520,8 +520,8 @@ rbmi_example <- function(name = NULL) {
     noext <- function(filename, ext = 'rds') gsub(paste0('\\.', ext, '$'), '', filename)
 
     if (is.null(name)) {
-        fullpaths = dir(system.file("extdata", package = "rbmi"), pattern="rds", full.names = TRUE, ignore.case = TRUE)
-        filenames = noext(basename(fullpaths))
+        fullpaths <- dir(system.file("extdata", package = "rbmi"), pattern="rds", full.names = TRUE, ignore.case = TRUE)
+        filenames <- noext(basename(fullpaths))
         out <- lapply(fullpaths, readRDS)
         names(out) <- filenames
         out
