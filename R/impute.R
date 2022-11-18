@@ -84,26 +84,23 @@
 #' 23(6):1352–1371, 2013. \[Section 4.2 and 4.3\]
 #'
 #' @examples
-#' \dontrun{
-#'
+#' drawobj <- rbmi_example('drawobj')
 #' impute(
 #'     draws = drawobj,
-#'     references = c("Trt" = "Placebo", "Placebo" = "Placebo")
+#'     references = c("DRUG" = "PLACEBO", "PLACEBO" = "PLACEBO")
 #' )
 #'
 #' new_strategy <- data.frame(
-#'   subjid = c("Pt1", "Pt2"),
-#'   strategy = c("MAR", "JR")
+#'     PATIENT = as.factor(c('1503', '1507')),
+#'     strategy = c("MAR", "JR")
 #' )
 #'
 #' impute(
 #'     draws = drawobj,
-#'     references = c("Trt" = "Placebo", "Placebo" = "Placebo"),
+#'     references = c("DRUG" = "PLACEBO", "PLACEBO" = "PLACEBO"),
 #'     update_strategy = new_strategy
 #' )
-#' }
 #'
-#' @export
 impute <- function(draws, references = NULL, update_strategy = NULL, strategies = getStrategies()) {
     UseMethod("impute")
 }

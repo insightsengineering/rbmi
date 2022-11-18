@@ -98,24 +98,22 @@ a non-MAR to a MAR strategy, whilst valid, will raise a warning as not all usabl
 will have been utilised in the imputation model.
 }
 \examples{
-\dontrun{
-
+drawobj <- rbmi_example('drawobj')
 impute(
     draws = drawobj,
-    references = c("Trt" = "Placebo", "Placebo" = "Placebo")
+    references = c("DRUG" = "PLACEBO", "PLACEBO" = "PLACEBO")
 )
 
 new_strategy <- data.frame(
-  subjid = c("Pt1", "Pt2"),
-  strategy = c("MAR", "JR")
+    PATIENT = as.factor(c('1503', '1507')),
+    strategy = c("MAR", "JR")
 )
 
 impute(
     draws = drawobj,
-    references = c("Trt" = "Placebo", "Placebo" = "Placebo"),
+    references = c("DRUG" = "PLACEBO", "PLACEBO" = "PLACEBO"),
     update_strategy = new_strategy
 )
-}
 
 }
 \references{
