@@ -92,32 +92,27 @@
 #' datasets prior to running `fun`. See details.
 #' @param ... Additional arguments passed onto `fun`.
 #' @examples
-#' \dontrun{
-#' vars <- set_vars(
-#'     subjid = "subjid",
-#'     visit = "visit",
-#'     outcome = "outcome",
-#'     group = "group",
-#'     covariates = c("sex", "age", "sex*age")
+#' imputeobj <- rbmi_example('imputeobj')
+#' delta_df <- rbmi_example('delta_df')
+#' vars = set_vars(
+#'     subjid = "PATIENT",
+#'     outcome = "CHANGE",
+#'     visit = "VISIT",
+#'     group = "THERAPY",
+#'     covariates = c("BASVAL")
 #' )
 #'
 #' analyse(
-#'     imputations = imputeObj,
+#'     imputeobj,
+#'     ancova,
 #'     vars = vars
 #' )
-#'
-#' deltadf <- data.frame(
-#'     subjid = c("Pt1", "Pt1", "Pt2"),
-#'     visit = c("Visit_1", "Visit_2", "Visit_2"),
-#'     delta = c( 5, 9, -10)
-#' )
-#'
 #' analyse(
-#'     imputations = imputeObj,
-#'     delta = deltadf,
+#'     imputeobj,
+#'     ancova,
+#'     delta = delta_df,
 #'     vars = vars
-#' )
-#' }
+#'     )
 #' @export
 analyse <- function(imputations, fun = ancova, delta = NULL, ...) {
 
