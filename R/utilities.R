@@ -516,11 +516,13 @@ as_dataframe <- function(x) {
 #' Get example files path
 #'
 #'@param path Character variable of example file name. Default NULL list all example files
-rbmi_example <- function(name = NULL) {
-    noext <- function(filename, ext = 'rds') gsub(paste0('\\.', ext, '$'), '', filename)
+rbmi_example <- function(name = NULL, ext = 'rds') {
+    make_pattern <- function(s) paste0('\\.', s, '$')
+    extpat <- make_pattern(ext)
+    noext <- function(filename, ext = 'rds') gsub(extpat, '', filename)
 
     if (is.null(name)) {
-        fullpaths <- dir(system.file("extdata", package = "rbmi"), pattern="rds", full.names = TRUE, ignore.case = TRUE)
+        fullpaths <- dir(system.file("extdata", package = "rbmi"), pattern=extpat, full.names = TRUE, ignore.case = TRUE)
         filenames <- noext(basename(fullpaths))
         out <- lapply(fullpaths, readRDS)
         names(out) <- filenames
