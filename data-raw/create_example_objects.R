@@ -75,7 +75,10 @@ delta_df <- delta_template(imputeobj) %>%
     mutate(delta = if_else(THERAPY == "DRUG" & is_missing , 5, 0)) %>%
     select(PATIENT, VISIT, delta)
 
+simpledat <- data.frame(subject =  c("pt1", "pt2", "pt3", "pt4"), visit = rep('a', 4), Sex =  c("M", "F", "F", "M"), "Age" = c(50,40,30,20))
+
 saveRDS(drawobj, 'inst/extdata/drawobj.rds')
 saveRDS(imputeobj, 'inst/extdata/imputeobj.rds')
 saveRDS(delta_df, 'inst/extdata/delta_df.rds')
+saveRDS(simpledat, 'inst/extdata/simpledat.rds')
 
