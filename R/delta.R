@@ -127,10 +127,9 @@
 #' post-ICE visits will stay the same regardless of this option).
 #'
 #' @examples
-#' \dontrun{
-#' delta_template(imputeObj)
-#' delta_template(imputeObj, delta = c(5,6,7,8), dlag = c(1,2,3,4))
-#' }
+#' imputeobj <- rbmi_example('imputeobj')
+#' delta_template(imputeobj)
+#' delta_template(imputeobj, delta = c(5,6,7,8), dlag = c(1,2,3,4))
 #' @seealso [analyse()]
 #' @export
 delta_template <- function(

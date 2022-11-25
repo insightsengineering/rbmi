@@ -190,7 +190,6 @@ sample_mvnorm <- function(mu, sigma) {
 #' - **messages** - NULL or a character vector if messages were produced
 #'
 #' @examples
-#' \dontrun{
 #' record({
 #'   x <- 1
 #'   y <- 2
@@ -198,7 +197,6 @@ sample_mvnorm <- function(mu, sigma) {
 #'   message("O nearly done")
 #'   x + y
 #' })
-#' }
 record <- function(expr) {
     env <- new.env()
     result <- withCallingHandlers(
@@ -315,9 +313,7 @@ str_contains <- function(x, subs) {
 #' Can be either a single logical value (in which case it is applied to
 #' all variables) or a vector which is the same length as `vars`
 #' @examples
-#' \dontrun{
 #' sort_by(iris, c("Sepal.Length", "Sepal.Width"), decreasing = c(TRUE, FALSE))
-#' }
 sort_by <- function(df, vars = NULL, decreasing = FALSE) {
     if (is.null(vars)) {
         return(df)
@@ -382,7 +378,6 @@ sort_by <- function(df, vars = NULL, decreasing = FALSE) {
 #' @seealso [ancova()]
 #'
 #' @examples
-#' \dontrun{
 #'
 #' # Using CDISC variable names as an example
 #' set_vars(
@@ -393,8 +388,6 @@ sort_by <- function(df, vars = NULL, decreasing = FALSE) {
 #'     covariates = c("bwt", "bht", "arm * avisit"),
 #'     strategy = "strat"
 #' )
-#'
-#' }
 #'
 #' @export
 set_vars <- function(

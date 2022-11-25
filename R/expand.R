@@ -7,9 +7,7 @@
 #' @param x a vector.
 #'
 #' @examples
-#' \dontrun{
 #' locf(c(NA, 1, 2, 3, NA, 4)) # Returns c(NA, 1, 2, 3, 3, 4)
-#' }
 #' @export
 locf <- function(x) {
     inds <- cumsum(!is.na(x))
@@ -69,7 +67,7 @@ locf <- function(x) {
 #'
 #' ```
 #' library(dplyr)
-#' 
+#'
 #' dat_expanded <- expand(
 #'     data = dat,
 #'     subject = c("pt1", "pt2", "pt3", "pt4"),
@@ -81,14 +79,14 @@ locf <- function(x) {
 #' ```
 #'
 #' @examples
-#' \dontrun{
+#' dat <- rbmi_example('simpledat')
 #' dat_expanded <- expand(
 #'     data = dat,
 #'     subject = c("pt1", "pt2", "pt3", "pt4"),
 #'     visit = c("vis1", "vis2", "vis3")
 #' )
 #'
-#' dat_filled <- fill_loc(
+#' dat_filled <- fill_locf(
 #'     data = dat_expanded,
 #'     vars = c("Sex", "Age"),
 #'     group = "subject",
@@ -105,7 +103,6 @@ locf <- function(x) {
 #'     group = "subject",
 #'     order = "visit"
 #' )
-#' }
 #' @export
 expand <- function(data, ...) {
     vars <- list(...)

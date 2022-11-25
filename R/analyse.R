@@ -194,10 +194,9 @@ analyse <- function(imputations, fun = ancova, delta = NULL, ...) {
 #' that will provide a map from the new subject IDs to the old subject IDs.
 #'
 #' @examples
-#' \dontrun{
-#' extract_imputed_dfs(imputeObj)
-#' extract_imputed_dfs(imputeObj, c(1:3))
-#' }
+#' imputeobj <- rbmi_example('imputeobj')
+#' extract_imputed_dfs(imputeobj)
+#' extract_imputed_dfs(imputeobj, c(1:3))
 #' @returns
 #' A list of data.frames equal in length to the `index` argument.
 #'
