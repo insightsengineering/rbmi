@@ -8,10 +8,10 @@ functions {
         return(i);
     }
     
-    vector[] to_vector_of_arrays(vector vec, int length_array) {
+    array[] vector to_vector_of_arrays(vector vec, int length_array) {
         // treansform a vector into a vector of arrays. Example: vec = [1,2,3,4,5,6] and
         // length_array = 2, then output = [1,2; 3,4; 5,6]
-        vector[length_array] res[integer_division(num_elements(vec),length_array)];
+        array[integer_division(num_elements(vec),length_array)] vector[length_array] res;
 
         int j = 1;
         int i = 1;
@@ -32,15 +32,15 @@ data {
     int<lower=1> n_visit;                   // number of visits
     int<lower=1> n_pat;                     // number of pat groups (# missingness patterns * groups)
     
-    int<lower=1> pat_G[n_pat];              // Index for which Sigma the pat group should use
-    int<lower=1> pat_n_pt[n_pat];           // number of patients in each pat group
-    int<lower=1> pat_n_visit[n_pat];        // number of non-missing visits in each pat group
-    int<lower=1> pat_sigma_index[n_pat, n_visit];    // rows/cols from sigma to subset on for the pat group
+    array[n_pat] int<lower=1> pat_G;              // Index for which Sigma the pat group should use
+    array[n_pat] int<lower=1> pat_n_pt;           // number of patients in each pat group
+    array[n_pat] int<lower=1> pat_n_visit;        // number of non-missing visits in each pat group
+    array[n_pat, n_visit] int<lower=1> pat_sigma_index;    // rows/cols from sigma to subset on for the pat group
     
     vector[N] y;                            // outcome variable
     matrix[N,P] Q;                          // design matrix (After QR decomp)
     matrix[P,P] R;                          // R matrix (from QR decomp)
-    matrix[n_visit, n_visit] Sigma_init[G]; // covariance matrix estimated from MMRM
+    array[G] matrix[n_visit, n_visit] Sigma_init; // covariance matrix estimated from MMRM
 }
 
 
@@ -52,7 +52,7 @@ transformed data {
 
 parameters {
     vector[P] theta;              // coefficients of linear model on covariates
-    cov_matrix[n_visit] Sigma[G]; // covariance matrix(s)
+    array[G] cov_matrix[n_visit] Sigma; // covariance matrix(s)
 }
 
 
@@ -72,15 +72,15 @@ model {
         int g = pat_G[i];          // Sigma index
         
         // Get required/reduced Sigma for current pat group
-        int sig_index[nvis] = pat_sigma_index[i, 1:nvis];
+        array[nvis] int sig_index = pat_sigma_index[i, 1:nvis];
         matrix[nvis,nvis] sig = Sigma[g][sig_index, sig_index];
         
         // Derive data indcies for current pat group
         int data_stop_row = data_start_row + ((nvis * npt)  -1);
         
         // Extract required data for the current pat group
-        vector[nvis] y_obs[npt] = to_vector_of_arrays(y[data_start_row:data_stop_row], nvis);
-        vector[nvis] mu_obs[npt] = to_vector_of_arrays(mu[data_start_row:data_stop_row], nvis);
+        array[npt] vector[nvis] y_obs = to_vector_of_arrays(y[data_start_row:data_stop_row], nvis);
+        array[npt] vector[nvis] mu_obs = to_vector_of_arrays(mu[data_start_row:data_stop_row], nvis);
         
         y_obs ~ multi_normal(mu_obs, sig);
         
