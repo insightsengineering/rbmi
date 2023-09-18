@@ -1,18 +1,18 @@
 Package: rbmi
 Title: Reference Based Multiple Imputation
-Version: 1.2.3
+Version: 1.2.4
 Authors@R: c(
     person("Craig", "Gower-Page", email = "craig.gower-page@roche.com", role = c("aut", "cre")),
     person("Alessandro", "Noci", email = "alessandro.noci@roche.com", role = c("aut")),
     person("Marcel", "Wolbers", email = "marcel.wolbers@roche.com", role = "ctb"),
     person("Roche", role = c("cph", "fnd"))
     )
-Description: Implements reference based multiple imputation allowing for the imputation of
-    longitudinal datasets using predefined strategies. See
-    Carpenter et al. (2013) <doi.org/10.1080/10543406.2013.834911>
-    Carpenter et al. (2013) <doi.org/10.1080/10543406.2013.834911>
-    Carpenter et al. (2013) <doi.org/10.1080/10543406.2013.834911>
-    Carpenter et al. (2013) <doi.org/10.1080/10543406.2013.834911>
+Description: Implements standard and reference based multiple imputation methods for continuous
+    longitudinal endpoints (Gower-Page et al. (2022) <doi:10.21105/joss.04251>). In particular, rbmi
+    supports deterministic conditional mean imputation and jackknifing as described in Wolbers et al.
+    (2022) <doi:10.1002/pst.2234>, Bayesian multiple imputation as described in Carpenter et al. (2013)
+    <doi:10.1080/10543406.2013.834911>, and bootstrapped maximum likelihood imputation as described in
+    von Hippel and Bartlett (2021) <doi: 10.1214/20-STS793>.
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
