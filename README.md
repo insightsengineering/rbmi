@@ -1,6 +1,6 @@
 <!-- badges: start -->
 [![CRAN
-status](https://www.r-pkg.org/badges/version/dplyr)](https://cran.r-project.org/package=dplyr)
+status](https://www.r-pkg.org/badges/version/rbmi)](https://cran.r-project.org/package=rbmi)
 [![R-CMD-check](https://github.com/insightsengineering/rbmi/actions/workflows/on_push.yaml/badge.svg)](https://github.com/insightsengineering/rbmi/actions/workflows/on_push.yaml)
 <!-- badges: end -->
 
