@@ -4,10 +4,10 @@
 \alias{progressLogger}
 \title{R6 Class for printing current sampling progress}
 \description{
-Object is initalised with total number of iterations that are expected to occour.
+Object is initalised with total number of iterations that are expected to occur.
 User can then update the object with the \code{add} method to indicate how many more iterations
-have just occoured.
-Every time \code{step} * 100 \% of iterations have occured a message is printed to the console.
+have just occurred.
+Every time \code{step} * 100 \% of iterations have occurred a message is printed to the console.
 Use the \code{quiet} argument to prevent the object from printing anything at all
 }
 \section{Public fields}{
@@ -73,7 +73,7 @@ This function will do nothing if \code{quiet} has been set to \code{TRUE}
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{n}}{the number of sucessfully complete iterations since \code{add()} was last called}
+\item{\code{n}}{the number of successfully complete iterations since \code{add()} was last called}
 }
 \if{html}{\out{</div>}}
 }

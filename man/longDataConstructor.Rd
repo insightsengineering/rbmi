@@ -55,7 +55,7 @@ if the subjects outcome values are MAR or not.
 This list is defaulted to TRUE for all subjects & outcomes and is then
 modified by calls to \code{self$set_strategies()}.
 Note that this does not indicate which values are missing, this variable
-is True for outcome values that either occoured before the ICE visit
+is True for outcome values that either occurred before the ICE visit
 or are post the ICE visit and have an imputation strategy of MAR}
 
 \item{\code{strategies}}{A list indexed by subject storing a single character

@@ -1,8 +1,8 @@
 # rbmi 1.2.4
 
 * Updated internal Stan code to ensure future compatibility (@andrjohns, #390)
-* Updated package description to include relevant references (#)
-* Fixed documentation typos (#)
+* Updated package description to include relevant references (#393)
+* Fixed documentation typos (#393)
 
 
 # rbmi 1.2.3

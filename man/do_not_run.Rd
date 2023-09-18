@@ -7,7 +7,7 @@
 do_not_run()
 }
 \description{
-This function only exists to supress the false positive
+This function only exists to suppress the false positive
 from R CMD Check about unused libraries
 }
 \details{

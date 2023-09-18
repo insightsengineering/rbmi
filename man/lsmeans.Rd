@@ -30,9 +30,9 @@ to the mean.
 
 A final lsmean value is calculated by averaging these hypothetical
 patients. If \code{.weights} equals \code{"proportional"} then the values are weighted
-by the frequency in which they occour in the full dataset. If \code{.weights}
+by the frequency in which they occur in the full dataset. If \code{.weights}
 equals \code{"equal"} then each hypothetical patient is given an equal weight
-regardless of what actually occours in the dataset.
+regardless of what actually occurs in the dataset.
 
 Use the \code{...} argument to fix specific variables to specific values.
 

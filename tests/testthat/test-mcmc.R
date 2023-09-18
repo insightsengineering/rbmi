@@ -81,7 +81,7 @@ test_that("split_dim creates a list from an array as expected", {
 
 
 
-test_that("Verbose supression works", {
+test_that("Verbose suppression works", {
 
     set.seed(301)
     sigma <- as_vcov(c(6, 4, 4), c(0.5, 0.2, 0.3))

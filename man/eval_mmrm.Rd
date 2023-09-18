@@ -21,7 +21,7 @@ without the program exiting.
 This function was originally developed for use with glmmTMB which needed
 more hand-holding and dropping of false-positive warnings. It is not
 as important now but is kept around encase we need to catch
-false-postive warnings again in the future.
+false-positive warnings again in the future.
 }
 \examples{
 \dontrun{

@@ -162,7 +162,7 @@ extract_params <- function(fit) {
 #' @param outcome a numeric vector. The outcome value to be regressed on in the MMRM model.
 #' @param subjid a character / factor vector. The subject identifier used to link separate visits
 #' that belong to the same subject.
-#' @param visit a character / factor vector. Indicates which visit the outcome value occoured on.
+#' @param visit a character / factor vector. Indicates which visit the outcome value occurred on.
 #' @param group a character / factor vector. Indicates which treatment group the patient belongs to.
 #' @param cov_struct a character value. Specifies which covariance structure to use. Must be one of
 #' `"us"`, `"toep"`, `"cs"` or  `"ar1"`
@@ -237,7 +237,7 @@ fit_mmrm <- function(designmat,
 #' This function was originally developed for use with glmmTMB which needed
 #' more hand-holding and dropping of false-positive warnings. It is not
 #' as important now but is kept around encase we need to catch
-#' false-postive warnings again in the future.
+#' false-positive warnings again in the future.
 #'
 #' @examples
 #' \dontrun{

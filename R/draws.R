@@ -275,7 +275,7 @@ draws.bmlmi <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet =
 #' the subject ids from the original dataset are returned. These values are used to tell [impute()]
 #' what subjects should be used to derive the imputed dataset.
 #' @param failure_limit Number of failed samples that are allowed before throwing an error
-#' @param ncores Number of processes to parallise the job over
+#' @param ncores Number of processes to parallelise the job over
 #' @param quiet Logical, If `TRUE` will suppress printing of progress information that is printed to
 #' the console.
 #'
@@ -695,10 +695,10 @@ validate.draws <- function(x, ...) {
 #'
 #' @description
 #'
-#' Object is initalised with total number of iterations that are expected to occour.
+#' Object is initalised with total number of iterations that are expected to occur.
 #' User can then update the object with the `add` method to indicate how many more iterations
-#' have just occoured.
-#' Every time `step` * 100 % of iterations have occured a message is printed to the console.
+#' have just occurred.
+#' Every time `step` * 100 % of iterations have occurred a message is printed to the console.
 #' Use the `quiet` argument to prevent the object from printing anything at all
 #'
 #' @import R6
@@ -739,7 +739,7 @@ progressLogger <- R6::R6Class(
         #' this will add that number to the current step count (`step_current`) and will
         #' print a progress message to the log if the step limit (`step`) has been reached.
         #' This function will do nothing if `quiet` has been set to `TRUE`
-        #' @param n the number of sucessfully complete iterations since `add()` was last called
+        #' @param n the number of successfully complete iterations since `add()` was last called
         add = function(n) {
             if (self$quiet) {
                 return(invisible())

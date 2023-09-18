@@ -25,7 +25,7 @@ any missing values}
 \item{subjid}{a character / factor vector. The subject identifier used to link separate visits
 that belong to the same subject.}
 
-\item{visit}{a character / factor vector. Indicates which visit the outcome value occoured on.}
+\item{visit}{a character / factor vector. Indicates which visit the outcome value occurred on.}
 
 \item{group}{a character / factor vector. Indicates which treatment group the patient belongs to.}
 
