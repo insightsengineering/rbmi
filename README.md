@@ -1,5 +1,7 @@
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/insightsengineering/rbmi/workflows/R-CMD-check/badge.svg)](https://github.com/insightsengineering/rbmi/actions)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/dplyr)](https://cran.r-project.org/package=dplyr)
+[![R-CMD-check](https://github.com/insightsengineering/rbmi/actions/workflows/on_push.yaml/badge.svg)](https://github.com/insightsengineering/rbmi/actions/workflows/on_push.yaml)
 <!-- badges: end -->
 
 
