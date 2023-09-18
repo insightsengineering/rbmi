@@ -14,7 +14,7 @@
 #' categorical covariate and by setting any numerical covariates equal
 #' to the mean.
 #'
-#' A final lsmean value is calculating by averaging these hypothetical
+#' A final lsmean value is calculated by averaging these hypothetical
 #' patients. If `.weights` equals `"proportional"` then the values are weighted
 #' by the frequency in which they occour in the full dataset. If `.weights`
 #' equals `"equal"` then each hypothetical patient is given an equal weight

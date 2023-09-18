@@ -7,7 +7,12 @@ Authors@R: c(
     person("Marcel", "Wolbers", email = "marcel.wolbers@roche.com", role = "ctb"),
     person("Roche", role = c("cph", "fnd"))
     )
-Description: Implements reference based multiple imputation allowing for the imputation of longitudinal datasets using predefined strategies.
+Description: Implements reference based multiple imputation allowing for the imputation of
+    longitudinal datasets using predefined strategies. See
+    Carpenter et al. (2013) <doi.org/10.1080/10543406.2013.834911>
+    Carpenter et al. (2013) <doi.org/10.1080/10543406.2013.834911>
+    Carpenter et al. (2013) <doi.org/10.1080/10543406.2013.834911>
+    Carpenter et al. (2013) <doi.org/10.1080/10543406.2013.834911>
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
