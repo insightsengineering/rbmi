@@ -1,12 +1,10 @@
 ## Summary of Submission
 
-This is a re-submission to ensure that our unit tests do not fail on CRANs servers. 
-The original uploads notes are as follows:
-
 In this version I have:
 
-* Replaced our dependencies from glmmTMB to mmrm to improve package performance and stability
-* Upgraded our use of parallel processes to be more reliable in testing environments
+* Updated our Stan syntax to ensure future compatibility
+* Updated our package description to contain relevant references
+* Fixed several typos in our documentation
 
 ## R CMD check results
 
@@ -33,10 +31,10 @@ There were 2 NOTEs:
 
 The package was tested in the following environments:
 
-- Ubuntu 20.04, R release (GitHub Actions)
-- Windows latest, R release (Local Machine)
-- Mac OS latest, R release (Local Machine + GitHub Actions)
-- Ubuntu 20.04, R devel (GitHub Actions)
+- Ubuntu-latest, R release (GitHub Actions)
+- Windows-latest, R release (GitHub Actions)
+- MacOS-latest, R release (Local Machine + GitHub Actions)
+- Ubuntu-latest, R devel (GitHub Actions)
 
 
 ## Downstream dependencies
