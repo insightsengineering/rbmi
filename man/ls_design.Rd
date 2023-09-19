@@ -25,6 +25,6 @@ Calculates the design vector as required to generate the lsmean
 and standard error. \code{ls_design_equal} calculates it by
 applying an equal weight per covariate combination whilst
 \code{ls_design_proportional} applies weighting proportional
-to the frequency in which the covariate combination occoured
+to the frequency in which the covariate combination occurred
 in the actual dataset.
 }

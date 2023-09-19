@@ -38,7 +38,7 @@ what subjects should be used to derive the imputed dataset.}
 
 \item{failure_limit}{Number of failed samples that are allowed before throwing an error}
 
-\item{ncores}{Number of processes to parallise the job over}
+\item{ncores}{Number of processes to parallelise the job over}
 
 \item{quiet}{Logical, If \code{TRUE} will suppress printing of progress information that is printed to
 the console.}

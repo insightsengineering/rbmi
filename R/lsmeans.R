@@ -14,11 +14,11 @@
 #' categorical covariate and by setting any numerical covariates equal
 #' to the mean.
 #'
-#' A final lsmean value is calculating by averaging these hypothetical
+#' A final lsmean value is calculated by averaging these hypothetical
 #' patients. If `.weights` equals `"proportional"` then the values are weighted
-#' by the frequency in which they occour in the full dataset. If `.weights`
+#' by the frequency in which they occur in the full dataset. If `.weights`
 #' equals `"equal"` then each hypothetical patient is given an equal weight
-#' regardless of what actually occours in the dataset.
+#' regardless of what actually occurs in the dataset.
 #'
 #' Use the `...` argument to fix specific variables to specific values.
 #'
@@ -83,7 +83,7 @@ lsmeans <- function(model, ..., .weights = c("proportional", "equal")) {
 #' and standard error. `ls_design_equal` calculates it by
 #' applying an equal weight per covariate combination whilst
 #' `ls_design_proportional` applies weighting proportional
-#' to the frequency in which the covariate combination occoured
+#' to the frequency in which the covariate combination occurred
 #' in the actual dataset.
 #'
 #' @param data A data.frame

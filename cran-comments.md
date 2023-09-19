@@ -1,12 +1,10 @@
 ## Summary of Submission
 
-This is a re-submission to ensure that our unit tests do not fail on CRANs servers. 
-The original uploads notes are as follows:
-
 In this version I have:
 
-* Replaced our dependencies from glmmTMB to mmrm to improve package performance and stability
-* Upgraded our use of parallel processes to be more reliable in testing environments
+* Updated our Stan syntax to ensure future compatibility
+* Updated our package description to contain relevant references
+* Fixed several typos in our documentation
 
 ## R CMD check results
 
@@ -15,9 +13,9 @@ There were no ERRORs or WARNINGs.
 There were 2 NOTEs:
 
 ❯ checking installed package size ... NOTE
-    installed size is 57.4Mb
-    sub-directories of 1Mb or more:
-      libs  56.0Mb
+  installed size is 55.6Mb
+  sub-directories of 1Mb or more:
+    libs  54.3Mb
 
 - This is a consequence of using Rstan which produces quite large binaries when compiled. As far as I'm aware there is no way for us to reduce this and is dependent on the Stan development team. Our understanding from the [developers](https://discourse.mc-stan.org/t/using-rstan-in-an-r-package-generates-r-cmd-check-notes/26628) is that this is acceptable to ignore.
 
@@ -33,11 +31,11 @@ There were 2 NOTEs:
 
 The package was tested in the following environments:
 
-- Ubuntu 20.04, R release (GitHub Actions)
-- Windows latest, R release (Local Machine)
-- Mac OS latest, R release (Local Machine + GitHub Actions)
-- Ubuntu 20.04, R devel (GitHub Actions)
-
+- Ubuntu, R release (GitHub Actions)
+- Windows, R release (Local Machine + Rhub + Win-Builder)
+- MacOS, R release (Local Machine + GitHub Actions)
+- Ubuntu, R devel (GitHub Actions)
+- Fedora, R devel (Rhub)
 
 ## Downstream dependencies
 

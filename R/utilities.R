@@ -517,7 +517,7 @@ as_dataframe <- function(x) {
 
 #' Do not run this function
 #' 
-#' This function only exists to supress the false positive
+#' This function only exists to suppress the false positive
 #' from R CMD Check about unused libraries
 #' 
 #' Both rstantools and RcppParallel are required but are only used at

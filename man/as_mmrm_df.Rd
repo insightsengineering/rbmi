@@ -13,7 +13,7 @@ any missing values}
 
 \item{outcome}{a numeric vector. The outcome value to be regressed on in the MMRM model.}
 
-\item{visit}{a character / factor vector. Indicates which visit the outcome value occoured on.}
+\item{visit}{a character / factor vector. Indicates which visit the outcome value occurred on.}
 
 \item{subjid}{a character / factor vector. The subject identifier used to link separate visits
 that belong to the same subject.}

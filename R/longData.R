@@ -78,7 +78,7 @@ longDataConstructor <- R6::R6Class(
         #' This list is defaulted to TRUE for all subjects & outcomes and is then
         #' modified by calls to `self$set_strategies()`.
         #' Note that this does not indicate which values are missing, this variable
-        #' is True for outcome values that either occoured before the ICE visit
+        #' is True for outcome values that either occurred before the ICE visit
         #' or are post the ICE visit and have an imputation strategy of MAR
         is_mar = list(),
 
@@ -475,7 +475,7 @@ longDataConstructor <- R6::R6Class(
             assert_that(
                 identical(names(x), self$visits),
                 msg = paste(
-                    "An unexpected error has occoured in check_has_data_at_each_visit()",
+                    "An unexpected error has occurred in check_has_data_at_each_visit()",
                     "please report this to the developer"
                 )
             )

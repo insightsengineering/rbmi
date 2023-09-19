@@ -617,7 +617,7 @@ test_that("draws.bmlmi works as expected", {
 
 
 
-test_that("quiet supress progress messages", {
+test_that("quiet suppress progress messages", {
 
     bign <- 90
     sigma <- as_vcov(
