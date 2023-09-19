@@ -15,7 +15,6 @@ jobs:
         config:
           - { R: "devel", os: "ubuntu-latest"}
           - { R: "release", os: "macos-latest"}
-          - { R: "release", os: "windows-latest"}
           - { R: "release", os: "ubuntu-latest"}
 
     runs-on: ${{ matrix.config.os }}
