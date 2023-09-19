@@ -32,11 +32,10 @@ There were 2 NOTEs:
 The package was tested in the following environments:
 
 - Ubuntu, R release (GitHub Actions)
-- Windows, R release (Local Machine + Rhub)
+- Windows, R release (Local Machine + Rhub + Win-Builder)
 - MacOS, R release (Local Machine + GitHub Actions)
 - Ubuntu, R devel (GitHub Actions)
 - Fedora, R devel (Rhub)
-- Debian, R devel (Rhub)
 
 ## Downstream dependencies
 
