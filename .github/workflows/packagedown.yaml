@@ -9,8 +9,9 @@ on:
 jobs:
   docs:
     name: Pkgdown Docs
-    uses: insightsengineering/r.pkg.template/.github/workflows/pkgdown.yaml@main
+    uses: insightsengineering/r.pkg.template/.github/workflows/pkgdown.yaml@add-update-remotes-input
     secrets:
       REPO_GITHUB_TOKEN: ${{ secrets.REPO_GITHUB_TOKEN }}
     with:
       install-system-dependencies: true
+      upgrade-remotes: true
