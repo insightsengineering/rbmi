@@ -1,5 +1,8 @@
 ## Summary of Submission
 
+This is a re-submission to fix unexpected NOTEs raised by CRANs automated
+checks. The cran-comments.md file for the original submission is below:
+
 In this version I have:
 
 * Updated our Stan syntax to ensure future compatibility
