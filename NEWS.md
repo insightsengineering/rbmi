@@ -1,24 +1,16 @@
-# rbmi 1.2.4
+# rbmi 1.2.5
 
 * Updated internal Stan code to ensure future compatibility (@andrjohns, #390)
 * Updated package description to include relevant references (#393)
 * Fixed documentation typos (#393)
 
-
 # rbmi 1.2.3
 
-* Minor changes to resolve R CMD CHECK notes
-
-# rbmi 1.2.2
-
-* Updated unit tests to resolve potential problems detected on CRAN's servers
+* Minor internal tweaks to ensure compatibility with the packages rbmi depends on
 
 # rbmi 1.2.1
 
 * Removed native pipes `|>` in testing code so package is backwards compatible with older servers
-
-# rbmi 1.2.0
-
 * Replaced our `glmmTMB` dependency with the `mmrm` package. This has resulted in the package being more stable (less model fitting convergence issues) as well as speeding up run times 3-fold. 
 
 # rbmi 1.1.4
