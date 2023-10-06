@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - test-pkgdown-workflow
 
 jobs:
   docs:
@@ -12,5 +13,6 @@ jobs:
     uses: insightsengineering/r.pkg.template/.github/workflows/pkgdown.yaml@main
     secrets:
       REPO_GITHUB_TOKEN: ${{ secrets.REPO_GITHUB_TOKEN }}
-    with:
-      install-system-dependencies: true
+    # with:
+      # install-system-dependencies: true
+      # upgrade-remotes: true
