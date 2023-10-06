@@ -1,5 +1,7 @@
 ## Summary of Submission
 
+This version (v1.2.5) is a re-submission of v1.2.4 with some minor tweaks to fix unexpected NOTEs raised by CRANs automated checks on the v1.2.4 versions. The cran-comments.md file for (failed) v1.2.4 submission is pasted below:
+
 In this version I have:
 
 * Updated our Stan syntax to ensure future compatibility

@@ -24,7 +24,11 @@ jobs:
 
       - name: Build report 🏗
         id: validation
-        uses: insightsengineering/thevalidatoR@v1.2.1
+        uses: insightsengineering/thevalidatoR@v1
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          report_output_prefix: validation_report
 
       # Upload the validation report to the release
       - name: Upload report to release 🔼

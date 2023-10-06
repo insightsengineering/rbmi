@@ -221,6 +221,7 @@ imputation_list_single <- function(imputations, D = 1) {
 }
 
 
+#' @export
 validate.imputation_list_single <- function(x, ...) {
     assert_that(
         is.character(x$id),
@@ -259,6 +260,7 @@ imputation_list_df <- function(...) {
 }
 
 
+#' @export
 validate.imputation_list_df <- function(x, ...) {
     assert_that(
         all(vapply(x, has_class, logical(1), "imputation_df")),
