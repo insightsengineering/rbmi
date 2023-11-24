@@ -1,12 +1,7 @@
 ## Summary of Submission
 
-This version (v1.2.5) is a re-submission of v1.2.4 with some minor tweaks to fix unexpected NOTEs raised by CRANs automated checks on the v1.2.4 versions. The cran-comments.md file for (failed) v1.2.4 submission is pasted below:
-
-In this version I have:
-
-* Updated our Stan syntax to ensure future compatibility
-* Updated our package description to contain relevant references
-* Fixed several typos in our documentation
+This version (v1.2.6) adjusts our unit tests to fix a false positive test failure on CRANs
+Clang Fedora/Debian servers.
 
 ## R CMD check results
 
@@ -33,11 +28,11 @@ There were 2 NOTEs:
 
 The package was tested in the following environments:
 
+- MacOS, R release (Local Machine)
+- Fedora, R devel (Local Machine via Docker & Rhub)
+- Debian, R release (Local Machine via Docker)
+- Windows, R release (Win-Builder)
 - Ubuntu, R release (GitHub Actions)
-- Windows, R release (Local Machine + Rhub + Win-Builder)
-- MacOS, R release (Local Machine + GitHub Actions)
-- Ubuntu, R devel (GitHub Actions)
-- Fedora, R devel (Rhub)
 
 ## Downstream dependencies
 
