@@ -1,3 +1,8 @@
+
+# rbmi 1.2.6
+
+* Updated unit tests to fix false-positive error on CRAN's testing servers
+
 # rbmi 1.2.5
 
 * Updated internal Stan code to ensure future compatibility (@andrjohns, #390)
