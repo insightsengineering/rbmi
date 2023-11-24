@@ -132,21 +132,15 @@ test_mmrm_numeric <- function(dat, formula_expr, same_cov, scale = FALSE) {
     )
 
     fit_expected <- extract_test_fit(mod)
-
     if (scale) {
         expect_true(all(
             abs(fit_actual$beta - fit_expected$beta) < 0.001
         ))
-
-        limit_a <- fit_expected$sigma[["A"]] - (fit_expected$sigma[["A"]] * 0.99)
-        limit_b <- fit_expected$sigma[["B"]] - (fit_expected$sigma[["B"]] * 0.99)
-
         expect_true(all(
-            abs(fit_actual$sigma[["A"]] - fit_expected$sigma[["A"]]) < limit_a
+            abs(fit_actual$sigma[["A"]] - fit_expected$sigma[["A"]]) < 0.01
         ))
-
         expect_true(all(
-            abs(fit_actual$sigma[["B"]] - fit_expected$sigma[["B"]]) < limit_b
+            abs(fit_actual$sigma[["B"]] - fit_expected$sigma[["B"]]) < 0.01
         ))
 
     } else {
@@ -336,14 +330,14 @@ test_that("MMRM returns expected estimates under different model specifications"
 
     testthat::skip_on_cran()
 
-    set.seed(101)
+    set.seed(4101)
 
     sigma <- as_vcov(c(5, 3, 8), c(0.4, 0.6, 0.3))
 
     dat <- ife(
         is_full_test(),
-        get_sim_data(n = 150, sigma),
-        get_sim_data(n = 50, sigma)
+        get_sim_data(n = 200, sigma),
+        get_sim_data(n = 100, sigma)
     )
 
     dat <- dat %>%

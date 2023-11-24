@@ -858,7 +858,7 @@ test_that("Three arms trial runs smoothly and gives expected results", {
     }
 
     set.seed(101)
-    bign <- 30
+    bign <- 40
     sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
     nsamp <- 0
 
