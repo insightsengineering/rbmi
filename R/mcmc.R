@@ -45,7 +45,6 @@
 #' - `fit`: a `stanfit` object.
 #'
 #' @import methods
-#' @importFrom rstan sampling
 fit_mcmc <- function(
     designmat,
     outcome,
@@ -122,7 +121,7 @@ fit_mcmc <- function(
     sampling_args$seed <- seed
 
     stan_fit <- record({
-        do.call(sampling, sampling_args)
+        do.call(rstan::sampling, sampling_args)
     })
 
     if (!is.null(stan_fit$errors)) {
@@ -239,10 +238,9 @@ split_dim <- function(a, n) {
 #'   of the list is a list with length equal to 1 if `same_cov = TRUE` or equal to the
 #'   number of groups if `same_cov = FALSE`.
 #'
-#' @importFrom rstan extract
 extract_draws <- function(stan_fit) {
 
-    pars <- extract(stan_fit, pars = c("beta", "Sigma"))
+    pars <- rstan::extract(stan_fit, pars = c("beta", "Sigma"))
     names(pars) <- c("beta", "sigma")
 
     ##################### from array to list
@@ -267,7 +265,6 @@ extract_draws <- function(stan_fit) {
 #' @return
 #' A named vector containing the ESS for each parameter of the model.
 #'
-#' @importFrom rstan summary
 get_ESS <- function(stan_fit) {
     return(rstan::summary(stan_fit, pars = c("beta", "Sigma"))$summary[, "n_eff"])
 }
