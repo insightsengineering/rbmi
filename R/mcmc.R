@@ -44,11 +44,8 @@
 #' - `samples`: a named list containing the draws for each parameter. It corresponds to the output of [extract_draws()].
 #' - `fit`: a `stanfit` object.
 #'
-#'
-#' @import Rcpp
 #' @import methods
 #' @importFrom rstan sampling
-#' @useDynLib rbmi, .registration = TRUE
 fit_mcmc <- function(
     designmat,
     outcome,
@@ -58,6 +55,8 @@ fit_mcmc <- function(
     method,
     quiet = FALSE
 ) {
+
+    ensure_stan_is_available()
 
     n_imputations <- method$n_samples
     burn_in <- method$burn_in
@@ -96,7 +95,7 @@ fit_mcmc <- function(
     )
 
     sampling_args <- list(
-        object = stanmodels$MMRM,
+        object = get_stan_model(),
         data = stan_data,
         pars = c("beta", "Sigma"),
         chains = 1,
@@ -644,5 +643,50 @@ validate.stan_data <- function(x, ...) {
         length(x$pat_sigma_index[[1]]) == x$n_visit,
         all(vapply(x$pat_sigma_index, function(z) all(z %in% c(seq_len(x$n_visit), 999)), logical(1))),
         msg = "Invalid Stan Data Object"
+    )
+}
+
+
+
+#' Ensure rstan is available
+#'
+#' This function checks if the rstan package is installed.
+#' If it is not installed, an error message is thrown.
+#'
+#' @export
+ensure_stan_is_available <- function() {
+    if (!requireNamespace("rstan", quietly = TRUE)) {
+        stop("rstan is not installed. Please install it before using rbmi.")
+    }
+}
+
+
+# Environment variable to store the compiled stan model
+# This is needed to prevent rstan from recompiling the model each time
+# https://discourse.mc-stan.org/t/rstan-sometimes-recompiles-to-avoid-crashing-r-session/4911
+STAN_ENV <- new.env()
+
+
+#' Get the compiled Stan model
+#'
+#' @description
+#' Get the compiled Stan model.
+#' If the model has already been compiled, return it from memory.
+#' If not, compile the model and return it.
+#'
+#' @return
+#' A `stanfit` object.
+#'
+get_stan_model <- function() {
+    model_file <- if (file.exists("inst/stan/MMRM.stan")) {
+        "inst/stan/MMRM.stan"
+    } else if (file.exists("stan/MMRM.stan")) {
+        "stan/MMRM.stan"
+    } else {
+        system.file("stan/MMRM.stan", package = "rbmi")
+    }
+    STAN_ENV$model <- rstan::stan_model(
+        file = model_file,
+        auto_write = TRUE
     )
 }

@@ -61,3 +61,7 @@ docs
 
 
 local/
+
+inst/stan/*.rds
+inst/stan/*.RDS
+inst/stan/*.Rds
