@@ -1,4 +1,8 @@
 
+# rbmi (development version)
+
+* Downgraded rstan to a `Suggests` dependency and opt to compile "just in time" rather than at installation time. This is intended to make installation easier for user who don't use `method_bayes()` (#405)
+
 # rbmi 1.2.6
 
 * Updated unit tests to fix false-positive error on CRAN's testing servers
