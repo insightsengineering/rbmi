@@ -674,7 +674,7 @@ STAN_ENV <- new.env()
 #' @return
 #' A `stanfit` object.
 #'
-get_stan_model <- function() {
+get_stan_model <- function(model_env = STAN_ENV) {
     model_file <- if (file.exists("inst/stan/MMRM.stan")) {
         "inst/stan/MMRM.stan"
     } else if (file.exists("stan/MMRM.stan")) {
@@ -682,8 +682,9 @@ get_stan_model <- function() {
     } else {
         system.file("stan/MMRM.stan", package = "rbmi")
     }
-    STAN_ENV$model <- rstan::stan_model(
+    model_env$model <- rstan::stan_model(
         file = model_file,
         auto_write = TRUE
     )
+    model_env$model
 }
