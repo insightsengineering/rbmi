@@ -17,10 +17,7 @@ jobs:
       
       - name: Checkout
         uses: actions/checkout@v3
-      
-      - name: Build src
-        uses: ./.github/actions/build-src
-      
+
       - name: testthat
         run: |
           options(crayon.enabled = TRUE, cli.dynamic = FALSE)
@@ -35,11 +32,6 @@ jobs:
       
       - name: Checkout
         uses: actions/checkout@v3
-      
-      - name: Build src
-        uses: ./.github/actions/build-src
-        with:
-          refresh: false
       
       - name: Document Code
         run: |

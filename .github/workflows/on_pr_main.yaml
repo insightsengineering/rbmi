@@ -12,7 +12,7 @@ name: On Pull Request
 jobs:
 
   rcmdcheck:
-
+    
     strategy:
       fail-fast: true
       matrix:
@@ -29,10 +29,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Build src
-        uses: ./.github/actions/build-src
-
+      
       - name: Check
         uses: ./.github/actions/rcmdcheck
         with:
@@ -53,9 +50,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      
-      - name: Build src
-        uses: ./.github/actions/build-src
       
       - name: Build Vignettes
         run: |

@@ -44,11 +44,7 @@
 #' - `samples`: a named list containing the draws for each parameter. It corresponds to the output of [extract_draws()].
 #' - `fit`: a `stanfit` object.
 #'
-#'
-#' @import Rcpp
 #' @import methods
-#' @importFrom rstan sampling
-#' @useDynLib rbmi, .registration = TRUE
 fit_mcmc <- function(
     designmat,
     outcome,
@@ -58,6 +54,8 @@ fit_mcmc <- function(
     method,
     quiet = FALSE
 ) {
+
+    ensure_stan_is_available()
 
     n_imputations <- method$n_samples
     burn_in <- method$burn_in
@@ -96,7 +94,7 @@ fit_mcmc <- function(
     )
 
     sampling_args <- list(
-        object = stanmodels$MMRM,
+        object = get_stan_model(),
         data = stan_data,
         pars = c("beta", "Sigma"),
         chains = 1,
@@ -123,7 +121,7 @@ fit_mcmc <- function(
     sampling_args$seed <- seed
 
     stan_fit <- record({
-        do.call(sampling, sampling_args)
+        do.call(rstan::sampling, sampling_args)
     })
 
     if (!is.null(stan_fit$errors)) {
@@ -240,10 +238,9 @@ split_dim <- function(a, n) {
 #'   of the list is a list with length equal to 1 if `same_cov = TRUE` or equal to the
 #'   number of groups if `same_cov = FALSE`.
 #'
-#' @importFrom rstan extract
 extract_draws <- function(stan_fit) {
 
-    pars <- extract(stan_fit, pars = c("beta", "Sigma"))
+    pars <- rstan::extract(stan_fit, pars = c("beta", "Sigma"))
     names(pars) <- c("beta", "sigma")
 
     ##################### from array to list
@@ -268,7 +265,6 @@ extract_draws <- function(stan_fit) {
 #' @return
 #' A named vector containing the ESS for each parameter of the model.
 #'
-#' @importFrom rstan summary
 get_ESS <- function(stan_fit) {
     return(rstan::summary(stan_fit, pars = c("beta", "Sigma"))$summary[, "n_eff"])
 }
@@ -645,4 +641,52 @@ validate.stan_data <- function(x, ...) {
         all(vapply(x$pat_sigma_index, function(z) all(z %in% c(seq_len(x$n_visit), 999)), logical(1))),
         msg = "Invalid Stan Data Object"
     )
+}
+
+
+
+#' Ensure rstan is available
+#'
+#' This function checks if the rstan package is installed.
+#' If it is not installed, an error message is thrown.
+#'
+#' @keywords internal
+ensure_stan_is_available <- function() {
+    if (!requireNamespace("rstan", quietly = TRUE)) {
+        stop("`method_bayes()` requires that the `rstan` package is installed. Please install it and try again.")
+    }
+}
+
+
+# Environment variable to store the compiled stan model
+# This is needed to prevent rstan from recompiling the model each time
+# https://discourse.mc-stan.org/t/rstan-sometimes-recompiles-to-avoid-crashing-r-session/4911
+STAN_ENV <- new.env()
+
+
+#' Get the compiled Stan model
+#'
+#' @description
+#' Get the compiled Stan model.
+#' If the model has already been compiled, return it from memory.
+#' If not, compile the model and return it.
+#'
+#' @param model_env An environment where the compiled model is stored.
+#' @return
+#' A `stanfit` object.
+#' @keywords internal
+get_stan_model <- function(model_env = STAN_ENV) {
+    model_file <- if (file.exists("inst/stan/MMRM.stan")) {
+        "inst/stan/MMRM.stan"
+    } else if (file.exists("stan/MMRM.stan")) {
+        "stan/MMRM.stan"
+    } else {
+        system.file("stan/MMRM.stan", package = "rbmi")
+    }
+    model_env$model <- rstan::stan_model(
+        file = model_file,
+        auto_write = TRUE,
+        save_dso = TRUE
+    )
+    model_env$model
 }
