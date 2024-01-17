@@ -650,10 +650,10 @@ validate.stan_data <- function(x, ...) {
 #' This function checks if the rstan package is installed.
 #' If it is not installed, an error message is thrown.
 #'
-#' @export
+#' @keywords internal
 ensure_stan_is_available <- function() {
     if (!requireNamespace("rstan", quietly = TRUE)) {
-        stop("rstan is not installed. Please install it before using rbmi.")
+        stop("`method_bayes()` requires that the `rstan` package is installed. Please install it and try again.")
     }
 }
 
@@ -671,9 +671,10 @@ STAN_ENV <- new.env()
 #' If the model has already been compiled, return it from memory.
 #' If not, compile the model and return it.
 #'
+#' @param model_env An environment where the compiled model is stored.
 #' @return
 #' A `stanfit` object.
-#'
+#' @keywords internal
 get_stan_model <- function(model_env = STAN_ENV) {
     model_file <- if (file.exists("inst/stan/MMRM.stan")) {
         "inst/stan/MMRM.stan"
@@ -684,7 +685,8 @@ get_stan_model <- function(model_env = STAN_ENV) {
     }
     model_env$model <- rstan::stan_model(
         file = model_file,
-        auto_write = TRUE
+        auto_write = TRUE,
+        save_dso = TRUE
     )
     model_env$model
 }

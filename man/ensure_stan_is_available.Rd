@@ -10,3 +10,4 @@ ensure_stan_is_available()
 This function checks if the rstan package is installed.
 If it is not installed, an error message is thrown.
 }
+\keyword{internal}

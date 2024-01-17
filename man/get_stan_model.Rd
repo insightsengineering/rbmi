@@ -4,7 +4,10 @@
 \alias{get_stan_model}
 \title{Get the compiled Stan model}
 \usage{
-get_stan_model()
+get_stan_model(model_env = STAN_ENV)
+}
+\arguments{
+\item{model_env}{An environment where the compiled model is stored.}
 }
 \value{
 A \code{stanfit} object.
@@ -14,3 +17,4 @@ Get the compiled Stan model.
 If the model has already been compiled, return it from memory.
 If not, compile the model and return it.
 }
+\keyword{internal}
