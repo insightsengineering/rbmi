@@ -25,3 +25,8 @@ rmarkdown::render(
     output_file = "advanced.html"
 )
 
+rmarkdown::render(
+  input = "./vignettes/CondMean_Inference.Rmd",
+  output_dir = "./vignettes/",
+  output_file = "CondMean_Inference.html"
+)

@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Craig Gower-Page, Alessandro Noci, and Marcel Wolbers" />
+
+
+<title>rbmi: Frequentist and information-anchored inference for reference-based conditional mean imputation</title>
+
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">rbmi: Frequentist and information-anchored inference for reference-based conditional mean imputation</h1>
+<h4 class="author">Craig Gower-Page, Alessandro Noci, and Marcel Wolbers</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction" id="toc-introduction"><span class="toc-section-number">1</span> Introduction</a></li>
+<li><a href="#data-and-model-specification" id="toc-data-and-model-specification"><span class="toc-section-number">2</span> Data and model specification</a></li>
+<li><a href="#reference-based-conditional-mean-imputation---frequentist-inference" id="toc-reference-based-conditional-mean-imputation---frequentist-inference"><span class="toc-section-number">3</span> Reference-based conditional mean imputation - frequentist inference</a>
+<ul>
+<li><a href="#draws" id="toc-draws"><span class="toc-section-number">3.1</span> Draws</a></li>
+<li><a href="#impute" id="toc-impute"><span class="toc-section-number">3.2</span> Impute</a></li>
+<li><a href="#analyse" id="toc-analyse"><span class="toc-section-number">3.3</span> Analyse</a></li>
+<li><a href="#pool" id="toc-pool"><span class="toc-section-number">3.4</span> Pool</a></li>
+</ul></li>
+<li><a href="#reference-based-conditional-mean-imputation---information-anchored-inference" id="toc-reference-based-conditional-mean-imputation---information-anchored-inference"><span class="toc-section-number">4</span> Reference-based conditional mean imputation - information-anchored inference</a>
+<ul>
+<li><a href="#imputation-step-including-calculation-of-delta-adjustment" id="toc-imputation-step-including-calculation-of-delta-adjustment"><span class="toc-section-number">4.1</span> Imputation step including calculation of delta-adjustment</a></li>
+<li><a href="#analyse-1" id="toc-analyse-1"><span class="toc-section-number">4.2</span> Analyse</a></li>
+<li><a href="#pool-1" id="toc-pool-1"><span class="toc-section-number">4.3</span> Pool</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="introduction" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
+<p>As described in section 3.10.2 of the statistical specifications of the package (<code>vignette(topic = &quot;stat_specs&quot;, package = &quot;rbmi&quot;)</code>), two different types of variance estimators have been proposed for reference-based imputation methods in the statistical literature (<span class="citation">Bartlett (<a href="#ref-Bartlett2021" role="doc-biblioref">2023</a>)</span>). The first is the frequentist variance which describes the actual repeated sampling variability of the estimator and results in inference which is correct in the frequentist sense, i.e. hypothesis tests have accurate type I error control and confidence intervals have correct coverage probabilities under repeated sampling if the reference-based assumption is correctly specified (<span class="citation">Bartlett (<a href="#ref-Bartlett2021" role="doc-biblioref">2023</a>)</span>, <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span>). Reference-based missing data assumption are strong and borrow information from the control arm for imputation in the active arm. As a consequence, the size of frequentist standard errors for treatment effects may decrease with increasing amounts of missing data. The second is the so-called “information-anchored” variance which was originally proposed in the context of sensitivity analyses (<span class="citation">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019" role="doc-biblioref">2019</a>)</span>). This variance estimator is based on disentangling point estimation and variance estimation altogether. The resulting information-anchored variance is typically very similar to the variance under missing-at-random (MAR) imputation and increases with increasing amounts of missing data at approximately the same rate as MAR imputation. However, the information-anchored variance does not reflect the actual variability of the reference-based estimator and the resulting frequentist inference is highly conservative resulting in a substantial power loss.</p>
+<p>Reference-based conditional mean imputation combined with a resampling method such as the jackknife or the bootstrap was first introduced in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span>. This approach naturally targets the frequentist variance. The information-anchored variance is typically estimated using Rubin’s rules for Bayesian multiple imputation which are not applicable within the conditional mean imputation framework. However, an alternative information-anchored variance proposed by <span class="citation">Lu (<a href="#ref-Lu2021" role="doc-biblioref">2021</a>)</span> can easily be obtained as we show below. The basic idea of <span class="citation">Lu (<a href="#ref-Lu2021" role="doc-biblioref">2021</a>)</span> is to obtain the information-anchored variance via a MAR imputation combined with a delta-adjustment where delta is selected in a data-driven way to match the reference-based estimator. For conditional mean imputation, the proposal by <span class="citation">Lu (<a href="#ref-Lu2021" role="doc-biblioref">2021</a>)</span> can be implemented by choosing the delta-adjustment as the difference between the conditional mean imputation under the chosen reference-based assumption and MAR on the original dataset. The variance can then be obtained via the jackknife or the bootstrap while keeping the delta-adjustment fixed. The resulting variance estimate is very similar to Rubin’s variance. Moreover as shown in <span class="citation">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019" role="doc-biblioref">2019</a>)</span>, the variance of MAR-imputation combined with a delta-adjustment achieves even better information-anchoring properties than Rubin’s variance for reference-based imputation.</p>
+<p>This vignette demonstrates first how to obtain frequentist inference using reference-based conditional mean imputation using <code>rbmi</code>, and then shows that an information-anchored inference can also be easily implemented using the package.</p>
+</div>
+<div id="data-and-model-specification" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Data and model specification</h1>
+<p>We use a publicly available example dataset from an antidepressant clinical trial of an active drug versus placebo. The relevant endpoint is the Hamilton 17-item depression rating scale (HAMD17) which was assessed at baseline and at weeks 1, 2, 4, and 6. Study drug discontinuation occurred in 24% of subjects from the active drug and 26% of subjects from placebo. All data after study drug discontinuation are missing and there is a single additional intermittent missing observation.</p>
+<p>We consider an imputation model with the mean change from baseline in the HAMD17 score as the outcome (variable CHANGE in the dataset). The following covariates are included in the imputation model: the treatment group (THERAPY), the (categorical) visit (VISIT), treatment-by-visit interactions, the baseline HAMD17 score (BASVAL), and baseline HAMD17 score-by-visit interactions. A common unstructured covariance matrix structure is assumed for both groups. The analysis model is an ANCOVA model with the treatment group as the primary factor and adjustment for the baseline HAMD17 score. For this example, we assume that the imputation strategy after the ICE “study-drug discontinuation” is Jump To Reference (JR) for all subjects and the imputation is based on conditional mean imputation combined with jackknife resampling (but the bootstrap could also have been selected).</p>
+</div>
+<div id="reference-based-conditional-mean-imputation---frequentist-inference" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Reference-based conditional mean imputation - frequentist inference</h1>
+<p>Conditional mean imputation combined with a resampling method such as jackknife or bootstrap naturally targets a frequentist estimation of the standard error of the treatment effect, thus providing a valid frequentist inference. Here we provide the code to obtain frequentist inference for reference-based conditional mean imputation using <code>rbmi</code>.</p>
+<p>The code used in this section is almost identical to the code in the quickstart vignette (<code>vignette(topic = &quot;quickstart&quot;, package = &quot;rbmi&quot;)</code>) except that we use conditional mean imputation combined with the jackknife (<code>method_condmean(type = &quot;jackknife&quot;)</code>) here rather than Bayesian multiple imputation (<code>method_bayes()</code>). We therefore refer to that vignette and the help files for the individual functions for further explanations and details.</p>
+<div id="draws" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Draws</h2>
+<p>We will make use of <code>rbmi::expand_locf()</code> to expand the dataset in order to have one row per subject per visit with missing outcomes denoted as <code>NA</code>. We will then construct the <code>data_ice</code>, <code>vars</code> and <code>method</code> input arguments to the first core <code>rbmi</code> function, <code>draws()</code>. Finally, we call the function <code>draws()</code> to derive the parameter estimates of the base imputation model for the full dataset and all leave-one-subject-out samples.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rbmi)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Attaching package: &#39;dplyr&#39;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; The following objects are masked from &#39;package:stats&#39;:</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     filter, lag</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; The following objects are masked from &#39;package:base&#39;:</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> antidepressant_data</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Use expand_locf to add rows corresponding to visits with missing outcomes to the dataset</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">expand_locf</span>(</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  dat,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">PATIENT =</span> <span class="fu">levels</span>(dat<span class="sc">$</span>PATIENT), <span class="co"># expand by PATIENT and VISIT </span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">VISIT =</span> <span class="fu">levels</span>(dat<span class="sc">$</span>VISIT),</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL&quot;</span>, <span class="st">&quot;THERAPY&quot;</span>), <span class="co"># fill with LOCF BASVAL and THERAPY</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> <span class="fu">c</span>(<span class="st">&quot;PATIENT&quot;</span>),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">order =</span> <span class="fu">c</span>(<span class="st">&quot;PATIENT&quot;</span>, <span class="st">&quot;VISIT&quot;</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># create data_ice and set the imputation strategy to JR for</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co"># each patient with at least one missing observation</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>dat_ice <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span> </span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(PATIENT, VISIT) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(CHANGE)) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(PATIENT) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(PATIENT, VISIT) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">strategy =</span> <span class="st">&quot;JR&quot;</span>)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="co"># In this dataset, subject 3618 has an intermittent missing values which does not correspond</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="co"># to a study drug discontinuation. We therefore remove this subject from `dat_ice`. </span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="co"># (In the later imputation step, it will automatically be imputed under the default MAR assumption.)</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>dat_ice <span class="ot">&lt;-</span> dat_ice[<span class="sc">-</span><span class="fu">which</span>(dat_ice<span class="sc">$</span>PATIENT <span class="sc">==</span> <span class="dv">3618</span>),]</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the names of key variables in our dataset and</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="co"># the covariates included in the imputation model using `set_vars()`</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL*VISIT&quot;</span>, <span class="st">&quot;THERAPY*VISIT&quot;</span>)</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="co"># Define which imputation method to use (here: conditional mean imputation with jackknife as resampling) </span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>method <span class="ot">&lt;-</span> <span class="fu">method_condmean</span>(<span class="at">type =</span> <span class="st">&quot;jackknife&quot;</span>)</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Create samples for the imputation parameters by running the draws() function</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>drawObj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>  <span class="at">data_ice =</span> dat_ice,</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>  <span class="at">vars =</span> vars,</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> method,</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>  <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>drawObj</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Draws Object</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ------------</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Number of Samples: 1 + 172</span></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Number of Failed Samples: 0</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Model Formula: CHANGE ~ 1 + THERAPY + VISIT + BASVAL * VISIT + THERAPY * VISIT</span></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Imputation Type: condmean</span></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Method:</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     name: Conditional Mean</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     covariance: us</span></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     threshold: 0.01</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     same_cov: TRUE</span></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     REML: TRUE</span></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     type: jackknife</span></span></code></pre></div>
+</div>
+<div id="impute" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Impute</h2>
+<p>We can use now the function <code>impute()</code> to perform the imputation of the original dataset and of each leave-one-out samples using the results obtained at the previous step.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>references <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;DRUG&quot;</span> <span class="ot">=</span> <span class="st">&quot;PLACEBO&quot;</span>, <span class="st">&quot;PLACEBO&quot;</span> <span class="ot">=</span> <span class="st">&quot;PLACEBO&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>imputeObj <span class="ot">&lt;-</span> <span class="fu">impute</span>(drawObj, references)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>imputeObj</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Imputation Object</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -----------------</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Number of Imputed Datasets: 1 + 172</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Fraction of Missing Data (Original Dataset):</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     4:   0%</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     5:   8%</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     6:  13%</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     7:  25%</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; References:</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     DRUG    -&gt; PLACEBO</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     PLACEBO -&gt; PLACEBO</span></span></code></pre></div>
+</div>
+<div id="analyse" class="section level2" number="3.3">
+<h2><span class="header-section-number">3.3</span> Analyse</h2>
+<p>Once the datasets have been imputed, we can call the <code>analyse()</code> function to apply the complete-data analysis model (here ANCOVA) to each imputed dataset.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Set analysis variables using rbmi function &quot;set_vars&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>vars_an <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> vars<span class="sc">$</span>group,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">visit =</span> vars<span class="sc">$</span>visit,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome =</span> vars<span class="sc">$</span>outcome,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">covariates =</span> <span class="st">&quot;BASVAL&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Analyse MAR imputation with derived delta adjustment</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>anaObj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  imputeObj,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  rbmi<span class="sc">::</span>ancova,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">vars =</span> vars_an</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>anaObj</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Analysis Object</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---------------</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Number of Results: 1 + 172</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Analysis Function: rbmi::ancova</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Delta Applied: FALSE</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Analysis Estimates:</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     trt_4</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     lsm_ref_4</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     lsm_alt_4</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     trt_5</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     lsm_ref_5</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     lsm_alt_5</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     trt_6</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     lsm_ref_6</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     lsm_alt_6</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     trt_7</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     lsm_ref_7</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     lsm_alt_7</span></span></code></pre></div>
+</div>
+<div id="pool" class="section level2" number="3.4">
+<h2><span class="header-section-number">3.4</span> Pool</h2>
+<p>Finally, we can extract the treatment effect estimates and perform inference using the jackknife variance estimator. This is done by calling the <code>pool()</code> function.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>poolObj <span class="ot">&lt;-</span> <span class="fu">pool</span>(anaObj)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>poolObj</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Pool Object</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -----------</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Number of Results Combined: 1 + 172</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Method: jackknife</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Confidence Level: 0.95</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Alternative: two.sided</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Results:</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ==================================================</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    parameter   est     se     lci     uci     pval  </span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   --------------------------------------------------</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      trt_4    -0.092  0.695  -1.453   1.27   0.895  </span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_4  -1.616  0.588  -2.767  -0.464  0.006  </span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_4  -1.708  0.396  -2.484  -0.931  &lt;0.001 </span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      trt_5    1.305   0.878  -0.416  3.027   0.137  </span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_5  -4.133  0.688  -5.481  -2.785  &lt;0.001 </span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_5  -2.828  0.604  -4.011  -1.645  &lt;0.001 </span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      trt_6    1.929   0.862  0.239   3.619   0.025  </span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_6  -6.088  0.671  -7.402  -4.773  &lt;0.001 </span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_6  -4.159  0.686  -5.503  -2.815  &lt;0.001 </span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      trt_7    2.126   0.858  0.444   3.807   0.013  </span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_7  -6.965  0.685  -8.307  -5.622  &lt;0.001 </span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_7  -4.839  0.762  -6.333  -3.346  &lt;0.001 </span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   --------------------------------------------------</span></span></code></pre></div>
+<p>This gives an estimated treatment effect of
+2.13 (95% CI 0.44 to 3.81)
+at the last visit with an associated p-value of 0.013.</p>
+</div>
+</div>
+<div id="reference-based-conditional-mean-imputation---information-anchored-inference" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Reference-based conditional mean imputation - information-anchored inference</h1>
+<p>In this section, we present how the estimation process based on conditional mean imputation combined with the jackknife can be adapted to obtain an information-anchored variance following the proposal by <span class="citation">Lu (<a href="#ref-Lu2021" role="doc-biblioref">2021</a>)</span>.
+## Draws</p>
+<p>The code for the pre-processing of the dataset and for the “draws” step is equivalent to the code provided for the frequentist inference. Please refer to <a href="#draws">that section</a> for details about this step.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rbmi)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> antidepressant_data</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Use expand_locf to add rows corresponding to visits with missing outcomes to the dataset</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">expand_locf</span>(</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  dat,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">PATIENT =</span> <span class="fu">levels</span>(dat<span class="sc">$</span>PATIENT), <span class="co"># expand by PATIENT and VISIT </span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">VISIT =</span> <span class="fu">levels</span>(dat<span class="sc">$</span>VISIT),</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL&quot;</span>, <span class="st">&quot;THERAPY&quot;</span>), <span class="co"># fill with LOCF BASVAL and THERAPY</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> <span class="fu">c</span>(<span class="st">&quot;PATIENT&quot;</span>),</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">order =</span> <span class="fu">c</span>(<span class="st">&quot;PATIENT&quot;</span>, <span class="st">&quot;VISIT&quot;</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co"># create data_ice and set the imputation strategy to JR for</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co"># each patient with at least one missing observation</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>dat_ice <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span> </span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(PATIENT, VISIT) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(CHANGE)) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(PATIENT) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(PATIENT, VISIT) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">strategy =</span> <span class="st">&quot;JR&quot;</span>)</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co"># In this dataset, subject 3618 has an intermittent missing values which does not correspond</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="co"># to a study drug discontinuation. We therefore remove this subject from `dat_ice`. </span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="co"># (In the later imputation step, it will automatically be imputed under the default MAR assumption.)</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>dat_ice <span class="ot">&lt;-</span> dat_ice[<span class="sc">-</span><span class="fu">which</span>(dat_ice<span class="sc">$</span>PATIENT <span class="sc">==</span> <span class="dv">3618</span>),]</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the names of key variables in our dataset and</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="co"># the covariates included in the imputation model using `set_vars()`</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>  <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>  <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL*VISIT&quot;</span>, <span class="st">&quot;THERAPY*VISIT&quot;</span>)</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Define which imputation method to use (here: conditional mean imputation with jackknife as resampling) </span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>method <span class="ot">&lt;-</span> <span class="fu">method_condmean</span>(<span class="at">type =</span> <span class="st">&quot;jackknife&quot;</span>)</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Create samples for the imputation parameters by running the draws() function</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>drawObj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>  <span class="at">data_ice =</span> dat_ice,</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>  <span class="at">vars =</span> vars,</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> method,</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>  <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>drawObj</span></code></pre></div>
+<div id="imputation-step-including-calculation-of-delta-adjustment" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Imputation step including calculation of delta-adjustment</h2>
+<p>The proposal by <span class="citation">Lu (<a href="#ref-Lu2021" role="doc-biblioref">2021</a>)</span> is to replace the reference-based imputation by a MAR imputation combined with a delta-adjustment where delta is selected in a data-driven way to match the reference-based estimator. In <code>rbmi</code>, this is implemented by first performing the imputation under the defined reference-based imputation strategy (here JR) as well as under MAR separately. Second, the delta-adjustment is defined as the difference between the conditional mean imputation under reference-based and MAR imputation, respectively, on the original dataset.</p>
+<p>To simplify the implementation, we have written a function <code>get_delta_match_refBased</code> that performs this step. The function takes as input arguments the <code>draws</code> object, <code>data_ice</code> (i.e. the <code>data.frame</code> containing the information about the intercurrent events and the imputation strategies), and <code>references</code>, a named vector that identifies the references to be used for reference-based imputation methods. The function returns a list containing the imputation objects under both reference-based and MAR imputation, plus a <code>data.frame</code> which contains the delta-adjustment.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>get_delta_match_refBased <span class="ot">&lt;-</span> <span class="cf">function</span>(draws, data_ice, references) {</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Impute according to `data_ice`</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  imputeObj <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">draws =</span> drawObj,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">update_strategy =</span> data_ice,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">references =</span> references</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  vars <span class="ot">&lt;-</span> imputeObj<span class="sc">$</span>data<span class="sc">$</span>vars</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Access imputed dataset (index=1 for method_condmean(type = &quot;jackknife&quot;))</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  cmi <span class="ot">&lt;-</span> <span class="fu">extract_imputed_dfs</span>(imputeObj, <span class="at">index =</span> <span class="dv">1</span>, <span class="at">idmap =</span> <span class="cn">TRUE</span>)[[<span class="dv">1</span>]] <span class="sc">%&gt;%</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(vars<span class="sc">$</span>subjid, vars<span class="sc">$</span>visit, vars<span class="sc">$</span>outcome) <span class="sc">%&gt;%</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="at">y_imp =</span> <span class="sc">!!</span><span class="fu">as.symbol</span>(vars<span class="sc">$</span>outcome))</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Map back original patients id since rbmi re-code ids to ensure id uniqueness</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  cmi <span class="ot">&lt;-</span> cmi <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!!</span>vars<span class="sc">$</span><span class="at">subjid :=</span> <span class="fu">factor</span>(</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">recode</span>(<span class="sc">!!</span><span class="fu">as.symbol</span>(vars<span class="sc">$</span>subjid), <span class="sc">!!!</span> <span class="fu">attributes</span>(cmi)<span class="sc">$</span>idmap),</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">attributes</span>(cmi)<span class="sc">$</span>idmap</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Derive conditional mean imputations under MAR</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>  dat_ice_MAR <span class="ot">&lt;-</span> data_ice <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!!</span>vars<span class="sc">$</span><span class="at">strategy :=</span> <span class="fu">ifelse</span>(</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>      <span class="sc">!!</span><span class="fu">as.symbol</span>(vars<span class="sc">$</span>strategy) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;CIR&quot;</span>,<span class="st">&quot;CR&quot;</span>,<span class="st">&quot;JR&quot;</span>),</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;MAR&quot;</span>, </span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>      strategy</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Impute under MAR </span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Note that in this specific context, it is desirable that an update   </span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>  <span class="co"># from a reference-based strategy to MAR uses the exact same data for     # fitting the imputation models, i.e. that available post-ICE data are </span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>  <span class="co"># omitted from the imputation model for both. This is the case when    </span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>  <span class="co"># using argument update_strategy in function impute(). </span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>  <span class="co"># However, for other settings (i.e. if one is interested in switching to</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>  <span class="co"># a standard MAR imputation strategy altogether), this behavior is  </span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>  <span class="co"># undesirable and, consequently, the function throws a warning which </span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>  <span class="co"># we suppress here. </span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">suppressWarnings</span>(</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    imputeObj_MAR <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>      draws,</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>      <span class="at">update_strategy =</span> dat_ice_MAR</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>  ) </span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Take imputed outcome</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>  cmi_MAR <span class="ot">&lt;-</span> <span class="fu">extract_imputed_dfs</span>(imputeObj_MAR, <span class="at">index =</span> <span class="dv">1</span>, <span class="at">idmap =</span> <span class="cn">TRUE</span>)[[<span class="dv">1</span>]] <span class="sc">%&gt;%</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(vars<span class="sc">$</span>subjid, vars<span class="sc">$</span>visit, vars<span class="sc">$</span>outcome) <span class="sc">%&gt;%</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="at">y_MAR =</span> <span class="sc">!!</span><span class="fu">as.symbol</span>(vars<span class="sc">$</span>outcome))</span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Map back original patients id since rbmi re-code ids to ensure id uniqueness</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>  cmi_MAR <span class="ot">&lt;-</span> cmi_MAR <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(</span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!!</span>vars<span class="sc">$</span><span class="at">subjid :=</span> <span class="fu">factor</span>(</span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>      <span class="fu">recode</span>(<span class="sc">!!</span><span class="fu">as.symbol</span>(vars<span class="sc">$</span>subjid), <span class="sc">!!!</span> <span class="fu">attributes</span>(cmi)<span class="sc">$</span>idmap),</span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">attributes</span>(cmi)<span class="sc">$</span>idmap</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Derive delta adjustment &quot;aligned with ref-based imputation&quot;,</span></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>  <span class="co"># i.e. difference between ref-based imputation and MAR imputation</span></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>  delta_adjust <span class="ot">&lt;-</span> <span class="fu">full_join</span>(cmi, cmi_MAR, <span class="at">by =</span> <span class="fu">c</span>(vars<span class="sc">$</span>subjid, vars<span class="sc">$</span>visit)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">delta =</span> y_imp <span class="sc">-</span> y_MAR)</span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>  ret_obj <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>    <span class="at">imputeObj =</span> imputeObj,</span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>    <span class="at">imputeObj_MAR =</span> imputeObj_MAR,</span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>    <span class="at">delta_adjust =</span> delta_adjust</span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(ret_obj)</span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>references <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;DRUG&quot;</span> <span class="ot">=</span> <span class="st">&quot;PLACEBO&quot;</span>, <span class="st">&quot;PLACEBO&quot;</span> <span class="ot">=</span> <span class="st">&quot;PLACEBO&quot;</span>)</span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a>res_delta_adjust <span class="ot">&lt;-</span> <span class="fu">get_delta_match_refBased</span>(drawObj, dat_ice, references)</span></code></pre></div>
+</div>
+<div id="analyse-1" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> Analyse</h2>
+<p>We use the function <code>analyse()</code> to add the delta-adjustment and perform the analysis of the imputed datasets under MAR. <code>analyse()</code> will take as the input argument <code>imputations = res_delta_adjust$imputeObj_MAR</code>, i.e. the imputation object corresponding to the MAR imputation (and not the JR imputation). The argument <code>delta</code> can be used to add a delta-adjustment prior to the analysis and we set this to the delta-adjustment obtained in the previous step: <code>delta = res_delta_adjust$delta_adjust</code>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Set analysis variables using rbmi function &quot;set_vars&quot;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>vars_an <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> vars<span class="sc">$</span>group,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">visit =</span> vars<span class="sc">$</span>visit,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome =</span> vars<span class="sc">$</span>outcome,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">covariates =</span> <span class="st">&quot;BASVAL&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Analyse MAR imputation with derived delta adjustment</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>anaObj_MAR_delta <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  res_delta_adjust<span class="sc">$</span>imputeObj_MAR,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  rbmi<span class="sc">::</span>ancova,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">delta =</span> res_delta_adjust<span class="sc">$</span>delta_adjust,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">vars =</span> vars_an</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="pool-1" class="section level2" number="4.3">
+<h2><span class="header-section-number">4.3</span> Pool</h2>
+<p>We can finally use the <code>pool()</code> function to extract the treatment effect estimate (as well as the estimated marginal means) at each visit and apply the jackknife variance estimator to the analysis estimates from all the imputed leave-one-out samples.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>poolObj_MAR_delta <span class="ot">&lt;-</span> <span class="fu">pool</span>(anaObj_MAR_delta)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>poolObj_MAR_delta</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Pool Object</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -----------</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Number of Results Combined: 1 + 172</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Method: jackknife</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Confidence Level: 0.95</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Alternative: two.sided</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Results:</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ==================================================</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    parameter   est     se     lci     uci     pval  </span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   --------------------------------------------------</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      trt_4    -0.092  0.695  -1.453   1.27   0.895  </span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_4  -1.616  0.588  -2.767  -0.464  0.006  </span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_4  -1.708  0.396  -2.484  -0.931  &lt;0.001 </span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      trt_5    1.305   0.944  -0.545  3.156   0.167  </span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_5  -4.133  0.738  -5.579  -2.687  &lt;0.001 </span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_5  -2.828  0.603  -4.01   -1.646  &lt;0.001 </span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      trt_6    1.929   0.993  -0.018  3.876   0.052  </span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_6  -6.088  0.758  -7.574  -4.602  &lt;0.001 </span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_6  -4.159  0.686  -5.504  -2.813  &lt;0.001 </span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      trt_7    2.126   1.123  -0.076  4.327   0.058  </span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_7  -6.965  0.85   -8.63   -5.299  &lt;0.001 </span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_7  -4.839  0.763  -6.335  -3.343  &lt;0.001 </span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   --------------------------------------------------</span></span></code></pre></div>
+<p>This gives an estimated treatment effect of
+2.13 (95% CI -0.08 to 4.33)
+at the last visit with an associated p-value of 0.058.
+Per construction of the delta-adjustment, the point estimate is identical to the frequentist analysis. However, its standard error is much larger (1.12 vs. 0.86). Indeed, the information-anchored standard error (and the resulting inference) is very similar to the results for Baysesian multiple imputation using Rubin’s rules for which a standard error of 1.13 was reported in the quickstart vignette (<code>vignette(topic = &quot;quickstart&quot;, package = &quot;rbmi&quot;</code>). Of note, as shown e.g. in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span>, hypothesis testing based on the information-anchored inference is very conservative, i.e. the actual type I error is much lower than the nominal value. Hence, confidence intervals and <span class="math inline">\(p\)</span>-values based on information-anchored inference should be interpreted with caution.</p>
+</div>
+</div>
+<div id="references" class="section level1 unnumbered unlisted">
+<h1>References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-Bartlett2021" class="csl-entry">
+Bartlett, Jonathan W. 2023. <span>“Reference-Based Multiple Imputation - What Is the Right Variance and How to Estimate It.”</span> <em>Statistics in Biopharmaceutical Research</em> 15 (1): 178–86.
+</div>
+<div id="ref-CroEtAl2019" class="csl-entry">
+Cro, Suzie, James R Carpenter, and Michael G Kenward. 2019. <span>“Information-Anchored Sensitivity Analysis: Theory and Application.”</span> <em>Journal of the Royal Statistical Society: Series A (Statistics in Society)</em> 182 (2): 623–45.
+</div>
+<div id="ref-Lu2021" class="csl-entry">
+Lu, Kaifeng. 2021. <span>“An Alternative Implementation of Reference-Based Controlled Imputation Procedures.”</span> <em>Statistics in Biopharmaceutical Research</em> 13 (4): 483–91.
+</div>
+<div id="ref-Wolbers2021" class="csl-entry">
+Wolbers, Marcel, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, and Jonathan W Bartlett. 2022. <span>“Standard and Reference-Based Conditional Mean Imputation.”</span> <em>Pharmaceutical Statistics</em> 21 (6): 1246–57.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
