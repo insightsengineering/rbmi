@@ -455,7 +455,7 @@ For finite samples, simulations for a sample size of $n=100$ per group reported 
 For reference-based conditional mean imputation, an alternative information-anchored variance can be obtained by following a proposal by @Lu2021. 
 The basic idea of @Lu2021 is to obtain the information-anchored variance via a MAR imputation combined with a delta-adjustment where delta is selected in a data-driven way to match the reference-based estimator. 
 For conditional mean imputation, the proposal by @Lu2021 can be implemented by choosing the delta-adjustment as the difference between the conditional mean imputation under the chosen reference-based assumption and MAR on the original dataset. 
-An illustration of how the different variances can be obtained for conditional mean imputation in `rbmi` is provided in the vignette "Frequentist and information-anchored inference for reference-based conditional mean imputation" (`vignette(topic = "CondMean_InfoAnchored", package = "rbmi")`).
+An illustration of how the different variances can be obtained for conditional mean imputation in `rbmi` is provided in the vignette "Frequentist and information-anchored inference for reference-based conditional mean imputation" (`vignette(topic = "CondMean_Inference", package = "rbmi")`).
 
 Reference-based Bayesian (or approximate Bayesian) multiple imputation methods combined with Rubin's rules (`method_bayes()` and `method_approxbayes()`) target the information-anchored variance (@CroEtA2019). 
 A frequentist variance for these methods could in principle be obtained via bootstrap or jackknife re-sampling of the treatment effect estimates but this would be very computationally intensive and is not directly supported by `rbmi`. 
