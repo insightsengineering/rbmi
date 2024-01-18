@@ -461,7 +461,7 @@ Reference-based Bayesian (or approximate Bayesian) multiple imputation methods c
 A frequentist variance for these methods could in principle be obtained via bootstrap or jackknife re-sampling of the treatment effect estimates but this would be very computationally intensive and is not directly supported by `rbmi`. 
 
 Our view is that for primary analyses, accurate type I error control (which can be obtained by using the frequntist variance) is more important than adherence to the information anchoring principle which, to us, is
-not fully compatible with the strong reference-based missing data assumptions. In any case, if reference-based imputation is used for the primary analysis, it is critical that the chosen
+not fully compatible with the strong reference-based assumptions. In any case, if reference-based imputation is used for the primary analysis, it is critical that the chosen
 reference-based assumption can be clinically justified, and that suitable sensitivity analyses are conducted to stress-test these assumptions. 
 
 Conditional mean imputation combined with the jackknife is the only method which leads to deterministic standard error estimates and, consequently, confidence intervals and $p$-values are also deterministic. This is particularly important in a regulatory setting where it is important to ascertain whether a calculated $p$-value which is close to the critical boundary of 5% is truly below or above that threshold rather than being uncertain about this because of Monte Carlo error. 
