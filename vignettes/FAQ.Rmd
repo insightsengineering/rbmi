@@ -1,0 +1,76 @@
+---
+title: "rbmi: Frequently Asked Questions"
+author: Alessandro Noci, Craig Gower-Page and Marcel Wolbers
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+    number_sections: true
+    citation_package: natbib
+    base_format: rmarkdown::html_vignette
+bibliography: "references.bib"
+link-citations: true
+pkgdown:
+  as_is: true
+linkcolor: blue
+vignette: >
+  %\VignetteIndexEntry{rbmi: Frequently Asked Questions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>"
+)
+```
+
+# Introduction
+
+This document provides answers to common questions about the `rbmi` package.
+It is intended to be read after the `rbmi: Introduction` vignette.
+
+<br>
+
+## How to handle missing data in baseline covariates?
+
+Unfortunately this is out of scope for the rbmi package and would need to be handled by the user before using rbmi.
+The best choice would need to be made on a case-by-case basis and, typically, a relatively simple approach should be sufficient.
+For reference, recent FDA guidance on covariate adjustment is:
+
+> Covariate adjustment is generally robust to the handling of subjects with missing baseline covariates.
+> Missing baseline covariate values can be singly or multiply imputed, or missingness indicators (Groenwold et al. 2012) can be added to the model used for covariate adjustment.
+> Sponsors should not perform imputation separately for different treatment groups, and sponsors should ensure that imputed baseline values are not dependent on any post-baseline variables, including the outcome.
+
+<br>
+
+## Why does rbmi use a Ancova model and not an MMRM in the analysis function?
+
+This is explained at the end of section 2.4 of @Wolbers2021.
+
+>  The proof relies on the fact that the ANCOVA estimator is a linear function of the outcome vector.
+> **For complete data, the ANCOVA estimator leads to identical parameter estimates as an MMRM model** of all longitudinal outcomes with an arbitrary common covariance structure across treatment groups **if treatment-by-visit interactions as well as covariate-by-visit-interactions** are included in the analysis model for all covariates,17 (p. 197).
+> Hence, the same proof also applies to such MMRM models.
+> We expect that conditional mean imputation is also valid if a general MMRM model is used for the analysis but more involved argument would be required to formally justify this.
+
+<br>
+
+## How can I analyse Change-From-Baseline in the analysis model?
+
+This can be achieved using custom analysis functions as outlined in Section 7 of the Advanced Vignette. e.g.
+
+```r
+ancova_modified <- function(data, ...) {
+    data2 <- data %>% mutate(ENDPOINT = ENDPOINT - BASELINE)
+    rbmi::ancova(data2, ...)
+}
+
+anaObj <- rbmi::analyse(
+    imputeObj,
+    ancova_modified,
+    vars = vars
+ )
+```
+
+<br>
