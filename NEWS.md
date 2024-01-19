@@ -1,4 +1,8 @@
 
+# rbmi 1.2.7
+
+* Include vignette on how to obtain frequentist and information-anchored inference with conditional mean imputation using `rbmi`
+
 # rbmi 1.2.6
 
 * Updated unit tests to fix false-positive error on CRAN's testing servers
