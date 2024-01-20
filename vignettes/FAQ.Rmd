@@ -33,21 +33,48 @@ It is intended to be read after the `rbmi: Introduction` vignette.
 
 <br>
 
-## How to handle missing data in baseline covariates?
+## How do the methods in `rbmi` compare to the mixed model for repeated measures (MMRM) implented in the `mmmrm` pacakge? 
 
-Unfortunately this is out of scope for the rbmi package and would need to be handled by the user before using rbmi.
-The best choice would need to be made on a case-by-case basis and, typically, a relatively simple approach should be sufficient.
-For reference, recent FDA guidance on covariate adjustment is:
+`rbmi` was designed to complement and, occasionally, replace standard MMRM analyses for clinical trials with longitudinal endpoints. 
 
-> Covariate adjustment is generally robust to the handling of subjects with missing baseline covariates.
-> Missing baseline covariate values can be singly or multiply imputed, or missingness indicators (Groenwold et al. 2012) can be added to the model used for covariate adjustment.
-> Sponsors should not perform imputation separately for different treatment groups, and sponsors should ensure that imputed baseline values are not dependent on any post-baseline variables, including the outcome.
+**Strengths** of `rbmi` compared to the standard MMRM model are:
+
+- `rbmi` was designed to allow for analyses which are fully aligned with the the estimand definition. To facilitate this, it implements methods under a range of different missing data assumptions including standard missing-at-random (MAR), extended MAR (via inclusion of time-varying covariates), reference-based missingness, and not missing-at-random at random (NMAR; via $\delta$-adjustments). In contrast, the standard MMRM model is only valid under a standard MAR assumption which is not always plausible. For example, the standard MAR assumption is rather implausible for implementing a treatment policy strategy for the intercurrent event "treatment discontinuation" if a substantial proportion of subjects are lost-to-follow-up after discontinuation.
+- The $\delta$-adjustment methods implemented in `rbmi` can be used for sensitivity analyses of a primary MMRM- or rbmi-type analysis.
+
+**Weaknesses** of `rbmi` compared to the standard MMRM model are:
+
+- MMRM models have been the de-facto standard analysis method for more than a decade. `rbmi` is currently less established. 
+- `rbmi` is computationally more intensive and using it requires more careful planning. 
+
+<br> 
+
+## How does `rbmi` compare to general-purpose software for multiple imputation (MI) such as `mice`? 
+
+`rbmi` covers only "MMRM-type" settings, i.e. settings with a single longitudinal continuous outcome which may be missing at some visits and hence require imputation. 
+
+For these settings, it has several **advantages** over general-purpose MI software:
+
+- `rbmi` supports imputation under a range of different missing data assumptions whereas general-purpose MI software is mostly focused on MAR-based imputation. In particular, it is unclear how to implement jump to reference (JR) or copy increments in reference (CIR) methods with such software. 
+- The `rbmi` interface is fully streamlined to this setting which arguably makes the implementation more straightforward than for general-purpose MI software.
+- The MICE algorithm is stochastic and inference is always based on Rubin's rules. In contrast, method "conditional mean imputation plus jackknifing" (`method="method_condmean(type = "jackknife")"`) in `rbmi` does not require any tuning parameters, is fully deterministic, and provides frequentist-consistent inference also for reference-based imputations (where Rubin's rule is very conservative leading to actual type I error rates which can be far below their nominal values). 
+
+However, `rbmi` is much more limited in its functionality than general-purpose MI software.
 
 <br>
 
-## Why does rbmi use a Ancova model and not an MMRM in the analysis function?
+## How to handle missing data in baseline covariates in `rbmi`?
 
-This is explained at the end of section 2.4 of @Wolbers2021.
+`rbmi` does not support imputation of missing baseline covariates. Therefore, missing baseline covariates need to be handled outside of `rbmi`. 
+The best approach for handling missing baseline covariates needs to be made on a case-by-case basis but in the context of randomized trials, relatively simple approach are often sufficient (@White2005).
+
+<br>
+
+## Why does `rbmi` by default use an ANCOVA analysis model and not an MMRM analysis model?
+
+The theoretical justification for the conditional mean imputation method requires that the analysis model leads to a point estimator which is a linear function of the outcome vector (@Wolbers2021). This is the case for ANCOVA but not for general MMRM models. For the other imputation methods, both ANCOVA and MMRM are valid analysis methods. An MMRM analysis model could be implemented by providing a custom analysis function to the `analyse()` function. 
+
+For further expalanations, we also cite the end of section 2.4 of the conditional mean imputation paper (@Wolbers2021):
 
 >  The proof relies on the fact that the ANCOVA estimator is a linear function of the outcome vector.
 > **For complete data, the ANCOVA estimator leads to identical parameter estimates as an MMRM model** of all longitudinal outcomes with an arbitrary common covariance structure across treatment groups **if treatment-by-visit interactions as well as covariate-by-visit-interactions** are included in the analysis model for all covariates,17 (p. 197).
@@ -56,7 +83,7 @@ This is explained at the end of section 2.4 of @Wolbers2021.
 
 <br>
 
-## How can I analyse Change-From-Baseline in the analysis model?
+## How can I analyse the change-from-baseline in the analysis model when imputation was done on the original outcomes?
 
 This can be achieved using custom analysis functions as outlined in Section 7 of the Advanced Vignette. e.g.
 
