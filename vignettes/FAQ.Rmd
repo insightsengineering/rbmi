@@ -29,11 +29,11 @@ knitr::opts_chunk$set(
 # Introduction
 
 This document provides answers to common questions about the `rbmi` package.
-It is intended to be read after the `rbmi: Introduction` vignette.
+It is intended to be read after the `rbmi: Quickstart` vignette.
 
 <br>
 
-## How do the methods in `rbmi` compare to the mixed model for repeated measures (MMRM) implented in the `mmmrm` pacakge? 
+## How do the methods in `rbmi` compare to the mixed model for repeated measures (MMRM) implemented in the `mmrm` package? 
 
 `rbmi` was designed to complement and, occasionally, replace standard MMRM analyses for clinical trials with longitudinal endpoints. 
 
