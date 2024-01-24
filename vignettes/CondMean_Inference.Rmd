@@ -212,7 +212,8 @@ get_delta_match_refBased <- function(draws, data_ice, references) {
   
   # Impute under MAR 
   # Note that in this specific context, it is desirable that an update   
-  # from a reference-based strategy to MAR uses the exact same data for     # fitting the imputation models, i.e. that available post-ICE data are 
+  # from a reference-based strategy to MAR uses the exact same data for 
+  # fitting the imputation models, i.e. that available post-ICE data are 
   # omitted from the imputation model for both. This is the case when    
   # using argument update_strategy in function impute(). 
   # However, for other settings (i.e. if one is interested in switching to
