@@ -1,6 +1,6 @@
 ---
 title: "rbmi: Frequentist and information-anchored inference for reference-based conditional mean imputation"
-author: Craig Gower-Page, Alessandro Noci, and Marcel Wolbers
+author: Alessandro Noci, Marcel Wolbers, Craig Gower-Page
 output: 
   bookdown::html_document2:
     toc: true
@@ -179,9 +179,9 @@ get_delta_match_refBased <- function(draws, data_ice, references) {
   
   # Impute according to `data_ice`
   imputeObj <- impute(
-  draws = drawObj,
-  update_strategy = data_ice,
-  references = references
+    draws = drawObj,
+    update_strategy = data_ice,
+    references = references
   )
   
   vars <- imputeObj$data$vars

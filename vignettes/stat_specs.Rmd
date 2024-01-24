@@ -438,7 +438,7 @@ Treatment effects based on conditional mean imputation are deterministic. All ot
 
 ### Standard errors of the treatment effect 
 
-All approaches provide frequentist consistent estimates of the standard error for imputation under a MAR assumption. 
+All approaches for imputation under a MAR assumption provide consistent estimates of the frequentist standard error. 
 
 For reference-based imputation methods, the situation is more complicated and two different types of variance estimators have been proposed in the statistical literature (@Bartlett2021). 
 The first is the frequentist variance which describes the actual repeated sampling variability of the estimator. 
