@@ -48,6 +48,7 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/CondMean_Inference.html">rbmi: Inference with Conditional Mean Imputation</a>
     <a class="dropdown-item" href="../articles/FAQ.html">rbmi: Frequently Asked Questions</a>
     <a class="dropdown-item" href="../articles/advanced.html">rbmi: Advanced Functionality</a>
     <a class="dropdown-item" href="../articles/quickstart.html">rbmi: Quickstart</a>
@@ -57,12 +58,6 @@
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a> </div></li>
-<!-- end dropdown for versions -->
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
@@ -531,7 +526,7 @@ As an example, the user can check how the CIR strategy was implemented by lookin
 <span><span class="co">#&gt;     pars &lt;- list(mu = mu, sigma = sigma)</span></span>
 <span><span class="co">#&gt;     return(pars)</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x56074bd3cc70&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55992dc74b80&gt;</span></span>
 <span><span class="co">#&gt; &lt;environment: namespace:rbmi&gt;</span></span></code></pre></div>
 <p>To further illustrate this for a simple example, assume that a new strategy is to be implemented as follows:
 - The marginal mean of the imputation distribution is equal to the marginal mean trajectory for the subject according to their assigned group and covariates up to the ICE.
@@ -980,7 +975,7 @@ Guizzaro, Lorenzo, Frank Pétavy, Robin Ristl, and Ciro Gallo. 2021. <span>“Th
 Noci, Alessandro, Marcel Wolbers, Markus Abt, Corine Baayen, Hans Ulrich Burger, Man Jin, and Weining Zhao Robieson. 2021. <span>“A Comparison of Estimand and Estimation Strategies for Clinical Trials in Early Parkinson’s Disease.”</span> <a href="https://arxiv.org/abs/2112.03700" class="external-link">https://arxiv.org/abs/2112.03700</a>.
 </div>
 <div id="ref-Wolbers2021" class="csl-entry">
-Wolbers, Marcel, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, and Jonathan W. Bartlett. 2022. <span>“Standard and Reference-Based Conditional Mean Imputation.”</span> <em>Pharmaceutical Statistics</em>. <a href="https://doi.org/10.1002/pst.2234" class="external-link">https://doi.org/10.1002/pst.2234</a>.
+Wolbers, Marcel, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, and Jonathan W Bartlett. 2022. <span>“Standard and Reference-Based Conditional Mean Imputation.”</span> <em>Pharmaceutical Statistics</em> 21 (6): 1246–57.
 </div>
 </div>
 </div>

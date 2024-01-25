@@ -48,6 +48,7 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/CondMean_Inference.html">rbmi: Inference with Conditional Mean Imputation</a>
     <a class="dropdown-item" href="../articles/FAQ.html">rbmi: Frequently Asked Questions</a>
     <a class="dropdown-item" href="../articles/advanced.html">rbmi: Advanced Functionality</a>
     <a class="dropdown-item" href="../articles/quickstart.html">rbmi: Quickstart</a>
@@ -57,12 +58,6 @@
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a> </div></li>
-<!-- end dropdown for versions -->
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
@@ -165,7 +160,7 @@ We expect that conditional mean imputation is also valid if a general MMRM model
 <p>This can be achieved using custom analysis functions as outlined in Section 7 of the Advanced Vignette. e.g.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ancova_modified</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">data2</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op">%&gt;%</span> <span class="fu">mutate</span><span class="op">(</span>ENDPOINT <span class="op">=</span> <span class="va">ENDPOINT</span> <span class="op">-</span> <span class="va">BASELINE</span><span class="op">)</span></span>
+<span>    <span class="va">data2</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ENDPOINT <span class="op">=</span> <span class="va">ENDPOINT</span> <span class="op">-</span> <span class="va">BASELINE</span><span class="op">)</span></span>
 <span>    <span class="fu">rbmi</span><span class="fu">::</span><span class="fu"><a href="../reference/ancova.html">ancova</a></span><span class="op">(</span><span class="va">data2</span>, <span class="va">...</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
@@ -180,7 +175,7 @@ We expect that conditional mean imputation is also valid if a general MMRM model
 White, Ian R, and Simon G Thompson. 2005. <span>“Adjusting for Partially Missing Baseline Measurements in Randomized Trials.”</span> <em>Statistics in Medicine</em> 24 (7): 993–1007.
 </div>
 <div id="ref-Wolbers2021" class="csl-entry">
-Wolbers, Marcel, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, and Jonathan W. Bartlett. 2022. <span>“Standard and Reference-Based Conditional Mean Imputation.”</span> <em>Pharmaceutical Statistics</em>. <a href="https://doi.org/10.1002/pst.2234" class="external-link">https://doi.org/10.1002/pst.2234</a>.
+Wolbers, Marcel, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, and Jonathan W Bartlett. 2022. <span>“Standard and Reference-Based Conditional Mean Imputation.”</span> <em>Pharmaceutical Statistics</em> 21 (6): 1246–57.
 </div>
 </div>
 </div>

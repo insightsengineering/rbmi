@@ -2,9 +2,10 @@ pandoc: 3.1.1
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
+  CondMean_Inference: CondMean_Inference.html
   FAQ: FAQ.html
   advanced: advanced.html
   quickstart: quickstart.html
   stat_specs: stat_specs.html
-last_built: 2024-01-25T11:41Z
+last_built: 2024-01-25T12:09Z
 
