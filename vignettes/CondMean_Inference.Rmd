@@ -78,7 +78,8 @@ library(dplyr)
 
 dat <- antidepressant_data
 
-# Use expand_locf to add rows corresponding to visits with missing outcomes to the dataset
+# Use expand_locf to add rows corresponding to visits with missing outcomes to
+# the dataset
 dat <- expand_locf(
   dat,
   PATIENT = levels(dat$PATIENT), # expand by PATIENT and VISIT 
@@ -99,9 +100,10 @@ dat_ice <- dat %>%
   select(PATIENT, VISIT) %>% 
   mutate(strategy = "JR")
 
-# In this dataset, subject 3618 has an intermittent missing values which does not correspond
-# to a study drug discontinuation. We therefore remove this subject from `dat_ice`. 
-# (In the later imputation step, it will automatically be imputed under the default MAR assumption.)
+# In this dataset, subject 3618 has an intermittent missing values which
+# does not correspond to a study drug discontinuation. We therefore remove
+# this subject from `dat_ice`. (In the later imputation step, it will
+# automatically be imputed under the default MAR assumption.)
 dat_ice <- dat_ice[-which(dat_ice$PATIENT == 3618),]
 
 # Define the names of key variables in our dataset and
@@ -114,7 +116,8 @@ vars <- set_vars(
   covariates = c("BASVAL*VISIT", "THERAPY*VISIT")
 )
 
-# Define which imputation method to use (here: conditional mean imputation with jackknife as resampling) 
+# Define which imputation method to use (here: conditional mean imputation
+# with jackknife as resampling) 
 method <- method_condmean(type = "jackknife")
 
 # Create samples for the imputation parameters by running the draws() function
@@ -205,11 +208,16 @@ The function returns a list containing the imputation objects under both referen
 #' Get delta adjustment that matches reference-based imputation
 #' 
 #' @param draws: A `draws` object created by `draws()`.
-#' @param data_ice: `data.frame` containing the information about the intercurrent events and the imputation strategies. Must represent the desired imputation strategy and not the MAR-variant.
-#' @param references: A named vector. Identifies the references to be used for reference-based imputation methods.
+#' @param data_ice: `data.frame` containing the information about the intercurrent
+#' events and the imputation strategies. Must represent the desired imputation
+#' strategy and not the MAR-variant.
+#' @param references: A named vector. Identifies the references to be used
+#' for reference-based imputation methods.
 #' 
 #' @return 
-#' The function returns a list containing the imputation objects under both reference-based and MAR imputation, plus a `data.frame` which contains the delta-adjustment.
+#' The function returns a list containing the imputation objects under both
+#' reference-based and MAR imputation, plus a `data.frame` which contains the
+#' delta-adjustment.
 #' 
 #' @seealso `draws()`, `impute()`.
 get_delta_match_refBased <- function(draws, data_ice, references) {
