@@ -1,6 +1,7 @@
 
 # rbmi (development version)
 
+* Include vignette on how to obtain frequentist and information-anchored inference with conditional mean imputation using `rbmi`
 * Added FAQ vignette
 
 # rbmi 1.2.6
