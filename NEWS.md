@@ -1,4 +1,8 @@
 
+# rbmi (development version)
+
+* Added FAQ vignette
+
 # rbmi 1.2.6
 
 * Updated unit tests to fix false-positive error on CRAN's testing servers

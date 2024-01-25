@@ -25,3 +25,8 @@ rmarkdown::render(
     output_file = "advanced.html"
 )
 
+rmarkdown::render(
+    input = "./vignettes/FAQ.Rmd",
+    output_dir = "./vignettes/",
+    output_file = "FAQ.html"
+)
