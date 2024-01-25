@@ -355,9 +355,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <ul>
 <li><a href="#introduction" id="toc-introduction"><span class="toc-section-number">1</span> Introduction</a>
 <ul>
-<li><a href="#how-to-handle-missing-data-in-baseline-covariates" id="toc-how-to-handle-missing-data-in-baseline-covariates"><span class="toc-section-number">1.1</span> How to handle missing data in baseline covariates?</a></li>
-<li><a href="#why-does-rbmi-use-a-ancova-model-and-not-an-mmrm-in-the-analysis-function" id="toc-why-does-rbmi-use-a-ancova-model-and-not-an-mmrm-in-the-analysis-function"><span class="toc-section-number">1.2</span> Why does rbmi use a Ancova model and not an MMRM in the analysis function?</a></li>
-<li><a href="#how-can-i-analyse-change-from-baseline-in-the-analysis-model" id="toc-how-can-i-analyse-change-from-baseline-in-the-analysis-model"><span class="toc-section-number">1.3</span> How can I analyse Change-From-Baseline in the analysis model?</a></li>
+<li><a href="#how-do-the-methods-in-rbmi-compare-to-the-mixed-model-for-repeated-measures-mmrm-implemented-in-the-mmrm-package" id="toc-how-do-the-methods-in-rbmi-compare-to-the-mixed-model-for-repeated-measures-mmrm-implemented-in-the-mmrm-package"><span class="toc-section-number">1.1</span> How do the methods in <code>rbmi</code> compare to the mixed model for repeated measures (MMRM) implemented in the <code>mmrm</code> package?</a></li>
+<li><a href="#how-does-rbmi-compare-to-general-purpose-software-for-multiple-imputation-mi-such-as-mice" id="toc-how-does-rbmi-compare-to-general-purpose-software-for-multiple-imputation-mi-such-as-mice"><span class="toc-section-number">1.2</span> How does <code>rbmi</code> compare to general-purpose software for multiple imputation (MI) such as <code>mice</code>?</a></li>
+<li><a href="#how-to-handle-missing-data-in-baseline-covariates-in-rbmi" id="toc-how-to-handle-missing-data-in-baseline-covariates-in-rbmi"><span class="toc-section-number">1.3</span> How to handle missing data in baseline covariates in <code>rbmi</code>?</a></li>
+<li><a href="#why-does-rbmi-by-default-use-an-ancova-analysis-model-and-not-an-mmrm-analysis-model" id="toc-why-does-rbmi-by-default-use-an-ancova-analysis-model-and-not-an-mmrm-analysis-model"><span class="toc-section-number">1.4</span> Why does <code>rbmi</code> by default use an ANCOVA analysis model and not an MMRM analysis model?</a></li>
+<li><a href="#how-can-i-analyse-the-change-from-baseline-in-the-analysis-model-when-imputation-was-done-on-the-original-outcomes" id="toc-how-can-i-analyse-the-change-from-baseline-in-the-analysis-model-when-imputation-was-done-on-the-original-outcomes"><span class="toc-section-number">1.5</span> How can I analyse the change-from-baseline in the analysis model when imputation was done on the original outcomes?</a></li>
 </ul></li>
 </ul>
 </div>
@@ -365,23 +367,45 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="introduction" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
 <p>This document provides answers to common questions about the <code>rbmi</code> package.
-It is intended to be read after the <code>rbmi: Introduction</code> vignette.</p>
+It is intended to be read after the <code>rbmi: Quickstart</code> vignette.</p>
 <p><br></p>
-<div id="how-to-handle-missing-data-in-baseline-covariates" class="section level2" number="1.1">
-<h2><span class="header-section-number">1.1</span> How to handle missing data in baseline covariates?</h2>
-<p>Unfortunately this is out of scope for the rbmi package and would need to be handled by the user before using rbmi.
-The best choice would need to be made on a case-by-case basis and, typically, a relatively simple approach should be sufficient.
-For reference, recent FDA guidance on covariate adjustment is:</p>
-<blockquote>
-<p>Covariate adjustment is generally robust to the handling of subjects with missing baseline covariates.
-Missing baseline covariate values can be singly or multiply imputed, or missingness indicators (Groenwold et al. 2012) can be added to the model used for covariate adjustment.
-Sponsors should not perform imputation separately for different treatment groups, and sponsors should ensure that imputed baseline values are not dependent on any post-baseline variables, including the outcome.</p>
-</blockquote>
+<div id="how-do-the-methods-in-rbmi-compare-to-the-mixed-model-for-repeated-measures-mmrm-implemented-in-the-mmrm-package" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> How do the methods in <code>rbmi</code> compare to the mixed model for repeated measures (MMRM) implemented in the <code>mmrm</code> package?</h2>
+<p><code>rbmi</code> was designed to complement and, occasionally, replace standard MMRM analyses for clinical trials with longitudinal endpoints.</p>
+<p><strong>Strengths</strong> of <code>rbmi</code> compared to the standard MMRM model are:</p>
+<ul>
+<li><code>rbmi</code> was designed to allow for analyses which are fully aligned with the the estimand definition. To facilitate this, it implements methods under a range of different missing data assumptions including standard missing-at-random (MAR), extended MAR (via inclusion of time-varying covariates), reference-based missingness, and not missing-at-random at random (NMAR; via <span class="math inline">\(\delta\)</span>-adjustments). In contrast, the standard MMRM model is only valid under a standard MAR assumption which is not always plausible. For example, the standard MAR assumption is rather implausible for implementing a treatment policy strategy for the intercurrent event “treatment discontinuation” if a substantial proportion of subjects are lost-to-follow-up after discontinuation.</li>
+<li>The <span class="math inline">\(\delta\)</span>-adjustment methods implemented in <code>rbmi</code> can be used for sensitivity analyses of a primary MMRM- or rbmi-type analysis.</li>
+</ul>
+<p><strong>Weaknesses</strong> of <code>rbmi</code> compared to the standard MMRM model are:</p>
+<ul>
+<li>MMRM models have been the de-facto standard analysis method for more than a decade. <code>rbmi</code> is currently less established.</li>
+<li><code>rbmi</code> is computationally more intensive and using it requires more careful planning.</li>
+</ul>
 <p><br></p>
 </div>
-<div id="why-does-rbmi-use-a-ancova-model-and-not-an-mmrm-in-the-analysis-function" class="section level2" number="1.2">
-<h2><span class="header-section-number">1.2</span> Why does rbmi use a Ancova model and not an MMRM in the analysis function?</h2>
-<p>This is explained at the end of section 2.4 of <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>.</p>
+<div id="how-does-rbmi-compare-to-general-purpose-software-for-multiple-imputation-mi-such-as-mice" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> How does <code>rbmi</code> compare to general-purpose software for multiple imputation (MI) such as <code>mice</code>?</h2>
+<p><code>rbmi</code> covers only “MMRM-type” settings, i.e. settings with a single longitudinal continuous outcome which may be missing at some visits and hence require imputation.</p>
+<p>For these settings, it has several <strong>advantages</strong> over general-purpose MI software:</p>
+<ul>
+<li><code>rbmi</code> supports imputation under a range of different missing data assumptions whereas general-purpose MI software is mostly focused on MAR-based imputation. In particular, it is unclear how to implement jump to reference (JR) or copy increments in reference (CIR) methods with such software.</li>
+<li>The <code>rbmi</code> interface is fully streamlined to this setting which arguably makes the implementation more straightforward than for general-purpose MI software.</li>
+<li>The MICE algorithm is stochastic and inference is always based on Rubin’s rules. In contrast, method “conditional mean imputation plus jackknifing” (<code>method=&quot;method_condmean(type = &quot;jackknife&quot;)&quot;</code>) in <code>rbmi</code> does not require any tuning parameters, is fully deterministic, and provides frequentist-consistent inference also for reference-based imputations (where Rubin’s rule is very conservative leading to actual type I error rates which can be far below their nominal values).</li>
+</ul>
+<p>However, <code>rbmi</code> is much more limited in its functionality than general-purpose MI software.</p>
+<p><br></p>
+</div>
+<div id="how-to-handle-missing-data-in-baseline-covariates-in-rbmi" class="section level2" number="1.3">
+<h2><span class="header-section-number">1.3</span> How to handle missing data in baseline covariates in <code>rbmi</code>?</h2>
+<p><code>rbmi</code> does not support imputation of missing baseline covariates. Therefore, missing baseline covariates need to be handled outside of <code>rbmi</code>.
+The best approach for handling missing baseline covariates needs to be made on a case-by-case basis but in the context of randomized trials, relatively simple approach are often sufficient (<span class="citation">White and Thompson (<a href="#ref-White2005">2005</a>)</span>).</p>
+<p><br></p>
+</div>
+<div id="why-does-rbmi-by-default-use-an-ancova-analysis-model-and-not-an-mmrm-analysis-model" class="section level2" number="1.4">
+<h2><span class="header-section-number">1.4</span> Why does <code>rbmi</code> by default use an ANCOVA analysis model and not an MMRM analysis model?</h2>
+<p>The theoretical justification for the conditional mean imputation method requires that the analysis model leads to a point estimator which is a linear function of the outcome vector (<span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>). This is the case for ANCOVA but not for general MMRM models. For the other imputation methods, both ANCOVA and MMRM are valid analysis methods. An MMRM analysis model could be implemented by providing a custom analysis function to the <code>analyse()</code> function.</p>
+<p>For further expalanations, we also cite the end of section 2.4 of the conditional mean imputation paper (<span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>):</p>
 <blockquote>
 <p>The proof relies on the fact that the ANCOVA estimator is a linear function of the outcome vector.
 <strong>For complete data, the ANCOVA estimator leads to identical parameter estimates as an MMRM model</strong> of all longitudinal outcomes with an arbitrary common covariance structure across treatment groups <strong>if treatment-by-visit interactions as well as covariate-by-visit-interactions</strong> are included in the analysis model for all covariates,17 (p. 197).
@@ -390,8 +414,8 @@ We expect that conditional mean imputation is also valid if a general MMRM model
 </blockquote>
 <p><br></p>
 </div>
-<div id="how-can-i-analyse-change-from-baseline-in-the-analysis-model" class="section level2" number="1.3">
-<h2><span class="header-section-number">1.3</span> How can I analyse Change-From-Baseline in the analysis model?</h2>
+<div id="how-can-i-analyse-the-change-from-baseline-in-the-analysis-model-when-imputation-was-done-on-the-original-outcomes" class="section level2" number="1.5">
+<h2><span class="header-section-number">1.5</span> How can I analyse the change-from-baseline in the analysis model when imputation was done on the original outcomes?</h2>
 <p>This can be achieved using custom analysis functions as outlined in Section 7 of the Advanced Vignette. e.g.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>ancova_modified <span class="ot">&lt;-</span> <span class="cf">function</span>(data, ...) {</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    data2 <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">ENDPOINT =</span> ENDPOINT <span class="sc">-</span> BASELINE)</span>
@@ -405,6 +429,9 @@ We expect that conditional mean imputation is also valid if a general MMRM model
 <span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a> )</span></code></pre></div>
 <p><br></p>
 <div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-White2005" class="csl-entry">
+White, Ian R, and Simon G Thompson. 2005. <span>“Adjusting for Partially Missing Baseline Measurements in Randomized Trials.”</span> <em>Statistics in Medicine</em> 24 (7): 993–1007.
+</div>
 <div id="ref-Wolbers2021" class="csl-entry">
 Wolbers, Marcel, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, and Jonathan W. Bartlett. 2022. <span>“Standard and Reference-Based Conditional Mean Imputation.”</span> <em>Pharmaceutical Statistics</em>. <a href="https://doi.org/10.1002/pst.2234">https://doi.org/10.1002/pst.2234</a>.
 </div>
