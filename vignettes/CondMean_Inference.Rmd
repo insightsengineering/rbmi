@@ -1,6 +1,6 @@
 ---
-title: "rbmi: Frequentist and information-anchored inference for reference-based conditional mean imputation"
-author: Craig Gower-Page, Alessandro Noci, and Marcel Wolbers
+title: "rbmi: Inference with Conditional Mean Imputation"
+author: Alessandro Noci, Marcel Wolbers, Craig Gower-Page
 output: 
   bookdown::html_document2:
     toc: true
@@ -14,7 +14,7 @@ linkcolor: blue
 pkgdown:
   as_is: true
 vignette: >
-  %\VignetteIndexEntry{rbmi: CondMean_Inference}
+  %\VignetteIndexEntry{rbmi: Inference with Conditional Mean Imputation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -37,12 +37,13 @@ The resulting information-anchored variance is typically very similar to the var
 However, the information-anchored variance does not reflect the actual variability of the reference-based estimator and the resulting frequentist inference is highly conservative resulting in a substantial power loss. 
 
 Reference-based conditional mean imputation combined with a resampling method such as the jackknife or the bootstrap was first introduced in @Wolbers2021.
-This approach naturally targets the frequentist variance.
-The information-anchored variance is typically estimated using Rubin's rules for Bayesian multiple imputation which are not applicable within the conditional mean imputation framework.
-However, an alternative information-anchored variance proposed by @Lu2021 can easily be obtained as we show below. The basic idea of @Lu2021 is to obtain the information-anchored variance via a MAR imputation combined with a delta-adjustment where delta is selected in a data-driven way to match the reference-based estimator.
+This approach naturally targets the frequentist variance. The information-anchored variance is typically estimated using Rubin's rules for Bayesian multiple imputation which are not applicable within the conditional mean imputation framework.
+However, an alternative information-anchored variance proposed by @Lu2021 can easily be obtained as we show below.
+The basic idea of @Lu2021 is to obtain the information-anchored variance via a MAR imputation combined with a delta-adjustment where delta is selected in a data-driven way to match the reference-based estimator.
 For conditional mean imputation, the proposal by @Lu2021 can be implemented by choosing the delta-adjustment as the difference between the conditional mean imputation under the chosen reference-based assumption and MAR on the original dataset.
 The variance can then be obtained via the jackknife or the bootstrap while keeping the delta-adjustment fixed. The resulting variance estimate is very similar to Rubin's variance.
 Moreover as shown in @CroEtAl2019, the variance of MAR-imputation combined with a delta-adjustment achieves even better information-anchoring properties than Rubin's variance for reference-based imputation.
+Reference-based missing data assumptions are strong and borrow information from the control arm for imputation in the active arm.
 
 This vignette demonstrates first how to obtain frequentist inference using reference-based conditional mean imputation using `rbmi`, and then shows that an information-anchored inference can also be easily implemented using the package. 
 
@@ -201,42 +202,45 @@ The function returns a list containing the imputation objects under both referen
 
 ```{r}
 
+#' Get delta adjustment that matches reference-based imputation
+#' 
+#' @param draws: A `draws` object created by `draws()`.
+#' @param data_ice: `data.frame` containing the information about the intercurrent events and the imputation strategies. Must represent the desired imputation strategy and not the MAR-variant.
+#' @param references: A named vector. Identifies the references to be used for reference-based imputation methods.
+#' 
+#' @return 
+#' The function returns a list containing the imputation objects under both reference-based and MAR imputation, plus a `data.frame` which contains the delta-adjustment.
+#' 
+#' @seealso `draws()`, `impute()`.
 get_delta_match_refBased <- function(draws, data_ice, references) {
   
   # Impute according to `data_ice`
   imputeObj <- impute(
-  draws = drawObj,
-  update_strategy = data_ice,
-  references = references
+    draws = drawObj,
+    update_strategy = data_ice,
+    references = references
   )
   
   vars <- imputeObj$data$vars
   
   # Access imputed dataset (index=1 for method_condmean(type = "jackknife"))
-  cmi <- extract_imputed_dfs(imputeObj, index = 1, idmap = TRUE)[[1]] %>%
-    dplyr::select(vars$subjid, vars$visit, vars$outcome) %>%
-    rename(y_imp = !!as.symbol(vars$outcome))
+  cmi <- extract_imputed_dfs(imputeObj, index = 1, idmap = TRUE)[[1]]
+  idmap <- attributes(cmi)$idmap
+  cmi <- cmi[, c(vars$subjid, vars$visit, vars$outcome)]
+  colnames(cmi)[colnames(cmi) == vars$outcome] <- "y_imp"
   
   # Map back original patients id since rbmi re-code ids to ensure id uniqueness
-  cmi <- cmi %>% mutate(
-    !!vars$subjid := factor(
-      recode(!!as.symbol(vars$subjid), !!! attributes(cmi)$idmap),
-      levels = attributes(cmi)$idmap
-      )
-    )
+  
+  cmi[[vars$subjid]] <- idmap[match(cmi[[vars$subjid]], names(idmap))]
   
   # Derive conditional mean imputations under MAR
-  dat_ice_MAR <- data_ice %>% mutate(
-    !!vars$strategy := ifelse(
-      !!as.symbol(vars$strategy) %in% c("CIR","CR","JR"),
-      "MAR", 
-      strategy
-      )
-    )
+  dat_ice_MAR <- data_ice 
+  dat_ice_MAR[[vars$strategy]] <- "MAR"
   
   # Impute under MAR 
   # Note that in this specific context, it is desirable that an update   
-  # from a reference-based strategy to MAR uses the exact same data for
+
+  # from a reference-based strategy to MAR uses the exact same data for 
   # fitting the imputation models, i.e. that available post-ICE data are 
   # omitted from the imputation model for both. This is the case when    
   # using argument update_strategy in function impute(). 
@@ -250,24 +254,21 @@ get_delta_match_refBased <- function(draws, data_ice, references) {
       update_strategy = dat_ice_MAR
     )
   ) 
-  # Take imputed outcome
-  cmi_MAR <- extract_imputed_dfs(imputeObj_MAR, index = 1, idmap = TRUE)[[1]] %>%
-    dplyr::select(vars$subjid, vars$visit, vars$outcome) %>%
-    rename(y_MAR = !!as.symbol(vars$outcome))
+  
+  # Access imputed dataset (index=1 for method_condmean(type = "jackknife"))
+  cmi_MAR <- extract_imputed_dfs(imputeObj_MAR, index = 1, idmap = TRUE)[[1]]
+  idmap <- attributes(cmi_MAR)$idmap
+  cmi_MAR <- cmi_MAR[, c(vars$subjid, vars$visit, vars$outcome)]
+  colnames(cmi_MAR)[colnames(cmi_MAR) == vars$outcome] <- "y_MAR"
   
   # Map back original patients id since rbmi re-code ids to ensure id uniqueness
-  cmi_MAR <- cmi_MAR %>% mutate(
-    !!vars$subjid := factor(
-      recode(!!as.symbol(vars$subjid), !!! attributes(cmi)$idmap),
-      levels = attributes(cmi)$idmap
-      )
-    )
+  cmi_MAR[[vars$subjid]] <- idmap[match(cmi_MAR[[vars$subjid]], names(idmap))]
   
   # Derive delta adjustment "aligned with ref-based imputation",
   # i.e. difference between ref-based imputation and MAR imputation
-  delta_adjust <- full_join(cmi, cmi_MAR, by = c(vars$subjid, vars$visit)) %>%
-    mutate(delta = y_imp - y_MAR)
-  
+  delta_adjust <- merge(cmi, cmi_MAR, by = c(vars$subjid, vars$visit), all = TRUE)
+  delta_adjust$delta <- delta_adjust$y_imp - delta_adjust$y_MAR
+
   ret_obj <- list(
     imputeObj = imputeObj,
     imputeObj_MAR = imputeObj_MAR,
