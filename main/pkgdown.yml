@@ -2,8 +2,9 @@ pandoc: 3.1.1
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
+  FAQ: FAQ.html
   advanced: advanced.html
   quickstart: quickstart.html
   stat_specs: stat_specs.html
-last_built: 2024-01-17T17:09Z
+last_built: 2024-01-25T11:41Z
 
