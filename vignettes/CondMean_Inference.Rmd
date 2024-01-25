@@ -42,7 +42,7 @@ However, an alternative information-anchored variance proposed by @Lu2021 can ea
 The basic idea of @Lu2021 is to obtain the information-anchored variance via a MAR imputation combined with a delta-adjustment where delta is selected in a data-driven way to match the reference-based estimator.
 For conditional mean imputation, the proposal by @Lu2021 can be implemented by choosing the delta-adjustment as the difference between the conditional mean imputation under the chosen reference-based assumption and MAR on the original dataset.
 The variance can then be obtained via the jackknife or the bootstrap while keeping the delta-adjustment fixed. The resulting variance estimate is very similar to Rubin's variance.
-Moreover as shown in @CroEtAl2019, the variance of MAR-imputation combined with a delta-adjustment achieves even better information-anchoring properties than Rubin's variance for reference-based imputation.
+Moreover, as shown in @CroEtAl2019, the variance of MAR-imputation combined with a delta-adjustment achieves even better information-anchoring properties than Rubin's variance for reference-based imputation.
 Reference-based missing data assumptions are strong and borrow information from the control arm for imputation in the active arm.
 
 This vignette demonstrates first how to obtain frequentist inference using reference-based conditional mean imputation using `rbmi`, and then shows that an information-anchored inference can also be easily implemented using the package. 
