@@ -58,12 +58,6 @@
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a> </div></li>
-<!-- end dropdown for versions -->
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
@@ -486,35 +480,35 @@ in the original call to <code><a href="../reference/draws.html">draws()</a></cod
 <span><span class="co">#&gt;      trt_4    -0.092  0.683  -1.439  1.256   0.893  </span></span>
 <span><span class="co">#&gt;    lsm_ref_4  -1.616  0.486  -2.576  -0.656  0.001  </span></span>
 <span><span class="co">#&gt;    lsm_alt_4  -1.708  0.475  -2.645  -0.77   &lt;0.001 </span></span>
-<span><span class="co">#&gt;      trt_5    1.278   0.928  -0.554   3.11    0.17  </span></span>
-<span><span class="co">#&gt;    lsm_ref_5  -4.111  0.662  -5.418  -2.804  &lt;0.001 </span></span>
-<span><span class="co">#&gt;    lsm_alt_5  -2.833  0.646  -4.108  -1.558  &lt;0.001 </span></span>
-<span><span class="co">#&gt;      trt_6    1.908   1.001  -0.07   3.885   0.059  </span></span>
-<span><span class="co">#&gt;    lsm_ref_6  -6.078  0.716  -7.493  -4.663  &lt;0.001 </span></span>
-<span><span class="co">#&gt;    lsm_alt_6  -4.171  0.694  -5.541   -2.8   &lt;0.001 </span></span>
-<span><span class="co">#&gt;      trt_7    2.066   1.129  -0.166  4.298   0.069  </span></span>
-<span><span class="co">#&gt;    lsm_ref_7  -6.916  0.815  -8.527  -5.305  &lt;0.001 </span></span>
-<span><span class="co">#&gt;    lsm_alt_7  -4.85   0.794  -6.42   -3.28   &lt;0.001 </span></span>
+<span><span class="co">#&gt;      trt_5    1.278   0.927  -0.553  3.108    0.17  </span></span>
+<span><span class="co">#&gt;    lsm_ref_5  -4.109  0.661  -5.415  -2.804  &lt;0.001 </span></span>
+<span><span class="co">#&gt;    lsm_alt_5  -2.831  0.647  -4.109  -1.553  &lt;0.001 </span></span>
+<span><span class="co">#&gt;      trt_6    1.907   0.997  -0.062  3.876   0.058  </span></span>
+<span><span class="co">#&gt;    lsm_ref_6  -6.084  0.711  -7.49   -4.679  &lt;0.001 </span></span>
+<span><span class="co">#&gt;    lsm_alt_6  -4.177  0.698  -5.556  -2.799  &lt;0.001 </span></span>
+<span><span class="co">#&gt;      trt_7    2.077   1.118  -0.133  4.287   0.065  </span></span>
+<span><span class="co">#&gt;    lsm_ref_7  -6.951  0.81   -8.552  -5.351  &lt;0.001 </span></span>
+<span><span class="co">#&gt;    lsm_alt_7  -4.875  0.796  -6.449   -3.3   &lt;0.001 </span></span>
 <span><span class="co">#&gt;   --------------------------------------------------</span></span></code></pre></div>
 <p>The table of values shown in the print message for <code>poolObj</code> can also be extracted using the <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> function:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">poolObj</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    parameter         est        se        lci        uci         pval</span></span>
-<span><span class="co">#&gt; 1      trt_4 -0.09180645 0.6826279 -1.4394968  1.2558839 8.931772e-01</span></span>
-<span><span class="co">#&gt; 2  lsm_ref_4 -1.61581996 0.4862316 -2.5757714 -0.6558685 1.093708e-03</span></span>
-<span><span class="co">#&gt; 3  lsm_alt_4 -1.70762640 0.4749573 -2.6453193 -0.7699335 4.262148e-04</span></span>
-<span><span class="co">#&gt; 4      trt_5  1.27824965 0.9275590 -0.5537586  3.1102579 1.701265e-01</span></span>
-<span><span class="co">#&gt; 5  lsm_ref_5 -4.11096746 0.6618921 -5.4183012 -2.8036337 4.497335e-09</span></span>
-<span><span class="co">#&gt; 6  lsm_alt_5 -2.83271780 0.6456372 -4.1079151 -1.5575205 2.088009e-05</span></span>
-<span><span class="co">#&gt; 7      trt_6  1.90775347 1.0008888 -0.0697423  3.8852492 5.853546e-02</span></span>
-<span><span class="co">#&gt; 8  lsm_ref_6 -6.07826221 0.7161684 -7.4933448 -4.6631796 1.895698e-14</span></span>
-<span><span class="co">#&gt; 9  lsm_alt_6 -4.17050874 0.6935966 -5.5407736 -2.8002439 1.287064e-08</span></span>
-<span><span class="co">#&gt; 10     trt_7  2.06617830 1.1290164 -0.1656278  4.2979844 6.933159e-02</span></span>
-<span><span class="co">#&gt; 11 lsm_ref_7 -6.91600605 0.8149223 -8.5273718 -5.3046403 2.990564e-14</span></span>
-<span><span class="co">#&gt; 12 lsm_alt_7 -4.84982775 0.7939914 -6.4197197 -3.2799358 9.576739e-09</span></span></code></pre></div>
+<span><span class="co">#&gt;    parameter         est        se         lci        uci         pval</span></span>
+<span><span class="co">#&gt; 1      trt_4 -0.09180645 0.6826279 -1.43949684  1.2558839 8.931772e-01</span></span>
+<span><span class="co">#&gt; 2  lsm_ref_4 -1.61581996 0.4862316 -2.57577141 -0.6558685 1.093708e-03</span></span>
+<span><span class="co">#&gt; 3  lsm_alt_4 -1.70762640 0.4749573 -2.64531931 -0.7699335 4.262148e-04</span></span>
+<span><span class="co">#&gt; 4      trt_5  1.27784334 0.9267958 -0.55262591  3.1083126 1.699077e-01</span></span>
+<span><span class="co">#&gt; 5  lsm_ref_5 -4.10912984 0.6609343 -5.41453523 -2.8037244 4.327320e-09</span></span>
+<span><span class="co">#&gt; 6  lsm_alt_5 -2.83128650 0.6469374 -4.10909149 -1.5534815 2.189243e-05</span></span>
+<span><span class="co">#&gt; 7      trt_6  1.90697590 0.9965203 -0.06173754  3.8756893 5.753387e-02</span></span>
+<span><span class="co">#&gt; 8  lsm_ref_6 -6.08439116 0.7114036 -7.48988902 -4.6788933 1.195687e-14</span></span>
+<span><span class="co">#&gt; 9  lsm_alt_6 -4.17741526 0.6975145 -5.55556852 -2.7992620 1.482787e-08</span></span>
+<span><span class="co">#&gt; 10     trt_7  2.07666647 1.1181891 -0.13345442  4.2867874 6.532284e-02</span></span>
+<span><span class="co">#&gt; 11 lsm_ref_7 -6.95143063 0.8095397 -8.55204130 -5.3508200 1.622026e-14</span></span>
+<span><span class="co">#&gt; 12 lsm_alt_7 -4.87476416 0.7963105 -6.44945627 -3.3000720 9.230722e-09</span></span></code></pre></div>
 <p>These outputs gives an estimated difference of
-2.066 (95% CI -0.166 to 4.298)
-between the two groups at the last visit with an associated p-value of 0.069.</p>
+2.077 (95% CI -0.133 to 4.287)
+between the two groups at the last visit with an associated p-value of 0.065.</p>
 </div>
 <div class="section level2" number="7">
 <h2 id="code">
