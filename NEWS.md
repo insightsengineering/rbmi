@@ -3,6 +3,7 @@
 
 * Include vignette on how to obtain frequentist and information-anchored inference with conditional mean imputation using `rbmi`
 * Added FAQ vignette
+* Updated documentation for `lsmeans()` to clarify differences between it and the corresponding function from the `emmeans` package
 
 # rbmi 1.2.6
 
