@@ -216,6 +216,44 @@ test_that("LSmeans (proportional) from rbmi equals means of average prediction",
 })
 
 
+test_that("LSmeans(proportional) returns equivalent results to 'counterfactual'", {
+    set.seed(2412)
+    n <- 10000
+    # Main goal here is to provide a more involved test of interactions between
+    # cont * cont, cont * cont * cont model terms
+    dat <- tibble(
+        v1 = rnorm(n),
+        v2 = rnorm(n),
+        v3 = rnorm(n),
+        c1 = sample(c("A", "B"), size = n, replace = TRUE, prob = c(0.8, 0.2)),
+        c2 = sample(c("X", "Y"), size = n, replace = TRUE, prob = c(0.6, 0.4)),
+        error = rnorm(n, 0, 4),
+        outcome = 30 +
+            5 * v1 +
+            3 * v2 +
+            2 * v3 +
+            8 * v1 * v2 +
+            9 * v1 * v3 +
+            10 * v2 * v3 +
+            12 * v1 * v2 * v3 +
+            4 * (c1 == "B") +
+            6 * (c2 == "Y") +
+            7 * (c1 == "B" & c2 == "Y") +
+            13 * (c1 == "B") * v1 +
+            error
+    )
+    mod <- lm(outcome ~ v1 * v2 * v3 + c1 * c2 + v1 * c1, data = dat)
+    
+    expect_equal(
+        lsmeans(mod, c1 = "A", .weights = "proportional")$est,
+        mean(predict(mod, newdata = dat |> mutate(c1 = "A")))
+    )
+
+    expect_equal(
+        lsm2 <- lsmeans(mod, c1 = "B", c2 = "Y", .weights = "proportional")$est,
+        mean(predict(mod, newdata = dat |> mutate(c1 = "B", c2 = "Y")))
+    )
+})
 
 
 #### Toy code to experiment with
@@ -253,6 +291,7 @@ test_that("LSmeans (proportional) from rbmi equals means of average prediction",
 # dat_c <- dat2 %>% mutate(trt = factor("C", levels = c("C", "T")))
 # mean(predict(mod, dat_c))
 # mean(predict(mod, dat_t))
+
 
 
 

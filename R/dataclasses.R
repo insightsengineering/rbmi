@@ -285,6 +285,7 @@ repr <- function(x, ...) {
     UseMethod("repr")
 }
 
+#' @export
 repr.numeric <- function(x, ...) {
     paste0("c(", paste0(round(x, 2), collapse = ", "), ")")
 }

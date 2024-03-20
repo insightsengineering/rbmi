@@ -2,30 +2,34 @@
 #' Least Square Means
 #'
 #'
-#' Estimates the least square means from a linear model. This is done by
-#' generating a prediction from the model using an hypothetical observation
-#' that is constructed by averaging the data. See details for more information.
+#' Estimates the least square means from a linear model. The exact implementation
+#' / interpretation depends on the weighting scheme; see details for more information.
 #'
 #' @details
 #'
-#' The lsmeans are obtained by calculating hypothetical patients
-#' and predicting their expected values. These hypothetical patients
-#' are constructed by expanding out all possible combinations of each
-#' categorical covariate and by setting any numerical covariates equal
-#' to the mean.
+#' For `.weights = "proportional"` (the default) the lsmeans are obtained by
+#' taking the average of the fitted values for each patient.
+#' In terms of the interactions between two continuous covariates 
+#' this is equivalent to constructing a hypothetical patient whose
+#' interaction term is `mean(X * Y)`. This is opposed to the
+#' `emmeans` package which calculates the interaction term
+#' of the hypothetical patient as `mean(X) * mean(Y)`. The approach
+#' outlined here is equivalent to standardization or g-computation.
+#' 
+#' For `.weights = "equal"` the lsmeans are obtained by taking the model fitted
+#' value of a hypothetical patient whose covariates are defined as follows:
+#' - Continuous covariates are set to `mean(X)`
+#' - Dummy categorical variables are set to `1/N` where `N` is the number of levels
+#' - Continuous * continuous interactions are set to `mean(X) * mean(Y)`
+#' - Continuous * categorical interactions are set to `mean(X) * 1/N`
 #'
-#' A final lsmean value is calculated by averaging these hypothetical
-#' patients. If `.weights` equals `"proportional"` then the values are weighted
-#' by the frequency in which they occur in the full dataset. If `.weights`
-#' equals `"equal"` then each hypothetical patient is given an equal weight
-#' regardless of what actually occurs in the dataset.
+#' Regardless of the weighting scheme any named arguments passed via `...` will
+#' fix the value of the covariate to the specified value.
+#' For example, `lsmeans(model, trt = "A")` will fix the dummy variable `trtA` to 1
+#' for all patients (real or hypothetical) when calculating the lsmeans.
 #'
-#' Use the `...` argument to fix specific variables to specific values.
-#'
-#' See the references for identical implementations as done in SAS and
-#' in R via the `emmeans` package. This function attempts to re-implement the
-#' `emmeans` derivation for standard linear models but without having to include
-#' all of it's dependencies.
+#' See the references for similar implementations as done in SAS and
+#' in R via the `emmeans` package.
 #'
 #' @param model A model created by `lm`.
 #' @param ... Fixes specific variables to specific values i.e.
@@ -67,7 +71,7 @@ lsmeans <- function(model, ..., .weights = c("proportional", "equal")) {
         proportional = ls_design_proportional
     )
 
-    design <- design_fun(data, frm, covars, fix)
+    design <- design_fun(data, frm, fix)
     beta <- matrix(coef(model), nrow = 1)
     list(
         est = as.vector(beta %*% design),
@@ -88,41 +92,61 @@ lsmeans <- function(model, ..., .weights = c("proportional", "equal")) {
 #'
 #' @param data A data.frame
 #' @param frm Formula used to fit the original model
-#' @param covars a character vector of variables names that exist in
-#' `data` which should be extracted (`ls_design_equal` only)
 #' @param fix A named list of variables with fixed values
 #' @name ls_design
-ls_design_equal <- function(data, frm, covars, fix) {
-    collection <- list()
-    for (var in covars) {
-        values <- data[[var]]
-        if (is.factor(values)) {
-            lvls <- levels(values)
-            if (var %in% names(fix)) {
-                collection[[var]] <- factor(fix[[var]], levels = lvls)
-            } else {
-                collection[[var]] <- factor(lvls, levels = lvls)
-            }
-        } else if (is.numeric(values)) {
-            if (var %in% names(fix)) {
-                collection[[var]] <- fix[[var]]
-            } else {
-                collection[[var]] <- mean(values)
-            }
-        } else {
-            stop("invalid data type")
+ls_design_equal <- function(data, frm, fix) {
+    assert_that(
+        inherits(frm, "formula"),
+        is.data.frame(data),
+        is.list(fix),
+        all(names(fix) %in% colnames(data))
+    )
+    frm2 <- update(frm, NULL ~ .)
+    data2 <- model.frame(frm2, data)
+    collection <- lapply(as.list(data2), collapse_values)
+    
+    for (var in names(fix)) {
+        if (is.numeric(data2[[var]])) {
+            collection[[var]] <- fix[[var]]
+        } else if (is.factor(data2[[var]])) {
+            collection[[var]] <- factor(fix[[var]], levels = levels(data2[[var]]))
         }
     }
-    design <- matrix(
-        apply(model.matrix(frm, expand.grid(collection)), 2, mean),
+
+    all_combinations <- expand.grid(collection)
+
+    design_matrix <- model.matrix(frm2, all_combinations)
+
+    result <- matrix(
+        apply(design_matrix, 2, mean),
         ncol = 1
     )
-    return(design)
+    return(result)
+}
+
+
+collapse_values <- function(x) {
+    UseMethod("collapse_values")
+}
+
+#' @export
+collapse_values.factor <- function(x) {
+    return(factor(levels(x), levels(x)))
+}
+
+#' @export
+collapse_values.numeric <- function(x) {
+    return(mean(x))
+}
+
+#' @export
+collapse_values.default <- function(x) {
+    stop("invalid data type")
 }
 
 
 #' @rdname ls_design
-ls_design_proportional <- function(data, frm, covars, fix) {
+ls_design_proportional <- function(data, frm, fix) {
     data2 <- data
     for (var in names(fix)) {
         value <- data[[var]]

@@ -17,29 +17,35 @@ of the variable within the dataset.}
 categorical covariate combination when calculating the lsmeans.}
 }
 \description{
-Estimates the least square means from a linear model. This is done by
-generating a prediction from the model using an hypothetical observation
-that is constructed by averaging the data. See details for more information.
+Estimates the least square means from a linear model. The exact implementation
+/ interpretation depends on the weighting scheme; see details for more information.
 }
 \details{
-The lsmeans are obtained by calculating hypothetical patients
-and predicting their expected values. These hypothetical patients
-are constructed by expanding out all possible combinations of each
-categorical covariate and by setting any numerical covariates equal
-to the mean.
+For \code{.weights = "proportional"} (the default) the lsmeans are obtained by
+taking the average of the fitted values for each patient.
+In terms of the interactions between two continuous covariates
+this is equivalent to constructing a hypothetical patient whose
+interaction term is \code{mean(X * Y)}. This is opposed to the
+\code{emmeans} package which calculates the interaction term
+of the hypothetical patient as \code{mean(X) * mean(Y)}. The approach
+outlined here is equivalent to standardization or g-computation.
 
-A final lsmean value is calculated by averaging these hypothetical
-patients. If \code{.weights} equals \code{"proportional"} then the values are weighted
-by the frequency in which they occur in the full dataset. If \code{.weights}
-equals \code{"equal"} then each hypothetical patient is given an equal weight
-regardless of what actually occurs in the dataset.
+For \code{.weights = "equal"} the lsmeans are obtained by taking the model fitted
+value of a hypothetical patient whose covariates are defined as follows:
+\itemize{
+\item Continuous covariates are set to \code{mean(X)}
+\item Dummy categorical variables are set to \code{1/N} where \code{N} is the number of levels
+\item Continuous * continuous interactions are set to \code{mean(X) * mean(Y)}
+\item Continuous * categorical interactions are set to \code{mean(X) * 1/N}
+}
 
-Use the \code{...} argument to fix specific variables to specific values.
+Regardless of the weighting scheme any named arguments passed via \code{...} will
+fix the value of the covariate to the specified value.
+For example, \code{lsmeans(model, trt = "A")} will fix the dummy variable \code{trtA} to 1
+for all patients (real or hypothetical) when calculating the lsmeans.
 
-See the references for identical implementations as done in SAS and
-in R via the \code{emmeans} package. This function attempts to re-implement the
-\code{emmeans} derivation for standard linear models but without having to include
-all of it's dependencies.
+See the references for similar implementations as done in SAS and
+in R via the \code{emmeans} package.
 }
 \examples{
 \dontrun{
