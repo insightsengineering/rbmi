@@ -3,25 +3,55 @@
 #'
 #'
 #' Estimates the least square means from a linear model. The exact implementation
-#' / interpretation depends on the weighting scheme; see details for more information.
+#' / interpretation depends on the weighting scheme; see the weighting section for more
+#' information.
 #'
-#' @details
-#'
-#' For `.weights = "proportional"` (the default) the lsmeans are obtained by
-#' taking the average of the fitted values for each patient.
-#' In terms of the interactions between two continuous covariates 
-#' this is equivalent to constructing a hypothetical patient whose
-#' interaction term is `mean(X * Y)`. This is opposed to the
-#' `emmeans` package which calculates the interaction term
-#' of the hypothetical patient as `mean(X) * mean(Y)`. The approach
-#' outlined here is equivalent to standardization or g-computation.
 #' 
-#' For `.weights = "equal"` the lsmeans are obtained by taking the model fitted
+#' @section Weighting:
+#'
+#' ### Counterfactual
+#'
+#' For `weights = "counterfactual"` (the default) the lsmeans are obtained by
+#' taking the average of the predicted values for each patient after assigning all patients
+#' to each arm in turn.
+#' This approach is equivalent to standardization or g-computation.
+#' In comparison to `emmeans` this approach is equivalent to:
+#' ```
+#' emmeans::emmeans(model, specs = "<treatment>", counterfactual = "<treatment>")
+#' ```
+#' Note that `weights = "proportional"` is an alias for `weights = "counterfactual"`.
+#' Whilst potentially confusing, this has been done to ensure backwards compatibility
+#' with prior versions of `rbmi`. To get results
+#' consistent with `emmeans`'s `weights = "proportional"` please use `weights = "proportional_em"`.
+#'
+#' ### Equal 
+#'
+#' For `weights = "equal"` the lsmeans are obtained by taking the model fitted
 #' value of a hypothetical patient whose covariates are defined as follows:
 #' - Continuous covariates are set to `mean(X)`
 #' - Dummy categorical variables are set to `1/N` where `N` is the number of levels
 #' - Continuous * continuous interactions are set to `mean(X) * mean(Y)`
 #' - Continuous * categorical interactions are set to `mean(X) * 1/N`
+#' - Dummary categorical * categorical interaction variables are set to `1/N * 1/M`
+#'
+#' In comparison to `emmeans` this approach is equivalent to:
+#' ```
+#' emmeans::emmeans(model, specs = "<treatment>", weights = "equal")
+#' ```
+#'
+#' ### Proportional
+#'
+#' For `weights = "proportional_em"` the lsmeans are obtained as per `weights = "equal"`
+#' except instead of weighting each observation equally they are weighted by the proportion
+#' in which the given combination of categorical values occurred in the data.
+#' In comparison to `emmeans` this approach is equivalent to:
+#' ```
+#' emmeans::emmeans(model, specs = "<treatment>", weights = "proportional")
+#' ```
+#' Note that this is not to be confused with `weights = "proportional"` which is an alias
+#' for `weights = "counterfactual"`.
+#'
+#' @section Fixing:
 #'
 #' Regardless of the weighting scheme any named arguments passed via `...` will
 #' fix the value of the covariate to the specified value.
@@ -35,8 +65,10 @@
 #' @param ... Fixes specific variables to specific values i.e.
 #' `trt = 1` or `age = 50`. The name of the argument must be the name
 #' of the variable within the dataset.
-#' @param .weights Character, specifies whether to use "proportional" or "equal" weighting for each
-#' categorical covariate combination when calculating the lsmeans.
+#' @param .weights Character, either `"counterfactual"` (default), `"equal"`,
+#' `"proportional_em"` or `"proportional"`.
+#' Specifies the weighting strategy to be used when calculating the lsmeans.
+#' See the weighting section for more details.
 #'
 #' @references \url{https://CRAN.R-project.org/package=emmeans}
 #' @references \url{https://documentation.sas.com/doc/en/pgmsascdc/9.4_3.3/statug/statug_glm_details41.htm}
@@ -49,7 +81,11 @@
 #' lsmeans(mod, Species = "versicolor", Petal.Length = 1)
 #' }
 #' @importFrom stats model.matrix terms reformulate
-lsmeans <- function(model, ..., .weights = c("proportional", "equal")) {
+lsmeans <- function(
+    model,
+    ...,
+    .weights = c("counterfactual", "equal", "proportional_em", "proportional")
+) {
     .weights <- match.arg(arg = .weights)
     fix <- list(...)
 
@@ -66,9 +102,22 @@ lsmeans <- function(model, ..., .weights = c("proportional", "equal")) {
         )
     }
 
+    if (.weights == "proportional") {
+        message(
+            paste(
+                "NOTE: The `proportional` weighting scheme is an alias for `counterfactual`",
+                "and will be deprecated in the future. Please use `proportional_em` or",
+                "`counterfactual` as appropriate instead.",
+                sep = " "
+            )
+        )
+    }
+
     design_fun <- switch(.weights,
+        counterfactual = ls_design_counterfactual,
+        proportional = ls_design_counterfactual,
         equal = ls_design_equal,
-        proportional = ls_design_proportional
+        proportional_em = ls_design_proportional
     )
 
     design <- design_fun(data, frm, fix)
@@ -78,6 +127,27 @@ lsmeans <- function(model, ..., .weights = c("proportional", "equal")) {
         se = as.vector(sqrt(t(design) %*% vcov(model) %*% design)),
         df = df.residual(model)
     )
+}
+
+
+
+collapse_values <- function(x) {
+    UseMethod("collapse_values")
+}
+
+#' @export
+collapse_values.factor <- function(x) {
+    return(factor(levels(x), levels(x)))
+}
+
+#' @export
+collapse_values.numeric <- function(x) {
+    return(mean(x))
+}
+
+#' @export
+collapse_values.default <- function(x) {
+    stop("invalid data type")
 }
 
 
@@ -99,7 +169,8 @@ ls_design_equal <- function(data, frm, fix) {
         inherits(frm, "formula"),
         is.data.frame(data),
         is.list(fix),
-        all(names(fix) %in% colnames(data))
+        all(names(fix) %in% colnames(data)),
+        all(vapply(fix, length, numeric(1)) == 1)
     )
     frm2 <- update(frm, NULL ~ .)
     data2 <- model.frame(frm2, data)
@@ -125,28 +196,8 @@ ls_design_equal <- function(data, frm, fix) {
 }
 
 
-collapse_values <- function(x) {
-    UseMethod("collapse_values")
-}
-
-#' @export
-collapse_values.factor <- function(x) {
-    return(factor(levels(x), levels(x)))
-}
-
-#' @export
-collapse_values.numeric <- function(x) {
-    return(mean(x))
-}
-
-#' @export
-collapse_values.default <- function(x) {
-    stop("invalid data type")
-}
-
-
 #' @rdname ls_design
-ls_design_proportional <- function(data, frm, fix) {
+ls_design_counterfactual <- function(data, frm, fix) {
     data2 <- data
     for (var in names(fix)) {
         value <- data[[var]]
@@ -157,5 +208,52 @@ ls_design_proportional <- function(data, frm, fix) {
         }
     }
     design <- colMeans(model.matrix(frm, data = data2))
+    return(design)
+}
+
+
+#' @rdname ls_design
+ls_design_proportional <- function(data, frm, fix) {
+    assert_that(
+        inherits(frm, "formula"),
+        is.data.frame(data),
+        is.list(fix),
+        all(names(fix) %in% colnames(data)),
+        all(vapply(fix, length, numeric(1)) == 1)
+    )
+    frm2 <- update(frm, NULL ~ .)
+    dat2 <- model.frame(frm2, data)
+    collection <- lapply(as.list(dat2), collapse_values)
+
+    for (var in names(fix)) {
+        if (is.numeric(dat2[[var]])) {
+            dat2[[var]] <- fix[[var]]
+            collection[[var]] <- fix[[var]]
+        } else if (is.factor(dat2[[var]])) {
+            dat2[[var]] <- factor(fix[[var]], levels = levels(dat2[[var]]))
+            collection[[var]] <- factor(fix[[var]], levels = levels(dat2[[var]]))
+        }
+    }
+
+    all_combinations <- expand.grid(collection)
+    design_matrix <- model.matrix(frm2, all_combinations)
+
+    categorical_vars <- dat2 |>
+        vapply(\(x) is.character(x) || is.factor(x), logical(1)) |>
+        which() |>
+        names()
+
+    wgts <- dat2[, categorical_vars[[1]]] |>
+        aggregate(
+            as.list(dat2[, categorical_vars]),
+            length
+        )
+    assert_that(
+        all.equal(wgts[, categorical_vars], all_combinations[, categorical_vars])
+    )
+
+    wgts_scaled <- wgts[["x"]] / sum(wgts[["x"]])
+
+    design <- apply(design_matrix, 2, \(x) sum(x * wgts_scaled))
     return(design)
 }

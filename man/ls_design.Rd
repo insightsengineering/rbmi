@@ -3,10 +3,13 @@
 \name{ls_design}
 \alias{ls_design}
 \alias{ls_design_equal}
+\alias{ls_design_counterfactual}
 \alias{ls_design_proportional}
 \title{Calculate design vector for the lsmeans}
 \usage{
 ls_design_equal(data, frm, fix)
+
+ls_design_counterfactual(data, frm, fix)
 
 ls_design_proportional(data, frm, fix)
 }

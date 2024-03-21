@@ -1,7 +1,7 @@
 library(dplyr)
 library(testthat)
 
-test_that("Least square means works as expected - Part 1", {
+test_that("Least square means works as expected", {
 
     ##### Check that treatment effect is unaffected
     set.seed(101)
@@ -53,114 +53,6 @@ test_that("Least square means works as expected - Part 1", {
         regex = "`group`"
     )
 
-})
-
-
-
-
-
-test_that("Least square means works as expected - Part 2", {
-    n <- 8000
-
-    dat <- tibble(
-        trt = sample(c("C", "T"), size = n, replace = TRUE, prob = c(0.5, 0.5)),
-        age = rnorm(n),
-        sex = sample(c("M", "F", "O"), size = n, replace = TRUE, prob = c(0.3, 0.5, 0.2)),
-        cat = sample(c("A", "B"), size = n, replace = TRUE, prob = c(0.8, 0.2)),
-        visit = "vis1"
-    ) %>%
-        mutate(sex = factor(sex, levels = c("M", "F", "O"))) %>%
-        mutate(trt = factor(trt, levels = c("C", "T"))) %>%
-        mutate(cat = factor(cat, levels = c("A", "B")))
-
-
-    outcome_vec <- (
-        model.matrix(~ trt * sex * cat + age, dat) %*%
-            c(10, 5, 4, 3, 9, 4, 2, 8, 1, -5, -1, -2, -3)
-        ) + rnorm(n, 0, 5)
-
-    dat2 <- dat %>%
-        mutate(outcome = outcome_vec)
-
-
-    mod <- lm(outcome ~ trt * sex * cat + age, data = dat2)
-
-
-    ###########
-    #
-    # Proportional weighting
-    #
-
-    d <- suppressMessages({
-        as.data.frame(emmeans::emmeans(mod, "trt", weights = "proportional"))
-    })
-    expected <- list(
-        "est" = d[["emmean"]],
-        "se" = d[["SE"]],
-        "df" = d[["df"]]
-    )
-    lsm1 <- lsmeans(mod, trt = "C")
-    lsm2 <- lsmeans(mod, trt = "T")
-    actual <- list(
-        "est" = c(lsm1$est, lsm2$est),
-        "se" = c(lsm1$se, lsm2$se),
-        "df" = c(lsm1$df, lsm2$df)
-    )
-    expect_equal(actual, expected)
-
-    result_actual <- ancova(
-        dat2,
-        set_vars(
-            visit = "visit",
-            covariates = c("age", "sex*cat*trt"),
-            outcome = "outcome",
-            group = "trt"
-        )
-    )[c("lsm_ref_vis1", "lsm_alt_vis1")]
-    result_expected <- list(
-        "lsm_ref_vis1" = lsm1,
-        "lsm_alt_vis1" = lsm2
-    )
-    expect_equal(result_actual, result_expected)
-
-
-    ###########
-    #
-    # Equal weighting
-    #
-
-    d <- suppressMessages({
-        as.data.frame(emmeans::emmeans(mod, "trt"))
-    })
-    expected <- list(
-        "est" = d[["emmean"]],
-        "se" = d[["SE"]],
-        "df" = d[["df"]]
-    )
-    lsm1 <- lsmeans(mod, trt = "C", .weights = "equal")
-    lsm2 <- lsmeans(mod, trt = "T", .weights = "equal")
-    actual <- list(
-        "est" = c(lsm1$est, lsm2$est),
-        "se" = c(lsm1$se, lsm2$se),
-        "df" = c(lsm1$df, lsm2$df)
-    )
-    expect_equal(actual, expected)
-
-    result_actual <- ancova(
-        dat2,
-        set_vars(
-            visit = "visit",
-            covariates = c("age", "sex*cat*trt"),
-            outcome = "outcome",
-            group = "trt"
-        ),
-        weights = "equal"
-    )[c("lsm_ref_vis1", "lsm_alt_vis1")]
-    result_expected <- list(
-        "lsm_ref_vis1" = lsm1,
-        "lsm_alt_vis1" = lsm2
-    )
-    expect_equal(result_actual, result_expected)
 })
 
 
@@ -218,15 +110,16 @@ test_that("LSmeans (proportional) from rbmi equals means of average prediction",
 
 test_that("LSmeans(proportional) returns equivalent results to 'counterfactual'", {
     set.seed(2412)
-    n <- 10000
-    # Main goal here is to provide a more involved test of interactions between
-    # cont * cont, cont * cont * cont model terms
+    n <- 4000
     dat <- tibble(
         v1 = rnorm(n),
         v2 = rnorm(n),
         v3 = rnorm(n),
         c1 = sample(c("A", "B"), size = n, replace = TRUE, prob = c(0.8, 0.2)),
-        c2 = sample(c("X", "Y"), size = n, replace = TRUE, prob = c(0.6, 0.4)),
+        c2 = sample(c("Y", "X"), size = n, replace = TRUE, prob = c(0.6, 0.4)) |>
+            factor(levels = c("Y", "X")),
+        c3 = sample(c("L", "K", "J"), size = n, replace = TRUE, prob = c(0.2, 0.5, 0.3)) |>
+            factor(levels = c("L", "K", "J")),
         error = rnorm(n, 0, 4),
         outcome = 30 +
             5 * v1 +
@@ -240,65 +133,84 @@ test_that("LSmeans(proportional) returns equivalent results to 'counterfactual'"
             6 * (c2 == "Y") +
             7 * (c1 == "B" & c2 == "Y") +
             13 * (c1 == "B") * v1 +
+            15 * (c3 == "K") + 
+            16 * (c3 == "J") +
             error
     )
-    mod <- lm(outcome ~ v1 * v2 * v3 + c1 * c2 + v1 * c1, data = dat)
-    
-    expect_equal(
-        lsmeans(mod, c1 = "A", .weights = "proportional")$est,
-        mean(predict(mod, newdata = dat |> mutate(c1 = "A")))
+    mod <- lm(outcome ~ (v1 * v2 * v3) + (c1 * c2) + (v1 * c1) + c3, data = dat)
+
+
+    #
+    #
+    # Equal
+    #
+    #
+    emod <- suppressMessages({
+        as.data.frame(emmeans::emmeans(mod, "c1", weights = "equal"))
+    })
+    expected <- list(
+        "est" = emod[["emmean"]],
+        "se" = emod[["SE"]],
+        "df" = emod[["df"]]
+    )
+    lsm1 <- lsmeans(mod, c1 = "A", .weights = "equal")
+    lsm2 <- lsmeans(mod, c1 = "B", .weights = "equal")
+    actual <- list(
+        "est" = c(lsm1$est, lsm2$est),
+        "se" = c(lsm1$se, lsm2$se),
+        "df" = c(lsm1$df, lsm2$df)
+    )
+    expect_equal(actual, expected)
+
+
+    #
+    #
+    # Proportional
+    #
+    #
+    emod <- suppressMessages({
+        as.data.frame(emmeans::emmeans(mod, "c1", weights = "proportional"))
+    })
+    expected <- list(
+        "est" = emod[["emmean"]],
+        "se" = emod[["SE"]],
+        "df" = emod[["df"]]
+    )
+    lsm1 <- lsmeans(mod, c1 = "A", .weights = "proportional_em")
+    lsm2 <- lsmeans(mod, c1 = "B", .weights = "proportional_em")
+    actual <- list(
+        "est" = c(lsm1$est, lsm2$est),
+        "se" = c(lsm1$se, lsm2$se),
+        "df" = c(lsm1$df, lsm2$df)
+    )
+    expect_equal(actual, expected)
+
+
+    #
+    #
+    # Counterfactual
+    #
+    #
+    emod <- suppressMessages({
+        as.data.frame(emmeans::emmeans(mod, "c1", counterfactual = "c1"))
+    })
+    expected <- list(
+        "est" = emod[["emmean"]],
+        "se" = emod[["SE"]],
+        "df" = emod[["df"]]
+    )
+    lsm1 <- lsmeans(mod, c1 = "A", .weights = "counterfactual")
+    lsm2 <- lsmeans(mod, c1 = "B", .weights = "counterfactual")
+    actual <- list(
+        "est" = c(lsm1$est, lsm2$est),
+        "se" = c(lsm1$se, lsm2$se),
+        "df" = c(lsm1$df, lsm2$df)
+    )
+    expect_equal(actual, expected)
+
+    expect_message(
+        lsmeans(mod, c1 = "A", .weights = "proportional"),
+        "NOTE: The `proportional` weighting scheme is an alias for `counterfactual`"
     )
 
-    expect_equal(
-        lsm2 <- lsmeans(mod, c1 = "B", c2 = "Y", .weights = "proportional")$est,
-        mean(predict(mod, newdata = dat |> mutate(c1 = "B", c2 = "Y")))
-    )
 })
-
-
-#### Toy code to experiment with
-
-# n <- 8000
-
-# dat <- tibble(
-#     trt = sample(c("C", "T"), size = n, replace = TRUE, prob = c(0.5, 0.5)),
-#     age = rnorm(n),
-#     sex = sample(c("M", "F", "O"), size = n, replace = TRUE, prob = c(0.3, 0.5, 0.2)),
-#     cat = sample(c("A", "B"), size = n, replace = TRUE, prob = c(0.8, 0.2)),
-#     visit = "vis1"
-# ) %>%
-#     mutate(sex = factor(sex, levels = c("M", "F", "O"))) %>%
-#     mutate(trt = factor(trt, levels = c("C", "T"))) %>%
-#     mutate(cat = factor(cat, levels = c("A", "B")))
-
-
-# outcome_vec <- (
-#     model.matrix(~ trt * sex * cat + age, dat) %*%
-#         c(10, 5, 4, 3, 9, 4, 2, 8, 1, -5, -1, -2, -3)
-#     ) + rnorm(n, 0, 5)
-
-# dat2 <- dat %>%
-#     mutate(outcome = outcome_vec)
-
-
-# mod <- lm(outcome ~ trt * sex * cat + age, data = dat2)
-
-
-# as.data.frame(emmeans::emmeans(mod, "trt", weights = "equal"))
-# as.data.frame(emmeans::emmeans(mod, "trt", weights = "proportional"))
-
-# dat_t <- dat2 %>% mutate(trt = factor("T", levels = c("C", "T")))
-# dat_c <- dat2 %>% mutate(trt = factor("C", levels = c("C", "T")))
-# mean(predict(mod, dat_c))
-# mean(predict(mod, dat_t))
-
-
-
-
-
-
-
-
-
-
-

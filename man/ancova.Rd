@@ -4,7 +4,12 @@
 \alias{ancova}
 \title{Analysis of Covariance}
 \usage{
-ancova(data, vars, visits = NULL, weights = c("proportional", "equal"))
+ancova(
+  data,
+  vars,
+  visits = NULL,
+  weights = c("counterfactual", "equal", "proportional_em", "proportional")
+)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing the data to be used in the model.}
@@ -17,9 +22,10 @@ fit the ancova model at. If \code{NULL}, a separate ancova model will be fit to 
 outcomes for each visit (as determined by \code{unique(data[[vars$visit]])}).
 See details.}
 
-\item{weights}{Character, either \code{"proportional"} (default) or \code{"equal"}. Specifies the
-weighting strategy to be used for categorical covariates when calculating the lsmeans.
-See details.}
+\item{weights}{Character, either \code{"counterfactual"} (default), \code{"equal"},
+\code{"proportional_em"} or \code{"proportional"}.
+Specifies the weighting strategy to be used when calculating the lsmeans.
+See the weighting section for more details.}
 }
 \description{
 Performs an analysis of covariance between two groups returning the estimated
@@ -60,26 +66,59 @@ coincide with the control arm. Analogously, "alt" refers to the second factor le
 If you want to include interaction terms in your model this can be done
 by providing them to the \code{covariates} argument of \code{\link[=set_vars]{set_vars()}}
 e.g. \code{set_vars(covariates = c("sex*age"))}.
-\subsection{Weighting}{
+}
+\section{Weighting}{
 
-\code{"proportional"} is the default scheme that is used. This is equivalent to standardization,
-i.e. the lsmeans in
-each group are equal to the predicted mean outcome from the ancova model for
-that group based on baseline characteristics of all subjects regardless of
-their assigned group. The alternative weighting scheme, \code{"equal"}, creates hypothetical
-patients by expanding out all combinations of the models categorical covariates. The
-lsmeans are then calculated as the average of
-the predicted mean outcome for these hypothetical patients assuming they come from each
-group in turn.
+\subsection{Counterfactual}{
 
-In short:
+For \code{weights = "counterfactual"} (the default) the lsmeans are obtained by
+taking the average of the predicted values for each patient after assigning all patients
+to each arm in turn.
+This approach is equivalent to standardization or g-computation.
+In comparison to \code{emmeans} this approach is equivalent to:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{emmeans::emmeans(model, specs = "<treatment>", counterfactual = "<treatment>")
+}\if{html}{\out{</div>}}
+
+Note that \code{weights = "proportional"} is an alias for \code{weights = "counterfactual"}.
+Whilst potentially confusing, this has been done to ensure backwards compatibility
+with prior versions of \code{rbmi}. To get results
+consistent with \code{emmeans}'s \code{weights = "proportional"} please use \code{weights = "proportional_em"}.
+}
+
+\subsection{Equal}{
+
+For \code{weights = "equal"} the lsmeans are obtained by taking the model fitted
+value of a hypothetical patient whose covariates are defined as follows:
 \itemize{
-\item \code{"proportional"} weights categorical covariates based upon their frequency of occurrence
-in the data.
-\item \code{"equal"} weights categorical covariates equally across all theoretical combinations.
+\item Continuous covariates are set to \code{mean(X)}
+\item Dummy categorical variables are set to \code{1/N} where \code{N} is the number of levels
+\item Continuous * continuous interactions are set to \code{mean(X) * mean(Y)}
+\item Continuous * categorical interactions are set to \code{mean(X) * 1/N}
+\item Dummary categorical * categorical interaction variables are set to \code{1/N * 1/M}
+}
+
+In comparison to \code{emmeans} this approach is equivalent to:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{emmeans::emmeans(model, specs = "<treatment>", weights = "equal")
+}\if{html}{\out{</div>}}
+}
+
+\subsection{Proportional}{
+
+For \code{weights = "proportional_em"} the lsmeans are obtained as per \code{weights = "equal"}
+except instead of weighting each observation equally they are weighted by the proportion
+in which the given combination of categorical values occurred in the data.
+In comparison to \code{emmeans} this approach is equivalent to:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{emmeans::emmeans(model, specs = "<treatment>", weights = "proportional")
+}\if{html}{\out{</div>}}
+
+Note that this is not to be confused with \code{weights = "proportional"} which is an alias
+for \code{weights = "counterfactual"}.
 }
 }
-}
+
 \seealso{
 \code{\link[=analyse]{analyse()}}
 
