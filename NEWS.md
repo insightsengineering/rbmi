@@ -3,7 +3,11 @@
 
 * Include vignette on how to obtain frequentist and information-anchored inference with conditional mean imputation using `rbmi`
 * Added FAQ vignette
-* Updated documentation for `lsmeans()` to clarify differences between it and the corresponding function from the `emmeans` package
+* Updates to `lsmeans()` for better consistency with the `emmeans` package (#412)
+    * Renamed `lsmeans(..., weights = "proportional")` to `lsmeans(..., weights = "counterfactual")`to more accurately reflect the weights used in the calculation.
+    * Added `lsmeans(..., weights = "proportional_em")` which provides consistent results with `emmeans(..., weights = "proportional")`
+    * `lsmeans(..., weights = "proportional")` has been left in the package for backwards compatibility and is an alias for `lsmeans(..., weights = "counterfactual")` but now gives
+    a message prompting users to use either "proptional_em" or "counterfactual" instead.
 
 # rbmi 1.2.6
 
