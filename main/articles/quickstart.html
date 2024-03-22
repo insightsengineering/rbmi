@@ -58,12 +58,6 @@
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a> </div></li>
-<!-- end dropdown for versions -->
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
@@ -486,15 +480,15 @@ in the original call to <code><a href="../reference/draws.html">draws()</a></cod
 <span><span class="co">#&gt;      trt_4    -0.092  0.683  -1.439  1.256   0.893  </span></span>
 <span><span class="co">#&gt;    lsm_ref_4  -1.616  0.486  -2.576  -0.656  0.001  </span></span>
 <span><span class="co">#&gt;    lsm_alt_4  -1.708  0.475  -2.645  -0.77   &lt;0.001 </span></span>
-<span><span class="co">#&gt;      trt_5    1.278   0.927  -0.553  3.108    0.17  </span></span>
-<span><span class="co">#&gt;    lsm_ref_5  -4.109  0.661  -5.415  -2.804  &lt;0.001 </span></span>
-<span><span class="co">#&gt;    lsm_alt_5  -2.831  0.647  -4.109  -1.553  &lt;0.001 </span></span>
-<span><span class="co">#&gt;      trt_6    1.907   0.997  -0.062  3.876   0.058  </span></span>
-<span><span class="co">#&gt;    lsm_ref_6  -6.084  0.711  -7.49   -4.679  &lt;0.001 </span></span>
-<span><span class="co">#&gt;    lsm_alt_6  -4.177  0.698  -5.556  -2.799  &lt;0.001 </span></span>
-<span><span class="co">#&gt;      trt_7    2.077   1.118  -0.133  4.287   0.065  </span></span>
-<span><span class="co">#&gt;    lsm_ref_7  -6.951  0.81   -8.552  -5.351  &lt;0.001 </span></span>
-<span><span class="co">#&gt;    lsm_alt_7  -4.875  0.796  -6.449   -3.3   &lt;0.001 </span></span>
+<span><span class="co">#&gt;      trt_5    1.281   0.927  -0.55   3.112   0.169  </span></span>
+<span><span class="co">#&gt;    lsm_ref_5  -4.112  0.661  -5.418  -2.807  &lt;0.001 </span></span>
+<span><span class="co">#&gt;    lsm_alt_5  -2.831  0.646  -4.107  -1.556  &lt;0.001 </span></span>
+<span><span class="co">#&gt;      trt_6    1.912   1.001  -0.066   3.89   0.058  </span></span>
+<span><span class="co">#&gt;    lsm_ref_6  -6.097  0.714  -7.508  -4.686  &lt;0.001 </span></span>
+<span><span class="co">#&gt;    lsm_alt_6  -4.186  0.696  -5.561  -2.81   &lt;0.001 </span></span>
+<span><span class="co">#&gt;      trt_7    2.079   1.122  -0.138  4.296   0.066  </span></span>
+<span><span class="co">#&gt;    lsm_ref_7  -6.946  0.815  -8.558  -5.335  &lt;0.001 </span></span>
+<span><span class="co">#&gt;    lsm_alt_7  -4.867  0.788  -6.426  -3.308  &lt;0.001 </span></span>
 <span><span class="co">#&gt;   --------------------------------------------------</span></span></code></pre></div>
 <p>The table of values shown in the print message for <code>poolObj</code> can also be extracted using the <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> function:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -503,18 +497,18 @@ in the original call to <code><a href="../reference/draws.html">draws()</a></cod
 <span><span class="co">#&gt; 1      trt_4 -0.09180645 0.6826279 -1.43949684  1.2558839 8.931772e-01</span></span>
 <span><span class="co">#&gt; 2  lsm_ref_4 -1.61581996 0.4862316 -2.57577141 -0.6558685 1.093708e-03</span></span>
 <span><span class="co">#&gt; 3  lsm_alt_4 -1.70762640 0.4749573 -2.64531931 -0.7699335 4.262148e-04</span></span>
-<span><span class="co">#&gt; 4      trt_5  1.27784334 0.9267958 -0.55262591  3.1083126 1.699077e-01</span></span>
-<span><span class="co">#&gt; 5  lsm_ref_5 -4.10912984 0.6609343 -5.41453523 -2.8037244 4.327320e-09</span></span>
-<span><span class="co">#&gt; 6  lsm_alt_5 -2.83128650 0.6469374 -4.10909149 -1.5534815 2.189243e-05</span></span>
-<span><span class="co">#&gt; 7      trt_6  1.90697590 0.9965203 -0.06173754  3.8756893 5.753387e-02</span></span>
-<span><span class="co">#&gt; 8  lsm_ref_6 -6.08439116 0.7114036 -7.48988902 -4.6788933 1.195687e-14</span></span>
-<span><span class="co">#&gt; 9  lsm_alt_6 -4.17741526 0.6975145 -5.55556852 -2.7992620 1.482787e-08</span></span>
-<span><span class="co">#&gt; 10     trt_7  2.07666647 1.1181891 -0.13345442  4.2867874 6.532284e-02</span></span>
-<span><span class="co">#&gt; 11 lsm_ref_7 -6.95143063 0.8095397 -8.55204130 -5.3508200 1.622026e-14</span></span>
-<span><span class="co">#&gt; 12 lsm_alt_7 -4.87476416 0.7963105 -6.44945627 -3.3000720 9.230722e-09</span></span></code></pre></div>
+<span><span class="co">#&gt; 4      trt_5  1.28107134 0.9269270 -0.54967136  3.1118141 1.689000e-01</span></span>
+<span><span class="co">#&gt; 5  lsm_ref_5 -4.11245871 0.6608409 -5.41768364 -2.8072338 4.201381e-09</span></span>
+<span><span class="co">#&gt; 6  lsm_alt_5 -2.83138737 0.6457744 -4.10686302 -1.5559117 2.114628e-05</span></span>
+<span><span class="co">#&gt; 7      trt_6  1.91163968 1.0011368 -0.06637259  3.8896520 5.809419e-02</span></span>
+<span><span class="co">#&gt; 8  lsm_ref_6 -6.09716631 0.7142461 -7.50839192 -4.6859407 1.384720e-14</span></span>
+<span><span class="co">#&gt; 9  lsm_alt_6 -4.18552662 0.6963163 -5.56127560 -2.8097776 1.321956e-08</span></span>
+<span><span class="co">#&gt; 10     trt_7  2.07945506 1.1216355 -0.13755657  4.2964667 6.579390e-02</span></span>
+<span><span class="co">#&gt; 11 lsm_ref_7 -6.94648032 0.8150602 -8.55819661 -5.3347640 2.515736e-14</span></span>
+<span><span class="co">#&gt; 12 lsm_alt_7 -4.86702525 0.7884953 -6.42588823 -3.3081623 6.801566e-09</span></span></code></pre></div>
 <p>These outputs gives an estimated difference of
-2.077 (95% CI -0.133 to 4.287)
-between the two groups at the last visit with an associated p-value of 0.065.</p>
+2.079 (95% CI -0.138 to 4.296)
+between the two groups at the last visit with an associated p-value of 0.066.</p>
 </div>
 <div class="section level2" number="7">
 <h2 id="code">

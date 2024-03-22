@@ -38,12 +38,6 @@ the least square means estimates in each group.'><meta property="og:image" conte
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a> </div></li>
-<!-- end dropdown for versions -->
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -73,7 +67,12 @@ the least square means estimates in each group.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ancova</span><span class="op">(</span><span class="va">data</span>, <span class="va">vars</span>, visits <span class="op">=</span> <span class="cn">NULL</span>, weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"proportional"</span>, <span class="st">"equal"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ancova</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">vars</span>,</span>
+<span>  visits <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"counterfactual"</span>, <span class="st">"equal"</span>, <span class="st">"proportional_em"</span>, <span class="st">"proportional"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -95,9 +94,10 @@ See details.</p></dd>
 
 
 <dt>weights</dt>
-<dd><p>Character, either <code>"proportional"</code> (default) or <code>"equal"</code>. Specifies the
-weighting strategy to be used for categorical covariates when calculating the lsmeans.
-See details.</p></dd>
+<dd><p>Character, either <code>"counterfactual"</code> (default), <code>"equal"</code>,
+<code>"proportional_em"</code> or <code>"proportional"</code>.
+Specifies the weighting strategy to be used when calculating the lsmeans.
+See the weighting section for more details.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -125,23 +125,54 @@ coincide with the control arm. Analogously, "alt" refers to the second factor le
 "trt" refers to the model contrast translating the mean difference between the second level and first level.</p>
 <p>If you want to include interaction terms in your model this can be done
 by providing them to the <code>covariates</code> argument of <code><a href="set_vars.html">set_vars()</a></code>
-e.g. <code>set_vars(covariates = c("sex*age"))</code>.</p><div class="section">
-<h3 id="weighting">Weighting<a class="anchor" aria-label="anchor" href="#weighting"></a></h3>
+e.g. <code>set_vars(covariates = c("sex*age"))</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="weighting">Weighting<a class="anchor" aria-label="anchor" href="#weighting"></a></h2>
+    
+
+<div class="section">
+<h3 id="counterfactual">Counterfactual<a class="anchor" aria-label="anchor" href="#counterfactual"></a></h3>
 
 
-<p><code>"proportional"</code> is the default scheme that is used. This is equivalent to standardization,
-i.e. the lsmeans in
-each group are equal to the predicted mean outcome from the ancova model for
-that group based on baseline characteristics of all subjects regardless of
-their assigned group. The alternative weighting scheme, <code>"equal"</code>, creates hypothetical
-patients by expanding out all combinations of the models categorical covariates. The
-lsmeans are then calculated as the average of
-the predicted mean outcome for these hypothetical patients assuming they come from each
-group in turn.</p>
-<p>In short:</p><ul><li><p><code>"proportional"</code> weights categorical covariates based upon their frequency of occurrence
-in the data.</p></li>
-<li><p><code>"equal"</code> weights categorical covariates equally across all theoretical combinations.</p></li>
-</ul></div>
+<p>For <code>weights = "counterfactual"</code> (the default) the lsmeans are obtained by
+taking the average of the predicted values for each patient after assigning all patients
+to each arm in turn.
+This approach is equivalent to standardization or g-computation.
+In comparison to <code>emmeans</code> this approach is equivalent to:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(model, <span class="at">specs =</span> <span class="st">"&lt;treatment&gt;"</span>, <span class="at">counterfactual =</span> <span class="st">"&lt;treatment&gt;"</span>)</span></code></pre><p></p></div>
+<p>Note that to ensure backwards compatibility with previous versions of rbmi
+<code>weights = "proportional"</code> is an alias for <code>weights = "counterfactual"</code>.
+To get results consistent with <code>emmeans</code>'s <code>weights = "proportional"</code>
+please use <code>weights = "proportional_em"</code>.</p>
+</div>
+
+<div class="section">
+<h3 id="equal">Equal<a class="anchor" aria-label="anchor" href="#equal"></a></h3>
+
+
+<p>For <code>weights = "equal"</code> the lsmeans are obtained by taking the model fitted
+value of a hypothetical patient whose covariates are defined as follows:</p><ul><li><p>Continuous covariates are set to <code>mean(X)</code></p></li>
+<li><p>Dummy categorical variables are set to <code>1/N</code> where <code>N</code> is the number of levels</p></li>
+<li><p>Continuous * continuous interactions are set to <code>mean(X) * mean(Y)</code></p></li>
+<li><p>Continuous * categorical interactions are set to <code>mean(X) * 1/N</code></p></li>
+<li><p>Dummy categorical * categorical interactions are set to <code>1/N * 1/M</code></p></li>
+</ul><p>In comparison to <code>emmeans</code> this approach is equivalent to:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(model, <span class="at">specs =</span> <span class="st">"&lt;treatment&gt;"</span>, <span class="at">weights =</span> <span class="st">"equal"</span>)</span></code></pre><p></p></div>
+</div>
+
+<div class="section">
+<h3 id="proportional">Proportional<a class="anchor" aria-label="anchor" href="#proportional"></a></h3>
+
+
+<p>For <code>weights = "proportional_em"</code> the lsmeans are obtained as per <code>weights = "equal"</code>
+except instead of weighting each observation equally they are weighted by the proportion
+in which the given combination of categorical values occurred in the data.
+In comparison to <code>emmeans</code> this approach is equivalent to:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(model, <span class="at">specs =</span> <span class="st">"&lt;treatment&gt;"</span>, <span class="at">weights =</span> <span class="st">"proportional"</span>)</span></code></pre><p></p></div>
+<p>Note that this is not to be confused with <code>weights = "proportional"</code> which is an alias
+for <code>weights = "counterfactual"</code>.</p>
+</div>
 
     </div>
     <div class="section level2">

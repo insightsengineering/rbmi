@@ -44,12 +44,6 @@ in the actual dataset."><meta property="og:image" content="/logo.png"><!-- mathj
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a> </div></li>
-<!-- end dropdown for versions -->
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -82,9 +76,11 @@ in the actual dataset.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ls_design_equal</span><span class="op">(</span><span class="va">data</span>, <span class="va">frm</span>, <span class="va">covars</span>, <span class="va">fix</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ls_design_equal</span><span class="op">(</span><span class="va">data</span>, <span class="va">frm</span>, <span class="va">fix</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">ls_design_proportional</span><span class="op">(</span><span class="va">data</span>, <span class="va">frm</span>, <span class="va">covars</span>, <span class="va">fix</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">ls_design_counterfactual</span><span class="op">(</span><span class="va">data</span>, <span class="va">frm</span>, <span class="va">fix</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ls_design_proportional</span><span class="op">(</span><span class="va">data</span>, <span class="va">frm</span>, <span class="va">fix</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -95,11 +91,6 @@ in the actual dataset.</p>
 
 <dt>frm</dt>
 <dd><p>Formula used to fit the original model</p></dd>
-
-
-<dt>covars</dt>
-<dd><p>a character vector of variables names that exist in
-<code>data</code> which should be extracted (<code>ls_design_equal</code> only)</p></dd>
 
 
 <dt>fix</dt>

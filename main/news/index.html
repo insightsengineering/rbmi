@@ -34,12 +34,6 @@
 <li class="active nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a> </div></li>
-<!-- end dropdown for versions -->
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -65,6 +59,13 @@
 <ul><li>Include vignette on how to obtain frequentist and information-anchored inference with conditional mean imputation using <code>rbmi</code>
 </li>
 <li>Added FAQ vignette</li>
+<li>Updates to <code><a href="../reference/lsmeans.html">lsmeans()</a></code> for better consistency with the <code>emmeans</code> package (<a href="https://github.com/insightsengineering/rbmi/issues/412" class="external-link">#412</a>)
+<ul><li>Renamed <code>lsmeans(..., weights = "proportional")</code> to <code>lsmeans(..., weights = "counterfactual")</code>to more accurately reflect the weights used in the calculation.</li>
+<li>Added <code>lsmeans(..., weights = "proportional_em")</code> which provides consistent results with <code>emmeans(..., weights = "proportional")</code>
+</li>
+<li>
+<code>lsmeans(..., weights = "proportional")</code> has been left in the package for backwards compatibility and is an alias for <code>lsmeans(..., weights = "counterfactual")</code> but now gives a message prompting users to use either “proptional_em” or “counterfactual” instead.</li>
+</ul></li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.2.6" id="rbmi-126">rbmi 1.2.6<a class="anchor" aria-label="anchor" href="#rbmi-126"></a></h2><p class="text-muted">CRAN release: 2023-11-24</p>
