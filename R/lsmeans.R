@@ -19,10 +19,10 @@
 #' ```
 #' emmeans::emmeans(model, specs = "<treatment>", counterfactual = "<treatment>")
 #' ```
-#' Note that `weights = "proportional"` is an alias for `weights = "counterfactual"`.
-#' Whilst potentially confusing, this has been done to ensure backwards compatibility
-#' with prior versions of `rbmi`. To get results
-#' consistent with `emmeans`'s `weights = "proportional"` please use `weights = "proportional_em"`.
+#' Note that to ensure backwards compatibility with previous versions of rbmi
+#' `weights = "proportional"` is an alias for `weights = "counterfactual"`.
+#' To get results consistent with `emmeans`'s `weights = "proportional"`
+#' please use `weights = "proportional_em"`.
 #'
 #' ### Equal 
 #'
@@ -32,7 +32,7 @@
 #' - Dummy categorical variables are set to `1/N` where `N` is the number of levels
 #' - Continuous * continuous interactions are set to `mean(X) * mean(Y)`
 #' - Continuous * categorical interactions are set to `mean(X) * 1/N`
-#' - Dummary categorical * categorical interaction variables are set to `1/N * 1/M`
+#' - Dummy categorical * categorical interactions are set to `1/N * 1/M`
 #'
 #' In comparison to `emmeans` this approach is equivalent to:
 #' ```

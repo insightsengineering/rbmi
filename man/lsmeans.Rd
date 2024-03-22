@@ -40,10 +40,10 @@ In comparison to \code{emmeans} this approach is equivalent to:
 \if{html}{\out{<div class="sourceCode">}}\preformatted{emmeans::emmeans(model, specs = "<treatment>", counterfactual = "<treatment>")
 }\if{html}{\out{</div>}}
 
-Note that \code{weights = "proportional"} is an alias for \code{weights = "counterfactual"}.
-Whilst potentially confusing, this has been done to ensure backwards compatibility
-with prior versions of \code{rbmi}. To get results
-consistent with \code{emmeans}'s \code{weights = "proportional"} please use \code{weights = "proportional_em"}.
+Note that to ensure backwards compatibility with previous versions of rbmi
+\code{weights = "proportional"} is an alias for \code{weights = "counterfactual"}.
+To get results consistent with \code{emmeans}'s \code{weights = "proportional"}
+please use \code{weights = "proportional_em"}.
 }
 
 \subsection{Equal}{
@@ -55,7 +55,7 @@ value of a hypothetical patient whose covariates are defined as follows:
 \item Dummy categorical variables are set to \code{1/N} where \code{N} is the number of levels
 \item Continuous * continuous interactions are set to \code{mean(X) * mean(Y)}
 \item Continuous * categorical interactions are set to \code{mean(X) * 1/N}
-\item Dummary categorical * categorical interaction variables are set to \code{1/N * 1/M}
+\item Dummy categorical * categorical interactions are set to \code{1/N * 1/M}
 }
 
 In comparison to \code{emmeans} this approach is equivalent to:
