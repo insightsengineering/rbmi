@@ -12,9 +12,10 @@
 #' fit the ancova model at. If `NULL`, a separate ancova model will be fit to the
 #' outcomes for each visit (as determined by `unique(data[[vars$visit]])`).
 #' See details.
-#' @param weights Character, either `"proportional"` (default) or `"equal"`. Specifies the
-#' weighting strategy to be used for categorical covariates when calculating the lsmeans.
-#' See details.
+#' @param weights Character, either `"counterfactual"` (default), `"equal"`,
+#' `"proportional_em"` or `"proportional"`.
+#' Specifies the weighting strategy to be used when calculating the lsmeans.
+#' See the weighting section for more details.
 #'
 #' @details
 #' The function works as follows:
@@ -49,29 +50,18 @@
 #' by providing them to the `covariates` argument of [set_vars()]
 #' e.g. `set_vars(covariates = c("sex*age"))`.
 #'
-#'
-#' ## Weighting
-#'
-#' `"proportional"` is the default scheme that is used. This is equivalent to standardization,
-#' i.e. the lsmeans in
-#' each group are equal to the predicted mean outcome from the ancova model for
-#' that group based on baseline characteristics of all subjects regardless of
-#' their assigned group. The alternative weighting scheme, `"equal"`, creates hypothetical
-#' patients by expanding out all combinations of the models categorical covariates. The
-#' lsmeans are then calculated as the average of
-#' the predicted mean outcome for these hypothetical patients assuming they come from each
-#' group in turn.
-#'
-#' In short:
-#'   - `"proportional"` weights categorical covariates based upon their frequency of occurrence
-#' in the data.
-#'   - `"equal"` weights categorical covariates equally across all theoretical combinations.
+#' @inheritSection lsmeans Weighting
 #'
 #' @seealso [analyse()]
 #' @seealso [stats::lm()]
 #' @seealso [set_vars()]
 #' @export
-ancova <- function(data, vars, visits = NULL, weights = c("proportional", "equal")) {
+ancova <- function(
+    data,
+    vars,
+    visits = NULL,
+    weights = c("counterfactual", "equal", "proportional_em", "proportional")
+) {
 
     outcome <- vars[["outcome"]]
     group <- vars[["group"]]
@@ -154,13 +144,13 @@ ancova <- function(data, vars, visits = NULL, weights = c("proportional", "equal
 #' @description
 #' Performance analysis of covariance. See [ancova()] for full details.
 #'
-#' @param data The `data.frame` containing all of the data required for the model.
 #' @param outcome Character, the name of the outcome variable in `data`.
 #' @param group Character, the name of the group variable in `data`.
 #' @param covariates Character vector containing the name of any additional covariates
 #' to be included in the model as well as any interaction terms.
-#' @param weights Character, specifies whether to use "proportional" or "equal" weighting for each
-#' categorical covariate combination when calculating the lsmeans.
+#'
+#' @inheritParams ancova
+#' @inheritSection lsmeans Weighting
 #'
 #' @details
 #' - `group` must be a factor variable with only 2 levels.
@@ -174,7 +164,13 @@ ancova <- function(data, vars, visits = NULL, weights = c("proportional", "equal
 #' }
 #' @seealso [ancova()]
 #' @importFrom stats lm coef vcov df.residual
-ancova_single <- function(data, outcome, group, covariates, weights = c("proportional", "equal")) {
+ancova_single <- function(
+    data,
+    outcome,
+    group,
+    covariates,
+    weights = c("counterfactual", "equal", "proportional_em", "proportional")
+) {
 
     weights <- match.arg(weights)
     assert_that(
