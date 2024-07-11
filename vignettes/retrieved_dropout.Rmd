@@ -1,0 +1,271 @@
+---
+title: "Implementation of retrieved-dropout models using rbmi"
+author: "Alessandro Noci, Marcel Wolbers"
+date: "2024-07-09"
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+    number_sections: true
+    citation_package: natbib
+    base_format: rmarkdown::html_vignette
+bibliography: "references.bib"
+link-citations: true   
+linkcolor: blue
+pkgdown:
+  as_is: true
+vignette: >
+  %\VignetteIndexEntry{Implementation of retrieved-dropout models using rbmi}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This vignette describes how retrieved dropout models which include time-varying intercurrent event (ICE) indicators can be implemented in the `rbmi` package.
+
+# Retrieved dropout models in a nutshell
+
+Retrieved dropout models have been proposed for the analysis of estimands using the treatment policy strategy for addressing ICE. In these models, missing outcomes are multiply imputed conditional upon whether they occur pre- or post-ICE. Retrieved dropout models typically rely on an extended missing-at-random (MAR) assumptions, i.e., they assume that missing outcome data is similar to observed data from subjects in the same treatment group with the same observed outcome history, and the same ICE status. For a more comprehensive description and evaluation of retrieved dropout models, we refer to @Guizzaro2021, @PolverejanDragalin2020, @Noci2021, @Drury2023, and @Bell2024. Broadly, these publications find that retrieved dropout models reduce bias compared to alternative analysis approaches based on imputation under a basic MAR assumption or a reference-based missing data assumption. However, several issues of retrieved dropout models have also been highlighted. Retrieved dropout models require that enough post-ICE data is collected to inform the imputation model. Even with relatively small amounts of missingness, complex retrieved dropout models may face identifiability issues. In addition, retrieved dropout models have been associated with inflated standard errors of associated treatment effect estimators which has a detrimental effect on  study power. In particular, it has been observed that once the post-ICE observation percentages falls below 50%, the power loss can be quite dramatic [@Bell2024]. 
+
+# Data simulation using function `simulate_data()` {#sec:dataSimul}
+
+For the purposes of this vignette we will first create a simulated dataset with the `rbmi` function `simulate_data()`.
+The `simulate_data()` function generates data from a randomized clinical trial with longitudinal continuous outcomes and up to two different types of intercurrent events (ICEs). 
+
+Specifically, we simulate a 1:1 randomized trial of an active drug (intervention) versus placebo (control) with 100 subjects per group and 4 post-baseline assessments (3-monthly visits until 12 months):
+
+- The mean outcome trajectory in the placebo group increases linearly from 50 at baseline (visit 0) to 60 at visit 4, i.e. the slope is 10 points/year.
+- The mean outcome trajectory in the intervention group is identical to the placebo group up to month 3. From month 3 onward, the slope decreases by 50% to 5 points/year.
+- The covariance structure of the baseline and follow-up values in both groups is implied by a random intercept and slope model with a standard deviation of 5 for both the intercept and the slope, and a correlation of 0.25. In addition, an independent residual error with standard deviation 2.5 is added to each assessment.   
+- The probability of the intercurrent event study drug discontinuation after each visit is calculated according to a logistic model which depends on the observed outcome at that visit. Specifically, a visit-wise discontinuation probability of 3% and 4% in the control and intervention group, respectively, is specified in case the observed outcome is equal to 50 (the mean value at baseline). The odds of a discontinuation is simulated to increase by +10% for each +1 point increase of the observed outcome.
+- Study drug discontinuation is simulated to have no effect on the mean trajectory in the placebo group. In the intervention group, subjects who discontinue follow the slope of the mean trajectory from the placebo group from that time point onward. This is compatible with a copy increments in reference (CIR) assumption. 
+- Study dropout at the study drug discontinuation visit occurs with a probability of 50% leading to missing outcome data from that time point onward.
+
+The function `simulate_data()` requires 3 arguments (see the function documentation `help(simulate_data)` for more details): 
+
+- `pars_c`: The simulation parameters of the control group
+- `pars_t`: The simulation parameters of the intervention group
+- `post_ice1_traj`: Specifies how observed outcomes after ICE1 are simulated
+
+
+Below, we report how data according to the specifications above can be simulated with function `simulate_data()`:
+
+```{r}
+library(rbmi)
+library(dplyr)
+
+set.seed(1392)
+
+n <- 100
+time <- c(0, 3, 6, 9, 12)
+
+# Mean trajectory control
+muC <- c(50.0, 52.5, 55.0, 57.5, 60.0)
+
+# Mean trajectory intervention
+muT <- c(50.0, 52.5, 55.0, 56.25, 57.50)
+
+# Create Sigma
+sd_error <- 2.5
+covRE <- rbind(
+  c(25.0, 6.25),
+  c(6.25, 25.0)
+)
+
+Sigma <- cbind(1, time / 12) %*% covRE %*% rbind(1, time / 12) + diag(sd_error^2, nrow = length(time))
+
+# Set probability of discontinuation
+probDisc_C <- 0.03
+probDisc_T <- 0.04
+or_outcome <- 1.10 # +1 point increase => +10% odds of discontinuation
+
+# Set dropout rate following discontinuation
+prob_dropout <- 0.5
+
+# Set simulation parameters of the control group
+parsC <- set_simul_pars(
+    mu = muC,
+    sigma = Sigma,
+    n = n,
+    prob_ice1 = probDisc_C,
+    or_outcome_ice1 = or_outcome,
+    prob_post_ice1_dropout = prob_dropout
+)
+
+# Set simulation parameters of the intervention group
+parsT <- parsC
+parsT$mu <- muT
+parsT$prob_ice1 <- probDisc_T
+
+# Set assumption about post-ice trajectory
+post_ice_traj <- "CIR"
+
+# Simulate data
+data <- simulate_data(
+    pars_c = parsC,
+    pars_t = parsT,
+    post_ice1_traj = post_ice_traj
+) %>%
+  select(-c(outcome_noICE, ind_ice2)) # remove unncessary columns
+  
+
+head(data)
+```
+
+The frequency of the ICE and proportion of data collected after the ICE impacts the variance of the treatment effect for retrieved dropout models. For example, a large proportion of ICE combined with a small proportion of data collected after the ICE might result in substantial variance inflation, especially for more complex retrieved dropout models.
+
+The proportion of subjects with an ICE and the proportion of subjects who withdrew from the simulated study is summarized below:
+
+```{r}
+
+# Compute endpoint of interest: change from baseline
+data <- data %>% 
+  filter(visit != "0") %>%
+  mutate(
+    change = outcome - outcome_bl,
+    visit = factor(visit, levels = unique(visit))
+  )
+      
+
+data %>% group_by(visit) %>% summarise(
+  freq_disc_ctrl = mean(ind_ice1[group == "Control"] == 1),
+  freq_dropout_ctrl = mean(dropout_ice1[group == "Control"] == 1),
+  freq_disc_interv = mean(ind_ice1[group == "Intervention"] == 1),
+  freq_dropout_interv = mean(dropout_ice1[group == "Intervention"] == 1)
+)
+
+```
+
+For this study 23\% of the study participants discontinued from study treatment in the control arm and 24\% in the intervention arm. Approximately half of the participants who discontinued from treatment dropped-out from the study at the discontinuation visit leading to missing outcomes at subsequent visits.
+
+# Estimators based on retrieved dropout models 
+
+We consider retrieved dropout methods which model pre- and post-ICE outcomes jointly by including time-varying ICE indicators in the imputation model, i.e. we allow the occurrence of the ICE to impact the mean structure but not the covariance matrix. Imputation of missing outcomes is then performed under a MAR assumption including all observed data. For the analysis of the completed data, we use a standard ANCOVA model of the outcome at each follow-up visit, respectively, with treatment assignment as the main covariate and adjustment for the baseline outcome. 
+
+Specifically, we consider the following imputation models: 
+
+- **Imputation under a basic MAR assumption (basic MAR)**: This model ignores whether an outcome is observed pre- or post-ICE, i.e. it is not a retrieved dropout model. Rather, it is asymptotically equivalent to a standard MMRM model and analogous to the "MI1" model in @Bell2024. The only difference to the "MI1" model is that `rbmi` is not based on sequential imputation but rather, all missing outcomes are imputed simultaneously based on a MMRM-type imputation model. We include baseline outcome by visit and treatment group by visit interaction terms in the imputation model which is of the form: `change ~ outcome_bl*visit + group*visit`.
+- **Retrieved dropout model 1 (RD1)**: This model uses the following imputation model: `change ~ outcome_bl*visit + group*visit + time_since_ice1*group`, where `time_since_ice1` is set to 0 up to the treatment discontinuation and to the time from treatment discontinuation (in months) at subsequent visits. This implies a change in the slope of the outcome trajectories after the ICE, which is modeled separately for each treatment arm. This model is similar to the "TV2-MAR" estimator in @Noci2021. Compared to the basic MAR model, this model requires estimation of 2 additional parameters.
+- **Retrieved dropout model 2 (RD2)**: This model uses the following imputation model: `change ~ outcome_bl*visit + group*visit + ind_ice1*group*visit`. This assumes a constant shift in outcomes after the ICE, which is modeled separately for each treatment arm and each visit. This model is analogous to the "MI2" model in @Bell2024. Compared to the basic MAR model, this model requires estimation of 2 times "number of visits" additional parameters. It makes different though rather weaker assumptions than the RD1 model but might also be harder to fit if post-ICE data collection is sparse at some visits. 
+
+# Implementation of the defined retrieved dropout models in `rbmi`
+
+`rbmi` supports the inclusion of time-varying covariates in the imputation model. The only requirement is that the time-varying covariate is non-missing at all visits including those where the outcome might be missing. 
+Imputation is performed under a (extended) MAR assumption. Therefore, all imputation approaches implemented in `rbmi` are valid and should yield comparable estimators and standard errors. 
+For this vignette, we used the conditional mean imputation approach combined with the jackkife.
+
+## Basic MAR model
+
+```{r}
+
+# Define key variables for the imputation and analysis models
+vars <- set_vars(
+  subjid = "id",
+  visit = "visit",
+  outcome = "change",
+  group = "group",
+  covariates = c("outcome_bl*visit", "group*visit")
+)
+
+vars_an <- vars
+vars_an$covariates <- "outcome_bl"
+
+# Define imputation method
+method <- method_condmean(type = "jackknife")
+
+draw_obj <- draws(
+  data = data,
+  data_ice = NULL,
+  vars = vars,
+  method = method,
+  quiet = TRUE
+)
+
+impute_obj <- impute(
+  draw_obj
+)
+
+ana_obj <- analyse(
+  impute_obj,
+  vars = vars_an
+)
+
+pool_obj_basicMAR <- pool(ana_obj)
+pool_obj_basicMAR
+```
+
+## Retrieved dropout model 1 (RD1)
+
+```{r}
+
+# derive variable "time_since_ice1" (time since ICE in months)
+data <- data %>% group_by(id) %>% 
+  mutate(time_since_ice1 = cumsum(ind_ice1)*3 )
+
+vars$covariates <- c("outcome_bl*visit", "group*visit", "time_since_ice1*group")
+
+draw_obj <- draws(
+  data = data,
+  data_ice = NULL,
+  vars = vars,
+  method = method,
+  quiet = TRUE
+)
+
+impute_obj <- impute(
+  draw_obj
+)
+
+ana_obj <- analyse(
+  impute_obj,
+  vars = vars_an
+)
+
+pool_obj_RD1 <- pool(ana_obj)
+pool_obj_RD1
+```
+
+## Retrieved dropout model 2 (RD2)
+
+```{r}
+
+vars$covariates <- c("outcome_bl*visit", "group*visit", "ind_ice1*group*visit")
+
+draw_obj <- draws(
+  data = data,
+  data_ice = NULL,
+  vars = vars,
+  method = method,
+  quiet = TRUE
+)
+
+impute_obj <- impute(
+  draw_obj
+)
+
+ana_obj <- analyse(
+  impute_obj,
+  vars = vars_an
+)
+
+pool_obj_RD2 <- pool(ana_obj)
+pool_obj_RD2
+```
+
+## Brief summary of results
+
+The point estimators of the treatment effect at the last visit were 
+`r formatC(pool_obj_basicMAR$pars$trt_4$est,format="f",digits=3)`, 
+`r formatC(pool_obj_RD1$pars$trt_4$est,format="f",digits=3)`, and
+`r formatC(pool_obj_RD2$pars$trt_4$est,format="f",digits=3)` for the basic MAR, RD1, and RD2 estimators, respectively, i.e. slightly smaller for the retrieved dropout models compared to the basic MAR model.
+The corresponding standard errors of the 3 estimators were 
+`r formatC(pool_obj_basicMAR$pars$trt_4$se,format="f",digits=3)`, 
+`r formatC(pool_obj_RD1$pars$trt_4$se,format="f",digits=3)`, and
+`r formatC(pool_obj_RD2$pars$trt_4$se,format="f",digits=3)`, i.e. slightly larger for the retrieved dropout models compared to the basic MAR model.
+
+
+
+# References {.unlisted .unnumbered}
