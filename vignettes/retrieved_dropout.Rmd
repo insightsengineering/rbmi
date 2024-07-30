@@ -1,7 +1,7 @@
 ---
 title: "Implementation of retrieved-dropout models using rbmi"
 author: "Alessandro Noci, Marcel Wolbers"
-date: "2024-07-09"
+date: "2024-07-30"
 output: 
   bookdown::html_document2:
     toc: true
@@ -28,12 +28,12 @@ This vignette describes how retrieved dropout models which include time-varying 
 
 # Retrieved dropout models in a nutshell
 
-Retrieved dropout models have been proposed for the analysis of estimands using the treatment policy strategy for addressing ICE. In these models, missing outcomes are multiply imputed conditional upon whether they occur pre- or post-ICE. Retrieved dropout models typically rely on an extended missing-at-random (MAR) assumptions, i.e., they assume that missing outcome data is similar to observed data from subjects in the same treatment group with the same observed outcome history, and the same ICE status. For a more comprehensive description and evaluation of retrieved dropout models, we refer to @Guizzaro2021, @PolverejanDragalin2020, @Noci2021, @Drury2023, and @Bell2024. Broadly, these publications find that retrieved dropout models reduce bias compared to alternative analysis approaches based on imputation under a basic MAR assumption or a reference-based missing data assumption. However, several issues of retrieved dropout models have also been highlighted. Retrieved dropout models require that enough post-ICE data is collected to inform the imputation model. Even with relatively small amounts of missingness, complex retrieved dropout models may face identifiability issues. In addition, retrieved dropout models have been associated with inflated standard errors of associated treatment effect estimators which has a detrimental effect on  study power. In particular, it has been observed that once the post-ICE observation percentages falls below 50%, the power loss can be quite dramatic [@Bell2024]. 
+Retrieved dropout models have been proposed for the analysis of estimands using the treatment policy strategy for addressing an ICE. In these models, missing outcomes are multiply imputed conditional upon whether they occur pre- or post-ICE. Retrieved dropout models typically rely on an extended missing-at-random (MAR) assumption, i.e., they assume that missing outcome data is similar to observed data from subjects in the same treatment group with the same observed outcome history, and the same ICE status. For a more comprehensive description and evaluation of retrieved dropout models, we refer to @Guizzaro2021, @PolverejanDragalin2020, @Noci2021, @Drury2023, and @Bell2024. Broadly, these publications find that retrieved dropout models reduce bias compared to alternative analysis approaches based on imputation under a basic MAR assumption or a reference-based missing data assumption. However, several issues of retrieved dropout models have also been highlighted. Retrieved dropout models require that enough post-ICE data is collected to inform the imputation model. Even with relatively small amounts of missingness, complex retrieved dropout models may face identifiability issues. In addition, retrieved dropout models have been associated with inflated standard errors of associated treatment effect estimators which has a detrimental effect on study power. In particular, it has been observed that once the post-ICE observation percentage falls below 50%, the power loss can be quite dramatic [@Bell2024]. 
 
 # Data simulation using function `simulate_data()` {#sec:dataSimul}
 
 For the purposes of this vignette we will first create a simulated dataset with the `rbmi` function `simulate_data()`.
-The `simulate_data()` function generates data from a randomized clinical trial with longitudinal continuous outcomes and up to two different types of intercurrent events (ICEs). 
+The `simulate_data()` function generates data from a randomized clinical trial with longitudinal continuous outcomes and up to two different types of ICEs. 
 
 Specifically, we simulate a 1:1 randomized trial of an active drug (intervention) versus placebo (control) with 100 subjects per group and 4 post-baseline assessments (3-monthly visits until 12 months):
 
@@ -46,9 +46,9 @@ Specifically, we simulate a 1:1 randomized trial of an active drug (intervention
 
 The function `simulate_data()` requires 3 arguments (see the function documentation `help(simulate_data)` for more details): 
 
-- `pars_c`: The simulation parameters of the control group
-- `pars_t`: The simulation parameters of the intervention group
-- `post_ice1_traj`: Specifies how observed outcomes after ICE1 are simulated
+- `pars_c`: The simulation parameters of the control group.
+- `pars_t`: The simulation parameters of the intervention group.
+- `post_ice1_traj`: Specifies how observed outcomes after ICE1 are simulated.
 
 
 Below, we report how data according to the specifications above can be simulated with function `simulate_data()`:
@@ -155,7 +155,7 @@ Specifically, we consider the following imputation models:
 
 `rbmi` supports the inclusion of time-varying covariates in the imputation model. The only requirement is that the time-varying covariate is non-missing at all visits including those where the outcome might be missing. 
 Imputation is performed under a (extended) MAR assumption. Therefore, all imputation approaches implemented in `rbmi` are valid and should yield comparable estimators and standard errors. 
-For this vignette, we used the conditional mean imputation approach combined with the jackkife.
+For this vignette, we used the conditional mean imputation approach combined with the jackknife.
 
 ## Basic MAR model
 
@@ -202,8 +202,9 @@ pool_obj_basicMAR
 ```{r}
 
 # derive variable "time_since_ice1" (time since ICE in months)
-data <- data %>% group_by(id) %>% 
-  mutate(time_since_ice1 = cumsum(ind_ice1)*3 )
+data <- data %>% 
+  group_by(id) %>% 
+  mutate(time_since_ice1 = cumsum(ind_ice1)*3)
 
 vars$covariates <- c("outcome_bl*visit", "group*visit", "time_since_ice1*group")
 
