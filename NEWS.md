@@ -1,8 +1,10 @@
 
 # rbmi (development version)
 
-* Include vignette on how to obtain frequentist and information-anchored inference with conditional mean imputation using `rbmi`
-* Added FAQ vignette
+* Added vignette on how to implement retrieved dropout models with time-varying intercurrent event (ICE) indicators (#414)
+* Added documentation clarifying potential false-positive warnings from rstan (#288)
+* Include vignette on how to obtain frequentist and information-anchored inference with conditional mean imputation using `rbmi` (#406)
+* Added FAQ vignette (#407)
 * Updates to `lsmeans()` for better consistency with the `emmeans` package (#412)
     * Renamed `lsmeans(..., weights = "proportional")` to `lsmeans(..., weights = "counterfactual")`to more accurately reflect the weights used in the calculation.
     * Added `lsmeans(..., weights = "proportional_em")` which provides consistent results with `emmeans(..., weights = "proportional")`

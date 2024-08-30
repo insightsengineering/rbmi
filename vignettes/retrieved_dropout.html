@@ -14,7 +14,7 @@
 
 <meta name="date" content="2024-07-30" />
 
-<title>Implementation of retrieved-dropout models using rbmi</title>
+<title>rbmi: Implementation of retrieved-dropout models using rbmi</title>
 
 
 <style type="text/css">
@@ -38,7 +38,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -49,7 +49,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -137,6 +137,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
 div.csl-bib-body { }
 div.csl-entry {
 clear: both;
+margin-bottom: 0em;
 }
 .hanging div.csl-entry {
 margin-left:2em;
@@ -347,7 +348,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">Implementation of retrieved-dropout models using rbmi</h1>
+<h1 class="title toc-ignore">rbmi: Implementation of retrieved-dropout models using rbmi</h1>
 <h4 class="author">Alessandro Noci, Marcel Wolbers</h4>
 <h4 class="date">2024-07-30</h4>
 
@@ -514,9 +515,11 @@ as the main covariate and adjustment for the baseline outcome.</p>
 i.e. it is not a retrieved dropout model. Rather, it is asymptotically equivalent to a standard MMRM model and analogous to the
 “MI1” model in <span class="citation">Bell et al. (<a href="#ref-Bell2024">2024</a>)</span>. The only difference to the “MI1” model is that <code>rbmi</code> is not based on sequential imputation but
 rather, all missing outcomes are imputed simultaneously based on a MMRM-type imputation model. We include baseline outcome by
-visit and treatment group by visit interaction terms in the imputation model which is of the form: <code>change ~ outcome_bl*visit +  group*visit</code>.</li>
-<li><strong>Retrieved dropout model 1 (RD1)</strong>: This model uses the following imputation model: `change ~ outcome_bl<em>visit + group</em>visit</li>
-<li>time_since_ice1*group<code>, where</code>time_since_ice1` is set to 0 up to the treatment discontinuation and to the time from treatment
+visit and treatment group by visit interaction terms in the imputation model which is of the form:
+<code>change ~ outcome_bl*visit + group*visit</code>.</li>
+<li><strong>Retrieved dropout model 1 (RD1)</strong>: This model uses the following imputation model:
+<code>change ~ outcome_bl*visit + group*visit + time_since_ice1*group</code>, where <code>time_since_ice1</code> is set to 0 up to
+the treatment discontinuation and to the time from treatment
 discontinuation (in months) at subsequent visits. This implies a change in the slope of the outcome trajectories after the ICE, which
 is modeled separately for each treatment arm. This model is similar to the “TV2-MAR” estimator in <span class="citation">Noci et al. (<a href="#ref-Noci2021">2023</a>)</span>. Compared to the basic
 MAR model, this model requires estimation of 2 additional parameters.</li>
@@ -717,7 +720,7 @@ basic MAR model.</p>
 </div>
 <div id="references" class="section level1 unnumbered unlisted">
 <h1>References</h1>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-Bell2024" class="csl-entry">
 Bell, James, Thomas Drury, Tobias Mütze, Christian Bressen Pipper, Lorenzo Guizzaro, Marian Mitroiu, Khadija Rerhou Rantell, Marcel Wolbers, and David Wright. 2024. <span>“Estimation Methods for Estimands Using the Treatment Policy Strategy; a Simulation Study Based on the PIONEER 1 Trial.”</span> <em>arXiv Preprint</em>. <a href="https://arxiv.org/abs/2402.12850">https://arxiv.org/abs/2402.12850</a>.
 </div>

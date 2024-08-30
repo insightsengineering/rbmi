@@ -1,5 +1,5 @@
 ---
-title: "Implementation of retrieved-dropout models using rbmi"
+title: "rbmi: Implementation of retrieved-dropout models using rbmi"
 author: "Alessandro Noci, Marcel Wolbers"
 date: "2024-07-30"
 output: 
@@ -10,7 +10,7 @@ output:
     citation_package: natbib
     base_format: rmarkdown::html_vignette
 bibliography: "references.bib"
-link-citations: true   
+link-citations: true
 linkcolor: blue
 pkgdown:
   as_is: true
@@ -132,7 +132,6 @@ ICE might result in substantial variance inflation, especially for more complex 
 The proportion of subjects with an ICE and the proportion of subjects who withdrew from the simulated study is summarized below:
 
 ```{r}
-
 # Compute endpoint of interest: change from baseline
 data <- data %>% 
   filter(visit != "0") %>%
@@ -171,10 +170,11 @@ Specifically, we consider the following imputation models:
 i.e. it is not a retrieved dropout model. Rather, it is asymptotically equivalent to a standard MMRM model and analogous to the 
 "MI1" model in @Bell2024. The only difference to the "MI1" model is that `rbmi` is not based on sequential imputation but 
 rather, all missing outcomes are imputed simultaneously based on a MMRM-type imputation model. We include baseline outcome by 
-visit and treatment group by visit interaction terms in the imputation model which is of the form: `change ~ outcome_bl*visit + 
-group*visit`.
-- **Retrieved dropout model 1 (RD1)**: This model uses the following imputation model: `change ~ outcome_bl*visit + group*visit 
-+ time_since_ice1*group`, where `time_since_ice1` is set to 0 up to the treatment discontinuation and to the time from treatment 
+visit and treatment group by visit interaction terms in the imputation model which is of the form:
+`change ~ outcome_bl*visit + group*visit`.
+- **Retrieved dropout model 1 (RD1)**: This model uses the following imputation model:
+`change ~ outcome_bl*visit + group*visit + time_since_ice1*group`, where `time_since_ice1` is set to 0 up to
+the treatment discontinuation and to the time from treatment 
 discontinuation (in months) at subsequent visits. This implies a change in the slope of the outcome trajectories after the ICE, which
 is modeled separately for each treatment arm. This model is similar to the "TV2-MAR" estimator in @Noci2021. Compared to the basic 
 MAR model, this model requires estimation of 2 additional parameters.
@@ -195,7 +195,6 @@ For this vignette, we used the conditional mean imputation approach combined wit
 ## Basic MAR model
 
 ```{r}
-
 # Define key variables for the imputation and analysis models
 vars <- set_vars(
   subjid = "id",
@@ -235,7 +234,6 @@ pool_obj_basicMAR
 ## Retrieved dropout model 1 (RD1)
 
 ```{r}
-
 # derive variable "time_since_ice1" (time since ICE in months)
 data <- data %>% 
   group_by(id) %>% 
@@ -267,7 +265,6 @@ pool_obj_RD1
 ## Retrieved dropout model 2 (RD2)
 
 ```{r}
-
 vars$covariates <- c("outcome_bl*visit", "group*visit", "ind_ice1*group*visit")
 
 draw_obj <- draws(
