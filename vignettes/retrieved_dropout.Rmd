@@ -15,7 +15,7 @@ linkcolor: blue
 pkgdown:
   as_is: true
 vignette: >
-  %\VignetteIndexEntry{Implementation of retrieved-dropout models using rbmi}
+  %\VignetteIndexEntry{rbmi: Implementation of retrieved-dropout models using rbmi}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -51,8 +51,8 @@ different types of ICEs.
 Specifically, we simulate a 1:1 randomized trial of an active drug (intervention) versus placebo (control) with 100 subjects per 
 group and 4 post-baseline assessments (3-monthly visits until 12 months):
 
-- The mean outcome trajectory in the placebo group increases linearly from 50 at baseline (visit 0) to 60 at visit 4, i.e. the slope is 10 points/year.
-- The mean outcome trajectory in the intervention group is identical to the placebo group up to month 3. From month 3 onward, the slope decreases by 50% to 5 points/year.
+- The mean outcome trajectory in the placebo group increases linearly from 50 at baseline (visit 0) to 60 at visit 4, i.e. the slope is 10 points/year (or 2.5 points every 3 months).
+- The mean outcome trajectory in the intervention group is identical to the placebo group up to month 6. From month 6 onward, the slope decreases by 50% to 5 points/year (i.e. 1.25 points every 3 months).
 - The covariance structure of the baseline and follow-up values in both groups is implied by a random intercept and slope model 
 with a standard deviation of 5 for both the intercept and the slope, and a correlation of 0.25. In addition, an independent 
 residual error with standard deviation 2.5 is added to each assessment.   
@@ -96,7 +96,9 @@ covRE <- rbind(
   c(6.25, 25.0)
 )
 
-Sigma <- cbind(1, time / 12) %*% covRE %*% rbind(1, time / 12) + diag(sd_error^2, nrow = length(time))
+Sigma <- cbind(1, time / 12) %*%
+    covRE %*% rbind(1, time / 12) +
+    diag(sd_error^2, nrow = length(time))
 
 # Set probability of discontinuation
 probDisc_C <- 0.03
@@ -153,12 +155,14 @@ data <- data %>%
   )
       
 
-data %>% group_by(visit) %>% summarise(
-  freq_disc_ctrl = mean(ind_ice1[group == "Control"] == 1),
-  freq_dropout_ctrl = mean(dropout_ice1[group == "Control"] == 1),
-  freq_disc_interv = mean(ind_ice1[group == "Intervention"] == 1),
-  freq_dropout_interv = mean(dropout_ice1[group == "Intervention"] == 1)
-)
+data %>%
+  group_by(visit) %>% 
+  summarise(
+    freq_disc_ctrl = mean(ind_ice1[group == "Control"] == 1),
+    freq_dropout_ctrl = mean(dropout_ice1[group == "Control"] == 1),
+    freq_disc_interv = mean(ind_ice1[group == "Intervention"] == 1),
+    freq_dropout_interv = mean(dropout_ice1[group == "Intervention"] == 1)
+  )
 
 ```
 
