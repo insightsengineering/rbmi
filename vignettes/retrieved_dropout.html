@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Alessandro Noci, Marcel Wolbers" />
+
+<meta name="date" content="2024-07-30" />
+
+<title>rbmi: Implementation of retrieved-dropout models using rbmi</title>
+
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">rbmi: Implementation of retrieved-dropout models using rbmi</h1>
+<h4 class="author">Alessandro Noci, Marcel Wolbers</h4>
+<h4 class="date">2024-07-30</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#retrieved-dropout-models-in-a-nutshell" id="toc-retrieved-dropout-models-in-a-nutshell"><span class="toc-section-number">1</span> Retrieved dropout models in a nutshell</a></li>
+<li><a href="#sec:dataSimul" id="toc-sec:dataSimul"><span class="toc-section-number">2</span> Data simulation using function <code>simulate_data()</code></a></li>
+<li><a href="#estimators-based-on-retrieved-dropout-models" id="toc-estimators-based-on-retrieved-dropout-models"><span class="toc-section-number">3</span> Estimators based on retrieved dropout models</a></li>
+<li><a href="#implementation-of-the-defined-retrieved-dropout-models-in-rbmi" id="toc-implementation-of-the-defined-retrieved-dropout-models-in-rbmi"><span class="toc-section-number">4</span> Implementation of the defined retrieved dropout models in <code>rbmi</code></a>
+<ul>
+<li><a href="#basic-mar-model" id="toc-basic-mar-model"><span class="toc-section-number">4.1</span> Basic MAR model</a></li>
+<li><a href="#retrieved-dropout-model-1-rd1" id="toc-retrieved-dropout-model-1-rd1"><span class="toc-section-number">4.2</span> Retrieved dropout model 1 (RD1)</a></li>
+<li><a href="#retrieved-dropout-model-2-rd2" id="toc-retrieved-dropout-model-2-rd2"><span class="toc-section-number">4.3</span> Retrieved dropout model 2 (RD2)</a></li>
+<li><a href="#brief-summary-of-results" id="toc-brief-summary-of-results"><span class="toc-section-number">4.4</span> Brief summary of results</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p>This vignette describes how retrieved dropout models which include time-varying intercurrent event (ICE) indicators can be
+implemented in the <code>rbmi</code> package.</p>
+<div id="retrieved-dropout-models-in-a-nutshell" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Retrieved dropout models in a nutshell</h1>
+<p>Retrieved dropout models have been proposed for the analysis of estimands using the treatment policy strategy for addressing an ICE.
+In these models, missing outcomes are multiply imputed conditional upon whether they occur pre- or post-ICE. Retrieved dropout models
+typically rely on an extended missing-at-random (MAR) assumption, i.e., they assume that missing outcome data is similar to observed
+data from subjects in the same treatment group with the same observed outcome history, and the same ICE status. For a more
+comprehensive description and evaluation of retrieved dropout models, we refer to <span class="citation">Guizzaro et al. (<a href="#ref-Guizzaro2021">2021</a>)</span>, <span class="citation">Polverejan and Dragalin (<a href="#ref-PolverejanDragalin2020">2020</a>)</span>, <span class="citation">Noci et al. (<a href="#ref-Noci2021">2023</a>)</span>,
+<span class="citation">Drury et al. (<a href="#ref-Drury2023">2023</a>)</span>, and <span class="citation">Bell et al. (<a href="#ref-Bell2024">2024</a>)</span>. Broadly, these publications find that retrieved dropout models reduce bias compared to alternative
+analysis approaches based on imputation under a basic MAR assumption or a reference-based missing data assumption. However, several
+issues of retrieved dropout models have also been highlighted. Retrieved dropout models require that enough post-ICE data is
+collected to inform the imputation model. Even with relatively small amounts of missingness, complex retrieved dropout models may
+face identifiability issues. Another drawback to these models in general is the loss of power relative to reference-based imputation methods, which
+becomes meaningful for post-ICE observation percentages below 50% and increases at an accelerating rate as this percentage decreases <span class="citation">(<a href="#ref-Bell2024">Bell et al. 2024</a>)</span>.</p>
+</div>
+<div id="sec:dataSimul" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Data simulation using function <code>simulate_data()</code></h1>
+<p>For the purposes of this vignette we will first create a simulated dataset with the <code>rbmi</code> function <code>simulate_data()</code>.
+The <code>simulate_data()</code> function generates data from a randomized clinical trial with longitudinal continuous outcomes and up to two
+different types of ICEs.</p>
+<p>Specifically, we simulate a 1:1 randomized trial of an active drug (intervention) versus placebo (control) with 100 subjects per
+group and 4 post-baseline assessments (3-monthly visits until 12 months):</p>
+<ul>
+<li>The mean outcome trajectory in the placebo group increases linearly from 50 at baseline (visit 0) to 60 at visit 4, i.e. the slope is 10 points/year (or 2.5 points every 3 months).</li>
+<li>The mean outcome trajectory in the intervention group is identical to the placebo group up to month 6. From month 6 onward, the slope decreases by 50% to 5 points/year (i.e. 1.25 points every 3 months).</li>
+<li>The covariance structure of the baseline and follow-up values in both groups is implied by a random intercept and slope model
+with a standard deviation of 5 for both the intercept and the slope, and a correlation of 0.25. In addition, an independent
+residual error with standard deviation 2.5 is added to each assessment.<br />
+</li>
+<li>The probability of the intercurrent event study drug discontinuation after each visit is calculated according to a logistic model which depends on the observed outcome at that visit.
+Specifically, a visit-wise discontinuation probability of 3% and 4% in the control and intervention group, respectively, is specified in case the observed outcome is equal to 50 (the mean value at baseline).
+The odds of a discontinuation is simulated to increase by +10% for each +1 point increase of the observed outcome.</li>
+<li>Study drug discontinuation is simulated to have no effect on the mean trajectory in the placebo group.
+In the intervention group, subjects who discontinue follow the slope of the mean trajectory from the placebo group
+from that time point onward. This is compatible with a copy increments in reference (CIR) assumption.</li>
+<li>Study dropout at the study drug discontinuation visit occurs with a probability of 50% leading to missing outcome
+data from that time point onward.</li>
+</ul>
+<p>The function <code>simulate_data()</code> requires 3 arguments (see the function documentation <code>help(simulate_data)</code> for more details):</p>
+<ul>
+<li><code>pars_c</code>: The simulation parameters of the control group.</li>
+<li><code>pars_t</code>: The simulation parameters of the intervention group.</li>
+<li><code>post_ice1_traj</code>: Specifies how observed outcomes after ICE1 are simulated.</li>
+</ul>
+<p>Below, we report how data according to the specifications above can be simulated with function <code>simulate_data()</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(rbmi)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1392</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>time <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">9</span>, <span class="dv">12</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co"># Mean trajectory control</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>muC <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">50.0</span>, <span class="fl">52.5</span>, <span class="fl">55.0</span>, <span class="fl">57.5</span>, <span class="fl">60.0</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co"># Mean trajectory intervention</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>muT <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">50.0</span>, <span class="fl">52.5</span>, <span class="fl">55.0</span>, <span class="fl">56.25</span>, <span class="fl">57.50</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co"># Create Sigma</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>sd_error <span class="ot">&lt;-</span> <span class="fl">2.5</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>covRE <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fl">25.0</span>, <span class="fl">6.25</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fl">6.25</span>, <span class="fl">25.0</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>)</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, time <span class="sc">/</span> <span class="dv">12</span>) <span class="sc">%*%</span></span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>    covRE <span class="sc">%*%</span> <span class="fu">rbind</span>(<span class="dv">1</span>, time <span class="sc">/</span> <span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a>    <span class="fu">diag</span>(sd_error<span class="sc">^</span><span class="dv">2</span>, <span class="at">nrow =</span> <span class="fu">length</span>(time))</span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co"># Set simulation parameters of the control group</span></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a>parsC <span class="ot">&lt;-</span> <span class="fu">set_simul_pars</span>(</span>
+<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a>    <span class="at">mu =</span> muC,</span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a>    <span class="at">sigma =</span> Sigma,</span>
+<span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a>    <span class="at">n =</span> <span class="dv">100</span>, <span class="co"># sample size</span></span>
+<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a>    <span class="at">prob_ice1 =</span> <span class="fl">0.03</span>, <span class="co"># prob of discontinuation for outcome equal to 50</span></span>
+<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a>    <span class="at">or_outcome_ice1 =</span> <span class="fl">1.10</span>,  <span class="co"># +1 point increase =&gt; +10% odds of discontinuation</span></span>
+<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a>    <span class="at">prob_post_ice1_dropout =</span> <span class="fl">0.5</span> <span class="co"># dropout rate following discontinuation</span></span>
+<span id="cb1-33"><a href="#cb1-33" tabindex="-1"></a>)</span>
+<span id="cb1-34"><a href="#cb1-34" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" tabindex="-1"></a><span class="co"># Set simulation parameters of the intervention group</span></span>
+<span id="cb1-36"><a href="#cb1-36" tabindex="-1"></a>parsT <span class="ot">&lt;-</span> parsC</span>
+<span id="cb1-37"><a href="#cb1-37" tabindex="-1"></a>parsT<span class="sc">$</span>mu <span class="ot">&lt;-</span> muT</span>
+<span id="cb1-38"><a href="#cb1-38" tabindex="-1"></a>parsT<span class="sc">$</span>prob_ice1 <span class="ot">&lt;-</span> <span class="fl">0.04</span></span>
+<span id="cb1-39"><a href="#cb1-39" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" tabindex="-1"></a><span class="co"># Simulate data</span></span>
+<span id="cb1-41"><a href="#cb1-41" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">simulate_data</span>(</span>
+<span id="cb1-42"><a href="#cb1-42" tabindex="-1"></a>    <span class="at">pars_c =</span> parsC,</span>
+<span id="cb1-43"><a href="#cb1-43" tabindex="-1"></a>    <span class="at">pars_t =</span> parsT,</span>
+<span id="cb1-44"><a href="#cb1-44" tabindex="-1"></a>    <span class="at">post_ice1_traj =</span> <span class="st">&quot;CIR&quot;</span> <span class="co"># Assumption about post-ice trajectory</span></span>
+<span id="cb1-45"><a href="#cb1-45" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-46"><a href="#cb1-46" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(outcome_noICE, ind_ice2)) <span class="co"># remove unncessary columns</span></span>
+<span id="cb1-47"><a href="#cb1-47" tabindex="-1"></a>  </span>
+<span id="cb1-48"><a href="#cb1-48" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" tabindex="-1"></a><span class="fu">head</span>(data)</span></code></pre></div>
+<pre><code>##     id visit   group outcome_bl ind_ice1 dropout_ice1  outcome
+## 1 id_1     0 Control   53.35397        0            0 53.35397
+## 2 id_1     1 Control   53.35397        0            0 55.15100
+## 3 id_1     2 Control   53.35397        0            0 59.81038
+## 4 id_1     3 Control   53.35397        0            0 61.59709
+## 5 id_1     4 Control   53.35397        0            0 67.08044
+## 6 id_2     0 Control   53.31025        0            0 53.31025</code></pre>
+<p>The frequency of the ICE and proportion of data collected after the ICE impacts the variance of the treatment effect for
+retrieved dropout models. For example, a large proportion of ICE combined with a small proportion of data collected after the
+ICE might result in substantial variance inflation, especially for more complex retrieved dropout models.</p>
+<p>The proportion of subjects with an ICE and the proportion of subjects who withdrew from the simulated study is summarized below:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Compute endpoint of interest: change from baseline</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> </span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="fu">filter</span>(visit <span class="sc">!=</span> <span class="st">&quot;0&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    <span class="at">change =</span> outcome <span class="sc">-</span> outcome_bl,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>    <span class="at">visit =</span> <span class="fu">factor</span>(visit, <span class="at">levels =</span> <span class="fu">unique</span>(visit))</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  )</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>      </span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>data <span class="sc">%&gt;%</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="fu">group_by</span>(visit) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    <span class="at">freq_disc_ctrl =</span> <span class="fu">mean</span>(ind_ice1[group <span class="sc">==</span> <span class="st">&quot;Control&quot;</span>] <span class="sc">==</span> <span class="dv">1</span>),</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    <span class="at">freq_dropout_ctrl =</span> <span class="fu">mean</span>(dropout_ice1[group <span class="sc">==</span> <span class="st">&quot;Control&quot;</span>] <span class="sc">==</span> <span class="dv">1</span>),</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>    <span class="at">freq_disc_interv =</span> <span class="fu">mean</span>(ind_ice1[group <span class="sc">==</span> <span class="st">&quot;Intervention&quot;</span>] <span class="sc">==</span> <span class="dv">1</span>),</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>    <span class="at">freq_dropout_interv =</span> <span class="fu">mean</span>(dropout_ice1[group <span class="sc">==</span> <span class="st">&quot;Intervention&quot;</span>] <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>  )</span></code></pre></div>
+<pre><code>## # A tibble: 4 × 5
+##   visit freq_disc_ctrl freq_dropout_ctrl freq_disc_interv freq_dropout_interv
+##   &lt;fct&gt;          &lt;dbl&gt;             &lt;dbl&gt;            &lt;dbl&gt;               &lt;dbl&gt;
+## 1 1               0.03              0.01             0.06                0.03
+## 2 2               0.1               0.03             0.1                 0.04
+## 3 3               0.19              0.09             0.17                0.06
+## 4 4               0.23              0.12             0.24                0.1</code></pre>
+<p>For this study 23% of the study participants discontinued from study treatment in the control arm and 24% in the intervention
+arm. Approximately half of the participants who discontinued from treatment dropped-out from the study at the discontinuation
+visit leading to missing outcomes at subsequent visits.</p>
+</div>
+<div id="estimators-based-on-retrieved-dropout-models" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Estimators based on retrieved dropout models</h1>
+<p>We consider retrieved dropout methods which model pre- and post-ICE outcomes jointly by including time-varying ICE indicators in
+the imputation model, i.e. we allow the occurrence of the ICE to impact the mean structure but not the covariance matrix.
+Imputation of missing outcomes is then performed under a MAR assumption including all observed data. For the analysis of the
+completed data, we use a standard ANCOVA model of the outcome at each follow-up visit, respectively, with treatment assignment
+as the main covariate and adjustment for the baseline outcome.</p>
+<p>Specifically, we consider the following imputation models:</p>
+<ul>
+<li><strong>Imputation under a basic MAR assumption (basic MAR)</strong>: This model ignores whether an outcome is observed pre- or post-ICE,
+i.e. it is not a retrieved dropout model. Rather, it is asymptotically equivalent to a standard MMRM model and analogous to the
+“MI1” model in <span class="citation">Bell et al. (<a href="#ref-Bell2024">2024</a>)</span>. The only difference to the “MI1” model is that <code>rbmi</code> is not based on sequential imputation but
+rather, all missing outcomes are imputed simultaneously based on a MMRM-type imputation model. We include baseline outcome by
+visit and treatment group by visit interaction terms in the imputation model which is of the form:
+<code>change ~ outcome_bl*visit + group*visit</code>.</li>
+<li><strong>Retrieved dropout model 1 (RD1)</strong>: This model uses the following imputation model:
+<code>change ~ outcome_bl*visit + group*visit + time_since_ice1*group</code>, where <code>time_since_ice1</code> is set to 0 up to
+the treatment discontinuation and to the time from treatment
+discontinuation (in months) at subsequent visits. This implies a change in the slope of the outcome trajectories after the ICE, which
+is modeled separately for each treatment arm. This model is similar to the “TV2-MAR” estimator in <span class="citation">Noci et al. (<a href="#ref-Noci2021">2023</a>)</span>. Compared to the basic
+MAR model, this model requires estimation of 2 additional parameters.</li>
+<li><strong>Retrieved dropout model 2 (RD2)</strong>: This model uses the following imputation model: <code>change ~ outcome_bl*visit + group*visit +  ind_ice1*group*visit</code>. This assumes a constant shift in outcomes after the ICE, which is modeled separately for each treatment arm
+and each visit. This model is analogous to the “MI2” model in <span class="citation">Bell et al. (<a href="#ref-Bell2024">2024</a>)</span>. Compared to the basic MAR model, this model requires
+estimation of 2 times “number of visits” additional parameters. It makes different though rather weaker assumptions than the RD1
+model but might also be harder to fit if post-ICE data collection is sparse at some visits.</li>
+</ul>
+</div>
+<div id="implementation-of-the-defined-retrieved-dropout-models-in-rbmi" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Implementation of the defined retrieved dropout models in <code>rbmi</code></h1>
+<p><code>rbmi</code> supports the inclusion of time-varying covariates in the imputation model. The only requirement is that the time-varying
+covariate is non-missing at all visits including those where the outcome might be missing.
+Imputation is performed under a (extended) MAR assumption. Therefore, all imputation approaches implemented in <code>rbmi</code> are valid and
+should yield comparable estimators and standard errors.
+For this vignette, we used the conditional mean imputation approach combined with the jackknife.</p>
+<div id="basic-mar-model" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Basic MAR model</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Define key variables for the imputation and analysis models</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="at">subjid =</span> <span class="st">&quot;id&quot;</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="at">visit =</span> <span class="st">&quot;visit&quot;</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="at">outcome =</span> <span class="st">&quot;change&quot;</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="at">group =</span> <span class="st">&quot;group&quot;</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;outcome_bl*visit&quot;</span>, <span class="st">&quot;group*visit&quot;</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>vars_an <span class="ot">&lt;-</span> vars</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>vars_an<span class="sc">$</span>covariates <span class="ot">&lt;-</span> <span class="st">&quot;outcome_bl&quot;</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co"># Define imputation method</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>method <span class="ot">&lt;-</span> <span class="fu">method_condmean</span>(<span class="at">type =</span> <span class="st">&quot;jackknife&quot;</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>draw_obj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>  <span class="at">data_ice =</span> <span class="cn">NULL</span>,</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>  <span class="at">vars =</span> vars,</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>  <span class="at">method =</span> method,</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>  <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>)</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>impute_obj <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>  draw_obj</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>)</span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>ana_obj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a>  impute_obj,</span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>  <span class="at">vars =</span> vars_an</span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>)</span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a>pool_obj_basicMAR <span class="ot">&lt;-</span> <span class="fu">pool</span>(ana_obj)</span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>pool_obj_basicMAR</span></code></pre></div>
+<pre><code>## 
+## Pool Object
+## -----------
+## Number of Results Combined: 1 + 200
+## Method: jackknife
+## Confidence Level: 0.95
+## Alternative: two.sided
+## 
+## Results:
+## 
+##   ==================================================
+##    parameter   est     se     lci     uci     pval  
+##   --------------------------------------------------
+##      trt_1    -0.991  0.557  -2.083  0.101   0.075  
+##    lsm_ref_1  3.117   0.401  2.331   3.902   &lt;0.001 
+##    lsm_alt_1  2.126   0.391   1.36   2.892   &lt;0.001 
+##      trt_2    -0.937  0.611  -2.134   0.26   0.125  
+##    lsm_ref_2  5.814   0.447  4.938    6.69   &lt;0.001 
+##    lsm_alt_2  4.877   0.414  4.066   5.688   &lt;0.001 
+##      trt_3    -1.491  0.743  -2.948  -0.034  0.045  
+##    lsm_ref_3  7.725   0.526  6.694   8.757   &lt;0.001 
+##    lsm_alt_3  6.234   0.522  5.211   7.258   &lt;0.001 
+##      trt_4    -2.872  0.945  -4.723  -1.02   0.002  
+##    lsm_ref_4  10.787  0.661  9.491   12.083  &lt;0.001 
+##    lsm_alt_4  7.915   0.67   6.603   9.228   &lt;0.001 
+##   --------------------------------------------------</code></pre>
+</div>
+<div id="retrieved-dropout-model-1-rd1" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> Retrieved dropout model 1 (RD1)</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># derive variable &quot;time_since_ice1&quot; (time since ICE in months)</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> </span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">time_since_ice1 =</span> <span class="fu">cumsum</span>(ind_ice1)<span class="sc">*</span><span class="dv">3</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>vars<span class="sc">$</span>covariates <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;outcome_bl*visit&quot;</span>, <span class="st">&quot;group*visit&quot;</span>, <span class="st">&quot;time_since_ice1*group&quot;</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>draw_obj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>  <span class="at">data_ice =</span> <span class="cn">NULL</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>  <span class="at">vars =</span> vars,</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  <span class="at">method =</span> method,</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>  <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>)</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>impute_obj <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  draw_obj</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>)</span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>ana_obj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>  impute_obj,</span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a>  <span class="at">vars =</span> vars_an</span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>)</span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a>pool_obj_RD1 <span class="ot">&lt;-</span> <span class="fu">pool</span>(ana_obj)</span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a>pool_obj_RD1</span></code></pre></div>
+<pre><code>## 
+## Pool Object
+## -----------
+## Number of Results Combined: 1 + 200
+## Method: jackknife
+## Confidence Level: 0.95
+## Alternative: two.sided
+## 
+## Results:
+## 
+##   ==================================================
+##    parameter   est     se     lci     uci     pval  
+##   --------------------------------------------------
+##      trt_1    -0.931  0.558  -2.025  0.163   0.095  
+##    lsm_ref_1  3.119    0.4   2.334   3.903   &lt;0.001 
+##    lsm_alt_1  2.188   0.393  1.419   2.957   &lt;0.001 
+##      trt_2    -0.805  0.616  -2.013  0.403   0.192  
+##    lsm_ref_2  5.822   0.445  4.949   6.695   &lt;0.001 
+##    lsm_alt_2  5.017   0.424  4.186   5.849   &lt;0.001 
+##      trt_3    -1.263  0.758  -2.748  0.222   0.096  
+##    lsm_ref_3  7.749   0.52   6.729   8.768   &lt;0.001 
+##    lsm_alt_3  6.486   0.549   5.41   7.562   &lt;0.001 
+##      trt_4    -2.506  0.969  -4.406  -0.606   0.01  
+##    lsm_ref_4  10.837  0.653  9.558   12.116  &lt;0.001 
+##    lsm_alt_4  8.331   0.718  6.924   9.737   &lt;0.001 
+##   --------------------------------------------------</code></pre>
+</div>
+<div id="retrieved-dropout-model-2-rd2" class="section level2" number="4.3">
+<h2><span class="header-section-number">4.3</span> Retrieved dropout model 2 (RD2)</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>vars<span class="sc">$</span>covariates <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;outcome_bl*visit&quot;</span>, <span class="st">&quot;group*visit&quot;</span>, <span class="st">&quot;ind_ice1*group*visit&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>draw_obj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">data_ice =</span> <span class="cn">NULL</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">vars =</span> vars,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="at">method =</span> method,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>)</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>impute_obj <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  draw_obj</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>)</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>ana_obj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>  impute_obj,</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>  <span class="at">vars =</span> vars_an</span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>)</span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a>pool_obj_RD2 <span class="ot">&lt;-</span> <span class="fu">pool</span>(ana_obj)</span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>pool_obj_RD2</span></code></pre></div>
+<pre><code>## 
+## Pool Object
+## -----------
+## Number of Results Combined: 1 + 200
+## Method: jackknife
+## Confidence Level: 0.95
+## Alternative: two.sided
+## 
+## Results:
+## 
+##   ==================================================
+##    parameter   est     se     lci     uci     pval  
+##   --------------------------------------------------
+##      trt_1    -0.927  0.558  -2.021  0.167   0.097  
+##    lsm_ref_1  3.125    0.4   2.341   3.908   &lt;0.001 
+##    lsm_alt_1  2.198   0.395  1.424   2.972   &lt;0.001 
+##      trt_2    -0.889  0.612  -2.089  0.311   0.146  
+##    lsm_ref_2  5.837   0.443   4.97   6.705   &lt;0.001 
+##    lsm_alt_2  4.948   0.421  4.124   5.772   &lt;0.001 
+##      trt_3    -1.305  0.757  -2.788  0.178   0.085  
+##    lsm_ref_3  7.648   0.54    6.59   8.707   &lt;0.001 
+##    lsm_alt_3  6.343   0.528  5.308   7.378   &lt;0.001 
+##      trt_4    -2.617  0.975  -4.528  -0.706  0.007  
+##    lsm_ref_4  10.883  0.665   9.58   12.186  &lt;0.001 
+##    lsm_alt_4  8.267   0.715  6.866   9.667   &lt;0.001 
+##   --------------------------------------------------</code></pre>
+</div>
+<div id="brief-summary-of-results" class="section level2" number="4.4">
+<h2><span class="header-section-number">4.4</span> Brief summary of results</h2>
+<p>The point estimators of the treatment effect at the last visit were
+-2.872,
+-2.506, and
+-2.617 for the basic MAR, RD1, and RD2 estimators, respectively, i.e. slightly
+smaller for the retrieved dropout models compared to the basic MAR model.
+The corresponding standard errors of the 3 estimators were
+0.945,
+0.969, and
+0.975, i.e. slightly larger for the retrieved dropout models compared to the
+basic MAR model.</p>
+</div>
+</div>
+<div id="references" class="section level1 unnumbered unlisted">
+<h1>References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Bell2024" class="csl-entry">
+Bell, James, Thomas Drury, Tobias Mütze, Christian Bressen Pipper, Lorenzo Guizzaro, Marian Mitroiu, Khadija Rerhou Rantell, Marcel Wolbers, and David Wright. 2024. <span>“Estimation Methods for Estimands Using the Treatment Policy Strategy; a Simulation Study Based on the PIONEER 1 Trial.”</span> <em>arXiv Preprint</em>. <a href="https://arxiv.org/abs/2402.12850">https://arxiv.org/abs/2402.12850</a>.
+</div>
+<div id="ref-Drury2023" class="csl-entry">
+Drury, Thomas, Juan J Abellan, Nicky Best, and Ian R White. 2023. <span>“Estimation of Treatment Policy Estimands for Continuous Outcomes Using Off Treatment Sequential Multiple Imputation.”</span> <em>arXiv Preprint arXiv:2308.10857</em>.
+</div>
+<div id="ref-Guizzaro2021" class="csl-entry">
+Guizzaro, Lorenzo, Frank Pétavy, Robin Ristl, and Ciro Gallo. 2021. <span>“The Use of a Variable Representing Compliance Improves Accuracy of Estimation of the Effect of Treatment Allocation Regardless of Discontinuation in Trials with Incomplete Follow-up.”</span> <em>Statistics in Biopharmaceutical Research</em> 13 (1): 119–27.
+</div>
+<div id="ref-Noci2021" class="csl-entry">
+Noci, Alessandro, Marcel Wolbers, Markus Abt, Corine Baayen, Hans Ulrich Burger, Man Jin, and Weining Zhao Robieson. 2023. <span>“A Comparison of Estimand and Estimation Strategies for Clinical Trials in Early Parkinson’s Disease.”</span> <em>Statistics in Biopharmaceutical Research</em> 15 (3): 491–501.
+</div>
+<div id="ref-PolverejanDragalin2020" class="csl-entry">
+Polverejan, Elena, and Vladimir Dragalin. 2020. <span>“Aligning Treatment Policy Estimands and Estimators—a Simulation Study in Alzheimer’s Disease.”</span> <em>Statistics in Biopharmaceutical Research</em> 12 (2): 142–54.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

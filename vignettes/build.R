@@ -36,3 +36,10 @@ rmarkdown::render(
     output_dir = "./vignettes/",
     output_file = "FAQ.html"
 )
+
+rmarkdown::render(
+    input = "./vignettes/retrieved_dropout.Rmd",
+    output_dir = "./vignettes/",
+    output_file = "retrieved_dropout.html"
+)
+

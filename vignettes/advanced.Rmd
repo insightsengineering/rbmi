@@ -276,56 +276,8 @@ between the two groups at the last visit with an associated p-value of
 
 # Imputation under MAR with time-varying covariates
 
-@Guizzaro2021 suggested to implement a treatment policy strategy via imputation under a MAR assumption after conditioning on the subject's ICE status, 
-i.e. to impute missing post-ICE data based on observed post-ICE data. One possible implementation of this proposal is to add time-varying covariates to the imputation model.
-A case study which implements this proposal and compares it to reference-based imputation methods for estimators in early Parkinson's disease can be found in @Noci2021.
-
-In some settings, this may be carried out by including a binary time-varying indicator of the subject's ICE status at each visit (defined as 0 for pre-ICE visits and as 1 for post-ICE visits) to the imputation model. However, for the simulated data introduced in section \@ref(sec:dataSimul), it may be more plausible to assume that treatment discontinuation leads to a change in the "slope" of the mean outcome trajectory. This can be implemented by including a time-varying covariate which is equal to 0 for visits prior to the treatment discontinuation and equal to the time from the treatment discontinuation for subsequent visits. The regression coefficient of the corresponding change in the post-ICE "slope" should then be allowed to depend on the assigned treatment group, i.e. the imputation model should include an interaction between the time-varying covariate and the treatment group. 
-
-Let's first define the time-varying covariate:
-
-```{r}
-data <- data %>%
-    group_by(id) %>%
-    mutate(time_from_ice1 = cumsum(ind_ice1)*2/12 ) # multiplication by 2/12 because visits are bi-monthly
-```
-
-We can then include the time-varying covariate in the imputation model, crossed with the `group` variable:
-
-```{r}
-vars_tv <- set_vars(
-    subjid = "id",
-    visit = "visit",
-    outcome = "change",
-    group = "group",
-    covariates = c("visit*outcome_bl", "visit*group", "time_from_ice1*group"),
-    strategy = "strategy"
-)
-```
-
-We now sequentially call the 4 key `rbmi` functions:
-
-```{r}
-draw_obj <- draws(
-    data = data,
-    data_ice = NULL, # if NULL, MAR is assumed for all missing data
-    vars = vars_tv,
-    method = method,
-    quiet = TRUE
-)
-
-impute_obj_tv <- impute(
-    draw_obj,
-    references = c("Control" = "Control", "Intervention" = "Intervention")
-)
-
-ana_obj_tv <- analyse(
-    impute_obj_tv,
-    vars = vars_an
-)
-
-pool(ana_obj_tv)
-```
+`rbmi` supports the inclusion of time-varying covariates in the imputation model. This is particularly useful for implementing so-called retrieved dropout models. 
+The vignette "Implementation of retrieved-dropout models using rbmi" (`vignette(topic = "retrieved_dropout", package = "rbmi")`) contains examples of such models.
 
 # Custom imputation strategies
 
