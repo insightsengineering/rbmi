@@ -133,7 +133,7 @@
 #' - `group`: name of the column in `data` which contains the group variable.
 #' - `outcome`: name of the column in `data` which contains the outcome variable.
 #' - `covariates`: vector of characters which contains the covariates to be included
-#'   in the model (including interactions which are specified as `"covariateName1*covariateName2"``).
+#'   in the model (including interactions which are specified as `"covariateName1*covariateName2"`).
 #'   If no covariates are provided the default model specification of `outcome ~ 1 + visit + group` will be used.
 #'   Please note that the `group*visit` interaction
 #'   is **not** included in the model by default.
@@ -141,6 +141,12 @@
 #'   By default only the `vars$group` is set as stratification variable.
 #'   Needed only for `method_condmean(type = "bootstrap")` and `method_approxbayes()`.
 #' - `strategy`: name of the column in `data_ice` which contains the subject-specific imputation strategy.
+#'
+#' In our experience, Bayesian MI (`method = method_bayes()`) with a relatively low number of samples (e.g. `n_samples` below 100)
+#' frequently triggers STAN warnings about R-hat such as "The largest R-hat is X.XX, indicating chains have not mixed".
+#' In many instances, this warning might be spurious, i.e. standard diagnostics analysis of the MCMC samples
+#' do not indicate any issues and results look reasonable. Increasing the number of samples to e.g. above 150 usually
+#' gets rid of the warning.
 #'
 #' @inherit as_draws return
 #'
