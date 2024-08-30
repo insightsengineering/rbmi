@@ -38,7 +38,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -49,7 +49,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -137,7 +137,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
 div.csl-bib-body { }
 div.csl-entry {
 clear: both;
-margin-bottom: 0em;
 }
 .hanging div.csl-entry {
 margin-left:2em;
@@ -381,9 +380,8 @@ comprehensive description and evaluation of retrieved dropout models, we refer t
 analysis approaches based on imputation under a basic MAR assumption or a reference-based missing data assumption. However, several
 issues of retrieved dropout models have also been highlighted. Retrieved dropout models require that enough post-ICE data is
 collected to inform the imputation model. Even with relatively small amounts of missingness, complex retrieved dropout models may
-face identifiability issues. In addition, retrieved dropout models have been associated with inflated standard errors of associated
-treatment effect estimators which has a detrimental effect on study power. In particular, it has been observed that once the post-ICE
-observation percentage falls below 50%, the power loss can be quite dramatic <span class="citation">(<a href="#ref-Bell2024">Bell et al. 2024</a>)</span>.</p>
+face identifiability issues. Another drawback to these models in general is the loss of power relative to reference-based imputation methods, which
+becomes meaningful for post-ICE observation percentages below 50% and increases at an accelerating rate as this percentage decreases <span class="citation">(<a href="#ref-Bell2024">Bell et al. 2024</a>)</span>.</p>
 </div>
 <div id="sec:dataSimul" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Data simulation using function <code>simulate_data()</code></h1>
@@ -393,8 +391,8 @@ different types of ICEs.</p>
 <p>Specifically, we simulate a 1:1 randomized trial of an active drug (intervention) versus placebo (control) with 100 subjects per
 group and 4 post-baseline assessments (3-monthly visits until 12 months):</p>
 <ul>
-<li>The mean outcome trajectory in the placebo group increases linearly from 50 at baseline (visit 0) to 60 at visit 4, i.e. the slope is 10 points/year.</li>
-<li>The mean outcome trajectory in the intervention group is identical to the placebo group up to month 3. From month 3 onward, the slope decreases by 50% to 5 points/year.</li>
+<li>The mean outcome trajectory in the placebo group increases linearly from 50 at baseline (visit 0) to 60 at visit 4, i.e. the slope is 10 points/year (or 2.5 points every 3 months).</li>
+<li>The mean outcome trajectory in the intervention group is identical to the placebo group up to month 6. From month 6 onward, the slope decreases by 50% to 5 points/year (i.e. 1.25 points every 3 months).</li>
 <li>The covariance structure of the baseline and follow-up values in both groups is implied by a random intercept and slope model
 with a standard deviation of 5 for both the intercept and the slope, and a correlation of 0.25. In addition, an independent
 residual error with standard deviation 2.5 is added to each assessment.<br />
@@ -416,71 +414,54 @@ data from that time point onward.</li>
 </ul>
 <p>Below, we report how data according to the specifications above can be simulated with function <code>simulate_data()</code>:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(rbmi)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
-<pre><code>## 
-## Attaching package: &#39;dplyr&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:stats&#39;:
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1392</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">100</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>time <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">9</span>, <span class="dv">12</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co"># Mean trajectory control</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>muC <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">50.0</span>, <span class="fl">52.5</span>, <span class="fl">55.0</span>, <span class="fl">57.5</span>, <span class="fl">60.0</span>)</span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co"># Mean trajectory intervention</span></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>muT <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">50.0</span>, <span class="fl">52.5</span>, <span class="fl">55.0</span>, <span class="fl">56.25</span>, <span class="fl">57.50</span>)</span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co"># Create Sigma</span></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>sd_error <span class="ot">&lt;-</span> <span class="fl">2.5</span></span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>covRE <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fl">25.0</span>, <span class="fl">6.25</span>),</span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fl">6.25</span>, <span class="fl">25.0</span>)</span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>)</span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a></span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, time <span class="sc">/</span> <span class="dv">12</span>) <span class="sc">%*%</span> covRE <span class="sc">%*%</span> <span class="fu">rbind</span>(<span class="dv">1</span>, time <span class="sc">/</span> <span class="dv">12</span>) <span class="sc">+</span> <span class="fu">diag</span>(sd_error<span class="sc">^</span><span class="dv">2</span>, <span class="at">nrow =</span> <span class="fu">length</span>(time))</span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a></span>
-<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co"># Set probability of discontinuation</span></span>
-<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>probDisc_C <span class="ot">&lt;-</span> <span class="fl">0.03</span></span>
-<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>probDisc_T <span class="ot">&lt;-</span> <span class="fl">0.04</span></span>
-<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>or_outcome <span class="ot">&lt;-</span> <span class="fl">1.10</span> <span class="co"># +1 point increase =&gt; +10% odds of discontinuation</span></span>
-<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a></span>
-<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co"># Set dropout rate following discontinuation</span></span>
-<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>prob_dropout <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
-<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a></span>
-<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="co"># Set simulation parameters of the control group</span></span>
-<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>parsC <span class="ot">&lt;-</span> <span class="fu">set_simul_pars</span>(</span>
-<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>    <span class="at">mu =</span> muC,</span>
-<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a>    <span class="at">sigma =</span> Sigma,</span>
-<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a>    <span class="at">n =</span> n,</span>
-<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>    <span class="at">prob_ice1 =</span> probDisc_C,</span>
-<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a>    <span class="at">or_outcome_ice1 =</span> or_outcome,</span>
-<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a>    <span class="at">prob_post_ice1_dropout =</span> prob_dropout</span>
-<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a>)</span>
-<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a></span>
-<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a><span class="co"># Set simulation parameters of the intervention group</span></span>
-<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a>parsT <span class="ot">&lt;-</span> parsC</span>
-<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a>parsT<span class="sc">$</span>mu <span class="ot">&lt;-</span> muT</span>
-<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a>parsT<span class="sc">$</span>prob_ice1 <span class="ot">&lt;-</span> probDisc_T</span>
-<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a></span>
-<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a><span class="co"># Set assumption about post-ice trajectory</span></span>
-<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a>post_ice_traj <span class="ot">&lt;-</span> <span class="st">&quot;CIR&quot;</span></span>
-<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a></span>
-<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a><span class="co"># Simulate data</span></span>
-<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">simulate_data</span>(</span>
-<span id="cb5-49"><a href="#cb5-49" tabindex="-1"></a>    <span class="at">pars_c =</span> parsC,</span>
-<span id="cb5-50"><a href="#cb5-50" tabindex="-1"></a>    <span class="at">pars_t =</span> parsT,</span>
-<span id="cb5-51"><a href="#cb5-51" tabindex="-1"></a>    <span class="at">post_ice1_traj =</span> post_ice_traj</span>
-<span id="cb5-52"><a href="#cb5-52" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-53"><a href="#cb5-53" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(outcome_noICE, ind_ice2)) <span class="co"># remove unncessary columns</span></span>
-<span id="cb5-54"><a href="#cb5-54" tabindex="-1"></a>  </span>
-<span id="cb5-55"><a href="#cb5-55" tabindex="-1"></a></span>
-<span id="cb5-56"><a href="#cb5-56" tabindex="-1"></a><span class="fu">head</span>(data)</span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1392</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>time <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">9</span>, <span class="dv">12</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co"># Mean trajectory control</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>muC <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">50.0</span>, <span class="fl">52.5</span>, <span class="fl">55.0</span>, <span class="fl">57.5</span>, <span class="fl">60.0</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co"># Mean trajectory intervention</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>muT <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">50.0</span>, <span class="fl">52.5</span>, <span class="fl">55.0</span>, <span class="fl">56.25</span>, <span class="fl">57.50</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co"># Create Sigma</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>sd_error <span class="ot">&lt;-</span> <span class="fl">2.5</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>covRE <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fl">25.0</span>, <span class="fl">6.25</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fl">6.25</span>, <span class="fl">25.0</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>)</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, time <span class="sc">/</span> <span class="dv">12</span>) <span class="sc">%*%</span></span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>    covRE <span class="sc">%*%</span> <span class="fu">rbind</span>(<span class="dv">1</span>, time <span class="sc">/</span> <span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a>    <span class="fu">diag</span>(sd_error<span class="sc">^</span><span class="dv">2</span>, <span class="at">nrow =</span> <span class="fu">length</span>(time))</span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co"># Set simulation parameters of the control group</span></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a>parsC <span class="ot">&lt;-</span> <span class="fu">set_simul_pars</span>(</span>
+<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a>    <span class="at">mu =</span> muC,</span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a>    <span class="at">sigma =</span> Sigma,</span>
+<span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a>    <span class="at">n =</span> <span class="dv">100</span>, <span class="co"># sample size</span></span>
+<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a>    <span class="at">prob_ice1 =</span> <span class="fl">0.03</span>, <span class="co"># prob of discontinuation for outcome equal to 50</span></span>
+<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a>    <span class="at">or_outcome_ice1 =</span> <span class="fl">1.10</span>,  <span class="co"># +1 point increase =&gt; +10% odds of discontinuation</span></span>
+<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a>    <span class="at">prob_post_ice1_dropout =</span> <span class="fl">0.5</span> <span class="co"># dropout rate following discontinuation</span></span>
+<span id="cb1-33"><a href="#cb1-33" tabindex="-1"></a>)</span>
+<span id="cb1-34"><a href="#cb1-34" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" tabindex="-1"></a><span class="co"># Set simulation parameters of the intervention group</span></span>
+<span id="cb1-36"><a href="#cb1-36" tabindex="-1"></a>parsT <span class="ot">&lt;-</span> parsC</span>
+<span id="cb1-37"><a href="#cb1-37" tabindex="-1"></a>parsT<span class="sc">$</span>mu <span class="ot">&lt;-</span> muT</span>
+<span id="cb1-38"><a href="#cb1-38" tabindex="-1"></a>parsT<span class="sc">$</span>prob_ice1 <span class="ot">&lt;-</span> <span class="fl">0.04</span></span>
+<span id="cb1-39"><a href="#cb1-39" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" tabindex="-1"></a><span class="co"># Simulate data</span></span>
+<span id="cb1-41"><a href="#cb1-41" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">simulate_data</span>(</span>
+<span id="cb1-42"><a href="#cb1-42" tabindex="-1"></a>    <span class="at">pars_c =</span> parsC,</span>
+<span id="cb1-43"><a href="#cb1-43" tabindex="-1"></a>    <span class="at">pars_t =</span> parsT,</span>
+<span id="cb1-44"><a href="#cb1-44" tabindex="-1"></a>    <span class="at">post_ice1_traj =</span> <span class="st">&quot;CIR&quot;</span> <span class="co"># Assumption about post-ice trajectory</span></span>
+<span id="cb1-45"><a href="#cb1-45" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-46"><a href="#cb1-46" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(outcome_noICE, ind_ice2)) <span class="co"># remove unncessary columns</span></span>
+<span id="cb1-47"><a href="#cb1-47" tabindex="-1"></a>  </span>
+<span id="cb1-48"><a href="#cb1-48" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" tabindex="-1"></a><span class="fu">head</span>(data)</span></code></pre></div>
 <pre><code>##     id visit   group outcome_bl ind_ice1 dropout_ice1  outcome
 ## 1 id_1     0 Control   53.35397        0            0 53.35397
 ## 2 id_1     1 Control   53.35397        0            0 55.15100
@@ -492,21 +473,23 @@ data from that time point onward.</li>
 retrieved dropout models. For example, a large proportion of ICE combined with a small proportion of data collected after the
 ICE might result in substantial variance inflation, especially for more complex retrieved dropout models.</p>
 <p>The proportion of subjects with an ICE and the proportion of subjects who withdrew from the simulated study is summarized below:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Compute endpoint of interest: change from baseline</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> </span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="fu">filter</span>(visit <span class="sc">!=</span> <span class="st">&quot;0&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>    <span class="at">change =</span> outcome <span class="sc">-</span> outcome_bl,</span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    <span class="at">visit =</span> <span class="fu">factor</span>(visit, <span class="at">levels =</span> <span class="fu">unique</span>(visit))</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  )</span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>      </span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>data <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(visit) <span class="sc">%&gt;%</span> <span class="fu">summarise</span>(</span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>  <span class="at">freq_disc_ctrl =</span> <span class="fu">mean</span>(ind_ice1[group <span class="sc">==</span> <span class="st">&quot;Control&quot;</span>] <span class="sc">==</span> <span class="dv">1</span>),</span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  <span class="at">freq_dropout_ctrl =</span> <span class="fu">mean</span>(dropout_ice1[group <span class="sc">==</span> <span class="st">&quot;Control&quot;</span>] <span class="sc">==</span> <span class="dv">1</span>),</span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>  <span class="at">freq_disc_interv =</span> <span class="fu">mean</span>(ind_ice1[group <span class="sc">==</span> <span class="st">&quot;Intervention&quot;</span>] <span class="sc">==</span> <span class="dv">1</span>),</span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>  <span class="at">freq_dropout_interv =</span> <span class="fu">mean</span>(dropout_ice1[group <span class="sc">==</span> <span class="st">&quot;Intervention&quot;</span>] <span class="sc">==</span> <span class="dv">1</span>)</span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Compute endpoint of interest: change from baseline</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> </span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="fu">filter</span>(visit <span class="sc">!=</span> <span class="st">&quot;0&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    <span class="at">change =</span> outcome <span class="sc">-</span> outcome_bl,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>    <span class="at">visit =</span> <span class="fu">factor</span>(visit, <span class="at">levels =</span> <span class="fu">unique</span>(visit))</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  )</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>      </span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>data <span class="sc">%&gt;%</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="fu">group_by</span>(visit) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    <span class="at">freq_disc_ctrl =</span> <span class="fu">mean</span>(ind_ice1[group <span class="sc">==</span> <span class="st">&quot;Control&quot;</span>] <span class="sc">==</span> <span class="dv">1</span>),</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    <span class="at">freq_dropout_ctrl =</span> <span class="fu">mean</span>(dropout_ice1[group <span class="sc">==</span> <span class="st">&quot;Control&quot;</span>] <span class="sc">==</span> <span class="dv">1</span>),</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>    <span class="at">freq_disc_interv =</span> <span class="fu">mean</span>(ind_ice1[group <span class="sc">==</span> <span class="st">&quot;Intervention&quot;</span>] <span class="sc">==</span> <span class="dv">1</span>),</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>    <span class="at">freq_dropout_interv =</span> <span class="fu">mean</span>(dropout_ice1[group <span class="sc">==</span> <span class="st">&quot;Intervention&quot;</span>] <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>  )</span></code></pre></div>
 <pre><code>## # A tibble: 4 × 5
 ##   visit freq_disc_ctrl freq_dropout_ctrl freq_disc_interv freq_dropout_interv
 ##   &lt;fct&gt;          &lt;dbl&gt;             &lt;dbl&gt;            &lt;dbl&gt;               &lt;dbl&gt;
@@ -552,40 +535,40 @@ should yield comparable estimators and standard errors.
 For this vignette, we used the conditional mean imputation approach combined with the jackknife.</p>
 <div id="basic-mar-model" class="section level2" number="4.1">
 <h2><span class="header-section-number">4.1</span> Basic MAR model</h2>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Define key variables for the imputation and analysis models</span></span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="at">subjid =</span> <span class="st">&quot;id&quot;</span>,</span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">visit =</span> <span class="st">&quot;visit&quot;</span>,</span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">outcome =</span> <span class="st">&quot;change&quot;</span>,</span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">group =</span> <span class="st">&quot;group&quot;</span>,</span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;outcome_bl*visit&quot;</span>, <span class="st">&quot;group*visit&quot;</span>)</span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>)</span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a></span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>vars_an <span class="ot">&lt;-</span> vars</span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>vars_an<span class="sc">$</span>covariates <span class="ot">&lt;-</span> <span class="st">&quot;outcome_bl&quot;</span></span>
-<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co"># Define imputation method</span></span>
-<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>method <span class="ot">&lt;-</span> <span class="fu">method_condmean</span>(<span class="at">type =</span> <span class="st">&quot;jackknife&quot;</span>)</span>
-<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a></span>
-<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>draw_obj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
-<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
-<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>  <span class="at">data_ice =</span> <span class="cn">NULL</span>,</span>
-<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a>  <span class="at">vars =</span> vars,</span>
-<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a>  <span class="at">method =</span> method,</span>
-<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>  <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
-<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a>)</span>
-<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a></span>
-<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a>impute_obj <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
-<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a>  draw_obj</span>
-<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a>)</span>
-<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a></span>
-<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a>ana_obj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
-<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a>  impute_obj,</span>
-<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a>  <span class="at">vars =</span> vars_an</span>
-<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a>)</span>
-<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a></span>
-<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a>pool_obj_basicMAR <span class="ot">&lt;-</span> <span class="fu">pool</span>(ana_obj)</span>
-<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a>pool_obj_basicMAR</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Define key variables for the imputation and analysis models</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="at">subjid =</span> <span class="st">&quot;id&quot;</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="at">visit =</span> <span class="st">&quot;visit&quot;</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="at">outcome =</span> <span class="st">&quot;change&quot;</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="at">group =</span> <span class="st">&quot;group&quot;</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;outcome_bl*visit&quot;</span>, <span class="st">&quot;group*visit&quot;</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>vars_an <span class="ot">&lt;-</span> vars</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>vars_an<span class="sc">$</span>covariates <span class="ot">&lt;-</span> <span class="st">&quot;outcome_bl&quot;</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co"># Define imputation method</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>method <span class="ot">&lt;-</span> <span class="fu">method_condmean</span>(<span class="at">type =</span> <span class="st">&quot;jackknife&quot;</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>draw_obj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>  <span class="at">data_ice =</span> <span class="cn">NULL</span>,</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>  <span class="at">vars =</span> vars,</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>  <span class="at">method =</span> method,</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>  <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>)</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>impute_obj <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>  draw_obj</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>)</span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>ana_obj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a>  impute_obj,</span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>  <span class="at">vars =</span> vars_an</span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>)</span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a>pool_obj_basicMAR <span class="ot">&lt;-</span> <span class="fu">pool</span>(ana_obj)</span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>pool_obj_basicMAR</span></code></pre></div>
 <pre><code>## 
 ## Pool Object
 ## -----------
@@ -615,32 +598,32 @@ For this vignette, we used the conditional mean imputation approach combined wit
 </div>
 <div id="retrieved-dropout-model-1-rd1" class="section level2" number="4.2">
 <h2><span class="header-section-number">4.2</span> Retrieved dropout model 1 (RD1)</h2>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># derive variable &quot;time_since_ice1&quot; (time since ICE in months)</span></span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> </span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">time_since_ice1 =</span> <span class="fu">cumsum</span>(ind_ice1)<span class="sc">*</span><span class="dv">3</span>)</span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a></span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>vars<span class="sc">$</span>covariates <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;outcome_bl*visit&quot;</span>, <span class="st">&quot;group*visit&quot;</span>, <span class="st">&quot;time_since_ice1*group&quot;</span>)</span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a></span>
-<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>draw_obj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
-<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
-<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>  <span class="at">data_ice =</span> <span class="cn">NULL</span>,</span>
-<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>  <span class="at">vars =</span> vars,</span>
-<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>  <span class="at">method =</span> method,</span>
-<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>  <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
-<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>)</span>
-<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a></span>
-<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>impute_obj <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
-<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>  draw_obj</span>
-<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>)</span>
-<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a></span>
-<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a>ana_obj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
-<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a>  impute_obj,</span>
-<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a>  <span class="at">vars =</span> vars_an</span>
-<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a>)</span>
-<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a></span>
-<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a>pool_obj_RD1 <span class="ot">&lt;-</span> <span class="fu">pool</span>(ana_obj)</span>
-<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a>pool_obj_RD1</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># derive variable &quot;time_since_ice1&quot; (time since ICE in months)</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> </span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">time_since_ice1 =</span> <span class="fu">cumsum</span>(ind_ice1)<span class="sc">*</span><span class="dv">3</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>vars<span class="sc">$</span>covariates <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;outcome_bl*visit&quot;</span>, <span class="st">&quot;group*visit&quot;</span>, <span class="st">&quot;time_since_ice1*group&quot;</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>draw_obj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>  <span class="at">data_ice =</span> <span class="cn">NULL</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>  <span class="at">vars =</span> vars,</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  <span class="at">method =</span> method,</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>  <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>)</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>impute_obj <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  draw_obj</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>)</span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>ana_obj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>  impute_obj,</span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a>  <span class="at">vars =</span> vars_an</span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>)</span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a>pool_obj_RD1 <span class="ot">&lt;-</span> <span class="fu">pool</span>(ana_obj)</span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a>pool_obj_RD1</span></code></pre></div>
 <pre><code>## 
 ## Pool Object
 ## -----------
@@ -670,27 +653,27 @@ For this vignette, we used the conditional mean imputation approach combined wit
 </div>
 <div id="retrieved-dropout-model-2-rd2" class="section level2" number="4.3">
 <h2><span class="header-section-number">4.3</span> Retrieved dropout model 2 (RD2)</h2>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>vars<span class="sc">$</span>covariates <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;outcome_bl*visit&quot;</span>, <span class="st">&quot;group*visit&quot;</span>, <span class="st">&quot;ind_ice1*group*visit&quot;</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>draw_obj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
-<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  <span class="at">data_ice =</span> <span class="cn">NULL</span>,</span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>  <span class="at">vars =</span> vars,</span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>  <span class="at">method =</span> method,</span>
-<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>  <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>)</span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a></span>
-<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>impute_obj <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
-<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>  draw_obj</span>
-<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>)</span>
-<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a></span>
-<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>ana_obj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
-<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>  impute_obj,</span>
-<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>  <span class="at">vars =</span> vars_an</span>
-<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a>)</span>
-<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a></span>
-<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a>pool_obj_RD2 <span class="ot">&lt;-</span> <span class="fu">pool</span>(ana_obj)</span>
-<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a>pool_obj_RD2</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>vars<span class="sc">$</span>covariates <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;outcome_bl*visit&quot;</span>, <span class="st">&quot;group*visit&quot;</span>, <span class="st">&quot;ind_ice1*group*visit&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>draw_obj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">data_ice =</span> <span class="cn">NULL</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">vars =</span> vars,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="at">method =</span> method,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>)</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>impute_obj <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  draw_obj</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>)</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>ana_obj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>  impute_obj,</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>  <span class="at">vars =</span> vars_an</span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>)</span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a>pool_obj_RD2 <span class="ot">&lt;-</span> <span class="fu">pool</span>(ana_obj)</span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>pool_obj_RD2</span></code></pre></div>
 <pre><code>## 
 ## Pool Object
 ## -----------
@@ -734,7 +717,7 @@ basic MAR model.</p>
 </div>
 <div id="references" class="section level1 unnumbered unlisted">
 <h1>References</h1>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-Bell2024" class="csl-entry">
 Bell, James, Thomas Drury, Tobias Mütze, Christian Bressen Pipper, Lorenzo Guizzaro, Marian Mitroiu, Khadija Rerhou Rantell, Marcel Wolbers, and David Wright. 2024. <span>“Estimation Methods for Estimands Using the Treatment Policy Strategy; a Simulation Study Based on the PIONEER 1 Trial.”</span> <em>arXiv Preprint</em>. <a href="https://arxiv.org/abs/2402.12850">https://arxiv.org/abs/2402.12850</a>.
 </div>

@@ -38,9 +38,8 @@ comprehensive description and evaluation of retrieved dropout models, we refer t
 analysis approaches based on imputation under a basic MAR assumption or a reference-based missing data assumption. However, several 
 issues of retrieved dropout models have also been highlighted. Retrieved dropout models require that enough post-ICE data is 
 collected to inform the imputation model. Even with relatively small amounts of missingness, complex retrieved dropout models may 
-face identifiability issues. In addition, retrieved dropout models have been associated with inflated standard errors of associated 
-treatment effect estimators which has a detrimental effect on study power. In particular, it has been observed that once the post-ICE
-observation percentage falls below 50%, the power loss can be quite dramatic [@Bell2024]. 
+face identifiability issues. Another drawback to these models in general is the loss of power relative to reference-based imputation methods, which
+becomes meaningful for post-ICE observation percentages below 50% and increases at an accelerating rate as this percentage decreases [@Bell2024]. 
 
 # Data simulation using function `simulate_data()` {#sec:dataSimul}
 
@@ -80,7 +79,6 @@ library(dplyr)
 
 set.seed(1392)
 
-n <- 100
 time <- c(0, 3, 6, 9, 12)
 
 # Mean trajectory control
@@ -100,37 +98,26 @@ Sigma <- cbind(1, time / 12) %*%
     covRE %*% rbind(1, time / 12) +
     diag(sd_error^2, nrow = length(time))
 
-# Set probability of discontinuation
-probDisc_C <- 0.03
-probDisc_T <- 0.04
-or_outcome <- 1.10 # +1 point increase => +10% odds of discontinuation
-
-# Set dropout rate following discontinuation
-prob_dropout <- 0.5
-
 # Set simulation parameters of the control group
 parsC <- set_simul_pars(
     mu = muC,
     sigma = Sigma,
-    n = n,
-    prob_ice1 = probDisc_C,
-    or_outcome_ice1 = or_outcome,
-    prob_post_ice1_dropout = prob_dropout
+    n = 100, # sample size
+    prob_ice1 = 0.03, # prob of discontinuation for outcome equal to 50
+    or_outcome_ice1 = 1.10,  # +1 point increase => +10% odds of discontinuation
+    prob_post_ice1_dropout = 0.5 # dropout rate following discontinuation
 )
 
 # Set simulation parameters of the intervention group
 parsT <- parsC
 parsT$mu <- muT
-parsT$prob_ice1 <- probDisc_T
-
-# Set assumption about post-ice trajectory
-post_ice_traj <- "CIR"
+parsT$prob_ice1 <- 0.04
 
 # Simulate data
 data <- simulate_data(
     pars_c = parsC,
     pars_t = parsT,
-    post_ice1_traj = post_ice_traj
+    post_ice1_traj = "CIR" # Assumption about post-ice trajectory
 ) %>%
   select(-c(outcome_noICE, ind_ice2)) # remove unncessary columns
   
