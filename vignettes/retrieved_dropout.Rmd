@@ -34,7 +34,7 @@ In these models, missing outcomes are multiply imputed conditional upon whether 
 typically rely on an extended missing-at-random (MAR) assumption, i.e., they assume that missing outcome data is similar to observed 
 data from subjects in the same treatment group with the same observed outcome history, and the same ICE status. For a more 
 comprehensive description and evaluation of retrieved dropout models, we refer to @Guizzaro2021, @PolverejanDragalin2020, @Noci2021, 
-@Drury2023, and @Bell2024. Broadly, these publications find that retrieved dropout models reduce bias compared to alternative 
+@Drury2024, and @Bell2024. Broadly, these publications find that retrieved dropout models reduce bias compared to alternative 
 analysis approaches based on imputation under a basic MAR assumption or a reference-based missing data assumption. However, several 
 issues of retrieved dropout models have also been highlighted. Retrieved dropout models require that enough post-ICE data is 
 collected to inform the imputation model. Even with relatively small amounts of missingness, complex retrieved dropout models may 
