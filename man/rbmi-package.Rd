@@ -42,7 +42,7 @@ Authors:
 Other contributors:
 \itemize{
   \item Marcel Wolbers \email{marcel.wolbers@roche.com} [contributor]
-  \item Roche [copyright holder, funder]
+  \item F. Hoffmann-La Roche AG [copyright holder, funder]
 }
 
 }
