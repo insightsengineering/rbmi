@@ -1,0 +1,26 @@
+# Workaround for pkgdown so that year information is made available.
+# When on CRAN this field is automatically added / made available
+# in the DESCRIPTION file
+if (is.null(meta[["Date/Publication"]])) {
+    meta["Date/Publication"] <- as.character(Sys.time())
+}
+
+citation(auto = meta)
+
+bibentry(
+    bibtype = "article",
+    title = "rbmi: A R package for standard and reference-based multiple imputation methods",
+    author = c(
+        person("Craig", "Gower-Page"),
+        person("Alessandro", "Noci"),
+        person("Marcel", "Wolbers")
+    ),
+    year = "2022",
+    publisher = "The Open Journal",
+    doi = "10.21105/joss.04251",
+    url = "https://doi.org/10.21105/joss.04251",
+    volume = "7",
+    number = "74",
+    pages = "4251",
+    journal = "Journal of Open Source Software"
+)
