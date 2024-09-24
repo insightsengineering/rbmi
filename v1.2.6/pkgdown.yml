@@ -1,0 +1,8 @@
+pandoc: '3.3'
+pkgdown: 2.1.0
+pkgdown_sha: ~
+articles:
+  advanced: advanced.html
+  quickstart: quickstart.html
+  stat_specs: stat_specs.html
+last_built: 2024-09-24T15:03Z
