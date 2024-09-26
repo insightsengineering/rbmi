@@ -42,8 +42,8 @@ RUN apt-get update -y --fix-missing && \
     apt-get upgrade -y && \
     apt-get install -y $REQD_PKGS
 
-ADD install_packages.R /
-ADD ../../DESCRIPTION /
+ADD misc/docker/install_packages.R /
+ADD DESCRIPTION /
 
 RUN Rscript  /install_packages.R
 

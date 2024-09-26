@@ -75,6 +75,11 @@ To support CI/CD, in terms of reducing setup time, a Docker images has been crea
 
 This image is automatically re-built once a month to contain the latest version of R and its packages. The code to create this images can be found in `misc/docker`.
 
+To build the image locally run the following from the project root directory:
+```
+docker build -f misc/docker/Dockerfile  -t rbmi:latest .
+```
+
 
 ### Reproducibility, Print Tests & Snaps
 
