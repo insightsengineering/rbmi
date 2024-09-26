@@ -1,9 +1,11 @@
-name: Build fixed version Docker images
+name: Build latest version Docker images
 
 env:
   REGISTRY: ghcr.io
 
 on:
+  schedule:
+    - cron: '0 5 1 * *'
   workflow_dispatch:
 
 
@@ -18,16 +20,7 @@ jobs:
       matrix:
         config:
           - {
-              src_image: "rocker/r-ver:4.0.4", 
-              cran_url: "https://packagemanager.rstudio.com/cran/2021-04-20",
-              tag: "rbmi:r404",
-              mmrm_version : "v0.1.5"
-            }
-          - {
-              src_image: "rocker/r-ver:4.1.0", 
-              cran_url: "https://packagemanager.rstudio.com/cran/2021-08-04",
-              tag: "rbmi:r410",
-              mmrm_version : "v0.1.5"
+              tag: "rbmi:latest"
             }
 
     # Token permissions
@@ -37,8 +30,8 @@ jobs:
 
     # Build steps
     steps:
-      - name: Checkout repository 
-        uses: actions/checkout@v3
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -64,9 +57,6 @@ jobs:
         run: |
           echo push = ${{ github.event_name == 'push' }}
           echo tag = ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.config.tag }}
-          echo IMAGE=${{ matrix.config.src_image }}
-          echo CRANURL=${{ matrix.config.cran_url }}
-          echo MMRM_VERSION=${{ matrix.config.mmrm_version }}
 
       - name: Build and push image 
         uses: docker/build-push-action@v3
@@ -75,9 +65,6 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.config.tag }}
           build-args: |
-            IMAGE=${{ matrix.config.src_image }}
-            CRANURL=${{ matrix.config.cran_url }}
-            MMRM_VERSION=${{ matrix.config.mmrm_version }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 

@@ -1,9 +1,5 @@
-ARG IMAGE
 
-FROM ${IMAGE}
-
-ARG CRANURL
-ARG MMRM_VERSION
+FROM rocker/r-ver:latest
 
 ENV REQD_PKGS="\
     libicu-dev \
@@ -39,13 +35,15 @@ ENV REQD_PKGS="\
     qpdf \
     devscripts \
     cmake \
+    libpq-dev \
     "
 
 RUN apt-get update -y --fix-missing && \
     apt-get upgrade -y && \
     apt-get install -y $REQD_PKGS
 
-ADD install_packages.R /
+ADD misc/docker/install_packages.R /
+ADD DESCRIPTION /
 
 RUN Rscript  /install_packages.R
 

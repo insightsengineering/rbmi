@@ -60,24 +60,20 @@ test_that("some unit test", {
 
 The scheduled tests can also be manually activated by going to "https://github.com/insightsengineering/rbmi" -> "Actions" -> "Bi-Weekly" -> "Run Workflow". It is advisable to do this before releasing to CRAN.
 
-### CRAN Releases
-
-In order to release a package to CRAN it needs to be tested across multiple different OS's and versions of R. This has been implemented in this project via a GitHub Action Workflow titled "Check for CRAN" which needs to be manually activated. To do this go to "https://github.com/insightsengineering/rbmi" -> "Actions" -> "Check for CRAN" -> "Run Workflow".
-
-If all these tests pass then the package can be safely released to CRAN (after updating the relevant `cran-comments.md` file)
 
 
 ### Docker Images
 
-To support CI/CD in terms of reducing installation time, several Docker images have been pre-built which contain all the packages and system dependencies that this project needs. The current relevant images can be found at:
+To support CI/CD, in terms of reducing setup time, a Docker images has been created which contains all the packages and system dependencies required for this project. The image can be found at:
 
-- ghcr.io/insightsengineering/rbmi:r404
-- ghcr.io/insightsengineering/rbmi:r410
 - ghcr.io/insightsengineering/rbmi:latest
 
-The `latest` image is automatically re-built once a month to contain the latest version of R and its packages. The other versions are built with older versions of R (as indicated by the tag number) and contain package versions as they were when that version of R was released. This is important to ensure that the package works with older versions of R which many companies typically run due to delays in their validation processes.
+This image is automatically re-built once a month to contain the latest version of R and its packages. The code to create this images can be found in `misc/docker`.
 
-The code to create these images can be found in `misc/docker`. The legacy images (i.e. everything excluding the "latest" image) are only built on manual request by running the corresponding GitHub Actions Workflow. 
+To build the image locally run the following from the project root directory:
+```
+docker build -f misc/docker/Dockerfile  -t rbmi:latest .
+```
 
 
 ### Reproducibility, Print Tests & Snaps

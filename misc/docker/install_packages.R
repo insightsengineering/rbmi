@@ -1,41 +1,59 @@
 
 
-
-options(warn = 2)
-
-install.packages("remotes", repos = Sys.getenv("CRANURL"))
-
-# mmrm wasn't available when in-house servers locked their package versions
-# and instead had v0.13 of mmrm patched in after the fact
-# here we allow the build to specify "latest" to grab the latest version of mmrm
-# or a specific named version from github
-mmrm_version <- Sys.getenv("MMRM_VERSION")
-if (mmrm_version == "latest") {
-    install.packages("mmrm", repos = Sys.getenv("CRANURL"), dependencies = TRUE)
-} else {
-    remotes::install_git("https://github.com/openpharma/mmrm.git", ref = mmrm_version, upgrade = FALSE)
-}
-
-pkgs <- c(
-    "tidyverse",
-    "glmmTMB",
-    "mvtnorm",
-    "devtools",
-    "rstan",
-    "rstantools",
-    "RcppParallel",
-    "Rcpp",
-    "R6",
-    "assertthat",
-    "emmeans",
-    "covr",
-    "testthat",
-    "nlme",
-    "roxygen2",
-    "tinytex",
-    "bookdown",
-    "RhpcBLASctl",
-    "R.rsp"
+# Determine which OS we are on
+# Rocker images are Ubuntu based so should be jammy / focal / etc
+OS_CODENAME <- system(
+    'cat /etc/os-release | grep "VERSION_CODENAME" | sed -e "s/VERSION_CODENAME=//"',
+    intern = TRUE
 )
 
-install.packages(pkgs, repos = Sys.getenv("CRANURL"), dependencies = TRUE)
+# Configure PPM URL for binary package installation
+CRANURL <- sprintf(
+    "https://packagemanager.posit.co/cran/__linux__/%s/latest",
+    OS_CODENAME
+)
+
+# Configure useragent to enable binary package installation from PPM
+options(
+    "repos" = list("CRAN" = CRANURL),
+    "HTTPUserAgent" = sprintf(
+        "R/%s R (%s)",
+        getRversion(),
+        paste(getRversion(), R.version["platform"], R.version["arch"], R.version["os"])
+    )
+)
+
+# Throw errors if any warnings arise
+options(warn = 2)
+
+if (!requireNamespace("desc", quietly = TRUE)) {
+    install.packages("desc")
+}
+
+
+# Get a list of all packages that we claim we depend on in the DESCRIPTION file
+pkgs <- desc::desc("DESCRIPTION")$get_deps()$package |> unique()
+
+# Add on additional packages that might be needed in the future
+pkgs <- c(pkgs, "tidyverse", "devtools")
+
+
+# R will error if you try to update the base packages so remove them
+# if they are in any of the imports / suggests / depends list
+base_pkgs <- c(
+    "KernSmooth", "class", "foreign", "methods", "rpart", "survival",
+    "MASS", "cluster", "grDevices", "mgcv", "spatial", "tcltk",
+    "Matrix", "codetools", "graphics", "nlme", "splines", "tools",
+    "base", "compiler", "grid", "nnet", "stats", "translations",
+    "boot", "datasets", "lattice", "parallel", "stats4", "utils",
+    "R"
+)
+pkgs <- pkgs[!pkgs %in% base_pkgs]
+
+install.packages(pkgs, dependencies = TRUE)
+
+# Install cmdstanr (not available from CRAN)
+install.packages(
+    "cmdstanr",
+    repos = c("https://stan-dev.r-universe.dev", getOption("repos"))
+)
