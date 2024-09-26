@@ -1,9 +1,5 @@
-ARG IMAGE
 
-FROM ${IMAGE}
-
-ARG CRANURL
-ARG MMRM_VERSION
+FROM rocker/r-ver:latest
 
 ENV REQD_PKGS="\
     libicu-dev \

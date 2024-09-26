@@ -1,32 +1,42 @@
 
 
+OS_CODENAME <- system(
+    'cat /etc/os-release | grep "VERSION_CODENAME" | sed -e "s/VERSION_CODENAME=//"',
+    intern = TRUE
+)
+
+CRANURL <- sprintf(
+    "https://packagemanager.posit.co/cran/__linux__/%s/latest",
+    OS_CODENAME
+)
+
+options(
+    "repos" = list("CRAN" = CRANURL),
+    "HTTPUserAgent" = sprintf(
+        "R/%s R (%s)",
+        getRversion(),
+        paste(getRversion(), R.version["platform"], R.version["arch"], R.version["os"])
+    )
+)
 
 options(warn = 2)
 
-install.packages("remotes", repos = Sys.getenv("CRANURL"))
-
-# mmrm wasn't available when in-house servers locked their package versions
-# and instead had v0.13 of mmrm patched in after the fact
-# here we allow the build to specify "latest" to grab the latest version of mmrm
-# or a specific named version from github
-mmrm_version <- Sys.getenv("MMRM_VERSION")
-if (mmrm_version == "latest") {
-    install.packages("mmrm", repos = Sys.getenv("CRANURL"), dependencies = TRUE)
-} else {
-    remotes::install_git("https://github.com/openpharma/mmrm.git", ref = mmrm_version, upgrade = FALSE)
-}
-
 pkgs <- c(
-    "tidyverse",
-    "glmmTMB",
+    "dplyr",
+    "purrr",
+    "tibble",
+    "lubridate",
+    "purrr",
     "mvtnorm",
     "devtools",
     "rstan",
     "rstantools",
     "RcppParallel",
     "Rcpp",
+    "knitr",
     "R6",
     "assertthat",
+    "rmarkdown",
     "emmeans",
     "covr",
     "testthat",
@@ -38,4 +48,11 @@ pkgs <- c(
     "R.rsp"
 )
 
-install.packages(pkgs, repos = Sys.getenv("CRANURL"), dependencies = TRUE)
+install.packages(pkgs, dependencies = TRUE)
+
+install.packages(
+    "cmdstanr",
+    repos = c("https://stan-dev.r-universe.dev", getOption("repos"))
+)
+
+cmdstanr::install_cmdstan(cores = 2)
