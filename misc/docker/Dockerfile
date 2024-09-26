@@ -35,6 +35,7 @@ ENV REQD_PKGS="\
     qpdf \
     devscripts \
     cmake \
+    libpq-dev \
     "
 
 RUN apt-get update -y --fix-missing && \
@@ -42,6 +43,7 @@ RUN apt-get update -y --fix-missing && \
     apt-get install -y $REQD_PKGS
 
 ADD install_packages.R /
+ADD ../../DESCRIPTION /
 
 RUN Rscript  /install_packages.R
 

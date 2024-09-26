@@ -13,8 +13,6 @@ jobs:
       fail-fast: true
       matrix:
        config:
-        # - { image: "ghcr.io/${{ github.repository_owner }}/rbmi:r404"}
-        # - { image: "ghcr.io/${{ github.repository_owner }}/rbmi:r410"}
          - { image: "ghcr.io/${{ github.repository_owner }}/rbmi:latest"}
 
     runs-on: ubuntu-latest
