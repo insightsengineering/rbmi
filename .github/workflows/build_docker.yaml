@@ -61,7 +61,7 @@ jobs:
       - name: Build and push image 
         uses: docker/build-push-action@v3
         with:
-          context: ./misc/docker
+          context: .
           push: true
           tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.config.tag }}
           build-args: |
