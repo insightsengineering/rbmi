@@ -60,11 +60,6 @@ test_that("some unit test", {
 
 The scheduled tests can also be manually activated by going to "https://github.com/insightsengineering/rbmi" -> "Actions" -> "Bi-Weekly" -> "Run Workflow". It is advisable to do this before releasing to CRAN.
 
-### CRAN Releases
-
-In order to release a package to CRAN it needs to be tested across multiple different OS's and versions of R. This has been implemented in this project via a GitHub Action Workflow titled "Check for CRAN" which needs to be manually activated. To do this go to "https://github.com/insightsengineering/rbmi" -> "Actions" -> "Check for CRAN" -> "Run Workflow".
-
-If all these tests pass then the package can be safely released to CRAN (after updating the relevant `cran-comments.md` file)
 
 
 ### Docker Images
