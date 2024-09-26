@@ -27,14 +27,6 @@
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.2.6">v1.2.6</a> </div></li>
-<!-- end dropdown for versions -->
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/insightsengineering/rbmi/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
@@ -90,18 +82,12 @@
 <p>The scheduled tests can also be manually activated by going to “<a href="https://github.com/insightsengineering/rbmi" class="external-link uri">https://github.com/insightsengineering/rbmi</a>” -&gt; “Actions” -&gt; “Bi-Weekly” -&gt; “Run Workflow”. It is advisable to do this before releasing to CRAN.</p>
 </div>
 <div class="section level3">
-<h3 id="cran-releases">CRAN Releases<a class="anchor" aria-label="anchor" href="#cran-releases"></a></h3>
-<p>In order to release a package to CRAN it needs to be tested across multiple different OS’s and versions of R. This has been implemented in this project via a GitHub Action Workflow titled “Check for CRAN” which needs to be manually activated. To do this go to “<a href="https://github.com/insightsengineering/rbmi" class="external-link uri">https://github.com/insightsengineering/rbmi</a>” -&gt; “Actions” -&gt; “Check for CRAN” -&gt; “Run Workflow”.</p>
-<p>If all these tests pass then the package can be safely released to CRAN (after updating the relevant <code>cran-comments.md</code> file)</p>
-</div>
-<div class="section level3">
 <h3 id="docker-images">Docker Images<a class="anchor" aria-label="anchor" href="#docker-images"></a></h3>
-<p>To support CI/CD in terms of reducing installation time, several Docker images have been pre-built which contain all the packages and system dependencies that this project needs. The current relevant images can be found at:</p>
-<ul><li>ghcr.io/insightsengineering/rbmi:r404</li>
-<li>ghcr.io/insightsengineering/rbmi:r410</li>
-<li>ghcr.io/insightsengineering/rbmi:latest</li>
-</ul><p>The <code>latest</code> image is automatically re-built once a month to contain the latest version of R and its packages. The other versions are built with older versions of R (as indicated by the tag number) and contain package versions as they were when that version of R was released. This is important to ensure that the package works with older versions of R which many companies typically run due to delays in their validation processes.</p>
-<p>The code to create these images can be found in <code>misc/docker</code>. The legacy images (i.e. everything excluding the “latest” image) are only built on manual request by running the corresponding GitHub Actions Workflow.</p>
+<p>To support CI/CD, in terms of reducing setup time, a Docker images has been created which contains all the packages and system dependencies required for this project. The image can be found at:</p>
+<ul><li>ghcr.io/insightsengineering/rbmi:latest</li>
+</ul><p>This image is automatically re-built once a month to contain the latest version of R and its packages. The code to create this images can be found in <code>misc/docker</code>.</p>
+<p>To build the image locally run the following from the project root directory:</p>
+<pre><code>docker build -f misc/docker/Dockerfile  -t rbmi:latest .</code></pre>
 </div>
 <div class="section level3">
 <h3 id="reproducibility-print-tests--snaps">Reproducibility, Print Tests &amp; Snaps<a class="anchor" aria-label="anchor" href="#reproducibility-print-tests--snaps"></a></h3>
