@@ -19,7 +19,7 @@ Roxygen: list(markdown = TRUE)
 URL: https://insightsengineering.github.io/rbmi/, https://github.com/insightsengineering/rbmi
 BugReports: https://github.com/insightsengineering/rbmi/issues
 RoxygenNote: 7.3.2
-Suggests: 
+Suggests:
     dplyr,
     tidyr,
     nlme,
@@ -47,7 +47,7 @@ Imports:
     rstantools (>= 2.1.1),
     R6,
     assertthat
-LinkingTo: 
+LinkingTo:
     BH (>= 1.66.0),
     Rcpp (>= 0.12.0),
     RcppEigen (>= 0.3.3.3.0),
@@ -55,7 +55,7 @@ LinkingTo:
     rstan (>= 2.26.0),
     StanHeaders (>= 2.26.0)
 SystemRequirements: GNU make
-Depends: 
+Depends:
     R (>= 3.4.0)
 License: Apache License (>= 2)
 VignetteBuilder: R.rsp

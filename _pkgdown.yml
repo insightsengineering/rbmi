@@ -1,4 +1,4 @@
-
+---
 url: https://github.com/insightsengineering/rbmi
 
 template:
@@ -9,3 +9,7 @@ navbar:
   right:
     - icon: fa-github
       href: https://github.com/insightsengineering/rbmi
+      aria-label: GitHub
+  structure:
+    left: [reference, articles, news]
+    right: [search, github]
