@@ -1,9 +1,14 @@
-pandoc: 3.1.1
-pkgdown: 2.0.7
+pandoc: '3.3'
+pkgdown: 2.1.0
 pkgdown_sha: ~
 articles:
   advanced: advanced.html
+  CondMean_Inference: CondMean_Inference.html
+  FAQ: FAQ.html
   quickstart: quickstart.html
+  retrieved_dropout: retrieved_dropout.html
   stat_specs: stat_specs.html
-last_built: 2023-10-06T15:58Z
-
+last_built: 2024-09-27T13:29Z
+urls:
+  reference: https://github.com/insightsengineering/rbmi/reference
+  article: https://github.com/insightsengineering/rbmi/articles

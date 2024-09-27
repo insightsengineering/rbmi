@@ -5,85 +5,61 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="rbmi">
 <title>rbmi: Statistical Specifications • rbmi</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="rbmi: Statistical Specifications">
-<meta property="og:description" content="rbmi">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="rbmi: Statistical Specifications">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">rbmi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.6.0001</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/advanced.html">rbmi: Advanced Functionality</a>
-    <a class="dropdown-item" href="../articles/quickstart.html">rbmi: Quickstart</a>
-    <a class="dropdown-item" href="../articles/stat_specs.html">rbmi: Statistical Specifications</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/advanced.html">rbmi: Advanced Functionality</a></li>
+    <li><a class="dropdown-item" href="../articles/CondMean_Inference.html">rbmi: Inference with Conditional Mean Imputation</a></li>
+    <li><a class="dropdown-item" href="../articles/FAQ.html">rbmi: Frequently Asked Questions</a></li>
+    <li><a class="dropdown-item" href="../articles/quickstart.html">rbmi: Quickstart</a></li>
+    <li><a class="dropdown-item" href="../articles/retrieved_dropout.html">rbmi: Implementation of retrieved-dropout models using rbmi</a></li>
+    <li><a class="dropdown-item" href="../articles/stat_specs.html">rbmi: Statistical Specifications</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
-</li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.2.6">v1.2.6</a> </div></li>
-<!-- end dropdown for versions -->
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/insightsengineering/rbmi/" aria-label="github">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><a class="nav-link" href="https://github.com/insightsengineering/rbmi"><span class="fa fa-github"></span></a></li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>rbmi: Statistical Specifications</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>rbmi: Statistical Specifications</h1>
                         <h4 data-toc-skip class="author">Alessandro Noci, Craig Gower-Page, and Marcel Wolbers</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/HEAD/vignettes/stat_specs.Rmd" class="external-link"><code>vignettes/stat_specs.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/test-pkgdown-workflow/vignettes/stat_specs.Rmd"><code>vignettes/stat_specs.Rmd</code></a></small>
       <div class="d-none name"><code>stat_specs.Rmd</code></div>
     </div>
 
@@ -144,10 +120,9 @@ However, in some situations, it may be more reasonable to assume that missingnes
 <p>Ideally, data collection continues after an ICE handled with a treatment policy strategy and no missing data arises.
 Indeed, such post-ICE data are increasingly systematically collected in RCTs.
 However, despite best efforts, missing data after an ICE such as study treatment discontinuation may still occur because the subject drops out from the study after discontinuation. It is difficult to give definite recommendations regarding the implementation of the treatment policy strategy in the presence of missing data at this stage because the optimal method is highly context dependent and a topic of ongoing statistical research.</p>
-<p>For ICEs which are thought to have a negligible effect on efficacy outcomes, standard MAR-based imputation may be appropriate. In contrast, an ICE such as treatment discontinuation may be expected to have a more substantial impact on efficacy outcomes. In such settings, the MAR assumption may still be plausible after conditioning on the subject’s time-varying treatment status (<span class="citation">Guizzaro et al. (<a href="#ref-Guizzaro2021">2021</a>)</span>). In this case, one option is to impute missing post-discontinuation data based on subjects who also discontinued treatment but continued to be followed up (<span class="citation">Polverejan and Dragalin (<a href="#ref-PolverejanDragalin2020">2020</a>)</span>). Another option which may require somewhat less post-discontinuation data is to include all subjects in the imputation procedure but to model post-discontinuation data by using a time-varying treatment status indicators (e.g. time-varying indicators of treatment compliance, discontinuation, or initiation of rescue
-treatment) (<span class="citation">Guizzaro et al. (<a href="#ref-Guizzaro2021">2021</a>)</span>). In this approach, post-ICE outcomes are included
-in every step of the analysis, including in the fitting of the imputation model.
-It assumes that ICEs may impact post-ICE outcomes but that otherwise missingness is non-informative. The approach also assumes that the time-varying covariates do not contain missing values, deviations in outcomes after the ICE are correctly modeled by these time-varying covariates, and that sufficient post-ICE data are available to inform the regression coefficients of the time-varying covariates. These proposals are relatively recent and there remain open questions regarding the appropriate trade-off between model complexity (e.g. should the model account for a potentially differential effect on post-ICE outcomes depending on the timing of the ICE?) and the variance in the resulting treatment effect estimate. More generally, it is not yet established how much post-discontinuation data is required to implement such methods robustly and without the risk of substantial inflation of variance.</p>
+<p>For ICEs which are thought to have a negligible effect on efficacy outcomes, standard MAR-based imputation which ignores whether an outcome is observed pre- or post-ICE may be appropriate.
+In contrast, an ICE such as treatment discontinuation may be expected to have a more substantial impact on efficacy outcomes. In such settings, the MAR assumption may still be plausible after conditioning on the subject’s time-varying treatment status (<span class="citation">Guizzaro et al. (<a href="#ref-Guizzaro2021">2021</a>)</span>). In this case, one option is to impute missing post-discontinuation data based on subjects who also discontinued treatment but continued to be followed up. Another option which may require somewhat less post-discontinuation data is to include all subjects in the imputation procedure but to model post-discontinuation data by using time-varying treatment status indicators (<span class="citation">Guizzaro et al. (<a href="#ref-Guizzaro2021">2021</a>)</span>, <span class="citation">Polverejan and Dragalin (<a href="#ref-PolverejanDragalin2020">2020</a>)</span>, <span class="citation">Noci et al. (<a href="#ref-Noci2021">2023</a>)</span>, <span class="citation">Drury et al. (<a href="#ref-Drury2024">2024</a>)</span>, <span class="citation">Bell et al. (<a href="#ref-Bell2024">2024</a>)</span>). In this approach, post-ICE outcomes are included in every step of the analysis, including in the fitting of the imputation model. It assumes that ICEs may impact post-ICE outcomes but that otherwise missingness is non-informative. The approach also assumes that the time-varying covariates do not contain missing values, deviations in outcomes after the ICE are correctly modeled by these time-varying covariates, and that sufficient post-ICE data are available to inform the regression coefficients of the time-varying covariates.
+The resulting imputation models are called “retrieved dropout models” in the statistical literature. These models tend to have less bias than alternative analysis approaches based on imputation under a basic MAR assumption or a reference-based missing data assumption. However, retrieved dropout models have been associated with inflated standard errors of associated treatment effect estimators which has a detrimental effect on study power. In particular, it has been observed that once the post-ICE observation percentages falls below 50%, the power loss can be quite dramatic <span class="citation">(<a href="#ref-Bell2024">Bell et al. 2024</a>)</span>. We illustrate the implementation of retrieved dropout models in the vignette “Implementation of retrieved-dropout models using rbmi” (<code><a href="../articles/retrieved_dropout.html">vignette(topic = "retrieved_dropout", package = "rbmi")</a></code>).</p>
 <p>In some trial settings, only few subjects discontinue the randomized treatment. In other settings, treatment discontinuation rates are higher but it is difficult to retain subjects in the trial after treatment discontinuation leading to sparse data collection after treatment discontinuation. In both settings, the amount of available data after treatment discontinuation may be insufficient to inform an imputation model which explicitly models post-discontinuation data. Depending on the disease area and the anticipated mechanism of action of the intervention, it may be plausible to assume that subjects in the intervention group behave similarly to subjects in the control group after the ICE treatment discontinuation. In this case, reference-based imputation methods are an option (<span class="citation">Mallinckrodt et al. (<a href="#ref-Mallinckrodt2020">2020</a>)</span>). Reference-based imputation methods formalize the idea to impute missing data in the intervention group based on data from a control or reference group. For a general description and review of reference-based imputation methods, we refer to <span class="citation">Carpenter, Roger, and Kenward (<a href="#ref-CarpenterEtAl2013">2013</a>)</span>, <span class="citation">Cro et al. (<a href="#ref-CroEtAlTutorial2020">2020</a>)</span>, <span class="citation">I. White, Royes, and Best (<a href="#ref-White2020causal">2020</a>)</span> and <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>. For a technical description of the implemented statistical methodology for reference-based imputation, we refer to section <a href="#sec:statsMethods">3</a> (in particular section <a href="#sec:imputationStep">3.4</a>).</p>
 </div>
 <div class="section level4" number="2.2.4">
@@ -556,11 +531,27 @@ Under the null hypothesis, <span class="math inline">\(T\)</span> has an approxi
 <h4 id="standard-errors-of-the-treatment-effect">
 <span class="header-section-number">3.10.2</span> Standard errors of the treatment effect<a class="anchor" aria-label="anchor" href="#standard-errors-of-the-treatment-effect"></a>
 </h4>
-<p>All approaches provide frequentist consistent estimates of the standard error for imputation under a MAR assumption. For reference-based imputation methods, methods based on conditional mean imputation or bootstrapped MI provide frequentist consistent estimates of the standard error whereas Rubin’s rules applied to conventional MI methods provides so-called information anchored inference (<span class="citation">Bartlett (<a href="#ref-Bartlett2021">2021</a>)</span>, <span class="citation">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019">2019</a>)</span>, <span class="citation">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021">2021</a>)</span>, <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>). Frequentist consistent estimates of the standard error lead to confidence intervals and tests which have (asymptotically) correct coverage and type I error control under the assumption that the reference-based assumption reflects the true data-generating mechanism. For finite samples, simulations for a sample size of <span class="math inline">\(n=100\)</span> per group reported in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span> demonstrated that conditional mean imputation combined with the jackknife provided exact protection of the type one error rate whereas the bootstrap was associated with a small type I error inflation (between 5.1% to 5.3% for a nominal level of 5%).</p>
-<p>It is well known that Rubin’s rules do not provide frequentist consistent estimates of the standard error for reference-based imputation methods (<span class="citation">Seaman, White, and Leacy (<a href="#ref-Seaman2014">2014</a>)</span>, <span class="citation">Liu and Pang (<a href="#ref-LiuPang2016">2016</a>)</span>, <span class="citation">Tang (<a href="#ref-Tang2017">2017</a>)</span>, <span class="citation">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019">2019</a>)</span>, <span class="citation">Bartlett (<a href="#ref-Bartlett2021">2021</a>)</span>). Standard errors from Rubin’s rule are typically larger than frequentist standard error estimates leading to conservative inference and a corresponding loss of statistical power, see e.g. the simulations reported in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>.
-Intuitively, this occurs because reference-based imputation methods borrow information from the reference group for imputations in the intervention group leading to a reduction in the frequentist variance of the resulting treatment effect contrast which is not captured by Rubin’s variance estimator. Formally, this occurs because the imputation and analysis models are uncongenial for reference-based imputation methods (<span class="citation">Meng (<a href="#ref-Meng1994">1994</a>)</span>, <span class="citation">Bartlett (<a href="#ref-Bartlett2021">2021</a>)</span>).
-<span class="citation">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019">2019</a>)</span> argued that Rubin’s rule is nevertheless valid for reference-based imputation methods because it is approximately information-anchored, i.e. that the proportion of information lost due to missing data under MAR is approximately preserved in reference-based analyses. In contrast, frequentist standard errors for reference based imputation are not information anchored for reference-based imputation and standard errors under reference-based assumptions are typically smaller than those for MAR imputation.</p>
-<p>Information anchoring is a sensible concept for sensitivity analyses, whereas for a primary analyses, it may be more important to adhere to the principles of frequentist inference. Analyses of data with missing observations generally rely on unverifiable missing data assumptions and the assumptions for reference-based imputation methods are relatively strong. Therefore, these assumptions need to be clinically justified as appropriate or at least conservative for the considered disease area and the anticipated mechanism of action of the intervention.</p>
+<p>All approaches for imputation under a MAR assumption provide consistent estimates of the frequentist standard error.</p>
+<p>For reference-based imputation methods, the situation is more complicated and two different types of variance estimators have been proposed in the statistical literature (<span class="citation">Bartlett (<a href="#ref-Bartlett2021">2023</a>)</span>).
+The first is the frequentist variance which describes the actual repeated sampling variability of the estimator.
+If the reference-based missing data assumption is correctly specified, then the resulting inference based on this variance is correct in the frequentist sense, i.e. hypothesis tests have asymptotically correct type I error control and confidence intervals have correct coverage probabilities under repeated sampling (<span class="citation">Bartlett (<a href="#ref-Bartlett2021">2023</a>)</span>, <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>).
+Reference-based missing data assumptions are strong and borrow information from the reference arm for imputation in the active arm. As a consequence, the size of frequentist standard errors for treatment effects may decrease with increasing amounts of missing data.
+The second proposal is the so-called “information-anchored” variance which was originally proposed in the context of sensitivity analyses (<span class="citation">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019">2019</a>)</span>). This variance estimator is based on disentangling point estimation and variance estimation altogether.
+The information-anchoring principle described in <span class="citation">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019">2019</a>)</span> states that the relative increase in the variance of the treatment effect estimator under MAR imputation with increasing amounts of missing data should be preserved for reference-based imputation methods.
+The resulting information-anchored variance is typically very similar to the variance under MAR imputation and typically increases with increasing amounts of missing data.
+However, the information-anchored variance does not reflect the actual variability of the reference-based estimator under repeated sampling and the resulting inference is highly conservative resulting in a substantial power loss (<span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>).
+Moreover, to date, no Bayesian or frequentist framework has been developed under which the information-anchored variance provides correct inference for reference-based missingness assumptions, nor is it clear whether such a framework can even be developed.</p>
+<p>Reference-based conditional mean imputation (<code><a href="../reference/method.html">method_condmean()</a></code>) and bootstrapped likelihood-based multiple methods (<code>method = method_bmlmi()</code>) obtain standard errors via resampling and hence target the frequentist variance (<span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>, <span class="citation">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021">2021</a>)</span>).
+For finite samples, simulations for a sample size of <span class="math inline">\(n=100\)</span> per group reported in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span> demonstrated that conditional mean imputation combined with the jackknife (<code>method_condmean(type = "jackknife")</code>) provided exact protection of the type one error rate whereas the bootstrap (<code>method_condmean(type = "bootstrap")</code>) was associated with a small type I error inflation (between 5.1% to 5.3% for a nominal level of 5%).
+For reference-based conditional mean imputation, an alternative information-anchored variance can be obtained by following a proposal by <span class="citation">Lu (<a href="#ref-Lu2021">2021</a>)</span>.
+The basic idea of <span class="citation">Lu (<a href="#ref-Lu2021">2021</a>)</span> is to obtain the information-anchored variance via a MAR imputation combined with a delta-adjustment where delta is selected in a data-driven way to match the reference-based estimator.
+For conditional mean imputation, the proposal by <span class="citation">Lu (<a href="#ref-Lu2021">2021</a>)</span> can be implemented by choosing the delta-adjustment as the difference between the conditional mean imputation under the chosen reference-based assumption and MAR on the original dataset.
+An illustration of how the different variances can be obtained for conditional mean imputation in <code>rbmi</code> is provided in the vignette “Frequentist and information-anchored inference for reference-based conditional mean imputation” (<code><a href="../articles/CondMean_Inference.html">vignette(topic = "CondMean_Inference", package = "rbmi")</a></code>).</p>
+<p>Reference-based Bayesian (or approximate Bayesian) multiple imputation methods combined with Rubin’s rules (<code><a href="../reference/method.html">method_bayes()</a></code> and <code><a href="../reference/method.html">method_approxbayes()</a></code>) target the information-anchored variance (<span class="citation">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019">2019</a>)</span>).
+A frequentist variance for these methods could in principle be obtained via bootstrap or jackknife re-sampling of the treatment effect estimates but this would be very computationally intensive and is not directly supported by <code>rbmi</code>.</p>
+<p>Our view is that for primary analyses, accurate type I error control (which can be obtained by using the frequentist variance) is more important than adherence to the information anchoring principle which, to us, is
+not fully compatible with the strong reference-based assumptions. In any case, if reference-based imputation is used for the primary analysis, it is critical that the chosen
+reference-based assumption can be clinically justified, and that suitable sensitivity analyses are conducted to stress-test these assumptions.</p>
 <p>Conditional mean imputation combined with the jackknife is the only method which leads to deterministic standard error estimates and, consequently, confidence intervals and <span class="math inline">\(p\)</span>-values are also deterministic. This is particularly important in a regulatory setting where it is important to ascertain whether a calculated <span class="math inline">\(p\)</span>-value which is close to the critical boundary of 5% is truly below or above that threshold rather than being uncertain about this because of Monte Carlo error.</p>
 </div>
 <div class="section level4" number="3.10.3">
@@ -611,12 +602,15 @@ All other methods based on multiple imputation or bootstrapping require no other
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-Barnard1999" class="csl-entry">
 Barnard, John, and Donald B Rubin. 1999. <span>“Miscellanea. Small-Sample Degrees of Freedom with Multiple Imputation.”</span> <em>Biometrika</em> 86 (4): 948–55.
 </div>
 <div id="ref-Bartlett2021" class="csl-entry">
-Bartlett, Jonathan W. 2021. <span>“Reference-Based Multiple Imputation - What Is the Right Variance and How to Estimate It.”</span> <em>Statistics in Biopharmaceutical Research</em>. <a href="https://doi.org/10.1080/19466315.2021.1983455" class="external-link">https://doi.org/10.1080/19466315.2021.1983455</a>.
+Bartlett, Jonathan W. 2023. <span>“Reference-Based Multiple Imputation - What Is the Right Variance and How to Estimate It.”</span> <em>Statistics in Biopharmaceutical Research</em> 15 (1): 178–86.
+</div>
+<div id="ref-Bell2024" class="csl-entry">
+Bell, James, Thomas Drury, Tobias Mütze, Christian Bressen Pipper, Lorenzo Guizzaro, Marian Mitroiu, Khadija Rerhou Rantell, Marcel Wolbers, and David Wright. 2024. <span>“Estimation Methods for Estimands Using the Treatment Policy Strategy; a Simulation Study Based on the PIONEER 1 Trial.”</span> <em>arXiv Preprint</em>. <a href="https://arxiv.org/abs/2402.12850" class="external-link">https://arxiv.org/abs/2402.12850</a>.
 </div>
 <div id="ref-CarpenterEtAl2013" class="csl-entry">
 Carpenter, James R, James H Roger, and Michael G Kenward. 2013. <span>“Analysis of Longitudinal Trials with Protocol Deviation: A Framework for Relevant, Accessible Assumptions, and Inference via Multiple Imputation.”</span> <em>Journal of Biopharmaceutical Statistics</em> 23 (6): 1352–71.
@@ -632,6 +626,9 @@ Darken, Patrick, Jack Nyberg, Shaila Ballal, and David Wright. 2020. <span>“Th
 </div>
 <div id="ref-DavisonHinkley1997" class="csl-entry">
 Davison, Anthony C, and David V Hinkley. 1997. <em>Bootstrap Methods and Their Application</em>. Cambridge University Press.
+</div>
+<div id="ref-Drury2024" class="csl-entry">
+Drury, Thomas, Juan J Abellan, Nicky Best, and Ian R White. 2024. <span>“Estimation of Treatment Policy Estimands for Continuous Outcomes Using Off-Treatment Sequential Multiple Imputation.”</span> <em>Pharmaceutical Statistics</em>.
 </div>
 <div id="ref-Efron1994" class="csl-entry">
 Efron, Bradley. 1994. <span>“Missing Data, Imputation, and the Bootstrap.”</span> <em>Journal of the American Statistical Association</em> 89 (426): 463–75.
@@ -651,8 +648,8 @@ ICH E9 working group. 2019. <span>“<span class="nocase">ICH E9 (R1): Addendum 
 <div id="ref-LittleRubin1992" class="csl-entry">
 Little, Roderick JA, and Donald B Rubin. 2002. <em>Statistical Analysis with Missing Data, Second Edition</em>. John Wiley &amp; Sons.
 </div>
-<div id="ref-LiuPang2016" class="csl-entry">
-Liu, G Frank, and Lei Pang. 2016. <span>“On Analysis of Longitudinal Clinical Trials with Missing Data Using Reference-Based Imputation.”</span> <em>Journal of Biopharmaceutical Statistics</em> 26 (5): 924–36.
+<div id="ref-Lu2021" class="csl-entry">
+Lu, Kaifeng. 2021. <span>“An Alternative Implementation of Reference-Based Controlled Imputation Procedures.”</span> <em>Statistics in Biopharmaceutical Research</em> 13 (4): 483–91.
 </div>
 <div id="ref-Mallinckrodt2020" class="csl-entry">
 Mallinckrodt, CH, J Bell, G Liu, B Ratitch, M O’Kelly, I Lipkovich, P Singh, L Xu, and G Molenberghs. 2020. <span>“Aligning Estimators with Estimands in Clinical Trials: Putting the ICH E9 (R1) Guidelines into Practice.”</span> <em>Therapeutic Innovation &amp; Regulatory Science</em> 54 (2): 353–64.
@@ -660,8 +657,8 @@ Mallinckrodt, CH, J Bell, G Liu, B Ratitch, M O’Kelly, I Lipkovich, P Singh, L
 <div id="ref-RefbasedMIpackage" class="csl-entry">
 McGrath, Kevin, and Ian White. 2021. <span>“RefBasedMI: Reference-Based Imputation for Longitudinal Clinical Trials with Protocol Deviation.”</span> <a href="https://github.com/UCL/RefbasedMI" class="external-link">https://github.com/UCL/RefbasedMI</a>.
 </div>
-<div id="ref-Meng1994" class="csl-entry">
-Meng, Xiao-Li. 1994. <span>“Multiple-Imputation Inferences with Uncongenial Sources of Input.”</span> <em>Statistical Science</em> 9 (4): 538–58.
+<div id="ref-Noci2021" class="csl-entry">
+Noci, Alessandro, Marcel Wolbers, Markus Abt, Corine Baayen, Hans Ulrich Burger, Man Jin, and Weining Zhao Robieson. 2023. <span>“A Comparison of Estimand and Estimation Strategies for Clinical Trials in Early Parkinson’s Disease.”</span> <em>Statistics in Biopharmaceutical Research</em> 15 (3): 491–501.
 </div>
 <div id="ref-Patterson1971" class="csl-entry">
 Patterson, H Desmond, and Robin Thompson. 1971. <span>“Recovery of Inter-Block Information When Block Sizes Are Unequal.”</span> <em>Biometrika</em> 58 (3): 545–54.
@@ -672,14 +669,8 @@ Polverejan, Elena, and Vladimir Dragalin. 2020. <span>“Aligning Treatment Poli
 <div id="ref-FiveMacros" class="csl-entry">
 Roger, James. 2021. <span>“Reference-Based MI via Multivariate Normal RM (the <span>‘Five Macros’</span> and MIWithD).”</span> <a href="https://www.lshtm.ac.uk/research/centres-projects-groups/missing-data#dia-missing-data" class="external-link">https://www.lshtm.ac.uk/research/centres-projects-groups/missing-data#dia-missing-data</a>.
 </div>
-<div id="ref-Seaman2014" class="csl-entry">
-Seaman, Shaun R, Ian R White, and Finbarr P Leacy. 2014. <span>“Comment on <span>‘<span>A</span>nalysis of Longitudinal Trials with Protocol Deviations: A Framework for Relevant, Accessible Assumptions, and Inference via Multiple Imputation,’</span> by <span>C</span>arpenter, <span>R</span>oger, and <span>K</span>enward.”</span> <em>Journal of Biopharmaceutical Statistics</em> 24 (6): 1358–62.
-</div>
 <div id="ref-Rstan" class="csl-entry">
 Stan Development Team. 2020. <span>“<span>RStan</span>: The <span>R</span> Interface to <span>Stan</span>.”</span> <a href="https://mc-stan.org/" class="external-link">https://mc-stan.org/</a>.
-</div>
-<div id="ref-Tang2017" class="csl-entry">
-Tang, Yongqiang. 2017. <span>“On the Multiple Imputation Variance Estimator for Control-Based and Delta-Adjusted Pattern Mixture Models.”</span> <em>Biometrics</em> 73 (4): 1379–87.
 </div>
 <div id="ref-vonHippelBartlett2021" class="csl-entry">
 von Hippel, Paul T, and Jonathan W Bartlett. 2021. <span>“Maximum Likelihood Multiple Imputation: Faster Imputations and Consistent Standard Errors Without Posterior Draws.”</span> <em>Statistical Science</em> 36 (3): 400–420.
@@ -691,32 +682,30 @@ White, Ian R, Patrick Royston, and Angela M Wood. 2011. <span>“Multiple Imputa
 White, Ian, Joseph Royes, and Nicky Best. 2020. <span>“A Causal Modelling Framework for Reference-Based Imputation and Tipping Point Analysis in Clinical Trials with Quantitative Outcome.”</span> <em>Journal of Biopharmaceutical Statistics</em> 30 (2): 334–50.
 </div>
 <div id="ref-Wolbers2021" class="csl-entry">
-Wolbers, Marcel, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, and Jonathan W. Bartlett. 2022. <span>“Standard and Reference-Based Conditional Mean Imputation.”</span> <em>Pharmaceutical Statistics</em>. <a href="https://doi.org/10.1002/pst.2234" class="external-link">https://doi.org/10.1002/pst.2234</a>.
+Wolbers, Marcel, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, and Jonathan W Bartlett. 2022. <span>“Standard and Reference-Based Conditional Mean Imputation.”</span> <em>Pharmaceutical Statistics</em> 21 (6): 1246–57.
 </div>
 </div>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p>
-<p>Developed by Craig Gower-Page, Alessandro Noci, Roche.</p>
+  <p>Developed by Craig Gower-Page, Alessandro Noci, F. Hoffmann-La Roche AG.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>
