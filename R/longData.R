@@ -397,6 +397,8 @@ longDataConstructor <- R6::R6Class(
 
             dat_ice <- sort_by(dat_ice, c(self$vars$subjid))
 
+            has_nonMAR_to_MAR <- FALSE
+
             for (subject in dat_ice[[self$vars$subjid]]) {
 
                 dat_ice_pt <- dat_ice[dat_ice[[self$vars$subjid]] == subject, ]
@@ -408,7 +410,6 @@ longDataConstructor <- R6::R6Class(
 
                 new_strategy <- dat_ice_pt[[self$vars$strategy]]
 
-                has_nonMAR_to_MAR <- FALSE
                 if (!update) {
                     visit <- dat_ice_pt[[self$vars$visit]]
                     self$ice_visit_index[[subject]] <- which(self$visits == visit)
