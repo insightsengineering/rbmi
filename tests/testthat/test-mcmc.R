@@ -529,8 +529,7 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
         n_samples = 250,
         burn_in = 100,
         burn_between = 3,
-        same_cov = FALSE,
-        seed = 8931
+        same_cov = FALSE
     )
 
     ### No missingness
@@ -604,36 +603,17 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
 })
 
 
-test_that("invalid seed throws an error", {
-
-    set.seed(301)
-    sigma <- as_vcov(c(6, 4, 4), c(0.5, 0.2, 0.3))
-    dat <- get_sim_data(50, sigma)
-
-    dat_ice <- dat %>%
-        group_by(id) %>%
-        arrange(desc(visit)) %>%
-        slice(1) %>%
-        ungroup() %>%
-        mutate(strategy = "MAR")
-
-    vars <- set_vars(
-        visit = "visit",
-        subjid = "id",
-        group = "group",
-        covariates = "sex",
-        strategy = "strategy",
-        outcome = "outcome"
-    )
-
-    expect_error(
-        draws(
-            dat,
-            dat_ice,
-            vars,
-            method_bayes(n_samples = 2, seed = NA),
-            quiet = TRUE
-        ),
-        regexp = "mcmc seed is invalid"
+test_that("seed argument to method_bayes is depreciated", {
+    expect_warning(
+        {
+            method <- method_bayes(
+                n_samples = 250,
+                burn_in = 100,
+                burn_between = 3,
+                same_cov = FALSE,
+                seed = 1234
+            )
+        },
+        regexp = "seed.*deprecated"
     )
 })

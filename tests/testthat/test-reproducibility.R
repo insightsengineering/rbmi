@@ -86,7 +86,7 @@ test_that("Results are Reproducible", {
 
 
 
-test_that("bayes - seed argument works without set.seed", {
+test_that("bayes - set.seed produces identical results", {
     
     sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
     dat <- get_sim_data(200, sigma, trt = 8) %>%
@@ -111,17 +111,16 @@ test_that("bayes - seed argument works without set.seed", {
     )
 
     meth <- method_bayes(
-        seed = 1482,
         burn_between = 5,
         burn_in = 200,
-        n_samples = 2
+        n_samples = 6
     )
 
-    set.seed(49812)
+    set.seed(1234)
     x <- suppressWarnings({
         draws(dat, dat_ice, vars, meth, quiet = TRUE)
     })
-    set.seed(2414)
+    set.seed(1234)
     y <- suppressWarnings({
         draws(dat, dat_ice, vars, meth, quiet = TRUE)
     })

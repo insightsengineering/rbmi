@@ -107,14 +107,14 @@ set.seed(413)
 dobj <- get_data(40)
 
 suppressWarnings({
+    set.seet(859)
     drawobj_b <- draws(
         data = dobj$dat,
         data_ice = dobj$dat_ice,
         vars = dobj$vars,
         method = method_bayes(
             n_samples = 50,
-            burn_between = 1,
-            seed = 859
+            burn_between = 1
         )
     )
 })

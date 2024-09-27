@@ -13,7 +13,7 @@ method_bayes(
   burn_between = 50,
   same_cov = TRUE,
   n_samples = 20,
-  seed = sample.int(.Machine$integer.max, 1)
+  seed = NULL
 )
 
 method_approxbayes(
@@ -61,10 +61,7 @@ matrix will be fit for each group as determined by the \code{group} argument of
 In the case of \code{method_condmean(type = "jackknife")} this argument
 must be set to \code{NULL}. See details.}
 
-\item{seed}{a numeric that specifies the seed to be used in the call to Stan. This
-argument is passed onto the \code{seed} argument of \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}. Note that
-this is only required for \code{method_bayes()}, for all other methods you can achieve
-reproducible results by setting the seed via \code{set.seed()}. See details.}
+\item{seed}{deprecated. Please use \code{set.seed()} instead.}
 
 \item{covariance}{a character string that specifies the structure of the covariance
 matrix to be used in the imputation model. Must be one of \code{"us"} (default), \code{"toep"},

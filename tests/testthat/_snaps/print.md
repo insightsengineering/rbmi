@@ -255,7 +255,6 @@
           burn_between: 1
           same_cov: TRUE
           n_samples: 50
-          seed: 859
       
 
 ---

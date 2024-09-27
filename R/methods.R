@@ -44,10 +44,7 @@
 #' @param type a character string that specifies the resampling method used to perform inference
 #' when a conditional mean imputation approach (set via `method_condmean()`) is used. Must be one of `"bootstrap"` or `"jackknife"`.
 #'
-#' @param seed a numeric that specifies the seed to be used in the call to Stan. This
-#' argument is passed onto the `seed` argument of [rstan::sampling()]. Note that
-#' this is only required for `method_bayes()`, for all other methods you can achieve
-#' reproducible results by setting the seed via `set.seed()`. See details.
+#' @param seed deprecated. Please use `set.seed()` instead.
 #'
 #' @details
 #'
@@ -93,14 +90,20 @@ method_bayes <- function(
     burn_between = 50,
     same_cov = TRUE,
     n_samples = 20,
-    seed = sample.int(.Machine$integer.max, 1)
+    seed = NULL
 ) {
+    if (!is.null(seed)) {
+        warning(paste0(
+            "The `seed` argument to `method_bayes()` has been deprecated",
+            " please use `set.seed()` instead"
+        ))
+    }
+
     x <- list(
         burn_in = burn_in,
         burn_between = burn_between,
         same_cov = same_cov,
-        n_samples = n_samples,
-        seed = seed
+        n_samples = n_samples
     )
     return(as_class(x, c("method", "bayes")))
 }
