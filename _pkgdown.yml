@@ -1,3 +1,11 @@
-url: ~
+
+url: https://github.com/insightsengineering/rbmi
+
 template:
   bootstrap: 5
+  bootswatch: cerulean
+
+navbar:
+  right:
+    - icon: fa-github
+      href: https://github.com/insightsengineering/rbmi
