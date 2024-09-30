@@ -411,3 +411,59 @@ poolObj <- pool(
     alternative = "two.sided"
 )
 ```
+
+
+```{r, eval = FALSE}
+library(future)
+library(lubridate)
+some_fun <- function(data) {
+    Sys.sleep(.5)
+    as_datetime(2)
+    NULL
+}
+
+my_fun <- function(
+    data,
+    vars,
+    visits = NULL,
+    weights = c("counterfactual", "equal", "proportional_em", "proportional")
+) {
+    some_fun(data)    
+    ancova(data, vars, visits, weights)
+}
+plan("multisession", workers = 4)
+system.time({
+anaObj_par <- analyse(
+    imputeObj,
+    my_fun,
+    vars = set_vars(
+        subjid = "PATIENT",
+        outcome = "CHANGE",
+        visit = "VISIT",
+        group = "THERAPY",
+        covariates = c("BASVAL")
+    )
+)
+anaObj_par
+})
+
+plan("sequential")
+system.time({
+anaObj_seq <- analyse(
+    imputeObj,
+    my_fun,
+    vars = set_vars(
+        subjid = "PATIENT",
+        outcome = "CHANGE",
+        visit = "VISIT",
+        group = "THERAPY",
+        covariates = c("BASVAL")
+    )
+)
+anaObj_seq
+})
+
+identical(anaObj_par, anaObj_seq)
+
+```
+

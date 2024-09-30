@@ -152,9 +152,9 @@ analyse <- function(imputations, fun = ancova, delta = NULL, ...) {
         )
     }
 
-    results <- lapply(
-        imputations$imputations,
-        function(x, ...) {
+    results <- future.apply::future_lapply(
+        X = imputations$imputations,
+        FUN = function(x, ...) {
             dat2 <- extract_imputed_df(x, imputations$data, delta)
             fun(dat2, ...)
         },
