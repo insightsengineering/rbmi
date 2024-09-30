@@ -6,6 +6,9 @@ suppressPackageStartupMessages({
 
 test_that("basic constructions of `analysis` work as expected",{
 
+    oldopt <- getOption("warnPartialMatchDollar")
+    options(warnPartialMatchDollar = TRUE)
+
     x <- as_analysis(
         results = list(
             list(p1 = list("est" = 1)),
@@ -65,6 +68,7 @@ test_that("basic constructions of `analysis` work as expected",{
     )
     expect_true(validate(x))
 
+    options(warnPartialMatchDollar = oldopt)
 })
 
 

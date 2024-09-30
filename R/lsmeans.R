@@ -163,6 +163,7 @@ collapse_values.default <- function(x) {
 #' @param data A data.frame
 #' @param frm Formula used to fit the original model
 #' @param fix A named list of variables with fixed values
+#' @importFrom stats update model.frame aggregate
 #' @name ls_design
 ls_design_equal <- function(data, frm, fix) {
     assert_that(

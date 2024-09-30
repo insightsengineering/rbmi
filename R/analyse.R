@@ -378,8 +378,8 @@ validate.analysis <- function(x, ...) {
     if (next_class %in% c("bootstrap", "rubin")) {
         nsamp <- ife(
             next_class %in% c("bootstrap"),
-            x$method$n_sample + 1,
-            x$method$n_sample
+            x$method$n_samples + 1,
+            x$method$n_samples
         )
         assert_that(
             length(x$results) == nsamp
