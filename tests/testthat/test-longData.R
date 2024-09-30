@@ -1063,3 +1063,64 @@ test_that("get_data() uses na.rm and nmar.rm correctly", {
     )
 
 })
+
+
+test_that("Warnings/errors are thrown when strategies are incorrectly updated", {
+    vars <- set_vars(
+        outcome = "out",
+        group = "group",
+        strategy = "strat",
+        subjid = "pt",
+        visit = "vis",
+        covariates = c("age")
+    )
+
+    dat <- tibble(
+        pt = factor(c("A", "A", "A", "B", "B", "B", "C", "C", "C"), levels = c("A", "B", "C")),
+        vis = factor(c("V1", "V2", "V3", "V1", "V2", "V3", "V1", "V2", "V3"), levels = c("V1", "V2", "V3")),
+        out = c(1, 2, 3, 4, 5, 6, 7, 8, 9),
+        group = factor(c("T", "T", "T", "C", "C", "C", "T", "T", "T"), levels = c("C", "T")),
+        age = rnorm(9)
+    )
+    dat_ice <- tibble(
+        pt = factor(c("A", "B", "C"), levels = c("A", "B", "C")),
+        vis = factor( c("V2", "V2", "V2"), levels = c("V1", "V2", "V3")),
+        strat = c("JR", "MAR", "JR")
+    )
+    longdata <- longDataConstructor$new(dat, vars)
+    longdata$set_strategies(dat_ice)
+
+    # Error if updating MAR -> Non-Mar
+    ld2 <- longdata$clone()
+    dat_ice_upd <- tibble(
+        pt = factor(c("A", "B", "C"), levels = c("A", "B", "C")),
+        strat = c("JR", "JR", "JR")
+    )
+    expect_error(
+        ld2$update_strategies(dat_ice_upd),
+        regexp = "Updating strategies from MAR to non-MAR is invalid"
+    )
+
+    # Warning if updating Non-MAR -> MAR
+    ld2 <- longdata$clone()
+    dat_ice_upd <- tibble(
+        pt = factor(c("A", "B", "C"), levels = c("A", "B", "C")),
+        strat = c("JR", "MAR", "MAR")
+    )
+    expect_warning(
+        ld2$update_strategies(dat_ice_upd),
+        regexp = "Updating strategies from non-MAR to MAR.*You are advised to re-run `draws\\(\\)`"
+    )
+
+    # Same as above but catches niche bug where the warning would be supressed
+    # if a correct imputation came after an incorrect
+    ld2 <- longdata$clone()
+    dat_ice_upd <- tibble(
+        pt = factor(c("A", "B", "C"), levels = c("A", "B", "C")),
+        strat = c("MAR", "MAR", "JR")
+    )
+    expect_warning(
+        ld2$update_strategies(dat_ice_upd),
+        regexp = "Updating strategies from non-MAR to MAR.*You are advised to re-run `draws\\(\\)`"
+    )
+})
