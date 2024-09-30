@@ -603,7 +603,7 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
 })
 
 
-test_that("seed argument to method_bayes is depreciated", {
+test_that("seed argument to method_bayes is deprecated", {
     expect_warning(
         {
             method <- method_bayes(

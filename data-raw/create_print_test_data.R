@@ -107,7 +107,7 @@ set.seed(413)
 dobj <- get_data(40)
 
 suppressWarnings({
-    set.seet(859)
+    set.seed(859)
     drawobj_b <- draws(
         data = dobj$dat,
         data_ice = dobj$dat_ice,

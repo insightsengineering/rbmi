@@ -93,10 +93,10 @@ method_bayes <- function(
     seed = NULL
 ) {
     if (!is.null(seed)) {
-        warning(paste0(
+        warning(
             "The `seed` argument to `method_bayes()` has been deprecated",
             " please use `set.seed()` instead"
-        ))
+        )
     }
 
     x <- list(
