@@ -91,6 +91,16 @@
 #' @param delta A `data.frame` containing the delta transformation to be applied to the imputed
 #' datasets prior to running `fun`. See details.
 #' @param ... Additional arguments passed onto `fun`.
+#' @param .globals a named list or character vector specifying the global variables to be
+#' made available to workers when running in parallel.
+#' The default value of `TRUE` results in package attempting to automatically work out
+#' what is required. See
+#' [future.apply::future_lapply()] for full details.
+#' @param .packages a character vector specifying the libraries to be loaded
+#' in workers when running in parallel.
+#' The default value of `NULL` results in package attempting to automatically work out
+#' what is required. See
+#' [future.apply::future_lapply()] for full details.
 #' @examples
 #' \dontrun{
 #' vars <- set_vars(
@@ -155,29 +165,37 @@ analyse <- function(imputations, fun = ancova, delta = NULL, ..., .globals = TRU
     # Mangle object names to avoid colisions if the user has defined
     # own globals list
     # Ensure that required internal objects are available on sub-processes
-    ..rbmi..future..objs.. <- list(
-        fun = fun,
-        imputations = imputations,
-        delta = delta,
-        extract_imputed_df = extract_imputed_df
-    )
+    ..rbmi..future..fun <- fun
+    ..rbmi..future..imputations <- imputations
+    ..rbmi..future..delta <- delta
+    ..rbmi..future..extract_imputed_df <- extract_imputed_df
+
     if (is.list(.globals)) {
-        .globals[["..rbmi..future..objs.."]] <- ..rbmi..future..objs..
+        .globals[["..rbmi..future..fun"]] <- fun
+        .globals[["..rbmi..future..imputations"]] <- imputations
+        .globals[["..rbmi..future..delta"]] <- delta
+        .globals[["..rbmi..future..extract_imputed_df"]] <- extract_imputed_df
     }
     if (is.character(.globals)) {
-        .globals <- c(.globals, "..rbmi..future..objs..")
+        .globals <- c(
+            .globals,
+            "..rbmi..future..fun",
+            "..rbmi..future..imputations",
+            "..rbmi..future..delta",
+            "..rbmi..future..extract_imputed_df"
+        )
     }
     if (is.character(.packages)) {
         c(.packages, "rbmi")
     }
 
     encap_analysis_fun <- function(x, ...) {
-        dat2 <- ..rbmi..future..objs..$extract_imputed_df(
+        dat2 <- ..rbmi..future..extract_imputed_df(
             x,
-            ..rbmi..future..objs..$imputations$data,
-            ..rbmi..future..objs..$delta
+            ..rbmi..future..imputations$data,
+            ..rbmi..future..delta
         )
-        ..rbmi..future..objs..$fun(dat2, ...)
+        ..rbmi..future..fun(dat2, ...)
     }
 
     results <- future.apply::future_lapply(

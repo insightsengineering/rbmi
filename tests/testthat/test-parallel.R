@@ -256,6 +256,8 @@ test_that("parallelisation of analyse() works as expected", {
         covariates = c("sex", "age")
     )
 
+
+    # Show that running in parallel vs sequential produce same results
     set.seed(1021)
     system.time({
         plan(sequential)
@@ -276,23 +278,37 @@ test_that("parallelisation of analyse() works as expected", {
 
     expect_equal(ana_obj_1, ana_obj_2)
 
+
+    # Check that user defined functions work as expected
     library(lubridate)
+    global_val <- 20
     my_a_fun <- function(...) {
         zz <- days(3)
         list(
             "trt_visit_1" = list(
-                "est" = 10,
+                "est" = global_val,
                 "df" = 1,
                 "se" = 2
             )
         )
     }
+    # Check that automatic library detection works as expected
+    system.time({
+        plan(multisession, workers = 2)
+        ana_obj_2 <- analyse(
+            impute_obj,
+            fun = my_a_fun
+        )
+    })
+
+    # Check that manual library / global specification works as expected
     system.time({
         plan(multisession, workers = 2)
         ana_obj_2 <- analyse(
             impute_obj,
             fun = my_a_fun,
-            .packages = c("lubridate")
+            .globals = c("global_val"),
+            .packages = "lubridate"
         )
     })
 

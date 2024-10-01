@@ -197,10 +197,11 @@ Needed only for \code{method_condmean(type = "bootstrap")} and \code{method_appr
 \item \code{strategy}: name of the column in \code{data_ice} which contains the subject-specific imputation strategy.
 }
 
-In our experience, Bayesian MI (\code{method = method_bayes()}) with a relatively low number of samples (e.g. \code{n_samples} below 100)
-frequently triggers STAN warnings about R-hat such as "The largest R-hat is X.XX, indicating chains have not mixed".
-In many instances, this warning might be spurious, i.e. standard diagnostics analysis of the MCMC samples
-do not indicate any issues and results look reasonable. Increasing the number of samples to e.g. above 150 usually
+In our experience, Bayesian MI (\code{method = method_bayes()}) with a relatively low number of
+samples (e.g. \code{n_samples} below 100) frequently triggers STAN warnings about R-hat such as
+"The largest R-hat is X.XX, indicating chains have not mixed". In many instances, this warning
+might be spurious, i.e. standard diagnostics analysis of the MCMC samples do not indicate any
+issues and results look reasonable. Increasing the number of samples to e.g. above 150 usually
 gets rid of the warning.
 }
 \references{
