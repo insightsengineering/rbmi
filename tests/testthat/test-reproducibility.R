@@ -1,5 +1,6 @@
 suppressPackageStartupMessages({
     library(dplyr)
+    library(future)
 })
 
 
@@ -7,7 +8,7 @@ suppressPackageStartupMessages({
 test_that("Results are Reproducible", {
 
     skip_if_not(is_full_test())
-
+    plan(sequential)
     run_test <- function(method) {
         set.seed(4642)
         sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
@@ -45,8 +46,8 @@ test_that("Results are Reproducible", {
                 quiet = TRUE
             )
         })
-        imputeobj <- impute( draws = drawobj, references = c("A" = "B", "B" = "B"))
-        anaobj <- analyse( imputeobj, fun = rbmi::ancova, vars = vars2)
+        imputeobj <- impute(draws = drawobj, references = c("A" = "B", "B" = "B"))
+        anaobj <- analyse(imputeobj, fun = rbmi::ancova, vars = vars2)
         poolobj <- pool(results = anaobj)
 
 
@@ -87,7 +88,7 @@ test_that("Results are Reproducible", {
 
 
 test_that("bayes - seed argument works without set.seed", {
-    
+    plan(sequential)
     sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
     dat <- get_sim_data(200, sigma, trt = 8) %>%
         mutate(outcome = if_else(rbinom(n(), 1, 0.3) == 1, NA_real_, outcome))

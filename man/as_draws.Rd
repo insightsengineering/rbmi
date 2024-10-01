@@ -45,3 +45,4 @@ Relevant only for \code{method_condmean(type = "bootstrap")}, \code{method_appro
 \description{
 Creates a \code{draws} object which is the final output of a call to \code{\link[=draws]{draws()}}.
 }
+\keyword{internal}

@@ -119,7 +119,7 @@
 #' )
 #' }
 #' @export
-analyse <- function(imputations, fun = ancova, delta = NULL, ...) {
+analyse <- function(imputations, fun = ancova, delta = NULL, ..., .globals = TRUE, .packages = NULL) {
 
     validate(imputations)
 
@@ -152,13 +152,41 @@ analyse <- function(imputations, fun = ancova, delta = NULL, ...) {
         )
     }
 
+    # Mangle object names to avoid colisions if the user has defined
+    # own globals list
+    # Ensure that required internal objects are available on sub-processes
+    ..rbmi..future..objs.. <- list(
+        fun = fun,
+        imputations = imputations,
+        delta = delta,
+        extract_imputed_df = extract_imputed_df
+    )
+    if (is.list(.globals)) {
+        .globals[["..rbmi..future..objs.."]] <- ..rbmi..future..objs..
+    }
+    if (is.character(.globals)) {
+        .globals <- c(.globals, "..rbmi..future..objs..")
+    }
+    if (is.character(.packages)) {
+        c(.packages, "rbmi")
+    }
+
+    encap_analysis_fun <- function(x, ...) {
+        dat2 <- ..rbmi..future..objs..$extract_imputed_df(
+            x,
+            ..rbmi..future..objs..$imputations$data,
+            ..rbmi..future..objs..$delta
+        )
+        ..rbmi..future..objs..$fun(dat2, ...)
+    }
+
     results <- future.apply::future_lapply(
         X = imputations$imputations,
-        FUN = function(x, ...) {
-            dat2 <- extract_imputed_df(x, imputations$data, delta)
-            fun(dat2, ...)
-        },
-        ...
+        FUN = encap_analysis_fun,
+        ...,
+        future.seed = TRUE,
+        future.globals = .globals,
+        future.packages = .packages
     )
 
     fun_name <- deparse(substitute(fun))
@@ -479,7 +507,7 @@ validate_analyse_pars <- function(results, pars) {
         } else {
             assert_that(
                 all(!is.na(vapply(results_unnested, function(x) x[[par]], numeric(1)))) ||
-                all(is.na(vapply(results_unnested, function(x) x[[par]], numeric(1)))) ,
+                    all(is.na(vapply(results_unnested, function(x) x[[par]], numeric(1)))),
                 msg = sprintf("Parameter `%s` contains both missing and observed values", par)
             )
         }

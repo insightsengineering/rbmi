@@ -2,6 +2,8 @@ suppressPackageStartupMessages({
     library(dplyr)
     library(testthat)
     library(tibble)
+    library(future)
+    library(future)
 })
 
 get_data <- function(n) {
@@ -58,7 +60,7 @@ standard_checks <- function(dobj, d, meth) {
 
 
 test_that("approxbayes", {
-
+    plan(sequential)
     set.seed(40123)
     d <- get_data(80)
     meth <- method_approxbayes(n_samples = 2)
@@ -73,7 +75,7 @@ test_that("approxbayes", {
 
 
 test_that("condmean - bootstrap", {
-
+    plan(sequential)
     set.seed(40123)
     d <- get_data(70)
     meth <- method_condmean(n_samples = 1)
@@ -111,32 +113,36 @@ test_that("condmean - bootstrap", {
 
 
 test_that("condmean - jackknife", {
-
+    plan(sequential)
     skip_if_not(is_full_test())
+    plan(multisession, workers = 2)
 
     set.seed(40123)
     N <- 70
     d <- get_data(N)
     meth <- method_condmean(type = "jackknife")
-    dobj <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE, ncores = 2)
+    plan(multisession, workers = 2)
+    dobj <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
     standard_checks(dobj, d, meth)
 
     expect_length(dobj$samples, N + 1)
     expect_equal(dobj$samples[[1]]$ids, levels(d$dat$id))
-    expect_true(all(vapply(dobj$samples[-1], function(x) length(x$ids) == N-1, logical(1))))
+    expect_true(all(vapply(dobj$samples[-1], function(x) length(x$ids) == (N - 1), logical(1))))
     for (i in seq_len(N)) {
         expect_equal(dobj$samples[-1][[i]]$ids, levels(d$dat$id)[-i])
     }
 
     set.seed(123)
-    dobj2 <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE, ncores = 2)
+    dobj2 <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
     expect_equal(dobj[c("samples", "data")], dobj2[c("samples", "data")])
+    plan(sequential)
 })
 
 
 
 
 test_that("bayes", {
+    plan(sequential)
     set.seed(40123)
     d <- get_data(140)
     meth <- method_bayes(n_samples = 2, burn_in = 200, burn_between = 2)
@@ -153,6 +159,7 @@ test_that("bayes", {
 
 
 test_that("nmar data is removed as expected", {
+    plan(sequential)
     # In order to test if nmar is being removed correctly we will
     # create a dataset flag seveal patients as being nmar then compare
     # the output of draws on this dataset vs the same dataset after
@@ -198,7 +205,7 @@ test_that("nmar data is removed as expected", {
 
 
 test_that("NULL data_ice works uses MAR by default", {
-
+    plan(sequential)
     set.seed(314)
     dat <- simulate_test_data(n = 100)
 
@@ -227,7 +234,7 @@ test_that("NULL data_ice works uses MAR by default", {
 
 
 test_that("Failure is handled properly", {
-
+    plan(sequential)
     set.seed(521)
     bign <- 80
     sigma <- as_vcov(
@@ -267,15 +274,15 @@ test_that("Failure is handled properly", {
             failure_index = 0,
             tracker = 0,
             sample_ids = function() {
-                self$tracker = self$tracker + 1
+                self$tracker <- self$tracker + 1
                 if (self$tracker %in% self$failure_index) {
                     return(c("1", "2"))
                 }
                 super$sample_ids()
             },
             set_failed_sample_index = function(x) {
-                self$tracker = 0
-                self$failure_index = x
+                self$tracker <- 0
+                self$failure_index <- x
             }
         )
     )
@@ -284,11 +291,27 @@ test_that("Failure is handled properly", {
     ld$set_strategies(dat_ice)
 
 
+
+
+
     ##################
     #
     # Bootstrap - 1 core
     #
 
+    # Explanation for how these tests work (its the same for the next 3)
+    # target samples = 10
+    # failure threshold = 50%
+    # therefore max number of samples = 15
+    # thus 15 sets of random IDs are entered onto stack to be popped off
+    # We then overwrite the first 4 entries of stack to ensure that an error gets
+    # thrown
+    # We also create a superclass of longdata that keeps track of how many times
+    # `sample_ids` gets called
+    # `ld$sample_ids` will be called 15 times by the stack generated to create the stack
+    # After running the stack should have 1 element left 15 - 4 failed draws - 10 correct
+    # draws = 1 left over unused entry
+    plan(sequential)
     method <- method_approxbayes(n_samples = 10, threshold = 0.5)
     ld$set_failed_sample_index(seq_len(4))
     stack <- get_bootstrap_stack(ld, method)
@@ -298,7 +321,6 @@ test_that("Failure is handled properly", {
         n_target_samples = method$n_samples,
         failure_limit = (method$threshold * method$n_samples),
         use_samp_ids = FALSE,
-        ncores = 1,
         first_sample_orig = FALSE,
         quiet = TRUE,
         sample_stack = stack
@@ -308,9 +330,15 @@ test_that("Failure is handled properly", {
     expect_length(stack$stack, 1)
 
 
-
-    method <- method_approxbayes(n_samples = 10, threshold = 0.3)
-    ld$set_failed_sample_index(2:5)
+    plan(sequential)
+    # threshold of 0.5 * 10 = 5 e.g. program should abort after 6 failed iterations
+    # We setup longdata such that the first entry works but then all others fail
+    # Thus stack starts with 15 entries
+    #    - 1 for the first sucsesful run
+    #    - 6 for all the failures before an error is thrown
+    #  = 8 remaining entries
+    method <- method_approxbayes(n_samples = 10, threshold = 0.5)
+    ld$set_failed_sample_index(2:100)
     stack <- get_bootstrap_stack(ld, method)
     expect_error(
         get_draws_mle(
@@ -319,13 +347,13 @@ test_that("Failure is handled properly", {
             n_target_samples = method$n_samples,
             failure_limit = (method$threshold * method$n_samples),
             use_samp_ids = FALSE,
-            ncores = 1,
             quiet = TRUE,
             first_sample_orig = FALSE,
             sample_stack = stack
-        )
+        ),
+        regexp = "More than 5 failed fits"
     )
-    expect_equal(ld$tracker, 13)
+    expect_equal(ld$tracker, 15)
     expect_length(stack$stack, 8)
 
 
@@ -335,8 +363,17 @@ test_that("Failure is handled properly", {
     # Bootstrap - 2 core
     #
 
-    method <- method_approxbayes(n_samples = 10, threshold = 0.5)
-    ld$set_failed_sample_index(seq_len(4))
+    # Same as before but the parllelisation code runs 4
+    # attempts at a time in each worker before checking for failures
+    # Setting it so the first 9 entries fail we would get
+    # Round 0 -    0 pass 0 fail  30 stack
+    # Round 1 -    0 pass 8 fail  22 stack
+    # Round 2 -    7 pass 9 fail  14 stack
+    # Round 3 -   15 pass 9 fail   6 stack
+    # Round 4 -   20 pass 9 fail   1 stack (only 5 pulled as we only need 5 more samples)
+    plan(multisession, workers = 2)
+    method <- method_approxbayes(n_samples = 20, threshold = 0.5)
+    ld$set_failed_sample_index(1:9)
     stack <- get_bootstrap_stack(ld, method)
     x <- get_draws_mle(
         longdata = ld,
@@ -344,20 +381,27 @@ test_that("Failure is handled properly", {
         n_target_samples = method$n_samples,
         failure_limit = (method$threshold * method$n_samples),
         use_samp_ids = FALSE,
-        ncores = 2,
         quiet = TRUE,
         first_sample_orig = FALSE,
         sample_stack = stack
     )
-    expect_equal(x$n_failures, 4)
-    expect_equal(ld$tracker, 15)
+    expect_equal(x$n_failures, 9)
+    expect_equal(ld$tracker, 30)
     expect_length(stack$stack, 1)
+    plan(sequential)
 
 
 
-
-    method <- method_approxbayes(n_samples = 10, threshold = 0.3)
-    ld$set_failed_sample_index(2:5)
+    # Same as before but the parllelisation code runs 4
+    # attempts at a time in each worker before checking for failures
+    # Setting it so the first 3 pass and then all else fail we get
+    # Round 0 -    0 pass  0 fail  30 stack
+    # Round 1 -    3 pass  5 fail  22 stack
+    # Round 2 -    3 pass 13 fail  14 stack
+    # Errror is then thrown as (n-fail = 13) > (20 * 50% = 10)
+    plan(multisession, workers = 2)
+    method <- method_approxbayes(n_samples = 20, threshold = 0.5)
+    ld$set_failed_sample_index(4:2000)
     stack <- get_bootstrap_stack(ld, method)
     expect_error(
         get_draws_mle(
@@ -366,14 +410,15 @@ test_that("Failure is handled properly", {
             n_target_samples = method$n_samples,
             failure_limit = (method$threshold * method$n_samples),
             use_samp_ids = FALSE,
-            ncores = 2,
             quiet = TRUE,
             first_sample_orig = FALSE,
             sample_stack = stack
-        )
+        ),
+        regexp = "More than 10 failed fits"
     )
-    expect_equal(ld$tracker, 13)
-    expect_length(stack$stack, 13 - 6)
+    expect_equal(ld$tracker, 30)
+    expect_length(stack$stack, 14)
+    plan(sequential)
 
 
     ##################
@@ -381,6 +426,13 @@ test_that("Failure is handled properly", {
     # Jackknife - failures only
     #
 
+    # Note that the error message in these tests is a bit confusing
+    # to determine which subject has been removed the code simply compares
+    # the list of subjects in the sample vs the full list of subjects in the dataset
+    # if for some reason there is more than 1 (as in this test) it just prints
+    # the first subject who was missing e.g. subject "3" is the first missing
+    # subject in the next test in the failed samples
+    plan(sequential)
     method <- method_condmean(type = "jackknife")
     stack <- get_jackknife_stack(ld)
     for (i in 5:10) {
@@ -393,7 +445,6 @@ test_that("Failure is handled properly", {
             n_target_samples = length(ld$ids),
             failure_limit = 0,
             use_samp_ids = FALSE,
-            ncores = 1,
             first_sample_orig = FALSE,
             sample_stack = stack,
             quiet = TRUE
@@ -402,10 +453,18 @@ test_that("Failure is handled properly", {
     )
     expect_length(stack$stack, length(ld$ids) - 5)
 
-
+    #
+    # Jackknife should error if any of the models fail to fit
+    # Again though in parallel 4 * 2workers are run at a time before
+    # checking for errors. Here we configure it so the first 10 run fine
+    # and then all others fail
+    # Round 0 -     0 pass  0 fail  80 stack
+    # Round 1 -     8 pass  0 fail  72 stack
+    # Round 2 -    10 pass  6 fail  64 stack
+    plan(multisession, workers = 2)
     method <- method_condmean(type = "jackknife")
     stack <- get_jackknife_stack(ld)
-    for (i in 5:10) {
+    for (i in 10:30) {
         stack$stack[[i]] <- c("1", "2", "3")
     }
     expect_error(
@@ -415,14 +474,13 @@ test_that("Failure is handled properly", {
             n_target_samples = length(ld$ids),
             failure_limit = 0,
             use_samp_ids = FALSE,
-            ncores = 2,
             first_sample_orig = FALSE,
             sample_stack = stack,
             quiet = TRUE
         ),
         regex = "after removing subject '4'"
     )
-    expect_length(stack$stack, length(ld$ids) - 6)
+    expect_length(stack$stack, 64)
 
 })
 
@@ -432,6 +490,7 @@ test_that("Failure is handled properly", {
 
 
 test_that("draws is calling get_mmrm_sample properly", {
+    plan(sequential)
     bign <- 75
     sigma <- as_vcov(
         c(2, 1, 0.7),
@@ -542,7 +601,7 @@ test_that("draws is calling get_mmrm_sample properly", {
 
 
 test_that("draws.bmlmi works as expected", {
-
+    plan(sequential)
     set.seed(3812)
     bign <- 120
     sigma <- as_vcov(
@@ -576,15 +635,16 @@ test_that("draws.bmlmi works as expected", {
         covariates = c("age", "sex", "visit * group")
     )
 
+    plan(multisession, workers = 2)
     set.seed(3013)
     x1 <- draws(
         quiet = TRUE,
         dat,
         dat_ice,
         vars,
-        method = method_bmlmi(B = 6),
-        ncores = 2
+        method = method_bmlmi(B = 6)
     )
+    plan(sequential)
 
     set.seed(3013)
     x2 <- draws(
@@ -618,7 +678,7 @@ test_that("draws.bmlmi works as expected", {
 
 
 test_that("quiet suppress progress messages", {
-
+    plan(sequential)
     bign <- 90
     sigma <- as_vcov(
         c(2, 1, 0.7),
@@ -676,6 +736,3 @@ test_that("quiet suppress progress messages", {
     })
     expect_true(length(x) == 0 & is.character(x))
 })
-
-
-

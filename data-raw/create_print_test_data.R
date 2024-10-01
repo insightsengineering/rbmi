@@ -249,7 +249,6 @@ set.seed(2413)
 dobj <- get_data(40)
 
 drawobj_bml <- draws(
-    ncores = 1,
     data = dobj$dat,
     data_ice = dobj$dat_ice,
     vars = dobj$vars,

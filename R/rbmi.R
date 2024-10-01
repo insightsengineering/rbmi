@@ -17,4 +17,6 @@
 #'
 #' @keywords internal
 #' @importFrom assertthat  assert_that
+#' @import future
+#' @import future.apply
 "_PACKAGE"

@@ -10,6 +10,7 @@ have just occurred.
 Every time \code{step} * 100 \% of iterations have occurred a message is printed to the console.
 Use the \code{quiet} argument to prevent the object from printing anything at all
 }
+\keyword{internal}
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{

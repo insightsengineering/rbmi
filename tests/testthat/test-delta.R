@@ -243,7 +243,7 @@ test_that("apply_delta", {
 
 
 test_that("extract_imputed_dfs + delta", {
-
+    plan(sequential)
     set.seed(301)
     sigma <- as_vcov(c(6, 4, 4), c(0.5, 0.2, 0.3))
     dat <- get_sim_data(50, sigma)
@@ -265,9 +265,9 @@ test_that("extract_imputed_dfs + delta", {
     )
 
     dobj <- draws(
-        dat, 
+        dat,
         dat_ice,
-        vars = vars, 
+        vars = vars,
         method = method_approxbayes(n_samples = 5),
         quiet = TRUE
     )

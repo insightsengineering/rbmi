@@ -1,6 +1,7 @@
 suppressPackageStartupMessages({
     library(dplyr)
     library(tidyr)
+    library(future)
 })
 
 
@@ -95,8 +96,8 @@ test_that("print - approx bayes", {
 
 test_that("print - bayesian", {
     set.seed(413)
+    plan(sequential)
     dobj <- test_print_get_data(40)
-
     suppressWarnings({
         drawobj_b <- draws(
             data = dobj$dat,
@@ -137,6 +138,7 @@ test_that("print - bayesian", {
 
 test_that("print - condmean bootstrap", {
     set.seed(313)
+    plan(sequential)
     dobj <- test_print_get_data(40)
 
     drawobj_cmb <- draws(
@@ -183,6 +185,7 @@ test_that("print - condmean bootstrap", {
 
 test_that("print - condmean jackknife", {
     set.seed(89513)
+    plan(sequential)
     dobj <- test_print_get_data(35)
     drawobj_cmj <- draws(
         data = dobj$dat,
@@ -221,10 +224,10 @@ test_that("print - condmean jackknife", {
 
 test_that("print - bmlmi", {
     set.seed(2413)
+    plan(sequential)
     dobj <- test_print_get_data(40)
 
     drawobj_bml <- draws(
-        ncores = 1,
         data = dobj$dat,
         data_ice = dobj$dat_ice,
         vars = dobj$vars,

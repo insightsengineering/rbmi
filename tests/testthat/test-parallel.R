@@ -1,12 +1,13 @@
 suppressPackageStartupMessages({
     library(dplyr)
+    library(future)
 })
 
 
 test_that("Parallisation works as expected", {
 
     skip_if_not(is_full_test())
-
+    plan(sequential)
     bign <- 150
     sigma <- as_vcov(
         c(2, 1, 0.7, 3, 4),
@@ -46,19 +47,20 @@ test_that("Parallisation works as expected", {
     #  Potential Unit tests
     #
 
-    test_parallel <- function(method, ncores = 2) {
+    test_parallel <- function(method, n_node = 2) {
         set.seed(101)
+        plan(sequential)
         time_1_core <- time_it({
             results_1 <- draws(
                 data = dat,
                 data_ice = dat_ice,
                 vars = vars,
                 method = method,
-                ncores = 1,
                 quiet = TRUE
             )
         })
 
+        plan(multisession, workers = n_node)
         set.seed(101)
         time_2_core <- time_it({
             results_2 <- draws(
@@ -66,16 +68,16 @@ test_that("Parallisation works as expected", {
                 data_ice = dat_ice,
                 vars = vars,
                 method = method,
-                ncores = ncores,
                 quiet = TRUE
             )
         })
+        plan(sequential)
 
         results_1$formula <- x ~ a + b + c + d
         results_2$formula <- x ~ a + b + c + d
-        
+
         # Test is currently disabled as for some reason there is no performance gains
-        # when run on github actions, this test appears to run fine everywhere 
+        # when run on github actions, this test appears to run fine everywhere
         # else though...
         # expect_true(time_1_core > (time_2_core * 1.3))
         expect_equal(results_1, results_2)
@@ -97,8 +99,9 @@ test_that("Parallisation works as expected", {
 })
 
 
-test_that("Basic parallisation works as expected", {
+test_that("Basic parallisation is reproducible", {
     set.seed(3812)
+    plan(sequential)
     bign <- 100
     sigma <- as_vcov(
         c(2, 1, 0.7),
@@ -131,30 +134,39 @@ test_that("Basic parallisation works as expected", {
     )
 
     set.seed(3013)
+    plan(sequential)
     x1 <- draws(
         quiet = TRUE,
         dat,
         dat_ice,
         vars,
-        method = method_approxbayes(n_samples = 10)
+        method = method_approxbayes(n_samples = 15)
     )
 
     set.seed(3013)
+    plan(multisession, workers = 2)
     x2 <- draws(
         quiet = TRUE,
         dat,
         dat_ice,
         vars,
-        ncores = 2,
-        method = method_approxbayes(n_samples = 10)
+        method = method_approxbayes(n_samples = 15)
     )
 
-    # Tolerance is set here to address mmrm issue where the first optimiser fails when run
-    # in parallel and moves onto the second optimiser, where as in sequence the first
-    # optimiser works fine. i.e. results are slightly different due to different optimisers
-    # being used
-    # https://github.com/openpharma/mmrm/issues/151
+    set.seed(11122)
+    plan(multisession, workers = 2)
+    x3 <- draws(
+        quiet = TRUE,
+        dat,
+        dat_ice,
+        vars,
+        method = method_approxbayes(n_samples = 15)
+    )
+    plan(sequential)
+
     expect_equal(x1, x2, tolerance = 0.0001)
+    expect_true(identical(x1$samples, x2$samples))
+    expect_false(identical(x1$samples, x3$samples))
 
 })
 
@@ -166,21 +178,21 @@ test_that("Basic parallisation works as expected", {
 # method <- method_approxbayes(n_samples = 20)
 # method <- method_condmean(n_samples = 80)
 # method <- method_condmean(type = "jackknife")
+# plan(sequential)
 # time_it({
 #     results_2 <- draws(
 #         data = dat,
 #         data_ice = dat_ice,
 #         vars = vars,
-#         method = method,
-#         ncores = 1
+#         method = method
 #     )
 # })
+# plan(multisession, workers = 2)
 # time_it({
 #     results_2 <- draws(
 #         data = dat,
 #         data_ice = dat_ice,
 #         vars = vars,
-#         method = method,
-#         ncores = 2
+#         method = method
 #     )
 # })

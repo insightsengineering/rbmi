@@ -63,6 +63,7 @@ library(rbmi)
 library(dplyr)
 library(ggplot2)
 library(purrr)
+library(future)
 
 set.seed(122)
 
@@ -201,13 +202,13 @@ method <- method_approxbayes(n_sample = 20)
 We can now sequentially call the 4 key functions of `rbmi` to perform the multiple imputation. Please note that the management of observed post-ICE data is performed without additional complexity for the user. `draws()` automatically excludes post-ICE data handled with a reference-based method (but keeps post-ICE data handled using MAR) using information provided by the argument `data_ice`. `impute()` will impute only truly missing data in `data[[vars$outcome]]`.
 
 ```{r}
+plan(multisession, workers = 2)
 draw_obj <- draws(
     data = data,
     data_ice = data_ice_CIR,
     vars = vars,
     method = method,
-    quiet = TRUE,
-    ncores = 2
+    quiet = TRUE
 )
 
 impute_obj_CIR <- impute(

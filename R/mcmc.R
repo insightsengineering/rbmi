@@ -332,9 +332,9 @@ check_ESS <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
 check_hmc_diagn <- function(stan_fit) {
 
     if (
-        any(rstan::get_divergent_iterations(stan_fit)) | # draws "out of the distribution"
-        isTRUE(rstan::get_bfmi(stan_fit) < 0.2) | # exploring well the target distribution
-        any(rstan::get_max_treedepth_iterations(stan_fit)) # efficiency of the algorithm
+        any(rstan::get_divergent_iterations(stan_fit)) ||      # draws "out of the distribution"
+            isTRUE(rstan::get_bfmi(stan_fit) < 0.2) ||         # exploring well the target distribution
+            any(rstan::get_max_treedepth_iterations(stan_fit)) # efficiency of the algorithm
     ) {
         warning(
             "Lack of efficiency in the HMC sampler: please consider increasing the burn-in period.",

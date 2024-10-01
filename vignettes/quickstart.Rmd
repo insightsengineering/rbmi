@@ -58,7 +58,7 @@ We consider an imputation model with the mean change from baseline in the HAMD17
 # Use expand_locf to add rows corresponding to visits with missing outcomes to the dataset
 dat <- expand_locf(
     dat,
-    PATIENT = levels(dat$PATIENT), # expand by PATIENT and VISIT 
+    PATIENT = levels(dat$PATIENT), # expand by PATIENT and VISIT
     VISIT = levels(dat$VISIT),
     vars = c("BASVAL", "THERAPY"), # fill with LOCF BASVAL and THERAPY
     group = c("PATIENT"),
@@ -86,19 +86,19 @@ and that 150 multiple imputed datasets using Bayesian posterior draws from the i
 ```{r}
 # create data_ice and set the imputation strategy to JR for
 # each patient with at least one missing observation
-dat_ice <- dat %>% 
-    arrange(PATIENT, VISIT) %>% 
-    filter(is.na(CHANGE)) %>% 
-    group_by(PATIENT) %>% 
+dat_ice <- dat %>%
+    arrange(PATIENT, VISIT) %>%
+    filter(is.na(CHANGE)) %>%
+    group_by(PATIENT) %>%
     slice(1) %>%
-    ungroup() %>% 
-    select(PATIENT, VISIT) %>% 
+    ungroup() %>%
+    select(PATIENT, VISIT) %>%
     mutate(strategy = "JR")
 
 # In this dataset, subject 3618 has an intermittent missing values which does not correspond
-# to a study drug discontinuation. We therefore remove this subject from `dat_ice`. 
+# to a study drug discontinuation. We therefore remove this subject from `dat_ice`.
 # (In the later imputation step, it will automatically be imputed under the default MAR assumption.)
-dat_ice <- dat_ice[-which(dat_ice$PATIENT == 3618),]
+dat_ice <- dat_ice[-which(dat_ice$PATIENT == 3618), ]
 
 dat_ice
 
@@ -113,7 +113,7 @@ vars <- set_vars(
     covariates = c("BASVAL*VISIT", "THERAPY*VISIT")
 )
 
-# Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets) 
+# Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets)
 method <- method_bayes(
     burn_in = 200,
     burn_between = 5,
@@ -238,10 +238,10 @@ which were missing in the original dataset) in the drug arm. That could then be 
 delta_template(imputeObj) %>% as_tibble()
 
 delta_df <- delta_template(imputeObj) %>%
-    as_tibble() %>% 
-    mutate(delta = if_else(THERAPY == "DRUG" & is_missing , 5, 0)) %>% 
+    as_tibble() %>%
+    mutate(delta = if_else(THERAPY == "DRUG" & is_missing, 5, 0)) %>%
     select(PATIENT, VISIT, delta)
-    
+
 delta_df
 
 anaObj_delta <- analyse(
@@ -276,8 +276,8 @@ Since we have used Bayesian multiple imputation in this vignette, the `pool()` f
 
 ```{r}
 poolObj <- pool(
-    anaObj, 
-    conf.level = 0.95, 
+    anaObj,
+    conf.level = 0.95,
     alternative = "two.sided"
 )
 poolObj
@@ -290,7 +290,7 @@ as.data.frame(poolObj)
 ```
 
 These outputs gives an estimated difference of 
-`r paste(formatC(poolObj$pars$trt_7$est,format="f",digits=3)," (95% CI ", 
+`r paste(formatC(poolObj$pars$trt_7$est,format="f",digits=3)," (95% CI ",
          formatC(poolObj$pars$trt_7$ci[1],format="f",digits=3), " to ",
          formatC(poolObj$pars$trt_7$ci[2],format="f",digits=3),")",sep="")`
 between the two groups at the last visit with an associated p-value of `r formatC(poolObj$pars$trt_7$pval,format="f",digits=3)`.
@@ -309,7 +309,7 @@ dat <- antidepressant_data
 # Use expand_locf to add rows corresponding to visits with missing outcomes to the dataset
 dat <- expand_locf(
     dat,
-    PATIENT = levels(dat$PATIENT), # expand by PATIENT and VISIT 
+    PATIENT = levels(dat$PATIENT), # expand by PATIENT and VISIT
     VISIT = levels(dat$VISIT),
     vars = c("BASVAL", "THERAPY"), # fill with LOCF BASVAL and THERAPY
     group = c("PATIENT"),
@@ -318,19 +318,19 @@ dat <- expand_locf(
 
 # Create data_ice and set the imputation strategy to JR for
 # each patient with at least one missing observation
-dat_ice <- dat %>% 
-    arrange(PATIENT, VISIT) %>% 
-    filter(is.na(CHANGE)) %>% 
-    group_by(PATIENT) %>% 
+dat_ice <- dat %>%
+    arrange(PATIENT, VISIT) %>%
+    filter(is.na(CHANGE)) %>%
+    group_by(PATIENT) %>%
     slice(1) %>%
-    ungroup() %>% 
-    select(PATIENT, VISIT) %>% 
+    ungroup() %>%
+    select(PATIENT, VISIT) %>%
     mutate(strategy = "JR")
 
 # In this dataset, subject 3618 has an intermittent missing values which does not correspond
-# to a study drug discontinuation. We therefore remove this subject from `dat_ice`. 
+# to a study drug discontinuation. We therefore remove this subject from `dat_ice`.
 # (In the later imputation step, it will automatically be imputed under the default MAR assumption.)
-dat_ice <- dat_ice[-which(dat_ice$PATIENT == 3618),]
+dat_ice <- dat_ice[-which(dat_ice$PATIENT == 3618), ]
 
 # Define the names of key variables in our dataset using `set_vars()`
 # and the covariates included in the imputation model
@@ -343,7 +343,7 @@ vars <- set_vars(
     covariates = c("BASVAL*VISIT", "THERAPY*VISIT")
 )
 
-# Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets) 
+# Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets)
 method <- method_bayes(
     burn_in = 200,
     burn_between = 5,
@@ -386,8 +386,8 @@ anaObj <- analyse(
 # Add a delta-value of 5 to all imputed values (i.e. those values
 # which were missing in the original dataset) in the drug arm.
 delta_df <- delta_template(imputeObj) %>%
-    as_tibble() %>% 
-    mutate(delta = if_else(THERAPY == "DRUG" & is_missing , 5, 0)) %>% 
+    as_tibble() %>%
+    mutate(delta = if_else(THERAPY == "DRUG" & is_missing, 5, 0)) %>%
     select(PATIENT, VISIT, delta)
 
 # Repeat the analyses with the adjusted values
@@ -406,8 +406,8 @@ anaObj_delta <- analyse(
 
 # Pool the results
 poolObj <- pool(
-    anaObj, 
-    conf.level = 0.95, 
+    anaObj,
+    conf.level = 0.95,
     alternative = "two.sided"
 )
 ```
@@ -417,10 +417,17 @@ poolObj <- pool(
 library(future)
 library(lubridate)
 some_fun <- function(data) {
-    Sys.sleep(.5)
+    xx <- 1
     as_datetime(2)
-    NULL
+    function(data) {
+        if (xx != 1) {
+            stop("its not 1")
+        }
+        xx <<- 2
+        NULL
+    }
 }
+some_fun2 <- some_fun()
 
 my_fun <- function(
     data,
@@ -428,42 +435,40 @@ my_fun <- function(
     visits = NULL,
     weights = c("counterfactual", "equal", "proportional_em", "proportional")
 ) {
-    some_fun(data)    
+    some_fun2(data)
     ancova(data, vars, visits, weights)
 }
 plan("multisession", workers = 4)
 system.time({
-anaObj_par <- analyse(
-    imputeObj,
-    my_fun,
-    vars = set_vars(
-        subjid = "PATIENT",
-        outcome = "CHANGE",
-        visit = "VISIT",
-        group = "THERAPY",
-        covariates = c("BASVAL")
+    anaObj_par <- analyse(
+        imputeObj,
+        my_fun,
+        vars = set_vars(
+            subjid = "PATIENT",
+            outcome = "CHANGE",
+            visit = "VISIT",
+            group = "THERAPY",
+            covariates = c("BASVAL")
+        )
     )
-)
-anaObj_par
+    anaObj_par
 })
 
 plan("sequential")
 system.time({
-anaObj_seq <- analyse(
-    imputeObj,
-    my_fun,
-    vars = set_vars(
-        subjid = "PATIENT",
-        outcome = "CHANGE",
-        visit = "VISIT",
-        group = "THERAPY",
-        covariates = c("BASVAL")
+    anaObj_seq <- analyse(
+        imputeObj,
+        my_fun,
+        vars = set_vars(
+            subjid = "PATIENT",
+            outcome = "CHANGE",
+            visit = "VISIT",
+            group = "THERAPY",
+            covariates = c("BASVAL")
+        )
     )
-)
-anaObj_seq
+    anaObj_seq
 })
 
 identical(anaObj_par, anaObj_seq)
-
 ```
-

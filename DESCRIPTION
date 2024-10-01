@@ -47,6 +47,7 @@ Imports:
     rstantools (>= 2.1.1),
     R6,
     assertthat,
+    future,
     future.apply
 LinkingTo: 
     BH (>= 1.66.0),

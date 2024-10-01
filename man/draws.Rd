@@ -8,13 +8,13 @@
 \alias{draws.bayes}
 \title{Fit the base imputation model and get parameter estimates}
 \usage{
-draws(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE)
+draws(data, data_ice = NULL, vars, method, ncores = NULL, quiet = FALSE)
 
-\method{draws}{approxbayes}(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE)
+\method{draws}{approxbayes}(data, data_ice = NULL, vars, method, ncores = NULL, quiet = FALSE)
 
-\method{draws}{condmean}(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE)
+\method{draws}{condmean}(data, data_ice = NULL, vars, method, ncores = NULL, quiet = FALSE)
 
-\method{draws}{bmlmi}(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE)
+\method{draws}{bmlmi}(data, data_ice = NULL, vars, method, ncores = NULL, quiet = FALSE)
 
 \method{draws}{bayes}(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE)
 }
@@ -30,8 +30,8 @@ to the ICEs and the imputation strategies. See details.}
 \code{\link[=method_approxbayes]{method_approxbayes()}}, \code{\link[=method_condmean]{method_condmean()}} or \code{\link[=method_bmlmi]{method_bmlmi()}}.
 It specifies the multiple imputation methodology to be used. See details.}
 
-\item{ncores}{A single numeric specifying the number of cores to use in creating the draws object.
-Note that this parameter is ignored for \code{\link[=method_bayes]{method_bayes()}} (Default = 1).}
+\item{ncores}{Deprecated. Use \code{future::plan()} instead. Please see \code{vignette("TODO")} for more
+details.}
 
 \item{quiet}{Logical, if \code{TRUE} will suppress printing of progress information that is printed to
 the console.}

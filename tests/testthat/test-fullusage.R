@@ -4,11 +4,8 @@ suppressPackageStartupMessages({
     library(dplyr)
     library(testthat)
     library(tibble)
+    library(future)
 })
-
-# Sys.setenv("R_TEST_FULL" = TRUE)
-# NCORES <- 6
-NCORES <- 2
 
 
 bign <- 700
@@ -42,7 +39,7 @@ expect_pool_est <- function(po, expected, param = "trt_visit_3") {
 test_that("Basic Usage - Approx Bayes", {
 
     skip_if_not(is_full_test())
-
+    plan(sequential)
     set.seed(1512)
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
@@ -70,14 +67,15 @@ test_that("Basic Usage - Approx Bayes", {
         covariates = c("age", "sex", "visit * group")
     )
 
+    plan(multisession, workers = 2)
     drawobj <- draws(
         data = dat,
         data_ice = dat_ice,
         vars = vars,
         method = method_approxbayes(n_samples = nsamp),
-        quiet = TRUE,
-        ncores = NCORES
+        quiet = TRUE
     )
+    plan(sequential)
 
     imputeobj <- impute(
         draws = drawobj,
@@ -116,7 +114,7 @@ test_that("Basic Usage - Approx Bayes", {
 test_that("Basic Usage - Bayesian", {
 
     skip_if_not(is_full_test())
-
+    plan(sequential)
     set.seed(5123)
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
@@ -144,14 +142,15 @@ test_that("Basic Usage - Bayesian", {
         covariates = c("age", "sex", "visit * group")
     )
 
+    plan(multisession, workers = 2)
     drawobj <- draws(
         data = dat,
         data_ice = dat_ice,
         vars = vars,
         method = method_bayes(n_samples = nsamp),
-        quiet = TRUE,
-        ncores = NCORES
+        quiet = TRUEplan(multisession, workers = 2)
     )
+    plan(sequential)
 
     ### Check to see if updating ice works and if it impacts the original values
     updated_ice <- dat_ice %>%
@@ -208,7 +207,7 @@ test_that("Basic Usage - Bayesian", {
 test_that("Basic Usage - Condmean", { 
 
     skip_if_not(is_full_test())
-
+    plan(sequential)
     set.seed(4642)
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
@@ -236,14 +235,15 @@ test_that("Basic Usage - Condmean", {
         covariates = c("age", "sex", "visit * group")
     )
 
+    plan(multisession, workers = 2)
     drawobj <- draws(
         data = dat,
         data_ice = dat_ice,
         vars = vars,
         method = method_condmean(n_samples = nsamp),
-        quiet = TRUE,
-        ncores = NCORES
+        quiet = TRUE
     )
+    plan(sequential)
 
     ### Check to see if updating ice works and if it impacts the original values
     updated_ice <- dat_ice %>%
@@ -299,7 +299,7 @@ test_that("Basic Usage - Condmean", {
 test_that("Custom Strategies and Custom analysis functions", {
 
     skip_if_not(is_full_test())
-
+    plan(sequential)
     set.seed(8368)
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
@@ -328,14 +328,15 @@ test_that("Custom Strategies and Custom analysis functions", {
     )
 
 
+    plan(multisession, workers = 2)
     drawobj <- draws(
         data = dat,
         data_ice = dat_ice,
         vars = vars,
         method = method_condmean(n_samples = nsamp),
-        quiet = TRUE,
-        ncores = NCORES
+        quiet = TRUE
     )
+    plan(sequential)
 
 
     imputeobj <- impute(
@@ -430,7 +431,7 @@ test_that("Custom Strategies and Custom analysis functions", {
 test_that("Sorting doesn't change results", {
 
     skip_if_not(is_full_test())
-
+    plan(sequential)
     set.seed(4642)
 
     dat <- get_sim_data(100, sigma, trt = 8) %>%
@@ -471,29 +472,31 @@ test_that("Sorting doesn't change results", {
 
     method <- method_condmean(n_samples = 10)
 
+    plan(multisession, workers = 2)
     set.seed(984)
     drawobj <- draws(
         data = dat,
         data_ice = dat_ice,
         vars = vars,
         method = method,
-        quiet = TRUE,
-        ncores = NCORES
+        quiet = TRUE
     )
+    plan(sequential)
     imputeobj <- impute( draws = drawobj, references = c("A" = "B", "B" = "B"))
     anaobj <- analyse( imputeobj, fun = rbmi::ancova, vars = vars2)
     poolobj <- pool(results = anaobj)
 
 
+    plan(multisession, workers = 2)
     set.seed(984)
     drawobj2 <- draws(
         data = dat2,
         data_ice = dat_ice_2,
         vars = vars,
         method = method,
-        quiet = TRUE,
-        ncores = NCORES
+        quiet = TRUE
     )
+    plan(sequential)
     imputeobj2 <- impute( draws = drawobj2, references = c("A" = "B", "B" = "B"))
     anaobj2 <- analyse( imputeobj2, fun = rbmi::ancova, vars = vars2)
     poolobj2 <- pool(results = anaobj2)
@@ -519,7 +522,7 @@ test_that("Sorting doesn't change results", {
 test_that("Multiple imputation references / groups work as expected (end to end checks)", {
 
     skip_if_not(is_full_test())
-
+    plan(sequential)
     extract_ci <- function(x, ref) {
         x_imp <- impute(x, ref)
         vars2 <- x$data$vars
@@ -625,6 +628,7 @@ test_that("Multiple imputation references / groups work as expected (end to end 
     )
 
 
+    plan(multisession, workers = 2)
     x <- draws(
         data = dat,
         quiet = TRUE,
@@ -633,9 +637,9 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         method = method_condmean(
             same_cov = TRUE,
             n_samples = 80
-        ),
-        ncores = NCORES
+        )
     )
+    plan(sequantial)
 
     expect_true(
         length(x$samples[[1]]$sigma) == 4
@@ -679,7 +683,7 @@ test_that("Multiple imputation references / groups work as expected (end to end 
 test_that("rbmi works for one arm trials", {
 
     skip_if_not(is_full_test())
-
+    plan(sequential)
     # ancova cannot be applied for 1 arm trial. Use a custom analysis function
     myanalysis <- function(data, ...) {
 
@@ -738,15 +742,16 @@ test_that("rbmi works for one arm trials", {
         mutate(strategy = "MAR")
 
     runtest <- function(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method) {
-        
+
+        plan(multisession, workers = 2)
         draw_obj <- draws(
             data = dat,
             data_ice = dat_ice,
             vars = vars,
             method = method,
-            ncores = NCORES,
             quiet = TRUE
         )
+        plan(sequential)
 
         expect_error(
             draws(
@@ -827,7 +832,7 @@ test_that("rbmi works for one arm trials", {
 
 
 test_that("Three arms trial runs smoothly and gives expected results", {
-
+    plan(sequential)
     copy_group <- function(dat, name_group) {
         datC <- dat[dat$group == name_group,]
         datC$group <- "C"

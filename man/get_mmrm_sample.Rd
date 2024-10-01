@@ -29,3 +29,4 @@ A named list of class \code{sample_single}. It contains the following:
 \code{get_mmrm_sample} fits the base imputation model using a ML/REML approach.
 Returns the parameter estimates from the fit.
 }
+\keyword{internal}

@@ -142,7 +142,7 @@ test_that("Basic Usage", {
 
 
 test_that("`references` is handled as expected", {
-
+    plan(sequential)
     set.seed(123)
     n <- 8
     nv <- 3

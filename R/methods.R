@@ -42,7 +42,8 @@
 #' likelihood.
 #'
 #' @param type a character string that specifies the resampling method used to perform inference
-#' when a conditional mean imputation approach (set via `method_condmean()`) is used. Must be one of `"bootstrap"` or `"jackknife"`.
+#' when a conditional mean imputation approach (set via `method_condmean()`) is used. Must be one
+#' of `"bootstrap"` or `"jackknife"`.
 #'
 #' @param seed a numeric that specifies the seed to be used in the call to Stan. This
 #' argument is passed onto the `seed` argument of [rstan::sampling()]. Note that
@@ -166,7 +167,7 @@ method_condmean <- function(
     if (type == "bootstrap") {
         x$n_samples <- n_samples
     }
-    
+
     return(as_class(x, c("method", "condmean")))
 }
 

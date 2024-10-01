@@ -1,10 +1,11 @@
 
 suppressPackageStartupMessages({
     library(dplyr)
+    library(future)
 })
 
 
-test_that("basic constructions of `analysis` work as expected",{
+test_that("basic constructions of `analysis` work as expected", {
 
     oldopt <- getOption("warnPartialMatchDollar")
     options(warnPartialMatchDollar = TRUE)
