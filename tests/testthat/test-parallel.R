@@ -312,4 +312,16 @@ test_that("parallelisation of analyse() works as expected", {
         )
     })
 
+    # Check that manual library / global specification works if using rbmi function
+    system.time({
+        plan(multisession, workers = 2)
+        ana_obj_2 <- analyse(
+            impute_obj,
+            fun = ancova,
+            vars = new_vars,
+            .globals = c("ancova"),
+            .packages = "lubridate"
+        )
+    })
+
 })

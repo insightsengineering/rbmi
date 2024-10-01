@@ -185,9 +185,6 @@ analyse <- function(imputations, fun = ancova, delta = NULL, ..., .globals = TRU
             "..rbmi..future..extract_imputed_df"
         )
     }
-    if (is.character(.packages)) {
-        c(.packages, "rbmi")
-    }
 
     encap_analysis_fun <- function(x, ...) {
         dat2 <- ..rbmi..future..extract_imputed_df(
