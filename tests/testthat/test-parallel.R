@@ -196,3 +196,104 @@ test_that("Basic parallisation is reproducible", {
 #         method = method
 #     )
 # })
+
+
+
+test_that("parallelisation of analyse() works as expected", {
+    set.seed(3812)
+    plan(sequential)
+    bign <- 100
+    sigma <- as_vcov(
+        c(2, 1, 0.7),
+        c(
+            0.3,
+            0.4, 0.2
+        )
+    )
+    dat <- get_sim_data(bign, sigma, trt = 8) %>%
+        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
+        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        select(-is_miss)
+
+    dat_ice <- dat %>%
+        group_by(id) %>%
+        arrange(id, visit) %>%
+        filter(is.na(outcome)) %>%
+        slice(1) %>%
+        ungroup() %>%
+        select(id, visit) %>%
+        mutate(strategy = "JR")
+
+    vars <- set_vars(
+        outcome = "outcome",
+        group = "group",
+        strategy = "strategy",
+        subjid = "id",
+        visit = "visit",
+        covariates = c("age", "sex", "visit * group")
+    )
+
+    set.seed(3013)
+    plan(sequential)
+    draw_obj <- draws(
+        quiet = TRUE,
+        dat,
+        dat_ice,
+        vars,
+        method = method_approxbayes(n_samples = 15)
+    )
+
+    impute_obj <- impute(
+        draw_obj,
+        references = c("A" = "B", "B" = "B")
+    )
+
+    new_vars <- set_vars(
+        subjid = "id",
+        outcome = "outcome",
+        visit = "visit",
+        group = "group",
+        covariates = c("sex", "age")
+    )
+
+    set.seed(1021)
+    system.time({
+        plan(sequential)
+        ana_obj_1 <- analyse(
+            impute_obj,
+            vars = new_vars
+        )
+    })
+
+    set.seed(1021)
+    system.time({
+        plan(multisession, workers = 2)
+        ana_obj_2 <- analyse(
+            impute_obj,
+            vars = new_vars
+        )
+    })
+
+    expect_equal(ana_obj_1, ana_obj_2)
+
+    library(lubridate)
+    my_a_fun <- function(...) {
+        zz <- days(3)
+        list(
+            "trt_visit_1" = list(
+                "est" = 10,
+                "df" = 1,
+                "se" = 2
+            )
+        )
+    }
+    system.time({
+        plan(multisession, workers = 2)
+        ana_obj_2 <- analyse(
+            impute_obj,
+            fun = my_a_fun,
+            .packages = c("lubridate")
+        )
+    })
+
+})
