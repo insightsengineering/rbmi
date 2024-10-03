@@ -212,12 +212,14 @@ analyse <- function(
 
     # Mangle name to avoid any conflicts with user defined objects if running
     # in a cluster
+    ..rbmi..analysis..imputations <- imputations
+    ..rbmi..analysis..delta <- delta
     ..rbmi..analysis..fun <- fun
     cl <- make_rbmi_cluster(
         ncores,
         objects = list(
-            "imputations" = imputations,
-            "delta" = delta,
+            "..rbmi..analysis..imputations" = imputations,
+            "..rbmi..analysis..delta" = delta,
             "..rbmi..analysis..fun" = fun
         )
     )
@@ -240,7 +242,11 @@ analyse <- function(
         cl,
         function(indicies, ...) {
             inner_fun <- function(idx, ...) {
-                dat2 <- extract_imputed_df(imputations$imputations[[idx]], imputations$data, delta)
+                dat2 <- extract_imputed_df(
+                    ..rbmi..analysis..imputations$imputations[[idx]],
+                    ..rbmi..analysis..imputations$data,
+                    ..rbmi..analysis..delta
+                )
                 ..rbmi..analysis..fun(dat2, ...)
             }
             lapply(indicies, inner_fun, ...)
