@@ -491,9 +491,12 @@ The same approach can be used to implement a tipping point analysis. Here, we ap
 
  
 ```{r fig.width=5, fig.height=4}
-perform_tipp_analysis <- function(delta_control, delta_intervention) {
 
-    # Derive delta offset based on control and intervention specific deltas    
+
+
+perform_tipp_analysis <- function(delta_control, delta_intervention, cl) {
+
+    # Derive delta offset based on control and intervention specific deltas
     delta_df <-  delta_df_init %>%
         mutate(
             delta_ctl = (group == "Control") * is_missing * delta_control,
@@ -506,6 +509,7 @@ perform_tipp_analysis <- function(delta_control, delta_intervention) {
         fun = compare_change_lastvisit,
         vars = vars_an,
         delta = delta_df,
+        ncores = cl
     )
 
     pool_delta <- as.data.frame(pool(ana_delta))
@@ -525,10 +529,12 @@ tipp_frame_grid <- expand.grid(
 ) %>%
     as_tibble()
 
+# parallelise to speed up computation
+cl <- make_rbmi_cluster(2)
 
 tipp_frame <- tipp_frame_grid %>%
     mutate(
-        results_list = map2(delta_control, delta_intervention, perform_tipp_analysis),
+        results_list = map2(delta_control, delta_intervention, perform_tipp_analysis, cl = cl),
         trt_effect_6 = map_dbl(results_list, "trt_effect_6"),
         pval_6 = map_dbl(results_list, "pval_6")
     ) %>%
@@ -541,6 +547,9 @@ tipp_frame <- tipp_frame_grid %>%
             labels = c("<0.001", "0.001 - <0.01", "0.01- <0.05", "0.05 - <0.20", ">= 0.20")
         )
     )
+
+# Close cluster when done with it
+parallel::stopCluster(cl)
 
 # Show delta values which lead to non-significant analysis results
 tipp_frame %>%
