@@ -30,7 +30,7 @@ is_cluster_closed <- function(cl) {
         stop("`cl` is not a cluster object")
     }
     result <- tryCatch({
-        clusterCall(cl1, function() Sys.info())
+        parallel::clusterCall(cl, function() Sys.info())
         FALSE
     }, error = function(e) {
         TRUE

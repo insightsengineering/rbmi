@@ -135,10 +135,20 @@ is_in_rbmi_development <- function() {
 #' @param x object to be looped over
 #' @param ... extra arguements passed to `fun`
 par_lapply <- function(cl, fun, x, ...) {
-    if (is.null(cl)) {
-        return(lapply(x, fun, ...))
+    result <- if (is.null(cl)) {
+        lapply(x, fun, ...)
     } else {
-        return(parallel::clusterApplyLB(cl, x, fun, ...))
+        parallel::clusterApplyLB(cl, x, fun, ...)
     }
+    return(result)
+}
+
+par_map2 <- function(cl, fun, x, y, ...) {
+    result <- if (is.null(cl)) {
+        mapply(fun, x, y, MoreArgs = list(...), SIMPLIFY = FALSE)
+    } else {
+        parallel::clusterMap(cl, fun, x, y, MoreArgs = list(...), SIMPLIFY = FALSE)
+    }
+    return(result)
 }
 

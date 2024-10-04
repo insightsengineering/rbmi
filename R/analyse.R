@@ -1,5 +1,13 @@
 
 
+time_it <- function(expr){
+    start <- Sys.time()
+    expr
+    stop <- Sys.time()
+    as.numeric(difftime(stop, start, units = "secs"))
+}
+
+
 
 
 #' Analyse Multiple Imputed Datasets
@@ -179,6 +187,7 @@ analyse <- function(
     ncores = 1
 ) {
 
+xx_startup <- system.time({
     validate(imputations)
 
     assert_that(
@@ -209,20 +218,51 @@ analyse <- function(
             )
         )
     }
+})
+print(sprintf("STARTUP = %f", xx_startup[[3]]))
+
+xx_data_prep <- system.time({
+
+    # ..rbmi..analysis..wrapup <- if (is(ncores, "cluster")) {
+    #     function(x, idx, folder) {
+    #         path <- file.path(
+    #             folder,
+    #             paste0("result_", sprintf("%012d", idx), ".Rds")
+    #         )
+    #         #saveRDS(x, path)
+    #         return(TRUE)
+    #     }
+    # } else {
+    #     function(x, ...) {
+    #         return(x)
+    #     }
+    # }
 
     # Mangle name to avoid any conflicts with user defined objects if running
     # in a cluster
-    ..rbmi..analysis..imputations <- imputations
-    ..rbmi..analysis..delta <- delta
-    ..rbmi..analysis..fun <- fun
-    cl <- make_rbmi_cluster(
-        ncores,
-        objects = list(
-            "..rbmi..analysis..imputations" = imputations,
-            "..rbmi..analysis..delta" = delta,
-            "..rbmi..analysis..fun" = fun
-        )
+    objects <- list(
+        ..rbmi..analysis..temppath = tempfile(),
+        ..rbmi..analysis..imputations = imputations,
+        ..rbmi..analysis..delta = delta,
+        ..rbmi..analysis..fun = fun
+        #..rbmi..analysis..wrapup = ..rbmi..analysis..wrapup
     )
+    list2env(objects, envir = environment())
+    cl <- make_rbmi_cluster(ncores)
+    if (is(ncores, "cluster")) {
+        ..rbmi..analysis..data..path <- file.path(tempdir(), "rbmi_data.Rds")
+        qs2::qs_save(objects, file = ..rbmi..analysis..data..path, compress = FALSE)
+        devnull <- parallel::clusterExport(cl, "..rbmi..analysis..data..path", environment())
+        devnull <- parallel::clusterEvalQ(
+            cl,
+            {
+                ..rbmi..analysis..objects <- qs2::qs_read(..rbmi..analysis..data..path)
+                list2env(..rbmi..analysis..objects, envir = environment())
+            }
+        )
+    }
+
+    dir.create(..rbmi..analysis..temppath, showWarnings = FALSE)
 
     # If the user provided the clusters object directly then do not close it on completion
     if (!is(ncores, "cluster")) {
@@ -232,15 +272,18 @@ analyse <- function(
             after = FALSE
         )
     }
+})
+print(sprintf("DATA PREP = %f", xx_data_prep[[3]]))
 
+xx_processing <- system.time({
     # Chunk up requests for significant speed improvement when running in parallel
     number_of_cores <- ifelse(is.null(cl), 1, length(cl))
     indexes <- seq_along(imputations$imputations)
     indexes_split <- split(indexes, (indexes %% number_of_cores) + 1)
 
-    results <- par_lapply(
+    results <- par_map2(
         cl,
-        function(indicies, ...) {
+        function(indicies, pid, ...) {
             inner_fun <- function(idx, ...) {
                 dat2 <- extract_imputed_df(
                     ..rbmi..analysis..imputations$imputations[[idx]],
@@ -249,14 +292,28 @@ analyse <- function(
                 )
                 ..rbmi..analysis..fun(dat2, ...)
             }
-            lapply(indicies, inner_fun, ...)
+            res <- lapply(indicies, inner_fun, ...)
+            #..rbmi..analysis..wrapup(res, pid, ..rbmi..analysis..temppath)
+            res
         },
         indexes_split,
+        seq_along(indexes_split),
         ...
     ) |>
         unlist(recursive = FALSE, use.names = FALSE)
 
-    # Reorder
+
+})
+print(sprintf("PROCESSING = %f", xx_processing[[3]]))
+
+xx_reaping <- system.time({
+    # if (is(cl, "cluster")) {
+    #     results <- lapply(
+    #         list.files(..rbmi..analysis..temppath, full.names = TRUE),
+    #         readRDS
+    #     ) |>
+    #         unlist(recursive = FALSE, use.names = FALSE)
+    # }
     results <- results[order(unlist(indexes_split, use.names = FALSE))]
     names(results) <- NULL
 
@@ -275,6 +332,8 @@ analyse <- function(
         method = imputations$method
     )
     validate(ret)
+})
+print(sprintf("REAPING = %f", xx_reaping[[3]]))
     return(ret)
 }
 
