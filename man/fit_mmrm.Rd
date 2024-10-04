@@ -10,7 +10,7 @@ fit_mmrm(
   subjid,
   visit,
   group,
-  cov_struct = c("us", "toep", "cs", "ar1"),
+  cov_struct = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
   REML = TRUE,
   same_cov = TRUE
 )
@@ -29,8 +29,8 @@ that belong to the same subject.}
 
 \item{group}{a character / factor vector. Indicates which treatment group the patient belongs to.}
 
-\item{cov_struct}{a character value. Specifies which covariance structure to use. Must be one of
-\code{"us"}, \code{"toep"}, \code{"cs"} or  \code{"ar1"}}
+\item{cov_struct}{a character value. Specifies which covariance structure to use. Must be one of \code{"us"} (default),
+\code{"ad"}, \code{"adh"}, \code{"ar1"}, \code{"ar1h"}, \code{"cs"}, \code{"csh"}, \code{"toep"}, or \code{"toeph"})}
 
 \item{REML}{logical. Specifies whether restricted maximum likelihood should be used}
 

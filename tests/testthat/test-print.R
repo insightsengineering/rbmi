@@ -67,7 +67,7 @@ test_that("print - approx bayes", {
             threshold = 0.5,
             same_cov = TRUE,
             REML = TRUE,
-            covariance = "ar"
+            covariance = "ar1"
         ),
         quiet = TRUE
     )
@@ -148,7 +148,7 @@ test_that("print - condmean bootstrap", {
             type = "bootstrap",
             same_cov = TRUE,
             REML = TRUE,
-            covariance = "ar"   # Partial completion of argument name
+            covariance = "ar1"   # Partial completion of argument name
         ),
         quiet = TRUE
     )

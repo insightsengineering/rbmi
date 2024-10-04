@@ -17,7 +17,7 @@ method_bayes(
 )
 
 method_approxbayes(
-  covariance = c("us", "toep", "cs", "ar1"),
+  covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
   threshold = 0.01,
   same_cov = TRUE,
   REML = TRUE,
@@ -25,7 +25,7 @@ method_approxbayes(
 )
 
 method_condmean(
-  covariance = c("us", "toep", "cs", "ar1"),
+  covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
   threshold = 0.01,
   same_cov = TRUE,
   REML = TRUE,
@@ -34,7 +34,7 @@ method_condmean(
 )
 
 method_bmlmi(
-  covariance = c("us", "toep", "cs", "ar1"),
+  covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
   threshold = 0.01,
   same_cov = TRUE,
   REML = TRUE,
@@ -64,8 +64,8 @@ must be set to \code{NULL}. See details.}
 \item{seed}{deprecated. Please use \code{set.seed()} instead.}
 
 \item{covariance}{a character string that specifies the structure of the covariance
-matrix to be used in the imputation model. Must be one of \code{"us"} (default), \code{"toep"},
-\code{"cs"} or \code{"ar1"}. See details.}
+matrix to be used in the imputation model. Must be one of \code{"us"} (default), \code{"ad"},
+\code{"adh"}, \code{"ar1"}, \code{"ar1h"}, \code{"cs"}, \code{"csh"}, \code{"toep"}, or \code{"toeph"}). See details.}
 
 \item{threshold}{a numeric between 0 and 1, specifies the proportion of bootstrap
 datasets that can fail to produce valid samples before an error is thrown.
@@ -97,11 +97,18 @@ represented by \code{n + 1} being displayed in the print message.
 The user is able to specify different covariance structures using the the \code{covariance}
 argument. Currently supported structures include:
 \itemize{
-\item Unstructured (\code{"us"})
+\item Unstructured (\code{"us"}) (default)
+\item Ante-dependence (\code{"ad"})
+\item Heterogeneous ante-dependence (\code{"adh"})
+\item First-order auto-regressive (\code{"ar1"})
+\item Heterogeneous first-order auto-regressive (\code{"ar1h"})
+\item Compound symmetry (\code{"cs"})
+\item Heterogeneous compound symmetry (\code{"csh"})
 \item Toeplitz (\code{"toep"})
-\item Compound Symmetry (\code{"cs"})
-\item Autoregression-1 (\code{"ar1"})
+\item Heterogeneous Toeplitz (\code{"toeph"})
 }
+
+For full details please see \code{\link[mmrm:covariance_types]{mmrm::cov_types()}}.
 
 Note that at present Bayesian methods only support unstructured.
 
