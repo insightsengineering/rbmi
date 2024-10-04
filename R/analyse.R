@@ -1,15 +1,4 @@
 
-
-time_it <- function(expr){
-    start <- Sys.time()
-    expr
-    stop <- Sys.time()
-    as.numeric(difftime(stop, start, units = "secs"))
-}
-
-
-
-
 #' Analyse Multiple Imputed Datasets
 #'
 #' @description
@@ -101,6 +90,9 @@ time_it <- function(expr){
 #' @param ... Additional arguments passed onto `fun`.
 #' @param ncores The number of parallel processes to use when running this function. Can also be a
 #' cluster object created by [`make_rbmi_cluster()`]. See the parallisation section below.
+#' @param .validate Should `inputations` be checked to ensure it conforms to the required format
+#' (default = `TRUE`) ? Can gain a small performance increase if this is set to `FALSE` when
+#' analysing a large number of samples.
 #'
 #' @section Parallelisation:
 #' To speed up the evaluation of `analyse()` you can use the `ncores` argument to enable parallelisation.
@@ -184,11 +176,11 @@ analyse <- function(
     fun = ancova,
     delta = NULL,
     ...,
-    ncores = 1
+    ncores = 1,
+    .validate = TRUE
 ) {
 
-xx_startup <- system.time({
-    validate(imputations)
+    if (.validate) validate(imputations)
 
     assert_that(
         is.function(fun),
@@ -202,7 +194,7 @@ xx_startup <- system.time({
 
     vars <- imputations$data$vars
 
-    devnull <- lapply(imputations$imputations, function(x) validate(x))
+    if (.validate) devnull <- lapply(imputations$imputations, function(x) validate(x))
 
     if (!is.null(delta)) {
         expected_vars <- c(
@@ -218,51 +210,29 @@ xx_startup <- system.time({
             )
         )
     }
-})
-print(sprintf("STARTUP = %f", xx_startup[[3]]))
 
-xx_data_prep <- system.time({
-
-    # ..rbmi..analysis..wrapup <- if (is(ncores, "cluster")) {
-    #     function(x, idx, folder) {
-    #         path <- file.path(
-    #             folder,
-    #             paste0("result_", sprintf("%012d", idx), ".Rds")
-    #         )
-    #         #saveRDS(x, path)
-    #         return(TRUE)
-    #     }
-    # } else {
-    #     function(x, ...) {
-    #         return(x)
-    #     }
-    # }
-
-    # Mangle name to avoid any conflicts with user defined objects if running
-    # in a cluster
+    # Mangle name to avoid any conflicts with user defined objects if running in a cluster
     objects <- list(
-        ..rbmi..analysis..temppath = tempfile(),
         ..rbmi..analysis..imputations = imputations,
         ..rbmi..analysis..delta = delta,
         ..rbmi..analysis..fun = fun
-        #..rbmi..analysis..wrapup = ..rbmi..analysis..wrapup
     )
     list2env(objects, envir = environment())
+
     cl <- make_rbmi_cluster(ncores)
-    if (is(ncores, "cluster")) {
-        ..rbmi..analysis..data..path <- file.path(tempdir(), "rbmi_data.Rds")
-        qs2::qs_save(objects, file = ..rbmi..analysis..data..path, compress = FALSE)
+
+    if (is(cl, "cluster")) {
+        ..rbmi..analysis..data..path <- tempfile()
+        saveRDS(objects, file = ..rbmi..analysis..data..path, compress = FALSE)
         devnull <- parallel::clusterExport(cl, "..rbmi..analysis..data..path", environment())
         devnull <- parallel::clusterEvalQ(
             cl,
             {
-                ..rbmi..analysis..objects <- qs2::qs_read(..rbmi..analysis..data..path)
+                ..rbmi..analysis..objects <- readRDS(..rbmi..analysis..data..path)
                 list2env(..rbmi..analysis..objects, envir = environment())
             }
         )
     }
-
-    dir.create(..rbmi..analysis..temppath, showWarnings = FALSE)
 
     # If the user provided the clusters object directly then do not close it on completion
     if (!is(ncores, "cluster")) {
@@ -272,18 +242,15 @@ xx_data_prep <- system.time({
             after = FALSE
         )
     }
-})
-print(sprintf("DATA PREP = %f", xx_data_prep[[3]]))
 
-xx_processing <- system.time({
     # Chunk up requests for significant speed improvement when running in parallel
     number_of_cores <- ifelse(is.null(cl), 1, length(cl))
     indexes <- seq_along(imputations$imputations)
     indexes_split <- split(indexes, (indexes %% number_of_cores) + 1)
 
-    results <- par_map2(
+    results <- par_lapply(
         cl,
-        function(indicies, pid, ...) {
+        function(indicies, ...) {
             inner_fun <- function(idx, ...) {
                 dat2 <- extract_imputed_df(
                     ..rbmi..analysis..imputations$imputations[[idx]],
@@ -292,28 +259,13 @@ xx_processing <- system.time({
                 )
                 ..rbmi..analysis..fun(dat2, ...)
             }
-            res <- lapply(indicies, inner_fun, ...)
-            #..rbmi..analysis..wrapup(res, pid, ..rbmi..analysis..temppath)
-            res
+            lapply(indicies, inner_fun, ...)
         },
         indexes_split,
-        seq_along(indexes_split),
         ...
     ) |>
         unlist(recursive = FALSE, use.names = FALSE)
 
-
-})
-print(sprintf("PROCESSING = %f", xx_processing[[3]]))
-
-xx_reaping <- system.time({
-    # if (is(cl, "cluster")) {
-    #     results <- lapply(
-    #         list.files(..rbmi..analysis..temppath, full.names = TRUE),
-    #         readRDS
-    #     ) |>
-    #         unlist(recursive = FALSE, use.names = FALSE)
-    # }
     results <- results[order(unlist(indexes_split, use.names = FALSE))]
     names(results) <- NULL
 
@@ -332,8 +284,6 @@ xx_reaping <- system.time({
         method = imputations$method
     )
     validate(ret)
-})
-print(sprintf("REAPING = %f", xx_reaping[[3]]))
     return(ret)
 }
 
