@@ -142,13 +142,3 @@ par_lapply <- function(cl, fun, x, ...) {
     }
     return(result)
 }
-
-par_map2 <- function(cl, fun, x, y, ...) {
-    result <- if (is.null(cl)) {
-        mapply(fun, x, y, MoreArgs = list(...), SIMPLIFY = FALSE)
-    } else {
-        parallel::clusterMap(cl, fun, x, y, MoreArgs = list(...), SIMPLIFY = FALSE)
-    }
-    return(result)
-}
-

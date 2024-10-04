@@ -266,6 +266,7 @@ analyse <- function(
     ) |>
         unlist(recursive = FALSE, use.names = FALSE)
 
+    # Re-order to ensure results are returned in same order as imputations
     results <- results[order(unlist(indexes_split, use.names = FALSE))]
     names(results) <- NULL
 
