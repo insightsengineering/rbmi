@@ -92,12 +92,14 @@ method_bayes <- function(
     n_samples = 20,
     seed = NULL
 ) {
-    if (!is.null(seed)) {
-        warning(
-            "The `seed` argument to `method_bayes()` has been deprecated",
-            " please use `set.seed()` instead"
+    assertthat::assert_that(
+        is.null(seed),
+        msg = paste(
+            "The `seed` argument to `method_bayes()` has been deprecated;",
+            "please use `set.seed()` instead.",
+            collapse = " "
         )
-    }
+    )
 
     x <- list(
         burn_in = burn_in,
