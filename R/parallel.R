@@ -53,14 +53,9 @@ make_rbmi_cluster <- function(ncores = 1, objects = NULL, packages = NULL) {
     }
 
     # Load user defined packages
-    packages <- if (is.null(packages)) {
-        # TODO - can't remember why this is needed; need to look into
-        "assertthat"
-    } else {
-        c(packages, "assertthat")
-    }
+    packages <- c(packages, "assertthat")
     # Remove attempts to load rbmi as this will be covered later
-    packages <- grep("^rbmi$", packages, value = TRUE, invert = TRUE)
+    packages <- setdiff(packages, "rbmi")
     devnull <- parallel::clusterCall(
         cl,
         function(pkgs) lapply(pkgs, function(x) library(x, character.only = TRUE)),
