@@ -478,10 +478,6 @@ extract_data_nmar_as_na <- function(longdata) {
 #' @export
 draws.bayes <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE) {
 
-    if (!is.na(method$seed)) {
-        set.seed(method$seed)
-    }
-
     longdata <- longDataConstructor$new(data, vars)
     longdata$set_strategies(data_ice)
 

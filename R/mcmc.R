@@ -59,7 +59,6 @@ fit_mcmc <- function(
 
     n_imputations <- method$n_samples
     burn_in <- method$burn_in
-    seed <- method$seed
     burn_between <- method$burn_between
     same_cov <- method$same_cov
 
@@ -112,13 +111,7 @@ fit_mcmc <- function(
         )
     )
 
-    assert_that(
-        !is.na(seed),
-        !is.null(seed),
-        is.numeric(seed),
-        msg = "mcmc seed is invalid"
-    )
-    sampling_args$seed <- seed
+    sampling_args$seed <- sample.int(.Machine$integer.max, 1)
 
     stan_fit <- record({
         do.call(sampling, sampling_args)

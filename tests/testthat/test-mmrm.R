@@ -6,10 +6,15 @@ suppressPackageStartupMessages({
 
 compute_n_params <- function(cov_struct, nv) {
     n_params <- switch(cov_struct,
-        "us" = nv * (nv + 1) / 2,
-        "toep" = 2 * nv - 1,
-        "cs" = nv + 1,
-        "ar1" = 2
+        "ad" = nv,
+        "adh" = 2 * nv - 1,
+        "ar1" = 2,
+        "ar1h" = nv + 1,
+        "cs" = 2,
+        "csh" = nv + 1,
+        "toep" = nv,
+        "toeph" = 2 * nv - 1,
+        "us" = nv * (nv + 1) / 2
     )
     return(n_params)
 }
@@ -25,13 +30,6 @@ is.formula <- function(x) {
 
 
 expect_valid_fit_object <- function(fit, cov_struct, nv, same_cov) {
-
-    n_params <- compute_n_params(cov_struct, nv)
-
-    if (!same_cov) {
-        n_params <- 2 * n_params
-    }
-
 
     expect_type(fit, "list")
     expect_length(fit, 3)
@@ -240,34 +238,41 @@ test_that("as_mmrm_df & as_mmrm_formula", {
 
 
 
-test_that("MMRM model fit has expected output structure (same_cov = TRUE)",{
-
-    ############# US
-    args <- args_default
-    args$cov_struct <- "us"
-    fit <- do.call(fit_mmrm, args = args)
-    expect_valid_fit_object(fit, "us", 3, TRUE)
-
-
-    ############# TOEP
-    args <- args_default
-    args$cov_struct <- "toep"
-    fit <- do.call(fit_mmrm, args = args)
-    expect_valid_fit_object(fit, "toep", 3, TRUE)
+test_that("MMRM model fit has expected output structure",{
+    for (struct in c("ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph", "us")) {
+        
+        ## First for same covariance per group
+        args <- args_default
+        args$cov_struct <- struct
+        fit <- do.call(fit_mmrm, args = args)
+        expect_valid_fit_object(fit, struct, 3, TRUE)
 
 
-    ############# CS
-    args <- args_default
-    args$cov_struct <- "cs"
-    fit <- do.call(fit_mmrm, args = args)
-    expect_valid_fit_object(fit, "cs", 3, TRUE)
+        mod <- mmrm::mmrm(
+            formula = as.formula(sprintf("outcome ~ sex + age + visit * group + %s(visit | id)", struct)),
+            data = dat,
+            reml = TRUE
+        )
+        expect_equal(length(mod$theta_est), compute_n_params(struct, 3))
+        expect_equal(fit$beta, coef(mod), ignore_attr = TRUE)
+        expect_equal(fit$sigma[[1]], VarCorr(mod), ignore_attr = TRUE)
 
+        ## And again for difference covariance per group
+        args <- args_default
+        args$cov_struct <- struct
+        args$same_cov <- FALSE
+        fit <- do.call(fit_mmrm, args = args)
+        expect_valid_fit_object(fit, struct, 3, FALSE)
 
-    ############# AR1
-    args <- args_default
-    args$cov_struct <- "ar1"
-    fit <- do.call(fit_mmrm, args = args)
-    expect_valid_fit_object(fit, "ar1", 3, TRUE)
+        mod <- mmrm::mmrm(
+            formula = as.formula(sprintf("outcome ~ sex + age + visit * group + %s(visit | group / id)", struct)),
+            data = dat,
+            reml = TRUE
+        )
+        expect_equal(length(mod$theta_est), compute_n_params(struct, 3) * 2)
+        expect_equal(fit$beta, coef(mod), ignore_attr = TRUE)
+        expect_equal(fit$sigma, VarCorr(mod), ignore_attr = TRUE)
+    }
 })
 
 

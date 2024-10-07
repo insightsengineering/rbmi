@@ -5,13 +5,13 @@
 \title{Construct random effects formula}
 \usage{
 random_effects_expr(
-  cov_struct = c("us", "toep", "cs", "ar1"),
+  cov_struct = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
   cov_by_group = FALSE
 )
 }
 \arguments{
-\item{cov_struct}{Character - The covariance structure to be used, must be one of \code{"us"},
-\code{"toep"}, \code{"cs"}, \code{"ar1"}}
+\item{cov_struct}{Character - The covariance structure to be used, must be one of \code{"us"} (default),
+\code{"ad"}, \code{"adh"}, \code{"ar1"}, \code{"ar1h"}, \code{"cs"}, \code{"csh"}, \code{"toep"}, or \code{"toeph"})}
 
 \item{cov_by_group}{Boolean - Whenever or not to use separate covariances per each group level}
 }
