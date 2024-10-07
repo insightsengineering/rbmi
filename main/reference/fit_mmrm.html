@@ -32,14 +32,6 @@ beta and sigma will not be present."><meta property="og:image" content="/logo.pn
     <li><a class="dropdown-item" href="../articles/stat_specs.html">rbmi: Statistical Specifications</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.2.6">v1.2.6</a> </div></li>
-<!-- end dropdown for versions -->
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/insightsengineering/rbmi/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -70,7 +62,7 @@ indicating whether or not the fit failed to converge. If the fit did fail to con
 <span>  <span class="va">subjid</span>,</span>
 <span>  <span class="va">visit</span>,</span>
 <span>  <span class="va">group</span>,</span>
-<span>  cov_struct <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"us"</span>, <span class="st">"toep"</span>, <span class="st">"cs"</span>, <span class="st">"ar1"</span><span class="op">)</span>,</span>
+<span>  cov_struct <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"us"</span>, <span class="st">"ad"</span>, <span class="st">"adh"</span>, <span class="st">"ar1"</span>, <span class="st">"ar1h"</span>, <span class="st">"cs"</span>, <span class="st">"csh"</span>, <span class="st">"toep"</span>, <span class="st">"toeph"</span><span class="op">)</span>,</span>
 <span>  REML <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  same_cov <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -104,8 +96,8 @@ that belong to the same subject.</p></dd>
 
 
 <dt id="arg-cov-struct">cov_struct<a class="anchor" aria-label="anchor" href="#arg-cov-struct"></a></dt>
-<dd><p>a character value. Specifies which covariance structure to use. Must be one of
-<code>"us"</code>, <code>"toep"</code>, <code>"cs"</code> or  <code>"ar1"</code></p></dd>
+<dd><p>a character value. Specifies which covariance structure to use. Must be one of <code>"us"</code> (default),
+<code>"ad"</code>, <code>"adh"</code>, <code>"ar1"</code>, <code>"ar1h"</code>, <code>"cs"</code>, <code>"csh"</code>, <code>"toep"</code>, or <code>"toeph"</code>)</p></dd>
 
 
 <dt id="arg-reml">REML<a class="anchor" aria-label="anchor" href="#arg-reml"></a></dt>
