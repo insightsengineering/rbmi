@@ -343,8 +343,7 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         n_samples = 200,
         burn_in = 100,
         burn_between = 3,
-        same_cov = TRUE,
-        seed = 8931
+        same_cov = TRUE
     )
 
     ### No missingness
