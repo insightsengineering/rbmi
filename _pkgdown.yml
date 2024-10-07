@@ -1,3 +1,4 @@
 url: ~
 template:
+  math-rendering: mathjax
   bootstrap: 5
