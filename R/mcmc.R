@@ -45,10 +45,8 @@
 #' - `fit`: a `stanfit` object.
 #'
 #'
-#' @import Rcpp
 #' @import methods
 #' @importFrom rstan sampling
-#' @useDynLib rbmi, .registration = TRUE
 fit_mcmc <- function(
     designmat,
     outcome,
@@ -96,7 +94,7 @@ fit_mcmc <- function(
     )
 
     sampling_args <- list(
-        object = stanmodels$MMRM,
+        object = get_stan_model(),
         data = stan_data,
         pars = c("beta", "Sigma"),
         chains = 1,

@@ -515,18 +515,38 @@ as_dataframe <- function(x) {
 
 
 
-#' Do not run this function
-#' 
-#' This function only exists to suppress the false positive
-#' from R CMD Check about unused libraries
-#' 
-#' Both rstantools and RcppParallel are required but are only used at
-#' installation time. In the case of RcppParallel it is used in the
-#' `src/Makevars` file which is created on the fly during installation
-#' by rstantools. rstantools is used in the `configure` file.
-#' 
-do_not_run <- function() {
-    rstantools::use_rstan()
-    RcppParallel::CxxFlags()
+#' Ensure `rstan` exists
+#'
+#' Checks to see if rstan exists and if not throws a helpful error message
+#' @keywords internal
+ensure_rstan <- function() {
+    if (!requireNamespace("rstan", quietly = TRUE)) {
+        stop(
+            "In order to use `method_bayes()` the `rstan` package must be installed.",
+            " This can be installed from CRAN by running:\n\n",
+            "      install.packages('rstan')\n\n"
+        )
+    }
 }
 
+#' Get Compiled Stan Object
+#'
+#' Gets a compiled Stan object that can be used with [`rstan::sampling()`]
+#' @keywords internal
+get_stan_model <- function() {
+    ensure_rstan()
+    local_file <- file.path("inst", "stan", "MMRM.stan")
+    system_file <- system.file(file.path("stan", "MMRM.stan"), package = "rbmi")
+    file_loc <- if (file.exists(local_file)) {
+        local_file
+    } else if (file.exists(system_file)) {
+        system_file
+    } else {
+        stop("Unable to find MMRM.stan; Please report this as a bug")
+    }
+    rstan::stan_model(
+        file = file_loc,
+        auto_write = TRUE,
+        model_name = "rbmi_mmrm"
+    )
+}

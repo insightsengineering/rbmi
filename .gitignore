@@ -61,3 +61,4 @@ docs
 
 
 local/
+*.rds
