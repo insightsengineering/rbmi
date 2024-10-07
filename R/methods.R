@@ -31,8 +31,8 @@
 #' Needed for `method_bmlmi()`.
 #'
 #' @param covariance a character string that specifies the structure of the covariance
-#' matrix to be used in the imputation model. Must be one of `"us"` (default), `"toep"`,
-#' `"cs"` or `"ar1"`. See details.
+#' matrix to be used in the imputation model. Must be one of `"us"` (default), `"ad"`,
+#' `"adh"`, `"ar1"`, `"ar1h"`, `"cs"`, `"csh"`, `"toep"`, or `"toeph"`). See details.
 #'
 #' @param threshold a numeric between 0 and 1, specifies the proportion of bootstrap
 #' datasets that can fail to produce valid samples before an error is thrown.
@@ -58,11 +58,18 @@
 #' The user is able to specify different covariance structures using the the `covariance`
 #' argument. Currently supported structures include:
 #'
-#' - Unstructured (`"us"`)
+#' - Unstructured (`"us"`) (default)
+#' - Ante-dependence (`"ad"`)
+#' - Heterogeneous ante-dependence (`"adh"`)
+#' - First-order auto-regressive (`"ar1"`)
+#' - Heterogeneous first-order auto-regressive (`"ar1h"`)
+#' - Compound symmetry (`"cs"`)
+#' - Heterogeneous compound symmetry (`"csh"`)
 #' - Toeplitz (`"toep"`)
-#' - Compound Symmetry (`"cs"`)
-#' - Autoregression-1 (`"ar1"`)
+#' - Heterogeneous Toeplitz (`"toeph"`)
 #'
+#' For full details please see [`mmrm::cov_types()`].
+#' 
 #' Note that at present Bayesian methods only support unstructured.
 #'
 #' In the case of `method_condmean(type = "bootstrap")`, `method_approxbayes()` and `method_bmlmi()` repeated
@@ -114,7 +121,7 @@ method_bayes <- function(
 #' @rdname method
 #' @export
 method_approxbayes <- function(
-    covariance = c("us", "toep", "cs", "ar1"),
+    covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
@@ -136,7 +143,7 @@ method_approxbayes <- function(
 #' @rdname method
 #' @export
 method_condmean <- function(
-    covariance = c("us", "toep", "cs", "ar1"),
+    covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
@@ -179,7 +186,7 @@ method_condmean <- function(
 #' @rdname method
 #' @export
 method_bmlmi <- function(
-    covariance = c("us", "toep", "cs", "ar1"),
+    covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,

@@ -9,8 +9,8 @@ as_mmrm_formula(mmrm_df, cov_struct)
 \arguments{
 \item{mmrm_df}{an mmrm \code{data.frame} as created by \code{\link[=as_mmrm_df]{as_mmrm_df()}}}
 
-\item{cov_struct}{Character - The covariance structure to be used, must be one of \code{"us"},
-\code{"toep"}, \code{"cs"}, \code{"ar1"}}
+\item{cov_struct}{Character - The covariance structure to be used, must be one of \code{"us"} (default),
+\code{"ad"}, \code{"adh"}, \code{"ar1"}, \code{"ar1h"}, \code{"cs"}, \code{"csh"}, \code{"toep"}, or \code{"toeph"})}
 }
 \description{
 Derives the MMRM model formula from the structure of mmrm_df.
