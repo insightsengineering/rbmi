@@ -8,7 +8,7 @@ suppressPackageStartupMessages({
 get_mcmc_sim_dat <- function(n, mcoefs, sigma) {
     nv <- ncol(sigma)
     covars <- tibble::tibble(
-        id = paste0("P",1:n),
+        id = paste0("P", seq_len(n)),
         age = rnorm(n),
         group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),
         sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F"))
@@ -17,36 +17,36 @@ get_mcmc_sim_dat <- function(n, mcoefs, sigma) {
     dat <- mvtnorm::rmvnorm(n, sigma = sigma) %>%
         set_col_names(paste0("visit_", 1:nv)) %>%
         dplyr::as_tibble() %>%
-        dplyr::mutate(id = paste0("P",1:n)) %>%
+        dplyr::mutate(id = paste0("P", seq_len(n))) %>%
         tidyr::gather("visit", "outcome", -id) %>%
-        dplyr::mutate(visit = factor(visit)) %>%
-        dplyr::arrange(id, visit) %>%
+        dplyr::mutate(visit = factor(.data$visit)) %>%
+        dplyr::arrange(id, .data$visit) %>%
         dplyr::left_join(covars, by = "id") %>%
         dplyr::mutate(
-            outcome = outcome +
+            outcome = .data$outcome +
                 mcoefs[["int"]] +
-                mcoefs[["age"]] * age +
-                mcoefs[["sex"]] * f2n(sex) +
-                mcoefs[["trtslope"]] * f2n(group) * as.numeric(visit)
+                mcoefs[["age"]] * .data$age +
+                mcoefs[["sex"]] * f2n(.data$sex) +
+                mcoefs[["trtslope"]] * f2n(.data$group) * as.numeric(.data$visit)
         ) %>%
         dplyr::mutate(id = as.factor(id))
 
     return(dat)
 }
 
-get_within <- function(x, real){
+get_within <- function(x, real) {
     x2 <- matrix(unlist(as.list(x)), nrow = length(x), byrow = TRUE)
-    colnames(x2) <- paste0("B", 1:ncol(x2))
+    colnames(x2) <- paste0("B", seq_len(ncol(x2)))
 
     as_tibble(x2) %>%
-        tidyr::gather(var, val) %>%
+        tidyr::gather(var, .data$val) %>%
         group_by(var) %>%
         summarise(
-            lci = quantile(val, 0.005),
-            uci = quantile(val, 0.995)
+            lci = quantile(.data$val, 0.005),
+            uci = quantile(.data$val, 0.995)
         ) %>%
         mutate(real = real) %>%
-        mutate(inside = real >= lci &  real <= uci)
+        mutate(inside = real >= .data$lci &  real <= .data$uci)
 }
 
 test_extract_draws <- function(draws_extracted, same_cov, n_groups, n_visits) {
@@ -55,7 +55,7 @@ test_extract_draws <- function(draws_extracted, same_cov, n_groups, n_visits) {
     expect_length(draws_extracted, 2)
     expect_true(all(names(draws_extracted) %in% c("beta", "sigma")))
 
-    if(same_cov) {
+    if (same_cov) {
         expect_true(all(sapply(draws_extracted$sigma, function(x) length(x) == 1)))
     } else {
         expect_true(all(sapply(draws_extracted$sigma, function(x) length(x) == n_groups)))
@@ -69,7 +69,7 @@ test_extract_draws <- function(draws_extracted, same_cov, n_groups, n_visits) {
 test_that("split_dim creates a list from an array as expected", {
     mat <- rbind(c(1, 0.2), c(0.2, 1))
     a <- array(data = NA, dim = c(3, 2, 2))
-    for(i in 1:dim(a)[1]) {
+    for (i in seq_len(dim(a)[1])) {
         a[i, , ] <- mat + i - 1
     }
 
@@ -274,7 +274,7 @@ test_that("get_pattern_groups_unique", {
         pgroup = c(1, 2),
         pattern = c("11", "10"),
         group_n = c(1, 2),
-        n = c(3,1),
+        n = c(3, 1),
         n_avail = c(2, 1)
     )
     expect_equal(results_actual, results_expected)
@@ -453,7 +453,7 @@ test_that("fit_mcmc returns error if mmrm on original sample fails", {
 
     dat <- get_mcmc_sim_dat(100, mcoefs, sigma)
     mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
-    mat[,2] <- 1
+    mat[, 2] <- 1
 
     method <- method_bayes(
         n_samples = 2,

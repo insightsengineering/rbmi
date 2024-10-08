@@ -160,10 +160,14 @@ impute_internal <- function(draws, references = NULL, update_strategy, strategie
         data$update_strategies(update_strategy)
     }
 
-    if(is.null(references)) {
+    if (is.null(references)) {
         assert_that(
             all(data$strategies == "MAR"),
-            msg = "You have set a non-MAR imputation strategy. Please specify the references using the argument `references`"
+            msg = paste0(
+                "You have set a non-MAR imputation strategy.",
+                "Please specify the references using the argument `references`",
+                collapse = " "
+            )
         )
         references <- levels(data$data[[data$vars$group]])
         names(references) <- references
@@ -491,7 +495,8 @@ invert_indexes <- function(x) {
 #' @param condmean Logical. If `TRUE` will impute using the conditional mean values, if `FALSE`
 #' will impute by taking a random draw from the multivariate normal distribution.
 #'
-#' @param n_imputations When `condmean = FALSE` numeric representing the number of random imputations to be performed for each sample.
+#' @param n_imputations When `condmean = FALSE` numeric representing the number of random
+#' imputations to be performed for each sample.
 #' Default is `1` (one random imputation per sample).
 impute_data_individual <- function(
     id,
@@ -890,10 +895,3 @@ print.imputation <- function(x, ...) {
     cat(string, sep = "\n")
     return(invisible(x))
 }
-
-
-
-
-
-
-

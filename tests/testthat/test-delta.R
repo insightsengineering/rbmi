@@ -52,9 +52,9 @@ test_that("delta_template & delta_lagscale", {
 
     output_expected <- select(dat, pt, vis, grp) %>%
         mutate(
-            is_mar  =     c(T, T, T, F, F,    T, T, T, T, T),
-            is_missing =  c(F, T, F, T, T,    T, F, T, F, F),
-            is_post_ice = c(F, F, F, T, T,    F, T, T, T, T),
+            is_mar  =     c(TRUE, TRUE, TRUE, FALSE, FALSE,    TRUE, TRUE, TRUE, TRUE, TRUE),
+            is_missing =  c(FALSE, TRUE, FALSE, TRUE, TRUE,    TRUE, FALSE, TRUE, FALSE, FALSE),
+            is_post_ice = c(FALSE, TRUE, FALSE, TRUE, TRUE,    FALSE, TRUE, TRUE, TRUE, TRUE),
             strategy = c(NA, "MAR", NA, "JTR", "JTR",    "MAR", NA, "MAR", NA, NA),
             delta = rep(0, n_vis * 2)
         ) %>%
@@ -78,7 +78,7 @@ test_that("delta_template & delta_lagscale", {
 })
 
 
-test_that( "d_lagscale",{
+test_that("d_lagscale", {
 
     dlag <- c(1, 1, 1, 1)
     delta <- c(-3, -6, -6, -12)
@@ -265,9 +265,9 @@ test_that("extract_imputed_dfs + delta", {
     )
 
     dobj <- draws(
-        dat, 
+        dat,
         dat_ice,
-        vars = vars, 
+        vars = vars,
         method = method_approxbayes(n_samples = 5),
         quiet = TRUE
     )
@@ -292,4 +292,3 @@ test_that("extract_imputed_dfs + delta", {
     expect_equal(d1, select(dat, -id) %>%  as.data.frame)
 
 })
-

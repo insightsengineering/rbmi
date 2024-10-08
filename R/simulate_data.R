@@ -295,7 +295,7 @@ generate_data_single <- function(pars_group, strategy_fun = NULL, distr_pars_ref
 
     data <- data.frame(
         id = as.factor(rep(paste0("id_", seq.int(pars_group$n)), each = n_visits)),
-        visit = as.factor(rep(seq.int(n_visits)-1, pars_group$n)),
+        visit = as.factor(rep(seq.int(n_visits) - 1, pars_group$n)),
         group = as.factor(rep("g", pars_group$n)),
         outcome_bl = NA,
         outcome_noICE = c(replicate(pars_group$n, sample_mvnorm(pars_group$mu, pars_group$sigma)))
@@ -324,14 +324,14 @@ generate_data_single <- function(pars_group, strategy_fun = NULL, distr_pars_ref
     data$ind_ice1 <- unlist(
         lapply(
             split(
-                data[,c("ind_ice1", "ind_ice2")],
+                data[, c("ind_ice1", "ind_ice2")],
                 data$id
             ),
             function(x) {
-                if(sum(x$ind_ice1) < sum(x$ind_ice2)) {
+                if (sum(x$ind_ice1) < sum(x$ind_ice2)) {
                     x$ind_ice1 <- 0
                 }
-            return(x$ind_ice1)
+                return(x$ind_ice1)
             }
         )
     )
@@ -356,7 +356,7 @@ generate_data_single <- function(pars_group, strategy_fun = NULL, distr_pars_ref
         subset = first_ice1_visit
     )
 
-    if(!is.null(strategy_fun)) {
+    if (!is.null(strategy_fun)) {
         data$outcome <- adjust_trajectories(
             distr_pars_group = list(mu = pars_group$mu, sigma = pars_group$sigma),
             outcome = data$outcome_noICE,
@@ -371,7 +371,7 @@ generate_data_single <- function(pars_group, strategy_fun = NULL, distr_pars_ref
 
     data$outcome[data$dropout_ice1 == 1 | data$ind_ice2 == 1] <- NA
 
-    rand_miss <- rbinom(n = pars_group$n*(n_visits-1), size = 1, prob = pars_group$prob_miss)
+    rand_miss <- rbinom(n = pars_group$n * (n_visits - 1), size = 1, prob = pars_group$prob_miss)
     data$outcome[data$visit != "0"][rand_miss == 1] <- NA
 
     return(data)
@@ -421,20 +421,20 @@ simulate_ice <- function(outcome, visits, ids, prob_ice, or_outcome_ice, baselin
     )
 
     n_visits <- nlevels(visits)
-    if(length(prob_ice) == 1) {
-        prob_ice <- rep(prob_ice, n_visits-1)
+    if (length(prob_ice) == 1) {
+        prob_ice <- rep(prob_ice, n_visits - 1)
     }
     prob_ice[prob_ice == 0] <- 1e-20
-    prob_ice[prob_ice == 1] <- 1-1e-15
+    prob_ice[prob_ice == 1] <- 1 - 1e-15
 
-    model_coef <- c(log(prob_ice/(1-prob_ice)), log(or_outcome_ice))
+    model_coef <- c(log(prob_ice / (1 - prob_ice)), log(or_outcome_ice))
 
     dat <- data.frame(
         visits = visits,
         x = outcome - baseline_mean
     )
     no_lastvisit <- dat$visits != levels(dat$visits)[n_visits]
-    dat <- dat[no_lastvisit,]
+    dat <- dat[no_lastvisit, ]
     dat$visits <- factor(dat$visits, levels = unique(dat$visits))
 
     mod <- model.matrix(~ 0 + visits + x, dat)
@@ -478,12 +478,11 @@ simulate_ice <- function(outcome, visits, ids, prob_ice, or_outcome_ice, baselin
 simulate_dropout <- function(prob_dropout, ids, subset = rep(1, length(ids))) {
 
 
-     # baseline values cannot be missing
-     subset <- unlist(tapply(subset, ids, function(x) {
-         x[1] <- 0
-         return(x)
-     }
-     ))
+    # baseline values cannot be missing
+    subset <- unlist(tapply(subset, ids, function(x) {
+        x[1] <- 0
+        return(x)
+    }))
 
     dropout <- rep(0, length(ids))
     dropout[subset == 1] <- rbinom(n = sum(subset), size = 1, prob = prob_dropout)
@@ -587,11 +586,11 @@ adjust_trajectories_single <- function(
 ) {
 
     is_post_ice <- is.na(outcome)
-    if(all(!is_post_ice)) {
+    if (all(!is_post_ice)) {
         return(outcome)
     }
 
-    if(is.null(distr_pars_ref)) {
+    if (is.null(distr_pars_ref)) {
         distr_pars_ref <- distr_pars_group
     }
 

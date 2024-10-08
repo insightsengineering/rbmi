@@ -73,9 +73,9 @@ test_that("Parallisation works as expected", {
 
         results_1$formula <- x ~ a + b + c + d
         results_2$formula <- x ~ a + b + c + d
-        
+
         # Test is currently disabled as for some reason there is no performance gains
-        # when run on github actions, this test appears to run fine everywhere 
+        # when run on github actions, this test appears to run fine everywhere
         # else though...
         # expect_true(time_1_core > (time_2_core * 1.3))
         expect_equal(results_1, results_2)
@@ -157,30 +157,3 @@ test_that("Basic parallisation works as expected", {
     expect_equal(x1, x2, tolerance = 0.0001)
 
 })
-
-
-###########################
-#
-#  Manual time testing
-#
-# method <- method_approxbayes(n_samples = 20)
-# method <- method_condmean(n_samples = 80)
-# method <- method_condmean(type = "jackknife")
-# time_it({
-#     results_2 <- draws(
-#         data = dat,
-#         data_ice = dat_ice,
-#         vars = vars,
-#         method = method,
-#         ncores = 1
-#     )
-# })
-# time_it({
-#     results_2 <- draws(
-#         data = dat,
-#         data_ice = dat_ice,
-#         vars = vars,
-#         method = method,
-#         ncores = 2
-#     )
-# })

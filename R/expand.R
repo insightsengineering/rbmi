@@ -69,7 +69,7 @@ locf <- function(x) {
 #'
 #' ```
 #' library(dplyr)
-#' 
+#'
 #' dat_expanded <- expand(
 #'     data = dat,
 #'     subject = c("pt1", "pt2", "pt3", "pt4"),
@@ -205,15 +205,15 @@ fill_locf <- function(data, vars, group = NULL, order = NULL) {
 
     if (length(warn_vars) > 0) {
         warn <- sprintf(
-                paste(
-                    "The following variables have missing values as their first value in one of more",
-                    "groups: %s\n",
-                    "Please consult the man page for `fill_locf()` for further",
-                    "details / recommendations"
-                ),
-                paste(warn_vars, collapse = ", ")
-            )
-            warning(warn)
+            paste(
+                "The following variables have missing values as their first value in one of more",
+                "groups: %s\n",
+                "Please consult the man page for `fill_locf()` for further",
+                "details / recommendations"
+            ),
+            paste(warn_vars, collapse = ", ")
+        )
+        warning(warn)
     }
 
     ## Restore orginal data sorting

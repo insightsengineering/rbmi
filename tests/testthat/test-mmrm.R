@@ -1,5 +1,6 @@
 suppressPackageStartupMessages({
     library(dplyr)
+    library(testthat)
 })
 
 
@@ -42,9 +43,9 @@ expect_valid_fit_object <- function(fit, cov_struct, nv, same_cov) {
     expect_type(fit$sigma, "list")
     expect_length(fit$sigma, 2)
     expect_true(is.matrix(fit$sigma[[1]]))
-    expect_equal(dim(fit$sigma[[1]]), c(nv,nv))
+    expect_equal(dim(fit$sigma[[1]]), c(nv, nv))
     expect_true(is.matrix(fit$sigma[[2]]))
-    expect_equal(dim(fit$sigma[[2]]), c(nv,nv))
+    expect_equal(dim(fit$sigma[[2]]), c(nv, nv))
 
     expect_true(fit$failed %in% c(TRUE, FALSE))
 }
@@ -91,9 +92,9 @@ test_mmrm_numeric <- function(dat, formula_expr, same_cov, scale = FALSE) {
     formula <- as.formula(formula_expr)
     designmat <- as_model_df(dat, formula)
 
-    if(scale){
+    if (scale) {
         dat_limit <- ceiling(nrow(dat) / 2)
-        scaler <- scalerConstructor$new(designmat[seq_len(dat_limit),])
+        scaler <- scalerConstructor$new(designmat[seq_len(dat_limit), ])
         dmat <- scaler$scale(designmat)
     } else {
         dmat <- designmat
@@ -110,7 +111,7 @@ test_mmrm_numeric <- function(dat, formula_expr, same_cov, scale = FALSE) {
         same_cov = same_cov
     )
 
-    if(scale){
+    if (scale) {
         fit_actual$beta <- scaler$unscale_beta(fit_actual$beta)
         fit_actual$sigma <- lapply(fit_actual$sigma, function(x) scaler$unscale_sigma(x))
     }
@@ -183,7 +184,7 @@ args_default <- list(
 
 test_that("as_mmrm_df & as_mmrm_formula", {
 
-    sigma <- as_vcov(c(2, 6, 3), c(0.4,0.7,0.5))
+    sigma <- as_vcov(c(2, 6, 3), c(0.4, 0.7, 0.5))
     dat <- get_sim_data(100, sigma)
 
 
@@ -238,9 +239,9 @@ test_that("as_mmrm_df & as_mmrm_formula", {
 
 
 
-test_that("MMRM model fit has expected output structure",{
+test_that("MMRM model fit has expected output structure", {
     for (struct in c("ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph", "us")) {
-        
+
         ## First for same covariance per group
         args <- args_default
         args$cov_struct <- struct
@@ -276,7 +277,7 @@ test_that("MMRM model fit has expected output structure",{
 })
 
 
-test_that("MMRM model fit has expected output structure (same_cov = FALSE)",{
+test_that("MMRM model fit has expected output structure (same_cov = FALSE)", {
     args <- args_default
     args$same_cov <- FALSE
     fit <- do.call(fit_mmrm, args = args)
@@ -383,63 +384,6 @@ test_that("MMRM returns expected estimates under different model specifications"
 })
 
 
-##### Current usage of mmrm has gotten rid of initial values
-##### re-implement if we decide to optimise mmrm
-#
-#
-# test_that("initial values speed up BFGS", {
-#
-#     set.seed(315)
-#     sigma <- as_vcov(c(5, 3, 8), c(0.4, 0.6, 0.3))
-#
-#     dat <- get_sim_data(n = 200, sigma)
-#
-#     vars <- set_vars(
-#         subjid = "id",
-#         covariates = c("group", "sex", "visit * group")
-#     )
-#
-#     frm <- as_simple_formula(vars$outcome, c(vars$group, vars$visit, vars$covariates))
-#     model_df <- as_model_df(dat = dat, frm = frm)
-#
-#     x <- time_it({
-#         fit <- fit_mmrm_multiopt(
-#             designmat = model_df[, -1, drop = FALSE],
-#             outcome = as.data.frame(model_df)[, 1],
-#             subjid = dat[[vars$subjid]],
-#             visit = dat[[vars$visit]],
-#             group = dat[[vars$group]],
-#             cov_struct = "us",
-#             REML = TRUE,
-#             same_cov = TRUE,
-#             optimizer = "BFGS"
-#         )
-#     })
-#
-#     y <- time_it({
-#         fit2 <- fit_mmrm_multiopt(
-#             designmat = model_df[, -1, drop = FALSE],
-#             outcome = as.data.frame(model_df)[, 1],
-#             subjid = dat[[vars$subjid]],
-#             visit = dat[[vars$visit]],
-#             group = dat[[vars$group]],
-#             cov_struct = "us",
-#             REML = TRUE,
-#             same_cov = TRUE,
-#             optimizer = list(
-#                 BFGS = fit[c("beta", "theta")]
-#             )
-#         )
-#     })
-#
-#     expect_true(
-#         (as.numeric(x) * 0.5) > as.numeric(y)
-#     )
-# })
-
-
-
-
 test_that("visit & group factor levels / order doesn't break model extraction", {
     set.seed(3812)
     bign <- 120
@@ -495,4 +439,3 @@ test_that("visit & group factor levels / order doesn't break model extraction", 
     expect_equal(expected, extract_params(mod)$sigma$A)
 
 })
-

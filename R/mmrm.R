@@ -172,14 +172,16 @@ extract_params <- function(fit) {
 #' @name fit_mmrm
 #'
 #'
-fit_mmrm <- function(designmat,
-                     outcome,
-                     subjid,
-                     visit,
-                     group,
-                     cov_struct = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
-                     REML = TRUE,
-                     same_cov = TRUE) {
+fit_mmrm <- function(
+    designmat,
+    outcome,
+    subjid,
+    visit,
+    group,
+    cov_struct = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
+    REML = TRUE,
+    same_cov = TRUE
+) {
     dat_mmrm <- as_mmrm_df(
         designmat = designmat,
         outcome = outcome,

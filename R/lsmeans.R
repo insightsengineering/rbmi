@@ -6,7 +6,7 @@
 #' / interpretation depends on the weighting scheme; see the weighting section for more
 #' information.
 #'
-#' 
+#'
 #' @section Weighting:
 #'
 #' ### Counterfactual
@@ -24,7 +24,7 @@
 #' To get results consistent with `emmeans`'s `weights = "proportional"`
 #' please use `weights = "proportional_em"`.
 #'
-#' ### Equal 
+#' ### Equal
 #'
 #' For `weights = "equal"` the lsmeans are obtained by taking the model fitted
 #' value of a hypothetical patient whose covariates are defined as follows:
@@ -176,7 +176,7 @@ ls_design_equal <- function(data, frm, fix) {
     frm2 <- update(frm, NULL ~ .)
     data2 <- model.frame(frm2, data)
     collection <- lapply(as.list(data2), collapse_values)
-    
+
     for (var in names(fix)) {
         if (is.numeric(data2[[var]])) {
             collection[[var]] <- fix[[var]]

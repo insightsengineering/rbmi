@@ -83,8 +83,8 @@ test_that("sample_mvnorm", {
     xm <- mean(x)
     xv <- var(x)
 
-    expect_true(all( abs(xm - m) < (m - (m * 0.99))))
-    expect_true(all( abs(xv - z) < (z - (z * 0.95))))
+    expect_true(all(abs(xm - m) < (m - (m * 0.99))))
+    expect_true(all(abs(xv - z) < (z - (z * 0.95))))
 
 
     # Sample multiple values
@@ -96,7 +96,7 @@ test_that("sample_mvnorm", {
     expect_true(nrow(x) == 1)
     expect_true(ncol(x) == 4)
 
-    vals <- replicate(n = 100000, {sample_mvnorm(m, z)})
+    vals <- replicate(n = 100000, { sample_mvnorm(m, z) })
     x2 <- matrix(unlist(vals), ncol = ncol(z), byrow = TRUE)
     x2_v <- var(x2)
     x2_m <- apply(x2, 2, mean)
@@ -151,14 +151,14 @@ test_that("record", {
 
 
 
-test_that("is_absent",{
+test_that("is_absent", {
 
 
     expect_true(is_absent(NULL))
     expect_true(is_absent(NA))
     expect_true(is_absent(""))
 
-    expect_true(is_absent(NULL, blank=FALSE))
+    expect_true(is_absent(NULL, blank = FALSE))
     expect_true(is_absent(NA, blank = FALSE))
     expect_true(is_absent("", na = FALSE))
 
@@ -176,7 +176,7 @@ test_that("is_absent",{
 })
 
 
-test_that("str_contains",{
+test_that("str_contains", {
 
     expect_equal(
         str_contains(c("abcde", "xyzj", "faiwx"), c("x")),
@@ -217,8 +217,8 @@ test_that("sort_by", {
     expect_equal(x, sort_by(x2, "z"))
     expect_equal(x, sort_by(x2, c("x", "y")))
 
-    expect_equal(arrange(x, desc(z)), sort_by(x, "z", T))
-    expect_equal(arrange(x, x, desc(y)), sort_by(x, c("x", "y"), c(F, T)))
+    expect_equal(arrange(x, desc(z)), sort_by(x, "z", TRUE))
+    expect_equal(arrange(x, x, desc(y)), sort_by(x, c("x", "y"), c(FALSE, TRUE)))
 })
 
 

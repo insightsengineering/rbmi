@@ -6,8 +6,7 @@ suppressPackageStartupMessages({
     library(tibble)
 })
 
-# Sys.setenv("R_TEST_FULL" = TRUE)
-# NCORES <- 6
+
 NCORES <- 2
 
 
@@ -205,7 +204,7 @@ test_that("Basic Usage - Bayesian", {
 
 
 
-test_that("Basic Usage - Condmean", { 
+test_that("Basic Usage - Condmean", {
 
     skip_if_not(is_full_test())
 
@@ -344,13 +343,13 @@ test_that("Custom Strategies and Custom analysis functions", {
         strategies = getStrategies("XX" = strategy_JR)
     )
 
-    myfun <- function(dat){
+    myfun <- function(dat) {
         dat <- dat %>% filter(visit == "visit_3")
         mod <- lm(data = dat, outcome ~ group + age + sex)
         list(
             "treatment_effect" = list(
                 "est" = coef(mod)[[2]],
-                "se" = sqrt(vcov(mod)[2,2]),
+                "se" = sqrt(vcov(mod)[2, 2]),
                 "df" = df.residual(mod)
             )
         )
@@ -480,8 +479,8 @@ test_that("Sorting doesn't change results", {
         quiet = TRUE,
         ncores = NCORES
     )
-    imputeobj <- impute( draws = drawobj, references = c("A" = "B", "B" = "B"))
-    anaobj <- analyse( imputeobj, fun = rbmi::ancova, vars = vars2)
+    imputeobj <- impute(draws = drawobj, references = c("A" = "B", "B" = "B"))
+    anaobj <- analyse(imputeobj, fun = rbmi::ancova, vars = vars2)
     poolobj <- pool(results = anaobj)
 
 
@@ -494,8 +493,8 @@ test_that("Sorting doesn't change results", {
         quiet = TRUE,
         ncores = NCORES
     )
-    imputeobj2 <- impute( draws = drawobj2, references = c("A" = "B", "B" = "B"))
-    anaobj2 <- analyse( imputeobj2, fun = rbmi::ancova, vars = vars2)
+    imputeobj2 <- impute(draws = drawobj2, references = c("A" = "B", "B" = "B"))
+    anaobj2 <- analyse(imputeobj2, fun = rbmi::ancova, vars = vars2)
     poolobj2 <- pool(results = anaobj2)
 
     ## Tidy up things that will never be the same:
@@ -540,7 +539,7 @@ test_that("Multiple imputation references / groups work as expected (end to end 
     mcoefs_c <- list("int" = 10, "age" = 3, "sex" = 6, "trt" = s2, "visit" = 2)
     mcoefs_d <- list("int" = 10, "age" = 3, "sex" = 6, "trt" = s3, "visit" = 2)
 
-    sigma_sd <-c(2, 2, 2)
+    sigma_sd <- c(2, 2, 2)
     sigma_cor <- c(0.1, 0.5, 0.3)
 
     n <- 100
@@ -591,13 +590,6 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         ),
         quiet = TRUE
     )
-
-
-    # lm(
-    #     data = dat %>% filter(visit == "visit_3"),
-    #     outcome ~ sex + age + group
-    # )
-
 
 
     t1 <- (s1 + 0) / 2
@@ -683,7 +675,7 @@ test_that("rbmi works for one arm trials", {
     # ancova cannot be applied for 1 arm trial. Use a custom analysis function
     myanalysis <- function(data, ...) {
 
-        data_anal <- data[data[[vars$visit]] == "visit_3",][[vars$outcome]]
+        data_anal <- data[data[[vars$visit]] == "visit_3", ][[vars$outcome]]
         res <- list(
             mean = list(
                 est = mean(data_anal),
@@ -738,7 +730,7 @@ test_that("rbmi works for one arm trials", {
         mutate(strategy = "MAR")
 
     runtest <- function(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method) {
-        
+
         draw_obj <- draws(
             data = dat,
             data_ice = dat_ice,
@@ -800,7 +792,7 @@ test_that("rbmi works for one arm trials", {
             fixed = TRUE
         )
 
-        if(class(anl_obj$method)[2] == "condmean") {
+        if (class(anl_obj$method)[2] == "condmean") {
             pooled <- pool(anl_obj, type = "normal")
         } else {
             pooled <- pool(anl_obj)
@@ -829,7 +821,7 @@ test_that("rbmi works for one arm trials", {
 test_that("Three arms trial runs smoothly and gives expected results", {
 
     copy_group <- function(dat, name_group) {
-        datC <- dat[dat$group == name_group,]
+        datC <- dat[dat$group == name_group, ]
         datC$group <- "C"
         datC$id <- paste0(datC$id, "C")
         dat <- rbind(dat, datC)
@@ -922,7 +914,6 @@ test_that("Three arms trial runs smoothly and gives expected results", {
     expect_equal(pooled$pars$trtB, pooled$pars$trtC)
 
 
-    ########## same_cov = FALSE
     drawobj <- draws(
         data = dat,
         data_ice = dat_ice,
@@ -950,4 +941,3 @@ test_that("Three arms trial runs smoothly and gives expected results", {
     expect_equal(anaobj$results[[1]]$trtB, anaobj$results[[1]]$trtC)
     expect_equal(pooled$pars$trtB, pooled$pars$trtC)
 })
-

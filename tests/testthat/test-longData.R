@@ -29,7 +29,7 @@ ld_2_list <- function(ld) {
         all(vars %in% names(ld))
     )
 
-    HOLD <- lapply( vars, function(x, ld) ld[[x]], ld = ld)
+    HOLD <- lapply(vars, function(x, ld) ld[[x]], ld = ld)
     names(HOLD) <- vars
     return(HOLD)
 }
@@ -54,14 +54,14 @@ get_ld <- function() {
         left_join(covars, by = "subjid") %>%
         mutate(outcome = rnorm(
             n(),
-            age * 3 + (as.numeric(sex) - 1) * 3 + (as.numeric(group) - 1) * 4,
+            .data$age * 3 + (as.numeric(.data$sex) - 1) * 3 + (as.numeric(.data$group) - 1) * 4,
             sd = 3
         )) %>%
-        arrange(subjid) %>%
-        group_by(subjid) %>%
-        mutate(visit = factor(paste0("Visit ", 1:n())))  %>%
+        arrange(.data$subjid) %>%
+        group_by(.data$subjid) %>%
+        mutate(visit = factor(paste0("Visit ", seq_len(n()))))  %>%
         ungroup() %>%
-        mutate(subjid = factor(subjid))
+        mutate(subjid = factor(.data$subjid))
 
     dat[c(1, 2, 3, 4, 6, 7), "outcome"] <- NA
 
@@ -92,18 +92,18 @@ get_data <- function(n) {
 
     dat <- get_sim_data(n, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
-        select(-is_miss) %>%
-        mutate(group = factor(group, labels = c("Placebo", "TRT")))
+        mutate(outcome = if_else(.data$is_miss == 1 & .data$visit == "visit_3", NA_real_, .data$outcome)) %>%
+        select(-.data$is_miss) %>%
+        mutate(group = factor(.data$group, labels = c("Placebo", "TRT")))
 
 
     dat_ice <- dat %>%
         group_by(id) %>%
-        arrange(id, visit) %>%
-        filter(is.na(outcome)) %>%
+        arrange(id, .data$visit) %>%
+        filter(is.na(.data$outcome)) %>%
         slice(1) %>%
         ungroup() %>%
-        select(id, visit) %>%
+        select(id, .data$visit) %>%
         mutate(strategy = "JR")
 
 
@@ -137,7 +137,12 @@ test_that("longData - Basics", {
 
     expect_equal(
         unlist(ld$is_missing, use.names = FALSE),
-        c(T, T, T,     T, F, T,     T, F, F,     F, F, F)
+        c(
+            TRUE, TRUE, TRUE,
+            TRUE, FALSE, TRUE,
+            TRUE, FALSE, FALSE,
+            FALSE, FALSE, FALSE
+        )
     )
 
     expect_equal(
@@ -383,7 +388,12 @@ test_that("Strategies", {
 
     expect_equal(
         unlist(ld$is_mar, use.names = FALSE),
-        c(F, F, F,    T, T, T,    T, T, F,    T, T, T)
+        c(
+            FALSE, FALSE, FALSE,
+            TRUE, TRUE, TRUE,
+            TRUE, TRUE, FALSE,
+            TRUE, TRUE, TRUE
+        )
     )
 
     expect_equal(
@@ -393,9 +403,9 @@ test_that("Strategies", {
 
     dat_ice <- tribble(
         ~subjid, ~strategy,
-          "1",  "ABC",
-          "2",  "MAR",
-          "3",  "ABC"
+        "1",  "ABC",
+        "2",  "MAR",
+        "3",  "ABC"
     )
     ld$update_strategies(dat_ice)
 
@@ -406,7 +416,12 @@ test_that("Strategies", {
 
     expect_equal(
         unlist(ld$is_mar, use.names = FALSE),
-        c(F, F, F,    T, T, T,    T, T, F,    T, T, T)
+        c(
+            FALSE, FALSE, FALSE,
+            TRUE, TRUE, TRUE,
+            TRUE, TRUE, FALSE,
+            TRUE, TRUE, TRUE
+        )
     )
 
     expect_equal(
@@ -424,8 +439,8 @@ test_that("Strategies", {
     )
 
     dat_ice <- tribble(
-         ~subjid, ~strategy,
-          "3",  "MAR",
+        ~subjid, ~strategy,
+        "3",  "MAR",
     )
 
     expect_warning(
@@ -534,7 +549,7 @@ test_that("strategies part 2", {
 
     expect_equal(
         unlist(ld$ice_visit_index, use.names = FALSE),
-        c(4,4,4,4)
+        c(4, 4, 4, 4)
     )
     expect_equal(
         unlist(ld$strategies, use.names = FALSE),
@@ -650,8 +665,8 @@ test_that("longdata can handle data that isn't sorted", {
     ld$set_strategies(dat_ice)
 
     expect_equal(ld$values, list("1" = c(1, 2, 3), "2" = c(5, NA, 4)))
-    expect_equal(ld$is_missing, list("1" = c(F, F, F), "2" = c(F, T, F)))
-    expect_equal(ld$is_mar, list("1" = c(T, T, T), "2" = c(T, F, F)))
+    expect_equal(ld$is_missing, list("1" = c(FALSE, FALSE, FALSE), "2" = c(FALSE, TRUE, FALSE)))
+    expect_equal(ld$is_mar, list("1" = c(TRUE, TRUE, TRUE), "2" = c(TRUE, FALSE, FALSE)))
 
     dat2 <- dat %>%
         arrange(id, visit) %>%
@@ -714,19 +729,19 @@ test_that("longdata rejects data that has no useable observations for a visit", 
 test_that(
     "Validate `is_mar` object", {
 
-        index_mar <- as_class(c(T,T,F,F), "is_mar")
+        index_mar <- as_class(c(TRUE, TRUE, FALSE, FALSE), "is_mar")
         expect_true(validate(index_mar))
 
-        index_mar <- as_class(c(T,T,T,T), "is_mar")
+        index_mar <- as_class(c(TRUE, TRUE, TRUE, TRUE), "is_mar")
         expect_true(validate(index_mar))
 
-        index_mar <- as_class(c(F,F,F,F), "is_mar")
+        index_mar <- as_class(c(FALSE, FALSE, FALSE, FALSE), "is_mar")
         expect_true(validate(index_mar))
 
-        index_mar <- as_class(c(T,T,F,T), "is_mar")
+        index_mar <- as_class(c(TRUE, TRUE, FALSE, TRUE), "is_mar")
         expect_error(validate(index_mar))
 
-        index_mar <- as_class(c(F,F,T,T), "is_mar")
+        index_mar <- as_class(c(FALSE, FALSE, TRUE, TRUE), "is_mar")
         expect_error(validate(index_mar))
 
     }
@@ -1084,7 +1099,7 @@ test_that("Warnings/errors are thrown when strategies are incorrectly updated", 
     )
     dat_ice <- tibble(
         pt = factor(c("A", "B", "C"), levels = c("A", "B", "C")),
-        vis = factor( c("V2", "V2", "V2"), levels = c("V1", "V2", "V3")),
+        vis = factor(c("V2", "V2", "V2"), levels = c("V1", "V2", "V3")),
         strat = c("JR", "MAR", "JR")
     )
     longdata <- longDataConstructor$new(dat, vars)

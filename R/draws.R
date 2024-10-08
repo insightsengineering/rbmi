@@ -142,10 +142,11 @@
 #'   Needed only for `method_condmean(type = "bootstrap")` and `method_approxbayes()`.
 #' - `strategy`: name of the column in `data_ice` which contains the subject-specific imputation strategy.
 #'
-#' In our experience, Bayesian MI (`method = method_bayes()`) with a relatively low number of samples (e.g. `n_samples` below 100)
-#' frequently triggers STAN warnings about R-hat such as "The largest R-hat is X.XX, indicating chains have not mixed".
-#' In many instances, this warning might be spurious, i.e. standard diagnostics analysis of the MCMC samples
-#' do not indicate any issues and results look reasonable. Increasing the number of samples to e.g. above 150 usually
+#' In our experience, Bayesian MI (`method = method_bayes()`) with a relatively low number of
+#' samples (e.g. `n_samples` below 100) frequently triggers STAN warnings about R-hat such as
+#' "The largest R-hat is X.XX, indicating chains have not mixed".  In many instances, this warning
+#' might be spurious, i.e. standard diagnostics analysis of the MCMC samples do not indicate any
+#' issues and results look reasonable. Increasing the number of samples to e.g. above 150 usually
 #' gets rid of the warning.
 #'
 #' @inherit as_draws return
@@ -170,11 +171,13 @@
 #' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing Data, Second Edition. John Wiley & Sons,
 #' Hoboken, New Jersey, 2002. \[Section 10.2.3\]
 #'
-#' Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Standard and reference-based
+#' Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett.
+#' Standard and reference-based
 #' conditional mean imputation. \url{https://arxiv.org/abs/2109.11162}, 2022.
 #'
 #' Von Hippel, Paul T and Bartlett, Jonathan W.
-#' Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021.
+#' Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without
+#' posterior draws. 2021.
 #'
 #' @export
 draws <- function(data, data_ice = NULL, vars, method, ncores = 1, quiet = FALSE) {
@@ -220,7 +223,7 @@ draws.condmean <- function(data, data_ice = NULL, vars, method, ncores = 1, quie
 
     if (method$type == "bootstrap") {
         extra_opts <- list(
-            n_target_samples = method$n_samples ,
+            n_target_samples = method$n_samples,
             failure_limit = ceiling(method$threshold * method$n_samples),
             sample_stack = get_bootstrap_stack(longdata, method)
         )
@@ -346,11 +349,6 @@ get_draws_mle <- function(
     mmrm_sample <- encap_get_mmrm_sample(cl, longdata, method)
 
 
-    # browser()
-    # get_mmrm_sample
-    # mmrm_sample(ids)
-    # clusterEvalQ(cl, fit_mmrm)
-
     samples <- list()
     n_failed_samples <- 0
     logger <- progressLogger$new(n_target_samples, quiet = quiet)
@@ -364,7 +362,7 @@ get_draws_mle <- function(
         if (n_failed_samples > failure_limit) {
             if (!is.null(cl)) parallel::stopCluster(cl)
             if (!is.null(method$type)) {
-                if(method$type == "jackknife"){
+                if (method$type == "jackknife") {
                     ids_fail <- ids[isfailure][[1]]
                     ids_jack <- longdata$ids[!longdata$ids %in% ids_fail][[1]]
                     msg <- "MMRM failed to fit to the data after removing subject '%s'"
@@ -564,10 +562,10 @@ print.draws <- function(x, ...) {
     frm_str <- sprintf("%s ~ %s", frm[[2]], frm[[3]])
 
     meth <- switch(
-         class(x$method)[[2]],
-         "approxbayes" = "Approximate Bayes",
-         "condmean" = "Conditional Mean",
-         "bayes" = "Bayes"
+        class(x$method)[[2]],
+        "approxbayes" = "Approximate Bayes",
+        "condmean" = "Conditional Mean",
+        "bayes" = "Bayes"
     )
 
     method <- x$method
@@ -731,9 +729,9 @@ progressLogger <- R6::R6Class(
         #' @param quiet logical, sets field `quiet`
         #' @param step real, sets field `step`
         initialize = function(n_max, quiet = FALSE, step = 0.1) {
-            self$step = step
-            self$n_max = n_max
-            self$quiet = quiet
+            self$step <- step
+            self$n_max <- n_max
+            self$quiet <- quiet
         },
 
         #' @description
@@ -750,7 +748,7 @@ progressLogger <- R6::R6Class(
             self$step_current <- self$step_current + n / self$n_max
             if (self$step_current >= self$step) {
                 self$print_progress()
-                self$step_current = 0
+                self$step_current <- 0
             }
         },
 
@@ -763,5 +761,3 @@ progressLogger <- R6::R6Class(
         }
     )
 )
-
-

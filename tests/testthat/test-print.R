@@ -1,6 +1,7 @@
 suppressPackageStartupMessages({
     library(dplyr)
     library(tidyr)
+    library(testthat)
 })
 
 
@@ -25,18 +26,18 @@ test_print_get_data <- function(n) {
 
     dat <- get_sim_data(n, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
-        select(-is_miss) %>%
-        mutate(group = factor(group, labels = c("Placebo", "TRT")))
+        mutate(outcome = if_else(.data$is_miss == 1 & .data$visit == "visit_3", NA_real_, .data$outcome)) %>%
+        select(-.data$is_miss) %>%
+        mutate(group = factor(.data$group, labels = c("Placebo", "TRT")))
 
 
     dat_ice <- dat %>%
         group_by(id) %>%
-        arrange(id, visit) %>%
-        filter(is.na(outcome)) %>%
+        arrange(id, .data$visit) %>%
+        filter(is.na(.data$outcome)) %>%
         slice(1) %>%
         ungroup() %>%
-        select(id, visit) %>%
+        select(id, .data$visit) %>%
         mutate(strategy = "JR")
 
 
