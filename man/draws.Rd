@@ -197,10 +197,11 @@ Needed only for \code{method_condmean(type = "bootstrap")} and \code{method_appr
 \item \code{strategy}: name of the column in \code{data_ice} which contains the subject-specific imputation strategy.
 }
 
-In our experience, Bayesian MI (\code{method = method_bayes()}) with a relatively low number of samples (e.g. \code{n_samples} below 100)
-frequently triggers STAN warnings about R-hat such as "The largest R-hat is X.XX, indicating chains have not mixed".
-In many instances, this warning might be spurious, i.e. standard diagnostics analysis of the MCMC samples
-do not indicate any issues and results look reasonable. Increasing the number of samples to e.g. above 150 usually
+In our experience, Bayesian MI (\code{method = method_bayes()}) with a relatively low number of
+samples (e.g. \code{n_samples} below 100) frequently triggers STAN warnings about R-hat such as
+"The largest R-hat is X.XX, indicating chains have not mixed".  In many instances, this warning
+might be spurious, i.e. standard diagnostics analysis of the MCMC samples do not indicate any
+issues and results look reasonable. Increasing the number of samples to e.g. above 150 usually
 gets rid of the warning.
 }
 \references{
@@ -215,11 +216,13 @@ Medicine, 39(21):2815–2842, 2020.
 Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing Data, Second Edition. John Wiley & Sons,
 Hoboken, New Jersey, 2002. [Section 10.2.3]
 
-Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Standard and reference-based
+Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett.
+Standard and reference-based
 conditional mean imputation. \url{https://arxiv.org/abs/2109.11162}, 2022.
 
 Von Hippel, Paul T and Bartlett, Jonathan W.
-Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021.
+Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without
+posterior draws. 2021.
 }
 \seealso{
 \code{\link[=method_bayes]{method_bayes()}}, \code{\link[=method_approxbayes]{method_approxbayes()}}, \code{\link[=method_condmean]{method_condmean()}}, \code{\link[=method_bmlmi]{method_bmlmi()}} for setting \code{method}.
