@@ -7,6 +7,6 @@
 get_stan_model()
 }
 \description{
-Gets a compiled Stan object that can be used with \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}
+Gets a compiled Stan object that can be used with \code{rstan::sampling()}
 }
 \keyword{internal}

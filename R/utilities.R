@@ -531,7 +531,7 @@ ensure_rstan <- function() {
 
 #' Get Compiled Stan Object
 #'
-#' Gets a compiled Stan object that can be used with [`rstan::sampling()`]
+#' Gets a compiled Stan object that can be used with `rstan::sampling()`
 #' @keywords internal
 get_stan_model <- function() {
     ensure_rstan()
