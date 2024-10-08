@@ -23,7 +23,7 @@ number of groups if \code{same_cov = FALSE}.
 \description{
 Extract draws from a \code{stanfit} object and convert them into lists.
 
-The function \code{\link[rstan:stanfit-method-extract]{rstan::extract()}} returns the draws for a given parameter as an array. This function
-calls \code{\link[rstan:stanfit-method-extract]{rstan::extract()}} to extract the draws from a \code{stanfit} object
+The function \code{rstan::extract()} returns the draws for a given parameter as an array. This function
+calls \code{rstan::extract()} to extract the draws from a \code{stanfit} object
 and then convert the arrays into lists.
 }

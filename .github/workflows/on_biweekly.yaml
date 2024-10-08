@@ -32,6 +32,4 @@ jobs:
 
       - name: Check
         uses: ./.github/actions/rcmdcheck
-        with:
-          slim: true
 

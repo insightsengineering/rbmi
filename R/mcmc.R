@@ -4,7 +4,7 @@
 #' @description
 #' `fit_mcmc()` fits the base imputation model using a Bayesian approach.
 #' This is done through a MCMC method that is implemented in `stan`
-#' and is run by using the function [rstan::sampling()].
+#' and is run by using the function `rstan::sampling()`.
 #' The function returns the draws from the posterior distribution of the model parameters
 #' and the `stanfit` object. Additionally it performs multiple diagnostics checks of the chain
 #' and returns warnings in case of any detected issues.
@@ -45,10 +45,7 @@
 #' - `fit`: a `stanfit` object.
 #'
 #'
-#' @import Rcpp
 #' @import methods
-#' @importFrom rstan sampling
-#' @useDynLib rbmi, .registration = TRUE
 fit_mcmc <- function(
     designmat,
     outcome,
@@ -95,7 +92,7 @@ fit_mcmc <- function(
     )
 
     sampling_args <- list(
-        object = stanmodels$MMRM,
+        object = get_stan_model(),
         data = stan_data,
         pars = c("beta", "Sigma"),
         chains = 1,
@@ -116,7 +113,7 @@ fit_mcmc <- function(
     sampling_args$seed <- sample.int(.Machine$integer.max, 1)
 
     stan_fit <- record({
-        do.call(sampling, sampling_args)
+        do.call(rstan::sampling, sampling_args)
     })
 
     if (!is.null(stan_fit$errors)) {
@@ -218,8 +215,8 @@ split_dim <- function(a, n) {
 #' @description
 #' Extract draws from a `stanfit` object and convert them into lists.
 #'
-#' The function [rstan::extract()] returns the draws for a given parameter as an array. This function
-#' calls [rstan::extract()] to extract the draws from a `stanfit` object
+#' The function `rstan::extract()` returns the draws for a given parameter as an array. This function
+#' calls `rstan::extract()` to extract the draws from a `stanfit` object
 #' and then convert the arrays into lists.
 #'
 #' @param stan_fit A `stanfit` object.
@@ -233,10 +230,9 @@ split_dim <- function(a, n) {
 #'   of the list is a list with length equal to 1 if `same_cov = TRUE` or equal to the
 #'   number of groups if `same_cov = FALSE`.
 #'
-#' @importFrom rstan extract
 extract_draws <- function(stan_fit) {
 
-    pars <- extract(stan_fit, pars = c("beta", "Sigma"))
+    pars <- rstan::extract(stan_fit, pars = c("beta", "Sigma"))
     names(pars) <- c("beta", "sigma")
 
     ##################### from array to list
@@ -261,7 +257,6 @@ extract_draws <- function(stan_fit) {
 #' @return
 #' A named vector containing the ESS for each parameter of the model.
 #'
-#' @importFrom rstan summary
 get_ESS <- function(stan_fit) {
     return(rstan::summary(stan_fit, pars = c("beta", "Sigma"))$summary[, "n_eff"])
 }
@@ -316,7 +311,7 @@ check_ESS <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
 #' 2. The Bayesian Fraction of Missing Information (BFMI) is sufficiently low.
 #' 3. The number of iterations that saturated the max treedepth is zero.
 #'
-#' Please see [rstan::check_hmc_diagnostics()] for details.
+#' Please see `rstan::check_hmc_diagnostics()` for details.
 #'
 #' @param stan_fit A `stanfit` object.
 #'
