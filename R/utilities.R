@@ -524,7 +524,10 @@ ensure_rstan <- function() {
         stop(
             "In order to use `method_bayes()` the `rstan` package must be installed.",
             " This can be installed from CRAN by running:\n\n",
-            "      install.packages('rstan')\n\n"
+            "      install.packages('rstan')\n\n",
+            "Please note that for `rstan` to work you need to ensure you have a valid C++ toolchain;",
+            " for details please see:\n",
+            "https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started#configuring-c-toolchain\n\n"
         )
     }
 }
