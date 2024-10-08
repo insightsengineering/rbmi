@@ -9,12 +9,22 @@ runs:
   using: "composite"
   steps:
 
+    - name: Determine system/package state
+      run: |
+        sink(".github/meta.txt")
+            list(
+                version = version,
+                pkgs = installed.packages()[c("rstan"), c("Version", "Package")]
+            )
+        sink()
+      shell: Rscript {0}
+
     - name: Cache Compiled Stan Code
       id: cache-pkgs
       uses: actions/cache@v3
       with:
         path: local/*
-        key: ${{ hashFiles('inst/stan/MMRM.stan') }}
+        key: ${{ hashFiles('.github/meta.txt') }}-${{ hashFiles('inst/stan/MMRM.stan') }}
 
     - name: Build if needed
       shell: bash
