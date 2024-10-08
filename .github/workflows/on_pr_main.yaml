@@ -53,5 +53,7 @@ jobs:
         uses: ./.github/actions/build-src
       
       - name: Build Vignettes
+        env:
+          RBMI_CACHE_DIR: local
         run: |
           Rscript ./vignettes/build.R

@@ -15,6 +15,7 @@ runs:
       
     - name: Run R CMD check
       env:
+        RBMI_CACHE_DIR: local
         _R_CHECK_CRAN_INCOMING_: false
         _R_CHECK_CRAN_INCOMING_REMOTE_: false
       shell: bash

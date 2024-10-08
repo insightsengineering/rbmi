@@ -18,10 +18,25 @@
             }
         },
         {
-            "label": "R - testthat (FULL)",
+            "label": "rbmi - testthat (local cache)",
+            "problemMatcher": "$testthat",
+            "command": "Rscript",
+            "args" : [
+                "-e",
+                "devtools::test()"
+            ],
+            "options": {
+                "env": {
+                    "RBMI_CACHE_DIR" : "${workspaceFolder}/local"
+                }
+            },
+        },
+        {
+            "label": "rbmi - testthat (FULL)",
             "command": "Rscript",
             "options": {
                 "env": {
+                    "RBMI_CACHE_DIR" : "${workspaceFolder}/local",
                     "R_TEST_FULL" : "TRUE"
                 }
             },
@@ -34,27 +49,7 @@
                 "clear": true,
                 "panel": "dedicated"
             },
-            "problemMatcher": {
-                "owner": "R-testthat",
-                "severity": "error",
-                "fileLocation": [
-                    "relative",
-                    "${workspaceFolder}/tests/testthat"
-                ],
-                "pattern": [
-                    {
-                        "regexp": "^(Failure|Error)\\s\\((.*\\.[Rr]):(\\d+):(\\d+)\\):\\s(.*)",
-                        "file": 2,
-                        "line": 3,
-                        "column": 4,
-                        "message": 5
-                    },
-                    {
-                        "regexp": "^(.*)$",
-                        "message": 1
-                    }
-                ]
-            }
+            "problemMatcher": "$testthat"
         }
     ]
 }

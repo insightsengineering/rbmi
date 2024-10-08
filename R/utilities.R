@@ -544,9 +544,60 @@ get_stan_model <- function() {
     } else {
         stop("Unable to find MMRM.stan; Please report this as a bug")
     }
+    cache_dir = getOption("rbmi.cache_dir")
+    dir.create(cache_dir, showWarnings = FALSE, recursive = TRUE)
+    file_loc_cache <- file.path(cache_dir, "MMRM.stan")
+    if (!file.exists(file_loc_cache)) {
+        message("Compiling Stan model please wait...")
+    }
+    file.copy(file_loc, file_loc_cache, overwrite = TRUE)
     rstan::stan_model(
-        file = file_loc,
+        file = file_loc_cache,
         auto_write = TRUE,
         model_name = "rbmi_mmrm"
     )
+}
+
+
+
+#' rbmi settings
+#'
+#' @description
+#' Define settings that modify the behaviour of the `rbmi` package
+#'
+#' Each of the following are the name of options that can be set via:
+#' ```
+#' options(<option_name> = <value>)
+#' ```
+#'
+#' ## `rbmi.cache_dir`
+#'
+#' Default = `tools::R_user_dir("rbmi", which = "cache")`
+#'
+#' Directory to store compiled Stan model in. If not set, a temporary directory is used for
+#' the given R session. Can also be set via the environment variable `RBMI_CACHE_DIR`.
+#'
+#'
+#' @examples
+#' \dontrun{
+#' options(rbmi.cache_dir = "some/directory/path")
+#' }
+#' @name rbmi-settings
+set_options <- function() {
+
+    cache_dir <- Sys.getenv("RBMI_CACHE_DIR")
+
+    if (cache_dir == "" || is.null(cache_dir)) {
+        cache_dir <- tools::R_user_dir("rbmi", which = "cache")
+    }
+
+    current_opts <- names(options())
+    rbmi_opts <- list(
+        rbmi.cache_dir = cache_dir
+    )
+    for (opt in names(rbmi_opts)) {
+        if (!opt %in% current_opts) {
+            options(rbmi_opts[opt])
+        }
+    }
 }

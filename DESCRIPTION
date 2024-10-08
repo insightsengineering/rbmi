@@ -40,6 +40,7 @@ Imports:
     mmrm,
     pkgload,
     Matrix,
+    tools,
     methods,
     R6,
     assertthat

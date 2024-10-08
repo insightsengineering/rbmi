@@ -22,6 +22,8 @@ jobs:
         uses: ./.github/actions/build-src
       
       - name: testthat
+        env:
+          RBMI_CACHE_DIR: local
         run: |
           options(crayon.enabled = TRUE, cli.dynamic = FALSE)
           devtools::test(stop_on_failure = TRUE, reporter = testthat::CheckReporter)
