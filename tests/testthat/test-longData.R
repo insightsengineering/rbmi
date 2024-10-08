@@ -54,14 +54,14 @@ get_ld <- function() {
         left_join(covars, by = "subjid") %>%
         mutate(outcome = rnorm(
             n(),
-            .data$age * 3 + (as.numeric(.data$sex) - 1) * 3 + (as.numeric(.data$group) - 1) * 4,
+            age * 3 + (as.numeric(sex) - 1) * 3 + (as.numeric(group) - 1) * 4,
             sd = 3
         )) %>%
-        arrange(.data$subjid) %>%
-        group_by(.data$subjid) %>%
+        arrange(subjid) %>%
+        group_by(subjid) %>%
         mutate(visit = factor(paste0("Visit ", seq_len(n()))))  %>%
         ungroup() %>%
-        mutate(subjid = factor(.data$subjid))
+        mutate(subjid = factor(subjid))
 
     dat[c(1, 2, 3, 4, 6, 7), "outcome"] <- NA
 
@@ -92,18 +92,18 @@ get_data <- function(n) {
 
     dat <- get_sim_data(n, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(.data$is_miss == 1 & .data$visit == "visit_3", NA_real_, .data$outcome)) %>%
-        select(-.data$is_miss) %>%
-        mutate(group = factor(.data$group, labels = c("Placebo", "TRT")))
+        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        select(-is_miss) %>%
+        mutate(group = factor(group, labels = c("Placebo", "TRT")))
 
 
     dat_ice <- dat %>%
         group_by(id) %>%
-        arrange(id, .data$visit) %>%
-        filter(is.na(.data$outcome)) %>%
+        arrange(id, visit) %>%
+        filter(is.na(outcome)) %>%
         slice(1) %>%
         ungroup() %>%
-        select(id, .data$visit) %>%
+        select(id, visit) %>%
         mutate(strategy = "JR")
 
 

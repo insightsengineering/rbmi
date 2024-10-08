@@ -54,7 +54,7 @@ test_that("delta_template & delta_lagscale", {
         mutate(
             is_mar  =     c(TRUE, TRUE, TRUE, FALSE, FALSE,    TRUE, TRUE, TRUE, TRUE, TRUE),
             is_missing =  c(FALSE, TRUE, FALSE, TRUE, TRUE,    TRUE, FALSE, TRUE, FALSE, FALSE),
-            is_post_ice = c(FALSE, TRUE, FALSE, TRUE, TRUE,    FALSE, TRUE, TRUE, TRUE, TRUE),
+            is_post_ice = c(FALSE, FALSE, FALSE, TRUE, TRUE,    FALSE, TRUE, TRUE, TRUE, TRUE),
             strategy = c(NA, "MAR", NA, "JTR", "JTR",    "MAR", NA, "MAR", NA, NA),
             delta = rep(0, n_vis * 2)
         ) %>%
