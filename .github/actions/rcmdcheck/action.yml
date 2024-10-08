@@ -1,10 +1,6 @@
 
 name: 'Build src'
 description: 'Build src!'
-inputs:
-  slim:
-    description: 'Should the reduced set of checks be run'
-    default: false
 runs:
   using: "composite"
   steps:
@@ -20,12 +16,7 @@ runs:
         _R_CHECK_CRAN_INCOMING_REMOTE_: false
       shell: bash
       run: |
-        echo "inputs.slim = ${{ inputs.slim }}"
-        if ${{ inputs.slim }} ; then
-          R CMD check --no-manual --no-build-vignettes --no-vignettes --ignore-vignettes *.tar.gz
-        else
           R CMD check --no-manual --as-cran *.tar.gz
-        fi
 
     - name: Catch warnings in R CMD check output
       id: catch-errors
