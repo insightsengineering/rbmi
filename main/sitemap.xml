@@ -45,9 +45,9 @@
 <url><loc>/reference/convert_to_imputation_list_df.html</loc></url>
 <url><loc>/reference/d_lagscale.html</loc></url>
 <url><loc>/reference/delta_template.html</loc></url>
-<url><loc>/reference/do_not_run.html</loc></url>
 <url><loc>/reference/draws.html</loc></url>
 <url><loc>/reference/encap_get_mmrm_sample.html</loc></url>
+<url><loc>/reference/ensure_rstan.html</loc></url>
 <url><loc>/reference/eval_mmrm.html</loc></url>
 <url><loc>/reference/expand.html</loc></url>
 <url><loc>/reference/extract_covariates.html</loc></url>
@@ -73,6 +73,7 @@
 <url><loc>/reference/get_pattern_groups.html</loc></url>
 <url><loc>/reference/get_pattern_groups_unique.html</loc></url>
 <url><loc>/reference/get_pool_components.html</loc></url>
+<url><loc>/reference/get_stan_model.html</loc></url>
 <url><loc>/reference/get_visit_distribution_parameters.html</loc></url>
 <url><loc>/reference/has_class.html</loc></url>
 <url><loc>/reference/ife.html</loc></url>
@@ -110,6 +111,7 @@
 <url><loc>/reference/pval_percentile.html</loc></url>
 <url><loc>/reference/random_effects_expr.html</loc></url>
 <url><loc>/reference/rbmi-package.html</loc></url>
+<url><loc>/reference/rbmi-settings.html</loc></url>
 <url><loc>/reference/record.html</loc></url>
 <url><loc>/reference/recursive_reduce.html</loc></url>
 <url><loc>/reference/remove_if_all_missing.html</loc></url>
