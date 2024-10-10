@@ -56,14 +56,6 @@ In any case the covariance matrix can be assumed to be the same or different acr
     <li><a class="dropdown-item" href="../articles/stat_specs.html">rbmi: Statistical Specifications</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.2.6">v1.2.6</a> </div></li>
-<!-- end dropdown for versions -->
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/insightsengineering/rbmi/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -263,10 +255,11 @@ is <strong>not</strong> included in the model by default.</p></li>
 By default only the <code>vars$group</code> is set as stratification variable.
 Needed only for <code>method_condmean(type = "bootstrap")</code> and <code><a href="method.html">method_approxbayes()</a></code>.</p></li>
 <li><p><code>strategy</code>: name of the column in <code>data_ice</code> which contains the subject-specific imputation strategy.</p></li>
-</ul><p>In our experience, Bayesian MI (<code>method = method_bayes()</code>) with a relatively low number of samples (e.g. <code>n_samples</code> below 100)
-frequently triggers STAN warnings about R-hat such as "The largest R-hat is X.XX, indicating chains have not mixed".
-In many instances, this warning might be spurious, i.e. standard diagnostics analysis of the MCMC samples
-do not indicate any issues and results look reasonable. Increasing the number of samples to e.g. above 150 usually
+</ul><p>In our experience, Bayesian MI (<code>method = method_bayes()</code>) with a relatively low number of
+samples (e.g. <code>n_samples</code> below 100) frequently triggers STAN warnings about R-hat such as
+"The largest R-hat is X.XX, indicating chains have not mixed".  In many instances, this warning
+might be spurious, i.e. standard diagnostics analysis of the MCMC samples do not indicate any
+issues and results look reasonable. Increasing the number of samples to e.g. above 150 usually
 gets rid of the warning.</p>
     </div>
     <div class="section level2">
@@ -279,10 +272,12 @@ missing continuous outcome data using controlled multiple imputation: a practica
 Medicine, 39(21):2815–2842, 2020.</p>
 <p>Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing Data, Second Edition. John Wiley &amp; Sons,
 Hoboken, New Jersey, 2002. [Section 10.2.3]</p>
-<p>Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett. Standard and reference-based
+<p>Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett.
+Standard and reference-based
 conditional mean imputation. <a href="https://arxiv.org/abs/2109.11162" class="external-link">https://arxiv.org/abs/2109.11162</a>, 2022.</p>
 <p>Von Hippel, Paul T and Bartlett, Jonathan W.
-Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021.</p>
+Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without
+posterior draws. 2021.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
