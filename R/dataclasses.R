@@ -91,7 +91,7 @@ validate.sample_single <- function(x, ...) {
 #' @param ... A list of `sample_single` objects.
 sample_list <- function(...) {
     x <- list(...)
-    if (length(x) == 1 & !has_class(x[[1]], "sample_single")) {
+    if (length(x) == 1 && !has_class(x[[1]], "sample_single")) {
         x <- x[[1]]
     }
     class(x) <- c("sample_list", "list")
@@ -145,7 +145,7 @@ print.imputation_single <- function(x, ...) {
 #' @param ... a list of `imputation_single`.
 imputation_df <- function(...) {
     x <- list(...)
-    if (length(x) == 1 & class(x[[1]])[[1]] != "imputation_single") {
+    if (length(x) == 1 && class(x[[1]])[[1]] != "imputation_single") {
         x <- x[[1]]
     }
     class(x) <- c("imputation_df", "list")

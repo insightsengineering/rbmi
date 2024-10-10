@@ -133,7 +133,7 @@ test_that("LSmeans(proportional) returns equivalent results to 'counterfactual'"
             6 * (c2 == "Y") +
             7 * (c1 == "B" & c2 == "Y") +
             13 * (c1 == "B") * v1 +
-            15 * (c3 == "K") + 
+            15 * (c3 == "K") +
             16 * (c3 == "J") +
             error
     )

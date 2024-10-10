@@ -1,6 +1,7 @@
 suppressPackageStartupMessages({
     library(dplyr)
     library(tidyr)
+    library(testthat)
 })
 
 

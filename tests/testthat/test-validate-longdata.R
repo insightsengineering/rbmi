@@ -12,25 +12,25 @@ covars <- tibble(
     age = rnorm(n),
     group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),
     sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F")),
-    strata = c("A","A","A","A","A","A","A","A","B", "B")
+    strata = c("A", "A", "A", "A", "A", "A", "A", "A", "B", "B")
 )
 
 dat <- tibble(
     subjid = rep.int(1:n, nv)
 ) %>%
     left_join(covars, by = "subjid") %>%
-    mutate( outcome = rnorm(
+    mutate(outcome = rnorm(
         n(),
         age * 3 + (as.numeric(sex) - 1) * 3 + (as.numeric(group) - 1) * 4,
         sd = 3
     )) %>%
     arrange(subjid) %>%
     group_by(subjid) %>%
-    mutate( visit = factor(paste0("Visit ", 1:n())))  %>%
+    mutate(visit = factor(paste0("Visit ", seq_len(n()))))  %>%
     ungroup() %>%
     mutate(subjid = factor(subjid))
 
-dat[c(1,2,3,4,5,7), "outcome"] <- NA
+dat[c(1, 2, 3, 4, 5, 7), "outcome"] <- NA
 
 
 vars <- set_vars(
@@ -45,7 +45,7 @@ vars <- set_vars(
 
 
 
-test_that("extract_covariates",{
+test_that("extract_covariates", {
     expect_equal(extract_covariates("age"), "age")
     expect_equal(extract_covariates(c("age", "sex")), c("age", "sex"))
     expect_equal(extract_covariates(c("age:sex")), c("age", "sex"))
@@ -144,7 +144,7 @@ test_that("validate_datalong_varExists", {
 
 
 
-test_that("validate_datalong_types",{
+test_that("validate_datalong_types", {
 
 
     expect_true(validate_datalong_types(dat, vars))
@@ -217,12 +217,12 @@ test_that("validate_datalong_types",{
     expect_true(validate_datalong_types(dat2, vars))
 
     # Test that if group or visit variables have unobserved levels return error
-    dat2 <- dat[dat$visit != "Visit 1",]
+    dat2 <- dat[dat$visit != "Visit 1", ]
     expect_error(
         validate_datalong_types(dat2, vars),
         "`visit`"
     )
-    dat2 <- dat[dat$group == "B",]
+    dat2 <- dat[dat$group == "B", ]
     expect_error(
         validate_datalong_types(dat2, vars),
         "`group`"
@@ -230,33 +230,33 @@ test_that("validate_datalong_types",{
 })
 
 
-test_that("validate_datalong_notMissing",{
+test_that("validate_datalong_notMissing", {
 
-    expect_true(validate_datalong_notMissing(dat,vars))
-
-    dat2 <- dat
-    dat2$age[c(1,2,3)] <- NA
-    expect_error(validate_datalong_notMissing(dat2,vars))
+    expect_true(validate_datalong_notMissing(dat, vars))
 
     dat2 <- dat
-    dat2$group[c(1,2,3)] <- NA
-    expect_error(validate_datalong_notMissing(dat2,vars))
+    dat2$age[c(1, 2, 3)] <- NA
+    expect_error(validate_datalong_notMissing(dat2, vars))
 
     dat2 <- dat
-    dat2$visit[c(1,2,3)] <- NA
-    expect_error(validate_datalong_notMissing(dat2,vars))
+    dat2$group[c(1, 2, 3)] <- NA
+    expect_error(validate_datalong_notMissing(dat2, vars))
 
     dat2 <- dat
-    dat2$subjid[c(1,2,3)] <- NA
-    expect_error(validate_datalong_notMissing(dat2,vars))
+    dat2$visit[c(1, 2, 3)] <- NA
+    expect_error(validate_datalong_notMissing(dat2, vars))
 
     dat2 <- dat
-    dat2$sex[c(1,2,3)] <- NA
-    expect_error(validate_datalong_notMissing(dat2,vars))
+    dat2$subjid[c(1, 2, 3)] <- NA
+    expect_error(validate_datalong_notMissing(dat2, vars))
 
     dat2 <- dat
-    dat2$strata[c(1,2,3)] <- NA
-    expect_error(validate_datalong_notMissing(dat2,vars))
+    dat2$sex[c(1, 2, 3)] <- NA
+    expect_error(validate_datalong_notMissing(dat2, vars))
+
+    dat2 <- dat
+    dat2$strata[c(1, 2, 3)] <- NA
+    expect_error(validate_datalong_notMissing(dat2, vars))
 
 })
 
@@ -271,7 +271,7 @@ test_that("validate_datalong_complete", {
     expect_error(validate_datalong_complete(dat2, vars))
 
     dat2 <- dat
-    dat2 <- dat2[-1,]
+    dat2 <- dat2[-1, ]
     expect_error(validate_datalong_complete(dat2, vars))
 
     ### Completely remove 1 visit (should check against the levels)
@@ -280,27 +280,27 @@ test_that("validate_datalong_complete", {
 })
 
 
-test_that("validate_datalong_unifromStrata",{
+test_that("validate_datalong_unifromStrata", {
 
-    expect_true(validate_datalong_unifromStrata(dat,vars))
+    expect_true(validate_datalong_unifromStrata(dat, vars))
 
     vars2 <- vars
     vars2$strata <- character(0)
-    expect_true(validate_datalong_unifromStrata(dat,vars2))
+    expect_true(validate_datalong_unifromStrata(dat, vars2))
 
     dat2 <- dat
     dat2$strata[[1]] <- "AXS"
-    expect_error(validate_datalong_unifromStrata(dat2,vars))
+    expect_error(validate_datalong_unifromStrata(dat2, vars))
 
 })
 
 
-test_that("validate_data_long",{
+test_that("validate_data_long", {
     expect_true(validate_datalong(dat, vars))
 })
 
 
-test_that("validate_data_ice",{
+test_that("validate_data_ice", {
 
     di <- data.frame(
         subjid = c("1", "1"),
@@ -357,6 +357,3 @@ test_that("validate_data_ice",{
     expect_true(validate_dataice(dat, di, vars, update = TRUE))
 
 })
-
-
-

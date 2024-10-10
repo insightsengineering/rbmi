@@ -231,5 +231,3 @@ test_that("ancova", {
         regex = "`k`"
     )
 })
-
-

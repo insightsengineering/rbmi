@@ -146,8 +146,8 @@ test_that("`references` is handled as expected", {
     set.seed(123)
     n <- 8
     nv <- 3
-    muT <- c(1,2,3)
-    muC <- c(1,3,5)
+    muT <- c(1, 2, 3)
+    muC <- c(1, 3, 5)
     covC <- rbind(
         c(2, 0.9, 0.8),
         c(0.9, 2, 0.9),
@@ -156,9 +156,9 @@ test_that("`references` is handled as expected", {
     covT <- covC
 
     dat <- data.frame(
-        subjid = factor(rep(1:(2*n), each = nv), levels = 1:(2*n)),
-        group = factor(rep(c("Control", "Intervention"), each = nv*n), levels = c("Control", "Intervention")),
-        visit = factor(rep(c("1", "2", "3"), 2*n), levels = c("1", "2", "3")),
+        subjid = factor(rep(1:(2 * n), each = nv), levels = 1:(2 * n)),
+        group = factor(rep(c("Control", "Intervention"), each = nv * n), levels = c("Control", "Intervention")),
+        visit = factor(rep(c("1", "2", "3"), 2 * n), levels = c("1", "2", "3")),
         outcome = c(
             replicate(n, sample_mvnorm(muC, covC)),
             replicate(n, sample_mvnorm(muT, covT))
@@ -169,7 +169,7 @@ test_that("`references` is handled as expected", {
     method <- method_condmean(type = "bootstrap", n_samples = 0)
 
     data_ice <- data.frame(
-        subjid = dat$subjid[c(1,10)],
+        subjid = dat$subjid[c(1, 10)],
         visit = c("2", "3"),
         strategy = "MAR"
     )
@@ -412,14 +412,14 @@ test_that("split_imputations", {
 
     output_expected <- list(
         imputation_df(
-            imputation_single("Phil", c(1,2,3)),
+            imputation_single("Phil", c(1, 2, 3)),
             imputation_single("Ben", 2),
             imputation_single("Ben", 1),
             imputation_single("Harry", 3)
         ),
         imputation_df(
-            imputation_single("Ben", c(1,2)),
-            imputation_single("Phil", c(4,5,6))
+            imputation_single("Ben", c(1, 2)),
+            imputation_single("Phil", c(4, 5, 6))
         )
     )
     expect_equal(output_actual_1, output_expected)
@@ -862,7 +862,7 @@ test_that("impute can recover known values", {
         ),
         data = ld,
         method = method_condmean(n_samples = 1),
-        formula = x~y
+        formula = x ~ y
     )
 
     x <- impute(dobj, c("A" = "B", "B" = "B"))
@@ -887,11 +887,11 @@ test_that("convert_to_imputation_list_df works as expected", {
         imputation_list_single(
             imputations = list(
                 imputation_single("Tom", c(1)),
-                imputation_single("Tom", c(1,2)),
-                imputation_single("Tom", c(1,2,3)),
+                imputation_single("Tom", c(1, 2)),
+                imputation_single("Tom", c(1, 2, 3)),
                 imputation_single("Tom", c(2)),
-                imputation_single("Tom", c(2,3)),
-                imputation_single("Tom", c(2,3,4))
+                imputation_single("Tom", c(2, 3)),
+                imputation_single("Tom", c(2, 3, 4))
             ),
             D = 2
         ),
@@ -1081,5 +1081,3 @@ test_that("method_bmlmi is working as expected in combination with impute", {
 
     expect_equal(x$imputations, expected_output)
 })
-
-

@@ -54,10 +54,10 @@ is_in_rbmi_development <- function() {
         pkgload::pkg_path(),
         error = function(e) return("")
     )
-    if (path == ""){
+    if (path == "") {
         return(FALSE)
     }
-    if (pkgload::pkg_name() == "rbmi" & file.exists(file.path(path,"misc/do_not_delete.txt"))) {
+    if (pkgload::pkg_name() == "rbmi" && file.exists(file.path(path, "misc/do_not_delete.txt"))) {
         return(TRUE)
     }
     return(FALSE)
@@ -106,5 +106,3 @@ encap_get_mmrm_sample <- function(cl, longdata, method) {
 
     return(lfun)
 }
-
-

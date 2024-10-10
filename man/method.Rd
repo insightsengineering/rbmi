@@ -75,7 +75,8 @@ See details.}
 likelihood.}
 
 \item{type}{a character string that specifies the resampling method used to perform inference
-when a conditional mean imputation approach (set via \code{method_condmean()}) is used. Must be one of \code{"bootstrap"} or \code{"jackknife"}.}
+when a conditional mean imputation approach (set via \code{method_condmean()}) is used.
+Must be one of \code{"bootstrap"} or \code{"jackknife"}.}
 
 \item{B}{a numeric that determines the number of bootstrap samples for \code{method_bmlmi}.}
 

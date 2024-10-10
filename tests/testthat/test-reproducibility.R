@@ -45,8 +45,8 @@ test_that("Results are Reproducible", {
                 quiet = TRUE
             )
         })
-        imputeobj <- impute( draws = drawobj, references = c("A" = "B", "B" = "B"))
-        anaobj <- analyse( imputeobj, fun = rbmi::ancova, vars = vars2)
+        imputeobj <- impute(draws = drawobj, references = c("A" = "B", "B" = "B"))
+        anaobj <- analyse(imputeobj, fun = rbmi::ancova, vars = vars2)
         poolobj <- pool(results = anaobj)
 
 
@@ -87,7 +87,7 @@ test_that("Results are Reproducible", {
 
 
 test_that("bayes - set.seed produces identical results", {
-    
+
     sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
     dat <- get_sim_data(200, sigma, trt = 8) %>%
         mutate(outcome = if_else(rbinom(n(), 1, 0.3) == 1, NA_real_, outcome))

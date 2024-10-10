@@ -158,7 +158,7 @@ ife <- function(x, a, b) {
 #'
 #' If mu is length 1 then just uses rnorm instead.
 sample_mvnorm <- function(mu, sigma) {
-    if (length(sigma) == 1 & length(mu) == 1) {
+    if (length(sigma) == 1 && length(mu) == 1) {
         return(rnorm(1, mu, sqrt(sigma)))
     }
     assert_that(
@@ -248,7 +248,7 @@ is_absent <- function(x, na = TRUE, blank = TRUE) {
         }
     }
 
-    if (blank & is.character(x)) {
+    if (blank && is.character(x)) {
         if (all(x == "")) {
             return(TRUE)
         }
@@ -294,7 +294,7 @@ extract_covariates <- function(x) {
 #' ```
 str_contains <- function(x, subs) {
     strings <- x
-    res_list <- lapply(subs, function(x) grepl(x, strings, fixed = T))
+    res_list <- lapply(subs, function(x) grepl(x, strings, fixed = TRUE))
     res_matrix <- matrix(unlist(res_list), nrow = length(res_list), byrow = TRUE)
     res <- unlist(apply(res_matrix, MARGIN = 2, any, simplify = FALSE), use.names = TRUE)
     assert_that(length(res) == length(strings))
@@ -547,7 +547,7 @@ get_stan_model <- function() {
     } else {
         stop("Unable to find MMRM.stan; Please report this as a bug")
     }
-    cache_dir = getOption("rbmi.cache_dir")
+    cache_dir <- getOption("rbmi.cache_dir")
     dir.create(cache_dir, showWarnings = FALSE, recursive = TRUE)
     file_loc_cache <- file.path(cache_dir, "MMRM.stan")
     if (!file.exists(file_loc_cache)) {

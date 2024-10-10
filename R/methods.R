@@ -42,7 +42,8 @@
 #' likelihood.
 #'
 #' @param type a character string that specifies the resampling method used to perform inference
-#' when a conditional mean imputation approach (set via `method_condmean()`) is used. Must be one of `"bootstrap"` or `"jackknife"`.
+#' when a conditional mean imputation approach (set via `method_condmean()`) is used.
+#' Must be one of `"bootstrap"` or `"jackknife"`.
 #'
 #' @param seed deprecated. Please use `set.seed()` instead.
 #'
@@ -69,7 +70,7 @@
 #' - Heterogeneous Toeplitz (`"toeph"`)
 #'
 #' For full details please see [`mmrm::cov_types()`].
-#' 
+#'
 #' Note that at present Bayesian methods only support unstructured.
 #'
 #' In the case of `method_condmean(type = "bootstrap")`, `method_approxbayes()` and `method_bmlmi()` repeated
@@ -178,7 +179,7 @@ method_condmean <- function(
     if (type == "bootstrap") {
         x$n_samples <- n_samples
     }
-    
+
     return(as_class(x, c("method", "condmean")))
 }
 
