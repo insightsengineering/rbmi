@@ -33,6 +33,28 @@ It is intended to be read after the `rbmi: Quickstart` vignette.
 
 <br>
 
+
+## Is `rbmi` validated ? 
+
+With regards to software, validation is the act of ensuring that the software meets the needs and
+requirements of users given the conditions of actual use. The FDA provides general principles and
+guidance for validation but leaves it to individual sponsors to define their specific validation
+processes. Therefore, no individual R package can claim to be 'validated' independently, as
+validation depends on the entire software stack and the specific processes of each company. 
+
+That being said, some of the core components of any validation process are the design specification
+(what is the software supposed to do) as well as the testing / test results that demonstrate that
+the design specification has been met. For rbmi, the design specification is documented extensively,
+both at a macro level in vignettes and literature publications, and at a micro level in detailed
+function manuals. This is supported by our extensive suite of unit and integration tests, which
+ensure the software consistently produces correct output across a wide range of input scenarios. 
+
+This documentation and test coverage enable rbmi to be easily installed and integrated into any
+R system, in alignment with the system's broader validation process.
+
+
+<br>
+
 ## How do the methods in `rbmi` compare to the mixed model for repeated measures (MMRM) implemented in the `mmrm` package? 
 
 `rbmi` was designed to complement and, occasionally, replace standard MMRM analyses for clinical trials with longitudinal endpoints. 
