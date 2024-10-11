@@ -317,7 +317,7 @@ test_that("Parallisation works with analyse and produces identical results", {
         fun = rbmi::ancova,
         vars = vars2,
         delta = dat_delta_1,
-        ncores = 3
+        ncores = 2
     )
 
     var <- 20
@@ -329,7 +329,7 @@ test_that("Parallisation works with analyse and produces identical results", {
         inner_fun(...)
     }
 
-    cl <- make_rbmi_cluster(3, objects = list(var = var, inner_fun = inner_fun), "lubridate")
+    cl <- make_rbmi_cluster(2, objects = list(var = var, inner_fun = inner_fun), "lubridate")
     anaobj_d1_t3 <- analyse(
         imputeobj,
         fun = rbmi::ancova,
