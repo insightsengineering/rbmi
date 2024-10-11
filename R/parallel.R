@@ -1,34 +1,84 @@
 
-#' Create cluster
+#' Create a rbmi ready cluster
 #'
-#' @param ncores Number of parallel processes to use
+#' @param ncores Number of parallel processes to use or an existing cluster to make use of
+#' @param objects a named list of objects to export into the sub-processes
+#' @param packages a character vector of libraries to load in the sub-processes
 #'
-#' If `ncores` is `1` this function will return NULL
-#' This function spawns a PSOCK cluster.
-#' Ensures that `rbmi` and `assert_that` have been loaded
-#' on the sub-processes
+#' This function is a wrapper around `parallel::makePSOCKcluster()` but takes
+#' care of configuring rbmi to be used in the sub-processes as well as loading
+#' user defined objects and libraries and setting the seed for reproducibility.
 #'
-get_cluster <- function(ncores = 1) {
-    if (ncores == 1) {
+#' If `ncores` is `1` this function will return `NULL`.
+#'
+#' If `ncores` is a cluster created via `parallel::makeCluster()` then this function
+#' just takes care of inserting the relevant rbmi objects into the existing cluster.
+#'
+#' @examples
+#' \dontrun{
+#' # Basic usage
+#' make_rbmi_cluster(5)
+#'
+#' # User objects + libraries
+#' VALUE <- 5
+#' myfun <- function(x) {
+#'     x + day(VALUE) # From lubridate::day()
+#' }
+#' make_rbmi_cluster(5, list(VALUE = VALUE, myfun = myfun), c("lubridate"))
+#'
+#' # Using a already created cluster
+#' cl <- parallel::makeCluster(5)
+#' make_rbmi_cluster(cl)
+#' }
+#' @export
+make_rbmi_cluster <- function(ncores = 1, objects = NULL, packages = NULL) {
+
+    if (is.numeric(ncores) && ncores == 1) {
         return(NULL)
+    } else if (is.numeric(ncores)) {
+        cl <- parallel::makePSOCKcluster(ncores)
+    } else if (is(ncores, "cluster")) {
+        cl <- ncores
+    } else {
+        stop(sprintf(
+            "`ncores` has unsupported class of: %s",
+            paste(class(ncores), collapse = ", ")
+        ))
     }
 
-    cl <- parallel::makePSOCKcluster(
-        ncores
+    # Load user defined objects into the globalname space
+    if (!is.null(objects) && length(objects)) {
+        export_env <- list2env(objects)
+        parallel::clusterExport(cl, names(objects), export_env)
+    }
+
+    # Load user defined packages
+    packages <- c(packages, "assertthat")
+    # Remove attempts to load rbmi as this will be covered later
+    packages <- setdiff(packages, "rbmi")
+    devnull <- parallel::clusterCall(
+        cl,
+        function(pkgs) lapply(pkgs, function(x) library(x, character.only = TRUE)),
+        as.list(packages)
     )
 
-    devnull <- parallel::clusterEvalQ(cl, {
-        library(assertthat)
-    })
+    # Ensure reproducibility
+    parallel::clusterSetRNGStream(cl, sample.int(1))
 
+    # If user has previously configured rbmi sub-processes then early exit
+    exported_rbmi <- unlist(parallel::clusterEvalQ(cl, exists("..exported..parallel..rbmi")))
+    if (all(exported_rbmi)) {
+        return(cl)
+    }
+
+    # Ensure that exported and unexported objects are all directly accessible
+    # from the globalenv in the sub-processes
     if (is_in_rbmi_development()) {
         devnull <- parallel::clusterEvalQ(cl, pkgload::load_all())
     } else {
         devnull <- parallel::clusterEvalQ(
             cl,
             {
-                # Here we "export" both exported and non-exported functions
-                # from the package to the global environment of our subprocesses
                 .namespace <- getNamespace("rbmi")
                 for (.nsfun in ls(.namespace)) {
                     assign(.nsfun, get(.nsfun, envir = .namespace))
@@ -36,6 +86,12 @@ get_cluster <- function(ncores = 1) {
             }
         )
     }
+
+    # Set variable to signify rbmi has been configured
+    devnull <- parallel::clusterEvalQ(cl, {
+        ..exported..parallel..rbmi <- TRUE
+    })
+
     return(cl)
 }
 
@@ -65,44 +121,19 @@ is_in_rbmi_development <- function() {
 
 
 
-#' Encapsulate get_mmrm_sample
+#' Parallelise Lapply
 #'
-#' Function creates a new wrapper function around [get_mmrm_sample()]
-#' so that the arguments of [get_mmrm_sample()] are enclosed within
-#' the new function. This makes running parallel and single process
-#' calls to the function smoother. In particular this function takes care
-#' of exporting the arguments if required to parallel process in a cluster
-#'
-#' @seealso [get_cluster()] for more documentation on the function inputs
-#'
-#' @param cl Either a cluster from [get_cluster()] or `NULL`
-#' @param longdata A longdata object from `longDataConstructor$new()`
-#' @param method A method object
-encap_get_mmrm_sample <- function(cl, longdata, method) {
-    fun <- function(ids) {
-        get_mmrm_sample(
-            ids = ids,
-            longdata = longdata,
-            method = method
-        )
+#' Simple wrapper around `lapply` and [`parallel::clusterApplyLB`] to abstract away
+#' the logic of deciding which one to use
+#' @param cl Cluster created by [`parallel::makeCluster()`] or `NULL`
+#' @param fun Function to be run
+#' @param x object to be looped over
+#' @param ... extra arguements passed to `fun`
+par_lapply <- function(cl, fun, x, ...) {
+    result <- if (is.null(cl)) {
+        lapply(x, fun, ...)
+    } else {
+        parallel::clusterApplyLB(cl, x, fun, ...)
     }
-    lfun <- function(ids) {
-        lapply(ids, fun)
-    }
-
-    if (is.null(cl)) {
-        return(lfun)
-    }
-
-    parallel::clusterExport(
-        cl = cl,
-        varlist = c("longdata", "method"),
-        envir = environment()
-    )
-
-    lfun <- function(ids) {
-        parallel::clusterApplyLB(cl, ids, fun)
-    }
-
-    return(lfun)
+    return(result)
 }

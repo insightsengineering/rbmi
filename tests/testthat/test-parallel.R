@@ -157,3 +157,88 @@ test_that("Basic parallisation works as expected", {
     expect_equal(x1, x2, tolerance = 0.0001)
 
 })
+
+
+###########################
+#
+#  Manual time testing
+#
+# method <- method_approxbayes(n_samples = 20)
+# method <- method_condmean(n_samples = 80)
+# method <- method_condmean(type = "jackknife")
+# time_it({
+#     results_2 <- draws(
+#         data = dat,
+#         data_ice = dat_ice,
+#         vars = vars,
+#         method = method,
+#         ncores = 1
+#     )
+# })
+# time_it({
+#     results_2 <- draws(
+#         data = dat,
+#         data_ice = dat_ice,
+#         vars = vars,
+#         method = method,
+#         ncores = 2
+#     )
+# })
+
+
+
+
+test_that("Creation and management of user defined clusters works as expected", {
+    # Setup a function to be run on the parallel cluster that requires
+    # global objects (namely the `inner_fun` and environment `e`) as well
+    # as a handful of packages to be loaded
+    e <- new.env()
+    e$x <- 20
+    inner_fun <- function(x) {
+        local_env <- e
+        temp1 <- e$x + 0
+        temp2 <- rnorm(2)
+        temp3 <- dplyr::as_tibble(dplyr::starwars) # Explicit namespace
+        temp4 <- day(x) # lubridate::day()
+        e$x
+    }
+    outer_fun <- function(x) {
+        temp1 <- inner_fun(2)
+        temp2 <- anova.lme %>% invisible() # nlme::anova.lme()
+        temp3 <- iris
+        temp1 + x + 10
+    }
+
+    # Check that function can be run (e.g. all elements are correctly exported)
+    set.seed(1223)
+    cl1 <- make_rbmi_cluster(2, list(inner_fun = inner_fun, e = e), c("lubridate", "nlme"))
+    res_1_a <- parallel::clusterCall(cl1, rnorm, 200)
+    res_1_b <- parallel::clusterApplyLB(cl1, c(4, 5), outer_fun)
+    expect_equal(res_1_b, list(34, 35))
+
+    # Test that re-using an existing cluster is quick to load
+    time <- time_it({
+        set.seed(1223)
+        cl2 <- make_rbmi_cluster(cl1, list(inner_fun = inner_fun, e = e), c("lubridate", "nlme"))
+    })
+    expect_true(as.numeric(time) <= 2)
+
+    # Should produce identical results as before
+    res_2_a <- parallel::clusterCall(cl2, rnorm, 200)
+    res_2_b <- parallel::clusterApplyLB(cl2, c(4, 5), outer_fun)
+    expect_equal(res_2_a, res_1_a)
+    expect_equal(res_2_b, res_1_b)
+
+    # Both clusters should be closed as they are points to the same thing
+    parallel::stopCluster(cl2)
+    expect_true(is_cluster_closed(cl1))
+    expect_true(is_cluster_closed(cl2))
+
+
+    # Check that seed ensures reproducibility
+    set.seed(1223)
+    cl <- make_rbmi_cluster(2, list(inner_fun = inner_fun, e = e), c("lubridate", "nlme"))
+    res_3_a <- parallel::clusterCall(cl1, rnorm, 200)
+    expect_equal(res_3_a, res_1_a)
+    parallel::stopCluster(cl)
+})

@@ -22,6 +22,22 @@ strip_names <- function(x) {
 }
 
 
+is_cluster_closed <- function(cl) {
+    if (is.null(cl)) {
+        return(TRUE)
+    }
+    if (!is(cl, "cluster")) {
+        stop("`cl` is not a cluster object")
+    }
+    result <- tryCatch({
+        parallel::clusterCall(cl, function() Sys.info())
+        FALSE
+    }, error = function(e) {
+        TRUE
+    })
+}
+
+
 trunctate <- function(x, n) {
     floor(x * 10 ^ n) / 10 ^ n
 }
