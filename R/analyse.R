@@ -221,12 +221,14 @@ analyse <- function(
     }
 
     # Mangle name to avoid any conflicts with user defined objects if running in a cluster
+    ..rbmi..analysis..imputations <- imputations
+    ..rbmi..analysis..delta <- delta
+    ..rbmi..analysis..fun <- fun
     objects <- list(
-        ..rbmi..analysis..imputations = imputations,
-        ..rbmi..analysis..delta = delta,
-        ..rbmi..analysis..fun = fun
+        ..rbmi..analysis..imputations = ..rbmi..analysis..imputations,
+        ..rbmi..analysis..delta = ..rbmi..analysis..delta,
+        ..rbmi..analysis..fun = ..rbmi..analysis..fun
     )
-    list2env(objects, envir = environment())
 
     cl <- make_rbmi_cluster(ncores)
 
