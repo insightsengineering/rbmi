@@ -13,11 +13,11 @@ method_bayes(
   burn_between = 50,
   same_cov = TRUE,
   n_samples = 20,
-  seed = sample.int(.Machine$integer.max, 1)
+  seed = NULL
 )
 
 method_approxbayes(
-  covariance = c("us", "toep", "cs", "ar1"),
+  covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
   threshold = 0.01,
   same_cov = TRUE,
   REML = TRUE,
@@ -25,7 +25,7 @@ method_approxbayes(
 )
 
 method_condmean(
-  covariance = c("us", "toep", "cs", "ar1"),
+  covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
   threshold = 0.01,
   same_cov = TRUE,
   REML = TRUE,
@@ -34,7 +34,7 @@ method_condmean(
 )
 
 method_bmlmi(
-  covariance = c("us", "toep", "cs", "ar1"),
+  covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
   threshold = 0.01,
   same_cov = TRUE,
   REML = TRUE,
@@ -61,14 +61,11 @@ matrix will be fit for each group as determined by the \code{group} argument of
 In the case of \code{method_condmean(type = "jackknife")} this argument
 must be set to \code{NULL}. See details.}
 
-\item{seed}{a numeric that specifies the seed to be used in the call to Stan. This
-argument is passed onto the \code{seed} argument of \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}. Note that
-this is only required for \code{method_bayes()}, for all other methods you can achieve
-reproducible results by setting the seed via \code{set.seed()}. See details.}
+\item{seed}{deprecated. Please use \code{set.seed()} instead.}
 
 \item{covariance}{a character string that specifies the structure of the covariance
-matrix to be used in the imputation model. Must be one of \code{"us"} (default), \code{"toep"},
-\code{"cs"} or \code{"ar1"}. See details.}
+matrix to be used in the imputation model. Must be one of \code{"us"} (default), \code{"ad"},
+\code{"adh"}, \code{"ar1"}, \code{"ar1h"}, \code{"cs"}, \code{"csh"}, \code{"toep"}, or \code{"toeph"}). See details.}
 
 \item{threshold}{a numeric between 0 and 1, specifies the proportion of bootstrap
 datasets that can fail to produce valid samples before an error is thrown.
@@ -78,7 +75,8 @@ See details.}
 likelihood.}
 
 \item{type}{a character string that specifies the resampling method used to perform inference
-when a conditional mean imputation approach (set via \code{method_condmean()}) is used. Must be one of \code{"bootstrap"} or \code{"jackknife"}.}
+when a conditional mean imputation approach (set via \code{method_condmean()}) is used.
+Must be one of \code{"bootstrap"} or \code{"jackknife"}.}
 
 \item{B}{a numeric that determines the number of bootstrap samples for \code{method_bmlmi}.}
 
@@ -100,11 +98,18 @@ represented by \code{n + 1} being displayed in the print message.
 The user is able to specify different covariance structures using the the \code{covariance}
 argument. Currently supported structures include:
 \itemize{
-\item Unstructured (\code{"us"})
+\item Unstructured (\code{"us"}) (default)
+\item Ante-dependence (\code{"ad"})
+\item Heterogeneous ante-dependence (\code{"adh"})
+\item First-order auto-regressive (\code{"ar1"})
+\item Heterogeneous first-order auto-regressive (\code{"ar1h"})
+\item Compound symmetry (\code{"cs"})
+\item Heterogeneous compound symmetry (\code{"csh"})
 \item Toeplitz (\code{"toep"})
-\item Compound Symmetry (\code{"cs"})
-\item Autoregression-1 (\code{"ar1"})
+\item Heterogeneous Toeplitz (\code{"toeph"})
 }
+
+For full details please see \code{\link[mmrm:covariance_types]{mmrm::cov_types()}}.
 
 Note that at present Bayesian methods only support unstructured.
 

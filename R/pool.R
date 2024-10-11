@@ -45,7 +45,8 @@
 #' Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. \[Section 5.4\]
 #'
 #' Von Hippel, Paul T and Bartlett, Jonathan W.
-#' Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021.
+#' Maximum likelihood multiple imputation: Faster imputations and consistent standard
+#' errors without posterior draws. 2021.
 
 #' @export
 pool <- function(
@@ -113,10 +114,10 @@ pool <- function(
 #' either `"rubin"`, `"jackknife"`, "`bootstrap"` or `"bmlmi"`.
 get_pool_components <- function(x) {
     switch(x,
-           "rubin" = c("est", "df", "se"),
-           "jackknife" = c("est"),
-           "bootstrap" = c("est"),
-           "bmlmi" = c("est")
+        "rubin" = c("est", "df", "se"),
+        "jackknife" = c("est"),
+        "bootstrap" = c("est"),
+        "bmlmi" = c("est")
     )
 }
 
@@ -223,7 +224,8 @@ pool_internal.bmlmi <- function(
 #'
 #' @references
 #'   Von Hippel, Paul T and Bartlett, Jonathan W8.
-#'   Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021
+#'   Maximum likelihood multiple imputation: Faster imputations and consistent standard errors
+#' without posterior draws. 2021
 get_ests_bmlmi <- function(ests, D) {
 
     l <- length(ests)
@@ -238,7 +240,7 @@ get_ests_bmlmi <- function(ests, D) {
         msg = "`D` must be a numeric larger than 1"
     )
 
-    B <- l/D
+    B <- l / D
 
     ests <- matrix(ests, nrow = B, ncol = D, byrow = TRUE)
 
@@ -246,14 +248,13 @@ get_ests_bmlmi <- function(ests, D) {
 
     SSW <- sum((ests - rowMeans(ests))^2)
     SSB <- D * sum((rowMeans(ests) - est_point)^2)
-    MSW <- SSW/(B * (D - 1))
-    MSB <- SSB/(B - 1)
+    MSW <- SSW / (B * (D - 1))
+    MSB <- SSB / (B - 1)
     resVar <- MSW
-    randIntVar <- (MSB - MSW)/D
+    randIntVar <- (MSB - MSW) / D
 
-    est_var <- (1 + 1/B) * randIntVar + resVar/(B * D)
-    df <- (est_var^2)/((((B + 1)/(B * D))^2 *
-                        MSB^2/(B - 1)) + MSW^2/(B * D^2 * (D - 1)))
+    est_var <- (1 + 1 / B) * randIntVar + resVar / (B * D)
+    df <- (est_var^2) / ((((B + 1) / (B * D))^2 * MSB^2 / (B - 1)) + MSW^2 / (B * D^2 * (D - 1)))
     df <- max(3, df)
 
     ret_obj <- list(
@@ -320,7 +321,7 @@ pool_internal.rubin <- function(results, conf.level, alternative, type, D) {
 #'   Small sample degrees of freedom with multiple imputation. Biometrika, 86, 948-955.
 rubin_df <- function(v_com, var_b, var_t, M) {
 
-    if (is.na(v_com) || (is.infinite(v_com) & var_b == 0)) {
+    if (is.na(v_com) || (is.infinite(v_com) && var_b == 0)) {
         df <- Inf
     } else {
         lambda <- (1 + 1 / M) * var_b / var_t
@@ -331,10 +332,10 @@ rubin_df <- function(v_com, var_b, var_t, M) {
 
         if (lambda != 0) {
             v_old <- (M - 1)  / lambda^2
-            if (is.infinite(v_com))
-                df <- v_old
-            else {
-                df <- (v_old * v_obs) / (v_old + v_obs)
+            df <- if (is.infinite(v_com)) {
+                v_old
+            } else {
+                (v_old * v_obs) / (v_old + v_obs)
             }
         } else {
             df <- v_obs
@@ -382,12 +383,12 @@ rubin_rules <- function(ests, ses, v_com) {
     M <- length(ests)
     est_point <- mean(ests)
 
-    if(all(is.na(ses))) {
+    if (all(is.na(ses))) {
         return(
             list(
-            est_point = est_point,
-            var_t = NA,
-            df = NA
+                est_point = est_point,
+                var_t = NA,
+                df = NA
             )
         )
     }
@@ -432,7 +433,7 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
     est_orig <- est[1]
     est <- est[-1]
 
-    if(length(est) == 0) { # if n_samples = 0 we cannot estimate pvalue and CIs
+    if (length(est) == 0) { # if n_samples = 0 we cannot estimate pvalue and CIs
         ret <- list(
             est = est_orig,  # First estimate should be original dataset
             ci = c(NA, NA),
@@ -499,7 +500,7 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
 #' (`"pval_greater"`) and the p-value for H_0: theta=0 vs H_A: theta<0 (`"pval_less"`).
 #'
 #' @importFrom stats uniroot
-pval_percentile <- function(est){
+pval_percentile <- function(est) {
 
     if (all(est == 0)) {
         ret <- c(1, 1)
@@ -509,7 +510,7 @@ pval_percentile <- function(est){
         ret <- c(1, 0)
     } else if (any(est == 0)) {
         # see ?quantile "type=6" section for explanation
-        quant <- rank(est, ties.method="first")/(length(est) + 1)
+        quant <- rank(est, ties.method = "first") / (length(est) + 1)
         ret <- c(
             min(quant[est == 0]),
             1 - max(quant[est == 0])
@@ -520,7 +521,7 @@ pval_percentile <- function(est){
             lower = 0,
             upper = 1
         )$root
-        ret <- c(x, 1-x)
+        ret <- c(x, 1 - x)
     }
     names(ret) <- c("pval_greater", "pval_less")
     return(ret)

@@ -1,23 +1,24 @@
 library(dplyr)
 library(tidyr)
+library(testthat)
 
 
 set.seed(123)
-mu <- c(1,2,3)
-sigma <- rbind(c(3,0.5,0.3),c(0.5,4,0.5),c(0.3,0.5,5))
+mu <- c(1, 2, 3)
+sigma <- rbind(c(3, 0.5, 0.3), c(0.5, 4, 0.5), c(0.3, 0.5, 5))
 baseline_mean <- mu[1]
 n <- 20
 n_visits <- length(mu)
-outcome <- c(replicate(n, sample_mvnorm(mu,sigma)))
+outcome <- c(replicate(n, sample_mvnorm(mu, sigma)))
 ids <- as.factor(rep(paste0("id_", seq.int(n)), each = n_visits))
-visits <- as.factor(rep(seq.int(n_visits)-1, n))
+visits <- as.factor(rep(seq.int(n_visits) - 1, n))
 
 test_data_basics <- function(res, n_visits, n) {
 
     expect_true(is.data.frame(res))
-    expect_true(all(sapply(res[,c("id", "group", "visit")], is.factor)))
+    expect_true(all(sapply(res[, c("id", "group", "visit")], is.factor)))
     expect_true(all(sapply(res[, ! colnames(res) %in% c("id", "group", "visit")], is.numeric)))
-    expect_equal(nrow(res), n_visits*n)
+    expect_equal(nrow(res), n_visits * n)
     expect_equal(nlevels(res$visit), n_visits)
     expect_length(unique(res$id), n)
 
@@ -33,8 +34,8 @@ test_data_basics <- function(res, n_visits, n) {
     expect_true(all(!is.na(res$outcome_noICE)))
 
     outcome_baseline <- unique(res$outcome_bl)
-    expect_equal(res$outcome_noICE[seq(from = 1, to = n_visits*n, by = n_visits)], outcome_baseline)
-    expect_equal(res$outcome[seq(from = 1, to = n_visits*n, by = n_visits)], outcome_baseline)
+    expect_equal(res$outcome_noICE[seq(from = 1, to = n_visits * n, by = n_visits)], outcome_baseline)
+    expect_equal(res$outcome[seq(from = 1, to = n_visits * n, by = n_visits)], outcome_baseline)
 }
 
 
@@ -43,9 +44,10 @@ test_that("set_simul_pars", {
     pars <- set_simul_pars(
         mu = mu,
         sigma = sigma,
-        n = n)
+        n = n
+    )
 
-    expect_equal(list(pars$mu, pars$sigma, pars$n) , list(mu, sigma, n))
+    expect_equal(list(pars$mu, pars$sigma, pars$n), list(mu, sigma, n))
 
     expect_true(
         all(c(pars$prob_ice1, pars$prob_post_ice1_dropout, pars$prob_ice2, pars$prob_miss) == 0)
@@ -74,9 +76,9 @@ test_that("set_simul_pars", {
         validate(pars),
         regexp = "`prob_ice2`"
     )
-    
+
     pars$prob_ice2 <- 0.5
-    pars$sigma[1,1] <- NA
+    pars$sigma[1, 1] <- NA
     expect_error(validate(pars))
 
     expect_error(set_simul_pars(mu = mu))
@@ -92,11 +94,11 @@ test_that("simulate_dropout", {
 
     prob_dropout <- 1
     res <- simulate_dropout(prob_dropout, ids)
-    expect_equal(res, rep(c(0,1,1), n))
+    expect_equal(res, rep(c(0, 1, 1), n))
 
     prob_dropout <- 0.5
     res <- simulate_dropout(prob_dropout, ids)
-    expect_true(all(res %in% c(0,1)))
+    expect_true(all(res %in% c(0, 1)))
     expect_length(res, length(ids))
 
     prob_dropout <- 1
@@ -104,26 +106,26 @@ test_that("simulate_dropout", {
     res <- simulate_dropout(prob_dropout, ids, subset)
     expect_equal(res, rep(0, length(ids)))
 
-    subset <- rep(c(0,0,1), n)
+    subset <- rep(c(0, 0, 1), n)
     res <- simulate_dropout(prob_dropout, ids, subset)
     expect_length(res, length(ids))
     expect_equal(res[subset == 0], subset[subset == 0])
     expect_true(all(res[subset == 1] == 1))
 
-    subset <- rep(c(1,1,1), n)
+    subset <- rep(c(1, 1, 1), n)
     res <- simulate_dropout(prob_dropout, ids, subset)
-    expect_equal(res, rep(c(0,1,1), n))
+    expect_equal(res, rep(c(0, 1, 1), n))
 
     prob_dropout <- 0
     subset <- rep(0, length(ids))
     res <- simulate_dropout(prob_dropout, ids, subset)
     expect_equal(res, rep(0, length(ids)))
 
-    subset <- rep(c(0,0,1), n)
+    subset <- rep(c(0, 0, 1), n)
     res <- simulate_dropout(prob_dropout, ids, subset)
     expect_equal(res, rep(0, length(ids)))
 
-    subset <- rep(c(1,1,1), n)
+    subset <- rep(c(1, 1, 1), n)
     res <- simulate_dropout(prob_dropout, ids, subset)
     expect_equal(res, rep(0, length(ids)))
 
@@ -138,17 +140,17 @@ test_that("simulate_ice", {
 
     pars$prob_ice1 <- 1
     res <- simulate_ice(outcome, visits, ids, pars$prob_ice1, pars$or_outcome_ice1, baseline_mean)
-    expect_equal(res, rep(c(0,1,1), n))
+    expect_equal(res, rep(c(0, 1, 1), n))
 
     pars$prob_ice1 <- rep(1, n_visits - 1)
     res <- simulate_ice(outcome, visits, ids, pars$prob_ice1, pars$or_outcome_ice1, baseline_mean)
-    expect_equal(res, rep(c(0,1,1), n))
+    expect_equal(res, rep(c(0, 1, 1), n))
 
     pars$prob_ice1 <- 0.1
     pars$or_outcome_ice1 <- 3
     res <- simulate_ice(outcome, visits, ids, pars$prob_ice1, pars$or_outcome_ice1, baseline_mean)
     expect_length(res, length(ids))
-    expect_true(all(res %in% c(0,1)))
+    expect_true(all(res %in% c(0, 1)))
     expect_true(all(res[seq(from = 1, to = length(ids), by = n_visits)] == 0))
 
 })
@@ -212,8 +214,8 @@ test_that("adjust_trajectories", {
     expect_equal(res, outcome)
 
     distr_pars_ref <- distr_pars_group
-    distr_pars_ref$sigma[1,1] <- 1
-    distr_pars_ref$mu <- c(3,6,9)
+    distr_pars_ref$sigma[1, 1] <- 1
+    distr_pars_ref$mu <- c(3, 6, 9)
     res <- adjust_trajectories(
         distr_pars_group,
         outcome,
@@ -260,15 +262,15 @@ test_that("generate_data_single", {
     pars_group$prob_ice1 <- 1
     res <- generate_data_single(pars_group, strategy_fun, distr_pars_ref = NULL)
     test_data_basics(res, n_visits, n)
-    expect_equal(res$ind_ice1, rep(c(0,1,1), n))
+    expect_equal(res$ind_ice1, rep(c(0, 1, 1), n))
     expect_false(identical(res$outcome_noICE, res$outcome))
 
     # add dropout
     pars_group$prob_post_ice1_dropout <- 1
     res <- generate_data_single(pars_group, strategy_fun, distr_pars_ref = NULL)
     test_data_basics(res, n_visits, n)
-    expect_equal(res$dropout_ice1, rep(c(0,1,1), n))
-    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits*n, by = n_visits)])))
+    expect_equal(res$dropout_ice1, rep(c(0, 1, 1), n))
+    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits * n, by = n_visits)])))
 
     # only ice2
     pars_group$prob_ice1 <- 0
@@ -276,31 +278,31 @@ test_that("generate_data_single", {
     pars_group$prob_ice2 <- 1
     res <- generate_data_single(pars_group, strategy_fun, distr_pars_ref = NULL)
     test_data_basics(res, n_visits, n)
-    expect_equal(res$ind_ice2, rep(c(0,1,1), n))
-    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits*n, by = n_visits)])))
+    expect_equal(res$ind_ice2, rep(c(0, 1, 1), n))
+    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits * n, by = n_visits)])))
 
     # both ice1 and ice2 have prob 1 -> expect only ice1
     pars_group$prob_ice1 <- 1
     pars_group$prob_ice2 <- 1
     res <- generate_data_single(pars_group, strategy_fun, distr_pars_ref = NULL)
     test_data_basics(res, n_visits, n)
-    expect_equal(res$ind_ice2, rep(c(0,0,0), n))
-    expect_equal(res$ind_ice1, rep(c(0,1,1), n))
+    expect_equal(res$ind_ice2, rep(c(0, 0, 0), n))
+    expect_equal(res$ind_ice1, rep(c(0, 1, 1), n))
     expect_true(all(!is.na(res$outcome)))
 
     pars_group$prob_post_ice1_dropout <- 1
     res <- generate_data_single(pars_group, strategy_fun, distr_pars_ref = NULL)
     test_data_basics(res, n_visits, n)
-    expect_equal(res$ind_ice2, rep(c(0,0,0), n))
-    expect_equal(res$ind_ice1, rep(c(0,1,1), n))
-    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits*n, by = n_visits)])))
+    expect_equal(res$ind_ice2, rep(c(0, 0, 0), n))
+    expect_equal(res$ind_ice1, rep(c(0, 1, 1), n))
+    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits * n, by = n_visits)])))
 
     # prob of both ICEs different than 0 or 1
     pars_group$prob_ice1 <- 0.7
     pars_group$prob_ice2 <- 0.7
     res <- generate_data_single(pars_group, strategy_fun, distr_pars_ref = NULL)
     test_data_basics(res, n_visits, n)
-    expect_true(all(res$ind_ice2*res$ind_ice1 == 0)) # they cannot both happen
+    expect_true(all(res$ind_ice2 * res$ind_ice1 == 0)) # they cannot both happen
     expect_true(all(is.na(res$outcome[(pars_group$prob_ice1 == 1 &
                                            pars_group$prob_post_ice1_dropout == 1) |
                                           pars_group$prob_ice2 == 1])))
@@ -315,13 +317,13 @@ test_that("simulate_data", {
         n = n
     )
     pars_c <- pars_t
-    pars_c$mu <- c(3,6,9)
-    pars_c$sigma[3,3] <- 10
+    pars_c$mu <- c(3, 6, 9)
+    pars_c$sigma[3, 3] <- 10
     post_ice1_traj <- "JR"
 
     # no ICEs
     res <- simulate_data(pars_c, pars_t, post_ice1_traj)
-    test_data_basics(res, n_visits, 2*n)
+    test_data_basics(res, n_visits, 2 * n)
 
     # ICE1
     pars_c$prob_ice1 <- pars_t$prob_ice1 <- c(0.4, 0.5)
@@ -331,14 +333,14 @@ test_that("simulate_data", {
     post_ice1_traj <- "CIR"
     set.seed(123)
     res <- simulate_data(pars_c, pars_t, post_ice1_traj)
-    test_data_basics(res, n_visits, 2*n)
+    test_data_basics(res, n_visits, 2 * n)
 
     # custom function
     myfun <- function(pars_group, pars_ref, index_mar) return(strategy_CIR(pars_group, pars_ref, index_mar))
     post_ice1_traj <- "myfun"
     set.seed(123)
     res_cir <- simulate_data(pars_c, pars_t, post_ice1_traj, strategies = getStrategies(myfun = myfun))
-    test_data_basics(res, n_visits, 2*n)
+    test_data_basics(res, n_visits, 2 * n)
     expect_equal(res, res_cir) # custom function is just CIR
 
     pars_c <- pars_t <- set_simul_pars(
@@ -349,7 +351,7 @@ test_that("simulate_data", {
     )
     post_ice1_traj <- "JR"
     res <- simulate_data(pars_c, pars_t, post_ice1_traj)
-    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits*2*n, by = n_visits)])))
+    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits * 2 * n, by = n_visits)])))
 
     pars_c <- pars_t <- set_simul_pars(
         mu = mu,
@@ -358,7 +360,7 @@ test_that("simulate_data", {
         prob_ice2 = 1
     )
     res <- simulate_data(pars_c, pars_t, post_ice1_traj)
-    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits*2*n, by = n_visits)])))
+    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits * 2 * n, by = n_visits)])))
 
     class(pars_c) <- NULL
     expect_error(simulate_data(pars_c, pars_t, post_ice1_traj))

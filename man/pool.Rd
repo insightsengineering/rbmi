@@ -64,5 +64,6 @@ Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing
 Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. [Section 5.4]
 
 Von Hippel, Paul T and Bartlett, Jonathan W.
-Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021.
+Maximum likelihood multiple imputation: Faster imputations and consistent standard
+errors without posterior draws. 2021.
 }

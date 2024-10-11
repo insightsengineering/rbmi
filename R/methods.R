@@ -31,8 +31,8 @@
 #' Needed for `method_bmlmi()`.
 #'
 #' @param covariance a character string that specifies the structure of the covariance
-#' matrix to be used in the imputation model. Must be one of `"us"` (default), `"toep"`,
-#' `"cs"` or `"ar1"`. See details.
+#' matrix to be used in the imputation model. Must be one of `"us"` (default), `"ad"`,
+#' `"adh"`, `"ar1"`, `"ar1h"`, `"cs"`, `"csh"`, `"toep"`, or `"toeph"`). See details.
 #'
 #' @param threshold a numeric between 0 and 1, specifies the proportion of bootstrap
 #' datasets that can fail to produce valid samples before an error is thrown.
@@ -42,12 +42,10 @@
 #' likelihood.
 #'
 #' @param type a character string that specifies the resampling method used to perform inference
-#' when a conditional mean imputation approach (set via `method_condmean()`) is used. Must be one of `"bootstrap"` or `"jackknife"`.
+#' when a conditional mean imputation approach (set via `method_condmean()`) is used.
+#' Must be one of `"bootstrap"` or `"jackknife"`.
 #'
-#' @param seed a numeric that specifies the seed to be used in the call to Stan. This
-#' argument is passed onto the `seed` argument of [rstan::sampling()]. Note that
-#' this is only required for `method_bayes()`, for all other methods you can achieve
-#' reproducible results by setting the seed via `set.seed()`. See details.
+#' @param seed deprecated. Please use `set.seed()` instead.
 #'
 #' @details
 #'
@@ -61,10 +59,17 @@
 #' The user is able to specify different covariance structures using the the `covariance`
 #' argument. Currently supported structures include:
 #'
-#' - Unstructured (`"us"`)
+#' - Unstructured (`"us"`) (default)
+#' - Ante-dependence (`"ad"`)
+#' - Heterogeneous ante-dependence (`"adh"`)
+#' - First-order auto-regressive (`"ar1"`)
+#' - Heterogeneous first-order auto-regressive (`"ar1h"`)
+#' - Compound symmetry (`"cs"`)
+#' - Heterogeneous compound symmetry (`"csh"`)
 #' - Toeplitz (`"toep"`)
-#' - Compound Symmetry (`"cs"`)
-#' - Autoregression-1 (`"ar1"`)
+#' - Heterogeneous Toeplitz (`"toeph"`)
+#'
+#' For full details please see [`mmrm::cov_types()`].
 #'
 #' Note that at present Bayesian methods only support unstructured.
 #'
@@ -93,14 +98,22 @@ method_bayes <- function(
     burn_between = 50,
     same_cov = TRUE,
     n_samples = 20,
-    seed = sample.int(.Machine$integer.max, 1)
+    seed = NULL
 ) {
+    assertthat::assert_that(
+        is.null(seed),
+        msg = paste(
+            "The `seed` argument to `method_bayes()` has been deprecated;",
+            "please use `set.seed()` instead.",
+            collapse = " "
+        )
+    )
+
     x <- list(
         burn_in = burn_in,
         burn_between = burn_between,
         same_cov = same_cov,
-        n_samples = n_samples,
-        seed = seed
+        n_samples = n_samples
     )
     return(as_class(x, c("method", "bayes")))
 }
@@ -109,7 +122,7 @@ method_bayes <- function(
 #' @rdname method
 #' @export
 method_approxbayes <- function(
-    covariance = c("us", "toep", "cs", "ar1"),
+    covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
@@ -131,7 +144,7 @@ method_approxbayes <- function(
 #' @rdname method
 #' @export
 method_condmean <- function(
-    covariance = c("us", "toep", "cs", "ar1"),
+    covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
@@ -166,7 +179,7 @@ method_condmean <- function(
     if (type == "bootstrap") {
         x$n_samples <- n_samples
     }
-    
+
     return(as_class(x, c("method", "condmean")))
 }
 
@@ -174,7 +187,7 @@ method_condmean <- function(
 #' @rdname method
 #' @export
 method_bmlmi <- function(
-    covariance = c("us", "toep", "cs", "ar1"),
+    covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,

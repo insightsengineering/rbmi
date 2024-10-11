@@ -123,7 +123,7 @@ test_that("condmean - jackknife", {
 
     expect_length(dobj$samples, N + 1)
     expect_equal(dobj$samples[[1]]$ids, levels(d$dat$id))
-    expect_true(all(vapply(dobj$samples[-1], function(x) length(x$ids) == N-1, logical(1))))
+    expect_true(all(vapply(dobj$samples[-1], function(x) length(x$ids) == N - 1, logical(1))))
     for (i in seq_len(N)) {
         expect_equal(dobj$samples[-1][[i]]$ids, levels(d$dat$id)[-i])
     }
@@ -267,15 +267,15 @@ test_that("Failure is handled properly", {
             failure_index = 0,
             tracker = 0,
             sample_ids = function() {
-                self$tracker = self$tracker + 1
+                self$tracker <- self$tracker + 1
                 if (self$tracker %in% self$failure_index) {
                     return(c("1", "2"))
                 }
                 super$sample_ids()
             },
             set_failed_sample_index = function(x) {
-                self$tracker = 0
-                self$failure_index = x
+                self$tracker <- 0
+                self$failure_index <- x
             }
         )
     )
@@ -676,6 +676,3 @@ test_that("quiet suppress progress messages", {
     })
     expect_true(length(x) == 0 & is.character(x))
 })
-
-
-

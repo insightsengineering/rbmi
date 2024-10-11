@@ -19,11 +19,11 @@
 #' ```
 #' us( visit | group / subjid )
 #' ```
-#' @param cov_struct Character - The covariance structure to be used, must be one of `"us"`,
-#' `"toep"`, `"cs"`, `"ar1"`
+#' @param cov_struct Character - The covariance structure to be used, must be one of `"us"` (default),
+#' `"ad"`, `"adh"`, `"ar1"`, `"ar1h"`, `"cs"`, `"csh"`, `"toep"`, or `"toeph"`)
 #' @param cov_by_group Boolean - Whenever or not to use separate covariances per each group level
 random_effects_expr <- function(
-    cov_struct = c("us", "toep", "cs", "ar1"),
+    cov_struct = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
     cov_by_group = FALSE
 ) {
     match.arg(cov_struct)
@@ -88,8 +88,8 @@ as_mmrm_df <- function(designmat,
 #' outcome ~ 0 + V1 + V2 + V4 + ... + us(visit | group / subjid)
 #' ```
 #' @param mmrm_df an mmrm `data.frame` as created by [as_mmrm_df()]
-#' @param cov_struct Character - The covariance structure to be used, must be one of `"us"`,
-#' `"toep"`, `"cs"`, `"ar1"`
+#' @param cov_struct Character - The covariance structure to be used, must be one of `"us"` (default),
+#' `"ad"`, `"adh"`, `"ar1"`, `"ar1h"`, `"cs"`, `"csh"`, `"toep"`, or `"toeph"`)
 #' @importFrom stats as.formula
 as_mmrm_formula <- function(mmrm_df, cov_struct) {
     dfnames <- names(mmrm_df)
@@ -164,22 +164,24 @@ extract_params <- function(fit) {
 #' that belong to the same subject.
 #' @param visit a character / factor vector. Indicates which visit the outcome value occurred on.
 #' @param group a character / factor vector. Indicates which treatment group the patient belongs to.
-#' @param cov_struct a character value. Specifies which covariance structure to use. Must be one of
-#' `"us"`, `"toep"`, `"cs"` or  `"ar1"`
+#' @param cov_struct a character value. Specifies which covariance structure to use. Must be one of `"us"` (default),
+#' `"ad"`, `"adh"`, `"ar1"`, `"ar1h"`, `"cs"`, `"csh"`, `"toep"`, or `"toeph"`)
 #' @param REML logical. Specifies whether restricted maximum likelihood should be used
 #' @param same_cov logical. Used to specify if a shared or individual covariance matrix should be
 #' used per `group`
 #' @name fit_mmrm
 #'
 #'
-fit_mmrm <- function(designmat,
-                     outcome,
-                     subjid,
-                     visit,
-                     group,
-                     cov_struct = c("us", "toep", "cs", "ar1"),
-                     REML = TRUE,
-                     same_cov = TRUE) {
+fit_mmrm <- function(
+    designmat,
+    outcome,
+    subjid,
+    visit,
+    group,
+    cov_struct = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
+    REML = TRUE,
+    same_cov = TRUE
+) {
     dat_mmrm <- as_mmrm_df(
         designmat = designmat,
         outcome = outcome,

@@ -60,12 +60,12 @@ get_sim_data <- function(n, sigma, trt = 4) {
     dat <- mvtnorm::rmvnorm(n, sigma = sigma) %>%
         set_col_names(paste0("visit_", 1:nv)) %>%
         dplyr::as_tibble() %>%
-        dplyr::mutate(id = 1:dplyr::n()) %>%
+        dplyr::mutate(id = seq_len(dplyr::n())) %>%
         tidyr::gather("visit", "outcome", -id) %>%
-        dplyr::mutate(visit = factor(visit)) %>%
-        dplyr::arrange(id, visit) %>%
+        dplyr::mutate(visit = factor(.data$visit)) %>%
+        dplyr::arrange(id, .data$visit) %>%
         dplyr::left_join(covars, by = "id") %>%
-        dplyr::mutate(outcome = outcome + 5 + 3 * age + 3 * f2n(sex) + trt * f2n(group)) %>%
+        dplyr::mutate(outcome = .data$outcome + 5 + 3 * .data$age + 3 * f2n(.data$sex) + trt * f2n(.data$group)) %>%
         dplyr::mutate(id = as.factor(id))
 
     return(dat)
@@ -73,7 +73,7 @@ get_sim_data <- function(n, sigma, trt = 4) {
 
 
 
-time_it <- function(expr){
+time_it <- function(expr) {
     start <- Sys.time()
     expr
     stop <- Sys.time()
@@ -119,4 +119,3 @@ with_mocking <- function(expr, ..., where) {
     )
     return(x)
 }
-

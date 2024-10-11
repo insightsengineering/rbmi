@@ -39,7 +39,8 @@ Default = \code{getStrategies()}. See \code{\link[=getStrategies]{getStrategies(
 \item{condmean}{Logical. If \code{TRUE} will impute using the conditional mean values, if \code{FALSE}
 will impute by taking a random draw from the multivariate normal distribution.}
 
-\item{n_imputations}{When \code{condmean = FALSE} numeric representing the number of random imputations to be performed for each sample.
+\item{n_imputations}{When \code{condmean = FALSE} numeric representing the number of random
+imputations to be performed for each sample.
 Default is \code{1} (one random imputation per sample).}
 }
 \description{

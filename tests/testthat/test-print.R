@@ -1,6 +1,7 @@
 suppressPackageStartupMessages({
     library(dplyr)
     library(tidyr)
+    library(testthat)
 })
 
 
@@ -67,7 +68,7 @@ test_that("print - approx bayes", {
             threshold = 0.5,
             same_cov = TRUE,
             REML = TRUE,
-            covariance = "ar"
+            covariance = "ar1"
         ),
         quiet = TRUE
     )
@@ -104,8 +105,7 @@ test_that("print - bayesian", {
             vars = dobj$vars,
             method = method_bayes(
                 n_samples = 50,
-                burn_between = 1,
-                seed = 859
+                burn_between = 1
             ),
             quiet = TRUE
         )
@@ -149,7 +149,7 @@ test_that("print - condmean bootstrap", {
             type = "bootstrap",
             same_cov = TRUE,
             REML = TRUE,
-            covariance = "ar"   # Partial completion of argument name
+            covariance = "ar1"   # Partial completion of argument name
         ),
         quiet = TRUE
     )

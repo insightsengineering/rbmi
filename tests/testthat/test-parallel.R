@@ -73,9 +73,9 @@ test_that("Parallisation works as expected", {
 
         results_1$formula <- x ~ a + b + c + d
         results_2$formula <- x ~ a + b + c + d
-        
+
         # Test is currently disabled as for some reason there is no performance gains
-        # when run on github actions, this test appears to run fine everywhere 
+        # when run on github actions, this test appears to run fine everywhere
         # else though...
         # expect_true(time_1_core > (time_2_core * 1.3))
         expect_equal(results_1, results_2)
@@ -189,7 +189,6 @@ test_that("Basic parallisation works as expected", {
 
 
 test_that("Creation and management of user defined clusters works as expected", {
-
     # Setup a function to be run on the parallel cluster that requires
     # global objects (namely the `inner_fun` and environment `e`) as well
     # as a handful of packages to be loaded
@@ -243,8 +242,3 @@ test_that("Creation and management of user defined clusters works as expected", 
     expect_equal(res_3_a, res_1_a)
     parallel::stopCluster(cl)
 })
-
-
-
-
-

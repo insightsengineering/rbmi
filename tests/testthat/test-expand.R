@@ -209,14 +209,14 @@ test_that("expand_locf", {
     input_df <- dplyr::tibble(
         c1 = c("A", "B", "A", "C"),
         c2 = c("A", "A", "B", "B"),
-        v1 = c(1,2,3,4),
+        v1 = c(1, 2, 3, 4),
         v2 = c("X", "Y", "Z", "W")
     )
 
     df_expected <- dplyr::tibble(
-        c1 = factor(c("A", "B","C", "A", "B", "C")),
+        c1 = factor(c("A", "B", "C", "A", "B", "C")),
         c2 = factor(c("A", "A", "A", "B", "B", "B")),
-        v1 = c(1,2,NA, 3,NA, 4),
+        v1 = c(1, 2, NA, 3, NA, 4),
         v2 = c("X", "Y", "Y", "Z", "Z", "W")
     ) %>%
         arrange(c1, c2)
@@ -256,7 +256,6 @@ test_that("fill_locf - works with data.frames & Dates", {
         v2 = c(1:8)
     )
 
-    #  arrange(input_df, pt, srt1, srt2)
     input_df[c(1, 7), "mydate"] <- NA
 
     df_actual <- fill_locf(
@@ -304,7 +303,7 @@ test_that("fill_locf - works with list columns", {
     df_expected <- dplyr::tibble(
         pt = c("a", "a", "b", "b", "b"),
         srt1 = c(1, 2, 1, 2, 3),
-        list_val = list(c(1, 1), c(1, 1), NA, c(4, 4,4,4), c(4,4,4,4))
+        list_val = list(c(1, 1), c(1, 1), NA, c(4, 4, 4, 4), c(4, 4, 4, 4))
     )
     expect_equal(df_actual, df_expected)
 
@@ -339,7 +338,7 @@ test_that("fill_locf works with factors", {
         pt = c("a", "a", "a", "a", "b", "b", "b", "b"),
         srt1 = c(1, 1, 1, 1, 2, 2, 2, 2),
         srt2 = c(1, 2, 3, 4, 1, 2, 3, 4),
-        myfac1 = factor(c("A", "A", NA, "B", NA, "A", "B", NA), levels = c("A", "B","C")),
+        myfac1 = factor(c("A", "A", NA, "B", NA, "A", "B", NA), levels = c("A", "B", "C")),
         v2 = c(1, 2, 3, 4, NA, 6, NA, 8)
     )
 
@@ -359,7 +358,7 @@ test_that("fill_locf works with factors", {
         pt = c("a", "a", "a", "a", "b", "b", "b", "b"),
         srt1 = c(1, 1, 1, 1, 2, 2, 2, 2),
         srt2 = c(1, 2, 3, 4, 1, 2, 3, 4),
-        myfac1 = factor(c("A", "A", "A", "B", NA, "A", "B", "B"), levels = c("A", "B","C")),
+        myfac1 = factor(c("A", "A", "A", "B", NA, "A", "B", "B"), levels = c("A", "B", "C")),
         v2 = c(1, 2, 3, 4, NA, 6, NA, 8)
     )
 
@@ -373,7 +372,7 @@ test_that("fill_locf works with factors", {
         pt = c("a", "a", "a", "a", "b", "b", "b", "b"),
         srt1 = c(1, 1, 1, 1, 2, 2, 2, 2),
         srt2 = c(1, 2, 3, 4, 1, 2, 3, 4),
-        myfac1 = factor(c("A", "A", NA, NA, NA, "B", "C", NA), levels = c("A", "B","C", "D")),
+        myfac1 = factor(c("A", "A", NA, NA, NA, "B", "C", NA), levels = c("A", "B", "C", "D")),
         v2 = c(1, 2, 3, 4, NA, 6, NA, 8)
     )
 
@@ -392,7 +391,7 @@ test_that("fill_locf works with factors", {
         pt = c("a", "a", "a", "a", "b", "b", "b", "b"),
         srt1 = c(1, 1, 1, 1, 2, 2, 2, 2),
         srt2 = c(1, 2, 3, 4, 1, 2, 3, 4),
-        myfac1 = factor(c("A", "A", "A", "A", NA, "B", "C", "C"), levels = c("A", "B","C", "D")),
+        myfac1 = factor(c("A", "A", "A", "A", NA, "B", "C", "C"), levels = c("A", "B", "C", "D")),
         v2 = c(1, 2, 3, 4, NA, 6, NA, 8)
     )
 

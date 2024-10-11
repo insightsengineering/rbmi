@@ -20,5 +20,5 @@ Check that:
 \item The number of iterations that saturated the max treedepth is zero.
 }
 
-Please see \code{\link[rstan:check_hmc_diagnostics]{rstan::check_hmc_diagnostics()}} for details.
+Please see \code{rstan::check_hmc_diagnostics()} for details.
 }

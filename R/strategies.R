@@ -113,9 +113,9 @@ strategy_MAR <- function(pars_group, pars_ref, index_mar) {
 #' @export
 strategy_JR <- function(pars_group, pars_ref, index_mar) {
 
-    if(all(index_mar)) {
+    if (all(index_mar)) {
         return(pars_group)
-    } else if(all(!index_mar)) {
+    } else if (all(!index_mar)) {
         return(pars_ref)
     }
 
@@ -149,9 +149,9 @@ strategy_CR <- function(pars_group, pars_ref, index_mar) {
 #' @export
 strategy_CIR <- function(pars_group, pars_ref, index_mar) {
 
-    if(all(index_mar)) {
+    if (all(index_mar)) {
         return(pars_group)
-    } else if(all(!index_mar)) {
+    } else if (all(!index_mar)) {
         return(pars_ref)
     }
 

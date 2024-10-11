@@ -60,27 +60,27 @@ test_that("Rubin's rules", {
 
 test_that("pval_percentile", {
 
-    est <- c(0,rep(1,3))
+    est <- c(0, rep(1, 3))
     pvals <- pval_percentile(est)
     expected <- c("pval_greater" = 0.2, "pval_less" = 0.8)
     expect_equal(pvals, expected)
 
-    est <- rep(0,4)
+    est <- rep(0, 4)
     pvals <- pval_percentile(est)
     expected <- c("pval_greater" = 1, "pval_less" = 1)
     expect_equal(pvals, expected)
 
-    est <- c(0, rep(-1,3))
+    est <- c(0, rep(-1, 3))
     pvals <- pval_percentile(est)
     expected <- c("pval_greater" = 0.8, "pval_less" = 0.2)
     expect_equal(pvals, expected)
 
-    est <- rep(1,4)
+    est <- rep(1, 4)
     pvals <- pval_percentile(est)
     expected <- c("pval_greater" = 0, "pval_less" = 1)
     expect_equal(pvals, expected)
 
-    est <- rep(-1,4)
+    est <- rep(-1, 4)
     pvals <- pval_percentile(est)
     expected <- c("pval_greater" = 1, "pval_less" = 0)
     expect_equal(pvals, expected)
@@ -133,7 +133,7 @@ test_that("get_ests_bmlmi", {
         V <- (1 / D) * (MSB * (1 + 1 / B) - MSW)
         df_num <- ((MSB * (B + 1)) - (MSW * B))^2
         df_den_1 <- ((MSB^2) * ((B + 1)^2)) / (B - 1)
-        df_den_2 <- (MSW^2 * B) / (D-1)
+        df_den_2 <- (MSW^2 * B) / (D - 1)
         df <- df_num / (df_den_1 + df_den_2)
         list(
             est_point = point,
@@ -221,7 +221,7 @@ test_that("pool", {
 
         pars <- res$pars[[1]]
 
-        real_ci <- real_mu + c(-1, 1) * qnorm( (1 - (1 - conf) / 2) * 1.005) * real_se
+        real_ci <- real_mu + c(-1, 1) * qnorm((1 - (1 - conf) / 2) * 1.005) * real_se
         ci <- pars$ci
 
 
@@ -240,14 +240,14 @@ test_that("pool", {
 
     x1 <- pool(results_boot, type = "normal", alternative = "less")
     x2 <- pool(results_boot, type = "percentile", alternative = "less")
-    expect_false(identical(x1,x2))
+    expect_false(identical(x1, x2))
 
 
 })
 
 test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     set.seed(101)
-  
+
     mu <- 0
     sd <- 1
     n <- 2000
@@ -340,8 +340,8 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
         tolerance = 1e-2
     )
 })
-  
-  test_that("pool BMLMI estimates", {
+
+test_that("pool BMLMI estimates", {
     set.seed(100)
 
     mu <- 0
@@ -355,15 +355,18 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     ############ NO MISSING VALUES
 
     boot_data <- lapply(seq.int(B), function(x) sample(data, size = n, replace = TRUE))
-    vals <- unlist(lapply(boot_data, function(x) lapply(seq.int(D), function(y)
-    {
-        mu_est <- mean(x, na.rm = TRUE)
-        sd_est <- sd(x, na.rm = TRUE)
-        x[is.na(x)] <- rnorm(sum(is.na(x)), mu_est, sd_est) # impute
-        return(x)
-    }
-    )
-    ), recursive = FALSE)
+    vals <- lapply(
+        boot_data,
+        function(x) {
+            lapply(seq.int(D), function(y) {
+                mu_est <- mean(x, na.rm = TRUE)
+                sd_est <- sd(x, na.rm = TRUE)
+                x[is.na(x)] <- rnorm(sum(is.na(x)), mu_est, sd_est) # impute
+                return(x)
+            })
+        }
+    ) %>%
+        unlist(recursive = FALSE)
 
     runanalysis <- function(x) {
         list("p1" = list(est = mean(x), se = sqrt(var(x) / length(x)), df = NA))
@@ -383,8 +386,9 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     real_mu <- mean(sapply(vals, mean))
 
     means_per_boot <- lapply(split(vals, rep(seq.int(B), each = D)), function(x) sapply(x, function(y) mean(y)))
-    var_within <- mean(sapply(means_per_boot, function(x) var(x))) # within bootstrap variability (0 if no missing values)
-    real_se <- sqrt(mean(sapply(vals[seq(1, B*D, by = D)], function(x) var(x)/n)) + var_within)
+    # within bootstrap variability (0 if no missing values)
+    var_within <- mean(sapply(means_per_boot, function(x) var(x)))
+    real_se <- sqrt(mean(sapply(vals[seq(1, B * D, by = D)], function(x) var(x) / n)) + var_within)
 
     # real_se is the sum of the within and between bootstrap variability.
     # It should be similar to the se estimate from the bmlmi pooling method
@@ -397,7 +401,7 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
 
         pars <- res$pars[[1]]
 
-        real_ci <- real_mu + c(-1, 1) * qnorm( (1 - (1 - conf) / 2) * 1.005) * real_se
+        real_ci <- real_mu + c(-1, 1) * qnorm((1 - (1 - conf) / 2) * 1.005) * real_se
         ci <- pars$ci
 
         expect_true(real_ci[1] < ci[1] & real_ci[2] > ci[2])
@@ -413,17 +417,19 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
 
     ############### WITH MISSING VALUES
 
-    data[1:ceiling(n/5)] <- NA # 20% missing values
+    data[1:ceiling(n / 5)] <- NA # 20% missing values
     boot_data <- lapply(seq.int(B), function(x) sample(data, size = n, replace = TRUE))
-    vals <- unlist(lapply(boot_data, function(x) lapply(seq.int(D), function(y)
-    {
-        mu_est <- mean(x, na.rm = TRUE)
-        sd_est <- sd(x, na.rm = TRUE)
-        x[is.na(x)] <- rnorm(sum(is.na(x)), mu_est, sd_est) # impute
-        return(x)
-    }
-    )
-    ), recursive = FALSE)
+    vals <- lapply(
+        boot_data,
+        function(x) {
+            lapply(seq.int(D), function(y) {
+                mu_est <- mean(x, na.rm = TRUE)
+                sd_est <- sd(x, na.rm = TRUE)
+                x[is.na(x)] <- rnorm(sum(is.na(x)), mu_est, sd_est) # impute
+                return(x)
+            })
+        }
+    ) |> unlist(recursive = FALSE)
 
 
     ########  BMLMI
@@ -440,7 +446,7 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
 
     means_per_boot <- lapply(split(vals, rep(seq.int(B), each = D)), function(x) sapply(x, function(y) mean(y)))
     var_within <- mean(sapply(means_per_boot, function(x) var(x))) # within bootstrap variability
-    real_se <- sqrt(mean(sapply(vals[seq(1, B*D, by = D)], function(x) var(x)/n)) + var_within)
+    real_se <- sqrt(mean(sapply(vals[seq(1, B * D, by = D)], function(x) var(x) / n)) + var_within)
 
     # real_se should be similar to the se estimate from the bmlmi pooling method
     # (exact equality is not proven)
@@ -448,22 +454,22 @@ test_that("Pool (Rubin) works as expected when se = NA in analysis model", {
     pooled_res <- pool(results_bmlmi)
 
     expect_results(pooled_res, real_mu = real_mu, real_se = real_se)
-    expect_true(sd/sqrt(n) < pooled_res$pars$p1$se)
+    expect_true(sd / sqrt(n) < pooled_res$pars$p1$se)
 
 })
 
 test_that("Can recover known jackknife with  H0 < 0 & H0 > 0", {
-    jest <- c( 7, 3, 4 , 5 , 3 ,3 , 9)
+    jest <- c(7, 3, 4, 5, 3, 3, 9)
 
     jest_r <- jest[-1]
     jest_m <- mean(jest_r)
 
     n <- length(jest_r)
-    jest_se <- sqrt((sum((jest_r - jest_m)^2) * ((n-1) / n)) )
+    jest_se <- sqrt((sum((jest_r - jest_m)^2) * ((n - 1) / n)))
 
     expected <- list(
         est = 7,
-        ci = 7 + c(-1,Inf) * qnorm(0.9) * jest_se,
+        ci = 7 + c(-1, Inf) * qnorm(0.9) * jest_se,
         se = jest_se,
         pvalue = pnorm(7, sd = jest_se, lower.tail = TRUE)
     )
@@ -483,7 +489,7 @@ test_that("Can recover known jackknife with  H0 < 0 & H0 > 0", {
     )
     expected <- list(
         est = 7,
-        ci = 7 + c(-Inf,1) * qnorm(0.9) * jest_se,
+        ci = 7 + c(-Inf, 1) * qnorm(0.9) * jest_se,
         se = jest_se,
         pvalue = pnorm(7, sd = jest_se, lower.tail = FALSE)
     )
@@ -498,7 +504,7 @@ test_that("Can recover known jackknife with  H0 < 0 & H0 > 0", {
     )
     expected <- list(
         est = 7,
-        ci = 7 + c(-1,1) * qnorm(0.95) * jest_se,
+        ci = 7 + c(-1, 1) * qnorm(0.95) * jest_se,
         se = jest_se,
         pvalue = pnorm(7, sd = jest_se, lower.tail = FALSE) * 2
     )
@@ -512,7 +518,7 @@ test_that("Can recover known jackknife with  H0 < 0 & H0 > 0", {
 
 
 test_that("Can recover known values using bootstrap percentiles", {
-    best <- c(1,-1,-2,3,2,1,-4,3,2)
+    best <- c(1, -1, -2, 3, 2, 1, -4, 3, 2)
 
     x <- quantile(best[-1], 0.9, type = 6)[[1]]
     pval <- pval_percentile(best[-1])[1]
@@ -575,7 +581,6 @@ test_that("Can recover known values using bootstrap percentiles", {
 
 test_that("Results of bootstrap percentiles when n_samples = 0 or 1", {
 
-    ################### n_samples = 0
 
     best <- c(1)
     expected <- list(
@@ -613,9 +618,8 @@ test_that("Results of bootstrap percentiles when n_samples = 0 or 1", {
 
 
 
-    ################## n_samples = 1
 
-    best <- c(1,3)
+    best <- c(1, 3)
     expected <- list(
         est = best[1],
         ci = c(-Inf, 3),
@@ -665,7 +669,7 @@ test_that("Results of bootstrap percentiles when n_samples = 0 or 1", {
 )
 
 test_that("Bootstrap percentile does not return two-sided p-value larger than 1 when number of positive and negative estimates is equal", {
-    best <- c(1,-1,-2,3,2,1,-4,-3,2)
+    best <- c(1, -1, -2, 3, 2, 1, -4, -3, 2)
 
     x1 <- quantile(best[-1], 0.10, type = 6)[[1]]
     x2 <- quantile(best[-1], 0.90, type = 6)[[1]]
@@ -690,14 +694,14 @@ test_that("Bootstrap percentile does not return two-sided p-value larger than 1 
 
 test_that("Can recover known values using bootstrap Normal", {
 
-    best <- c(1,-1,-2,3,2,1,-4,3,2)
+    best <- c(1, -1, -2, 3, 2, 1, -4, 3, 2)
     se <- sd(best[-1])
 
     expected <- list(
         est = best[1],
-        ci = best[1] + c(-1,1) * qnorm(0.96) * se,
+        ci = best[1] + c(-1, 1) * qnorm(0.96) * se,
         se = se,
-        pvalue = pnorm(best[1], sd=se, lower.tail = FALSE) * 2
+        pvalue = pnorm(best[1], sd = se, lower.tail = FALSE) * 2
     )
     observed <- pool_internal.bootstrap(
         list(est = best),
@@ -711,9 +715,9 @@ test_that("Can recover known values using bootstrap Normal", {
 
     expected <- list(
         est = best[1],
-        ci = best[1] + c(-1,Inf) * qnorm(0.92) * se,
+        ci = best[1] + c(-1, Inf) * qnorm(0.92) * se,
         se = se,
-        pvalue = pnorm(best[1], sd=se, lower.tail = TRUE)
+        pvalue = pnorm(best[1], sd = se, lower.tail = TRUE)
     )
     observed <- pool_internal.bootstrap(
         list(est = best),
@@ -727,9 +731,9 @@ test_that("Can recover known values using bootstrap Normal", {
 
     expected <- list(
         est = best[1],
-        ci = best[1] + c(-Inf,1) * qnorm(0.92) * se,
+        ci = best[1] + c(-Inf, 1) * qnorm(0.92) * se,
         se = se,
-        pvalue = pnorm(best[1], sd=se, lower.tail = FALSE)
+        pvalue = pnorm(best[1], sd = se, lower.tail = FALSE)
     )
     observed <- pool_internal.bootstrap(
         list(est = best),
@@ -744,8 +748,6 @@ test_that("Can recover known values using bootstrap Normal", {
 
 
 test_that("Results of bootstrap Normal when n_samples = 0 or 1", {
-
-    ################### n_samples = 0
 
     best <- c(1)
     expected <- list(
@@ -786,9 +788,8 @@ test_that("Results of bootstrap Normal when n_samples = 0 or 1", {
 
 
 
-    ################## n_samples = 1
 
-    best <- c(1,3)
+    best <- c(1, 3)
     observed <- pool_internal.bootstrap(
         list(est = best),
         conf.level = 0.90,

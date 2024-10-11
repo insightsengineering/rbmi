@@ -26,5 +26,6 @@ are related to the second bootstrap sample and so on.
 }
 \references{
 Von Hippel, Paul T and Bartlett, Jonathan W8.
-Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without posterior draws. 2021
+Maximum likelihood multiple imputation: Faster imputations and consistent standard errors
+without posterior draws. 2021
 }
