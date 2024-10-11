@@ -46,7 +46,6 @@
 <url><loc>/reference/d_lagscale.html</loc></url>
 <url><loc>/reference/delta_template.html</loc></url>
 <url><loc>/reference/draws.html</loc></url>
-<url><loc>/reference/encap_get_mmrm_sample.html</loc></url>
 <url><loc>/reference/ensure_rstan.html</loc></url>
 <url><loc>/reference/eval_mmrm.html</loc></url>
 <url><loc>/reference/expand.html</loc></url>
@@ -62,7 +61,6 @@
 <url><loc>/reference/getStrategies.html</loc></url>
 <url><loc>/reference/get_ESS.html</loc></url>
 <url><loc>/reference/get_bootstrap_stack.html</loc></url>
-<url><loc>/reference/get_cluster.html</loc></url>
 <url><loc>/reference/get_conditional_parameters.html</loc></url>
 <url><loc>/reference/get_delta_template.html</loc></url>
 <url><loc>/reference/get_draws_mle.html</loc></url>
@@ -97,7 +95,9 @@
 <url><loc>/reference/longDataConstructor.html</loc></url>
 <url><loc>/reference/ls_design.html</loc></url>
 <url><loc>/reference/lsmeans.html</loc></url>
+<url><loc>/reference/make_rbmi_cluster.html</loc></url>
 <url><loc>/reference/method.html</loc></url>
+<url><loc>/reference/par_lapply.html</loc></url>
 <url><loc>/reference/parametric_ci.html</loc></url>
 <url><loc>/reference/pool.html</loc></url>
 <url><loc>/reference/pool_bootstrap_normal.html</loc></url>
