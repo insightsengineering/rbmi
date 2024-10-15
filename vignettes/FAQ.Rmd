@@ -36,7 +36,7 @@ It is intended to be read after the `rbmi: Quickstart` vignette.
 
 ## Is rbmi validated? 
 
-With regards to software, validation is the act of ensuring that the software meets the needs and
+With regards to software in the pharmaceutical industry, validation is the act of ensuring that the software meets the needs and
 requirements of users given the conditions of actual use. The FDA provides general principles and
 guidance for validation but leaves it to individual sponsors to define their specific validation
 processes. Therefore, no individual R package can claim to be 'validated' independently, as
