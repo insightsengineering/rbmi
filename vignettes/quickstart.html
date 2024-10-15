@@ -350,35 +350,38 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li><code>analyse()</code> - analyses each of the multiple imputed datasets</li>
 <li><code>pool()</code> - combines the analysis results across imputed datasets into a single statistic</li>
 </ul>
+<p>This example in this vignette makes use of Bayesian multiuple imputation; this functionality
+requires the installation of the suggested package <a href="https://CRAN.R-project.org/package=rstan">rstan</a>.</p>
+<pre><code>install.packages(&quot;rstan&quot;)</code></pre>
 </div>
 <div id="the-data" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> The Data</h1>
 <p>We use a publicly available example dataset from an antidepressant clinical trial of an active drug versus placebo. The relevant endpoint is the Hamilton 17-item depression rating scale (HAMD17) which was assessed at baseline and at weeks 1, 2, 4, and 6. Study drug discontinuation occurred in 24% of subjects from the active drug and 26% of subjects from placebo. All data after study drug discontinuation are missing and there is a single additional intermittent missing observation.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(rbmi)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; Attaching package: &#39;dplyr&#39;</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; The following objects are masked from &#39;package:stats&#39;:</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt;     filter, lag</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; The following objects are masked from &#39;package:base&#39;:</span></span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;antidepressant_data&quot;</span>)</span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>dat <span class="ot">&lt;-</span> antidepressant_data</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(rbmi)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; Attaching package: &#39;dplyr&#39;</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; The following objects are masked from &#39;package:stats&#39;:</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;     filter, lag</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; The following objects are masked from &#39;package:base&#39;:</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;antidepressant_data&quot;</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>dat <span class="ot">&lt;-</span> antidepressant_data</span></code></pre></div>
 <p>We consider an imputation model with the mean change from baseline in the HAMD17 score as the outcome (variable <code>CHANGE</code> in the dataset). The following covariates are included in the imputation model: the treatment group (<code>THERAPY</code>), the (categorical) visit (<code>VISIT</code>), treatment-by-visit interactions, the baseline HAMD17 score (<code>BASVAL</code>), and baseline HAMD17 score-by-visit interactions. A common unstructured covariance matrix structure is assumed for both groups. The analysis model is an ANCOVA model with the treatment group as the primary factor and adjustment for the baseline HAMD17 score.</p>
 <p><code>rbmi</code> expects its input dataset to be complete; that is, there must be one row per subject for each visit. Missing outcome values should be coded as <code>NA</code>, while missing covariate values are not allowed. If the dataset is incomplete, then the <code>expand_locf()</code> helper function can be used to add any missing rows, using LOCF imputation to carry forward the observed baseline covariate values to visits with missing outcomes. Rows corresponding to missing outcomes are not present in the antidepressant trial dataset. To address this we will therefore use the <code>expand_locf()</code> function as follows:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a></span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co"># Use expand_locf to add rows corresponding to visits with missing outcomes to the dataset</span></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">expand_locf</span>(</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>    dat,</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>    <span class="at">PATIENT =</span> <span class="fu">levels</span>(dat<span class="sc">$</span>PATIENT), <span class="co"># expand by PATIENT and VISIT </span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>    <span class="at">VISIT =</span> <span class="fu">levels</span>(dat<span class="sc">$</span>VISIT),</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>    <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL&quot;</span>, <span class="st">&quot;THERAPY&quot;</span>), <span class="co"># fill with LOCF BASVAL and THERAPY</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>    <span class="at">group =</span> <span class="fu">c</span>(<span class="st">&quot;PATIENT&quot;</span>),</span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>    <span class="at">order =</span> <span class="fu">c</span>(<span class="st">&quot;PATIENT&quot;</span>, <span class="st">&quot;VISIT&quot;</span>)</span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co"># Use expand_locf to add rows corresponding to visits with missing outcomes to the dataset</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">expand_locf</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>    dat,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    <span class="at">PATIENT =</span> <span class="fu">levels</span>(dat<span class="sc">$</span>PATIENT), <span class="co"># expand by PATIENT and VISIT </span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>    <span class="at">VISIT =</span> <span class="fu">levels</span>(dat<span class="sc">$</span>VISIT),</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>    <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL&quot;</span>, <span class="st">&quot;THERAPY&quot;</span>), <span class="co"># fill with LOCF BASVAL and THERAPY</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>    <span class="at">group =</span> <span class="fu">c</span>(<span class="st">&quot;PATIENT&quot;</span>),</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    <span class="at">order =</span> <span class="fu">c</span>(<span class="st">&quot;PATIENT&quot;</span>, <span class="st">&quot;VISIT&quot;</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>)</span></code></pre></div>
 </div>
 <div id="draws" class="section level1" number="3">
 <h1><span class="header-section-number">3</span> Draws</h1>
@@ -394,83 +397,82 @@ the subject’s first visit affected by the ICE “study drug discontinuation”
 We first derive the dateset <code>data_ice</code> and then create 150 Bayesian posterior draws of the imputation model parameters.</p>
 <p>For this example, we assume that the imputation strategy after the ICE is Jump To Reference (JR) for all subjects
 and that 150 multiple imputed datasets using Bayesian posterior draws from the imputation model are to be created.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># create data_ice and set the imputation strategy to JR for</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co"># each patient with at least one missing observation</span></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>dat_ice <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span> </span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>    <span class="fu">arrange</span>(PATIENT, VISIT) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="fu">is.na</span>(CHANGE)) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>    <span class="fu">group_by</span>(PATIENT) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>    <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    <span class="fu">select</span>(PATIENT, VISIT) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">strategy =</span> <span class="st">&quot;JR&quot;</span>)</span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co"># In this dataset, subject 3618 has an intermittent missing values which does not correspond</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co"># to a study drug discontinuation. We therefore remove this subject from `dat_ice`. </span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co"># (In the later imputation step, it will automatically be imputed under the default MAR assumption.)</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>dat_ice <span class="ot">&lt;-</span> dat_ice[<span class="sc">-</span><span class="fu">which</span>(dat_ice<span class="sc">$</span>PATIENT <span class="sc">==</span> <span class="dv">3618</span>),]</span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>dat_ice</span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; # A tibble: 43 × 3</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt;    PATIENT VISIT strategy</span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt;    &lt;fct&gt;   &lt;fct&gt; &lt;chr&gt;   </span></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt;  1 1513    5     JR      </span></span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt;  2 1514    5     JR      </span></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt;  3 1517    5     JR      </span></span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt;  4 1804    7     JR      </span></span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt;  5 2104    7     JR      </span></span>
-<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt;  6 2118    5     JR      </span></span>
-<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co">#&gt;  7 2218    6     JR      </span></span>
-<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt;  8 2230    6     JR      </span></span>
-<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co">#&gt;  9 2721    5     JR      </span></span>
-<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#&gt; 10 2729    5     JR      </span></span>
-<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="co">#&gt; # ℹ 33 more rows</span></span>
-<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a></span>
-<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="co"># Define the names of key variables in our dataset and</span></span>
-<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co"># the covariates included in the imputation model using `set_vars()`</span></span>
-<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="co"># Note that the covariates argument can also include interaction terms</span></span>
-<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
-<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
-<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a>    <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
-<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a>    <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
-<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
-<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a>    <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL*VISIT&quot;</span>, <span class="st">&quot;THERAPY*VISIT&quot;</span>)</span>
-<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a>)</span>
-<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a></span>
-<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a><span class="co"># Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets) </span></span>
-<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a>method <span class="ot">&lt;-</span> <span class="fu">method_bayes</span>(</span>
-<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a>    <span class="at">burn_in =</span> <span class="dv">200</span>,</span>
-<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a>    <span class="at">burn_between =</span> <span class="dv">5</span>,</span>
-<span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a>    <span class="at">n_samples =</span> <span class="dv">150</span></span>
-<span id="cb3-49"><a href="#cb3-49" tabindex="-1"></a>)</span>
-<span id="cb3-50"><a href="#cb3-50" tabindex="-1"></a></span>
-<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a><span class="co"># Create samples for the imputation parameters by running the draws() function</span></span>
-<span id="cb3-52"><a href="#cb3-52" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">987</span>)</span>
-<span id="cb3-53"><a href="#cb3-53" tabindex="-1"></a>drawObj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
-<span id="cb3-54"><a href="#cb3-54" tabindex="-1"></a>    <span class="at">data =</span> dat,</span>
-<span id="cb3-55"><a href="#cb3-55" tabindex="-1"></a>    <span class="at">data_ice =</span> dat_ice,</span>
-<span id="cb3-56"><a href="#cb3-56" tabindex="-1"></a>    <span class="at">vars =</span> vars,</span>
-<span id="cb3-57"><a href="#cb3-57" tabindex="-1"></a>    <span class="at">method =</span> method,</span>
-<span id="cb3-58"><a href="#cb3-58" tabindex="-1"></a>    <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
-<span id="cb3-59"><a href="#cb3-59" tabindex="-1"></a>)</span>
-<span id="cb3-60"><a href="#cb3-60" tabindex="-1"></a><span class="co">#&gt; recompiling to avoid crashing R session</span></span>
-<span id="cb3-61"><a href="#cb3-61" tabindex="-1"></a><span class="co">#&gt; Warning in fit_mcmc(designmat = model_df_scaled[, -1, drop = FALSE], outcome = model_df_scaled[, : The largest R-hat is 1.05, indicating chains have not mixed.</span></span>
-<span id="cb3-62"><a href="#cb3-62" tabindex="-1"></a><span class="co">#&gt; Running the chains for more iterations may help. See</span></span>
-<span id="cb3-63"><a href="#cb3-63" tabindex="-1"></a><span class="co">#&gt; https://mc-stan.org/misc/warnings.html#r-hat</span></span>
-<span id="cb3-64"><a href="#cb3-64" tabindex="-1"></a>drawObj</span>
-<span id="cb3-65"><a href="#cb3-65" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-66"><a href="#cb3-66" tabindex="-1"></a><span class="co">#&gt; Draws Object</span></span>
-<span id="cb3-67"><a href="#cb3-67" tabindex="-1"></a><span class="co">#&gt; ------------</span></span>
-<span id="cb3-68"><a href="#cb3-68" tabindex="-1"></a><span class="co">#&gt; Number of Samples: 150</span></span>
-<span id="cb3-69"><a href="#cb3-69" tabindex="-1"></a><span class="co">#&gt; Number of Failed Samples: 0</span></span>
-<span id="cb3-70"><a href="#cb3-70" tabindex="-1"></a><span class="co">#&gt; Model Formula: CHANGE ~ 1 + THERAPY + VISIT + BASVAL * VISIT + THERAPY * VISIT</span></span>
-<span id="cb3-71"><a href="#cb3-71" tabindex="-1"></a><span class="co">#&gt; Imputation Type: random</span></span>
-<span id="cb3-72"><a href="#cb3-72" tabindex="-1"></a><span class="co">#&gt; Method:</span></span>
-<span id="cb3-73"><a href="#cb3-73" tabindex="-1"></a><span class="co">#&gt;     name: Bayes</span></span>
-<span id="cb3-74"><a href="#cb3-74" tabindex="-1"></a><span class="co">#&gt;     burn_in: 200</span></span>
-<span id="cb3-75"><a href="#cb3-75" tabindex="-1"></a><span class="co">#&gt;     burn_between: 5</span></span>
-<span id="cb3-76"><a href="#cb3-76" tabindex="-1"></a><span class="co">#&gt;     same_cov: TRUE</span></span>
-<span id="cb3-77"><a href="#cb3-77" tabindex="-1"></a><span class="co">#&gt;     n_samples: 150</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># create data_ice and set the imputation strategy to JR for</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co"># each patient with at least one missing observation</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>dat_ice <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span> </span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    <span class="fu">arrange</span>(PATIENT, VISIT) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="fu">is.na</span>(CHANGE)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="fu">group_by</span>(PATIENT) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>    <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>    <span class="fu">select</span>(PATIENT, VISIT) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">strategy =</span> <span class="st">&quot;JR&quot;</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co"># In this dataset, subject 3618 has an intermittent missing values which does not correspond</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co"># to a study drug discontinuation. We therefore remove this subject from `dat_ice`. </span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co"># (In the later imputation step, it will automatically be imputed under the default MAR assumption.)</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>dat_ice <span class="ot">&lt;-</span> dat_ice[<span class="sc">-</span><span class="fu">which</span>(dat_ice<span class="sc">$</span>PATIENT <span class="sc">==</span> <span class="dv">3618</span>),]</span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>dat_ice</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; # A tibble: 43 × 3</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt;    PATIENT VISIT strategy</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt;    &lt;fct&gt;   &lt;fct&gt; &lt;chr&gt;   </span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt;  1 1513    5     JR      </span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt;  2 1514    5     JR      </span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt;  3 1517    5     JR      </span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt;  4 1804    7     JR      </span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt;  5 2104    7     JR      </span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt;  6 2118    5     JR      </span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt;  7 2218    6     JR      </span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#&gt;  8 2230    6     JR      </span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co">#&gt;  9 2721    5     JR      </span></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="co">#&gt; 10 2729    5     JR      </span></span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a><span class="co">#&gt; # ℹ 33 more rows</span></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a></span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a><span class="co"># Define the names of key variables in our dataset and</span></span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a><span class="co"># the covariates included in the imputation model using `set_vars()`</span></span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a><span class="co"># Note that the covariates argument can also include interaction terms</span></span>
+<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
+<span id="cb4-38"><a href="#cb4-38" tabindex="-1"></a>    <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
+<span id="cb4-39"><a href="#cb4-39" tabindex="-1"></a>    <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
+<span id="cb4-40"><a href="#cb4-40" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
+<span id="cb4-41"><a href="#cb4-41" tabindex="-1"></a>    <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL*VISIT&quot;</span>, <span class="st">&quot;THERAPY*VISIT&quot;</span>)</span>
+<span id="cb4-42"><a href="#cb4-42" tabindex="-1"></a>)</span>
+<span id="cb4-43"><a href="#cb4-43" tabindex="-1"></a></span>
+<span id="cb4-44"><a href="#cb4-44" tabindex="-1"></a><span class="co"># Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets) </span></span>
+<span id="cb4-45"><a href="#cb4-45" tabindex="-1"></a>method <span class="ot">&lt;-</span> <span class="fu">method_bayes</span>(</span>
+<span id="cb4-46"><a href="#cb4-46" tabindex="-1"></a>    <span class="at">burn_in =</span> <span class="dv">200</span>,</span>
+<span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a>    <span class="at">burn_between =</span> <span class="dv">5</span>,</span>
+<span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a>    <span class="at">n_samples =</span> <span class="dv">150</span></span>
+<span id="cb4-49"><a href="#cb4-49" tabindex="-1"></a>)</span>
+<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a></span>
+<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a><span class="co"># Create samples for the imputation parameters by running the draws() function</span></span>
+<span id="cb4-52"><a href="#cb4-52" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">987</span>)</span>
+<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a>drawObj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
+<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a>    <span class="at">data =</span> dat,</span>
+<span id="cb4-55"><a href="#cb4-55" tabindex="-1"></a>    <span class="at">data_ice =</span> dat_ice,</span>
+<span id="cb4-56"><a href="#cb4-56" tabindex="-1"></a>    <span class="at">vars =</span> vars,</span>
+<span id="cb4-57"><a href="#cb4-57" tabindex="-1"></a>    <span class="at">method =</span> method,</span>
+<span id="cb4-58"><a href="#cb4-58" tabindex="-1"></a>    <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb4-59"><a href="#cb4-59" tabindex="-1"></a>)</span>
+<span id="cb4-60"><a href="#cb4-60" tabindex="-1"></a><span class="co">#&gt; Warning in fit_mcmc(designmat = model_df_scaled[, -1, drop = FALSE], outcome = model_df_scaled[, : The largest R-hat is 1.06, indicating chains have not mixed.</span></span>
+<span id="cb4-61"><a href="#cb4-61" tabindex="-1"></a><span class="co">#&gt; Running the chains for more iterations may help. See</span></span>
+<span id="cb4-62"><a href="#cb4-62" tabindex="-1"></a><span class="co">#&gt; https://mc-stan.org/misc/warnings.html#r-hat</span></span>
+<span id="cb4-63"><a href="#cb4-63" tabindex="-1"></a>drawObj</span>
+<span id="cb4-64"><a href="#cb4-64" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-65"><a href="#cb4-65" tabindex="-1"></a><span class="co">#&gt; Draws Object</span></span>
+<span id="cb4-66"><a href="#cb4-66" tabindex="-1"></a><span class="co">#&gt; ------------</span></span>
+<span id="cb4-67"><a href="#cb4-67" tabindex="-1"></a><span class="co">#&gt; Number of Samples: 150</span></span>
+<span id="cb4-68"><a href="#cb4-68" tabindex="-1"></a><span class="co">#&gt; Number of Failed Samples: 0</span></span>
+<span id="cb4-69"><a href="#cb4-69" tabindex="-1"></a><span class="co">#&gt; Model Formula: CHANGE ~ 1 + THERAPY + VISIT + BASVAL * VISIT + THERAPY * VISIT</span></span>
+<span id="cb4-70"><a href="#cb4-70" tabindex="-1"></a><span class="co">#&gt; Imputation Type: random</span></span>
+<span id="cb4-71"><a href="#cb4-71" tabindex="-1"></a><span class="co">#&gt; Method:</span></span>
+<span id="cb4-72"><a href="#cb4-72" tabindex="-1"></a><span class="co">#&gt;     name: Bayes</span></span>
+<span id="cb4-73"><a href="#cb4-73" tabindex="-1"></a><span class="co">#&gt;     burn_in: 200</span></span>
+<span id="cb4-74"><a href="#cb4-74" tabindex="-1"></a><span class="co">#&gt;     burn_between: 5</span></span>
+<span id="cb4-75"><a href="#cb4-75" tabindex="-1"></a><span class="co">#&gt;     same_cov: TRUE</span></span>
+<span id="cb4-76"><a href="#cb4-76" tabindex="-1"></a><span class="co">#&gt;     n_samples: 150</span></span></code></pre></div>
 <p>Note the use of <code>set_vars()</code> which specifies the names of the key variables
 within the dataset and the imputation model. Additionally, note that whilst <code>vars$group</code> and <code>vars$visit</code>
 are added as terms to the imputation model by default, their interaction is not,
@@ -499,55 +501,55 @@ thus the inclusion of <code>group * visit</code> in the list of covariates.</p>
 <p>The next step is to use the parameters from the imputation model to generate the imputed datasets. This is
 done via the <code>impute()</code> function. The function only has two key inputs: the imputation
 model output from <code>draws()</code> and the reference groups relevant to reference-based imputation methods. It’s usage is thus:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>imputeObj <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>    drawObj,</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    <span class="at">references =</span> <span class="fu">c</span>(<span class="st">&quot;DRUG&quot;</span> <span class="ot">=</span> <span class="st">&quot;PLACEBO&quot;</span>, <span class="st">&quot;PLACEBO&quot;</span> <span class="ot">=</span> <span class="st">&quot;PLACEBO&quot;</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>)</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>imputeObj</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; Imputation Object</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; -----------------</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; Number of Imputed Datasets: 150</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; Fraction of Missing Data (Original Dataset):</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt;     4:   0%</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt;     5:   8%</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;     6:  13%</span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt;     7:  25%</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; References:</span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt;     DRUG    -&gt; PLACEBO</span></span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt;     PLACEBO -&gt; PLACEBO</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>imputeObj <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>    drawObj,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>    <span class="at">references =</span> <span class="fu">c</span>(<span class="st">&quot;DRUG&quot;</span> <span class="ot">=</span> <span class="st">&quot;PLACEBO&quot;</span>, <span class="st">&quot;PLACEBO&quot;</span> <span class="ot">=</span> <span class="st">&quot;PLACEBO&quot;</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>imputeObj</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; Imputation Object</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; -----------------</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; Number of Imputed Datasets: 150</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; Fraction of Missing Data (Original Dataset):</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt;     4:   0%</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt;     5:   8%</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt;     6:  13%</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt;     7:  25%</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; References:</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt;     DRUG    -&gt; PLACEBO</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt;     PLACEBO -&gt; PLACEBO</span></span></code></pre></div>
 <p>In this instance, we are specifying that the <code>PLACEBO</code> group should be the reference group for itself as well as for the <code>DRUG</code> group (as is standard for imputation using reference-based methods).</p>
 <p>Generally speaking, there is no need to see or directly interact with the imputed
 datasets. However, if you do wish to inspect them, they can be extracted from the imputation
 object using the <code>extract_imputed_dfs()</code> helper function, i.e.:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>imputed_dfs <span class="ot">&lt;-</span> <span class="fu">extract_imputed_dfs</span>(imputeObj)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">head</span>(imputed_dfs[[<span class="dv">10</span>]], <span class="dv">12</span>) <span class="co"># first 12 rows of 10th imputed dataset</span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt;     PATIENT HAMATOTL PGIIMP RELDAYS VISIT THERAPY GENDER POOLINV BASVAL</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; 1  new_pt_1       21      2       7     4    DRUG      F     006     32</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; 2  new_pt_1       19      2      14     5    DRUG      F     006     32</span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; 3  new_pt_1       21      3      28     6    DRUG      F     006     32</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; 4  new_pt_1       17      4      42     7    DRUG      F     006     32</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; 5  new_pt_2       18      3       7     4 PLACEBO      F     006     14</span></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; 6  new_pt_2       18      2      15     5 PLACEBO      F     006     14</span></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; 7  new_pt_2       14      3      29     6 PLACEBO      F     006     14</span></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; 8  new_pt_2        8      2      42     7 PLACEBO      F     006     14</span></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; 9  new_pt_3       18      3       7     4    DRUG      F     006     21</span></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; 10 new_pt_3       17      3      14     5    DRUG      F     006     21</span></span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; 11 new_pt_3       12      3      28     6    DRUG      F     006     21</span></span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; 12 new_pt_3        9      3      44     7    DRUG      F     006     21</span></span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt;    HAMDTL17 CHANGE</span></span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; 1        21    -11</span></span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt; 2        20    -12</span></span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; 3        19    -13</span></span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; 4        17    -15</span></span>
-<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt; 5        11     -3</span></span>
-<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt; 6        14      0</span></span>
-<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt; 7         9     -5</span></span>
-<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co">#&gt; 8         5     -9</span></span>
-<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt; 9        20     -1</span></span>
-<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt; 10       18     -3</span></span>
-<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt; 11       16     -5</span></span>
-<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="co">#&gt; 12       13     -8</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>imputed_dfs <span class="ot">&lt;-</span> <span class="fu">extract_imputed_dfs</span>(imputeObj)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">head</span>(imputed_dfs[[<span class="dv">10</span>]], <span class="dv">12</span>) <span class="co"># first 12 rows of 10th imputed dataset</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt;     PATIENT HAMATOTL PGIIMP RELDAYS VISIT THERAPY GENDER POOLINV BASVAL</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; 1  new_pt_1       21      2       7     4    DRUG      F     006     32</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; 2  new_pt_1       19      2      14     5    DRUG      F     006     32</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; 3  new_pt_1       21      3      28     6    DRUG      F     006     32</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; 4  new_pt_1       17      4      42     7    DRUG      F     006     32</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; 5  new_pt_2       18      3       7     4 PLACEBO      F     006     14</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; 6  new_pt_2       18      2      15     5 PLACEBO      F     006     14</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; 7  new_pt_2       14      3      29     6 PLACEBO      F     006     14</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; 8  new_pt_2        8      2      42     7 PLACEBO      F     006     14</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; 9  new_pt_3       18      3       7     4    DRUG      F     006     21</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; 10 new_pt_3       17      3      14     5    DRUG      F     006     21</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; 11 new_pt_3       12      3      28     6    DRUG      F     006     21</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; 12 new_pt_3        9      3      44     7    DRUG      F     006     21</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt;    HAMDTL17 CHANGE</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; 1        21    -11</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; 2        20    -12</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; 3        19    -13</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; 4        17    -15</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; 5        11     -3</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; 6        14      0</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; 7         9     -5</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt; 8         5     -9</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt; 9        20     -1</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; 10       18     -3</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co">#&gt; 11       16     -5</span></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt; 12       13     -8</span></span></code></pre></div>
 <p>Note that in the case of <code>method_bayes()</code> or <code>method_approxbayes()</code>, all imputed datasets correspond to random imputations on the original dataset.
 For <code>method_condmean()</code>, the first imputed dataset will always correspond to the completed original dataset containing all subjects.
 For <code>method_condmean(type=&quot;jackknife&quot;)</code>, the remaining datasets correspond to conditional mean imputations on leave-one-subject-out datasets,
@@ -561,37 +563,37 @@ an analysis function and then calling <code>analyse()</code> to apply this funct
 imputed dataset. For this vignette we use the <code>ancova()</code> function provided by the rbmi
 package which fits a separate ANCOVA model for the outcomes from each visit and returns a treatment
 effect estimate and corresponding least square means for each group per visit.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>anaObj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>    imputeObj,</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>    ancova,</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>    <span class="at">vars =</span> <span class="fu">set_vars</span>(</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>        <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>        <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>        <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>        <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>        <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL&quot;</span>)</span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>    )</span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>)</span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>anaObj</span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; Analysis Object</span></span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; ---------------</span></span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; Number of Results: 150</span></span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; Analysis Function: ancova</span></span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; Delta Applied: FALSE</span></span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; Analysis Estimates:</span></span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt;     trt_4</span></span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt;     lsm_ref_4</span></span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt;     lsm_alt_4</span></span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt;     trt_5</span></span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt;     lsm_ref_5</span></span>
-<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt;     lsm_alt_5</span></span>
-<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt;     trt_6</span></span>
-<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co">#&gt;     lsm_ref_6</span></span>
-<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt;     lsm_alt_6</span></span>
-<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co">#&gt;     trt_7</span></span>
-<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co">#&gt;     lsm_ref_7</span></span>
-<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co">#&gt;     lsm_alt_7</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>anaObj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>    imputeObj,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>    ancova,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>    <span class="at">vars =</span> <span class="fu">set_vars</span>(</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>        <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>        <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>        <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>        <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>        <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL&quot;</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>    )</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>)</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>anaObj</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; Analysis Object</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; ---------------</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; Number of Results: 150</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; Analysis Function: ancova</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; Delta Applied: FALSE</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; Analysis Estimates:</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt;     trt_4</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt;     lsm_ref_4</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt;     lsm_alt_4</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt;     trt_5</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt;     lsm_ref_5</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt;     lsm_alt_5</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt;     trt_6</span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt;     lsm_ref_6</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt;     lsm_alt_6</span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt;     trt_7</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="co">#&gt;     lsm_ref_7</span></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="co">#&gt;     lsm_alt_7</span></span></code></pre></div>
 <p>Note that, similar to <code>draws()</code>, the <code>ancova()</code> function uses the <code>set_vars()</code>
 function which determines the names of the key variables within the data and the covariates
 (in addition to the treatment group) for which the analysis model will be adjusted.</p>
@@ -608,56 +610,56 @@ patients. Additionally <code>delta_template()</code> adds several meta-variables
 <code>data.frame</code> which can be used for manual derivation or manipulation of the delta-adjustment.</p>
 <p>For example lets say we want to add a delta-value of 5 to all imputed values (i.e. those values
 which were missing in the original dataset) in the drug arm. That could then be implemented as follows:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># For reference show the additional meta variables provided</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">delta_template</span>(imputeObj) <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>()</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; # A tibble: 688 × 8</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt;    PATIENT VISIT THERAPY is_mar is_missing is_post_ice strategy delta</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt;    &lt;fct&gt;   &lt;fct&gt; &lt;fct&gt;   &lt;lgl&gt;  &lt;lgl&gt;      &lt;lgl&gt;       &lt;chr&gt;    &lt;dbl&gt;</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt;  1 1503    4     DRUG    TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt;  2 1503    5     DRUG    TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt;  3 1503    6     DRUG    TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt;  4 1503    7     DRUG    TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt;  5 1507    4     PLACEBO TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt;  6 1507    5     PLACEBO TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt;  7 1507    6     PLACEBO TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt;  8 1507    7     PLACEBO TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt;  9 1509    4     DRUG    TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; 10 1509    5     DRUG    TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
-<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; # ℹ 678 more rows</span></span>
-<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a></span>
-<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>delta_df <span class="ot">&lt;-</span> <span class="fu">delta_template</span>(imputeObj) <span class="sc">%&gt;%</span></span>
-<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>    <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">delta =</span> <span class="fu">if_else</span>(THERAPY <span class="sc">==</span> <span class="st">&quot;DRUG&quot;</span> <span class="sc">&amp;</span> is_missing , <span class="dv">5</span>, <span class="dv">0</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>    <span class="fu">select</span>(PATIENT, VISIT, delta)</span>
-<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a>    </span>
-<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>delta_df</span>
-<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt; # A tibble: 688 × 3</span></span>
-<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt;    PATIENT VISIT delta</span></span>
-<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt;    &lt;fct&gt;   &lt;fct&gt; &lt;dbl&gt;</span></span>
-<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt;  1 1503    4         0</span></span>
-<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt;  2 1503    5         0</span></span>
-<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt;  3 1503    6         0</span></span>
-<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="co">#&gt;  4 1503    7         0</span></span>
-<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="co">#&gt;  5 1507    4         0</span></span>
-<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a><span class="co">#&gt;  6 1507    5         0</span></span>
-<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a><span class="co">#&gt;  7 1507    6         0</span></span>
-<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="co">#&gt;  8 1507    7         0</span></span>
-<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a><span class="co">#&gt;  9 1509    4         0</span></span>
-<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a><span class="co">#&gt; 10 1509    5         0</span></span>
-<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a><span class="co">#&gt; # ℹ 678 more rows</span></span>
-<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a></span>
-<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a>anaObj_delta <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
-<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a>    imputeObj,</span>
-<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a>    ancova,</span>
-<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a>    <span class="at">delta =</span> delta_df,</span>
-<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a>    <span class="at">vars =</span> <span class="fu">set_vars</span>(</span>
-<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a>        <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
-<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a>        <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
-<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a>        <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
-<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a>        <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
-<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a>        <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL&quot;</span>)</span>
-<span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a>    )</span>
-<span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># For reference show the additional meta variables provided</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">delta_template</span>(imputeObj) <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>()</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt; # A tibble: 688 × 8</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt;    PATIENT VISIT THERAPY is_mar is_missing is_post_ice strategy delta</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt;    &lt;fct&gt;   &lt;fct&gt; &lt;fct&gt;   &lt;lgl&gt;  &lt;lgl&gt;      &lt;lgl&gt;       &lt;chr&gt;    &lt;dbl&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt;  1 1503    4     DRUG    TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt;  2 1503    5     DRUG    TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt;  3 1503    6     DRUG    TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt;  4 1503    7     DRUG    TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt;  5 1507    4     PLACEBO TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt;  6 1507    5     PLACEBO TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt;  7 1507    6     PLACEBO TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt;  8 1507    7     PLACEBO TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt;  9 1509    4     DRUG    TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; 10 1509    5     DRUG    TRUE   FALSE      FALSE       &lt;NA&gt;         0</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt; # ℹ 678 more rows</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>delta_df <span class="ot">&lt;-</span> <span class="fu">delta_template</span>(imputeObj) <span class="sc">%&gt;%</span></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>    <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">delta =</span> <span class="fu">if_else</span>(THERAPY <span class="sc">==</span> <span class="st">&quot;DRUG&quot;</span> <span class="sc">&amp;</span> is_missing , <span class="dv">5</span>, <span class="dv">0</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>    <span class="fu">select</span>(PATIENT, VISIT, delta)</span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a>    </span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a>delta_df</span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="co">#&gt; # A tibble: 688 × 3</span></span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="co">#&gt;    PATIENT VISIT delta</span></span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a><span class="co">#&gt;    &lt;fct&gt;   &lt;fct&gt; &lt;dbl&gt;</span></span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a><span class="co">#&gt;  1 1503    4         0</span></span>
+<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a><span class="co">#&gt;  2 1503    5         0</span></span>
+<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a><span class="co">#&gt;  3 1503    6         0</span></span>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a><span class="co">#&gt;  4 1503    7         0</span></span>
+<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a><span class="co">#&gt;  5 1507    4         0</span></span>
+<span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a><span class="co">#&gt;  6 1507    5         0</span></span>
+<span id="cb8-33"><a href="#cb8-33" tabindex="-1"></a><span class="co">#&gt;  7 1507    6         0</span></span>
+<span id="cb8-34"><a href="#cb8-34" tabindex="-1"></a><span class="co">#&gt;  8 1507    7         0</span></span>
+<span id="cb8-35"><a href="#cb8-35" tabindex="-1"></a><span class="co">#&gt;  9 1509    4         0</span></span>
+<span id="cb8-36"><a href="#cb8-36" tabindex="-1"></a><span class="co">#&gt; 10 1509    5         0</span></span>
+<span id="cb8-37"><a href="#cb8-37" tabindex="-1"></a><span class="co">#&gt; # ℹ 678 more rows</span></span>
+<span id="cb8-38"><a href="#cb8-38" tabindex="-1"></a></span>
+<span id="cb8-39"><a href="#cb8-39" tabindex="-1"></a>anaObj_delta <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb8-40"><a href="#cb8-40" tabindex="-1"></a>    imputeObj,</span>
+<span id="cb8-41"><a href="#cb8-41" tabindex="-1"></a>    ancova,</span>
+<span id="cb8-42"><a href="#cb8-42" tabindex="-1"></a>    <span class="at">delta =</span> delta_df,</span>
+<span id="cb8-43"><a href="#cb8-43" tabindex="-1"></a>    <span class="at">vars =</span> <span class="fu">set_vars</span>(</span>
+<span id="cb8-44"><a href="#cb8-44" tabindex="-1"></a>        <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
+<span id="cb8-45"><a href="#cb8-45" tabindex="-1"></a>        <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
+<span id="cb8-46"><a href="#cb8-46" tabindex="-1"></a>        <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
+<span id="cb8-47"><a href="#cb8-47" tabindex="-1"></a>        <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
+<span id="cb8-48"><a href="#cb8-48" tabindex="-1"></a>        <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL&quot;</span>)</span>
+<span id="cb8-49"><a href="#cb8-49" tabindex="-1"></a>    )</span>
+<span id="cb8-50"><a href="#cb8-50" tabindex="-1"></a>)</span></code></pre></div>
 </div>
 <div id="pool" class="section level1" number="6">
 <h1><span class="header-section-number">6</span> Pool</h1>
@@ -673,169 +675,169 @@ in the original call to <code>draws()</code>:</p>
 <li>For <code>method = method_bmlmi()</code> inference is according to the methods described by von Hippel and Bartlett (see the <code>stat_specs</code> vignette for details)</li>
 </ul>
 <p>Since we have used Bayesian multiple imputation in this vignette, the <code>pool()</code> function will automatically use Rubin’s rules.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>poolObj <span class="ot">&lt;-</span> <span class="fu">pool</span>(</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>    anaObj, </span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>    <span class="at">conf.level =</span> <span class="fl">0.95</span>, </span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>    <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>)</span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>poolObj</span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; Pool Object</span></span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; -----------</span></span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; Number of Results Combined: 150</span></span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; Method: rubin</span></span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; Confidence Level: 0.95</span></span>
-<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; Alternative: two.sided</span></span>
-<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; Results:</span></span>
-<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt;   ==================================================</span></span>
-<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="co">#&gt;    parameter   est     se     lci     uci     pval  </span></span>
-<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co">#&gt;   --------------------------------------------------</span></span>
-<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a><span class="co">#&gt;      trt_4    -0.092  0.683  -1.439  1.256   0.893  </span></span>
-<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_4  -1.616  0.486  -2.576  -0.656  0.001  </span></span>
-<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_4  -1.708  0.475  -2.645  -0.77   &lt;0.001 </span></span>
-<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a><span class="co">#&gt;      trt_5    1.334   0.926  -0.494  3.162   0.151  </span></span>
-<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_5  -4.151  0.661  -5.457  -2.846  &lt;0.001 </span></span>
-<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_5  -2.817  0.648  -4.097  -1.537  &lt;0.001 </span></span>
-<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a><span class="co">#&gt;      trt_6    1.934     1    -0.042   3.91   0.055  </span></span>
-<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_6  -6.088  0.715  -7.501  -4.676  &lt;0.001 </span></span>
-<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_6  -4.155  0.698  -5.533  -2.777  &lt;0.001 </span></span>
-<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a><span class="co">#&gt;      trt_7    2.177   1.138  -0.073  4.426   0.058  </span></span>
-<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_7  -7.002  0.827  -8.638  -5.367  &lt;0.001 </span></span>
-<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_7  -4.826  0.783  -6.373  -3.278  &lt;0.001 </span></span>
-<span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a><span class="co">#&gt;   --------------------------------------------------</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>poolObj <span class="ot">&lt;-</span> <span class="fu">pool</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>    anaObj, </span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>    <span class="at">conf.level =</span> <span class="fl">0.95</span>, </span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>    <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>poolObj</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; Pool Object</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; -----------</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; Number of Results Combined: 150</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; Method: rubin</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; Confidence Level: 0.95</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; Alternative: two.sided</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; Results:</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt;   ==================================================</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt;    parameter   est     se     lci     uci     pval  </span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt;   --------------------------------------------------</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt;      trt_4    -0.092  0.683  -1.439  1.256   0.893  </span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_4  -1.616  0.486  -2.576  -0.656  0.001  </span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_4  -1.708  0.475  -2.645  -0.77   &lt;0.001 </span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt;      trt_5    1.328   0.924  -0.497  3.153   0.153  </span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_5  -4.14   0.66   -5.443  -2.838  &lt;0.001 </span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_5  -2.812  0.646  -4.088  -1.537  &lt;0.001 </span></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt;      trt_6    1.939     1    -0.037  3.915   0.054  </span></span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_6  -6.085  0.718  -7.503  -4.667  &lt;0.001 </span></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_6  -4.146  0.699  -5.527  -2.766  &lt;0.001 </span></span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt;      trt_7    2.136   1.12   -0.078   4.35   0.058  </span></span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt;    lsm_ref_7  -6.982  0.812  -8.587  -5.377  &lt;0.001 </span></span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="co">#&gt;    lsm_alt_7  -4.846  0.789  -6.405  -3.287  &lt;0.001 </span></span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="co">#&gt;   --------------------------------------------------</span></span></code></pre></div>
 <p>The table of values shown in the print message for <code>poolObj</code> can also be extracted using the <code>as.data.frame()</code> function:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">as.data.frame</span>(poolObj)</span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#&gt;    parameter         est        se         lci        uci         pval</span></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt; 1      trt_4 -0.09180645 0.6826279 -1.43949684  1.2558839 8.931772e-01</span></span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; 2  lsm_ref_4 -1.61581996 0.4862316 -2.57577141 -0.6558685 1.093708e-03</span></span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; 3  lsm_alt_4 -1.70762640 0.4749573 -2.64531931 -0.7699335 4.262148e-04</span></span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; 4      trt_5  1.33436741 0.9255820 -0.49370018  3.1624350 1.513737e-01</span></span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; 5  lsm_ref_5 -4.15140080 0.6608110 -5.45658456 -2.8462170 3.110832e-09</span></span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; 6  lsm_alt_5 -2.81703340 0.6478134 -4.09662455 -1.5374422 2.460646e-05</span></span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; 7      trt_6  1.93372720 1.0000881 -0.04213496  3.9095894 5.502527e-02</span></span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; 8  lsm_ref_6 -6.08849645 0.7148756 -7.50096014 -4.6760328 1.548722e-14</span></span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; 9  lsm_alt_6 -4.15476925 0.6975559 -5.53298494 -2.7765536 1.739819e-08</span></span>
-<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; 10     trt_7  2.17651184 1.1379189 -0.07335404  4.4263777 5.784145e-02</span></span>
-<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; 11 lsm_ref_7 -7.00205125 0.8268086 -8.63751537 -5.3665871 4.132364e-14</span></span>
-<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; 12 lsm_alt_7 -4.82553941 0.7830124 -6.37333317 -3.2777456 6.903910e-09</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">as.data.frame</span>(poolObj)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt;    parameter         est        se         lci        uci         pval</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; 1      trt_4 -0.09180645 0.6826279 -1.43949684  1.2558839 8.931772e-01</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; 2  lsm_ref_4 -1.61581996 0.4862316 -2.57577141 -0.6558685 1.093708e-03</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; 3  lsm_alt_4 -1.70762640 0.4749573 -2.64531931 -0.7699335 4.262148e-04</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; 4      trt_5  1.32800107 0.9239991 -0.49687491  3.1528770 1.526144e-01</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; 5  lsm_ref_5 -4.14031255 0.6595847 -5.44302381 -2.8376013 3.163421e-09</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; 6  lsm_alt_5 -2.81231148 0.6459122 -4.08807336 -1.5365496 2.396574e-05</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; 7      trt_6  1.93891419 1.0001460 -0.03694571  3.9147741 5.438468e-02</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; 8  lsm_ref_6 -6.08530002 0.7176967 -7.50335519 -4.6672448 1.946811e-14</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; 9  lsm_alt_6 -4.14638583 0.6985434 -5.52650481 -2.7662668 1.911219e-08</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt; 10     trt_7  2.13609482 1.1201125 -0.07781920  4.3500088 5.849971e-02</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt; 11 lsm_ref_7 -6.98181990 0.8117268 -8.58678186 -5.3768579 1.511791e-14</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; 12 lsm_alt_7 -4.84572508 0.7885999 -6.40477980 -3.2866704 7.793320e-09</span></span></code></pre></div>
 <p>These outputs gives an estimated difference of
-2.177 (95% CI -0.073 to 4.426)
+2.136 (95% CI -0.078 to 4.350)
 between the two groups at the last visit with an associated p-value of 0.058.</p>
 </div>
 <div id="code" class="section level1" number="7">
 <h1><span class="header-section-number">7</span> Code</h1>
 <p>We report below all the code presented in this vignette.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">library</span>(rbmi)</span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;antidepressant_data&quot;</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>dat <span class="ot">&lt;-</span> antidepressant_data</span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co"># Use expand_locf to add rows corresponding to visits with missing outcomes to the dataset</span></span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">expand_locf</span>(</span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>    dat,</span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>    <span class="at">PATIENT =</span> <span class="fu">levels</span>(dat<span class="sc">$</span>PATIENT), <span class="co"># expand by PATIENT and VISIT </span></span>
-<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>    <span class="at">VISIT =</span> <span class="fu">levels</span>(dat<span class="sc">$</span>VISIT),</span>
-<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>    <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL&quot;</span>, <span class="st">&quot;THERAPY&quot;</span>), <span class="co"># fill with LOCF BASVAL and THERAPY</span></span>
-<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>    <span class="at">group =</span> <span class="fu">c</span>(<span class="st">&quot;PATIENT&quot;</span>),</span>
-<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>    <span class="at">order =</span> <span class="fu">c</span>(<span class="st">&quot;PATIENT&quot;</span>, <span class="st">&quot;VISIT&quot;</span>)</span>
-<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>)</span>
-<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a></span>
-<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co"># Create data_ice and set the imputation strategy to JR for</span></span>
-<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co"># each patient with at least one missing observation</span></span>
-<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a>dat_ice <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span> </span>
-<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a>    <span class="fu">arrange</span>(PATIENT, VISIT) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="fu">is.na</span>(CHANGE)) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a>    <span class="fu">group_by</span>(PATIENT) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a>    <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a>    <span class="fu">select</span>(PATIENT, VISIT) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">strategy =</span> <span class="st">&quot;JR&quot;</span>)</span>
-<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a></span>
-<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a><span class="co"># In this dataset, subject 3618 has an intermittent missing values which does not correspond</span></span>
-<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a><span class="co"># to a study drug discontinuation. We therefore remove this subject from `dat_ice`. </span></span>
-<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a><span class="co"># (In the later imputation step, it will automatically be imputed under the default MAR assumption.)</span></span>
-<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a>dat_ice <span class="ot">&lt;-</span> dat_ice[<span class="sc">-</span><span class="fu">which</span>(dat_ice<span class="sc">$</span>PATIENT <span class="sc">==</span> <span class="dv">3618</span>),]</span>
-<span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a></span>
-<span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a><span class="co"># Define the names of key variables in our dataset using `set_vars()`</span></span>
-<span id="cb10-34"><a href="#cb10-34" tabindex="-1"></a><span class="co"># and the covariates included in the imputation model</span></span>
-<span id="cb10-35"><a href="#cb10-35" tabindex="-1"></a><span class="co"># Note that the covariates argument can also include interaction terms</span></span>
-<span id="cb10-36"><a href="#cb10-36" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
-<span id="cb10-37"><a href="#cb10-37" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
-<span id="cb10-38"><a href="#cb10-38" tabindex="-1"></a>    <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
-<span id="cb10-39"><a href="#cb10-39" tabindex="-1"></a>    <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
-<span id="cb10-40"><a href="#cb10-40" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
-<span id="cb10-41"><a href="#cb10-41" tabindex="-1"></a>    <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL*VISIT&quot;</span>, <span class="st">&quot;THERAPY*VISIT&quot;</span>)</span>
-<span id="cb10-42"><a href="#cb10-42" tabindex="-1"></a>)</span>
-<span id="cb10-43"><a href="#cb10-43" tabindex="-1"></a></span>
-<span id="cb10-44"><a href="#cb10-44" tabindex="-1"></a><span class="co"># Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets) </span></span>
-<span id="cb10-45"><a href="#cb10-45" tabindex="-1"></a>method <span class="ot">&lt;-</span> <span class="fu">method_bayes</span>(</span>
-<span id="cb10-46"><a href="#cb10-46" tabindex="-1"></a>    <span class="at">burn_in =</span> <span class="dv">200</span>,</span>
-<span id="cb10-47"><a href="#cb10-47" tabindex="-1"></a>    <span class="at">burn_between =</span> <span class="dv">5</span>,</span>
-<span id="cb10-48"><a href="#cb10-48" tabindex="-1"></a>    <span class="at">n_samples =</span> <span class="dv">150</span></span>
-<span id="cb10-49"><a href="#cb10-49" tabindex="-1"></a>)</span>
-<span id="cb10-50"><a href="#cb10-50" tabindex="-1"></a></span>
-<span id="cb10-51"><a href="#cb10-51" tabindex="-1"></a></span>
-<span id="cb10-52"><a href="#cb10-52" tabindex="-1"></a><span class="co"># Create samples for the imputation parameters by running the draws() function</span></span>
-<span id="cb10-53"><a href="#cb10-53" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">987</span>)</span>
-<span id="cb10-54"><a href="#cb10-54" tabindex="-1"></a>drawObj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
-<span id="cb10-55"><a href="#cb10-55" tabindex="-1"></a>    <span class="at">data =</span> dat,</span>
-<span id="cb10-56"><a href="#cb10-56" tabindex="-1"></a>    <span class="at">data_ice =</span> dat_ice,</span>
-<span id="cb10-57"><a href="#cb10-57" tabindex="-1"></a>    <span class="at">vars =</span> vars,</span>
-<span id="cb10-58"><a href="#cb10-58" tabindex="-1"></a>    <span class="at">method =</span> method,</span>
-<span id="cb10-59"><a href="#cb10-59" tabindex="-1"></a>    <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
-<span id="cb10-60"><a href="#cb10-60" tabindex="-1"></a>)</span>
-<span id="cb10-61"><a href="#cb10-61" tabindex="-1"></a></span>
-<span id="cb10-62"><a href="#cb10-62" tabindex="-1"></a><span class="co"># Impute the data</span></span>
-<span id="cb10-63"><a href="#cb10-63" tabindex="-1"></a>imputeObj <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
-<span id="cb10-64"><a href="#cb10-64" tabindex="-1"></a>    drawObj,</span>
-<span id="cb10-65"><a href="#cb10-65" tabindex="-1"></a>    <span class="at">references =</span> <span class="fu">c</span>(<span class="st">&quot;DRUG&quot;</span> <span class="ot">=</span> <span class="st">&quot;PLACEBO&quot;</span>, <span class="st">&quot;PLACEBO&quot;</span> <span class="ot">=</span> <span class="st">&quot;PLACEBO&quot;</span>)</span>
-<span id="cb10-66"><a href="#cb10-66" tabindex="-1"></a>)</span>
-<span id="cb10-67"><a href="#cb10-67" tabindex="-1"></a></span>
-<span id="cb10-68"><a href="#cb10-68" tabindex="-1"></a><span class="co"># Fit the analysis model on each imputed dataset</span></span>
-<span id="cb10-69"><a href="#cb10-69" tabindex="-1"></a>anaObj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
-<span id="cb10-70"><a href="#cb10-70" tabindex="-1"></a>    imputeObj,</span>
-<span id="cb10-71"><a href="#cb10-71" tabindex="-1"></a>    ancova,</span>
-<span id="cb10-72"><a href="#cb10-72" tabindex="-1"></a>    <span class="at">vars =</span> <span class="fu">set_vars</span>(</span>
-<span id="cb10-73"><a href="#cb10-73" tabindex="-1"></a>        <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
-<span id="cb10-74"><a href="#cb10-74" tabindex="-1"></a>        <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
-<span id="cb10-75"><a href="#cb10-75" tabindex="-1"></a>        <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
-<span id="cb10-76"><a href="#cb10-76" tabindex="-1"></a>        <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
-<span id="cb10-77"><a href="#cb10-77" tabindex="-1"></a>        <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL&quot;</span>)</span>
-<span id="cb10-78"><a href="#cb10-78" tabindex="-1"></a>    )</span>
-<span id="cb10-79"><a href="#cb10-79" tabindex="-1"></a>)</span>
-<span id="cb10-80"><a href="#cb10-80" tabindex="-1"></a></span>
-<span id="cb10-81"><a href="#cb10-81" tabindex="-1"></a><span class="co"># Apply a delta adjustment</span></span>
-<span id="cb10-82"><a href="#cb10-82" tabindex="-1"></a></span>
-<span id="cb10-83"><a href="#cb10-83" tabindex="-1"></a><span class="co"># Add a delta-value of 5 to all imputed values (i.e. those values</span></span>
-<span id="cb10-84"><a href="#cb10-84" tabindex="-1"></a><span class="co"># which were missing in the original dataset) in the drug arm.</span></span>
-<span id="cb10-85"><a href="#cb10-85" tabindex="-1"></a>delta_df <span class="ot">&lt;-</span> <span class="fu">delta_template</span>(imputeObj) <span class="sc">%&gt;%</span></span>
-<span id="cb10-86"><a href="#cb10-86" tabindex="-1"></a>    <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb10-87"><a href="#cb10-87" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">delta =</span> <span class="fu">if_else</span>(THERAPY <span class="sc">==</span> <span class="st">&quot;DRUG&quot;</span> <span class="sc">&amp;</span> is_missing , <span class="dv">5</span>, <span class="dv">0</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-88"><a href="#cb10-88" tabindex="-1"></a>    <span class="fu">select</span>(PATIENT, VISIT, delta)</span>
-<span id="cb10-89"><a href="#cb10-89" tabindex="-1"></a></span>
-<span id="cb10-90"><a href="#cb10-90" tabindex="-1"></a><span class="co"># Repeat the analyses with the adjusted values</span></span>
-<span id="cb10-91"><a href="#cb10-91" tabindex="-1"></a>anaObj_delta <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
-<span id="cb10-92"><a href="#cb10-92" tabindex="-1"></a>    imputeObj,</span>
-<span id="cb10-93"><a href="#cb10-93" tabindex="-1"></a>    ancova,</span>
-<span id="cb10-94"><a href="#cb10-94" tabindex="-1"></a>    <span class="at">delta =</span> delta_df,</span>
-<span id="cb10-95"><a href="#cb10-95" tabindex="-1"></a>    <span class="at">vars =</span> <span class="fu">set_vars</span>(</span>
-<span id="cb10-96"><a href="#cb10-96" tabindex="-1"></a>        <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
-<span id="cb10-97"><a href="#cb10-97" tabindex="-1"></a>        <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
-<span id="cb10-98"><a href="#cb10-98" tabindex="-1"></a>        <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
-<span id="cb10-99"><a href="#cb10-99" tabindex="-1"></a>        <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
-<span id="cb10-100"><a href="#cb10-100" tabindex="-1"></a>        <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL&quot;</span>)</span>
-<span id="cb10-101"><a href="#cb10-101" tabindex="-1"></a>    )</span>
-<span id="cb10-102"><a href="#cb10-102" tabindex="-1"></a>)</span>
-<span id="cb10-103"><a href="#cb10-103" tabindex="-1"></a></span>
-<span id="cb10-104"><a href="#cb10-104" tabindex="-1"></a><span class="co"># Pool the results</span></span>
-<span id="cb10-105"><a href="#cb10-105" tabindex="-1"></a>poolObj <span class="ot">&lt;-</span> <span class="fu">pool</span>(</span>
-<span id="cb10-106"><a href="#cb10-106" tabindex="-1"></a>    anaObj, </span>
-<span id="cb10-107"><a href="#cb10-107" tabindex="-1"></a>    <span class="at">conf.level =</span> <span class="fl">0.95</span>, </span>
-<span id="cb10-108"><a href="#cb10-108" tabindex="-1"></a>    <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span></span>
-<span id="cb10-109"><a href="#cb10-109" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">library</span>(rbmi)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;antidepressant_data&quot;</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>dat <span class="ot">&lt;-</span> antidepressant_data</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co"># Use expand_locf to add rows corresponding to visits with missing outcomes to the dataset</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">expand_locf</span>(</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>    dat,</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>    <span class="at">PATIENT =</span> <span class="fu">levels</span>(dat<span class="sc">$</span>PATIENT), <span class="co"># expand by PATIENT and VISIT </span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>    <span class="at">VISIT =</span> <span class="fu">levels</span>(dat<span class="sc">$</span>VISIT),</span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>    <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL&quot;</span>, <span class="st">&quot;THERAPY&quot;</span>), <span class="co"># fill with LOCF BASVAL and THERAPY</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>    <span class="at">group =</span> <span class="fu">c</span>(<span class="st">&quot;PATIENT&quot;</span>),</span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>    <span class="at">order =</span> <span class="fu">c</span>(<span class="st">&quot;PATIENT&quot;</span>, <span class="st">&quot;VISIT&quot;</span>)</span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>)</span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co"># Create data_ice and set the imputation strategy to JR for</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co"># each patient with at least one missing observation</span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a>dat_ice <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span> </span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a>    <span class="fu">arrange</span>(PATIENT, VISIT) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="fu">is.na</span>(CHANGE)) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a>    <span class="fu">group_by</span>(PATIENT) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a>    <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a>    <span class="fu">select</span>(PATIENT, VISIT) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">strategy =</span> <span class="st">&quot;JR&quot;</span>)</span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a></span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a><span class="co"># In this dataset, subject 3618 has an intermittent missing values which does not correspond</span></span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="co"># to a study drug discontinuation. We therefore remove this subject from `dat_ice`. </span></span>
+<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a><span class="co"># (In the later imputation step, it will automatically be imputed under the default MAR assumption.)</span></span>
+<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a>dat_ice <span class="ot">&lt;-</span> dat_ice[<span class="sc">-</span><span class="fu">which</span>(dat_ice<span class="sc">$</span>PATIENT <span class="sc">==</span> <span class="dv">3618</span>),]</span>
+<span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a></span>
+<span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a><span class="co"># Define the names of key variables in our dataset using `set_vars()`</span></span>
+<span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a><span class="co"># and the covariates included in the imputation model</span></span>
+<span id="cb11-35"><a href="#cb11-35" tabindex="-1"></a><span class="co"># Note that the covariates argument can also include interaction terms</span></span>
+<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
+<span id="cb11-38"><a href="#cb11-38" tabindex="-1"></a>    <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
+<span id="cb11-39"><a href="#cb11-39" tabindex="-1"></a>    <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
+<span id="cb11-40"><a href="#cb11-40" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
+<span id="cb11-41"><a href="#cb11-41" tabindex="-1"></a>    <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL*VISIT&quot;</span>, <span class="st">&quot;THERAPY*VISIT&quot;</span>)</span>
+<span id="cb11-42"><a href="#cb11-42" tabindex="-1"></a>)</span>
+<span id="cb11-43"><a href="#cb11-43" tabindex="-1"></a></span>
+<span id="cb11-44"><a href="#cb11-44" tabindex="-1"></a><span class="co"># Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets) </span></span>
+<span id="cb11-45"><a href="#cb11-45" tabindex="-1"></a>method <span class="ot">&lt;-</span> <span class="fu">method_bayes</span>(</span>
+<span id="cb11-46"><a href="#cb11-46" tabindex="-1"></a>    <span class="at">burn_in =</span> <span class="dv">200</span>,</span>
+<span id="cb11-47"><a href="#cb11-47" tabindex="-1"></a>    <span class="at">burn_between =</span> <span class="dv">5</span>,</span>
+<span id="cb11-48"><a href="#cb11-48" tabindex="-1"></a>    <span class="at">n_samples =</span> <span class="dv">150</span></span>
+<span id="cb11-49"><a href="#cb11-49" tabindex="-1"></a>)</span>
+<span id="cb11-50"><a href="#cb11-50" tabindex="-1"></a></span>
+<span id="cb11-51"><a href="#cb11-51" tabindex="-1"></a></span>
+<span id="cb11-52"><a href="#cb11-52" tabindex="-1"></a><span class="co"># Create samples for the imputation parameters by running the draws() function</span></span>
+<span id="cb11-53"><a href="#cb11-53" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">987</span>)</span>
+<span id="cb11-54"><a href="#cb11-54" tabindex="-1"></a>drawObj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
+<span id="cb11-55"><a href="#cb11-55" tabindex="-1"></a>    <span class="at">data =</span> dat,</span>
+<span id="cb11-56"><a href="#cb11-56" tabindex="-1"></a>    <span class="at">data_ice =</span> dat_ice,</span>
+<span id="cb11-57"><a href="#cb11-57" tabindex="-1"></a>    <span class="at">vars =</span> vars,</span>
+<span id="cb11-58"><a href="#cb11-58" tabindex="-1"></a>    <span class="at">method =</span> method,</span>
+<span id="cb11-59"><a href="#cb11-59" tabindex="-1"></a>    <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb11-60"><a href="#cb11-60" tabindex="-1"></a>)</span>
+<span id="cb11-61"><a href="#cb11-61" tabindex="-1"></a></span>
+<span id="cb11-62"><a href="#cb11-62" tabindex="-1"></a><span class="co"># Impute the data</span></span>
+<span id="cb11-63"><a href="#cb11-63" tabindex="-1"></a>imputeObj <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
+<span id="cb11-64"><a href="#cb11-64" tabindex="-1"></a>    drawObj,</span>
+<span id="cb11-65"><a href="#cb11-65" tabindex="-1"></a>    <span class="at">references =</span> <span class="fu">c</span>(<span class="st">&quot;DRUG&quot;</span> <span class="ot">=</span> <span class="st">&quot;PLACEBO&quot;</span>, <span class="st">&quot;PLACEBO&quot;</span> <span class="ot">=</span> <span class="st">&quot;PLACEBO&quot;</span>)</span>
+<span id="cb11-66"><a href="#cb11-66" tabindex="-1"></a>)</span>
+<span id="cb11-67"><a href="#cb11-67" tabindex="-1"></a></span>
+<span id="cb11-68"><a href="#cb11-68" tabindex="-1"></a><span class="co"># Fit the analysis model on each imputed dataset</span></span>
+<span id="cb11-69"><a href="#cb11-69" tabindex="-1"></a>anaObj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb11-70"><a href="#cb11-70" tabindex="-1"></a>    imputeObj,</span>
+<span id="cb11-71"><a href="#cb11-71" tabindex="-1"></a>    ancova,</span>
+<span id="cb11-72"><a href="#cb11-72" tabindex="-1"></a>    <span class="at">vars =</span> <span class="fu">set_vars</span>(</span>
+<span id="cb11-73"><a href="#cb11-73" tabindex="-1"></a>        <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
+<span id="cb11-74"><a href="#cb11-74" tabindex="-1"></a>        <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
+<span id="cb11-75"><a href="#cb11-75" tabindex="-1"></a>        <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
+<span id="cb11-76"><a href="#cb11-76" tabindex="-1"></a>        <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
+<span id="cb11-77"><a href="#cb11-77" tabindex="-1"></a>        <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL&quot;</span>)</span>
+<span id="cb11-78"><a href="#cb11-78" tabindex="-1"></a>    )</span>
+<span id="cb11-79"><a href="#cb11-79" tabindex="-1"></a>)</span>
+<span id="cb11-80"><a href="#cb11-80" tabindex="-1"></a></span>
+<span id="cb11-81"><a href="#cb11-81" tabindex="-1"></a><span class="co"># Apply a delta adjustment</span></span>
+<span id="cb11-82"><a href="#cb11-82" tabindex="-1"></a></span>
+<span id="cb11-83"><a href="#cb11-83" tabindex="-1"></a><span class="co"># Add a delta-value of 5 to all imputed values (i.e. those values</span></span>
+<span id="cb11-84"><a href="#cb11-84" tabindex="-1"></a><span class="co"># which were missing in the original dataset) in the drug arm.</span></span>
+<span id="cb11-85"><a href="#cb11-85" tabindex="-1"></a>delta_df <span class="ot">&lt;-</span> <span class="fu">delta_template</span>(imputeObj) <span class="sc">%&gt;%</span></span>
+<span id="cb11-86"><a href="#cb11-86" tabindex="-1"></a>    <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb11-87"><a href="#cb11-87" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">delta =</span> <span class="fu">if_else</span>(THERAPY <span class="sc">==</span> <span class="st">&quot;DRUG&quot;</span> <span class="sc">&amp;</span> is_missing , <span class="dv">5</span>, <span class="dv">0</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-88"><a href="#cb11-88" tabindex="-1"></a>    <span class="fu">select</span>(PATIENT, VISIT, delta)</span>
+<span id="cb11-89"><a href="#cb11-89" tabindex="-1"></a></span>
+<span id="cb11-90"><a href="#cb11-90" tabindex="-1"></a><span class="co"># Repeat the analyses with the adjusted values</span></span>
+<span id="cb11-91"><a href="#cb11-91" tabindex="-1"></a>anaObj_delta <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb11-92"><a href="#cb11-92" tabindex="-1"></a>    imputeObj,</span>
+<span id="cb11-93"><a href="#cb11-93" tabindex="-1"></a>    ancova,</span>
+<span id="cb11-94"><a href="#cb11-94" tabindex="-1"></a>    <span class="at">delta =</span> delta_df,</span>
+<span id="cb11-95"><a href="#cb11-95" tabindex="-1"></a>    <span class="at">vars =</span> <span class="fu">set_vars</span>(</span>
+<span id="cb11-96"><a href="#cb11-96" tabindex="-1"></a>        <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
+<span id="cb11-97"><a href="#cb11-97" tabindex="-1"></a>        <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
+<span id="cb11-98"><a href="#cb11-98" tabindex="-1"></a>        <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
+<span id="cb11-99"><a href="#cb11-99" tabindex="-1"></a>        <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
+<span id="cb11-100"><a href="#cb11-100" tabindex="-1"></a>        <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL&quot;</span>)</span>
+<span id="cb11-101"><a href="#cb11-101" tabindex="-1"></a>    )</span>
+<span id="cb11-102"><a href="#cb11-102" tabindex="-1"></a>)</span>
+<span id="cb11-103"><a href="#cb11-103" tabindex="-1"></a></span>
+<span id="cb11-104"><a href="#cb11-104" tabindex="-1"></a><span class="co"># Pool the results</span></span>
+<span id="cb11-105"><a href="#cb11-105" tabindex="-1"></a>poolObj <span class="ot">&lt;-</span> <span class="fu">pool</span>(</span>
+<span id="cb11-106"><a href="#cb11-106" tabindex="-1"></a>    anaObj, </span>
+<span id="cb11-107"><a href="#cb11-107" tabindex="-1"></a>    <span class="at">conf.level =</span> <span class="fl">0.95</span>, </span>
+<span id="cb11-108"><a href="#cb11-108" tabindex="-1"></a>    <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span></span>
+<span id="cb11-109"><a href="#cb11-109" tabindex="-1"></a>)</span></code></pre></div>
 </div>
 
 
