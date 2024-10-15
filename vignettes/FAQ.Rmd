@@ -34,7 +34,7 @@ It is intended to be read after the `rbmi: Quickstart` vignette.
 <br>
 
 
-## Is `rbmi` validated ? 
+## Is rbmi validated? 
 
 With regards to software, validation is the act of ensuring that the software meets the needs and
 requirements of users given the conditions of actual use. The FDA provides general principles and
