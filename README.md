@@ -38,6 +38,11 @@ The basic usage of these core functions is described in the quickstart vignette:
 vignette(topic = "quickstart", package = "rbmi")
 ```
 
+## Validation
+
+For clarification on the current validation status of rbmi please see the FAQ vignette.
+
+
 ## Support
 
 For any help with regards to using the package or if you find a bug please create a [GitHub issue](https://github.com/insightsengineering/rbmi/issues)
