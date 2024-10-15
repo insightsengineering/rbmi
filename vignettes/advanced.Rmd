@@ -276,7 +276,7 @@ between the two groups at the last visit with an associated p-value of
 
 # Imputation under MAR with time-varying covariates
 
-`rbmi` supports the inclusion of time-varying covariates in the imputation model. This is particularly useful for implementing so-called retrieved dropout models. 
+The `rbmi` package supports the inclusion of time-varying covariates in the imputation model. This is particularly useful for implementing so-called retrieved dropout models. 
 The vignette "Implementation of retrieved-dropout models using rbmi" (`vignette(topic = "retrieved_dropout", package = "rbmi")`) contains examples of such models.
 
 # Custom imputation strategies

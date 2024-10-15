@@ -34,7 +34,7 @@ It is intended to be read after the `rbmi: Quickstart` vignette.
 <br>
 
 
-## Is rbmi validated? 
+## Is `rbmi` validated? 
 
 With regards to software in the pharmaceutical industry, validation is the act of ensuring that the software meets the needs and
 requirements of users given the conditions of actual use. The FDA provides general principles and
@@ -44,12 +44,12 @@ validation depends on the entire software stack and the specific processes of ea
 
 That being said, some of the core components of any validation process are the design specification
 (what is the software supposed to do) as well as the testing / test results that demonstrate that
-the design specification has been met. For rbmi, the design specification is documented extensively,
+the design specification has been met. For `rbmi`, the design specification is documented extensively,
 both at a macro level in vignettes and literature publications, and at a micro level in detailed
 function manuals. This is supported by our extensive suite of unit and integration tests, which
 ensure the software consistently produces correct output across a wide range of input scenarios. 
 
-This documentation and test coverage enable rbmi to be easily installed and integrated into any
+This documentation and test coverage enable `rbmi` to be easily installed and integrated into any
 R system, in alignment with the system's broader validation process.
 
 

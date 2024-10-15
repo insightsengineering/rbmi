@@ -342,8 +342,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <div id="introduction" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
-<p>The purpose of this vignette is to provide a 15 minute quickstart guide to the core functions of the rbmi package.</p>
-<p>The rbmi package consists of 4 core functions (plus several helper functions) which are typically called in sequence:</p>
+<p>The purpose of this vignette is to provide a 15 minute quickstart guide to the core functions of the <code>rbmi</code> package.</p>
+<p>The <code>rbmi</code> package consists of 4 core functions (plus several helper functions) which are typically called in sequence:</p>
 <ul>
 <li><code>draws()</code> - fits the imputation models and stores their parameters</li>
 <li><code>impute()</code> - creates multiple imputed datasets</li>
@@ -560,7 +560,7 @@ For <code>method_bmlmi()</code>, all the imputed datasets correspond to sets of 
 <h1><span class="header-section-number">5</span> Analyse</h1>
 <p>The next step is to run the analysis model on each imputed dataset. This is done by defining
 an analysis function and then calling <code>analyse()</code> to apply this function to each
-imputed dataset. For this vignette we use the <code>ancova()</code> function provided by the rbmi
+imputed dataset. For this vignette we use the <code>ancova()</code> function provided by the <code>rbmi</code>
 package which fits a separate ANCOVA model for the outcomes from each visit and returns a treatment
 effect estimate and corresponding least square means for each group per visit.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>anaObj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>

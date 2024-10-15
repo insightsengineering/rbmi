@@ -19,7 +19,7 @@
 #' ```
 #' emmeans::emmeans(model, specs = "<treatment>", counterfactual = "<treatment>")
 #' ```
-#' Note that to ensure backwards compatibility with previous versions of rbmi
+#' Note that to ensure backwards compatibility with previous versions of `rbmi`
 #' `weights = "proportional"` is an alias for `weights = "counterfactual"`.
 #' To get results consistent with `emmeans`'s `weights = "proportional"`
 #' please use `weights = "proportional_em"`.

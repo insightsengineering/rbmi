@@ -506,7 +506,7 @@ Finally, we call the function <code>draws()</code> to derive the parameter estim
 <h2><span class="header-section-number">3.3</span> Analyse</h2>
 <p>Once the datasets have been imputed, we can call the <code>analyse()</code> function to apply the complete-data analysis model (here ANCOVA) to each imputed dataset.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co"># Set analysis variables using rbmi function &quot;set_vars&quot;</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co"># Set analysis variables using `rbmi` function &quot;set_vars&quot;</span></span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>vars_an <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="at">group =</span> vars<span class="sc">$</span>group,</span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="at">visit =</span> vars<span class="sc">$</span>visit,</span>
@@ -682,7 +682,7 @@ The function returns a list containing the imputation objects under both referen
 <span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a>  cmi <span class="ot">&lt;-</span> cmi[, <span class="fu">c</span>(vars<span class="sc">$</span>subjid, vars<span class="sc">$</span>visit, vars<span class="sc">$</span>outcome)]</span>
 <span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a>  <span class="fu">colnames</span>(cmi)[<span class="fu">colnames</span>(cmi) <span class="sc">==</span> vars<span class="sc">$</span>outcome] <span class="ot">&lt;-</span> <span class="st">&quot;y_imp&quot;</span></span>
 <span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a>  </span>
-<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a>  <span class="co"># Map back original patients id since rbmi re-code ids to ensure id uniqueness</span></span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a>  <span class="co"># Map back original patients id since `rbmi` re-code ids to ensure id uniqueness</span></span>
 <span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a>  </span>
 <span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>  cmi[[vars<span class="sc">$</span>subjid]] <span class="ot">&lt;-</span> idmap[<span class="fu">match</span>(cmi[[vars<span class="sc">$</span>subjid]], <span class="fu">names</span>(idmap))]</span>
 <span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a>  </span>
@@ -714,7 +714,7 @@ The function returns a list containing the imputation objects under both referen
 <span id="cb6-63"><a href="#cb6-63" tabindex="-1"></a>  cmi_MAR <span class="ot">&lt;-</span> cmi_MAR[, <span class="fu">c</span>(vars<span class="sc">$</span>subjid, vars<span class="sc">$</span>visit, vars<span class="sc">$</span>outcome)]</span>
 <span id="cb6-64"><a href="#cb6-64" tabindex="-1"></a>  <span class="fu">colnames</span>(cmi_MAR)[<span class="fu">colnames</span>(cmi_MAR) <span class="sc">==</span> vars<span class="sc">$</span>outcome] <span class="ot">&lt;-</span> <span class="st">&quot;y_MAR&quot;</span></span>
 <span id="cb6-65"><a href="#cb6-65" tabindex="-1"></a>  </span>
-<span id="cb6-66"><a href="#cb6-66" tabindex="-1"></a>  <span class="co"># Map back original patients id since rbmi re-code ids to ensure id uniqueness</span></span>
+<span id="cb6-66"><a href="#cb6-66" tabindex="-1"></a>  <span class="co"># Map back original patients id since `rbmi` re-code ids to ensure id uniqueness</span></span>
 <span id="cb6-67"><a href="#cb6-67" tabindex="-1"></a>  cmi_MAR[[vars<span class="sc">$</span>subjid]] <span class="ot">&lt;-</span> idmap[<span class="fu">match</span>(cmi_MAR[[vars<span class="sc">$</span>subjid]], <span class="fu">names</span>(idmap))]</span>
 <span id="cb6-68"><a href="#cb6-68" tabindex="-1"></a>  </span>
 <span id="cb6-69"><a href="#cb6-69" tabindex="-1"></a>  <span class="co"># Derive delta adjustment &quot;aligned with ref-based imputation&quot;,</span></span>
@@ -741,7 +741,7 @@ The function returns a list containing the imputation objects under both referen
 <code>analyse()</code> will take as the input argument <code>imputations = res_delta_adjust$imputeObj_MAR</code>, i.e. the imputation object corresponding to the MAR imputation (and not the JR imputation).
 The argument <code>delta</code> can be used to add a delta-adjustment prior to the analysis and we set this to the delta-adjustment obtained in the previous step: <code>delta = res_delta_adjust$delta_adjust</code>.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co"># Set analysis variables using rbmi function &quot;set_vars&quot;</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co"># Set analysis variables using `rbmi` function &quot;set_vars&quot;</span></span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>vars_an <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">group =</span> vars<span class="sc">$</span>group,</span>
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">visit =</span> vars<span class="sc">$</span>visit,</span>
