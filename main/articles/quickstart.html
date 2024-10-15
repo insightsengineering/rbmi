@@ -42,14 +42,6 @@
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.2.6">v1.2.6</a> </div></li>
-<!-- end dropdown for versions -->
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -92,13 +84,16 @@
 <li>
 <code><a href="../reference/pool.html">pool()</a></code> - combines the analysis results across imputed datasets into a single statistic</li>
 </ul>
+<p>This example in this vignette makes use of Bayesian multiuple imputation; this functionality
+requires the installation of the suggested package <a href="https://CRAN.R-project.org/package=rstan" class="external-link">rstan</a>.</p>
+<pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"rstan"</span><span class="op">)</span></span></code></pre>
 </div>
 <div class="section level2" number="2">
 <h2 id="the-data">
 <span class="header-section-number">2</span> The Data<a class="anchor" aria-label="anchor" href="#the-data"></a>
 </h2>
 <p>We use a publicly available example dataset from an antidepressant clinical trial of an active drug versus placebo. The relevant endpoint is the Hamilton 17-item depression rating scale (HAMD17) which was assessed at baseline and at weeks 1, 2, 4, and 6. Study drug discontinuation occurred in 24% of subjects from the active drug and 26% of subjects from placebo. All data after study drug discontinuation are missing and there is a single additional intermittent missing observation.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://insightsengineering.github.io/rbmi/" class="external-link">rbmi</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -114,7 +109,7 @@
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="va">antidepressant_data</span></span></code></pre></div>
 <p>We consider an imputation model with the mean change from baseline in the HAMD17 score as the outcome (variable <code>CHANGE</code> in the dataset). The following covariates are included in the imputation model: the treatment group (<code>THERAPY</code>), the (categorical) visit (<code>VISIT</code>), treatment-by-visit interactions, the baseline HAMD17 score (<code>BASVAL</code>), and baseline HAMD17 score-by-visit interactions. A common unstructured covariance matrix structure is assumed for both groups. The analysis model is an ANCOVA model with the treatment group as the primary factor and adjustment for the baseline HAMD17 score.</p>
 <p><code>rbmi</code> expects its input dataset to be complete; that is, there must be one row per subject for each visit. Missing outcome values should be coded as <code>NA</code>, while missing covariate values are not allowed. If the dataset is incomplete, then the <code><a href="../reference/expand.html">expand_locf()</a></code> helper function can be used to add any missing rows, using LOCF imputation to carry forward the observed baseline covariate values to visits with missing outcomes. Rows corresponding to missing outcomes are not present in the antidepressant trial dataset. To address this we will therefore use the <code><a href="../reference/expand.html">expand_locf()</a></code> function as follows:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Use expand_locf to add rows corresponding to visits with missing outcomes to the dataset</span></span>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expand.html">expand_locf</a></span><span class="op">(</span></span>
@@ -145,7 +140,7 @@ the subject’s first visit affected by the ICE “study drug discontinuation”
 We first derive the dateset <code>data_ice</code> and then create 150 Bayesian posterior draws of the imputation model parameters.</p>
 <p>For this example, we assume that the imputation strategy after the ICE is Jump To Reference (JR) for all subjects
 and that 150 multiple imputed datasets using Bayesian posterior draws from the imputation model are to be created.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># create data_ice and set the imputation strategy to JR for</span></span>
 <span><span class="co"># each patient with at least one missing observation</span></span>
 <span><span class="va">dat_ice</span> <span class="op">&lt;-</span> <span class="va">dat</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
@@ -260,7 +255,7 @@ thus the inclusion of <code>group * visit</code> in the list of covariates.</p>
 <p>The next step is to use the parameters from the imputation model to generate the imputed datasets. This is
 done via the <code><a href="../reference/impute.html">impute()</a></code> function. The function only has two key inputs: the imputation
 model output from <code><a href="../reference/draws.html">draws()</a></code> and the reference groups relevant to reference-based imputation methods. It’s usage is thus:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">imputeObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/impute.html">impute</a></span><span class="op">(</span></span>
 <span>    <span class="va">drawObj</span>,</span>
 <span>    references <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DRUG"</span> <span class="op">=</span> <span class="st">"PLACEBO"</span>, <span class="st">"PLACEBO"</span> <span class="op">=</span> <span class="st">"PLACEBO"</span><span class="op">)</span></span>
@@ -282,7 +277,7 @@ model output from <code><a href="../reference/draws.html">draws()</a></code> and
 <p>Generally speaking, there is no need to see or directly interact with the imputed
 datasets. However, if you do wish to inspect them, they can be extracted from the imputation
 object using the <code><a href="../reference/extract_imputed_dfs.html">extract_imputed_dfs()</a></code> helper function, i.e.:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">imputed_dfs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_imputed_dfs.html">extract_imputed_dfs</a></span><span class="op">(</span><span class="va">imputeObj</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">imputed_dfs</span><span class="op">[[</span><span class="fl">10</span><span class="op">]</span><span class="op">]</span>, <span class="fl">12</span><span class="op">)</span> <span class="co"># first 12 rows of 10th imputed dataset</span></span>
 <span><span class="co">#&gt;     PATIENT HAMATOTL PGIIMP RELDAYS VISIT THERAPY GENDER POOLINV BASVAL</span></span>
@@ -326,7 +321,7 @@ an analysis function and then calling <code><a href="../reference/analyse.html">
 imputed dataset. For this vignette we use the <code><a href="../reference/ancova.html">ancova()</a></code> function provided by the rbmi
 package which fits a separate ANCOVA model for the outcomes from each visit and returns a treatment
 effect estimate and corresponding least square means for each group per visit.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anaObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/analyse.html">analyse</a></span><span class="op">(</span></span>
 <span>    <span class="va">imputeObj</span>,</span>
 <span>    <span class="va">ancova</span>,</span>
@@ -374,7 +369,7 @@ patients. Additionally <code><a href="../reference/delta_template.html">delta_te
 <code>data.frame</code> which can be used for manual derivation or manipulation of the delta-adjustment.</p>
 <p>For example lets say we want to add a delta-value of 5 to all imputed values (i.e. those values
 which were missing in the original dataset) in the drug arm. That could then be implemented as follows:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># For reference show the additional meta variables provided</span></span>
 <span><span class="fu"><a href="../reference/delta_template.html">delta_template</a></span><span class="op">(</span><span class="va">imputeObj</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 688 × 8</span></span></span>
@@ -442,7 +437,7 @@ in the original call to <code><a href="../reference/draws.html">draws()</a></cod
 <li>For <code>method = method_bmlmi()</code> inference is according to the methods described by von Hippel and Bartlett (see the <code>stat_specs</code> vignette for details)</li>
 </ul>
 <p>Since we have used Bayesian multiple imputation in this vignette, the <code><a href="../reference/pool.html">pool()</a></code> function will automatically use Rubin’s rules.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">poolObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pool.html">pool</a></span><span class="op">(</span></span>
 <span>    <span class="va">anaObj</span>, </span>
 <span>    conf.level <span class="op">=</span> <span class="fl">0.95</span>, </span>
@@ -476,7 +471,7 @@ in the original call to <code><a href="../reference/draws.html">draws()</a></cod
 <span><span class="co">#&gt;    lsm_alt_7  -4.815  0.791  -6.379  -3.25   &lt;0.001 </span></span>
 <span><span class="co">#&gt;   --------------------------------------------------</span></span></code></pre></div>
 <p>The table of values shown in the print message for <code>poolObj</code> can also be extracted using the <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> function:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">poolObj</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    parameter         est        se         lci        uci         pval</span></span>
 <span><span class="co">#&gt; 1      trt_4 -0.09180645 0.6826279 -1.43949684  1.2558839 8.931772e-01</span></span>
@@ -500,7 +495,7 @@ between the two groups at the last visit with an associated p-value of 0.059.</p
 <span class="header-section-number">7</span> Code<a class="anchor" aria-label="anchor" href="#code"></a>
 </h2>
 <p>We report below all the code presented in this vignette.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://insightsengineering.github.io/rbmi/" class="external-link">rbmi</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>

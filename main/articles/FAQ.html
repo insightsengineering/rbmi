@@ -42,14 +42,6 @@
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.2.6">v1.2.6</a> </div></li>
-<!-- end dropdown for versions -->
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -84,8 +76,27 @@
 It is intended to be read after the <code>rbmi: Quickstart</code> vignette.</p>
 <p><br></p>
 <div class="section level3" number="1.1">
+<h3 id="is-rbmi-validated">
+<span class="header-section-number">1.1</span> Is rbmi validated?<a class="anchor" aria-label="anchor" href="#is-rbmi-validated"></a>
+</h3>
+<p>With regards to software in the pharmaceutical industry, validation is the act of ensuring that the software meets the needs and
+requirements of users given the conditions of actual use. The FDA provides general principles and
+guidance for validation but leaves it to individual sponsors to define their specific validation
+processes. Therefore, no individual R package can claim to be ‘validated’ independently, as
+validation depends on the entire software stack and the specific processes of each company.</p>
+<p>That being said, some of the core components of any validation process are the design specification
+(what is the software supposed to do) as well as the testing / test results that demonstrate that
+the design specification has been met. For rbmi, the design specification is documented extensively,
+both at a macro level in vignettes and literature publications, and at a micro level in detailed
+function manuals. This is supported by our extensive suite of unit and integration tests, which
+ensure the software consistently produces correct output across a wide range of input scenarios.</p>
+<p>This documentation and test coverage enable rbmi to be easily installed and integrated into any
+R system, in alignment with the system’s broader validation process.</p>
+<p><br></p>
+</div>
+<div class="section level3" number="1.2">
 <h3 id="how-do-the-methods-in-rbmi-compare-to-the-mixed-model-for-repeated-measures-mmrm-implemented-in-the-mmrm-package">
-<span class="header-section-number">1.1</span> How do the methods in <code>rbmi</code> compare to the mixed model for repeated measures (MMRM) implemented in the <code>mmrm</code> package?<a class="anchor" aria-label="anchor" href="#how-do-the-methods-in-rbmi-compare-to-the-mixed-model-for-repeated-measures-mmrm-implemented-in-the-mmrm-package"></a>
+<span class="header-section-number">1.2</span> How do the methods in <code>rbmi</code> compare to the mixed model for repeated measures (MMRM) implemented in the <code>mmrm</code> package?<a class="anchor" aria-label="anchor" href="#how-do-the-methods-in-rbmi-compare-to-the-mixed-model-for-repeated-measures-mmrm-implemented-in-the-mmrm-package"></a>
 </h3>
 <p><code>rbmi</code> was designed to complement and, occasionally, replace standard MMRM analyses for clinical trials with longitudinal endpoints.</p>
 <p><strong>Strengths</strong> of <code>rbmi</code> compared to the standard MMRM model are:</p>
@@ -102,9 +113,9 @@ It is intended to be read after the <code>rbmi: Quickstart</code> vignette.</p>
 </ul>
 <p><br></p>
 </div>
-<div class="section level3" number="1.2">
+<div class="section level3" number="1.3">
 <h3 id="how-does-rbmi-compare-to-general-purpose-software-for-multiple-imputation-mi-such-as-mice">
-<span class="header-section-number">1.2</span> How does <code>rbmi</code> compare to general-purpose software for multiple imputation (MI) such as <code>mice</code>?<a class="anchor" aria-label="anchor" href="#how-does-rbmi-compare-to-general-purpose-software-for-multiple-imputation-mi-such-as-mice"></a>
+<span class="header-section-number">1.3</span> How does <code>rbmi</code> compare to general-purpose software for multiple imputation (MI) such as <code>mice</code>?<a class="anchor" aria-label="anchor" href="#how-does-rbmi-compare-to-general-purpose-software-for-multiple-imputation-mi-such-as-mice"></a>
 </h3>
 <p><code>rbmi</code> covers only “MMRM-type” settings, i.e. settings with a single longitudinal continuous outcome which may be missing at some visits and hence require imputation.</p>
 <p>For these settings, it has several <strong>advantages</strong> over general-purpose MI software:</p>
@@ -117,17 +128,17 @@ It is intended to be read after the <code>rbmi: Quickstart</code> vignette.</p>
 <p>However, <code>rbmi</code> is much more limited in its functionality than general-purpose MI software.</p>
 <p><br></p>
 </div>
-<div class="section level3" number="1.3">
+<div class="section level3" number="1.4">
 <h3 id="how-to-handle-missing-data-in-baseline-covariates-in-rbmi">
-<span class="header-section-number">1.3</span> How to handle missing data in baseline covariates in <code>rbmi</code>?<a class="anchor" aria-label="anchor" href="#how-to-handle-missing-data-in-baseline-covariates-in-rbmi"></a>
+<span class="header-section-number">1.4</span> How to handle missing data in baseline covariates in <code>rbmi</code>?<a class="anchor" aria-label="anchor" href="#how-to-handle-missing-data-in-baseline-covariates-in-rbmi"></a>
 </h3>
 <p><code>rbmi</code> does not support imputation of missing baseline covariates. Therefore, missing baseline covariates need to be handled outside of <code>rbmi</code>.
 The best approach for handling missing baseline covariates needs to be made on a case-by-case basis but in the context of randomized trials, relatively simple approach are often sufficient (<span class="citation">White and Thompson (<a href="#ref-White2005">2005</a>)</span>).</p>
 <p><br></p>
 </div>
-<div class="section level3" number="1.4">
+<div class="section level3" number="1.5">
 <h3 id="why-does-rbmi-by-default-use-an-ancova-analysis-model-and-not-an-mmrm-analysis-model">
-<span class="header-section-number">1.4</span> Why does <code>rbmi</code> by default use an ANCOVA analysis model and not an MMRM analysis model?<a class="anchor" aria-label="anchor" href="#why-does-rbmi-by-default-use-an-ancova-analysis-model-and-not-an-mmrm-analysis-model"></a>
+<span class="header-section-number">1.5</span> Why does <code>rbmi</code> by default use an ANCOVA analysis model and not an MMRM analysis model?<a class="anchor" aria-label="anchor" href="#why-does-rbmi-by-default-use-an-ancova-analysis-model-and-not-an-mmrm-analysis-model"></a>
 </h3>
 <p>The theoretical justification for the conditional mean imputation method requires that the analysis model leads to a point estimator which is a linear function of the outcome vector (<span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>). This is the case for ANCOVA but not for general MMRM models. For the other imputation methods, both ANCOVA and MMRM are valid analysis methods. An MMRM analysis model could be implemented by providing a custom analysis function to the <code><a href="../reference/analyse.html">analyse()</a></code> function.</p>
 <p>For further expalanations, we also cite the end of section 2.4 of the conditional mean imputation paper (<span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>):</p>
@@ -139,9 +150,9 @@ We expect that conditional mean imputation is also valid if a general MMRM model
 </blockquote>
 <p><br></p>
 </div>
-<div class="section level3" number="1.5">
+<div class="section level3" number="1.6">
 <h3 id="how-can-i-analyse-the-change-from-baseline-in-the-analysis-model-when-imputation-was-done-on-the-original-outcomes">
-<span class="header-section-number">1.5</span> How can I analyse the change-from-baseline in the analysis model when imputation was done on the original outcomes?<a class="anchor" aria-label="anchor" href="#how-can-i-analyse-the-change-from-baseline-in-the-analysis-model-when-imputation-was-done-on-the-original-outcomes"></a>
+<span class="header-section-number">1.6</span> How can I analyse the change-from-baseline in the analysis model when imputation was done on the original outcomes?<a class="anchor" aria-label="anchor" href="#how-can-i-analyse-the-change-from-baseline-in-the-analysis-model-when-imputation-was-done-on-the-original-outcomes"></a>
 </h3>
 <p>This can be achieved using custom analysis functions as outlined in Section 7 of the Advanced Vignette. e.g.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
