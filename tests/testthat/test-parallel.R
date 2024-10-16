@@ -211,7 +211,7 @@ test_that("Creation and management of user defined clusters works as expected", 
 
     # Check that function can be run (e.g. all elements are correctly exported)
     set.seed(1223)
-    cl1 <- make_rbmi_cluster(2, list(inner_fun = inner_fun, e = e), c("lubridate", "nlme"))
+    cl1 <- make_rbmi_cluster(2, list(inner_fun = inner_fun, e = e), c("lubridate", "nlme", "dplyr"))
     res_1_a <- parallel::clusterCall(cl1, rnorm, 200)
     res_1_b <- parallel::clusterApplyLB(cl1, c(4, 5), outer_fun)
     expect_equal(res_1_b, list(34, 35))

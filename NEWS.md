@@ -1,15 +1,31 @@
 
-# rbmi (development version)
+# rbmi 1.3.0
+
+## Breaking Changes
+
+* Convert `rstan` to be a suggested package to simplify the installation process. This means that the Bayesian imputation functionality will not be available by default. To use this feature, you will need to install `rstan` separately (#441)
+* Deprecated the `seed` argument to `method_bayes()` in favour of using the base `set.seed()` function (#431)
+
+## New Features
 
 * Added vignette on how to implement retrieved dropout models with time-varying intercurrent event (ICE) indicators (#414)
-* Added documentation clarifying potential false-positive warnings from rstan (#288)
-* Include vignette on how to obtain frequentist and information-anchored inference with conditional mean imputation using `rbmi` (#406)
-* Added FAQ vignette (#407)
+* Added vignette on how to obtain frequentist and information-anchored inference with conditional mean imputation using `rbmi` (#406)
+* Added FAQ vignette including a statement on validation (#407 #440)
 * Updates to `lsmeans()` for better consistency with the `emmeans` package (#412)
     * Renamed `lsmeans(..., weights = "proportional")` to `lsmeans(..., weights = "counterfactual")`to more accurately reflect the weights used in the calculation.
     * Added `lsmeans(..., weights = "proportional_em")` which provides consistent results with `emmeans(..., weights = "proportional")`
     * `lsmeans(..., weights = "proportional")` has been left in the package for backwards compatibility and is an alias for `lsmeans(..., weights = "counterfactual")` but now gives
     a message prompting users to use either "proptional_em" or "counterfactual" instead.
+* Added support for parallel processing in the `analyse()` function (#370)
+* Added documentation clarifying potential false-positive warnings from rstan (#288)
+* Added support for all covariance structures supported by the `mmrm` package (#437)
+* Updated `rbmi` citation detail (#423 #425)
+
+## Miscellaneous Bug Fixes
+
+* Stopped warning messages being accidentally supressed when changing the ICE type in `impute()` (#408)
+* Fixed equations not rendering properly in the `pkgdown` website (#433) 
+
 
 # rbmi 1.2.6
 
