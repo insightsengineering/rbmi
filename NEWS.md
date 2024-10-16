@@ -1,7 +1,6 @@
 
 # rbmi 1.3.0
 
-
 ## Breaking Changes
 
 * Convert `rstan` to be a suggested package to simplify the installation process. This means that the Bayesian imputation functionality will not be available by default. To use this feature, you will need to install `rstan` separately (#441)
