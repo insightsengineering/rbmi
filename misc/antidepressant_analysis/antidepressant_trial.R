@@ -356,4 +356,4 @@ saveRDS(ret_obj$results, file = "Results/results3.rds")
 saveRDS(ret_obj$draws_obj, file = "Results/draws_obj3.rds")
 saveRDS(ret_obj$times, file = "Results/times3.rds")
 
-# results can be seen at Wolbers et al 2021 (https://arxiv.org/abs/2109.11162, table 1)
+# results can be seen at Wolbers et al 2022 (https://doi.org/10.1002/pst.2234, table 1)

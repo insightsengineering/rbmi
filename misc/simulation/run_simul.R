@@ -306,4 +306,4 @@ parallel::mclapply(seq.int(N), runsim, H0=TRUE, mc.cores = parallel::detectCores
 li <- list.files('Results', pattern = '.*\\.rds$', full.names = TRUE)
 saveRDS(bind_rows(lapply(li, function(X) unlist(readRDS(X)))), file = "results.rds")
 
-# results can be seen at Wolbers et al 2021 (https://arxiv.org/abs/2109.11162, tables 2,3)
+# results can be seen at Wolbers et al 2022 (https://doi.org/10.1002/pst.2234, tables 2,3)
