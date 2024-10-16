@@ -1,4 +1,4 @@
 DO NOT DELETE
 
-This is a flag file whose existance indicates to rbmi that it is running in development mode.
+This is a flag file whose existance indicates to `rbmi` that it is running in development mode.
 Relevant code can be found in R/parallel.R

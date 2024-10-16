@@ -40,7 +40,7 @@
 
 # rbmi 1.2.3
 
-* Minor internal tweaks to ensure compatibility with the packages rbmi depends on
+* Minor internal tweaks to ensure compatibility with the packages `rbmi` depends on
 
 # rbmi 1.2.1
 

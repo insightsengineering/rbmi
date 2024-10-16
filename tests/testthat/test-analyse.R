@@ -397,5 +397,5 @@ test_that("Parallisation works with analyse and produces identical results", {
     expect_false(identical(anaobj_d1_t1$results, anaobj_d2_t1$results))
     expect_false(identical(anaobj_d1_t1$results, anaobj_d3_t1$results))
     expect_false(identical(anaobj_d2_t1$results, anaobj_d3_t1$results))
-
+    parallel::stopCluster(cl)
 })

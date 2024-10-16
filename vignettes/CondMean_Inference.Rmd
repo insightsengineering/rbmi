@@ -147,7 +147,7 @@ Once the datasets have been imputed, we can call the `analyse()` function to app
 
 ```{r}
 
-# Set analysis variables using rbmi function "set_vars"
+# Set analysis variables using `rbmi` function "set_vars"
 vars_an <- set_vars(
   group = vars$group,
   visit = vars$visit,
@@ -237,7 +237,7 @@ get_delta_match_refBased <- function(draws, data_ice, references) {
   cmi <- cmi[, c(vars$subjid, vars$visit, vars$outcome)]
   colnames(cmi)[colnames(cmi) == vars$outcome] <- "y_imp"
   
-  # Map back original patients id since rbmi re-code ids to ensure id uniqueness
+  # Map back original patients id since `rbmi` re-code ids to ensure id uniqueness
   
   cmi[[vars$subjid]] <- idmap[match(cmi[[vars$subjid]], names(idmap))]
   
@@ -269,7 +269,7 @@ get_delta_match_refBased <- function(draws, data_ice, references) {
   cmi_MAR <- cmi_MAR[, c(vars$subjid, vars$visit, vars$outcome)]
   colnames(cmi_MAR)[colnames(cmi_MAR) == vars$outcome] <- "y_MAR"
   
-  # Map back original patients id since rbmi re-code ids to ensure id uniqueness
+  # Map back original patients id since `rbmi` re-code ids to ensure id uniqueness
   cmi_MAR[[vars$subjid]] <- idmap[match(cmi_MAR[[vars$subjid]], names(idmap))]
   
   # Derive delta adjustment "aligned with ref-based imputation",
@@ -300,7 +300,7 @@ The argument `delta` can be used to add a delta-adjustment prior to the analysis
 
 ```{r}
 
-# Set analysis variables using rbmi function "set_vars"
+# Set analysis variables using `rbmi` function "set_vars"
 vars_an <- set_vars(
   group = vars$group,
   visit = vars$visit,

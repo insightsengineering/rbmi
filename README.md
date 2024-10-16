@@ -9,7 +9,7 @@ status](https://www.r-pkg.org/badges/version/rbmi)](https://cran.r-project.org/p
 
 ## Overview
 
-rbmi is a R package for imputation of missing data in clinical trials with continuous multivariate normal longitudinal outcomes. 
+The `rbmi` package is used for the imputation of missing data in clinical trials with continuous multivariate normal longitudinal outcomes. 
 It supports imputation under a missing at random (MAR) assumption, reference-based imputation methods, 
 and delta adjustments (as required for sensitivity analysis such as tipping point analyses). The package implements both Bayesian and 
 approximate Bayesian multiple imputation combined with Rubin's rules for inference, and frequentist conditional mean imputation combined with 
@@ -46,7 +46,7 @@ vignette(topic = "quickstart", package = "rbmi")
 
 ## Validation
 
-For clarification on the current validation status of rbmi please see the FAQ vignette.
+For clarification on the current validation status of `rbmi` please see the FAQ vignette.
 
 
 ## Support

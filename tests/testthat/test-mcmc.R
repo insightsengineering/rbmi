@@ -19,15 +19,15 @@ get_mcmc_sim_dat <- function(n, mcoefs, sigma) {
         dplyr::as_tibble() %>%
         dplyr::mutate(id = paste0("P", seq_len(n))) %>%
         tidyr::gather("visit", "outcome", -id) %>%
-        dplyr::mutate(visit = factor(.data$visit)) %>%
-        dplyr::arrange(id, .data$visit) %>%
+        dplyr::mutate(visit = factor(visit)) %>%
+        dplyr::arrange(id, visit) %>%
         dplyr::left_join(covars, by = "id") %>%
         dplyr::mutate(
-            outcome = .data$outcome +
+            outcome = outcome +
                 mcoefs[["int"]] +
-                mcoefs[["age"]] * .data$age +
-                mcoefs[["sex"]] * f2n(.data$sex) +
-                mcoefs[["trtslope"]] * f2n(.data$group) * as.numeric(.data$visit)
+                mcoefs[["age"]] * age +
+                mcoefs[["sex"]] * f2n(sex) +
+                mcoefs[["trtslope"]] * f2n(group) * as.numeric(visit)
         ) %>%
         dplyr::mutate(id = as.factor(id))
 
@@ -39,14 +39,14 @@ get_within <- function(x, real) {
     colnames(x2) <- paste0("B", seq_len(ncol(x2)))
 
     as_tibble(x2) %>%
-        tidyr::gather(var, .data$val) %>%
+        tidyr::gather(var, val) %>%
         group_by(var) %>%
         summarise(
-            lci = quantile(.data$val, 0.005),
-            uci = quantile(.data$val, 0.995)
+            lci = quantile(val, 0.005),
+            uci = quantile(val, 0.995)
         ) %>%
         mutate(real = real) %>%
-        mutate(inside = real >= .data$lci &  real <= .data$uci)
+        mutate(inside = real >= lci &  real <= uci)
 }
 
 test_extract_draws <- function(draws_extracted, same_cov, n_groups, n_visits) {

@@ -110,7 +110,7 @@ exactly which visits have been imputed.
 \section{Parallelisation}{
 
 To speed up the evaluation of \code{analyse()} you can use the \code{ncores} argument to enable parallelisation.
-Simply providing an integer will get rbmi to automatically spawn that many background processes
+Simply providing an integer will get \code{rbmi} to automatically spawn that many background processes
 to parallelise across. If you are using a custom analysis function then you need to ensure
 that any libraries or global objects required by your function are available in the
 sub-processes. To do this you need to use the \code{\link[=make_rbmi_cluster]{make_rbmi_cluster()}} function for example:
@@ -141,8 +141,8 @@ machine and not a remote cluster. One such optimisation is that the required dat
 a temporary file on the local disk from which it is then read into each sub-process. This is
 done to avoid the overhead of transferring the data over the network. Our assumption is that
 if you are at the stage where you need to be parallelising your analysis over a remote cluster
-then you would likely be better off parallelising across multiple rbmi runs rather than within
-a single rbmi run.
+then you would likely be better off parallelising across multiple \code{rbmi} runs rather than within
+a single \code{rbmi} run.
 
 Finally, if you are doing a tipping point analysis you can get a reasonable performance
 improvement by re-using the cluster between each call to \code{analyse()} e.g.

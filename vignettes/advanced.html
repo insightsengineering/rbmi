@@ -670,7 +670,7 @@ between the two groups at the last visit with an associated p-value of
 </div>
 <div id="imputation-under-mar-with-time-varying-covariates" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> Imputation under MAR with time-varying covariates</h1>
-<p><code>rbmi</code> supports the inclusion of time-varying covariates in the imputation model. This is particularly useful for implementing so-called retrieved dropout models.
+<p>The <code>rbmi</code> package supports the inclusion of time-varying covariates in the imputation model. This is particularly useful for implementing so-called retrieved dropout models.
 The vignette “Implementation of retrieved-dropout models using rbmi” (<code>vignette(topic = &quot;retrieved_dropout&quot;, package = &quot;rbmi&quot;)</code>) contains examples of such models.</p>
 </div>
 <div id="custom-imputation-strategies" class="section level1" number="6">
@@ -714,7 +714,7 @@ As an example, the user can check how the CIR strategy was implemented by lookin
 <span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt;     pars &lt;- list(mu = mu, sigma = sigma)</span></span>
 <span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt;     return(pars)</span></span>
 <span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7f7f2a7523a0&gt;</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7f904526d7c0&gt;</span></span>
 <span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:rbmi&gt;</span></span></code></pre></div>
 <p>To further illustrate this for a simple example, assume that a new strategy is to be implemented as follows:
 - The marginal mean of the imputation distribution is equal to the marginal mean trajectory for the subject according to their assigned group and covariates up to the ICE.
