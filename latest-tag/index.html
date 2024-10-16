@@ -10,9 +10,10 @@
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Reference Based Multiple Imputation">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><script src="deps/MathJax-3.2.2/tex-chtml.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Reference Based Multiple Imputation">
 <meta name="description" content="Implements standard and reference based multiple imputation methods for continuous longitudinal endpoints (Gower-Page et al. (2022) &lt;doi:10.21105/joss.04251&gt;). In particular, this package supports deterministic conditional mean imputation and jackknifing as described in Wolbers et al. (2022) &lt;doi:10.1002/pst.2234&gt;, Bayesian multiple imputation as described in Carpenter et al. (2013) &lt;doi:10.1080/10543406.2013.834911&gt;, and bootstrapped maximum likelihood imputation as described in von Hippel and Bartlett (2021) &lt;doi: 10.1214/20-STS793&gt;.">
 <meta property="og:description" content="Implements standard and reference based multiple imputation methods for continuous longitudinal endpoints (Gower-Page et al. (2022) &lt;doi:10.21105/joss.04251&gt;). In particular, this package supports deterministic conditional mean imputation and jackknifing as described in Wolbers et al. (2022) &lt;doi:10.1002/pst.2234&gt;, Bayesian multiple imputation as described in Carpenter et al. (2013) &lt;doi:10.1080/10543406.2013.834911&gt;, and bootstrapped maximum likelihood imputation as described in von Hippel and Bartlett (2021) &lt;doi: 10.1214/20-STS793&gt;.">
+<meta property="og:image" content="/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">rbmi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +37,10 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/advanced.html">rbmi: Advanced Functionality</a></li>
+    <li><a class="dropdown-item" href="articles/CondMean_Inference.html">rbmi: Inference with Conditional Mean Imputation</a></li>
+    <li><a class="dropdown-item" href="articles/FAQ.html">rbmi: Frequently Asked Questions</a></li>
     <li><a class="dropdown-item" href="articles/quickstart.html">rbmi: Quickstart</a></li>
+    <li><a class="dropdown-item" href="articles/retrieved_dropout.html">rbmi: Implementation of retrieved-dropout models using rbmi</a></li>
     <li><a class="dropdown-item" href="articles/stat_specs.html">rbmi: Statistical Specifications</a></li>
   </ul>
 </li>
@@ -47,10 +51,10 @@
           aria-expanded="false" aria-haspopup="true"
           id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
+<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.3.0">v1.3.0</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.2.6">v1.2.6</a> </div></li>
 <!-- end dropdown for versions -->
       </ul>
-
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
@@ -65,18 +69,23 @@
 <div class="row">
   <main id="main" class="col-md-9">
 <div class="section level1">
-<div class="page-header"><h1 id="reference-based-multiple-imputation-rbmi">Reference Based Multiple Imputation (rbmi)<a class="anchor" aria-label="anchor" href="#reference-based-multiple-imputation-rbmi"></a>
-</h1></div>
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="reference-based-multiple-imputation-rbmi-">Reference Based Multiple Imputation (<code>rbmi</code>) 
+<a class="anchor" aria-label="anchor" href="#reference-based-multiple-imputation-rbmi-"></a>
+</h1>
+</div>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>rbmi is a R package for imputation of missing data in clinical trials with continuous multivariate normal longitudinal outcomes. It supports imputation under a missing at random (MAR) assumption, reference-based imputation methods, and delta adjustments (as required for sensitivity analysis such as tipping point analyses). The package implements both Bayesian and approximate Bayesian multiple imputation combined with Rubin’s rules for inference, and frequentist conditional mean imputation combined with (jackknife or bootstrap) resampling.</p>
+<p>The <code>rbmi</code> package is used for the imputation of missing data in clinical trials with continuous multivariate normal longitudinal outcomes. It supports imputation under a missing at random (MAR) assumption, reference-based imputation methods, and delta adjustments (as required for sensitivity analysis such as tipping point analyses). The package implements both Bayesian and approximate Bayesian multiple imputation combined with Rubin’s rules for inference, and frequentist conditional mean imputation combined with (jackknife or bootstrap) resampling.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>The package can be installed directly from CRAN via:</p>
 <pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"rbmi"</span><span class="op">)</span></span></code></pre>
+<p>Note that the usage of Bayesian multiple imputation requires the installation of the suggested package <a href="https://CRAN.R-project.org/package=rstan" class="external-link">rstan</a>.</p>
+<pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"rstan"</span><span class="op">)</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
@@ -94,6 +103,11 @@
 </ul>
 <p>The basic usage of these core functions is described in the quickstart vignette:</p>
 <pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span>topic <span class="op">=</span> <span class="st">"quickstart"</span>, package <span class="op">=</span> <span class="st">"rbmi"</span><span class="op">)</span></span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="validation">Validation<a class="anchor" aria-label="anchor" href="#validation"></a>
+</h2>
+<p>For clarification on the current validation status of <code>rbmi</code> please see the FAQ vignette.</p>
 </div>
 <div class="section level2">
 <h2 id="support">Support<a class="anchor" aria-label="anchor" href="#support"></a>
@@ -138,7 +152,7 @@
 <ul class="list-unstyled">
 <li>Craig Gower-Page <br><small class="roles"> Author, maintainer </small>  </li>
 <li>Alessandro Noci <br><small class="roles"> Author </small>  </li>
-<li>Roche <br><small class="roles"> Copyright holder, funder </small>  </li>
+<li>F. Hoffmann-La Roche AG <br><small class="roles"> Copyright holder, funder </small>  </li>
 <li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>
@@ -156,11 +170,11 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Craig Gower-Page, Alessandro Noci, Roche.</p>
+  <p>Developed by Craig Gower-Page, Alessandro Noci, F. Hoffmann-La Roche AG.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

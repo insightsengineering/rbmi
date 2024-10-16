@@ -2,9 +2,12 @@
 <url><loc>/404.html</loc></url>
 <url><loc>/CONTRIBUTING.html</loc></url>
 <url><loc>/LICENSE.html</loc></url>
+<url><loc>/articles/CondMean_Inference.html</loc></url>
+<url><loc>/articles/FAQ.html</loc></url>
 <url><loc>/articles/advanced.html</loc></url>
 <url><loc>/articles/index.html</loc></url>
 <url><loc>/articles/quickstart.html</loc></url>
+<url><loc>/articles/retrieved_dropout.html</loc></url>
 <url><loc>/articles/stat_specs.html</loc></url>
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
@@ -42,9 +45,8 @@
 <url><loc>/reference/convert_to_imputation_list_df.html</loc></url>
 <url><loc>/reference/d_lagscale.html</loc></url>
 <url><loc>/reference/delta_template.html</loc></url>
-<url><loc>/reference/do_not_run.html</loc></url>
 <url><loc>/reference/draws.html</loc></url>
-<url><loc>/reference/encap_get_mmrm_sample.html</loc></url>
+<url><loc>/reference/ensure_rstan.html</loc></url>
 <url><loc>/reference/eval_mmrm.html</loc></url>
 <url><loc>/reference/expand.html</loc></url>
 <url><loc>/reference/extract_covariates.html</loc></url>
@@ -59,7 +61,6 @@
 <url><loc>/reference/getStrategies.html</loc></url>
 <url><loc>/reference/get_ESS.html</loc></url>
 <url><loc>/reference/get_bootstrap_stack.html</loc></url>
-<url><loc>/reference/get_cluster.html</loc></url>
 <url><loc>/reference/get_conditional_parameters.html</loc></url>
 <url><loc>/reference/get_delta_template.html</loc></url>
 <url><loc>/reference/get_draws_mle.html</loc></url>
@@ -70,6 +71,7 @@
 <url><loc>/reference/get_pattern_groups.html</loc></url>
 <url><loc>/reference/get_pattern_groups_unique.html</loc></url>
 <url><loc>/reference/get_pool_components.html</loc></url>
+<url><loc>/reference/get_stan_model.html</loc></url>
 <url><loc>/reference/get_visit_distribution_parameters.html</loc></url>
 <url><loc>/reference/has_class.html</loc></url>
 <url><loc>/reference/ife.html</loc></url>
@@ -93,7 +95,9 @@
 <url><loc>/reference/longDataConstructor.html</loc></url>
 <url><loc>/reference/ls_design.html</loc></url>
 <url><loc>/reference/lsmeans.html</loc></url>
+<url><loc>/reference/make_rbmi_cluster.html</loc></url>
 <url><loc>/reference/method.html</loc></url>
+<url><loc>/reference/par_lapply.html</loc></url>
 <url><loc>/reference/parametric_ci.html</loc></url>
 <url><loc>/reference/pool.html</loc></url>
 <url><loc>/reference/pool_bootstrap_normal.html</loc></url>
@@ -107,6 +111,7 @@
 <url><loc>/reference/pval_percentile.html</loc></url>
 <url><loc>/reference/random_effects_expr.html</loc></url>
 <url><loc>/reference/rbmi-package.html</loc></url>
+<url><loc>/reference/rbmi-settings.html</loc></url>
 <url><loc>/reference/record.html</loc></url>
 <url><loc>/reference/recursive_reduce.html</loc></url>
 <url><loc>/reference/remove_if_all_missing.html</loc></url>
