@@ -1,18 +1,18 @@
 
-#' Create a rbmi ready cluster
+#' Create a `rbmi` ready cluster
 #'
 #' @param ncores Number of parallel processes to use or an existing cluster to make use of
 #' @param objects a named list of objects to export into the sub-processes
 #' @param packages a character vector of libraries to load in the sub-processes
 #'
 #' This function is a wrapper around `parallel::makePSOCKcluster()` but takes
-#' care of configuring rbmi to be used in the sub-processes as well as loading
+#' care of configuring `rbmi` to be used in the sub-processes as well as loading
 #' user defined objects and libraries and setting the seed for reproducibility.
 #'
 #' If `ncores` is `1` this function will return `NULL`.
 #'
 #' If `ncores` is a cluster created via `parallel::makeCluster()` then this function
-#' just takes care of inserting the relevant rbmi objects into the existing cluster.
+#' just takes care of inserting the relevant `rbmi` objects into the existing cluster.
 #'
 #' @examples
 #' \dontrun{
@@ -54,7 +54,7 @@ make_rbmi_cluster <- function(ncores = 1, objects = NULL, packages = NULL) {
 
     # Load user defined packages
     packages <- c(packages, "assertthat")
-    # Remove attempts to load rbmi as this will be covered later
+    # Remove attempts to load `rbmi` as this will be covered later
     packages <- setdiff(packages, "rbmi")
     devnull <- parallel::clusterCall(
         cl,
@@ -65,7 +65,7 @@ make_rbmi_cluster <- function(ncores = 1, objects = NULL, packages = NULL) {
     # Ensure reproducibility
     parallel::clusterSetRNGStream(cl, sample.int(1))
 
-    # If user has previously configured rbmi sub-processes then early exit
+    # If user has previously configured `rbmi` sub-processes then early exit
     exported_rbmi <- unlist(parallel::clusterEvalQ(cl, exists("..exported..parallel..rbmi")))
     if (all(exported_rbmi)) {
         return(cl)
@@ -87,7 +87,7 @@ make_rbmi_cluster <- function(ncores = 1, objects = NULL, packages = NULL) {
         )
     }
 
-    # Set variable to signify rbmi has been configured
+    # Set variable to signify `rbmi` has been configured
     devnull <- parallel::clusterEvalQ(cl, {
         ..exported..parallel..rbmi <- TRUE
     })

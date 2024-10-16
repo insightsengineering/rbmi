@@ -80,7 +80,7 @@ In comparison to \code{emmeans} this approach is equivalent to:
 \if{html}{\out{<div class="sourceCode">}}\preformatted{emmeans::emmeans(model, specs = "<treatment>", counterfactual = "<treatment>")
 }\if{html}{\out{</div>}}
 
-Note that to ensure backwards compatibility with previous versions of rbmi
+Note that to ensure backwards compatibility with previous versions of \code{rbmi}
 \code{weights = "proportional"} is an alias for \code{weights = "counterfactual"}.
 To get results consistent with \code{emmeans}'s \code{weights = "proportional"}
 please use \code{weights = "proportional_em"}.

@@ -6,7 +6,7 @@
 \alias{rbmi-package}
 \title{rbmi: Reference Based Multiple Imputation}
 \description{
-The rbmi package is used to perform reference based multiple imputation. The package
+The \code{rbmi} package is used to perform reference based multiple imputation. The package
 provides implementations for common, patient-specific imputation strategies whilst allowing the user to
 select between various standard Bayesian and frequentist approaches.
 
@@ -18,7 +18,7 @@ The package is designed around 4 core functions:
 \item \code{\link[=pool]{pool()}} - Pools multiple results into a single statistic
 }
 
-To learn more about rbmi, please see the quickstart vignette:
+To learn more about \code{rbmi}, please see the quickstart vignette:
 
 \code{vignette(topic= "quickstart", package = "rbmi")}
 }
