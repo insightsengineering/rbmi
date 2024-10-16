@@ -26,14 +26,6 @@
     <li><a class="dropdown-item" href="../articles/stat_specs.html">rbmi: Statistical Specifications</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.2.6">v1.2.6</a> </div></li>
-<!-- end dropdown for versions -->
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/insightsengineering/rbmi/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -44,13 +36,13 @@
 </nav><div class="container template-reference-topic">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Create a rbmi ready cluster</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Create a <code>rbmi</code> ready cluster</h1>
       <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/main/R/parallel.R" class="external-link"><code>R/parallel.R</code></a></small>
       <div class="d-none name"><code>make_rbmi_cluster.Rd</code></div>
     </div>
 
     <div class="ref-description section level2">
-    <p>Create a rbmi ready cluster</p>
+    <p>Create a <code>rbmi</code> ready cluster</p>
     </div>
 
     <div class="section level2">
@@ -73,11 +65,11 @@
 <dt id="arg-packages">packages<a class="anchor" aria-label="anchor" href="#arg-packages"></a></dt>
 <dd><p>a character vector of libraries to load in the sub-processes</p>
 <p>This function is a wrapper around <code><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">parallel::makePSOCKcluster()</a></code> but takes
-care of configuring rbmi to be used in the sub-processes as well as loading
+care of configuring <code>rbmi</code> to be used in the sub-processes as well as loading
 user defined objects and libraries and setting the seed for reproducibility.</p>
 <p>If <code>ncores</code> is <code>1</code> this function will return <code>NULL</code>.</p>
 <p>If <code>ncores</code> is a cluster created via <code><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">parallel::makeCluster()</a></code> then this function
-just takes care of inserting the relevant rbmi objects into the existing cluster.</p></dd>
+just takes care of inserting the relevant <code>rbmi</code> objects into the existing cluster.</p></dd>
 
 </dl></div>
 

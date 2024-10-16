@@ -30,14 +30,6 @@ each of them."><meta property="og:image" content="/logo.png"></head><body>
     <li><a class="dropdown-item" href="../articles/stat_specs.html">rbmi: Statistical Specifications</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.2.6">v1.2.6</a> </div></li>
-<!-- end dropdown for versions -->
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/insightsengineering/rbmi/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -169,7 +161,7 @@ exactly which visits have been imputed.</p>
 
 
 <p>To speed up the evaluation of <code>analyse()</code> you can use the <code>ncores</code> argument to enable parallelisation.
-Simply providing an integer will get rbmi to automatically spawn that many background processes
+Simply providing an integer will get <code>rbmi</code> to automatically spawn that many background processes
 to parallelise across. If you are using a custom analysis function then you need to ensure
 that any libraries or global objects required by your function are available in the
 sub-processes. To do this you need to use the <code><a href="make_rbmi_cluster.html">make_rbmi_cluster()</a></code> function for example:</p>
@@ -196,8 +188,8 @@ machine and not a remote cluster. One such optimisation is that the required dat
 a temporary file on the local disk from which it is then read into each sub-process. This is
 done to avoid the overhead of transferring the data over the network. Our assumption is that
 if you are at the stage where you need to be parallelising your analysis over a remote cluster
-then you would likely be better off parallelising across multiple rbmi runs rather than within
-a single rbmi run.</p>
+then you would likely be better off parallelising across multiple <code>rbmi</code> runs rather than within
+a single <code>rbmi</code> run.</p>
 <p>Finally, if you are doing a tipping point analysis you can get a reasonable performance
 improvement by re-using the cluster between each call to <code>analyse()</code> e.g.</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>cl <span class="ot">&lt;-</span> <span class="fu">make_rbmi_cluster</span>(<span class="dv">4</span>)</span>

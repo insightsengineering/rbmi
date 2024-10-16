@@ -30,14 +30,6 @@ information."><meta property="og:image" content="/logo.png"></head><body>
     <li><a class="dropdown-item" href="../articles/stat_specs.html">rbmi: Statistical Specifications</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.2.6">v1.2.6</a> </div></li>
-<!-- end dropdown for versions -->
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/insightsengineering/rbmi/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -103,7 +95,7 @@ to each arm in turn.
 This approach is equivalent to standardization or g-computation.
 In comparison to <code>emmeans</code> this approach is equivalent to:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>emmeans<span class="sc">::</span><span class="fu">emmeans</span>(model, <span class="at">specs =</span> <span class="st">"&lt;treatment&gt;"</span>, <span class="at">counterfactual =</span> <span class="st">"&lt;treatment&gt;"</span>)</span></code></pre><p></p></div>
-<p>Note that to ensure backwards compatibility with previous versions of rbmi
+<p>Note that to ensure backwards compatibility with previous versions of <code>rbmi</code>
 <code>weights = "proportional"</code> is an alias for <code>weights = "counterfactual"</code>.
 To get results consistent with <code>emmeans</code>'s <code>weights = "proportional"</code>
 please use <code>weights = "proportional_em"</code>.</p>
