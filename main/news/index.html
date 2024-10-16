@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rbmi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.6.0001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,14 +26,6 @@
     <li><a class="dropdown-item" href="../articles/stat_specs.html">rbmi: Statistical Specifications</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-<!-- start dropdown for versions --> <li class="nav-item dropdown">
-        <a href="#" class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown" role="button"
-          aria-expanded="false" aria-haspopup="true"
-          id="dropdown-versions">Versions</a> <div class="dropdown-menu" aria-labelledby="dropdown-versions"> <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
-<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.2.6">v1.2.6</a> </div></li>
-<!-- end dropdown for versions -->
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/insightsengineering/rbmi/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -49,11 +41,17 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="rbmi-development-version">rbmi (development version)<a class="anchor" aria-label="anchor" href="#rbmi-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.3.0" id="rbmi-130">rbmi 1.3.0<a class="anchor" aria-label="anchor" href="#rbmi-130"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-1-3-0">Breaking Changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-3-0"></a></h3>
+<ul><li>Convert <code>rstan</code> to be a suggested package to simplify the installation process. This means that the Bayesian imputation functionality will not be available by default. To use this feature, you will need to install <code>rstan</code> separately (<a href="https://github.com/insightsengineering/rbmi/issues/441" class="external-link">#441</a>)</li>
+<li>Deprecated the <code>seed</code> argument to <code><a href="../reference/method.html">method_bayes()</a></code> in favour of using the base <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> function (<a href="https://github.com/insightsengineering/rbmi/issues/431" class="external-link">#431</a>)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-1-3-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-1-3-0"></a></h3>
 <ul><li>Added vignette on how to implement retrieved dropout models with time-varying intercurrent event (ICE) indicators (<a href="https://github.com/insightsengineering/rbmi/issues/414" class="external-link">#414</a>)</li>
-<li>Added documentation clarifying potential false-positive warnings from rstan (<a href="https://github.com/insightsengineering/rbmi/issues/288" class="external-link">#288</a>)</li>
-<li>Include vignette on how to obtain frequentist and information-anchored inference with conditional mean imputation using <code>rbmi</code> (<a href="https://github.com/insightsengineering/rbmi/issues/406" class="external-link">#406</a>)</li>
-<li>Added FAQ vignette (<a href="https://github.com/insightsengineering/rbmi/issues/407" class="external-link">#407</a>)</li>
+<li>Added vignette on how to obtain frequentist and information-anchored inference with conditional mean imputation using <code>rbmi</code> (<a href="https://github.com/insightsengineering/rbmi/issues/406" class="external-link">#406</a>)</li>
+<li>Added FAQ vignette including a statement on validation (<a href="https://github.com/insightsengineering/rbmi/issues/407" class="external-link">#407</a> <a href="https://github.com/insightsengineering/rbmi/issues/440" class="external-link">#440</a>)</li>
 <li>Updates to <code><a href="../reference/lsmeans.html">lsmeans()</a></code> for better consistency with the <code>emmeans</code> package (<a href="https://github.com/insightsengineering/rbmi/issues/412" class="external-link">#412</a>)
 <ul><li>Renamed <code>lsmeans(..., weights = "proportional")</code> to <code>lsmeans(..., weights = "counterfactual")</code>to more accurately reflect the weights used in the calculation.</li>
 <li>Added <code>lsmeans(..., weights = "proportional_em")</code> which provides consistent results with <code>emmeans(..., weights = "proportional")</code>
@@ -61,7 +59,17 @@
 <li>
 <code>lsmeans(..., weights = "proportional")</code> has been left in the package for backwards compatibility and is an alias for <code>lsmeans(..., weights = "counterfactual")</code> but now gives a message prompting users to use either “proptional_em” or “counterfactual” instead.</li>
 </ul></li>
+<li>Added support for parallel processing in the <code><a href="../reference/analyse.html">analyse()</a></code> function (<a href="https://github.com/insightsengineering/rbmi/issues/370" class="external-link">#370</a>)</li>
+<li>Added documentation clarifying potential false-positive warnings from rstan (<a href="https://github.com/insightsengineering/rbmi/issues/288" class="external-link">#288</a>)</li>
+<li>Added support for all covariance structures supported by the <code>mmrm</code> package (<a href="https://github.com/insightsengineering/rbmi/issues/437" class="external-link">#437</a>)</li>
+<li>Updated <code>rbmi</code> citation detail (<a href="https://github.com/insightsengineering/rbmi/issues/423" class="external-link">#423</a> <a href="https://github.com/insightsengineering/rbmi/issues/425" class="external-link">#425</a>)</li>
 </ul></div>
+<div class="section level3">
+<h3 id="miscellaneous-bug-fixes-1-3-0">Miscellaneous Bug Fixes<a class="anchor" aria-label="anchor" href="#miscellaneous-bug-fixes-1-3-0"></a></h3>
+<ul><li>Stopped warning messages being accidentally supressed when changing the ICE type in <code><a href="../reference/impute.html">impute()</a></code> (<a href="https://github.com/insightsengineering/rbmi/issues/408" class="external-link">#408</a>)</li>
+<li>Fixed equations not rendering properly in the <code>pkgdown</code> website (<a href="https://github.com/insightsengineering/rbmi/issues/433" class="external-link">#433</a>)</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.2.6" id="rbmi-126">rbmi 1.2.6<a class="anchor" aria-label="anchor" href="#rbmi-126"></a></h2><p class="text-muted">CRAN release: 2023-11-24</p>
 <ul><li>Updated unit tests to fix false-positive error on CRAN’s testing servers</li>
