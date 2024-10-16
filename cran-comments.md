@@ -1,6 +1,6 @@
 ## Summary of Submission
 
-This version of the package adds two new vignettes as well as additional parallel processing support. It also includes a number of bug fixes and updates to the documentation.
+This version of the package adds two new vignettes as well as additional parallel processing support. It also includes a number of minor bug fixes and updates to the documentation.
 
 
 ## R CMD check results
