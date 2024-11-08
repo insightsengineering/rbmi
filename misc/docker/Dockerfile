@@ -15,6 +15,8 @@ ENV REQD_PKGS="\
     libxml2-dev \
     libcurl4-openssl-dev\
     git\
+    vim\
+    curl\
     libgit2-dev\
     libv8-dev\
     libsodium-dev\
@@ -48,7 +50,6 @@ ADD DESCRIPTION /
 RUN Rscript  /install_packages.R
 
 
-RUN wget --no-check-certificate "https://yihui.org/tinytex/install-bin-unix.sh" | sh && \
-    ln -s ~/.TinyTeX/bin/*/tlmgr  /usr/local/bin && \
-    ~/.TinyTeX/bin/*/tlmgr install makeindex && \
+ENV TINYTEX_INSTALLER=TinyTeX
+RUN wget -qO- "https://yihui.org/tinytex/install-bin-unix.sh" | sh && \
     ln -s ~/.TinyTeX/bin/*/makeindex  /usr/local/bin
