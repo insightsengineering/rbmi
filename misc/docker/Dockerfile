@@ -16,7 +16,6 @@ ENV REQD_PKGS="\
     libcurl4-openssl-dev\
     git\
     libgit2-dev\
-    pandoc-citeproc\
     libv8-dev\
     libsodium-dev\
     libgsl-dev\
