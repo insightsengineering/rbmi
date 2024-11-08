@@ -31,6 +31,7 @@ ENV REQD_PKGS="\
     libtiff5-dev \
     wget\
     gdebi-core \
+    cargo\
     qpdf \
     devscripts \
     cmake \
