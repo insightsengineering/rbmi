@@ -48,7 +48,7 @@ ADD DESCRIPTION /
 RUN Rscript  /install_packages.R
 
 
-RUN wget -qO- "https://yihui.org/tinytex/install-unx.sh" | sh -s - --admin --no-path && \
-    ~/.TinyTeX/bin/*/tlmgr path add && \
-    tlmgr install makeindex && \
+RUN wget --no-check-certificate "https://yihui.org/tinytex/install-bin-unix.sh" | sh
+    ln -s ~/.TinyTeX/bin/*/tlmgr  /usr/local/bin && \
+    ~/.TinyTeX/bin/*/tlmgr install makeindex && \
     ln -s ~/.TinyTeX/bin/*/makeindex  /usr/local/bin
