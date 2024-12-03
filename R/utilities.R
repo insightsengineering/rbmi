@@ -553,7 +553,7 @@ get_session_hash <- function() {
 tidy_up_models <- function(cache_dir, keep_hash = NULL) {
     files <- list.files(cache_dir, pattern = "(MMRM_).*(\\.stan|\\.rds)", full.names = TRUE)
     if (!is.null(keep_hash)) {
-        keep_pattern <- paste0("(MMRM_", keep_hash, "(\\.stan|\\.rds)")
+        keep_pattern <- paste0("(MMRM_", keep_hash, ")(\\.stan|\\.rds)")
         files <- grep(keep_pattern, files, invert = TRUE, value = TRUE)
     }
     unlink(files)
