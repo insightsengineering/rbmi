@@ -241,3 +241,27 @@ test_that("Stack", {
     expect_equal(mstack$pop(3), list(7))
     expect_error(mstack$pop(1), "items to return")
 })
+
+
+test_that("tidy_up_models", {
+    td <- tempdir()
+    files <- c(
+        file.path(td, "MMRM_123.rds"),
+        file.path(td, "MMRM_123.stan"),
+        file.path(td, "MMRM_456.stan"),
+        file.path(td, "MMRM_456.rds"),
+        file.path(td, "MMRM_456.log")
+    )
+    expect_equal(file.create(files), rep(TRUE, 5))
+    tidy_up_models(td, keep_hash = "123")
+    expect_equal(
+        file.exists(files), 
+        c(TRUE, TRUE, FALSE, FALSE, TRUE)
+    )
+    tidy_up_models(td)
+    expect_equal(
+        file.exists(files), 
+        c(FALSE, FALSE, FALSE, FALSE, TRUE)
+    )
+    file.remove(files[5])
+})
