@@ -550,12 +550,8 @@ get_session_hash <- function() {
     return(hash)
 }
 
-tidy_up_models <- function(cache_dir, keep_hash = NULL) {
+clear_model_cache <- function(cache_dir = getOption("rbmi.cache_dir")) {
     files <- list.files(cache_dir, pattern = "(MMRM_).*(\\.stan|\\.rds)", full.names = TRUE)
-    if (!is.null(keep_hash)) {
-        keep_pattern <- paste0("(MMRM_", keep_hash, ")(\\.stan|\\.rds)")
-        files <- grep(keep_pattern, files, invert = TRUE, value = TRUE)
-    }
     unlink(files)
 }
 
@@ -576,15 +572,15 @@ get_stan_model <- function() {
     }
     cache_dir <- getOption("rbmi.cache_dir")
     dir.create(cache_dir, showWarnings = FALSE, recursive = TRUE)
-    session_hash <- get_session_hash()
-    file_loc_cache <- file.path(cache_dir, paste0("MMRM_", session_hash, ".stan"))
-    if (!file.exists(file_loc_cache)) {
-        message("Compiling Stan model please wait...")
+    model_file <- file.path(cache_dir, paste0("MMRM_", get_session_hash(), ".stan"))
+    
+    if (!file.exists(model_file)) {
+        clear_model_cache()
+        file.copy(file_loc, model_file, overwrite = TRUE)
     }
-    file.copy(file_loc, file_loc_cache, overwrite = TRUE)
-    tidy_up_models(cache_dir, keep_hash = session_hash)
+    
     rstan::stan_model(
-        file = file_loc_cache,
+        file = model_file,
         auto_write = TRUE,
         model_name = "rbmi_mmrm"
     )

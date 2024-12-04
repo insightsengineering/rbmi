@@ -243,7 +243,7 @@ test_that("Stack", {
 })
 
 
-test_that("tidy_up_models", {
+test_that("clear_model_cache", {
     td <- tempdir()
     files <- c(
         file.path(td, "MMRM_123.rds"),
@@ -253,12 +253,7 @@ test_that("tidy_up_models", {
         file.path(td, "MMRM_456.log")
     )
     expect_equal(file.create(files), rep(TRUE, 5))
-    tidy_up_models(td, keep_hash = "123")
-    expect_equal(
-        file.exists(files), 
-        c(TRUE, TRUE, FALSE, FALSE, TRUE)
-    )
-    tidy_up_models(td)
+    clear_model_cache(td)
     expect_equal(
         file.exists(files), 
         c(FALSE, FALSE, FALSE, FALSE, TRUE)
