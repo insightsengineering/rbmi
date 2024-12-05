@@ -532,6 +532,29 @@ ensure_rstan <- function() {
     }
 }
 
+#' Get session hash
+#' 
+#' Gets a unique string based on the current R version and relevant packages.
+#' @keywords internal
+get_session_hash <- function() {
+    pkg_versions <- vapply(
+        sessionInfo(c("rbmi", "rstan", "Rcpp", "RcppEigen", "BH"))[["otherPkgs"]],
+        function(x) x[["Version"]],
+        character(1L)
+    )
+    version_string <- paste0(R.version.string, paste0(names(pkg_versions), pkg_versions, collapse = ":"))
+    temp_file <- tempfile()
+    writeLines(version_string, temp_file)
+    hash <- tools::md5sum(temp_file)
+    unlist(temp_file)
+    return(hash)
+}
+
+clear_model_cache <- function(cache_dir = getOption("rbmi.cache_dir")) {
+    files <- list.files(cache_dir, pattern = "(MMRM_).*(\\.stan|\\.rds)", full.names = TRUE)
+    unlink(files)
+}
+
 #' Get Compiled Stan Object
 #'
 #' Gets a compiled Stan object that can be used with `rstan::sampling()`
@@ -549,13 +572,15 @@ get_stan_model <- function() {
     }
     cache_dir <- getOption("rbmi.cache_dir")
     dir.create(cache_dir, showWarnings = FALSE, recursive = TRUE)
-    file_loc_cache <- file.path(cache_dir, "MMRM.stan")
-    if (!file.exists(file_loc_cache)) {
-        message("Compiling Stan model please wait...")
+    model_file <- file.path(cache_dir, paste0("MMRM_", get_session_hash(), ".stan"))
+    
+    if (!file.exists(model_file)) {
+        clear_model_cache()
+        file.copy(file_loc, model_file, overwrite = TRUE)
     }
-    file.copy(file_loc, file_loc_cache, overwrite = TRUE)
+    
     rstan::stan_model(
-        file = file_loc_cache,
+        file = model_file,
         auto_write = TRUE,
         model_name = "rbmi_mmrm"
     )
