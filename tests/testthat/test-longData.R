@@ -1139,3 +1139,36 @@ test_that("Warnings/errors are thrown when strategies are incorrectly updated", 
         regexp = "Updating strategies from non-MAR to MAR.*You are advised to re-run `draws\\(\\)`"
     )
 })
+
+
+test_that("Missing data_ices are handled correctly", {
+    vars <- set_vars(
+        outcome = "out",
+        group = "group",
+        strategy = "strat",
+        subjid = "pt",
+        visit = "vis",
+        covariates = c("age")
+    )
+    dat <- tibble(
+        pt = factor(c("A", "A", "A", "B", "B", "B", "C", "C", "C"), levels = c("A", "B", "C")),
+        vis = factor(c("V1", "V2", "V3", "V1", "V2", "V3", "V1", "V2", "V3"), levels = c("V1", "V2", "V3")),
+        out = c(1, 2, 3, 4, 5, 6, 7, 8, 9),
+        group = factor(c("T", "T", "T", "C", "C", "C", "T", "T", "T"), levels = c("C", "T")),
+        age = rnorm(9)
+    )
+    dat_ice <- tibble(
+        pt = factor(c("A", "B", "C"), levels = c("A", "B", "C")),
+        vis = factor(c("V2", "V2", "V2"), levels = c("V1", "V2", "V3")),
+        strat = c("JR", "MAR", "JR")
+    ) |>
+        dplyr::filter(pt == "NOT A PT")
+
+    longdata <- longDataConstructor$new(dat, vars)
+
+    original <- longdata$clone(deep = TRUE)
+    longdata$set_strategies(dat_ice)
+
+    # When using a blank data_ice, nothing in longdata should be updated
+    expect_equal(longdata, original)
+})
