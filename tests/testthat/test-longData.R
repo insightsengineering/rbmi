@@ -1166,9 +1166,9 @@ test_that("Missing data_ices are handled correctly", {
 
     longdata <- longDataConstructor$new(dat, vars)
 
-    og <- longdata$clone(deep = TRUE)
+    original <- longdata$clone(deep = TRUE)
     longdata$set_strategies(dat_ice)
 
     # When using a blank data_ice, nothing in longdata should be updated
-    expect_equal(longdata, og)
+    expect_equal(longdata, original)
 })
