@@ -535,6 +535,7 @@ ensure_rstan <- function() {
 #' Get session hash
 #' 
 #' Gets a unique string based on the current R version and relevant packages.
+#' @importFrom utils sessionInfo
 #' @keywords internal
 get_session_hash <- function() {
     pkg_versions <- vapply(

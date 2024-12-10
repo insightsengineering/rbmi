@@ -37,6 +37,7 @@ Useful links:
 Authors:
 \itemize{
   \item Alessandro Noci \email{alessandro.noci@roche.com}
+  \item Isaac Gravestock \email{isaac.gravestock@roche.com}
 }
 
 Other contributors:
