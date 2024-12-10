@@ -539,7 +539,7 @@ ensure_rstan <- function() {
 #' @keywords internal
 get_session_hash <- function() {
     pkg_versions <- vapply(
-        sessionInfo(c("rbmi", "rstan", "Rcpp", "RcppEigen", "BH"))[["otherPkgs"]],
+        sessionInfo(c("rbmi", "rstan", "Rcpp", "RcppEigen"))[["otherPkgs"]],
         function(x) x[["Version"]],
         character(1L)
     )
