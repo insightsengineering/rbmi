@@ -1,6 +1,6 @@
 ## Summary of Submission
 
-This version of the package adds two new vignettes as well as additional parallel processing support. It also includes a number of minor bug fixes and updates to the documentation.
+This version of the package fixes an issue that was causing the unit tests to crash on CRAN. The issue was due to the package not correctly clearing out the cache of previously compiled `rstan` models.
 
 
 ## R CMD check results
