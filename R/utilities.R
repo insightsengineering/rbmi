@@ -574,12 +574,12 @@ get_stan_model <- function() {
     cache_dir <- getOption("rbmi.cache_dir")
     dir.create(cache_dir, showWarnings = FALSE, recursive = TRUE)
     model_file <- file.path(cache_dir, paste0("MMRM_", get_session_hash(), ".stan"))
-    
+
     if (!file.exists(model_file)) {
         clear_model_cache()
         file.copy(file_loc, model_file, overwrite = TRUE)
     }
-    
+
     rstan::stan_model(
         file = model_file,
         auto_write = TRUE,
@@ -603,8 +603,18 @@ get_stan_model <- function() {
 #'
 #' Default = `tools::R_user_dir("rbmi", which = "cache")`
 #'
-#' Directory to store compiled Stan model in. If not set, a temporary directory is used for
-#' the given R session. Can also be set via the environment variable `RBMI_CACHE_DIR`.
+#' Directory to store compiled Stan models in to avoid having to re-compile.
+#' If the environment variable `RBMI_CACHE_DIR` has been set this will be used
+#' as the default value.
+#' Note that if you are running rbmi in multiple R processes at the same time
+#' (that is say multiple calls to `Rscript` at once) then there is a theoretical
+#' risk of the processes breaking each other as they attempt to read/write to the
+#' same cache folder at the same time. To avoid this potential issue it is recommended
+#' to set the cache directory to a unique folder for each R session e.g.
+#'
+#' ```
+#' options("rbmi.cache_dir" = tempdir(check = TRUE))
+#' ```
 #'
 #'
 #' @examples
