@@ -18,8 +18,17 @@ Each of the following are the name of options that can be set via:
 
 Default = \code{tools::R_user_dir("rbmi", which = "cache")}
 
-Directory to store compiled Stan model in. If not set, a temporary directory is used for
-the given R session. Can also be set via the environment variable \code{RBMI_CACHE_DIR}.
+Directory to store compiled Stan models in to avoid having to re-compile.
+If the environment variable \code{RBMI_CACHE_DIR} has been set this will be used
+as the default value.
+Note that if you are running rbmi in multiple R processes at the same time
+(that is say multiple calls to \code{Rscript} at once) then there is a theoretical
+risk of the processes breaking each other as they attempt to read/write to the
+same cache folder at the same time. To avoid this potential issue it is recommended
+to set the cache directory to a unique folder for each R session e.g.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{options("rbmi.cache_dir" = tempdir(check = TRUE))
+}\if{html}{\out{</div>}}
 }
 }
 \examples{
