@@ -569,7 +569,11 @@ get_stan_model <- function() {
     # at the end of this function so that it is in the same state regardless of
     # whether the model was compiled or not.
     # See https://github.com/insightsengineering/rbmi/issues/469
-    current_seed_state <- .Random.seed
+    # Note that .Random.seed is only set if the seed has been set or if a random number
+    # has been generated.
+    if (exists(".Random.seed")) {
+        current_seed_state <- .Random.seed
+    }
 
     ensure_rstan()
     local_file <- file.path("inst", "stan", "MMRM.stan")
@@ -596,7 +600,9 @@ get_stan_model <- function() {
         model_name = "rbmi_mmrm"
     )
 
-    .Random.seed <- current_seed_state
+    if (exists("current_seed_state")) {
+        .Random.seed <- current_seed_state
+    }
     return(model)
 }
 
