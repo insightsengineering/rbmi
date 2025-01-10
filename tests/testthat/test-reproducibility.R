@@ -175,8 +175,8 @@ test_that("Results are if model is recompiled", {
 
         ## Tidy up things that will never be the same:
         drawobj$formula <- NULL # Formulas contain environments specific to their build
-        drawobj$fit <- NULL  # Bayes object has "fit" which contains a timestamp
-        anaobj$call <- NULL   # Argument names are different (imputeobj2)
+        drawobj$fit <- NULL     # Bayes object has "fit" which contains a timestamp
+        anaobj$call <- NULL     # Argument names are different (imputeobj2)
 
         return(list(
             draws = drawobj,

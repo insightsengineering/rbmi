@@ -571,9 +571,14 @@ get_stan_model <- function() {
     # See https://github.com/insightsengineering/rbmi/issues/469
     # Note that .Random.seed is only set if the seed has been set or if a random number
     # has been generated.
-    if (exists(".Random.seed")) {
-        current_seed_state <- .Random.seed
-    }
+    current_seed_state <- globalenv()$.Random.seed
+    on.exit({
+        if (is.null(current_seed_state) && exists(".Random.seed", envir = globalenv())) {
+            rm(".Random.seed", envir = globalenv(), inherits = FALSE)
+        } else {
+            assign(".Random.seed", value = current_seed_state, envir = globalenv(), inherits = FALSE)
+        }
+    })
 
     ensure_rstan()
     local_file <- file.path("inst", "stan", "MMRM.stan")
@@ -600,9 +605,6 @@ get_stan_model <- function() {
         model_name = "rbmi_mmrm"
     )
 
-    if (exists("current_seed_state")) {
-        .Random.seed <- current_seed_state
-    }
     return(model)
 }
 
