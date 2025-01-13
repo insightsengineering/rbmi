@@ -126,3 +126,77 @@ test_that("bayes - set.seed produces identical results", {
     })
     expect_equal(x$samples, y$samples)
 })
+
+
+test_that("Results are if model is recompiled", {
+
+    skip_if_not(is_full_test())
+
+    run_test <- function() {
+        set.seed(4642)
+        sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
+        dat <- get_sim_data(40, sigma, trt = 8) %>%
+            mutate(outcome = if_else(rbinom(n(), 1, 0.3) == 1, NA_real_, outcome))
+
+        dat_ice <- dat %>%
+            group_by(id) %>%
+            arrange(id, visit) %>%
+            filter(is.na(outcome)) %>%
+            slice(1) %>%
+            ungroup() %>%
+            select(id, visit) %>%
+            mutate(strategy = "JR")
+
+        vars <- set_vars(
+            outcome = "outcome",
+            group = "group",
+            strategy = "strategy",
+            subjid = "id",
+            visit = "visit",
+            covariates = c("age", "sex", "visit * group")
+        )
+
+        vars2 <- vars
+        vars2$covariates <- c("age", "sex")
+
+        set.seed(984)
+        drawobj <- suppressWarnings({
+            draws(
+                data = dat,
+                data_ice = dat_ice,
+                vars = vars,
+                method = method_bayes(n_samples = 20),
+                quiet = TRUE
+            )
+        })
+        imputeobj <- impute(draws = drawobj, references = c("A" = "B", "B" = "B"))
+        anaobj <- analyse(imputeobj, fun = rbmi::ancova, vars = vars2)
+        poolobj <- pool(results = anaobj)
+
+        ## Tidy up things that will never be the same:
+        drawobj$formula <- NULL # Formulas contain environments specific to their build
+        drawobj$fit <- NULL     # Bayes object has "fit" which contains a timestamp
+        anaobj$call <- NULL     # Argument names are different (imputeobj2)
+
+        return(list(
+            draws = drawobj,
+            impute = imputeobj,
+            analyse = anaobj,
+            pool = poolobj
+        ))
+    }
+
+    old_cache <- options("rbmi.cache_dir")
+    tmp_dir <- tempfile(tmpdir = tempdir(check = TRUE))
+    dir.create(tmp_dir)
+    options("rbmi.cache_dir" = tmp_dir)
+    results_no_cache <- run_test()
+    results_cache <- run_test()  # Now rerun but using the same cache
+    options("rbmi.cache_dir" = old_cache)
+
+    expect_equal(results_no_cache$draws, results_cache$draws)
+    expect_equal(results_no_cache$impute, results_cache$impute)
+    expect_equal(results_no_cache$analyse, results_cache$analyse)
+    expect_equal(results_no_cache$pool, results_cache$pool)
+
+})
