@@ -214,3 +214,99 @@ test_that("LSmeans(proportional) returns equivalent results to 'counterfactual'"
     )
 
 })
+
+
+test_that("lsmeans correctly handles case when only using 1 categorical (#412)", {
+
+    set.seed(2412)
+    n <- 4000
+    dat <- tibble(
+        v1 = rnorm(n),
+        v2 = rnorm(n),
+        v3 = rnorm(n),
+        c1 = sample(c("A", "B"), size = n, replace = TRUE, prob = c(0.8, 0.2)),
+        error = rnorm(n, 0, 4),
+        outcome = 30 +
+            5 * v1 +
+            3 * v2 +
+            2 * v3 +
+            8 * v1 * v2 +
+            9 * v1 * v3 +
+            10 * v2 * v3 +
+            12 * v1 * v2 * v3 +
+            4 * (c1 == "B") +
+            13 * (c1 == "B") * v1 +
+            error
+    )
+    mod <- lm(outcome ~ (v1 * v2 * v3) + (c1), data = dat)
+
+
+    #
+    #
+    # Equal
+    #
+    #
+    emod <- suppressMessages({
+        as.data.frame(emmeans::emmeans(mod, "c1", weights = "equal"))
+    })
+    expected <- list(
+        "est" = emod[["emmean"]],
+        "se" = emod[["SE"]],
+        "df" = emod[["df"]]
+    )
+    lsm1 <- lsmeans(mod, c1 = "A", .weights = "equal")
+    lsm2 <- lsmeans(mod, c1 = "B", .weights = "equal")
+    actual <- list(
+        "est" = c(lsm1$est, lsm2$est),
+        "se" = c(lsm1$se, lsm2$se),
+        "df" = c(lsm1$df, lsm2$df)
+    )
+    expect_equal(actual, expected)
+
+
+    #
+    #
+    # Proportional
+    #
+    #
+    emod <- suppressMessages({
+        as.data.frame(emmeans::emmeans(mod, "c1", weights = "proportional"))
+    })
+    expected <- list(
+        "est" = emod[["emmean"]],
+        "se" = emod[["SE"]],
+        "df" = emod[["df"]]
+    )
+    lsm1 <- lsmeans(mod, c1 = "A", .weights = "proportional_em")
+    lsm2 <- lsmeans(mod, c1 = "B", .weights = "proportional_em")
+    actual <- list(
+        "est" = c(lsm1$est, lsm2$est),
+        "se" = c(lsm1$se, lsm2$se),
+        "df" = c(lsm1$df, lsm2$df)
+    )
+    expect_equal(actual, expected)
+
+
+    #
+    #
+    # Counterfactual
+    #
+    #
+    emod <- suppressMessages({
+        as.data.frame(emmeans::emmeans(mod, "c1", counterfactual = "c1"))
+    })
+    expected <- list(
+        "est" = emod[["emmean"]],
+        "se" = emod[["SE"]],
+        "df" = emod[["df"]]
+    )
+    lsm1 <- lsmeans(mod, c1 = "A", .weights = "counterfactual")
+    lsm2 <- lsmeans(mod, c1 = "B", .weights = "counterfactual")
+    actual <- list(
+        "est" = c(lsm1$est, lsm2$est),
+        "se" = c(lsm1$se, lsm2$se),
+        "df" = c(lsm1$df, lsm2$df)
+    )
+    expect_equal(actual, expected)
+})
+
