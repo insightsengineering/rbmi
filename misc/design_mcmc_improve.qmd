@@ -7,7 +7,7 @@ This design doc proposes several updates to the `rbmi` package to improve the op
 1. Stan sampling argument as input parameters (`rstan::sampling` control should be controllable)
 1. Keep current option (single chain; MMRM output as initial value as default)
 1. Add option to have multiple chains with random initial values
-1. Always have default prior and don't make prior the input parameter
+1. Always have default prior and don't make prior the input parameter.
 
 ## Sampling controls
 
@@ -22,7 +22,14 @@ Idea:
   - The user can override the default behavior by providing a list of control parameters
   - Takes additional arguments which are then included in the returned list
   - In order to simplify the user interface, the previous `method` parts `burn_in`, `burn_between`, `n_samples` are moved to the `control_bayes()` function, and will properly be deprecated from `method_bayes()`.
+  - Arguments of the new control function will be briefly documented (not just copied from the `rstan` documentation, but rather explained in the context of the `rbmi` package). The user will be referred to the `rstan` documentation for more details for additionally passed arguments.
 - The `fit_mcmc` function should take the `control_bayes()` output as an additional argument and passes it internally to `rstan::sampling()`  
+
+License considerations:
+
+- The `rstan` package is licensed under GPL-3.0, while `rbmi` is licensed under the MIT license.
+- Only using the `rstan::sampling()` function and specifying reasonable default values for some of its control arguments should not require to change the license of the `rbmi` package. This is because this does not constitute a derivative work. Instead, the `rbmi` package would continue to be "linking" to the GPL package.
+- Importantly, the `rbmi` package only has the `rstan` package in the `Suggests` field of the `DESCRIPTION` file, not in the `Imports` field. This means that the `rstan` package is not required to be installed to use the `rbmi` package. 
 
 ## Multiple chains
 
@@ -36,13 +43,14 @@ Idea:
 
 We note that due to the definition of the prior distribution for the covariance matrix, we still need to fit the frequentist MMRM model in any case to get the required prior parameter.
 
-Question: What do we need to adapt downstream when using multiple chains?
+Question: What do we need to adapt downstream when using multiple chains? 
+Answer: We will be able to test this in detail and address it, once we have implemented the possibility to use multiple chains in the development version. To avoid possible confusion, we can add a warning in the development version, which informs the user that multiple chains are not yet fully supported, while we are still working on it.
 
 ## Default prior
 
-We would want to keep using a default prior, as it is currently implemented for the unstructured covariance structure already.
+We would want to keep using a default prior, as it is currently implemented for the unstructured covariance structure already. The user should never have to specify the priors actively, because there should always be a reasonable default prior implemented by `rbmi`.
 
-That implies that we will need to come up with such default priors for the other covariance structures. This will be handled in the separate design doc.
+That implies that we will need to come up with such default priors for the other covariance structures. This will be handled in a separate, forthcoming design doc.
 
 ## Prototype
 
@@ -69,10 +77,6 @@ control_bayes <- function(
         thin = burn_between,
         iter = burn_in + burn_between * n_samples,
         chains = chains,
-        warmup = warmup,
-        thin = thin,
-        iter = iter,
-        quiet = quiet,
         refresh = refresh,
         init = init,
         seed = seed,
@@ -80,6 +84,15 @@ control_bayes <- function(
     )  
 }
 ```
+
+The rationale for using this control function approach is:
+
+- We provide sensible defaults to the user, however they can now override them if they want to.
+- The user can now also pass additional arguments to the `rstan::sampling()` function, but they are not required to do so.
+- If the `rstan` API changes, we can adapt the `control_bayes()` function accordingly, and the user does not have to change their code. We would be notified by CRAN reverse dependencies checks if the `rstan` API changes because we will include tests for the actual use of the `rstan` package in the `rbmi` package.
+- We have checked the stability of the `rstan` API over the past, by having a look at the GitHub repository ([link](https://github.com/stan-dev/rstan/blob/develop/rstan/rstan/R/stanmodel-class.R#L507)). It seems stable over the last 6 years:
+  - Via the [blame view](https://github.com/stan-dev/rstan/blame/develop/rstan/rstan/R/stanmodel-class.R#L507) we can see that the signature of the `sampling` method has not changed during the last 6 years. The signature explicitly includes all of our arguments, except for the `refresh` argument.
+  - The `refresh` argument is passed via `...`. We can see that the arguments provided via `...` are checked by `is_arg_deprecated()`, which only lists an argument `enable_random_init` as deprecated, and this has not changed in the last 9 years. Further we can see that in the `stan()` function's [blame view](https://github.com/stan-dev/rstan/blame/develop/rstan/rstan/R/rstan.R#L280) the `refresh` argument has been recognized for 11 years.
 
 This function's output `control` can then be used in `fit_mcmc()` like this (copied and adapted function code):
 
