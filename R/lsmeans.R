@@ -246,7 +246,7 @@ ls_design_proportional <- function(data, frm, fix) {
 
     wgts <- dat2[, categorical_vars[[1]]] |>
         aggregate(
-            as.list(dat2[, categorical_vars]),
+            as.list(dat2[, categorical_vars, drop = FALSE]),
             length
         )
     assert_that(

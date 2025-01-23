@@ -1,4 +1,9 @@
 
+
+# rbmi Development Version
+
+* Fixed bug where `lsmeans(.weights = "proportional_em")` would error if there was only a single categorical variable in the dataset. (#412)
+
 # rbmi 1.3.1
 
 * Fixed bug where stale caches of the `rstan` model were not being correctly cleared (#459)
