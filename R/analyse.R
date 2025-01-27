@@ -259,7 +259,7 @@ analyse <- function(
     indexes <- seq_along(imputations$imputations)
     indexes_split <- split(indexes, (indexes %% number_of_cores) + 1)
 
-    results <- par_lapply(
+    results_list <- par_lapply(
         cl,
         function(indicies, ...) {
             inner_fun <- function(idx, ...) {
@@ -274,8 +274,8 @@ analyse <- function(
         },
         indexes_split,
         ...
-    ) |>
-        unlist(recursive = FALSE, use.names = FALSE)
+    )
+    results <- unlist(results_list, recursive = FALSE, use.names = FALSE)
 
     # Re-order to ensure results are returned in same order as imputations
     results <- results[order(unlist(indexes_split, use.names = FALSE))]

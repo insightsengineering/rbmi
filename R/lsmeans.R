@@ -239,22 +239,23 @@ ls_design_proportional <- function(data, frm, fix) {
     all_combinations <- expand.grid(collection)
     design_matrix <- model.matrix(frm2, all_combinations)
 
-    categorical_vars <- dat2 |>
-        vapply(\(x) is.character(x) || is.factor(x), logical(1)) |>
-        which() |>
-        names()
+    categorical_vars_fl <- vapply(
+        dat2,
+        function(x) is.character(x) || is.factor(x), logical(1)
+    )
+    categorical_vars <- names(which(categorical_vars_fl))
 
-    wgts <- dat2[, categorical_vars[[1]]] |>
-        aggregate(
-            as.list(dat2[, categorical_vars, drop = FALSE]),
-            length
-        )
+    wgts <- aggregate(
+        dat2[, categorical_vars[[1]]],
+        as.list(dat2[, categorical_vars, drop = FALSE]),
+        length
+    )
     assert_that(
         all.equal(wgts[, categorical_vars], all_combinations[, categorical_vars])
     )
 
     wgts_scaled <- wgts[["x"]] / sum(wgts[["x"]])
 
-    design <- apply(design_matrix, 2, \(x) sum(x * wgts_scaled))
+    design <- apply(design_matrix, 2, function(x) sum(x * wgts_scaled))
     return(design)
 }
