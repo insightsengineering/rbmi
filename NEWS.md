@@ -3,6 +3,7 @@
 # rbmi Development Version
 
 * Fixed bug where `lsmeans(.weights = "proportional_em")` would error if there was only a single categorical variable in the dataset. (#412)
+* Removed native pipes `|>` and lambda functions `\(x)` from code base to ensure package is backwards compatible with older versions of R. (#474)
 
 # rbmi 1.3.1
 

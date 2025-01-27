@@ -1161,8 +1161,8 @@ test_that("Missing data_ices are handled correctly", {
         pt = factor(c("A", "B", "C"), levels = c("A", "B", "C")),
         vis = factor(c("V2", "V2", "V2"), levels = c("V1", "V2", "V3")),
         strat = c("JR", "MAR", "JR")
-    ) |>
-        dplyr::filter(pt == "NOT A PT")
+    )
+    dat_ice <- dplyr::filter(dat_ice, pt == "NOT A PT")
 
     longdata <- longDataConstructor$new(dat, vars)
 
