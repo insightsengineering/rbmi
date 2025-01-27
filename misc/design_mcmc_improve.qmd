@@ -4,14 +4,14 @@ This design doc proposes several updates to the `rbmi` package to improve the op
 
 ## Wish list
 
-1. Stan sampling argument as input parameters (`rstan::sampling` control should be controllable)
+1. Allow more detailed Stan sampling arguments as input parameters (`rstan::sampling` control should be controllable)
 1. Keep current option (single chain; MMRM output as initial value as default)
 1. Add option to have multiple chains with random initial values
 1. Always have default prior and don't make prior the input parameter.
 
 ## Sampling controls
 
-Currently the `rstan` sampling is controlled by a hard coded list in [`fit_mcmc`](https://github.com/insightsengineering/rbmi/blob/main/R/mcmc.R#L94). 
+Currently the `rstan` sampling details are controlled by a hard coded list in [`fit_mcmc`](https://github.com/insightsengineering/rbmi/blob/main/R/mcmc.R#L94). A few of the parameters are exposed in `method_bayes()` to the user.
 
 The `sampling()` function is described [here](https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html). In particular, the `control` argument allows to further specify the sampling behavior, which is documented [here](https://mc-stan.org/rstan/reference/stan.html).
 
@@ -21,9 +21,11 @@ Idea:
   - This function should have a default behavior that is the same as the current behavior
   - The user can override the default behavior by providing a list of control parameters
   - Takes additional arguments which are then included in the returned list
-  - In order to simplify the user interface, the previous `method` parts `burn_in`, `burn_between`, `n_samples` are moved to the `control_bayes()` function, and will properly be deprecated from `method_bayes()`.
+  - In order to simplify the user interface, the previous `method` parts `burn_in` and `burn_between`, are moved to the `control_bayes()` function, and will properly be deprecated from `method_bayes()`.
+  - In order to keep the pattern with the other `method_*()` functions, the `n_samples` argument remains in the `method_bayes()` function. The `method_bayes()` function gains an additional argument `control` where the `control_bayes()` function result is passed.
   - Arguments of the new control function will be briefly documented (not just copied from the `rstan` documentation, but rather explained in the context of the `rbmi` package). The user will be referred to the `rstan` documentation for more details for additionally passed arguments.
-- The `fit_mcmc` function should take the `control_bayes()` output as an additional argument and passes it internally to `rstan::sampling()`  
+- The `draws()` method keeps its current signature, but internally sets the `iter` and `refresh` arguments in the `method$control` list, based on the `method$n_samples` and the `quiet` arguments.
+- The `fit_mcmc` function processes the additional `control` output instead of the currently hard coded settings, and passes it internally to `rstan::sampling()`  
 
 License considerations:
 
@@ -43,8 +45,8 @@ Idea:
 
 We note that due to the definition of the prior distribution for the covariance matrix, we still need to fit the frequentist MMRM model in any case to get the required prior parameter.
 
-Question: What do we need to adapt downstream when using multiple chains? 
-Answer: We will be able to test this in detail and address it, once we have implemented the possibility to use multiple chains in the development version. To avoid possible confusion, we can add a warning in the development version, which informs the user that multiple chains are not yet fully supported, while we are still working on it.
+- *Question*: What do we need to adapt downstream when using multiple chains? 
+- *Answer*: We will be able to test this in detail and address it, once we have implemented the possibility to use multiple chains in the development version. To avoid possible confusion, we can add a warning in the development version, which informs the user that multiple chains are not yet fully supported, while we are still working on it.
 
 ## Default prior
 
@@ -54,28 +56,31 @@ That implies that we will need to come up with such default priors for the other
 
 ## Prototype
 
-This is how it could look like:
+### Control function
+
+This is how the control function could look like:
 
 ```r
 control_bayes <- function( 
     burn_in = 200,
     burn_between = 50,
-    n_samples = 20,
     chains = 1,
     init = ife(chains > 1, "random", "mmrm"),
-    quiet = FALSE,
-    refresh = ife(
-      quiet,
-      0,
-      iter / 10
-    ),
     seed = sample.int(.Machine$integer.max, 1),
+    n_samples = NULL,
+    iter = NULL,
+    refresh = NULL,
     ...
 ) {
+    if (!is.null(n_samples) || !is.null(iter)) {
+        stop("Please provide the number of samples directly via the `n_samples` argument of `method_bayes()`")
+    }
+    is (!is.null(refresh)) {
+        stop("Instead of the `refresh` argument here, please provide the `quiet` argument directly to `draws()`")
+    }
     list(
         warmup = burn_in,
         thin = burn_between,
-        iter = burn_in + burn_between * n_samples,
         chains = chains,
         refresh = refresh,
         init = init,
@@ -91,10 +96,38 @@ The rationale for using this control function approach is:
 - The user can now also pass additional arguments to the `rstan::sampling()` function, but they are not required to do so.
 - If the `rstan` API changes, we can adapt the `control_bayes()` function accordingly, and the user does not have to change their code. We would be notified by CRAN reverse dependencies checks if the `rstan` API changes because we will include tests for the actual use of the `rstan` package in the `rbmi` package.
 - We have checked the stability of the `rstan` API over the past, by having a look at the GitHub repository ([link](https://github.com/stan-dev/rstan/blob/develop/rstan/rstan/R/stanmodel-class.R#L507)). It seems stable over the last 6 years:
-  - Via the [blame view](https://github.com/stan-dev/rstan/blame/develop/rstan/rstan/R/stanmodel-class.R#L507) we can see that the signature of the `sampling` method has not changed during the last 6 years. The signature explicitly includes all of our arguments, except for the `refresh` argument.
-  - The `refresh` argument is passed via `...`. We can see that the arguments provided via `...` are checked by `is_arg_deprecated()`, which only lists an argument `enable_random_init` as deprecated, and this has not changed in the last 9 years. Further we can see that in the `stan()` function's [blame view](https://github.com/stan-dev/rstan/blame/develop/rstan/rstan/R/rstan.R#L280) the `refresh` argument has been recognized for 11 years.
+  - Via the [blame view](https://github.com/stan-dev/rstan/blame/develop/rstan/rstan/R/stanmodel-class.R#L507) we can see that the signature of the `sampling` method has not changed during the last 6 years. The signature explicitly includes all of our arguments.
+  - The `refresh` argument is not directly accessible, because we want to keep the `quiet` interface of the `draws()` method. Internally, it will still be used (as now as well). The `refresh` argument is passed via `...`. We can see that the arguments provided via `...` are checked by `is_arg_deprecated()`, which only lists an argument `enable_random_init` as deprecated, and this has not changed in the last 9 years. Further we can see that in the `stan()` function's [blame view](https://github.com/stan-dev/rstan/blame/develop/rstan/rstan/R/rstan.R#L280) the `refresh` argument has been recognized for 11 years.
 
-This function's output `control` can then be used in `fit_mcmc()` like this (copied and adapted function code):
+### Method function
+
+This is how the method function could look like:
+
+```r
+method_bayes <- function(
+    same_cov = TRUE,
+    n_samples = 500,
+    control = control_bayes(),
+    burn_in = NULL,
+    burn_between = NULL
+) {
+   assertthat::assert_that(
+      is.null(burn_in), msg = paste("The `burn_in` argument to `method_bayes()` has been deprecated;",
+        "please specify this inside `control = control_bayes()` instead.", collapse = " "))
+   assertthat::assert_that(
+      is.null(burn_between), msg = paste("The `burn_between` argument to `method_bayes()` has been deprecated;",
+        "please specify this inside `control = control_bayes()` instead.", collapse = " "))
+    x <- list(same_cov = same_cov, n_samples = n_samples, control = control)
+    return(as_class(x, c("method", "bayes")))
+}
+```
+
+- The `seed` argument has been deprecated in a previous release and can therefore be removed here.
+- We deprecate here the `burn_in` and `burn_between` arguments, and refer the user to the `control_bayes()` function instead. We will remove these arguments in a future release.
+
+### Fit function
+
+This function's output `control` inside the `method` list can then be used in `fit_mcmc()` like this (copied and adapted function code):
 
 ```r
 fit_mcmc <- function(
@@ -104,7 +137,7 @@ fit_mcmc <- function(
     subjid,
     visit,
     method,
-    control) {
+    quiet = FALSE) {
 
     # Fit MMRM (needed for Sigma prior parameter and possibly initial values).
     mmrm_initial <- fit_mmrm(
@@ -136,6 +169,7 @@ fit_mcmc <- function(
         mmrm_initial$sigma
     )
 
+    control <- method$control
     sampling_args <- c(
       list(
         object = get_stan_model(),
@@ -192,18 +226,23 @@ fit_mcmc <- function(
 }
 ```
 
-Finally, the user can call the `draws()` method now including the new `control` argument. This then also comprises the `quiet` argument. The method signature changes to:
+### Draws method
 
-```{r}
-draws.bayes <- function(data, 
-                        data_ice = NULL, 
-                        vars, 
-                        method, 
-                        ncores = 1,  
-                        control = control_bayes()) 
+Finally, the user can call the `draws()` method as before. The only differences are:
+
+- The `method` argument called by `method_bayes()` now also comprises the `control` argument.
+- Internally in the `draws()` method, additional elements are inserted in the `control` list:
+
+```r
+method$control$iter <- method$control$warmup + method$control$thin * method$n_samples
+method$control$refresh <- ife(
+    quiet,
+    0,
+    method$control$iter / 10
+)
 ```
 
-and internally the `control` argument is just forwarded to `fit_mcmc()`.
+This is to keep the pattern of having the `quiet` argument of the `draws` method. See above the corresponding checks we make in the `control_bayes()` function call to avoid problems if the user passes `refresh`, `iter` or `n_samples` to the `control_bayes()` function.
 
 Note that it is important for easy usability that we just rely on all default arguments in the `control_bayes()` function. The user can then just override the defaults they need to override by
 specifying the corresponding arguments. In addition, we can still pass the Stan `control` argument inside `control_bayes()`, and it is not a problem that this argument has the same name as the `draws()` argument.
@@ -212,7 +251,17 @@ So a call could e.g. just be:
 
 ```r
 draws(
-    data = data, vars = c("beta", "Sigma"), method = method, chains = 4, 
-    control = control_bayes(seed = 123, control = list(adapt_delta = 0.99))
+    data = data, 
+    vars = c("beta", "Sigma"), 
+    method = method_bayes(
+        n_samples = 500,
+        control = control_bayes(
+            chains = 4,
+            burn_in = 1000,
+            burn_between = 100,
+            seed = 123
+        )
+    ), 
+    ncores = 4    
 )
 ```
