@@ -419,7 +419,7 @@ test_that("pool BMLMI estimates", {
 
     data[1:ceiling(n / 5)] <- NA # 20% missing values
     boot_data <- lapply(seq.int(B), function(x) sample(data, size = n, replace = TRUE))
-    vals <- lapply(
+    vals_list <- lapply(
         boot_data,
         function(x) {
             lapply(seq.int(D), function(y) {
@@ -429,7 +429,8 @@ test_that("pool BMLMI estimates", {
                 return(x)
             })
         }
-    ) |> unlist(recursive = FALSE)
+    )
+    vals <- unlist(vals_list, recursive = FALSE)
 
 
     ########  BMLMI

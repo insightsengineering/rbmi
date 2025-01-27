@@ -116,10 +116,8 @@ test_that("LSmeans(proportional) returns equivalent results to 'counterfactual'"
         v2 = rnorm(n),
         v3 = rnorm(n),
         c1 = sample(c("A", "B"), size = n, replace = TRUE, prob = c(0.8, 0.2)),
-        c2 = sample(c("Y", "X"), size = n, replace = TRUE, prob = c(0.6, 0.4)) |>
-            factor(levels = c("Y", "X")),
-        c3 = sample(c("L", "K", "J"), size = n, replace = TRUE, prob = c(0.2, 0.5, 0.3)) |>
-            factor(levels = c("L", "K", "J")),
+        c2 = sample(c("Y", "X"), size = n, replace = TRUE, prob = c(0.6, 0.4)),
+        c3 = sample(c("L", "K", "J"), size = n, replace = TRUE, prob = c(0.2, 0.5, 0.3)),
         error = rnorm(n, 0, 4),
         outcome = 30 +
             5 * v1 +
@@ -137,6 +135,8 @@ test_that("LSmeans(proportional) returns equivalent results to 'counterfactual'"
             16 * (c3 == "J") +
             error
     )
+    dat$c2 <- factor(dat$c2, levels = c("Y", "X"))
+    dat$c3 <- factor(dat$c3, levels = c("L", "K", "J"))
     mod <- lm(outcome ~ (v1 * v2 * v3) + (c1 * c2) + (v1 * c1) + c3, data = dat)
 
 
