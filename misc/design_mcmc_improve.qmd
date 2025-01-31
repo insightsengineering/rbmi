@@ -22,6 +22,7 @@ Idea:
   - The user can override the default behavior by providing a list of control parameters
   - Takes additional arguments which are then included in the returned list
   - In order to simplify the user interface, the previous `method` parts `burn_in` and `burn_between`, are moved to the `control_bayes()` function, and will properly be deprecated from `method_bayes()`.
+  - As we are creating these as new arguments we also rename them to `warmup` and `thin` to be consistent with Stan's nomenclature.
   - In order to keep the pattern with the other `method_*()` functions, the `n_samples` argument remains in the `method_bayes()` function. The `method_bayes()` function gains an additional argument `control` where the `control_bayes()` function result is passed.
   - Arguments of the new control function will be briefly documented (not just copied from the `rstan` documentation, but rather explained in the context of the `rbmi` package). The user will be referred to the `rstan` documentation for more details for additionally passed arguments.
 - The `draws()` method keeps its current signature, but internally sets the `iter` and `refresh` arguments in the `method$control` list, based on the `method$n_samples` and the `quiet` arguments.
@@ -42,6 +43,8 @@ Idea:
 - As part of the `control_bayes()` function, we could add an argument to specify the number of chains. 
 - If the number of chains is greater than 1, then the `init` argument of `rstan::sampling()` should be set to `random` (see [here](https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html)).
 - We can make some experiments to ensure that chains converge to the stationary distribution within reasonable time frame if started from random values. If the Stan random initial values are not good enough, we could later have the option to use initial values sampled from the MLE distribution as the initial values for the chains.
+- In general it is the user's responsibility to ensure the convergence of the Markov chains. Since we expose the underlying Stan object, the user can always check the chains and the convergence diagnostics themselves. We can also provide some guidance in the documentation on how to check the convergence of the chains.
+
 
 We note that due to the definition of the prior distribution for the covariance matrix, we still need to fit the frequentist MMRM model in any case to get the required prior parameter.
 
@@ -62,25 +65,25 @@ This is how the control function could look like:
 
 ```r
 control_bayes <- function( 
-    burn_in = 200,
-    burn_between = 50,
+    warmup = 200,
+    thin = 50,
     chains = 1,
     init = ifelse(chains > 1, "random", "mmrm"),
     seed = sample.int(.Machine$integer.max, 1),
-    n_samples = NULL,
-    iter = NULL,
-    refresh = NULL,
     ...
 ) {
-    if (!is.null(n_samples) || !is.null(iter)) {
+    additional <- list(...)
+    additional_pars <- names(additional)
+    
+    if (any(c("n_samples", "iter") %in% additional_pars)) {
         stop("Please provide the number of samples directly via the `n_samples` argument of `method_bayes()`")
     }
-    is (!is.null(refresh)) {
+    is ("refresh" %in% additional_pars) {
         stop("Instead of the `refresh` argument here, please provide the `quiet` argument directly to `draws()`")
     }
     list(
-        warmup = burn_in,
-        thin = burn_between,
+        warmup = warmup,
+        thin = thin,
         chains = chains,
         refresh = refresh,
         init = init,
@@ -122,7 +125,7 @@ method_bayes <- function(
 }
 ```
 
-- The `seed` argument has been deprecated in a previous release and can therefore be removed here.
+- The `seed` argument has been deprecated in a previous release and can therefore be removed here. Note that it is now available in the `control_bayes()` function though, which replaces the hardcoded seed in the `fit_mcmc()` function.
 - We deprecate here the `burn_in` and `burn_between` arguments, and refer the user to the `control_bayes()` function instead. We will remove these arguments in a future release.
 
 ### Fit function
