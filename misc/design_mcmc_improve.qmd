@@ -29,7 +29,7 @@ Idea:
 
 License considerations:
 
-- The `rstan` package is licensed under GPL-3.0, while `rbmi` is licensed under the MIT license.
+- The `rstan` package is licensed under GPL-3.0, while `rbmi` is licensed under the Apache 2.0 license.
 - Only using the `rstan::sampling()` function and specifying reasonable default values for some of its control arguments should not require to change the license of the `rbmi` package. This is because this does not constitute a derivative work. Instead, the `rbmi` package would continue to be "linking" to the GPL package.
 - Importantly, the `rbmi` package only has the `rstan` package in the `Suggests` field of the `DESCRIPTION` file, not in the `Imports` field. This means that the `rstan` package is not required to be installed to use the `rbmi` package. 
 
@@ -65,7 +65,7 @@ control_bayes <- function(
     burn_in = 200,
     burn_between = 50,
     chains = 1,
-    init = ife(chains > 1, "random", "mmrm"),
+    init = ifelse(chains > 1, "random", "mmrm"),
     seed = sample.int(.Machine$integer.max, 1),
     n_samples = NULL,
     iter = NULL,
