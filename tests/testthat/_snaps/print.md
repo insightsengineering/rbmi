@@ -251,10 +251,14 @@
       Imputation Type: random
       Method:
           name: Bayes
-          burn_in: 200
-          burn_between: 1
           same_cov: TRUE
           n_samples: 50
+      Controls:
+          warmup: 200
+          thin: 1
+          chains: 1
+          init: mmrm
+          seed: 791990519
       
 
 ---
