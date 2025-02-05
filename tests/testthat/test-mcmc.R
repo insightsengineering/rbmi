@@ -341,9 +341,11 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
 
     method <- method_bayes(
         n_samples = 200,
-        burn_in = 100,
-        burn_between = 3,
-        same_cov = TRUE
+        same_cov = TRUE,
+        control = control_bayes(
+            warmup = 200,
+            thin = 3
+        )
     )
 
     ### No missingness
@@ -457,7 +459,7 @@ test_that("fit_mcmc returns error if mmrm on original sample fails", {
 
     method <- method_bayes(
         n_samples = 2,
-        burn_between = 10
+        control = control_bayes(thin = 10)
     )
 
     expect_error(
@@ -476,8 +478,8 @@ test_that("fit_mcmc returns error if mmrm on original sample fails", {
 
     method <- method_bayes(
         n_samples = 2,
-        burn_between = 10,
-        same_cov = FALSE
+        same_cov = FALSE,
+        control = control_bayes(thin = 10)
     )
 
     expect_error(
@@ -526,9 +528,11 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
 
     method <- method_bayes(
         n_samples = 250,
-        burn_in = 100,
-        burn_between = 3,
-        same_cov = FALSE
+        same_cov = FALSE,
+        control = control_bayes(
+            warmup = 100,
+            thin = 3
+        )
     )
 
     ### No missingness
@@ -602,17 +606,28 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
 })
 
 
-test_that("seed argument to method_bayes is deprecated", {
+test_that("burn_in and burn_between arguments to method_bayes are deprecated", {
     expect_error(
         {
             method <- method_bayes(
                 n_samples = 250,
                 burn_in = 100,
-                burn_between = 3,
                 same_cov = FALSE,
                 seed = 1234
             )
         },
-        regexp = "seed.*deprecated"
+        regexp = "burn_in.*deprecated"
+    )
+
+    expect_error(
+        {
+            method <- method_bayes(
+                n_samples = 250,
+                burn_between = 10,
+                same_cov = FALSE,
+                seed = 1234
+            )
+        },
+        regexp = "burn_between.*deprecated"
     )
 })

@@ -584,9 +584,11 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         vars = vars,
         method = method_bayes(
             same_cov = FALSE,
-            burn_between = 4,
             n_samples = 250,
-            burn_in = 50
+            control = control_bayes(
+                warmup = 50,
+                thin = 4
+            )
         ),
         quiet = TRUE
     )
@@ -807,7 +809,7 @@ test_that("rbmi works for one arm trials", {
     method <- method_condmean(type = "jackknife")
     runtest(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method)
 
-    method <- method_bayes(n_samples = 250, burn_between = 10)
+    method <- method_bayes(n_samples = 250, control = control_bayes(thin = 10))
     runtest(dat, dat_ice, vars, vars_wrong, vars_wrong2, vars_wrong3, method)
 
     method <- method_approxbayes(n_samples = 3)

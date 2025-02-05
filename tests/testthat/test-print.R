@@ -105,7 +105,7 @@ test_that("print - bayesian", {
             vars = dobj$vars,
             method = method_bayes(
                 n_samples = 50,
-                burn_between = 1
+                control = control_bayes(thin = 1)
             ),
             quiet = TRUE
         )
