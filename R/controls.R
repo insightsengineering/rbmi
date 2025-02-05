@@ -42,12 +42,12 @@ control_bayes <- function(
     seed = sample.int(.Machine$integer.max, 1),
     ...
 ) {
-    additional <- list(...)
-    additional_pars <- names(additional)
+    additional_pars <- names(list(...))
     
     if (any(c("n_samples", "iter") %in% additional_pars)) {
         stop(
-            "Please provide the number of samples directly via the `n_samples`",
+            "Instead of providing `n_samples` or `iter` here, please specify the",
+            " number of samples directly via the `n_samples`",
             " argument of `method_bayes()`"
         )
     }
@@ -63,6 +63,49 @@ control_bayes <- function(
         chains = chains,
         init = init,
         seed = seed,
-        additional = list(...)
+        ...
     )
+}
+
+complete_control_bayes <- function(
+    control,
+    n_samples,
+    quiet,
+    stan_data,
+    mmrm_initial
+) {
+    assertthat::assert_that(is.list(control))
+    control_pars <- names(control)
+    if ("iter" %in% control_pars) {
+        stop("`method$control$iter` must not be specified directly, please use `method$n_samples`")
+    }
+    assertthat::assert_that(
+        asserthat::is.number(control$warmup),
+        asserthat::is.number(control$thin),
+        asserthat::is.number(n_samples)
+    )
+    control$iter <- control$warmup + control$thin * n_samples
+    if ("refresh" %in% control_pars) {
+        stop("`method$control$refresh` must not be specified directly, please use `quiet`")
+    }
+    control$refresh <- ife(
+        quiet,
+        0,
+        ceiling(control$iter / 10)
+    )
+    control$init <- ife(
+        control$init == "mmrm",
+        list(list(
+            theta = as.vector(stan_data$R %*% mmrm_initial$beta),
+            sigma = mmrm_initial$sigma
+        )),
+        control$init
+    )
+    if (any(c("object", "data", "pars") %in% control_pars)) {
+        stop(
+            "The `object`, `data` and `pars` arguments must not be specified",
+            " in `method$control`"
+        )
+    }
+    control
 }
