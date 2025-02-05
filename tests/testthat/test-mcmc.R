@@ -612,8 +612,7 @@ test_that("burn_in and burn_between arguments to method_bayes are deprecated", {
             method <- method_bayes(
                 n_samples = 250,
                 burn_in = 100,
-                same_cov = FALSE,
-                seed = 1234
+                same_cov = FALSE
             )
         },
         regexp = "burn_in.*deprecated"
@@ -624,8 +623,7 @@ test_that("burn_in and burn_between arguments to method_bayes are deprecated", {
             method <- method_bayes(
                 n_samples = 250,
                 burn_between = 10,
-                same_cov = FALSE,
-                seed = 1234
+                same_cov = FALSE
             )
         },
         regexp = "burn_between.*deprecated"

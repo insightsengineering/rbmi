@@ -80,9 +80,9 @@ complete_control_bayes <- function(
         stop("`method$control$iter` must not be specified directly, please use `method$n_samples`")
     }
     assertthat::assert_that(
-        asserthat::is.number(control$warmup),
-        asserthat::is.number(control$thin),
-        asserthat::is.number(n_samples)
+        assertthat::is.number(control$warmup),
+        assertthat::is.number(control$thin),
+        assertthat::is.number(n_samples)
     )
     control$iter <- control$warmup + control$thin * n_samples
     if ("refresh" %in% control_pars) {

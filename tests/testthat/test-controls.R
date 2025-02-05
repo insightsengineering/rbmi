@@ -9,8 +9,7 @@ test_that("control_bayes", {
             thin = 50,
             chains = 1,
             init = "mmrm",
-            seed = 1235143119,
-            additional = list()
+            seed = 1756553742
         )
     )
     set.seed(123)
@@ -22,17 +21,17 @@ test_that("control_bayes", {
             thin = 50,
             chains = 1,
             init = "mmrm",
-            seed = 1235143119,
-            additional = list(verbose = TRUE)
+            seed = 1756553742,
+            verbose = TRUE
         )
     )
     expect_error(
         control_bayes(n_samples = 1000),
-        "provide the number of samples directly"
+        "specify the number of samples directly"
     )
     expect_error(
         control_bayes(iter = 1000),
-        "provide the number of samples directly"
+        "specify the number of samples directly"
     )
     expect_error(
         control_bayes(refresh = 1000),
