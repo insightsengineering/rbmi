@@ -500,6 +500,25 @@ is_num_char_fact <- function(x) {
 }
 
 
+#' Format method descriptions
+#'
+#' This function formats method descriptions by combining method names and their descriptions.
+#'
+#' @param method A named list of methods and their descriptions.
+#' @return A character vector of formatted method descriptions.
+format_method_descriptions <- function(method) {
+    vapply(
+        mapply(
+            function(x, y) sprintf("    %s: %s", y, x),
+            method,
+            names(method),
+            USE.NAMES = FALSE,
+            SIMPLIFY = FALSE
+        ),
+        identity,
+        character(1)
+    )
+}
 
 #' Convert object to dataframe
 #'

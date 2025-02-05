@@ -112,7 +112,6 @@ test_that("print - bayesian", {
     })
     expect_snapshot(print(drawobj_b), cran = TRUE)
 
-
     impute_b <- impute(
         drawobj_b,
         references = c("TRT" = "TRT", "Placebo" = "Placebo"),
