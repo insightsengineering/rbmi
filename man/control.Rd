@@ -37,11 +37,16 @@ Currently only the Bayesian imputation via \code{\link[=method_bayes]{method_bay
 default values or to \code{"mmrm"} to initialise the sampler with the maximum likelihood estimate
 values of the MMRM.
 \item The \code{seed} argument is used to set the seed for the MCMC sampler. By default, a random seed
-is generated, such that outside invocation of the \code{set.seed()} call will effectively set the
+is generated, such that outside invocation of the \code{set.seed()} call can effectively set the
 seed.
 \item The additional parameters passed to \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} must not contain \code{n_samples} or \code{iter}.
 Instead, the number of samples must be provided directly via the \code{n_samples} argument of
 \code{\link[=method_bayes]{method_bayes()}}. The \code{refresh} argument is also not allowed here, instead use the \code{quiet} argument
 directly in \code{\link[=draws]{draws()}}.
 }
+}
+\note{
+For full reproducibility of the imputation results, it is required to use a \code{set.seed()} call
+before defining the \code{control} list, and calling the \code{draws()} function. It is not sufficient to
+merely set the \code{seed} argument in the \code{control} list.
 }

@@ -238,8 +238,9 @@ $$
 We choose $S$ equal to the estimated covariance matrix from the frequentist REML fit and $\nu = J+2$ as these are the lowest degrees of freedom that guarantee a finite mean. Setting the degrees of freedom with such a low $\nu$ ensures that the prior has little impact on the posterior. Moreover, this choice allows to interpret the parameter $S$ as the mean of the prior distribution.
 
 As in the "five macros", the MCMC algorithm is initialized at the parameters from a frequentist REML fit (see section \@ref(sec:imputationModelREML)). As described above, we are using only weakly informative priors for the parameters. Therefore, the Markov chain is essentially starting from the targeted stationary posterior distribution and only a minimal amount of burn-in of the chain is required. 
-If more than one chain is being run, the chains are currently initialized at `"random"` values as per `rstan` default. This and other expert options for the MCMC sampling can be defined via the `control` argument to `method_bayes`, which is simplified with the corresponding `control_bayes()` function call.
-Note that for consistency with `rstan`, the burn-in can be customized via the `warmup` argument, and the burn-between can be customized via the `thin` argument.
+The initial values and other expert options for the MCMC sampling can be defined via the `control` argument to `method_bayes`, which is simplified with the corresponding `control_bayes()` function call.
+With the default initial values, i.e. when using `init = "mmrm"` in the `control` list, then for obtaining reproducible results an external `set.seed()` call is required before running `draws()`. In particular, please note that it is not sufficient to just set the `seed` option in the `control` list.
+If more than one chain is being run, the chains are currently initialized at `"random"` values as per `rstan` default. Note that for consistency with `rstan`, the burn-in can be customized via the `warmup` argument, and the burn-between can be customized via the `thin` argument.
 
 ### Approximate Bayesian posterior draws via the bootstrap {#sec:imputationModelBoot}
 

@@ -26,12 +26,16 @@
 #' default values or to `"mmrm"` to initialise the sampler with the maximum likelihood estimate
 #' values of the MMRM.
 #' - The `seed` argument is used to set the seed for the MCMC sampler. By default, a random seed
-#' is generated, such that outside invocation of the `set.seed()` call will effectively set the 
+#' is generated, such that outside invocation of the `set.seed()` call can effectively set the 
 #' seed.
 #' - The additional parameters passed to [rstan::sampling()] must not contain `n_samples` or `iter`.
 #' Instead, the number of samples must be provided directly via the `n_samples` argument of
 #' [method_bayes()]. The `refresh` argument is also not allowed here, instead use the `quiet` argument
 #' directly in [draws()].
+#' 
+#' @note For full reproducibility of the imputation results, it is required to use a `set.seed()` call 
+#' before defining the `control` list, and calling the `draws()` function. It is not sufficient to
+#' merely set the `seed` argument in the `control` list.
 #' 
 #' @export 
 control_bayes <- function( 

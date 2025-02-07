@@ -15,3 +15,7 @@ A character vector of formatted method descriptions.
 \description{
 This function formats method descriptions by combining method names and their descriptions.
 }
+\details{
+If any non-atomic elements are present in the method list, they are converted to
+a string representation using \code{dput()}.
+}
