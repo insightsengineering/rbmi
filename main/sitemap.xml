@@ -42,6 +42,7 @@
 <url><loc>/reference/check_hmc_diagn.html</loc></url>
 <url><loc>/reference/check_mcmc.html</loc></url>
 <url><loc>/reference/compute_sigma.html</loc></url>
+<url><loc>/reference/control.html</loc></url>
 <url><loc>/reference/convert_to_imputation_list_df.html</loc></url>
 <url><loc>/reference/d_lagscale.html</loc></url>
 <url><loc>/reference/delta_template.html</loc></url>
@@ -57,6 +58,7 @@
 <url><loc>/reference/extract_params.html</loc></url>
 <url><loc>/reference/fit_mcmc.html</loc></url>
 <url><loc>/reference/fit_mmrm.html</loc></url>
+<url><loc>/reference/format_method_descriptions.html</loc></url>
 <url><loc>/reference/generate_data_single.html</loc></url>
 <url><loc>/reference/getStrategies.html</loc></url>
 <url><loc>/reference/get_ESS.html</loc></url>
