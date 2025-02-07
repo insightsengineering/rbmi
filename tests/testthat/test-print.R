@@ -105,7 +105,19 @@ test_that("print - bayesian", {
             vars = dobj$vars,
             method = method_bayes(
                 n_samples = 50,
-                control = control_bayes(thin = 1)
+                control = control_bayes(
+                    thin = 1,
+                    init = function (chain_id) {
+                        list(
+                            b0 = chain_id,
+                            b1 = chain_id
+                        )
+                    },
+                    control = list(
+                        adapt_delta = 0.95,
+                        max_treedepth = 15
+                    )
+                ),
             ),
             quiet = TRUE
         )

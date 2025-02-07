@@ -257,8 +257,12 @@
           warmup: 200
           thin: 1
           chains: 1
-          init: mmrm
+          init: function (chain_id) 
+          {
+              list(b0 = chain_id, b1 = chain_id)
+          }
           seed: 791990519
+          control: list(adapt_delta = 0.95, max_treedepth = 15)
       
 
 ---

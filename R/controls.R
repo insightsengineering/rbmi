@@ -94,7 +94,7 @@ complete_control_bayes <- function(
         ceiling(control$iter / 10)
     )
     control$init <- ife(
-        control$init == "mmrm",
+        identical(control$init, "mmrm"),
         list(list(
             theta = as.vector(stan_data$R %*% mmrm_initial$beta),
             sigma = mmrm_initial$sigma
