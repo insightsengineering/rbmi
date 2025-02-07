@@ -30,7 +30,7 @@ and then convert the arrays into lists.">
 
     <a class="navbar-brand me-2" href="../index.html">rbmi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,6 +57,7 @@ and then convert the arrays into lists.">
     <div class="dropdown-menu" aria-labelledby="dropdown-versions">
     <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
+<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.4.0">v1.4.0</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.3.1">v1.3.1</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.3.0">v1.3.0</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.2.6">v1.2.6</a>
@@ -77,7 +78,7 @@ and then convert the arrays into lists.">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Extract draws from a <code>stanfit</code> object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/v1.3.1/R/mcmc.R" class="external-link"><code>R/mcmc.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/v1.4.0/R/mcmc.R" class="external-link"><code>R/mcmc.R</code></a></small>
       <div class="d-none name"><code>extract_draws.Rd</code></div>
     </div>
 
@@ -91,7 +92,7 @@ and then convert the arrays into lists.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a>
 </h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">extract_draws</span><span class="op">(</span><span class="va">stan_fit</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">extract_draws</span><span class="op">(</span><span class="va">stan_fit</span>, <span class="va">n_samples</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -104,6 +105,11 @@ and then convert the arrays into lists.</p>
 </dt>
 <dd><p>A <code>stanfit</code> object.</p></dd>
 
+
+<dt id="arg-n-samples">n_samples<a class="anchor" aria-label="anchor" href="#arg-n-samples"></a>
+</dt>
+<dd><p>Number of MCMC draws.</p></dd>
+
 </dl>
 </div>
     <div class="section level2">
@@ -111,9 +117,9 @@ and then convert the arrays into lists.</p>
 </h2>
     <p>A named list of length 2 containing:</p>
 <ul>
-<li><p><code>beta</code>: a list of length equal to the number of draws containing
+<li><p><code>beta</code>: a list of length equal to <code>n_samples</code> containing
 the draws from the posterior distribution of the regression coefficients.</p></li>
-<li><p><code>sigma</code>: a list of length equal to the number of draws containing
+<li><p><code>sigma</code>: a list of length equal to <code>n_samples</code> containing
 the draws from the posterior distribution of the covariance matrices. Each element
 of the list is a list with length equal to 1 if <code>same_cov = TRUE</code> or equal to the
 number of groups if <code>same_cov = FALSE</code>.</p></li>
@@ -126,7 +132,7 @@ number of groups if <code>same_cov = FALSE</code>.</p></li>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Craig Gower-Page, Alessandro Noci, Isaac Gravestock, F. Hoffmann-La Roche AG.</p>
+  <p>Developed by Craig Gower-Page, Alessandro Noci, Isaac Gravestock, Daniel Sabanes Bove, F. Hoffmann-La Roche AG.</p>
 </div>
 
 <div class="pkgdown-footer-right">

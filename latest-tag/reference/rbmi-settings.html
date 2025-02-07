@@ -20,8 +20,16 @@ rbmi.cache_dir
 
 
 Default = tools::R_user_dir("rbmi", which = "cache")
-Directory to store compiled Stan model in. If not set, a temporary directory is used for
-the given R session. Can also be set via the environment variable RBMI_CACHE_DIR.
+Directory to store compiled Stan models in to avoid having to re-compile.
+If the environment variable RBMI_CACHE_DIR has been set this will be used
+as the default value.
+Note that if you are running rbmi in multiple R processes at the same time
+(that is say multiple calls to Rscript at once) then there is a theoretical
+risk of the processes breaking each other as they attempt to read/write to the
+same cache folder at the same time. To avoid this potential issue it is recommended
+to set the cache directory to a unique folder for each R session e.g.
+options("rbmi.cache_dir" = tempdir(check = TRUE))
+
 
 '>
 <meta property="og:description" content='Define settings that modify the behaviour of the rbmi package
@@ -32,8 +40,16 @@ rbmi.cache_dir
 
 
 Default = tools::R_user_dir("rbmi", which = "cache")
-Directory to store compiled Stan model in. If not set, a temporary directory is used for
-the given R session. Can also be set via the environment variable RBMI_CACHE_DIR.
+Directory to store compiled Stan models in to avoid having to re-compile.
+If the environment variable RBMI_CACHE_DIR has been set this will be used
+as the default value.
+Note that if you are running rbmi in multiple R processes at the same time
+(that is say multiple calls to Rscript at once) then there is a theoretical
+risk of the processes breaking each other as they attempt to read/write to the
+same cache folder at the same time. To avoid this potential issue it is recommended
+to set the cache directory to a unique folder for each R session e.g.
+options("rbmi.cache_dir" = tempdir(check = TRUE))
+
 
 '>
 <meta property="og:image" content="/logo.png">
@@ -46,7 +62,7 @@ the given R session. Can also be set via the environment variable RBMI_CACHE_DIR
 
     <a class="navbar-brand me-2" href="../index.html">rbmi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,6 +89,7 @@ the given R session. Can also be set via the environment variable RBMI_CACHE_DIR
     <div class="dropdown-menu" aria-labelledby="dropdown-versions">
     <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
+<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.4.0">v1.4.0</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.3.1">v1.3.1</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.3.0">v1.3.0</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.2.6">v1.2.6</a>
@@ -93,7 +110,7 @@ the given R session. Can also be set via the environment variable RBMI_CACHE_DIR
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>rbmi settings</h1>
-      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/v1.3.1/R/utilities.R" class="external-link"><code>R/utilities.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/v1.4.0/R/utilities.R" class="external-link"><code>R/utilities.R</code></a></small>
       <div class="d-none name"><code>rbmi-settings.Rd</code></div>
     </div>
 
@@ -112,8 +129,19 @@ the given R session. Can also be set via the environment variable RBMI_CACHE_DIR
 
 
 <p>Default = <code>tools::R_user_dir("rbmi", which = "cache")</code></p>
-<p>Directory to store compiled Stan model in. If not set, a temporary directory is used for
-the given R session. Can also be set via the environment variable <code>RBMI_CACHE_DIR</code>.</p>
+<p>Directory to store compiled Stan models in to avoid having to re-compile.
+If the environment variable <code>RBMI_CACHE_DIR</code> has been set this will be used
+as the default value.
+Note that if you are running rbmi in multiple R processes at the same time
+(that is say multiple calls to <code>Rscript</code> at once) then there is a theoretical
+risk of the processes breaking each other as they attempt to read/write to the
+same cache folder at the same time. To avoid this potential issue it is recommended
+to set the cache directory to a unique folder for each R session e.g.</p>
+<p></p>
+<div class="sourceCode">
+<pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">options</span>(<span class="st">"rbmi.cache_dir"</span> <span class="ot">=</span> <span class="fu">tempdir</span>(<span class="at">check =</span> <span class="cn">TRUE</span>))</span></code></pre>
+<p></p>
+</div>
 </div>
 
     </div>
@@ -139,7 +167,7 @@ the given R session. Can also be set via the environment variable <code>RBMI_CAC
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Craig Gower-Page, Alessandro Noci, Isaac Gravestock, F. Hoffmann-La Roche AG.</p>
+  <p>Developed by Craig Gower-Page, Alessandro Noci, Isaac Gravestock, Daniel Sabanes Bove, F. Hoffmann-La Roche AG.</p>
 </div>
 
 <div class="pkgdown-footer-right">

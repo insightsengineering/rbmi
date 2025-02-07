@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rbmi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,6 +48,7 @@
     <div class="dropdown-menu" aria-labelledby="dropdown-versions">
     <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
+<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.4.0">v1.4.0</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.3.1">v1.3.1</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.3.0">v1.3.0</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.2.6">v1.2.6</a>
@@ -73,7 +74,7 @@
                         <h4 data-toc-skip class="author">Craig Gower-Page, Alessandro Noci, and Marcel Wolbers</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/v1.3.1/vignettes/quickstart.Rmd" class="external-link"><code>vignettes/quickstart.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/v1.4.0/vignettes/quickstart.Rmd" class="external-link"><code>vignettes/quickstart.Rmd</code></a></small>
       <div class="d-none name"><code>quickstart.Rmd</code></div>
     </div>
 
@@ -195,11 +196,13 @@ and that 150 multiple imputed datasets using Bayesian posterior draws from the i
 <span>    covariates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BASVAL*VISIT"</span>, <span class="st">"THERAPY*VISIT"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets) </span></span>
+<span><span class="co"># Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets)</span></span>
 <span><span class="va">method</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/method.html">method_bayes</a></span><span class="op">(</span></span>
-<span>    burn_in <span class="op">=</span> <span class="fl">200</span>,</span>
-<span>    burn_between <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>    n_samples <span class="op">=</span> <span class="fl">150</span></span>
+<span>    n_samples <span class="op">=</span> <span class="fl">150</span>,</span>
+<span>    control <span class="op">=</span> <span class="fu"><a href="../reference/control.html">control_bayes</a></span><span class="op">(</span></span>
+<span>        warmup <span class="op">=</span> <span class="fl">200</span>,</span>
+<span>        thin <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create samples for the imputation parameters by running the draws() function</span></span>
@@ -221,10 +224,14 @@ and that 150 multiple imputed datasets using Bayesian posterior draws from the i
 <span><span class="co">#&gt; Imputation Type: random</span></span>
 <span><span class="co">#&gt; Method:</span></span>
 <span><span class="co">#&gt;     name: Bayes</span></span>
-<span><span class="co">#&gt;     burn_in: 200</span></span>
-<span><span class="co">#&gt;     burn_between: 5</span></span>
 <span><span class="co">#&gt;     same_cov: TRUE</span></span>
-<span><span class="co">#&gt;     n_samples: 150</span></span></code></pre></div>
+<span><span class="co">#&gt;     n_samples: 150</span></span>
+<span><span class="co">#&gt; Controls:</span></span>
+<span><span class="co">#&gt;     warmup: 200</span></span>
+<span><span class="co">#&gt;     thin: 5</span></span>
+<span><span class="co">#&gt;     chains: 1</span></span>
+<span><span class="co">#&gt;     init: mmrm</span></span>
+<span><span class="co">#&gt;     seed: 346871191</span></span></code></pre></div>
 <p>Note the use of <code><a href="../reference/set_vars.html">set_vars()</a></code> which specifies the names of the key variables
 within the dataset and the imputation model. Additionally, note that whilst <code>vars$group</code> and <code>vars$visit</code>
 are added as terms to the imputation model by default, their interaction is not,
@@ -470,15 +477,15 @@ in the original call to <code><a href="../reference/draws.html">draws()</a></cod
 <span><span class="co">#&gt;      trt_4    -0.092  0.683  -1.439  1.256   0.893  </span></span>
 <span><span class="co">#&gt;    lsm_ref_4  -1.616  0.486  -2.576  -0.656  0.001  </span></span>
 <span><span class="co">#&gt;    lsm_alt_4  -1.708  0.475  -2.645  -0.77   &lt;0.001 </span></span>
-<span><span class="co">#&gt;      trt_5    1.332   0.925  -0.495  3.159   0.152  </span></span>
-<span><span class="co">#&gt;    lsm_ref_5  -4.157  0.661  -5.462  -2.852  &lt;0.001 </span></span>
-<span><span class="co">#&gt;    lsm_alt_5  -2.825  0.646   -4.1   -1.55   &lt;0.001 </span></span>
-<span><span class="co">#&gt;      trt_6    1.927   1.005  -0.059  3.913   0.057  </span></span>
-<span><span class="co">#&gt;    lsm_ref_6  -6.097  0.721  -7.522  -4.671  &lt;0.001 </span></span>
-<span><span class="co">#&gt;    lsm_alt_6  -4.17    0.7   -5.553  -2.786  &lt;0.001 </span></span>
-<span><span class="co">#&gt;      trt_7     2.18   1.143  -0.08   4.439   0.059  </span></span>
-<span><span class="co">#&gt;    lsm_ref_7  -6.994  0.826  -8.628  -5.36   &lt;0.001 </span></span>
-<span><span class="co">#&gt;    lsm_alt_7  -4.815  0.791  -6.379  -3.25   &lt;0.001 </span></span>
+<span><span class="co">#&gt;      trt_5    1.339   0.923  -0.485  3.162   0.149  </span></span>
+<span><span class="co">#&gt;    lsm_ref_5  -4.157  0.66   -5.462  -2.853  &lt;0.001 </span></span>
+<span><span class="co">#&gt;    lsm_alt_5  -2.819  0.646  -4.094  -1.543  &lt;0.001 </span></span>
+<span><span class="co">#&gt;      trt_6    1.953   0.994  -0.011  3.917   0.051  </span></span>
+<span><span class="co">#&gt;    lsm_ref_6  -6.104  0.713  -7.514  -4.695  &lt;0.001 </span></span>
+<span><span class="co">#&gt;    lsm_alt_6  -4.151  0.699  -5.531  -2.771  &lt;0.001 </span></span>
+<span><span class="co">#&gt;      trt_7    2.185   1.113  -0.014  4.384   0.051  </span></span>
+<span><span class="co">#&gt;    lsm_ref_7  -7.027  0.818  -8.644  -5.41   &lt;0.001 </span></span>
+<span><span class="co">#&gt;    lsm_alt_7  -4.842  0.781  -6.386  -3.298  &lt;0.001 </span></span>
 <span><span class="co">#&gt;   --------------------------------------------------</span></span></code></pre></div>
 <p>The table of values shown in the print message for <code>poolObj</code> can also be extracted using the <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> function:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -487,18 +494,18 @@ in the original call to <code><a href="../reference/draws.html">draws()</a></cod
 <span><span class="co">#&gt; 1      trt_4 -0.09180645 0.6826279 -1.43949684  1.2558839 8.931772e-01</span></span>
 <span><span class="co">#&gt; 2  lsm_ref_4 -1.61581996 0.4862316 -2.57577141 -0.6558685 1.093708e-03</span></span>
 <span><span class="co">#&gt; 3  lsm_alt_4 -1.70762640 0.4749573 -2.64531931 -0.7699335 4.262148e-04</span></span>
-<span><span class="co">#&gt; 4      trt_5  1.33217342 0.9248889 -0.49452471  3.1588715 1.517381e-01</span></span>
-<span><span class="co">#&gt; 5  lsm_ref_5 -4.15685743 0.6607638 -5.46196249 -2.8517524 2.982856e-09</span></span>
-<span><span class="co">#&gt; 6  lsm_alt_5 -2.82468402 0.6455730 -4.09978956 -1.5495785 2.197441e-05</span></span>
-<span><span class="co">#&gt; 7      trt_6  1.92723926 1.0050687 -0.05860912  3.9130876 5.706399e-02</span></span>
-<span><span class="co">#&gt; 8  lsm_ref_6 -6.09679600 0.7213490 -7.52226719 -4.6713248 2.489617e-14</span></span>
-<span><span class="co">#&gt; 9  lsm_alt_6 -4.16955674 0.7003707 -5.55341225 -2.7857012 1.784937e-08</span></span>
-<span><span class="co">#&gt; 10     trt_7  2.17964370 1.1426199 -0.07965819  4.4389456 5.852211e-02</span></span>
-<span><span class="co">#&gt; 11 lsm_ref_7 -6.99418014 0.8260358 -8.62803604 -5.3603242 4.048404e-14</span></span>
-<span><span class="co">#&gt; 12 lsm_alt_7 -4.81453644 0.7913711 -6.37916058 -3.2499123 1.067031e-08</span></span></code></pre></div>
+<span><span class="co">#&gt; 4      trt_5  1.33881542 0.9233479 -0.48478102  3.1624119 1.490383e-01</span></span>
+<span><span class="co">#&gt; 5  lsm_ref_5 -4.15732223 0.6603544 -5.46159984 -2.8530446 2.902365e-09</span></span>
+<span><span class="co">#&gt; 6  lsm_alt_5 -2.81850682 0.6458507 -4.09416505 -1.5428486 2.303086e-05</span></span>
+<span><span class="co">#&gt; 7      trt_6  1.95333471 0.9941558 -0.01055623  3.9172256 5.122882e-02</span></span>
+<span><span class="co">#&gt; 8  lsm_ref_6 -6.10437154 0.7132696 -7.51357452 -4.6951686 1.167112e-14</span></span>
+<span><span class="co">#&gt; 9  lsm_alt_6 -4.15103683 0.6986806 -5.53148811 -2.7705856 1.876913e-08</span></span>
+<span><span class="co">#&gt; 10     trt_7  2.18487679 1.1127820 -0.01440535  4.3841589 5.149964e-02</span></span>
+<span><span class="co">#&gt; 11 lsm_ref_7 -7.02684383 0.8176496 -8.64389020 -5.4097975 1.826939e-14</span></span>
+<span><span class="co">#&gt; 12 lsm_alt_7 -4.84196703 0.7809657 -6.38572322 -3.2982109 5.740224e-09</span></span></code></pre></div>
 <p>These outputs gives an estimated difference of
-2.180 (95% CI -0.080 to 4.439)
-between the two groups at the last visit with an associated p-value of 0.059.</p>
+2.185 (95% CI -0.014 to 4.384)
+between the two groups at the last visit with an associated p-value of 0.051.</p>
 </div>
 <div class="section level2" number="7">
 <h2 id="code">
@@ -549,13 +556,14 @@ between the two groups at the last visit with an associated p-value of 0.059.</p
 <span>    covariates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BASVAL*VISIT"</span>, <span class="st">"THERAPY*VISIT"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets) </span></span>
+<span><span class="co"># Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets)</span></span>
 <span><span class="va">method</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/method.html">method_bayes</a></span><span class="op">(</span></span>
-<span>    burn_in <span class="op">=</span> <span class="fl">200</span>,</span>
-<span>    burn_between <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>    n_samples <span class="op">=</span> <span class="fl">150</span></span>
+<span>    n_samples <span class="op">=</span> <span class="fl">150</span>,</span>
+<span>    control <span class="op">=</span> <span class="fu"><a href="../reference/control.html">control_bayes</a></span><span class="op">(</span></span>
+<span>        warmup <span class="op">=</span> <span class="fl">200</span>,</span>
+<span>        thin <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span></span>
 <span></span>
 <span><span class="co"># Create samples for the imputation parameters by running the draws() function</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">987</span><span class="op">)</span></span>
@@ -623,7 +631,7 @@ between the two groups at the last visit with an associated p-value of 0.059.</p
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Craig Gower-Page, Alessandro Noci, Isaac Gravestock, F. Hoffmann-La Roche AG.</p>
+  <p>Developed by Craig Gower-Page, Alessandro Noci, Isaac Gravestock, Daniel Sabanes Bove, F. Hoffmann-La Roche AG.</p>
 </div>
 
 <div class="pkgdown-footer-right">
