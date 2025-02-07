@@ -4,17 +4,19 @@
 \alias{extract_draws}
 \title{Extract draws from a \code{stanfit} object}
 \usage{
-extract_draws(stan_fit)
+extract_draws(stan_fit, n_samples)
 }
 \arguments{
 \item{stan_fit}{A \code{stanfit} object.}
+
+\item{n_samples}{Number of MCMC draws.}
 }
 \value{
 A named list of length 2 containing:
 \itemize{
-\item \code{beta}: a list of length equal to the number of draws containing
+\item \code{beta}: a list of length equal to \code{n_samples} containing
 the draws from the posterior distribution of the regression coefficients.
-\item \code{sigma}: a list of length equal to the number of draws containing
+\item \code{sigma}: a list of length equal to \code{n_samples} containing
 the draws from the posterior distribution of the covariance matrices. Each element
 of the list is a list with length equal to 1 if \code{same_cov = TRUE} or equal to the
 number of groups if \code{same_cov = FALSE}.

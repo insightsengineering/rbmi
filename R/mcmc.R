@@ -55,13 +55,7 @@ fit_mcmc <- function(
     method,
     quiet = FALSE
 ) {
-
-    n_imputations <- method$n_samples
-    burn_in <- method$burn_in
-    burn_between <- method$burn_between
-    same_cov <- method$same_cov
-
-    # fit MMRM (needed for initial values)
+    # Fit MMRM (needed for Sigma prior parameter and possibly initial values).
     mmrm_initial <- fit_mmrm(
         designmat = designmat,
         outcome = outcome,
@@ -70,7 +64,7 @@ fit_mcmc <- function(
         group = group,
         cov_struct = "us",
         REML = TRUE,
-        same_cov = same_cov
+        same_cov = method$same_cov
     )
 
     if (mmrm_initial$failed) {
@@ -82,35 +76,35 @@ fit_mcmc <- function(
         subjid = subjid,
         visit = visit,
         outcome = outcome,
-        group = ife(same_cov == TRUE, rep(1, length(group)), group)
+        group = ife(
+            isTRUE(method$same_cov), 
+            rep(1, length(group)), 
+            group
+        )
     )
 
     stan_data$Sigma_init <- ife(
-        same_cov == TRUE,
+        isTRUE(method$same_cov),
         list(mmrm_initial$sigma[[1]]),
         mmrm_initial$sigma
     )
 
-    sampling_args <- list(
-        object = get_stan_model(),
-        data = stan_data,
-        pars = c("beta", "Sigma"),
-        chains = 1,
-        warmup = burn_in,
-        thin = burn_between,
-        iter = burn_in + burn_between * n_imputations,
-        init = list(list(
-            theta = as.vector(stan_data$R %*% mmrm_initial$beta),
-            sigma = mmrm_initial$sigma
-        )),
-        refresh = ife(
-            quiet,
-            0,
-            (burn_in + burn_between * n_imputations) / 10
-        )
+    control <- complete_control_bayes(
+        control = method$control,
+        n_samples = method$n_samples,
+        quiet = quiet,
+        stan_data = stan_data,
+        mmrm_initial = mmrm_initial
     )
-
-    sampling_args$seed <- sample.int(.Machine$integer.max, 1)
+    
+    sampling_args <- c(
+        list(
+            object = get_stan_model(),
+            data = stan_data,
+            pars = c("beta", "Sigma")
+        ),
+        control
+    )
 
     stan_fit <- record({
         do.call(rstan::sampling, sampling_args)
@@ -132,9 +126,9 @@ fit_mcmc <- function(
     for (i in warnings_not_allowed) warning(warnings_not_allowed)
 
     fit <- stan_fit$results
-    check_mcmc(fit, n_imputations)
+    check_mcmc(fit, method$n_samples)
 
-    draws <- extract_draws(fit)
+    draws <- extract_draws(fit, method$n_samples)
 
     ret_obj <- list(
         "samples" = draws,
@@ -220,17 +214,20 @@ split_dim <- function(a, n) {
 #' and then convert the arrays into lists.
 #'
 #' @param stan_fit A `stanfit` object.
+#' 
+#' @param n_samples Number of MCMC draws.
 #'
 #' @return
 #' A named list of length 2 containing:
-#' - `beta`: a list of length equal to the number of draws containing
+#' - `beta`: a list of length equal to `n_samples` containing
 #'   the draws from the posterior distribution of the regression coefficients.
-#' - `sigma`: a list of length equal to the number of draws containing
+#' - `sigma`: a list of length equal to `n_samples` containing
 #'   the draws from the posterior distribution of the covariance matrices. Each element
 #'   of the list is a list with length equal to 1 if `same_cov = TRUE` or equal to the
 #'   number of groups if `same_cov = FALSE`.
 #'
-extract_draws <- function(stan_fit) {
+extract_draws <- function(stan_fit, n_samples) {
+    assertthat::assert_that(assertthat::is.number(n_samples))
 
     pars <- rstan::extract(stan_fit, pars = c("beta", "Sigma"))
     names(pars) <- c("beta", "sigma")
@@ -242,9 +239,13 @@ extract_draws <- function(stan_fit) {
         pars$sigma,
         function(x) split_dim(x, 1)
     )
+    assertthat::assert_that(length(pars$sigma) >= n_samples)
+    pars$sigma <- pars$sigma[seq_len(n_samples)]
 
     pars$beta <- split_dim(pars$beta, 1)
     pars$beta <- lapply(pars$beta, as.vector)
+    assertthat::assert_that(length(pars$beta) >= n_samples)
+    pars$beta <- pars$beta[seq_len(n_samples)]
 
     return(pars)
 }

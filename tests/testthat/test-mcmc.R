@@ -341,9 +341,11 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
 
     method <- method_bayes(
         n_samples = 200,
-        burn_in = 100,
-        burn_between = 3,
-        same_cov = TRUE
+        same_cov = TRUE,
+        control = control_bayes(
+            warmup = 200,
+            thin = 3
+        )
     )
 
     ### No missingness
@@ -365,7 +367,7 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
 
     # check extract_draws() worked properly
     test_extract_draws(
-        extract_draws(fit$fit),
+        extract_draws(fit$fit, method$n_samples),
         same_cov = TRUE,
         n_groups = 2,
         n_visits = 3
@@ -397,7 +399,7 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
 
     # check extract_draws() worked properly
     test_extract_draws(
-        extract_draws(fit$fit),
+        extract_draws(fit$fit, method$n_samples),
         same_cov = TRUE,
         n_groups = 2,
         n_visits = 3
@@ -431,7 +433,7 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
 
     # check extract_draws() worked properly
     test_extract_draws(
-        extract_draws(fit$fit),
+        extract_draws(fit$fit, method$n_samples),
         same_cov = TRUE,
         n_groups = 2,
         n_visits = 3
@@ -457,7 +459,7 @@ test_that("fit_mcmc returns error if mmrm on original sample fails", {
 
     method <- method_bayes(
         n_samples = 2,
-        burn_between = 10
+        control = control_bayes(thin = 10)
     )
 
     expect_error(
@@ -476,8 +478,8 @@ test_that("fit_mcmc returns error if mmrm on original sample fails", {
 
     method <- method_bayes(
         n_samples = 2,
-        burn_between = 10,
-        same_cov = FALSE
+        same_cov = FALSE,
+        control = control_bayes(thin = 10)
     )
 
     expect_error(
@@ -526,9 +528,11 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
 
     method <- method_bayes(
         n_samples = 250,
-        burn_in = 100,
-        burn_between = 3,
-        same_cov = FALSE
+        same_cov = FALSE,
+        control = control_bayes(
+            warmup = 100,
+            thin = 3
+        )
     )
 
     ### No missingness
@@ -555,7 +559,7 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
 
     # check extract_draws() worked properly
     test_extract_draws(
-        extract_draws(fit$fit),
+        extract_draws(fit$fit, method$n_samples),
         same_cov = FALSE,
         n_groups = 2,
         n_visits = 3
@@ -591,7 +595,7 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
 
     # check extract_draws() worked properly
     test_extract_draws(
-        extract_draws(fit$fit),
+        extract_draws(fit$fit, method$n_samples),
         same_cov = FALSE,
         n_groups = 2,
         n_visits = 3
@@ -602,17 +606,80 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
 })
 
 
-test_that("seed argument to method_bayes is deprecated", {
+test_that("burn_in and burn_between arguments to method_bayes are deprecated", {
     expect_error(
         {
             method <- method_bayes(
                 n_samples = 250,
                 burn_in = 100,
-                burn_between = 3,
-                same_cov = FALSE,
-                seed = 1234
+                same_cov = FALSE
             )
         },
-        regexp = "seed.*deprecated"
+        regexp = "burn_in.*deprecated"
+    )
+
+    expect_error(
+        {
+            method <- method_bayes(
+                n_samples = 250,
+                burn_between = 10,
+                same_cov = FALSE
+            )
+        },
+        regexp = "burn_between.*deprecated"
+    )
+})
+
+test_that("fit_mcmc works with multiple chains", {
+
+    skip_if_not(is_full_test())
+
+    set.seed(3459)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
+
+    method <- method_bayes(
+        n_samples = 200,
+        same_cov = TRUE,
+        control = control_bayes(
+            warmup = 200,
+            thin = 3,
+            chains = 3
+        )
+    )
+
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat$outcome,
+        group = dat$group,
+        subjid = dat$id,
+        visit = dat$visit,
+        method = method,
+        quiet = TRUE
+    )
+    expect_true(length(fit$samples$beta) == method$n_samples)
+    expect_true(length(fit$samples$sigma) == method$n_samples)
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    assert_that(all(sigma_within$inside))
+
+    # check extract_draws() worked properly
+    test_extract_draws(
+        extract_draws(fit$fit, method$n_samples),
+        same_cov = TRUE,
+        n_groups = 2,
+        n_visits = 3
     )
 })

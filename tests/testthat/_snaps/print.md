@@ -251,10 +251,18 @@
       Imputation Type: random
       Method:
           name: Bayes
-          burn_in: 200
-          burn_between: 1
           same_cov: TRUE
           n_samples: 50
+      Controls:
+          warmup: 200
+          thin: 1
+          chains: 1
+          init: function (chain_id) 
+          {
+              list(b0 = chain_id, b1 = chain_id)
+          }
+          seed: 791990519
+          control: list(adapt_delta = 0.95, max_treedepth = 15)
       
 
 ---

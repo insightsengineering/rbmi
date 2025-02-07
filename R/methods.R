@@ -7,15 +7,6 @@
 #'
 #' @name method
 #'
-#' @param burn_in a numeric that specifies how many observations should be discarded
-#' prior to extracting actual samples. Note that the sampler
-#' is initialized at the maximum likelihood estimates and a weakly informative
-#' prior is used thus in theory this value should not need to be that high.
-#'
-#' @param burn_between a numeric that specifies the "thinning" rate i.e. how many
-#' observations should be discarded between each sample. This is used to prevent
-#' issues associated with autocorrelation between the samples.
-#'
 #' @param same_cov a logical, if `TRUE` the imputation model will be fitted using a single
 #' shared covariance matrix for all observations. If `FALSE` a separate covariance
 #' matrix will be fit for each group as determined by the `group` argument of
@@ -24,6 +15,10 @@
 #' @param n_samples a numeric that determines how many imputed datasets are generated.
 #' In the case of `method_condmean(type = "jackknife")` this argument
 #' must be set to `NULL`. See details.
+#' 
+#' @param control a list which specifies further lower level details of the computations.
+#' Currently only used by `method_bayes()`, please see [control_bayes()] for details and
+#' default settings.
 #'
 #' @param B a numeric that determines the number of bootstrap samples for `method_bmlmi`.
 #'
@@ -45,7 +40,9 @@
 #' when a conditional mean imputation approach (set via `method_condmean()`) is used.
 #' Must be one of `"bootstrap"` or `"jackknife"`.
 #'
-#' @param seed deprecated. Please use `set.seed()` instead.
+#' @param burn_in deprecated. Please use the `warmup` argument in [control_bayes()] instead.
+#'
+#' @param burn_between deprecated. Please use the `thin` argument in [control_bayes()] instead.
 #'
 #' @details
 #'
@@ -55,6 +52,9 @@
 #' bootstrapped datasets. Likewise, for `method_condmean(type = "jackknife")` there will
 #' be `length(unique(data$subjid)) + 1` imputation models and datasets generated. In both cases this is
 #' represented by `n + 1` being displayed in the print message.
+#' In the case that `method_bayes()` is used, and with the `control` argument the number of chains
+#' is set to more than 1, then the `n_samples` samples will be distributed across the chains.
+#' The total number of returned samples will still be `n_samples`.
 #'
 #' The user is able to specify different covariance structures using the the `covariance`
 #' argument. Currently supported structures include:
@@ -94,26 +94,25 @@
 #'
 #' @export
 method_bayes <- function(
-    burn_in = 200,
-    burn_between = 50,
     same_cov = TRUE,
     n_samples = 20,
-    seed = NULL
+    control = control_bayes(),
+    burn_in = NULL,
+    burn_between = NULL
 ) {
     assertthat::assert_that(
-        is.null(seed),
+        is.null(burn_in) && is.null(burn_between),
         msg = paste(
-            "The `seed` argument to `method_bayes()` has been deprecated;",
-            "please use `set.seed()` instead.",
+            "The `burn_in` and `burn_between` arguments to `method_bayes()` have been deprecated;",
+            "please use the `warmup` and `thin` arguments inside `control_bayes()` instead.",
             collapse = " "
         )
     )
 
     x <- list(
-        burn_in = burn_in,
-        burn_between = burn_between,
         same_cov = same_cov,
-        n_samples = n_samples
+        n_samples = n_samples,
+        control = control
     )
     return(as_class(x, c("method", "bayes")))
 }

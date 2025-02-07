@@ -111,9 +111,11 @@ test_that("bayes - set.seed produces identical results", {
     )
 
     meth <- method_bayes(
-        burn_between = 5,
-        burn_in = 200,
-        n_samples = 6
+        n_samples = 6,
+        control = control_bayes(
+            warmup = 200,
+            thin = 5
+        )
     )
 
     set.seed(1234)

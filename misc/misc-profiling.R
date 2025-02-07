@@ -564,10 +564,12 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         data_ice = dat_ice,
         vars = vars,
         method = method_bayes(
-            same_cov = FALSE,
-            burn_between = 4,
+            same_cov = FALSE,            
             n_samples = 150,
-            burn_in = 25,
+            control = control_bayes(
+                warmup = 25,
+                thin = 4
+            )
         ),
         quiet = TRUE
     )

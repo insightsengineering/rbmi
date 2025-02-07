@@ -260,3 +260,36 @@ test_that("clear_model_cache", {
     )
     file.remove(files[5])
 })
+
+test_that("format_method_descriptions", {
+    method <- list(
+        same_cov = TRUE,
+        n_samples = 200
+    )
+    result <- format_method_descriptions(method)
+    expect_true(is.character(result) && length(result) == 2)
+    expect_match(result[1], "same_cov: TRUE")
+    expect_match(result[2], "n_samples: 200")
+
+    method <- list(
+        init = list(
+            list(theta = 1, sigma = 2),
+            list(theta = 3, sigma = 4)
+        ),
+        init2 = function(chain_id) {
+            list(theta = chain_id, sigma = chain_id + 1)
+        }
+    )
+    result <- format_method_descriptions(method)
+    expect_true(is.character(result) && length(result) == 2)
+    expect_match(
+        result[1], 
+        "init: list(list(theta = 1, sigma = 2), list(theta = 3, sigma = 4))",
+        fixed = TRUE
+    )
+    expect_match(
+        result[2], 
+        "init2: function (chain_id)",
+        fixed = TRUE
+    )
+})

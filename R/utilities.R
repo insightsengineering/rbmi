@@ -500,6 +500,41 @@ is_num_char_fact <- function(x) {
 }
 
 
+#' Format method descriptions
+#'
+#' This function formats method descriptions by combining method names and their descriptions.
+#'
+#' @param method A named list of methods and their descriptions.
+#' @return A character vector of formatted method descriptions.
+#' @details If any non-atomic elements are present in the method list, they are converted to
+#' a string representation using `dput()`.
+format_method_descriptions <- function(method) {
+    assertthat::assert_that(is.list(method))
+
+    is_atomic <- vapply(method, is.atomic, logical(1))
+    if (any(!is_atomic)) {
+        method[!is_atomic] <- lapply(
+            method[!is_atomic],
+            function(x) {
+                paste(
+                    capture.output(dput(x)),
+                    collapse = "\n    "
+                )
+            }
+        )
+    }
+    vapply(
+        mapply(
+            function(x, y) sprintf("    %s: %s", y, x),
+            method,
+            names(method),
+            USE.NAMES = FALSE,
+            SIMPLIFY = FALSE
+        ),
+        identity,
+        character(1)
+    )
+}
 
 #' Convert object to dataframe
 #'

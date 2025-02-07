@@ -9,11 +9,11 @@
 \title{Set the multiple imputation methodology}
 \usage{
 method_bayes(
-  burn_in = 200,
-  burn_between = 50,
   same_cov = TRUE,
   n_samples = 20,
-  seed = NULL
+  control = control_bayes(),
+  burn_in = NULL,
+  burn_between = NULL
 )
 
 method_approxbayes(
@@ -43,15 +43,6 @@ method_bmlmi(
 )
 }
 \arguments{
-\item{burn_in}{a numeric that specifies how many observations should be discarded
-prior to extracting actual samples. Note that the sampler
-is initialized at the maximum likelihood estimates and a weakly informative
-prior is used thus in theory this value should not need to be that high.}
-
-\item{burn_between}{a numeric that specifies the "thinning" rate i.e. how many
-observations should be discarded between each sample. This is used to prevent
-issues associated with autocorrelation between the samples.}
-
 \item{same_cov}{a logical, if \code{TRUE} the imputation model will be fitted using a single
 shared covariance matrix for all observations. If \code{FALSE} a separate covariance
 matrix will be fit for each group as determined by the \code{group} argument of
@@ -61,7 +52,13 @@ matrix will be fit for each group as determined by the \code{group} argument of
 In the case of \code{method_condmean(type = "jackknife")} this argument
 must be set to \code{NULL}. See details.}
 
-\item{seed}{deprecated. Please use \code{set.seed()} instead.}
+\item{control}{a list which specifies further lower level details of the computations.
+Currently only used by \code{method_bayes()}, please see \code{\link[=control_bayes]{control_bayes()}} for details and
+default settings.}
+
+\item{burn_in}{deprecated. Please use the \code{warmup} argument in \code{\link[=control_bayes]{control_bayes()}} instead.}
+
+\item{burn_between}{deprecated. Please use the \code{thin} argument in \code{\link[=control_bayes]{control_bayes()}} instead.}
 
 \item{covariance}{a character string that specifies the structure of the covariance
 matrix to be used in the imputation model. Must be one of \code{"us"} (default), \code{"ad"},
@@ -94,6 +91,9 @@ the original dataset whilst the other \code{n_samples} samples will be
 bootstrapped datasets. Likewise, for \code{method_condmean(type = "jackknife")} there will
 be \code{length(unique(data$subjid)) + 1} imputation models and datasets generated. In both cases this is
 represented by \code{n + 1} being displayed in the print message.
+In the case that \code{method_bayes()} is used, and with the \code{control} argument the number of chains
+is set to more than 1, then the \code{n_samples} samples will be distributed across the chains.
+The total number of returned samples will still be \code{n_samples}.
 
 The user is able to specify different covariance structures using the the \code{covariance}
 argument. Currently supported structures include:

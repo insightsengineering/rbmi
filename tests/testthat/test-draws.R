@@ -139,7 +139,7 @@ test_that("condmean - jackknife", {
 test_that("bayes", {
     set.seed(40123)
     d <- get_data(140)
-    meth <- method_bayes(n_samples = 2, burn_in = 200, burn_between = 2)
+    meth <- method_bayes(n_samples = 2, control = control_bayes(warmup = 200, thin = 2, seed = 123))
     dobj <- suppressWarnings({
         draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
     })

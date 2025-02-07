@@ -586,17 +586,14 @@ print.draws <- function(x, ...) {
 
     method <- x$method
 
-    meth_args <- vapply(
-        mapply(
-            function(x, y) sprintf("    %s: %s", y, x),
-            method,
-            names(method),
-            USE.NAMES = FALSE,
-            SIMPLIFY = FALSE
-        ),
-        identity,
-        character(1)
-    )
+    control_args <- if ("control" %in% names(method)) {
+        control <- method$control
+        method <- method[!(names(method) == "control")]
+        format_method_descriptions(control)
+    } else {
+        character()
+    }
+    meth_args <- format_method_descriptions(method)
 
     n_samp <- length(x$samples)
     n_samp_string <- ife(
@@ -616,6 +613,14 @@ print.draws <- function(x, ...) {
         "Method:",
         sprintf("    name: %s", meth),
         meth_args,
+        ife(
+            length(control_args),
+            c(
+                "Controls:",
+                control_args
+            ),
+            NULL
+        ),
         ""
     )
 

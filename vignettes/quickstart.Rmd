@@ -122,11 +122,13 @@ vars <- set_vars(
     covariates = c("BASVAL*VISIT", "THERAPY*VISIT")
 )
 
-# Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets) 
+# Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets)
 method <- method_bayes(
-    burn_in = 200,
-    burn_between = 5,
-    n_samples = 150
+    n_samples = 150,
+    control = control_bayes(
+        warmup = 200,
+        thin = 5,
+    )
 )
 
 # Create samples for the imputation parameters by running the draws() function
@@ -351,13 +353,14 @@ vars <- set_vars(
     covariates = c("BASVAL*VISIT", "THERAPY*VISIT")
 )
 
-# Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets) 
+# Define which imputation method to use (here: Bayesian multiple imputation with 150 imputed datsets)
 method <- method_bayes(
-    burn_in = 200,
-    burn_between = 5,
-    n_samples = 150
+    n_samples = 150,
+    control = control_bayes(
+        warmup = 200,
+        thin = 5,
+    )
 )
-
 
 # Create samples for the imputation parameters by running the draws() function
 set.seed(987)
