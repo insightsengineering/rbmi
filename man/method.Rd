@@ -91,6 +91,9 @@ the original dataset whilst the other \code{n_samples} samples will be
 bootstrapped datasets. Likewise, for \code{method_condmean(type = "jackknife")} there will
 be \code{length(unique(data$subjid)) + 1} imputation models and datasets generated. In both cases this is
 represented by \code{n + 1} being displayed in the print message.
+In the case that \code{method_bayes()} is used, and with the \code{control} argument the number of chains
+is set to more than 1, then the \code{n_samples} samples will be distributed across the chains.
+The total number of returned samples will still be \code{n_samples}.
 
 The user is able to specify different covariance structures using the the \code{covariance}
 argument. Currently supported structures include:

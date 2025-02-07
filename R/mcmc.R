@@ -128,7 +128,7 @@ fit_mcmc <- function(
     fit <- stan_fit$results
     check_mcmc(fit, method$n_samples)
 
-    draws <- extract_draws(fit)
+    draws <- extract_draws(fit, method$n_samples)
 
     ret_obj <- list(
         "samples" = draws,
@@ -214,17 +214,20 @@ split_dim <- function(a, n) {
 #' and then convert the arrays into lists.
 #'
 #' @param stan_fit A `stanfit` object.
+#' 
+#' @param n_samples Number of MCMC draws.
 #'
 #' @return
 #' A named list of length 2 containing:
-#' - `beta`: a list of length equal to the number of draws containing
+#' - `beta`: a list of length equal to `n_samples` containing
 #'   the draws from the posterior distribution of the regression coefficients.
-#' - `sigma`: a list of length equal to the number of draws containing
+#' - `sigma`: a list of length equal to `n_samples` containing
 #'   the draws from the posterior distribution of the covariance matrices. Each element
 #'   of the list is a list with length equal to 1 if `same_cov = TRUE` or equal to the
 #'   number of groups if `same_cov = FALSE`.
 #'
-extract_draws <- function(stan_fit) {
+extract_draws <- function(stan_fit, n_samples) {
+    assertthat::assert_that(assertthat::is.number(n_samples))
 
     pars <- rstan::extract(stan_fit, pars = c("beta", "Sigma"))
     names(pars) <- c("beta", "sigma")
@@ -236,9 +239,13 @@ extract_draws <- function(stan_fit) {
         pars$sigma,
         function(x) split_dim(x, 1)
     )
+    assertthat::assert_that(length(pars$sigma) >= n_samples)
+    pars$sigma <- pars$sigma[seq_len(n_samples)]
 
     pars$beta <- split_dim(pars$beta, 1)
     pars$beta <- lapply(pars$beta, as.vector)
+    assertthat::assert_that(length(pars$beta) >= n_samples)
+    pars$beta <- pars$beta[seq_len(n_samples)]
 
     return(pars)
 }

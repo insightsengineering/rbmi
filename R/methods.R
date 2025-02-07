@@ -52,6 +52,9 @@
 #' bootstrapped datasets. Likewise, for `method_condmean(type = "jackknife")` there will
 #' be `length(unique(data$subjid)) + 1` imputation models and datasets generated. In both cases this is
 #' represented by `n + 1` being displayed in the print message.
+#' In the case that `method_bayes()` is used, and with the `control` argument the number of chains
+#' is set to more than 1, then the `n_samples` samples will be distributed across the chains.
+#' The total number of returned samples will still be `n_samples`.
 #'
 #' The user is able to specify different covariance structures using the the `covariance`
 #' argument. Currently supported structures include:

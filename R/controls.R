@@ -28,11 +28,14 @@
 #' - The `seed` argument is used to set the seed for the MCMC sampler. By default, a random seed
 #' is generated, such that outside invocation of the `set.seed()` call can effectively set the 
 #' seed.
-#' - The additional parameters passed to [rstan::sampling()] must not contain `n_samples` or `iter`.
-#' Instead, the number of samples must be provided directly via the `n_samples` argument of
-#' [method_bayes()]. The `refresh` argument is also not allowed here, instead use the `quiet` argument
-#' directly in [draws()].
-#' 
+#' - The samples are split across the chains, such that each chain produces `n_samples / chains`
+#' (rounded up) samples. The total number of samples that will be returned across all chains is `n_samples`
+#' as specified in [method_bayes()].
+#' - Therefore, the additional parameters passed to [rstan::sampling()] must not contain
+#' `n_samples` or `iter`. Instead, the number of samples must only be provided directly via the 
+#' `n_samples` argument of [method_bayes()]. Similarly, the `refresh` argument is also not allowed 
+#' here, instead use the `quiet` argument directly in [draws()].
+#'
 #' @note For full reproducibility of the imputation results, it is required to use a `set.seed()` call 
 #' before defining the `control` list, and calling the `draws()` function. It is not sufficient to
 #' merely set the `seed` argument in the `control` list.
@@ -47,7 +50,7 @@ control_bayes <- function(
     ...
 ) {
     additional_pars <- names(list(...))
-    
+
     if (any(c("n_samples", "iter") %in% additional_pars)) {
         stop(
             "Instead of providing `n_samples` or `iter` here, please specify the",
@@ -86,9 +89,11 @@ complete_control_bayes <- function(
     assertthat::assert_that(
         assertthat::is.number(control$warmup),
         assertthat::is.number(control$thin),
+        assertthat::is.number(control$chains),
         assertthat::is.number(n_samples)
     )
-    control$iter <- control$warmup + control$thin * n_samples
+    n_samples_per_chain <- ceiling(n_samples / control$chains)
+    control$iter <- control$warmup + control$thin * n_samples_per_chain
     if ("refresh" %in% control_pars) {
         stop("`method$control$refresh` must not be specified directly, please use `quiet`")
     }
