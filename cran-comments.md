@@ -1,6 +1,6 @@
 ## Summary of Submission
 
-This version of the package fixes an issue that was causing the unit tests to crash on CRAN. The issue was due to the package not correctly clearing out the cache of previously compiled `rstan` models.
+This version of the package removes references to native pipes `|>` and lambda functions `\(x)` to ensure the package is backwards compatible with older versions of R. This update also exposes the control options for `rstan` allowing the user greater control over the MCMC computations.
 
 
 ## R CMD check results
@@ -20,4 +20,6 @@ The package was tested in the following environments:
 
 ## Downstream dependencies
 
-There are currently no downstream dependencies for this package
+The following revdeps were checked:
+
+- term.rbmi - no issues detected

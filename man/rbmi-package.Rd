@@ -38,6 +38,7 @@ Authors:
 \itemize{
   \item Alessandro Noci \email{alessandro.noci@roche.com}
   \item Isaac Gravestock \email{isaac.gravestock@roche.com}
+  \item Daniel Sabanes Bove \email{daniel.sabanes_bove@rconis.com}
 }
 
 Other contributors:

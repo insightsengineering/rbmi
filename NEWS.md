@@ -1,17 +1,20 @@
 
 
-# rbmi Development Version
+# rbmi 1.4.0
+
+## Breaking Changes
+
+* Deprecated the `burn_in` and `burn_between` arguments in `method_bayes()` in favour of using the `warmup` and `thin` arguments, respectively, in the new `control` list produced by `control_bayes`. This is to align with the `rstan` package. (#477)
+
+## New Features
+
+* Added `control_bayes()` function to allow expert users to specify additional control arguments for the MCMC computations using `rstan`. (#477)
+
+## Bug Fixes
 
 * Fixed bug where `lsmeans(.weights = "proportional_em")` would error if there was only a single categorical variable in the dataset. (#412)
 * Removed native pipes `|>` and lambda functions `\(x)` from code base to ensure package is backwards compatible with older versions of R. (#474)
 
-## Breaking Changes
-
-* Deprecated the `burn_in` and `burn_between` arguments in `method_bayes()` in favour of using the `warmup` and `thin` arguments, respectively, in the new `control` list produced by `control_bayes`. This is to align with the `rstan` package.
-
-## New Features
-
-* Added `control_bayes()` function to allow expert users to specify additional control arguments for the MCMC computations using `rstan`.
 
 # rbmi 1.3.1
 
