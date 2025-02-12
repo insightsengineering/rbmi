@@ -629,7 +629,7 @@ get_stan_model <- function() {
     dir.create(cache_dir, showWarnings = FALSE, recursive = TRUE)
     model_file <- file.path(cache_dir, paste0("MMRM_", get_session_hash(), ".stan"))
 
-    if (!file.exists(model_file)) {
+    if (!file.exists(model_file) | isTRUE(getOption("rbmi.no.cache"))) {
         clear_model_cache()
         file.copy(file_loc, model_file, overwrite = TRUE)
     }

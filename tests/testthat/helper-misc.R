@@ -11,7 +11,11 @@ set_col_names <- function(x, nam) {
 
 f2n <- function(x) as.numeric(x) - 1
 
-
+if (!interactive() && !isTRUE(as.logical(Sys.getenv("NOT_CRAN", unset = "false")))) {
+    options("rbmi.no.cache" = TRUE)
+} else {
+    options("rbmi.no.cache" = FALSE)
+}
 
 
 strip_names <- function(x) {
