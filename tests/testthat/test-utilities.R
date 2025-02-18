@@ -246,11 +246,11 @@ test_that("Stack", {
 test_that("clear_model_cache", {
     td <- tempdir()
     files <- c(
-        file.path(td, "MMRM_123.rds"),
-        file.path(td, "MMRM_123.stan"),
-        file.path(td, "MMRM_456.stan"),
-        file.path(td, "MMRM_456.rds"),
-        file.path(td, "MMRM_456.log")
+        file.path(td, "rbmi_MMRM_123.rds"),
+        file.path(td, "rbmi_MMRM_123.stan"),
+        file.path(td, "rbmi_MMRM_456.stan"),
+        file.path(td, "rbmi_MMRM_456.rds"),
+        file.path(td, "rbmi_MMRM_456.log")
     )
     expect_equal(file.create(files), rep(TRUE, 5))
     clear_model_cache(td)
