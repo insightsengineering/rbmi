@@ -587,7 +587,7 @@ get_session_hash <- function() {
 }
 
 clear_model_cache <- function(cache_dir = getOption("rbmi.cache_dir")) {
-    files <- list.files(cache_dir, pattern = "(MMRM_).*(\\.stan|\\.rds)", full.names = TRUE)
+    files <- list.files(cache_dir, pattern = "(rbmi_MMRM_).*(\\.stan|\\.rds)", full.names = TRUE)
     unlink(files)
 }
 
@@ -627,7 +627,7 @@ get_stan_model <- function() {
     }
     cache_dir <- getOption("rbmi.cache_dir")
     dir.create(cache_dir, showWarnings = FALSE, recursive = TRUE)
-    model_file <- file.path(cache_dir, paste0("MMRM_", get_session_hash(), ".stan"))
+    model_file <- file.path(cache_dir, paste0("rbmi_MMRM_", get_session_hash(), ".stan"))
 
     if (!file.exists(model_file)) {
         clear_model_cache()

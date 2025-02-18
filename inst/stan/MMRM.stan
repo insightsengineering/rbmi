@@ -30,7 +30,7 @@ data {
     int<lower=1> P;                         // number of covariates (number of columns of design matrix)
     int<lower=1> G;                         // number of Sigma Groups
     int<lower=1> n_visit;                   // number of visits
-    int<lower=1> n_pat;                     // number of pat groups (# missingness patterns * groups)
+    int<lower=1> n_pat;                     // number of pat groups (number of missingness patterns * groups)
     
     array[n_pat] int<lower=1> pat_G;              // Index for which Sigma the pat group should use
     array[n_pat] int<lower=1> pat_n_pt;           // number of patients in each pat group
