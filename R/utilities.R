@@ -689,7 +689,7 @@ get_stan_model <- function() {
 set_options <- function() {
 
     cache_dir <- Sys.getenv("RBMI_CACHE_DIR", unset = tools::R_user_dir("rbmi", which = "cache"))
-    enable_cache <- Sys.getenv("RBMI_ENABLE_CACHE", unset = "TRUE") == "TRUE"
+    enable_cache <- isTRUE(as.logical(Sys.getenv("RBMI_ENABLE_CACHE", unset = "TRUE")))
 
     current_opts <- names(options())
     rbmi_opts <- list(
