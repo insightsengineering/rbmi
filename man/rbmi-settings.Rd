@@ -30,6 +30,16 @@ to set the cache directory to a unique folder for each R session e.g.
 \if{html}{\out{<div class="sourceCode">}}\preformatted{options("rbmi.cache_dir" = tempdir(check = TRUE))
 }\if{html}{\out{</div>}}
 }
+
+\subsection{\code{rbmi.enable_cache}}{
+
+Default = \code{TRUE}
+
+If \code{TRUE} then the package will attempt to cache compiled Stan models to the
+\code{rbmi.cache_dir} directory. If \code{FALSE} then the package will re-compile the
+Stan model each time it is required. If the environment variable \code{RBMI_ENABLE_CACHE}
+has been set this will be used as the default value.
+}
 }
 \examples{
 \dontrun{

@@ -587,7 +587,7 @@ get_session_hash <- function() {
 }
 
 clear_model_cache <- function(cache_dir = getOption("rbmi.cache_dir")) {
-    files <- list.files(cache_dir, pattern = "(MMRM_).*(\\.stan|\\.rds)", full.names = TRUE)
+    files <- list.files(cache_dir, pattern = "(rbmi_MMRM_).*(\\.stan|\\.rds)", full.names = TRUE)
     unlink(files)
 }
 
@@ -627,7 +627,7 @@ get_stan_model <- function() {
     }
     cache_dir <- getOption("rbmi.cache_dir")
     dir.create(cache_dir, showWarnings = FALSE, recursive = TRUE)
-    model_file <- file.path(cache_dir, paste0("MMRM_", get_session_hash(), ".stan"))
+    model_file <- file.path(cache_dir, paste0("rbmi_MMRM_", get_session_hash(), ".stan"))
 
     if (!file.exists(model_file)) {
         clear_model_cache()
@@ -636,7 +636,7 @@ get_stan_model <- function() {
 
     model <- rstan::stan_model(
         file = model_file,
-        auto_write = TRUE,
+        auto_write = getOption("rbmi.enable_cache"),
         model_name = "rbmi_mmrm"
     )
 
@@ -671,7 +671,15 @@ get_stan_model <- function() {
 #' ```
 #' options("rbmi.cache_dir" = tempdir(check = TRUE))
 #' ```
-#'
+#' 
+#' ## `rbmi.enable_cache`
+#' 
+#' Default = `TRUE`
+#' 
+#' If `TRUE` then the package will attempt to cache compiled Stan models to the
+#' `rbmi.cache_dir` directory. If `FALSE` then the package will re-compile the
+#' Stan model each time it is required. If the environment variable `RBMI_ENABLE_CACHE`
+#' has been set this will be used as the default value.
 #'
 #' @examples
 #' \dontrun{
@@ -680,15 +688,13 @@ get_stan_model <- function() {
 #' @name rbmi-settings
 set_options <- function() {
 
-    cache_dir <- Sys.getenv("RBMI_CACHE_DIR")
-
-    if (cache_dir == "" || is.null(cache_dir)) {
-        cache_dir <- tools::R_user_dir("rbmi", which = "cache")
-    }
+    cache_dir <- Sys.getenv("RBMI_CACHE_DIR", unset = tools::R_user_dir("rbmi", which = "cache"))
+    enable_cache <- isTRUE(as.logical(Sys.getenv("RBMI_ENABLE_CACHE", unset = "TRUE")))
 
     current_opts <- names(options())
     rbmi_opts <- list(
-        rbmi.cache_dir = cache_dir
+        rbmi.cache_dir = cache_dir,
+        rbmi.enable_cache = enable_cache
     )
     for (opt in names(rbmi_opts)) {
         if (!opt %in% current_opts) {
