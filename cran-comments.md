@@ -1,7 +1,8 @@
 ## Summary of Submission
 
-This version of the package removes references to native pipes `|>` and lambda functions `\(x)` to ensure the package is backwards compatible with older versions of R. This update also exposes the control options for `rstan` allowing the user greater control over the MCMC computations.
+This version of the package fixes the error of the Stan code failing to compile on machines using the C23 standard. The issue was the inclusion of a `#` character within in a comment which the compiler interprets as a preprocessor directive. Removing the `#` character resolved this issue. 
 
+Also within this release we have changed the maintainer.
 
 ## R CMD check results
 
