@@ -35,6 +35,11 @@ test_that("Results are Reproducible", {
         vars2 <- vars
         vars2$covariates <- c("age", "sex")
 
+        # Force the resolution of any random draws within the method object
+        # so that they don't advance the seed when called within `draws()`
+        # see #482 for further details
+        force(method)
+
         set.seed(984)
         drawobj <- suppressWarnings({
             draws(
