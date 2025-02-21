@@ -9,8 +9,8 @@
 <title>rbmi settings — rbmi-settings • rbmi</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="../deps/MathJax-3.2.2/tex-chtml.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="rbmi settings — rbmi-settings">
 <meta name="description" content='Define settings that modify the behaviour of the rbmi package
 Each of the following are the name of options that can be set via:
@@ -30,6 +30,17 @@ same cache folder at the same time. To avoid this potential issue it is recommen
 to set the cache directory to a unique folder for each R session e.g.
 options("rbmi.cache_dir" = tempdir(check = TRUE))
 
+
+
+
+rbmi.enable_cache
+
+
+Default = TRUE
+If TRUE then the package will attempt to cache compiled Stan models to the
+rbmi.cache_dir directory. If FALSE then the package will re-compile the
+Stan model each time it is required. If the environment variable RBMI_ENABLE_CACHE
+has been set this will be used as the default value.
 
 '>
 <meta property="og:description" content='Define settings that modify the behaviour of the rbmi package
@@ -51,6 +62,17 @@ to set the cache directory to a unique folder for each R session e.g.
 options("rbmi.cache_dir" = tempdir(check = TRUE))
 
 
+
+
+rbmi.enable_cache
+
+
+Default = TRUE
+If TRUE then the package will attempt to cache compiled Stan models to the
+rbmi.cache_dir directory. If FALSE then the package will re-compile the
+Stan model each time it is required. If the environment variable RBMI_ENABLE_CACHE
+has been set this will be used as the default value.
+
 '>
 <meta property="og:image" content="/logo.png">
 </head>
@@ -62,7 +84,7 @@ options("rbmi.cache_dir" = tempdir(check = TRUE))
 
     <a class="navbar-brand me-2" href="../index.html">rbmi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,6 +111,7 @@ options("rbmi.cache_dir" = tempdir(check = TRUE))
     <div class="dropdown-menu" aria-labelledby="dropdown-versions">
     <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
+<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.4.1">v1.4.1</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.4.0">v1.4.0</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.3.1">v1.3.1</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.3.0">v1.3.0</a>
@@ -110,7 +133,7 @@ options("rbmi.cache_dir" = tempdir(check = TRUE))
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>rbmi settings</h1>
-      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/v1.4.0/R/utilities.R" class="external-link"><code>R/utilities.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/v1.4.1/R/utilities.R" class="external-link"><code>R/utilities.R</code></a></small>
       <div class="d-none name"><code>rbmi-settings.Rd</code></div>
     </div>
 
@@ -144,6 +167,19 @@ to set the cache directory to a unique folder for each R session e.g.</p>
 </div>
 </div>
 
+<div class="section">
+<h3 id="rbmi-enable-cache">
+<code>rbmi.enable_cache</code><a class="anchor" aria-label="anchor" href="#rbmi-enable-cache"></a>
+</h3>
+
+
+<p>Default = <code>TRUE</code></p>
+<p>If <code>TRUE</code> then the package will attempt to cache compiled Stan models to the
+<code>rbmi.cache_dir</code> directory. If <code>FALSE</code> then the package will re-compile the
+Stan model each time it is required. If the environment variable <code>RBMI_ENABLE_CACHE</code>
+has been set this will be used as the default value.</p>
+</div>
+
     </div>
 
     <div class="section level2">
@@ -167,7 +203,7 @@ to set the cache directory to a unique folder for each R session e.g.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Craig Gower-Page, Alessandro Noci, Isaac Gravestock, Daniel Sabanes Bove, F. Hoffmann-La Roche AG.</p>
+  <p>Developed by Isaac Gravestock, Craig Gower-Page, Alessandro Noci, Daniel Sabanes Bove, F. Hoffmann-La Roche AG.</p>
 </div>
 
 <div class="pkgdown-footer-right">
