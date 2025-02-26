@@ -1,12 +1,22 @@
 ## Summary of Submission
 
-This version of the package removes references to native pipes `|>` and lambda functions `\(x)` to ensure the package is backwards compatible with older versions of R. This update also exposes the control options for `rstan` allowing the user greater control over the MCMC computations.
+This version of the package fixes the error of the Stan code failing to compile on machines using the C23 standard. The issue was the inclusion of a `#` character within in a comment in the Stan code which the compiler then interpreted as a preprocessor directive. Removing the `#` character resolved this issue. 
 
+Also within this release we have changed the maintainer.
 
 ## R CMD check results
 
-There were no ERRORs, no WARNINGs and no NOTEs.
+```
+Status: 1 NOTE
 
+❯ checking CRAN incoming feasibility ... [7s/39s] NOTE
+  Maintainer: ‘Isaac Gravestock <isaac.gravestock@roche.com>’
+  
+  New maintainer:
+    Isaac Gravestock <isaac.gravestock@roche.com>
+  Old maintainer(s):
+    Craig Gower-Page <craig.gower-page@roche.com>
+```
 
 ## Test environments
 
@@ -20,6 +30,6 @@ The package was tested in the following environments:
 
 ## Downstream dependencies
 
-The following revdeps were checked:
+The following reverse dependencies were checked:
 
 - term.rbmi - no issues detected

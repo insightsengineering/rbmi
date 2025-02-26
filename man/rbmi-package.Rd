@@ -32,12 +32,12 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Craig Gower-Page \email{craig.gower-page@roche.com}
+\strong{Maintainer}: Isaac Gravestock \email{isaac.gravestock@roche.com}
 
 Authors:
 \itemize{
+  \item Craig Gower-Page \email{craig.gower-page@roche.com}
   \item Alessandro Noci \email{alessandro.noci@roche.com}
-  \item Isaac Gravestock \email{isaac.gravestock@roche.com}
   \item Daniel Sabanes Bove \email{daniel.sabanes_bove@rconis.com}
 }
 
