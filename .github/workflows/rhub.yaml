@@ -62,7 +62,7 @@ jobs:
           job-config: ${{ matrix.config.job-config }}
       - name: install BH
         run: |
-          Rscript -e "if (!requireNamespace("BH")) install.packages('BH', repos = 'https://cloud.r-project.org')"
+          Rscript -e "if (!requireNamespace('BH')) install.packages('BH', repos = 'https://cloud.r-project.org')"
       - uses: r-hub/actions/run-check@v1
         with:
           token: ${{ secrets.RHUB_TOKEN }}
