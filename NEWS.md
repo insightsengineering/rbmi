@@ -1,4 +1,9 @@
 
+# rbmi 1.4.1
+
+* Fixed Stan related bug that caused unit tests to fail on machines compiling with the C23 standard (#481)
+* Fixed bug in unit test that caused false-positive reproducibility errors (#483)
+
 
 # rbmi 1.4.0
 
