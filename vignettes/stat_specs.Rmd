@@ -370,6 +370,20 @@ $$
 $$
 where $\lambda = \frac{(1 + \frac{1}{M})V_B(\hat{\theta})}{V(\hat{\theta})}$ is the fraction of missing information.
 
+### Monte Carlo standard error
+
+The Bayesian approach to multiple imputation yields probabilistic results. The precision of the MC algorithm can be quantified through the MC standard error (MCSE). Such quantification is important for judging the scientific reproducibility of the results, e.g., when computational parameters such as the seed are changed. For the treatment effect estimates $\hat{\theta}$ obtained through Rubin's rule as described above, a closed-form expression for the MCSE exists [@Royston2009]: 
+
+$$
+\text{MCSE}(\hat{\theta}) = \sqrt{V_B(\hat{\theta}) / M}
+$$
+
+However, since decisions are generally based not just on the treatment effect estimate but also on the p-value, it is important to calculate the corresponding MCSE. No closed-form expression exists for the MCSE of the p-value, but as argued by @Royston2009, the Jackknife method could be used to estimate the MCSE. Let $\theta$ be the parameter of interest (e.g. the p-value) and let $\hat{\theta}_{(-m)}$ be the pooled treatment effect estimate from the $M-1$ imputed datasets after removing the $m$-th imputed dataset. The MCSE of the overall estimate $\hat{\theta}$ is then given by:
+
+$$
+\text{MCSE}(\hat{\theta}) = \sqrt{\frac{1}{M(M-1)} \sum_{m=1}^{M} (\hat{\theta}_{(-m)} - \hat{\theta})^2}
+$$
+
 ## Bootstrap and jackknife inference for conditional mean imputation {#sec:bootInference}
 
 ### Point estimate of the treatment effect

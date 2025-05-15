@@ -1,677 +1,426 @@
 <!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
-<html>
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
 
-<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta charset="utf-8" />
-<meta name="generator" content="pandoc" />
-<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
-
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-
-<meta name="author" content="Alessandro Noci, Craig Gower-Page, and Marcel Wolbers" />
-
+<meta name="author" content="Alessandro Noci, Craig Gower-Page, and Marcel Wolbers">
 
 <title>rbmi: Statistical Specifications</title>
-
-
-<style type="text/css">
+<style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-span.underline{text-decoration: underline;}
-div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
-</style>
-
-
-
-
-
-
-<style type="text/css">
-
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
 div.csl-bib-body { }
 div.csl-entry {
-clear: both;
-margin-bottom: 0em;
+  clear: both;
+  margin-bottom: 0em;
 }
-.hanging div.csl-entry {
-margin-left:2em;
-text-indent:-2em;
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
 }
 div.csl-left-margin {
-min-width:2em;
-float:left;
+  min-width:2em;
+  float:left;
 }
 div.csl-right-inline {
-margin-left:2em;
-padding-left:1em;
+  margin-left:2em;
+  padding-left:1em;
 }
 div.csl-indent {
-margin-left: 2em;
-}
-</style>
-
-<style type="text/css">body {
-background-color: #fff;
-margin: 1em auto;
-max-width: 700px;
-overflow: visible;
-padding-left: 2em;
-padding-right: 2em;
-font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-font-size: 14px;
-line-height: 1.35;
-}
-#TOC {
-clear: both;
-margin: 0 0 10px 10px;
-padding: 4px;
-width: 400px;
-border: 1px solid #CCCCCC;
-border-radius: 5px;
-background-color: #f6f6f6;
-font-size: 13px;
-line-height: 1.3;
-}
-#TOC .toctitle {
-font-weight: bold;
-font-size: 15px;
-margin-left: 5px;
-}
-#TOC ul {
-padding-left: 40px;
-margin-left: -1.5em;
-margin-top: 5px;
-margin-bottom: 5px;
-}
-#TOC ul ul {
-margin-left: -2em;
-}
-#TOC li {
-line-height: 16px;
-}
-table {
-margin: 1em auto;
-border-width: 1px;
-border-color: #DDDDDD;
-border-style: outset;
-border-collapse: collapse;
-}
-table th {
-border-width: 2px;
-padding: 5px;
-border-style: inset;
-}
-table td {
-border-width: 1px;
-border-style: inset;
-line-height: 18px;
-padding: 5px 5px;
-}
-table, table th, table td {
-border-left-style: none;
-border-right-style: none;
-}
-table thead, table tr.even {
-background-color: #f7f7f7;
-}
-p {
-margin: 0.5em 0;
-}
-blockquote {
-background-color: #f6f6f6;
-padding: 0.25em 0.75em;
-}
-hr {
-border-style: solid;
-border: none;
-border-top: 1px solid #777;
-margin: 28px 0;
-}
-dl {
-margin-left: 0;
-}
-dl dd {
-margin-bottom: 13px;
-margin-left: 13px;
-}
-dl dt {
-font-weight: bold;
-}
-ul {
-margin-top: 0;
-}
-ul li {
-list-style: circle outside;
-}
-ul ul {
-margin-bottom: 0;
-}
-pre, code {
-background-color: #f7f7f7;
-border-radius: 3px;
-color: #333;
-white-space: pre-wrap; 
-}
-pre {
-border-radius: 3px;
-margin: 5px 0px 10px 0px;
-padding: 10px;
-}
-pre:not([class]) {
-background-color: #f7f7f7;
-}
-code {
-font-family: Consolas, Monaco, 'Courier New', monospace;
-font-size: 85%;
-}
-p > code, li > code {
-padding: 2px 0px;
-}
-div.figure {
-text-align: center;
-}
-img {
-background-color: #FFFFFF;
-padding: 2px;
-border: 1px solid #DDDDDD;
-border-radius: 3px;
-border: 1px solid #CCCCCC;
-margin: 0 5px;
-}
-h1 {
-margin-top: 0;
-font-size: 35px;
-line-height: 40px;
-}
-h2 {
-border-bottom: 4px solid #f7f7f7;
-padding-top: 10px;
-padding-bottom: 2px;
-font-size: 145%;
-}
-h3 {
-border-bottom: 2px solid #f7f7f7;
-padding-top: 10px;
-font-size: 120%;
-}
-h4 {
-border-bottom: 1px solid #f7f7f7;
-margin-left: 8px;
-font-size: 105%;
-}
-h5, h6 {
-border-bottom: 1px solid #ccc;
-font-size: 105%;
-}
-a {
-color: #0033dd;
-text-decoration: none;
-}
-a:hover {
-color: #6666ff; }
-a:visited {
-color: #800080; }
-a:visited:hover {
-color: #BB00BB; }
-a[href^="http:"] {
-text-decoration: underline; }
-a[href^="https:"] {
-text-decoration: underline; }
-
-code > span.kw { color: #555; font-weight: bold; } 
-code > span.dt { color: #902000; } 
-code > span.dv { color: #40a070; } 
-code > span.bn { color: #d14; } 
-code > span.fl { color: #d14; } 
-code > span.ch { color: #d14; } 
-code > span.st { color: #d14; } 
-code > span.co { color: #888888; font-style: italic; } 
-code > span.ot { color: #007020; } 
-code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; } 
-code > span.er { color: #a61717; background-color: #e3d2d2; } 
-</style>
+  margin-left: 2em;
+}</style>
 
 
+<script src="stat_specs_files/libs/clipboard/clipboard.min.js"></script>
+<script src="stat_specs_files/libs/quarto-html/quarto.js"></script>
+<script src="stat_specs_files/libs/quarto-html/popper.min.js"></script>
+<script src="stat_specs_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="stat_specs_files/libs/quarto-html/anchor.min.js"></script>
+<link href="stat_specs_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="stat_specs_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="stat_specs_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="stat_specs_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="stat_specs_files/libs/bootstrap/bootstrap-2be0f3dbad3195d1673f471184f1c73d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
-<body>
+<body class="fullcontent">
 
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
 
+<main class="content" id="quarto-document-content">
 
-
-<h1 class="title toc-ignore">rbmi: Statistical Specifications</h1>
-<h4 class="author">Alessandro Noci, Craig Gower-Page, and Marcel Wolbers</h4>
-
-
-<div id="TOC">
-<ul>
-<li><a href="#scope-of-this-document" id="toc-scope-of-this-document"><span class="toc-section-number">1</span> Scope of this document</a></li>
-<li><a href="#sec:intro" id="toc-sec:intro"><span class="toc-section-number">2</span> Introduction to estimands and estimation methods</a>
-<ul>
-<li><a href="#estimands" id="toc-estimands"><span class="toc-section-number">2.1</span> Estimands</a></li>
-<li><a href="#alignment-between-the-estimand-and-the-estimation-method" id="toc-alignment-between-the-estimand-and-the-estimation-method"><span class="toc-section-number">2.2</span> Alignment between the estimand and the estimation method</a>
-<ul>
-<li><a href="#missing-data-prior-to-ices" id="toc-missing-data-prior-to-ices"><span class="toc-section-number">2.2.1</span> Missing data prior to ICEs</a></li>
-<li><a href="#implementation-of-the-hypothetical-strategy" id="toc-implementation-of-the-hypothetical-strategy"><span class="toc-section-number">2.2.2</span> Implementation of the hypothetical strategy</a></li>
-<li><a href="#implementation-of-the-treatment-policy-strategy" id="toc-implementation-of-the-treatment-policy-strategy"><span class="toc-section-number">2.2.3</span> Implementation of the treatment policy strategy</a></li>
-<li><a href="#implementation-of-the-composite-strategy" id="toc-implementation-of-the-composite-strategy"><span class="toc-section-number">2.2.4</span> Implementation of the composite strategy</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#sec:statsMethods" id="toc-sec:statsMethods"><span class="toc-section-number">3</span> Statistical methodology</a>
-<ul>
-<li><a href="#sec:methodsOverview" id="toc-sec:methodsOverview"><span class="toc-section-number">3.1</span> Overview of the imputation procedure</a>
-<ul>
-<li><a href="#conventional-mi" id="toc-conventional-mi"><span class="toc-section-number">3.1.1</span> Conventional MI</a></li>
-<li><a href="#conditional-mean-imputation" id="toc-conditional-mean-imputation"><span class="toc-section-number">3.1.2</span> Conditional mean imputation</a></li>
-<li><a href="#bootstrapped-mi" id="toc-bootstrapped-mi"><span class="toc-section-number">3.1.3</span> Bootstrapped MI</a></li>
-</ul></li>
-<li><a href="#setting-notation-and-missing-data-assumptions" id="toc-setting-notation-and-missing-data-assumptions"><span class="toc-section-number">3.2</span> Setting, notation, and missing data assumptions</a></li>
-<li><a href="#sec:imputationModel" id="toc-sec:imputationModel"><span class="toc-section-number">3.3</span> The base imputation model</a>
-<ul>
-<li><a href="#sec:imputationModelSpecs" id="toc-sec:imputationModelSpecs"><span class="toc-section-number">3.3.1</span> Included data and model specification</a></li>
-<li><a href="#sec:imputationModelREML" id="toc-sec:imputationModelREML"><span class="toc-section-number">3.3.2</span> Restricted maximum likelihood estimation (REML)</a></li>
-<li><a href="#sec:imputationModelBayes" id="toc-sec:imputationModelBayes"><span class="toc-section-number">3.3.3</span> Bayesian model fitting</a></li>
-<li><a href="#sec:imputationModelBoot" id="toc-sec:imputationModelBoot"><span class="toc-section-number">3.3.4</span> Approximate Bayesian posterior draws via the bootstrap</a></li>
-</ul></li>
-<li><a href="#sec:imputationStep" id="toc-sec:imputationStep"><span class="toc-section-number">3.4</span> Imputation step</a>
-<ul>
-<li><a href="#sec:imputatioMNAR" id="toc-sec:imputatioMNAR"><span class="toc-section-number">3.4.1</span> Marginal imputation distribution for a subject - MAR case</a></li>
-<li><a href="#sec:imputationRefBased" id="toc-sec:imputationRefBased"><span class="toc-section-number">3.4.2</span> Marginal imputation distribution for a subject - reference-based imputation methods</a></li>
-<li><a href="#sec:imputationRandomConditionalMean" id="toc-sec:imputationRandomConditionalMean"><span class="toc-section-number">3.4.3</span> Imputation of missing outcome data</a></li>
-</ul></li>
-<li><a href="#sec:deltaAdjustment" id="toc-sec:deltaAdjustment"><span class="toc-section-number">3.5</span> <span class="math inline">\(\delta\)</span>-adjustment</a></li>
-<li><a href="#sec:analysis" id="toc-sec:analysis"><span class="toc-section-number">3.6</span> Analysis step</a></li>
-<li><a href="#sec:pooling" id="toc-sec:pooling"><span class="toc-section-number">3.7</span> Pooling step for inference of (approximate) Bayesian MI and Rubin’s rules</a></li>
-<li><a href="#sec:bootInference" id="toc-sec:bootInference"><span class="toc-section-number">3.8</span> Bootstrap and jackknife inference for conditional mean imputation</a>
-<ul>
-<li><a href="#point-estimate-of-the-treatment-effect" id="toc-point-estimate-of-the-treatment-effect"><span class="toc-section-number">3.8.1</span> Point estimate of the treatment effect</a></li>
-<li><a href="#jackknife-standard-errors-confidence-intervals-ci-and-tests-for-the-treatment-effect" id="toc-jackknife-standard-errors-confidence-intervals-ci-and-tests-for-the-treatment-effect"><span class="toc-section-number">3.8.2</span> Jackknife standard errors, confidence intervals (CI) and tests for the treatment effect</a></li>
-<li><a href="#bootstrap-standard-errors-confidence-intervals-ci-and-tests-for-the-treatment-effect" id="toc-bootstrap-standard-errors-confidence-intervals-ci-and-tests-for-the-treatment-effect"><span class="toc-section-number">3.8.3</span> Bootstrap standard errors, confidence intervals (CI) and tests for the treatment effect</a></li>
-</ul></li>
-<li><a href="#sec:poolbmlmi" id="toc-sec:poolbmlmi"><span class="toc-section-number">3.9</span> Pooling step for inference of the bootstrapped MI methods</a></li>
-<li><a href="#sec:methodsComparison" id="toc-sec:methodsComparison"><span class="toc-section-number">3.10</span> Comparison between the implemented approaches</a>
-<ul>
-<li><a href="#treatment-effect-estimation" id="toc-treatment-effect-estimation"><span class="toc-section-number">3.10.1</span> Treatment effect estimation</a></li>
-<li><a href="#standard-errors-of-the-treatment-effect" id="toc-standard-errors-of-the-treatment-effect"><span class="toc-section-number">3.10.2</span> Standard errors of the treatment effect</a></li>
-<li><a href="#computational-complexity" id="toc-computational-complexity"><span class="toc-section-number">3.10.3</span> Computational complexity</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#sec:rbmiFunctions" id="toc-sec:rbmiFunctions"><span class="toc-section-number">4</span> Mapping of statistical methods to <code>rbmi</code> functions</a></li>
-<li><a href="#sec:otherSoftware" id="toc-sec:otherSoftware"><span class="toc-section-number">5</span> Comparison to other software implementations</a></li>
-<li><a href="#references" id="toc-references">References</a></li>
-</ul>
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">rbmi: Statistical Specifications</h1>
 </div>
 
-<div id="scope-of-this-document" class="section level1" number="1">
-<h1><span class="header-section-number">1</span> Scope of this document</h1>
-<p>This document describes the statistical methods implemented in the <code>rbmi</code> R package for standard and reference-based multiple imputation of continuous longitudinal outcomes.
-The package implements three classes of multiple imputation (MI) approaches:</p>
-<ol style="list-style-type: decimal">
-<li><p>Conventional MI methods based on Bayesian (or approximate Bayesian) posterior draws of model parameters combined with Rubin’s rules to make inferences as described in <span class="citation">Carpenter, Roger, and Kenward (<a href="#ref-CarpenterEtAl2013">2013</a>)</span> and <span class="citation">Cro et al. (<a href="#ref-CroEtAlTutorial2020">2020</a>)</span>.</p></li>
-<li><p>Conditional mean imputation methods combined with re-sampling techniques as described in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>.</p></li>
-<li><p>Bootstrapped MI methods as described in <span class="citation">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021">2021</a>)</span>.</p></li>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Alessandro Noci, Craig Gower-Page, and Marcel Wolbers </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="scope-of-this-document" class="level1">
+<h1>Scope of this document</h1>
+<p>This document describes the statistical methods implemented in the <code>rbmi</code> R package for standard and reference-based multiple imputation of continuous longitudinal outcomes. The package implements three classes of multiple imputation (MI) approaches:</p>
+<ol type="1">
+<li><p>Conventional MI methods based on Bayesian (or approximate Bayesian) posterior draws of model parameters combined with Rubin’s rules to make inferences as described in <span class="citation" data-cites="CarpenterEtAl2013">Carpenter, Roger, and Kenward (<a href="#ref-CarpenterEtAl2013" role="doc-biblioref">2013</a>)</span> and <span class="citation" data-cites="CroEtAlTutorial2020">Cro et al. (<a href="#ref-CroEtAlTutorial2020" role="doc-biblioref">2020</a>)</span>.</p></li>
+<li><p>Conditional mean imputation methods combined with re-sampling techniques as described in <span class="citation" data-cites="Wolbers2021">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span>.</p></li>
+<li><p>Bootstrapped MI methods as described in <span class="citation" data-cites="vonHippelBartlett2021">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021" role="doc-biblioref">2021</a>)</span>.</p></li>
 </ol>
-<p>The document is structured as follows: we first provide an informal introduction to estimands and corresponding treatment effect estimation based on MI (section <a href="#sec:intro">2</a>). The core of this document consists of section <a href="#sec:statsMethods">3</a> which describes the statistical methodology in detail and also contains a comparison of the implemented approaches (section <a href="#sec:methodsComparison">3.10</a>). The link between theory and the functions included in package <code>rbmi</code> is described in section <a href="#sec:rbmiFunctions">4</a>. We conclude with a comparison of our package to some alternative software implementations of reference-based imputation methods (section <a href="#sec:otherSoftware">5</a>).</p>
-</div>
-<div id="sec:intro" class="section level1" number="2">
-<h1><span class="header-section-number">2</span> Introduction to estimands and estimation methods</h1>
-<div id="estimands" class="section level2" number="2.1">
-<h2><span class="header-section-number">2.1</span> Estimands</h2>
-<p>The ICH E9(R1) addendum on estimands and sensitivity analyses describes a systematic approach to ensure alignment among clinical trial objectives, trial execution/conduct, statistical analyses, and interpretation of results (<span class="citation">ICH E9 working group (<a href="#ref-iche9r1">2019</a>)</span>).
-As per the addendum, an estimand is a precise description of the treatment effect reflecting the clinical question posed by the trial objective which summarizes at a population-level what the outcomes would be in the same patients under different
-treatment conditions being compared.
-One important attribute of an estimand is a list of possible intercurrent events (ICEs), i.e. of events occurring after treatment initiation that affect either the interpretation or the existence of the measurements associated with the clinical question of interest, and the definition of appropriate strategies to deal with ICEs. The three most relevant strategies for the purpose of this document are the hypothetical strategy, the treatment policy strategy, and the composite strategy. For the hypothetical strategy, a scenario is envisaged in which the ICE would not occur. Under this scenario, endpoint values after the ICE are not directly observable and treated using models for missing data.
-For the treatment policy strategy, the treatment effect in the presence of the ICEs is targeted and analyses are based on the observed outcomes regardless whether the subject had an ICE or not.
-For the composite strategy, the ICE itself is included as a component of the endpoint.</p>
-</div>
-<div id="alignment-between-the-estimand-and-the-estimation-method" class="section level2" number="2.2">
-<h2><span class="header-section-number">2.2</span> Alignment between the estimand and the estimation method</h2>
-<p>The ICH E9(R1) addendum distinguishes between ICEs and missing data (<span class="citation">ICH E9 working group (<a href="#ref-iche9r1">2019</a>)</span>). Whereas ICEs such as treatment discontinuations reflect clinical practice, the amount of missing data can be minimized in the conduct of a clinical trial. However, there are many connections between missing data and ICEs. For example, it is often difficult to retain subjects in a clinical trial after treatment discontinuation and a subject’s dropout from the trial leads to missing data. As another example, outcome values after ICEs addressed using a hypothetical strateg are not directly observable under the hypothetical scenario. Consequently, any observed outcome values after such ICEs are typically discarded and treated as missing data.</p>
-<p>The addendum proposes that estimation methods to address the problem presented by missing data should be selected to align with the estimand. A recent overview of methods to align the estimator with the estimand is <span class="citation">Mallinckrodt et al. (<a href="#ref-Mallinckrodt2020">2020</a>)</span>. A short introduction on estimation methods for studies with longitudinal endpoints can also be found in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>. One prominent statistical method for this purpose is multiple imputation (MI), which is the target of the <code>rbmi</code> package.</p>
-<div id="missing-data-prior-to-ices" class="section level3" number="2.2.1">
-<h3><span class="header-section-number">2.2.1</span> Missing data prior to ICEs</h3>
+<p>The document is structured as follows: we first provide an informal introduction to estimands and corresponding treatment effect estimation based on MI (section @ref(sec:intro)). The core of this document consists of section @ref(sec:statsMethods) which describes the statistical methodology in detail and also contains a comparison of the implemented approaches (section @ref(sec:methodsComparison)). The link between theory and the functions included in package <code>rbmi</code> is described in section @ref(sec:rbmiFunctions). We conclude with a comparison of our package to some alternative software implementations of reference-based imputation methods (section @ref(sec:otherSoftware)).</p>
+</section>
+<section id="sec:intro" class="level1">
+<h1>Introduction to estimands and estimation methods</h1>
+<section id="estimands" class="level2">
+<h2 class="anchored" data-anchor-id="estimands">Estimands</h2>
+<p>The ICH E9(R1) addendum on estimands and sensitivity analyses describes a systematic approach to ensure alignment among clinical trial objectives, trial execution/conduct, statistical analyses, and interpretation of results (<span class="citation" data-cites="iche9r1">ICH E9 working group (<a href="#ref-iche9r1" role="doc-biblioref">2019</a>)</span>). As per the addendum, an estimand is a precise description of the treatment effect reflecting the clinical question posed by the trial objective which summarizes at a population-level what the outcomes would be in the same patients under different treatment conditions being compared. One important attribute of an estimand is a list of possible intercurrent events (ICEs), i.e.&nbsp;of events occurring after treatment initiation that affect either the interpretation or the existence of the measurements associated with the clinical question of interest, and the definition of appropriate strategies to deal with ICEs. The three most relevant strategies for the purpose of this document are the hypothetical strategy, the treatment policy strategy, and the composite strategy. For the hypothetical strategy, a scenario is envisaged in which the ICE would not occur. Under this scenario, endpoint values after the ICE are not directly observable and treated using models for missing data. For the treatment policy strategy, the treatment effect in the presence of the ICEs is targeted and analyses are based on the observed outcomes regardless whether the subject had an ICE or not. For the composite strategy, the ICE itself is included as a component of the endpoint.</p>
+</section>
+<section id="alignment-between-the-estimand-and-the-estimation-method" class="level2">
+<h2 class="anchored" data-anchor-id="alignment-between-the-estimand-and-the-estimation-method">Alignment between the estimand and the estimation method</h2>
+<p>The ICH E9(R1) addendum distinguishes between ICEs and missing data (<span class="citation" data-cites="iche9r1">ICH E9 working group (<a href="#ref-iche9r1" role="doc-biblioref">2019</a>)</span>). Whereas ICEs such as treatment discontinuations reflect clinical practice, the amount of missing data can be minimized in the conduct of a clinical trial. However, there are many connections between missing data and ICEs. For example, it is often difficult to retain subjects in a clinical trial after treatment discontinuation and a subject’s dropout from the trial leads to missing data. As another example, outcome values after ICEs addressed using a hypothetical strateg are not directly observable under the hypothetical scenario. Consequently, any observed outcome values after such ICEs are typically discarded and treated as missing data.</p>
+<p>The addendum proposes that estimation methods to address the problem presented by missing data should be selected to align with the estimand. A recent overview of methods to align the estimator with the estimand is <span class="citation" data-cites="Mallinckrodt2020">Mallinckrodt et al. (<a href="#ref-Mallinckrodt2020" role="doc-biblioref">2020</a>)</span>. A short introduction on estimation methods for studies with longitudinal endpoints can also be found in <span class="citation" data-cites="Wolbers2021">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span>. One prominent statistical method for this purpose is multiple imputation (MI), which is the target of the <code>rbmi</code> package.</p>
+<section id="missing-data-prior-to-ices" class="level3">
+<h3 class="anchored" data-anchor-id="missing-data-prior-to-ices">Missing data prior to ICEs</h3>
 <p>Missing data may occur in subjects without an ICE or prior to the occurrence of an ICE. As such missing outcomes are not associated with an ICE, it is often plausible to impute them under a missing-at-random (MAR) assumption using a standard MMRM imputation model of the longitudinal outcomes. Informally, MAR occurs if the missing data can be fully accounted for by the baseline variables included in the model and the observed longitudinal outcomes, and if the model is correctly specified.</p>
-</div>
-<div id="implementation-of-the-hypothetical-strategy" class="section level3" number="2.2.2">
-<h3><span class="header-section-number">2.2.2</span> Implementation of the hypothetical strategy</h3>
-<p>The MAR imputation model described above is often also a good starting point for imputing data after an ICE handled using a hypothetical strategy (<span class="citation">Mallinckrodt et al. (<a href="#ref-Mallinckrodt2020">2020</a>)</span>).
-Informally, this assumes that unobserved values after the ICE would have been similar to the observed data from subjects who did not have the ICE and remained under follow-up.
-However, in some situations, it may be more reasonable to assume that missingness is “informative” and indicates a systematically better or worse outcome than in observed subjects. In such situations, MNAR imputation with a <span class="math inline">\(\delta\)</span>-adjustment could be explored as a sensitivity analysis. <span class="math inline">\(\delta\)</span>-adjustments add a fixed or random quantity to the imputations in order to make the imputed outcomes systematically worse or better than those observed as described in <span class="citation">Cro et al. (<a href="#ref-CroEtAlTutorial2020">2020</a>)</span>. In <code>rbmi</code> only fixed <span class="math inline">\(\delta\)</span>-adjustments are implemented.</p>
-</div>
-<div id="implementation-of-the-treatment-policy-strategy" class="section level3" number="2.2.3">
-<h3><span class="header-section-number">2.2.3</span> Implementation of the treatment policy strategy</h3>
-<p>Ideally, data collection continues after an ICE handled with a treatment policy strategy and no missing data arises.
-Indeed, such post-ICE data are increasingly systematically collected in RCTs.
-However, despite best efforts, missing data after an ICE such as study treatment discontinuation may still occur because the subject drops out from the study after discontinuation. It is difficult to give definite recommendations regarding the implementation of the treatment policy strategy in the presence of missing data at this stage because the optimal method is highly context dependent and a topic of ongoing statistical research.</p>
-<p>For ICEs which are thought to have a negligible effect on efficacy outcomes, standard MAR-based imputation which ignores whether an outcome is observed pre- or post-ICE may be appropriate.
-In contrast, an ICE such as treatment discontinuation may be expected to have a more substantial impact on efficacy outcomes. In such settings, the MAR assumption may still be plausible after conditioning on the subject’s time-varying treatment status (<span class="citation">Guizzaro et al. (<a href="#ref-Guizzaro2021">2021</a>)</span>). In this case, one option is to impute missing post-discontinuation data based on subjects who also discontinued treatment but continued to be followed up. Another option which may require somewhat less post-discontinuation data is to include all subjects in the imputation procedure but to model post-discontinuation data by using time-varying treatment status indicators (<span class="citation">Guizzaro et al. (<a href="#ref-Guizzaro2021">2021</a>)</span>, <span class="citation">Polverejan and Dragalin (<a href="#ref-PolverejanDragalin2020">2020</a>)</span>, <span class="citation">Noci et al. (<a href="#ref-Noci2021">2023</a>)</span>, <span class="citation">Drury et al. (<a href="#ref-Drury2024">2024</a>)</span>, <span class="citation">Bell et al. (<a href="#ref-Bell2024">2024</a>)</span>). In this approach, post-ICE outcomes are included in every step of the analysis, including in the fitting of the imputation model. It assumes that ICEs may impact post-ICE outcomes but that otherwise missingness is non-informative. The approach also assumes that the time-varying covariates do not contain missing values, deviations in outcomes after the ICE are correctly modeled by these time-varying covariates, and that sufficient post-ICE data are available to inform the regression coefficients of the time-varying covariates.
-The resulting imputation models are called “retrieved dropout models” in the statistical literature. These models tend to have less bias than alternative analysis approaches based on imputation under a basic MAR assumption or a reference-based missing data assumption. However, retrieved dropout models have been associated with inflated standard errors of associated treatment effect estimators which has a detrimental effect on study power. In particular, it has been observed that once the post-ICE observation percentages falls below 50%, the power loss can be quite dramatic <span class="citation">(<a href="#ref-Bell2024">Bell et al. 2024</a>)</span>. We illustrate the implementation of retrieved dropout models in the vignette “Implementation of retrieved-dropout models using rbmi” (<code>vignette(topic = &quot;retrieved_dropout&quot;, package = &quot;rbmi&quot;)</code>).</p>
-<p>In some trial settings, only few subjects discontinue the randomized treatment. In other settings, treatment discontinuation rates are higher but it is difficult to retain subjects in the trial after treatment discontinuation leading to sparse data collection after treatment discontinuation. In both settings, the amount of available data after treatment discontinuation may be insufficient to inform an imputation model which explicitly models post-discontinuation data. Depending on the disease area and the anticipated mechanism of action of the intervention, it may be plausible to assume that subjects in the intervention group behave similarly to subjects in the control group after the ICE treatment discontinuation. In this case, reference-based imputation methods are an option (<span class="citation">Mallinckrodt et al. (<a href="#ref-Mallinckrodt2020">2020</a>)</span>). Reference-based imputation methods formalize the idea to impute missing data in the intervention group based on data from a control or reference group. For a general description and review of reference-based imputation methods, we refer to <span class="citation">Carpenter, Roger, and Kenward (<a href="#ref-CarpenterEtAl2013">2013</a>)</span>, <span class="citation">Cro et al. (<a href="#ref-CroEtAlTutorial2020">2020</a>)</span>, <span class="citation">I. White, Royes, and Best (<a href="#ref-White2020causal">2020</a>)</span> and <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>. For a technical description of the implemented statistical methodology for reference-based imputation, we refer to section <a href="#sec:statsMethods">3</a> (in particular section <a href="#sec:imputationStep">3.4</a>).</p>
-</div>
-<div id="implementation-of-the-composite-strategy" class="section level3" number="2.2.4">
-<h3><span class="header-section-number">2.2.4</span> Implementation of the composite strategy</h3>
-<p>The composite strategy is typically applied to binary or time-to-event outcomes but it can also be used for continuous outcomes by ascribing a suitably unfavorable value to patients who experience ICEs for which a composite strategy has been defined. One possibility to implement this is to use MI with a <span class="math inline">\(\delta\)</span>-adjustment for post-ICE data as described in <span class="citation">Darken et al. (<a href="#ref-Darken2020">2020</a>)</span>.</p>
-</div>
-</div>
-</div>
-<div id="sec:statsMethods" class="section level1" number="3">
-<h1><span class="header-section-number">3</span> Statistical methodology</h1>
-<div id="sec:methodsOverview" class="section level2" number="3.1">
-<h2><span class="header-section-number">3.1</span> Overview of the imputation procedure</h2>
+</section>
+<section id="implementation-of-the-hypothetical-strategy" class="level3">
+<h3 class="anchored" data-anchor-id="implementation-of-the-hypothetical-strategy">Implementation of the hypothetical strategy</h3>
+<p>The MAR imputation model described above is often also a good starting point for imputing data after an ICE handled using a hypothetical strategy (<span class="citation" data-cites="Mallinckrodt2020">Mallinckrodt et al. (<a href="#ref-Mallinckrodt2020" role="doc-biblioref">2020</a>)</span>). Informally, this assumes that unobserved values after the ICE would have been similar to the observed data from subjects who did not have the ICE and remained under follow-up. However, in some situations, it may be more reasonable to assume that missingness is “informative” and indicates a systematically better or worse outcome than in observed subjects. In such situations, MNAR imputation with a <span class="math inline">\(\delta\)</span>-adjustment could be explored as a sensitivity analysis. <span class="math inline">\(\delta\)</span>-adjustments add a fixed or random quantity to the imputations in order to make the imputed outcomes systematically worse or better than those observed as described in <span class="citation" data-cites="CroEtAlTutorial2020">Cro et al. (<a href="#ref-CroEtAlTutorial2020" role="doc-biblioref">2020</a>)</span>. In <code>rbmi</code> only fixed <span class="math inline">\(\delta\)</span>-adjustments are implemented.</p>
+</section>
+<section id="implementation-of-the-treatment-policy-strategy" class="level3">
+<h3 class="anchored" data-anchor-id="implementation-of-the-treatment-policy-strategy">Implementation of the treatment policy strategy</h3>
+<p>Ideally, data collection continues after an ICE handled with a treatment policy strategy and no missing data arises. Indeed, such post-ICE data are increasingly systematically collected in RCTs. However, despite best efforts, missing data after an ICE such as study treatment discontinuation may still occur because the subject drops out from the study after discontinuation. It is difficult to give definite recommendations regarding the implementation of the treatment policy strategy in the presence of missing data at this stage because the optimal method is highly context dependent and a topic of ongoing statistical research.</p>
+<p>For ICEs which are thought to have a negligible effect on efficacy outcomes, standard MAR-based imputation which ignores whether an outcome is observed pre- or post-ICE may be appropriate. In contrast, an ICE such as treatment discontinuation may be expected to have a more substantial impact on efficacy outcomes. In such settings, the MAR assumption may still be plausible after conditioning on the subject’s time-varying treatment status (<span class="citation" data-cites="Guizzaro2021">Guizzaro et al. (<a href="#ref-Guizzaro2021" role="doc-biblioref">2021</a>)</span>). In this case, one option is to impute missing post-discontinuation data based on subjects who also discontinued treatment but continued to be followed up. Another option which may require somewhat less post-discontinuation data is to include all subjects in the imputation procedure but to model post-discontinuation data by using time-varying treatment status indicators (<span class="citation" data-cites="Guizzaro2021">Guizzaro et al. (<a href="#ref-Guizzaro2021" role="doc-biblioref">2021</a>)</span>, <span class="citation" data-cites="PolverejanDragalin2020">Polverejan and Dragalin (<a href="#ref-PolverejanDragalin2020" role="doc-biblioref">2020</a>)</span>, <span class="citation" data-cites="Noci2021">Noci et al. (<a href="#ref-Noci2021" role="doc-biblioref">2023</a>)</span>, <span class="citation" data-cites="Drury2024">Drury et al. (<a href="#ref-Drury2024" role="doc-biblioref">2024</a>)</span>, <span class="citation" data-cites="Bell2024">Bell et al. (<a href="#ref-Bell2024" role="doc-biblioref">2024</a>)</span>). In this approach, post-ICE outcomes are included in every step of the analysis, including in the fitting of the imputation model. It assumes that ICEs may impact post-ICE outcomes but that otherwise missingness is non-informative. The approach also assumes that the time-varying covariates do not contain missing values, deviations in outcomes after the ICE are correctly modeled by these time-varying covariates, and that sufficient post-ICE data are available to inform the regression coefficients of the time-varying covariates. The resulting imputation models are called “retrieved dropout models” in the statistical literature. These models tend to have less bias than alternative analysis approaches based on imputation under a basic MAR assumption or a reference-based missing data assumption. However, retrieved dropout models have been associated with inflated standard errors of associated treatment effect estimators which has a detrimental effect on study power. In particular, it has been observed that once the post-ICE observation percentages falls below 50%, the power loss can be quite dramatic <span class="citation" data-cites="Bell2024">(<a href="#ref-Bell2024" role="doc-biblioref">Bell et al. 2024</a>)</span>. We illustrate the implementation of retrieved dropout models in the vignette “Implementation of retrieved-dropout models using rbmi” (<code>vignette(topic = "retrieved_dropout", package = "rbmi")</code>).</p>
+<p>In some trial settings, only few subjects discontinue the randomized treatment. In other settings, treatment discontinuation rates are higher but it is difficult to retain subjects in the trial after treatment discontinuation leading to sparse data collection after treatment discontinuation. In both settings, the amount of available data after treatment discontinuation may be insufficient to inform an imputation model which explicitly models post-discontinuation data. Depending on the disease area and the anticipated mechanism of action of the intervention, it may be plausible to assume that subjects in the intervention group behave similarly to subjects in the control group after the ICE treatment discontinuation. In this case, reference-based imputation methods are an option (<span class="citation" data-cites="Mallinckrodt2020">Mallinckrodt et al. (<a href="#ref-Mallinckrodt2020" role="doc-biblioref">2020</a>)</span>). Reference-based imputation methods formalize the idea to impute missing data in the intervention group based on data from a control or reference group. For a general description and review of reference-based imputation methods, we refer to <span class="citation" data-cites="CarpenterEtAl2013">Carpenter, Roger, and Kenward (<a href="#ref-CarpenterEtAl2013" role="doc-biblioref">2013</a>)</span>, <span class="citation" data-cites="CroEtAlTutorial2020">Cro et al. (<a href="#ref-CroEtAlTutorial2020" role="doc-biblioref">2020</a>)</span>, <span class="citation" data-cites="White2020causal">I. White, Royes, and Best (<a href="#ref-White2020causal" role="doc-biblioref">2020</a>)</span> and <span class="citation" data-cites="Wolbers2021">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span>. For a technical description of the implemented statistical methodology for reference-based imputation, we refer to section @ref(sec:statsMethods) (in particular section @ref(sec:imputationStep)).</p>
+</section>
+<section id="implementation-of-the-composite-strategy" class="level3">
+<h3 class="anchored" data-anchor-id="implementation-of-the-composite-strategy">Implementation of the composite strategy</h3>
+<p>The composite strategy is typically applied to binary or time-to-event outcomes but it can also be used for continuous outcomes by ascribing a suitably unfavorable value to patients who experience ICEs for which a composite strategy has been defined. One possibility to implement this is to use MI with a <span class="math inline">\(\delta\)</span>-adjustment for post-ICE data as described in <span class="citation" data-cites="Darken2020">Darken et al. (<a href="#ref-Darken2020" role="doc-biblioref">2020</a>)</span>.</p>
+</section>
+</section>
+</section>
+<section id="sec:statsMethods" class="level1">
+<h1>Statistical methodology</h1>
+<section id="sec:methodsOverview" class="level2">
+<h2 class="anchored" data-anchor-id="sec:methodsOverview">Overview of the imputation procedure</h2>
 <p>Analyses of datasets with missing data always rely on missing data assumptions. The methods described here can be used to produce valid imputations under a MAR assumption or under reference-based imputation assumptions. MNAR imputation based on fixed <span class="math inline">\(\delta\)</span>-adjustments as typically used in sensitivity analyses such as tipping-point analyses are also supported.</p>
 <p>Three general imputation approaches are implemented in <code>rbmi</code>:</p>
-<ol style="list-style-type: decimal">
-<li><p><strong>Conventional MI</strong> based on Bayesian (or approximate Bayesian) posterior draws from the imputation model combined with Rubin’s rules for inference as described in <span class="citation">Carpenter, Roger, and Kenward (<a href="#ref-CarpenterEtAl2013">2013</a>)</span> and <span class="citation">Cro et al. (<a href="#ref-CroEtAlTutorial2020">2020</a>)</span>.</p></li>
-<li><p><strong>Conditional mean imputation</strong> based on the REML estimate of the imputation model combined with resampling techniques (the jackknife or the bootstrap) for inference as described in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>.</p></li>
-<li><p><strong>Bootstrapped MI</strong> methods based on REML estimates of the imputation model as described in <span class="citation">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021">2021</a>)</span>.</p></li>
+<ol type="1">
+<li><p><strong>Conventional MI</strong> based on Bayesian (or approximate Bayesian) posterior draws from the imputation model combined with Rubin’s rules for inference as described in <span class="citation" data-cites="CarpenterEtAl2013">Carpenter, Roger, and Kenward (<a href="#ref-CarpenterEtAl2013" role="doc-biblioref">2013</a>)</span> and <span class="citation" data-cites="CroEtAlTutorial2020">Cro et al. (<a href="#ref-CroEtAlTutorial2020" role="doc-biblioref">2020</a>)</span>.</p></li>
+<li><p><strong>Conditional mean imputation</strong> based on the REML estimate of the imputation model combined with resampling techniques (the jackknife or the bootstrap) for inference as described in <span class="citation" data-cites="Wolbers2021">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span>.</p></li>
+<li><p><strong>Bootstrapped MI</strong> methods based on REML estimates of the imputation model as described in <span class="citation" data-cites="vonHippelBartlett2021">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021" role="doc-biblioref">2021</a>)</span>.</p></li>
 </ol>
-<div id="conventional-mi" class="section level3" number="3.1.1">
-<h3><span class="header-section-number">3.1.1</span> Conventional MI</h3>
+<section id="conventional-mi" class="level3">
+<h3 class="anchored" data-anchor-id="conventional-mi">Conventional MI</h3>
 <p>Conventional MI approaches include the following steps:</p>
-<ol style="list-style-type: decimal">
-<li><strong>Base imputation model fitting step</strong> (Section <a href="#sec:imputationModel">3.3</a>)</li>
+<ol type="1">
+<li><strong>Base imputation model fitting step</strong> (Section @ref(sec:imputationModel))</li>
 </ol>
 <ul>
-<li><p>Fit a Bayesian multivariate normal mixed model for repeated measures (MMRM) to the observed longitudinal outcomes after exclusion of data after ICEs for which reference-based missing data imputation is desired (Section <a href="#sec:imputationModelBayes">3.3.3</a>). Draw <span class="math inline">\(M\)</span> posterior samples of the estimated parameters (regression coefficients and covariance matrices) from this model.</p></li>
-<li><p>Alternatively, <span class="math inline">\(M\)</span> approximate posterior draws from the posterior distribution can be sampled by repeatedly applying conventional restricted maximum-likelihood (REML) parameter estimation of the MMRM model to nonparametric bootstrap samples from the original dataset (Section <a href="#sec:imputationModelBoot">3.3.4</a>).</p></li>
+<li><p>Fit a Bayesian multivariate normal mixed model for repeated measures (MMRM) to the observed longitudinal outcomes after exclusion of data after ICEs for which reference-based missing data imputation is desired (Section @ref(sec:imputationModelBayes)). Draw <span class="math inline">\(M\)</span> posterior samples of the estimated parameters (regression coefficients and covariance matrices) from this model.</p></li>
+<li><p>Alternatively, <span class="math inline">\(M\)</span> approximate posterior draws from the posterior distribution can be sampled by repeatedly applying conventional restricted maximum-likelihood (REML) parameter estimation of the MMRM model to nonparametric bootstrap samples from the original dataset (Section @ref(sec:imputationModelBoot)).</p></li>
 </ul>
-<ol start="2" style="list-style-type: decimal">
-<li><strong>Imputation step</strong> (Section <a href="#sec:imputationStep">3.4</a>)</li>
+<ol start="2" type="1">
+<li><strong>Imputation step</strong> (Section @ref(sec:imputationStep))</li>
 </ol>
 <ul>
 <li><p>Take a single sample <span class="math inline">\(m\)</span> (<span class="math inline">\(m\in 1,\ldots, M)\)</span> from the posterior distribution of the imputation model parameters.</p></li>
-<li><p>For each subject, use the sampled parameters and the defined imputation strategy to determine the mean and covariance matrix describing the subject’s marginal outcome distribution for all longitudinal outcome assessments (i.e. observed and missing outcomes).</p></li>
+<li><p>For each subject, use the sampled parameters and the defined imputation strategy to determine the mean and covariance matrix describing the subject’s marginal outcome distribution for all longitudinal outcome assessments (i.e.&nbsp;observed and missing outcomes).</p></li>
 <li><p>For each subjects, construct the conditional multivariate normal distribution of their missing outcomes given their observed outcomes (including observed outcomes after ICEs for which a reference-based assumption is desired).</p></li>
 <li><p>For each subject, draw a single sample from this conditional distribution to impute their missing outcomes leading to a complete imputed dataset.</p></li>
-<li><p>For sensitivity analyses, a pre-defined <span class="math inline">\(\delta\)</span>-adjustment may be applied to the imputed data prior to the analysis step. (Section <a href="#sec:deltaAdjustment">3.5</a>).</p></li>
+<li><p>For sensitivity analyses, a pre-defined <span class="math inline">\(\delta\)</span>-adjustment may be applied to the imputed data prior to the analysis step. (Section @ref(sec:deltaAdjustment)).</p></li>
 </ul>
-<ol start="3" style="list-style-type: decimal">
-<li><strong>Analysis step</strong> (Section <a href="#sec:analysis">3.6</a>)</li>
+<ol start="3" type="1">
+<li><strong>Analysis step</strong> (Section @ref(sec:analysis))</li>
 </ol>
 <ul>
-<li>Analyze the imputed dataset using an analysis model (e.g. ANCOVA) resulting in a point estimate and a standard error (with corresponding degrees of freedom) of the treatment effect.</li>
+<li>Analyze the imputed dataset using an analysis model (e.g.&nbsp;ANCOVA) resulting in a point estimate and a standard error (with corresponding degrees of freedom) of the treatment effect.</li>
 </ul>
-<ol start="4" style="list-style-type: decimal">
-<li><strong>Pooling step for inference</strong> (Section <a href="#sec:pooling">3.7</a>)</li>
+<ol start="4" type="1">
+<li><strong>Pooling step for inference</strong> (Section @ref(sec:pooling))</li>
 </ol>
 <ul>
 <li>Repeat steps 2. and 3. for each posterior sample <span class="math inline">\(m\)</span>, resulting in <span class="math inline">\(M\)</span> complete datasets, <span class="math inline">\(M\)</span> point estimates of the treatment effect, and <span class="math inline">\(M\)</span> standard errors (with corresponding degrees of freedom). Pool the <span class="math inline">\(M\)</span> treatment effect estimates, standard errors, and degrees of freedom using the rules by Barnard and Rubin to obtain the final pooled treatment effect estimator, standard error, and degrees of freedom.</li>
 </ul>
-</div>
-<div id="conditional-mean-imputation" class="section level3" number="3.1.2">
-<h3><span class="header-section-number">3.1.2</span> Conditional mean imputation</h3>
+</section>
+<section id="conditional-mean-imputation" class="level3">
+<h3 class="anchored" data-anchor-id="conditional-mean-imputation">Conditional mean imputation</h3>
 <p>The conditional mean imputation approach includes the following steps:</p>
-<ol style="list-style-type: decimal">
-<li><strong>Base imputation model fitting step</strong> (Section <a href="#sec:imputationModel">3.3</a>)</li>
+<ol type="1">
+<li><strong>Base imputation model fitting step</strong> (Section @ref(sec:imputationModel))</li>
 </ol>
 <ul>
-<li>Fit a conventional multivariate normal/MMRM model using restricted maximum likelihood (REML) to the observed longitudinal outcomes after exclusion of data after ICEs for which reference-based missing data imputation is desired (Section <a href="#sec:imputationModelREML">3.3.2</a>).</li>
+<li>Fit a conventional multivariate normal/MMRM model using restricted maximum likelihood (REML) to the observed longitudinal outcomes after exclusion of data after ICEs for which reference-based missing data imputation is desired (Section @ref(sec:imputationModelREML)).</li>
 </ul>
-<ol start="2" style="list-style-type: decimal">
-<li><strong>Imputation step</strong> (Section <a href="#sec:imputationStep">3.4</a>)</li>
+<ol start="2" type="1">
+<li><strong>Imputation step</strong> (Section @ref(sec:imputationStep))</li>
 </ol>
 <ul>
 <li><p>For each subject, use the fitted parameters from step 1. to construct the conditional distribution of missing outcomes given observed outcomes (including observed outcomes after ICEs for which reference-based missing data imputation is desired) as described above.</p></li>
 <li><p>For each subject, impute their missing data deterministically by the mean of this conditional distribution leading to a complete imputed dataset.</p></li>
-<li><p>For sensitivity analyses, a pre-defined <span class="math inline">\(\delta\)</span>-adjustment may be applied to the imputed data prior to the analysis step. (Section <a href="#sec:deltaAdjustment">3.5</a>).</p></li>
+<li><p>For sensitivity analyses, a pre-defined <span class="math inline">\(\delta\)</span>-adjustment may be applied to the imputed data prior to the analysis step. (Section @ref(sec:deltaAdjustment)).</p></li>
 </ul>
-<ol start="3" style="list-style-type: decimal">
-<li><strong>Analysis step</strong> (Section <a href="#sec:analysis">3.6</a>)</li>
+<ol start="3" type="1">
+<li><strong>Analysis step</strong> (Section @ref(sec:analysis))</li>
 </ol>
 <ul>
-<li>Apply an analysis model (e.g. ANCOVA) to the completed dataset resulting in a point estimate of the treatment effect.</li>
+<li>Apply an analysis model (e.g.&nbsp;ANCOVA) to the completed dataset resulting in a point estimate of the treatment effect.</li>
 </ul>
-<ol start="4" style="list-style-type: decimal">
-<li><strong>Jackknife or bootstrap inference step</strong> (Section <a href="#sec:bootInference">3.8</a>)</li>
+<ol start="4" type="1">
+<li><strong>Jackknife or bootstrap inference step</strong> (Section @ref(sec:bootInference))</li>
 </ol>
 <ul>
-<li>Inference for the treatment effect estimate from 3. is based on re-sampling techniques. Both the jackknife and the bootstrap are supported. Importantly, these methods require repeating all steps of the imputation procedure (i.e. imputation, conditional mean imputation, and analysis steps) on each of the resampled datasets.</li>
+<li>Inference for the treatment effect estimate from 3. is based on re-sampling techniques. Both the jackknife and the bootstrap are supported. Importantly, these methods require repeating all steps of the imputation procedure (i.e.&nbsp;imputation, conditional mean imputation, and analysis steps) on each of the resampled datasets.</li>
 </ul>
-</div>
-<div id="bootstrapped-mi" class="section level3" number="3.1.3">
-<h3><span class="header-section-number">3.1.3</span> Bootstrapped MI</h3>
+</section>
+<section id="bootstrapped-mi" class="level3">
+<h3 class="anchored" data-anchor-id="bootstrapped-mi">Bootstrapped MI</h3>
 <p>The bootstrapped MI approach includes the following steps:</p>
-<ol style="list-style-type: decimal">
-<li><strong>Base imputation model fitting step</strong> (Section <a href="#sec:imputationModel">3.3</a>)</li>
+<ol type="1">
+<li><strong>Base imputation model fitting step</strong> (Section @ref(sec:imputationModel))</li>
 </ol>
 <ul>
 <li>Apply conventional restricted maximum-likelihood (REML) parameter estimation of the MMRM model to <span class="math inline">\(B\)</span> nonparametric bootstrap samples from the original dataset using the observed longitudinal outcomes after exclusion of data after ICEs for which reference-based missing data imputation is desired.</li>
 </ul>
-<ol start="2" style="list-style-type: decimal">
-<li><strong>Imputation step</strong> (Section <a href="#sec:imputationStep">3.4</a>)</li>
+<ol start="2" type="1">
+<li><strong>Imputation step</strong> (Section @ref(sec:imputationStep))</li>
 </ol>
 <ul>
 <li><p>Take a bootstrapped dataset <span class="math inline">\(b\)</span> (<span class="math inline">\(b\in 1,\ldots, B)\)</span> and its corresponding imputation model parameter estimates.</p></li>
-<li><p>For each subject (from the bootstrapped dataset), use the parameter estimates and the defined strategy for dealing with their ICEs to determine the mean and covariance matrix describing the subject’s marginal outcome distribution for all longitudinal outcome assessments (i.e. observed and missing outcomes).</p></li>
+<li><p>For each subject (from the bootstrapped dataset), use the parameter estimates and the defined strategy for dealing with their ICEs to determine the mean and covariance matrix describing the subject’s marginal outcome distribution for all longitudinal outcome assessments (i.e.&nbsp;observed and missing outcomes).</p></li>
 <li><p>For each subjects (from the bootstrapped dataset), construct the conditional multivariate normal distribution of their missing outcomes given their observed outcomes (including observed outcomes after ICEs for which reference-based missing data imputation is desired).</p></li>
 <li><p>For each subject (from the bootstrapped dataset), draw <span class="math inline">\(D\)</span> samples from this conditional distributions to impute their missing outcomes leading to <span class="math inline">\(D\)</span> complete imputed dataset for bootstrap sample <span class="math inline">\(b\)</span>.</p></li>
-<li><p>For sensitivity analyses, a pre-defined <span class="math inline">\(\delta\)</span>-adjustment may be applied to the imputed data prior to the analysis step. (Section <a href="#sec:deltaAdjustment">3.5</a>).</p></li>
+<li><p>For sensitivity analyses, a pre-defined <span class="math inline">\(\delta\)</span>-adjustment may be applied to the imputed data prior to the analysis step. (Section @ref(sec:deltaAdjustment)).</p></li>
 </ul>
-<ol start="3" style="list-style-type: decimal">
-<li><strong>Analysis step</strong> (Section <a href="#sec:analysis">3.6</a>)</li>
+<ol start="3" type="1">
+<li><strong>Analysis step</strong> (Section @ref(sec:analysis))</li>
 </ol>
 <ul>
-<li>Analyze each of the <span class="math inline">\(B\times D\)</span> imputed datasets using an analysis model (e.g. ANCOVA) resulting in <span class="math inline">\(B\times D\)</span> point estimates of the treatment effect.</li>
+<li>Analyze each of the <span class="math inline">\(B\times D\)</span> imputed datasets using an analysis model (e.g.&nbsp;ANCOVA) resulting in <span class="math inline">\(B\times D\)</span> point estimates of the treatment effect.</li>
 </ul>
-<ol start="4" style="list-style-type: decimal">
-<li><strong>Pooling step for inference</strong> (Section <a href="#sec:poolbmlmi">3.9</a>)</li>
+<ol start="4" type="1">
+<li><strong>Pooling step for inference</strong> (Section @ref(sec:poolbmlmi))</li>
 </ol>
 <ul>
-<li>Pool the <span class="math inline">\(B\times D\)</span> treatment effect estimates as described in <span class="citation">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021">2021</a>)</span> to obtain the final pooled treatment effect estimate, standard error, and degrees of freedom.</li>
+<li>Pool the <span class="math inline">\(B\times D\)</span> treatment effect estimates as described in <span class="citation" data-cites="vonHippelBartlett2021">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021" role="doc-biblioref">2021</a>)</span> to obtain the final pooled treatment effect estimate, standard error, and degrees of freedom.</li>
 </ul>
-</div>
-</div>
-<div id="setting-notation-and-missing-data-assumptions" class="section level2" number="3.2">
-<h2><span class="header-section-number">3.2</span> Setting, notation, and missing data assumptions</h2>
-<p>Assume that the data are from a study with <span class="math inline">\(n\)</span> subjects in total and that each subject <span class="math inline">\(i\)</span> (<span class="math inline">\(i=1,\ldots,n\)</span>) has <span class="math inline">\(J\)</span> scheduled follow-up visits at which the outcome of interest is assessed.
-In most applications, the data will be from a randomized trial of an intervention vs a control group and the treatment effect of interest is a comparison in outcomes at a specific visit between these randomized groups. However, single-arm trials or multi-arm trials are in principle also supported by the <code>rbmi</code> implementation.</p>
-<p>Denote the observed outcome vector of length <span class="math inline">\(J\)</span> for subject <span class="math inline">\(i\)</span> by <span class="math inline">\(Y_i\)</span> (with missing assessments coded as NA (not available)) and its non-missing and missing components by <span class="math inline">\(Y_{i!}\)</span> and <span class="math inline">\(Y_{i?}\)</span>, respectively.
-By default, imputation of missing outcomes in <span class="math inline">\(Y_{i}\)</span> is performed under a MAR assumption in <code>rbmi</code>. Therefore, if missing data following an ICE are to be handled using MAR imputation, this is compatible with the default assumption. As discussed in Section <a href="#sec:intro">2</a>, the MAR assumption is often a good starting point for implementing a hypothetical strategy. But also note that observed outcome data after an ICE handled using a hypothetical strategy is not compatible with this strategy. Therefore, we assume that all post-ICE data after ICEs handled using a hypothetical strategy are already set to NA in <span class="math inline">\(Y_i\)</span> prior calling any <code>rbmi</code> functions. However, any observed outcomes after ICEs handled using a treatment policy strategy should be included in <span class="math inline">\(Y_i\)</span> as they are compatible with this strategy.</p>
-<p>Subjects may also experience up to one ICE after which missing data imputation according to a reference-based imputation method is foreseen. For a subject <span class="math inline">\(i\)</span> with such an ICE, denote their first visit which is affected by the ICE by <span class="math inline">\(\tilde{t}_i \in \{1,\ldots,J\}\)</span>. For all other subjects, set <span class="math inline">\(\tilde{t}_i=\infty\)</span>. A subject’s outcome vector after setting observed outcomes from visit <span class="math inline">\(\tilde{t}_i\)</span> onwards to missing (i.e. NA) is denoted as <span class="math inline">\(Y&#39;_i\)</span> and the corresponding data vector after removal of NA elements as <span class="math inline">\(Y&#39;_{i!}\)</span>.</p>
-<p>MNAR <span class="math inline">\(\delta\)</span>-adjustments are added to the imputed datasets after the formal imputation steps. This is covered in a separate section (Section <a href="#sec:deltaAdjustment">3.5</a>).</p>
-</div>
-<div id="sec:imputationModel" class="section level2" number="3.3">
-<h2><span class="header-section-number">3.3</span> The base imputation model</h2>
-<div id="sec:imputationModelSpecs" class="section level3" number="3.3.1">
-<h3><span class="header-section-number">3.3.1</span> Included data and model specification</h3>
-<p>The purpose of the imputation model is to estimate (covariate-dependent) mean trajectories and covariance matrices for each group in the absence of ICEs handled using reference-based imputation methods. Conventionally,
-publications on reference-based imputation methods have implicitly assumed that the corresponding post-ICE
-data is missing for all subjects (<span class="citation">Carpenter, Roger, and Kenward (<a href="#ref-CarpenterEtAl2013">2013</a>)</span>). We also allow the situation where post-ICE data
-is available for some subjects but needs to be imputed using reference-based methods for others. However,
-any observed data after ICEs for which reference-based imputation methods are specified is not compatible
-with the imputation model described below and they are therefore removed and considered as missing for
-the purpose of estimating the imputation model, and for this purpose only. For example, if a patient has an ICE addressed with a reference-based method but outcomes after the ICE are collected, these post-ICE outcomes will be excluded when fitting the base imputation model (but they will be included again in the following steps).
-That is, the base imputation model is fitted to <span class="math inline">\(Y&#39;_{i!}\)</span> and not to <span class="math inline">\(Y_{i!}\)</span>.
-If we did not exclude these data, then the imputation model would mistakenly estimate mean trajectories based on a mixture of observed pre- and post-ICE data which are not relevant for reference-based imputations.</p>
+</section>
+</section>
+<section id="setting-notation-and-missing-data-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="setting-notation-and-missing-data-assumptions">Setting, notation, and missing data assumptions</h2>
+<p>Assume that the data are from a study with <span class="math inline">\(n\)</span> subjects in total and that each subject <span class="math inline">\(i\)</span> (<span class="math inline">\(i=1,\ldots,n\)</span>) has <span class="math inline">\(J\)</span> scheduled follow-up visits at which the outcome of interest is assessed. In most applications, the data will be from a randomized trial of an intervention vs a control group and the treatment effect of interest is a comparison in outcomes at a specific visit between these randomized groups. However, single-arm trials or multi-arm trials are in principle also supported by the <code>rbmi</code> implementation.</p>
+<p>Denote the observed outcome vector of length <span class="math inline">\(J\)</span> for subject <span class="math inline">\(i\)</span> by <span class="math inline">\(Y_i\)</span> (with missing assessments coded as NA (not available)) and its non-missing and missing components by <span class="math inline">\(Y_{i!}\)</span> and <span class="math inline">\(Y_{i?}\)</span>, respectively. By default, imputation of missing outcomes in <span class="math inline">\(Y_{i}\)</span> is performed under a MAR assumption in <code>rbmi</code>. Therefore, if missing data following an ICE are to be handled using MAR imputation, this is compatible with the default assumption. As discussed in Section @ref(sec:intro), the MAR assumption is often a good starting point for implementing a hypothetical strategy. But also note that observed outcome data after an ICE handled using a hypothetical strategy is not compatible with this strategy. Therefore, we assume that all post-ICE data after ICEs handled using a hypothetical strategy are already set to NA in <span class="math inline">\(Y_i\)</span> prior calling any <code>rbmi</code> functions. However, any observed outcomes after ICEs handled using a treatment policy strategy should be included in <span class="math inline">\(Y_i\)</span> as they are compatible with this strategy.</p>
+<p>Subjects may also experience up to one ICE after which missing data imputation according to a reference-based imputation method is foreseen. For a subject <span class="math inline">\(i\)</span> with such an ICE, denote their first visit which is affected by the ICE by <span class="math inline">\(\tilde{t}_i \in \{1,\ldots,J\}\)</span>. For all other subjects, set <span class="math inline">\(\tilde{t}_i=\infty\)</span>. A subject’s outcome vector after setting observed outcomes from visit <span class="math inline">\(\tilde{t}_i\)</span> onwards to missing (i.e.&nbsp;NA) is denoted as <span class="math inline">\(Y'_i\)</span> and the corresponding data vector after removal of NA elements as <span class="math inline">\(Y'_{i!}\)</span>.</p>
+<p>MNAR <span class="math inline">\(\delta\)</span>-adjustments are added to the imputed datasets after the formal imputation steps. This is covered in a separate section (Section @ref(sec:deltaAdjustment)).</p>
+</section>
+<section id="sec:imputationModel" class="level2">
+<h2 class="anchored" data-anchor-id="sec:imputationModel">The base imputation model</h2>
+<section id="sec:imputationModelSpecs" class="level3">
+<h3 class="anchored" data-anchor-id="sec:imputationModelSpecs">Included data and model specification</h3>
+<p>The purpose of the imputation model is to estimate (covariate-dependent) mean trajectories and covariance matrices for each group in the absence of ICEs handled using reference-based imputation methods. Conventionally, publications on reference-based imputation methods have implicitly assumed that the corresponding post-ICE data is missing for all subjects (<span class="citation" data-cites="CarpenterEtAl2013">Carpenter, Roger, and Kenward (<a href="#ref-CarpenterEtAl2013" role="doc-biblioref">2013</a>)</span>). We also allow the situation where post-ICE data is available for some subjects but needs to be imputed using reference-based methods for others. However, any observed data after ICEs for which reference-based imputation methods are specified is not compatible with the imputation model described below and they are therefore removed and considered as missing for the purpose of estimating the imputation model, and for this purpose only. For example, if a patient has an ICE addressed with a reference-based method but outcomes after the ICE are collected, these post-ICE outcomes will be excluded when fitting the base imputation model (but they will be included again in the following steps). That is, the base imputation model is fitted to <span class="math inline">\(Y'_{i!}\)</span> and not to <span class="math inline">\(Y_{i!}\)</span>. If we did not exclude these data, then the imputation model would mistakenly estimate mean trajectories based on a mixture of observed pre- and post-ICE data which are not relevant for reference-based imputations.</p>
 <p>Observed post-ICE outcomes in the control or reference group are also excluded from the base imputation model if the user specifies a reference-based imputation strategy for such ICEs. This ensures that an ICE has the same impact on the data included in the imputation model regardless whether the ICE occurred in the control or the intervention group. On the other hand, imputation in the reference group is based on a MAR assumption even for reference-based imputation methods and it may be preferable in some settings to include post-ICE data from the control group in the base imputation model. This can be implemented by specifying a <code>MAR</code> strategy for the ICE in the control group and a reference-based strategy for the same ICE in the intervention group.</p>
-<p>The base imputation model of the longitudinal outcomes <span class="math inline">\(Y&#39;_i\)</span> assumes that the mean structure is a linear function of covariates. Full flexibility for the specification of the linear predictor of the model is supported. At a minimum the covariates should include the treatment group, the (categorical) visit, and treatment-by-visit interactions. Typically, other covariates including the baseline outcome are also included.
-External time-varying covariates (e.g. calendar time of the visit) as well as internal time-varying (e.g. time-varying indicators of treatment discontinuation or initiation of rescue treatment) may in principle also be included if indicated (<span class="citation">Guizzaro et al. (<a href="#ref-Guizzaro2021">2021</a>)</span>). Missing covariate values are not allowed. This means that the values of time-varying covariates must be non-missing at every visit regardless of whether the outcome is measured or missing.</p>
-<p>Denote the <span class="math inline">\(J\times p\)</span> design matrix for subject <span class="math inline">\(i\)</span> corresponding to the mean structure model by <span class="math inline">\(X_i\)</span> and the same matrix after removal of rows corresponding to missing outcomes in <span class="math inline">\(Y&#39;_{i!}\)</span> by <span class="math inline">\(X&#39;_{i!}\)</span>.
-Here <span class="math inline">\(p\)</span> is the number of parameters in the mean structure of the model for the elements of <span class="math inline">\(Y&#39;_{i!}\)</span>.
-The base imputation model for the observed outcomes is defined as:
-<span class="math display">\[ Y&#39;_{i!} = X&#39;_{i!}\beta + \epsilon_{i!} \mbox{ with } \epsilon_{i!}\sim N(0,\Sigma_{i!!})\]</span>
-where <span class="math inline">\(\beta\)</span> is the vector of regression coefficients and <span class="math inline">\(\Sigma_{i!!}\)</span> is a covariance matrix which is obtained from the complete-data <span class="math inline">\(J\times J\)</span>-covariance matrix <span class="math inline">\(\Sigma\)</span> by omitting rows and columns corresponding to missing outcome assessments for subject <span class="math inline">\(i\)</span>.</p>
-<p>Typically, a common unstructured covariance matrix for all subjects is assumed for <span class="math inline">\(\Sigma\)</span> but separate covariate matrices per treatment group are also supported. Indeed, the implementation also supports the specification of separate covariate matrices according to an arbitrarily defined categorical variable which groups the subjects into disjoint subset. For example, this could be useful if different covariance matrices are suspected in different subject strata. Finally, for all imputation methods described below that do not rely on Bayesian model fitting through MCMC, there is further flexibility in the choice of the covariance structure, i.e. unstructured (default), heterogeneous Toeplitz, heterogeneous compound symmetry, and AR(1) covariance structures are supported.</p>
-</div>
-<div id="sec:imputationModelREML" class="section level3" number="3.3.2">
-<h3><span class="header-section-number">3.3.2</span> Restricted maximum likelihood estimation (REML)</h3>
-<p>Frequentist parameter estimation for the base imputation is based on REML. The use of REML as an improved alternative to maximum likelihood (ML) for covariance parameter estimation was originally proposed by <span class="citation">Patterson and Thompson (<a href="#ref-Patterson1971">1971</a>)</span>. Since then, it has become the default method for parameter estimation in linear mixed effects models. <code>rbmi</code> allows to choose between ML and REML methods to estimate the model parameters, with REML being the default option.</p>
-</div>
-<div id="sec:imputationModelBayes" class="section level3" number="3.3.3">
-<h3><span class="header-section-number">3.3.3</span> Bayesian model fitting</h3>
-<p>The Bayesian imputation model is fitted with the R package <code>rstan</code> (<span class="citation">Stan Development Team (<a href="#ref-Rstan">2020</a>)</span>). <code>rstan</code> is the R interface of Stan. Stan is a powerful and flexible statistical software developed by a dedicated team and implements Bayesian inference with state-of-the-art MCMC sampling procedures. The multivariate normal model with missing data specified in section <a href="#sec:imputationModelSpecs">3.3.1</a> can be considered a generalization of the models described in the Stan user’s guide (see <span class="citation">Stan Development Team (<a href="#ref-Rstan">2020, sec. 3.5</a>)</span>).</p>
-<p>The same prior distributions as in the SAS implementation of the “five macros” are used (<span class="citation">Roger (<a href="#ref-FiveMacros">2021</a>)</span>), i.e. an improper flat priors for the regression coefficients and a weakly informative inverse Wishart prior for the covariance matrix (or matrices). Specifically, let <span class="math inline">\(S \in \mathbb{R}^{J \times J}\)</span> be a symmetric positive definite matrix and <span class="math inline">\(\nu \in (J-1, \infty)\)</span>. Then the symmetric positive definite matrix <span class="math inline">\(x \in \mathbb{R}^{J \times J}\)</span> has density:
-<span class="math display">\[
+<p>The base imputation model of the longitudinal outcomes <span class="math inline">\(Y'_i\)</span> assumes that the mean structure is a linear function of covariates. Full flexibility for the specification of the linear predictor of the model is supported. At a minimum the covariates should include the treatment group, the (categorical) visit, and treatment-by-visit interactions. Typically, other covariates including the baseline outcome are also included. External time-varying covariates (e.g.&nbsp;calendar time of the visit) as well as internal time-varying (e.g.&nbsp;time-varying indicators of treatment discontinuation or initiation of rescue treatment) may in principle also be included if indicated (<span class="citation" data-cites="Guizzaro2021">Guizzaro et al. (<a href="#ref-Guizzaro2021" role="doc-biblioref">2021</a>)</span>). Missing covariate values are not allowed. This means that the values of time-varying covariates must be non-missing at every visit regardless of whether the outcome is measured or missing.</p>
+<p>Denote the <span class="math inline">\(J\times p\)</span> design matrix for subject <span class="math inline">\(i\)</span> corresponding to the mean structure model by <span class="math inline">\(X_i\)</span> and the same matrix after removal of rows corresponding to missing outcomes in <span class="math inline">\(Y'_{i!}\)</span> by <span class="math inline">\(X'_{i!}\)</span>. Here <span class="math inline">\(p\)</span> is the number of parameters in the mean structure of the model for the elements of <span class="math inline">\(Y'_{i!}\)</span>. The base imputation model for the observed outcomes is defined as: <span class="math display">\[ Y'_{i!} = X'_{i!}\beta + \epsilon_{i!} \mbox{ with } \epsilon_{i!}\sim N(0,\Sigma_{i!!})\]</span> where <span class="math inline">\(\beta\)</span> is the vector of regression coefficients and <span class="math inline">\(\Sigma_{i!!}\)</span> is a covariance matrix which is obtained from the complete-data <span class="math inline">\(J\times J\)</span>-covariance matrix <span class="math inline">\(\Sigma\)</span> by omitting rows and columns corresponding to missing outcome assessments for subject <span class="math inline">\(i\)</span>.</p>
+<p>Typically, a common unstructured covariance matrix for all subjects is assumed for <span class="math inline">\(\Sigma\)</span> but separate covariate matrices per treatment group are also supported. Indeed, the implementation also supports the specification of separate covariate matrices according to an arbitrarily defined categorical variable which groups the subjects into disjoint subset. For example, this could be useful if different covariance matrices are suspected in different subject strata. Finally, for all imputation methods described below that do not rely on Bayesian model fitting through MCMC, there is further flexibility in the choice of the covariance structure, i.e.&nbsp;unstructured (default), heterogeneous Toeplitz, heterogeneous compound symmetry, and AR(1) covariance structures are supported.</p>
+</section>
+<section id="sec:imputationModelREML" class="level3">
+<h3 class="anchored" data-anchor-id="sec:imputationModelREML">Restricted maximum likelihood estimation (REML)</h3>
+<p>Frequentist parameter estimation for the base imputation is based on REML. The use of REML as an improved alternative to maximum likelihood (ML) for covariance parameter estimation was originally proposed by <span class="citation" data-cites="Patterson1971">Patterson and Thompson (<a href="#ref-Patterson1971" role="doc-biblioref">1971</a>)</span>. Since then, it has become the default method for parameter estimation in linear mixed effects models. <code>rbmi</code> allows to choose between ML and REML methods to estimate the model parameters, with REML being the default option.</p>
+</section>
+<section id="sec:imputationModelBayes" class="level3">
+<h3 class="anchored" data-anchor-id="sec:imputationModelBayes">Bayesian model fitting</h3>
+<p>The Bayesian imputation model is fitted with the R package <code>rstan</code> (<span class="citation" data-cites="Rstan">Stan Development Team (<a href="#ref-Rstan" role="doc-biblioref">2020</a>)</span>). <code>rstan</code> is the R interface of Stan. Stan is a powerful and flexible statistical software developed by a dedicated team and implements Bayesian inference with state-of-the-art MCMC sampling procedures. The multivariate normal model with missing data specified in section @ref(sec:imputationModelSpecs) can be considered a generalization of the models described in the Stan user’s guide (see <span class="citation" data-cites="Rstan">Stan Development Team (<a href="#ref-Rstan" role="doc-biblioref">2020, sec. 3.5</a>)</span>).</p>
+<p>The same prior distributions as in the SAS implementation of the “five macros” are used (<span class="citation" data-cites="FiveMacros">Roger (<a href="#ref-FiveMacros" role="doc-biblioref">2021</a>)</span>), i.e.&nbsp;an improper flat priors for the regression coefficients and a weakly informative inverse Wishart prior for the covariance matrix (or matrices). Specifically, let <span class="math inline">\(S \in \mathbb{R}^{J \times J}\)</span> be a symmetric positive definite matrix and <span class="math inline">\(\nu \in (J-1, \infty)\)</span>. Then the symmetric positive definite matrix <span class="math inline">\(x \in \mathbb{R}^{J \times J}\)</span> has density: <span class="math display">\[
 \text{InvWish}(x \vert \nu, S) = \frac{1}{2^{\nu J/2}} \frac{1}{\Gamma_J(\frac{\nu}{2})} \vert S \vert^{\nu/2} \vert x \vert ^{-(\nu + J + 1)/2} \text{exp}(-\frac{1}{2} \text{tr}(Sx^{-1})).
-\]</span>
-For <span class="math inline">\(\nu &gt; J+1\)</span> the mean is given by:
-<span class="math display">\[
+\]</span> For <span class="math inline">\(\nu &gt; J+1\)</span> the mean is given by: <span class="math display">\[
 E[x] = \frac{S}{\nu - J - 1}.
-\]</span>
-We choose <span class="math inline">\(S\)</span> equal to the estimated covariance matrix from the frequentist REML fit and <span class="math inline">\(\nu = J+2\)</span> as these are the lowest degrees of freedom that guarantee a finite mean. Setting the degrees of freedom with such a low <span class="math inline">\(\nu\)</span> ensures that the prior has little impact on the posterior. Moreover, this choice allows to interpret the parameter <span class="math inline">\(S\)</span> as the mean of the prior distribution.</p>
-<p>As in the “five macros”, the MCMC algorithm is initialized at the parameters from a frequentist REML fit (see section <a href="#sec:imputationModelREML">3.3.2</a>). As described above, we are using only weakly informative priors for the parameters. Therefore, the Markov chain is essentially starting from the targeted stationary posterior distribution and only a minimal amount of burn-in of the chain is required.</p>
-<p>The initial values and other expert options for the MCMC sampling can be defined via the <code>control</code> argument to <code>method_bayes</code>, which is simplified with the corresponding <code>control_bayes()</code> function call.
-With the default initial values, i.e. when using <code>init = &quot;mmrm&quot;</code> in the <code>control</code> list, then for obtaining reproducible results an external <code>set.seed()</code> call is required before running <code>draws()</code>. In particular, please note that it is not sufficient to just set the <code>seed</code> option in the <code>control</code> list.
-If more than one chain is being run, the chains are currently initialized at <code>&quot;random&quot;</code> values as per <code>rstan</code> default. Note that for consistency with <code>rstan</code>, the burn-in can be customized via the <code>warmup</code> argument, and the burn-between can be customized via the <code>thin</code> argument.
-Independent of the number of chains used, the total number of returned samples is always <code>n_samples</code>. In the case that more than one chain is used, these samples are distributed across the multiple chains appropriately.</p>
-</div>
-<div id="sec:imputationModelBoot" class="section level3" number="3.3.4">
-<h3><span class="header-section-number">3.3.4</span> Approximate Bayesian posterior draws via the bootstrap</h3>
-<p>Several authors have suggested that a stabler way to get Bayesian posterior draws from the imputation model is to bootstrap the incomplete data and to calculate REML estimates for each bootstrap sample (<span class="citation">Little and Rubin (<a href="#ref-LittleRubin1992">2002</a>)</span>, <span class="citation">Efron (<a href="#ref-Efron1994">1994</a>)</span>, <span class="citation">Honaker and King (<a href="#ref-Honaker2010">2010</a>)</span>, <span class="citation">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021">2021</a>)</span>). This method is proper in that the REML estimates from the bootstrap samples are asymptotically equivalent to a sample from the posterior distribution and may provide additional robustness to model misspecification (<span class="citation">Little and Rubin (<a href="#ref-LittleRubin1992">2002, sec. 10.2.3</a>, part 6)</span>, <span class="citation">Honaker and King (<a href="#ref-Honaker2010">2010</a>)</span>). In order to retain balance between treatment groups and stratification factors across bootstrap samples, the user is able to provide stratification variables for the bootstrap in the <code>rbmi</code> implementation.</p>
-</div>
-</div>
-<div id="sec:imputationStep" class="section level2" number="3.4">
-<h2><span class="header-section-number">3.4</span> Imputation step</h2>
-<div id="sec:imputatioMNAR" class="section level3" number="3.4.1">
-<h3><span class="header-section-number">3.4.1</span> Marginal imputation distribution for a subject - MAR case</h3>
+\]</span> We choose <span class="math inline">\(S\)</span> equal to the estimated covariance matrix from the frequentist REML fit and <span class="math inline">\(\nu = J+2\)</span> as these are the lowest degrees of freedom that guarantee a finite mean. Setting the degrees of freedom with such a low <span class="math inline">\(\nu\)</span> ensures that the prior has little impact on the posterior. Moreover, this choice allows to interpret the parameter <span class="math inline">\(S\)</span> as the mean of the prior distribution.</p>
+<p>As in the “five macros”, the MCMC algorithm is initialized at the parameters from a frequentist REML fit (see section @ref(sec:imputationModelREML)). As described above, we are using only weakly informative priors for the parameters. Therefore, the Markov chain is essentially starting from the targeted stationary posterior distribution and only a minimal amount of burn-in of the chain is required.</p>
+<p>The initial values and other expert options for the MCMC sampling can be defined via the <code>control</code> argument to <code>method_bayes</code>, which is simplified with the corresponding <code>control_bayes()</code> function call. With the default initial values, i.e.&nbsp;when using <code>init = "mmrm"</code> in the <code>control</code> list, then for obtaining reproducible results an external <code>set.seed()</code> call is required before running <code>draws()</code>. In particular, please note that it is not sufficient to just set the <code>seed</code> option in the <code>control</code> list. If more than one chain is being run, the chains are currently initialized at <code>"random"</code> values as per <code>rstan</code> default. Note that for consistency with <code>rstan</code>, the burn-in can be customized via the <code>warmup</code> argument, and the burn-between can be customized via the <code>thin</code> argument. Independent of the number of chains used, the total number of returned samples is always <code>n_samples</code>. In the case that more than one chain is used, these samples are distributed across the multiple chains appropriately.</p>
+</section>
+<section id="sec:imputationModelBoot" class="level3">
+<h3 class="anchored" data-anchor-id="sec:imputationModelBoot">Approximate Bayesian posterior draws via the bootstrap</h3>
+<p>Several authors have suggested that a stabler way to get Bayesian posterior draws from the imputation model is to bootstrap the incomplete data and to calculate REML estimates for each bootstrap sample (<span class="citation" data-cites="LittleRubin1992">Little and Rubin (<a href="#ref-LittleRubin1992" role="doc-biblioref">2002</a>)</span>, <span class="citation" data-cites="Efron1994">Efron (<a href="#ref-Efron1994" role="doc-biblioref">1994</a>)</span>, <span class="citation" data-cites="Honaker2010">Honaker and King (<a href="#ref-Honaker2010" role="doc-biblioref">2010</a>)</span>, <span class="citation" data-cites="vonHippelBartlett2021">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021" role="doc-biblioref">2021</a>)</span>). This method is proper in that the REML estimates from the bootstrap samples are asymptotically equivalent to a sample from the posterior distribution and may provide additional robustness to model misspecification (<span class="citation" data-cites="LittleRubin1992">Little and Rubin (<a href="#ref-LittleRubin1992" role="doc-biblioref">2002, sec. 10.2.3</a>, part 6)</span>, <span class="citation" data-cites="Honaker2010">Honaker and King (<a href="#ref-Honaker2010" role="doc-biblioref">2010</a>)</span>). In order to retain balance between treatment groups and stratification factors across bootstrap samples, the user is able to provide stratification variables for the bootstrap in the <code>rbmi</code> implementation.</p>
+</section>
+</section>
+<section id="sec:imputationStep" class="level2">
+<h2 class="anchored" data-anchor-id="sec:imputationStep">Imputation step</h2>
+<section id="sec:imputatioMNAR" class="level3">
+<h3 class="anchored" data-anchor-id="sec:imputatioMNAR">Marginal imputation distribution for a subject - MAR case</h3>
 <p>For each subject <span class="math inline">\(i\)</span>, the marginal distribution of the complete <span class="math inline">\(J\)</span>-dimensional outcome vector from all assessment visits according to the imputation model is a multivariate normal distribution. Its mean <span class="math inline">\(\tilde{\mu}_i\)</span> is given by the predicted mean from the imputation model conditional on the subject’s baseline characteristics, group, and, optionally, time-varying covariates. Its covariance matrix <span class="math inline">\(\tilde{\Sigma}_i\)</span> is given by the overall estimated covariance matrix or, if different covariance matrices are assumed for different groups, the covariance matrix corresponding to subject <span class="math inline">\(i\)</span>’s group.</p>
-</div>
-<div id="sec:imputationRefBased" class="section level3" number="3.4.2">
-<h3><span class="header-section-number">3.4.2</span> Marginal imputation distribution for a subject - reference-based imputation methods</h3>
-<p>For each subject <span class="math inline">\(i\)</span>, we calculate the mean and covariance matrix of the complete <span class="math inline">\(J\)</span>-dimensional outcome vector from all assessment visits as for the MAR case and denote them by <span class="math inline">\(\mu_i\)</span> and <span class="math inline">\(\Sigma_i\)</span>.
-For reference-based imputation methods, a corresponding reference group is also required for each group. Typically, the reference group for the intervention group will be the control group.
-The reference mean <span class="math inline">\(\mu_{ref,i}\)</span> is defined as the predicted mean from the imputation model conditional on the reference group (rather than the actual group subject <span class="math inline">\(i\)</span> belongs to) and the subject’s baseline characteristics.
-The reference covariance matrix <span class="math inline">\(\Sigma_{ref,i}\)</span> is the overall estimated covariance matrix or, if different covariance matrices are assumed for different groups, the estimated covariance matrix corresponding to the reference group. In principle, time-varying covariates could also be included in reference-based imputation methods. However, this is only sensible for external time-varying covariates (e.g. calendar time of the visit) and not for internal time-varying covariates (e.g. treatment discontinuation) because the latter likely depend on the actual treatment group and it is typically not sensible to assume the same trajectory of the time-varying covariate for the reference group.</p>
-<p>Based on these means and covariance matrices, the subject’s marginal imputation distribution for the reference-based imputation methods is then calculated as detailed in <span class="citation">Carpenter, Roger, and Kenward (<a href="#ref-CarpenterEtAl2013">2013, sec. 4.3</a>)</span>.
-Denote the mean and covariance matrix of this marginal imputation distribution by <span class="math inline">\(\tilde{\mu}_i\)</span> and <span class="math inline">\(\tilde{\Sigma}_i\)</span>. Recall that the subject’s first visit which is affected by the ICE is denoted by <span class="math inline">\(\tilde{t}_i \in \{1,\ldots,J\}\)</span> (and visit <span class="math inline">\(\tilde{t}_i-1\)</span> is the last visit unaffected by the ICE). The marginal distribution for the patient <span class="math inline">\(i\)</span> is then built according to the specific assumption for the data up to and post the ICE as follows:</p>
-<ol style="list-style-type: decimal">
-<li><p>Jump to reference (JR): the patient’s outcome distribution is normally distributed with the following mean:
-<span class="math display">\[\tilde{\mu}_i = (\mu_i[1], \dots, \mu_i[\tilde{t}_i-1], \mu_{ref,i}[\tilde{t}_i], \dots, \mu_{ref,i}[J])^T.\]</span>
-The covariance matrix is constructed as follows. First, we partition the covariance matrices <span class="math inline">\(\Sigma_i\)</span> and <span class="math inline">\(\Sigma_{ref,i}\)</span> in blocks according to the time of the ICE <span class="math inline">\(\tilde{t}_i\)</span>:
-<span class="math display">\[
+</section>
+<section id="sec:imputationRefBased" class="level3">
+<h3 class="anchored" data-anchor-id="sec:imputationRefBased">Marginal imputation distribution for a subject - reference-based imputation methods</h3>
+<p>For each subject <span class="math inline">\(i\)</span>, we calculate the mean and covariance matrix of the complete <span class="math inline">\(J\)</span>-dimensional outcome vector from all assessment visits as for the MAR case and denote them by <span class="math inline">\(\mu_i\)</span> and <span class="math inline">\(\Sigma_i\)</span>. For reference-based imputation methods, a corresponding reference group is also required for each group. Typically, the reference group for the intervention group will be the control group. The reference mean <span class="math inline">\(\mu_{ref,i}\)</span> is defined as the predicted mean from the imputation model conditional on the reference group (rather than the actual group subject <span class="math inline">\(i\)</span> belongs to) and the subject’s baseline characteristics. The reference covariance matrix <span class="math inline">\(\Sigma_{ref,i}\)</span> is the overall estimated covariance matrix or, if different covariance matrices are assumed for different groups, the estimated covariance matrix corresponding to the reference group. In principle, time-varying covariates could also be included in reference-based imputation methods. However, this is only sensible for external time-varying covariates (e.g.&nbsp;calendar time of the visit) and not for internal time-varying covariates (e.g.&nbsp;treatment discontinuation) because the latter likely depend on the actual treatment group and it is typically not sensible to assume the same trajectory of the time-varying covariate for the reference group.</p>
+<p>Based on these means and covariance matrices, the subject’s marginal imputation distribution for the reference-based imputation methods is then calculated as detailed in <span class="citation" data-cites="CarpenterEtAl2013">Carpenter, Roger, and Kenward (<a href="#ref-CarpenterEtAl2013" role="doc-biblioref">2013, sec. 4.3</a>)</span>. Denote the mean and covariance matrix of this marginal imputation distribution by <span class="math inline">\(\tilde{\mu}_i\)</span> and <span class="math inline">\(\tilde{\Sigma}_i\)</span>. Recall that the subject’s first visit which is affected by the ICE is denoted by <span class="math inline">\(\tilde{t}_i \in \{1,\ldots,J\}\)</span> (and visit <span class="math inline">\(\tilde{t}_i-1\)</span> is the last visit unaffected by the ICE). The marginal distribution for the patient <span class="math inline">\(i\)</span> is then built according to the specific assumption for the data up to and post the ICE as follows:</p>
+<ol type="1">
+<li><p>Jump to reference (JR): the patient’s outcome distribution is normally distributed with the following mean: <span class="math display">\[\tilde{\mu}_i = (\mu_i[1], \dots, \mu_i[\tilde{t}_i-1], \mu_{ref,i}[\tilde{t}_i], \dots, \mu_{ref,i}[J])^T.\]</span> The covariance matrix is constructed as follows. First, we partition the covariance matrices <span class="math inline">\(\Sigma_i\)</span> and <span class="math inline">\(\Sigma_{ref,i}\)</span> in blocks according to the time of the ICE <span class="math inline">\(\tilde{t}_i\)</span>: <span class="math display">\[
 \Sigma_{i} = \begin{bmatrix} \Sigma_{i, 11} &amp; \Sigma_{i, 12} \\
 \Sigma_{i, 21} &amp; \Sigma_{i,22} \\
 \end{bmatrix}
-\]</span>
-<span class="math display">\[
+\]</span> <span class="math display">\[
 \Sigma_{ref,i} = \begin{bmatrix} \Sigma_{ref, i, 11} &amp; \Sigma_{ref, i, 12} \\
 \Sigma_{ref, i, 21} &amp; \Sigma_{ref, i,22} \\
 \end{bmatrix}.
-\]</span>
-We want the covariance matrix <span class="math inline">\(\tilde{\Sigma}_i\)</span> to match <span class="math inline">\(\Sigma_i\)</span> for the pre-deviation measurements, and <span class="math inline">\(\Sigma_{ref,i}\)</span> for the conditional components for the post-deviation given the pre-deviation measurements. The solution is derived in <span class="citation">Carpenter, Roger, and Kenward (<a href="#ref-CarpenterEtAl2013">2013, sec. 4.3</a>)</span> and is given by:
-<span class="math display">\[
+\]</span> We want the covariance matrix <span class="math inline">\(\tilde{\Sigma}_i\)</span> to match <span class="math inline">\(\Sigma_i\)</span> for the pre-deviation measurements, and <span class="math inline">\(\Sigma_{ref,i}\)</span> for the conditional components for the post-deviation given the pre-deviation measurements. The solution is derived in <span class="citation" data-cites="CarpenterEtAl2013">Carpenter, Roger, and Kenward (<a href="#ref-CarpenterEtAl2013" role="doc-biblioref">2013, sec. 4.3</a>)</span> and is given by: <span class="math display">\[
 \begin{matrix}
 \tilde{\Sigma}_{i,11} = \Sigma_{i, 11} \\
 \tilde{\Sigma}_{i, 21} = \Sigma_{ref,i, 21} \Sigma^{-1}_{ref,i, 11} \Sigma_{i, 11} \\
 \tilde{\Sigma}_{i, 22} = \Sigma_{ref, i, 22} - \Sigma_{ref,i, 21} \Sigma^{-1}_{ref,i, 11} (\Sigma_{ref,i, 11} - \Sigma_{i,11}) \Sigma^{-1}_{ref,i, 11} \Sigma_{ref,i, 12}.
 \end{matrix}
 \]</span></p></li>
-<li><p>Copy increments in reference (CIR): the patient’s outcome distribution is normally distributed with the following mean:
-<span class="math display">\[
+<li><p>Copy increments in reference (CIR): the patient’s outcome distribution is normally distributed with the following mean: <span class="math display">\[
 \begin{split}
 \tilde{\mu}_i =&amp; (\mu_i[1], \dots, \mu_i[\tilde{t}_i-1], \mu_i[\tilde{t}_i-1] + (\mu_{ref,i}[\tilde{t}_i] - \mu_{ref,i}[\tilde{t}_i-1]), \dots,\\ &amp;
 \mu_i[\tilde{t}_i-1]+(\mu_{ref,i}[J] - \mu_{ref,i}[\tilde{t}_i-1]))^T.
 \end{split}
-\]</span>
-The covariance matrix is derived as for the JR method.</p></li>
-<li><p>Copy reference (CR): the patient’s outcome distribution is normally distributed with mean and covariance matrix taken from the reference group:
-<span class="math display">\[
+\]</span> The covariance matrix is derived as for the JR method.</p></li>
+<li><p>Copy reference (CR): the patient’s outcome distribution is normally distributed with mean and covariance matrix taken from the reference group: <span class="math display">\[
 \tilde{\mu}_i = \mu_{ref,i}
-\]</span>
-<span class="math display">\[
+\]</span> <span class="math display">\[
 \tilde{\Sigma}_i = \Sigma_{ref,i}.
 \]</span></p></li>
-<li><p>Last mean carried forward (LMCF): the patient’s outcome distribution is normally distributed with the following mean:
-<span class="math display">\[ \tilde{\mu}_i = (\mu_i[1], \dots, \mu_i[\tilde{t}_i-1], \mu_i[\tilde{t}_i-1], \dots, \mu_i[\tilde{t}_i-1])&#39;\]</span>
-and covariance matrix: <span class="math display">\[ \tilde{\Sigma}_i = \Sigma_i.\]</span></p></li>
+<li><p>Last mean carried forward (LMCF): the patient’s outcome distribution is normally distributed with the following mean: <span class="math display">\[ \tilde{\mu}_i = (\mu_i[1], \dots, \mu_i[\tilde{t}_i-1], \mu_i[\tilde{t}_i-1], \dots, \mu_i[\tilde{t}_i-1])'\]</span> and covariance matrix: <span class="math display">\[ \tilde{\Sigma}_i = \Sigma_i.\]</span></p></li>
 </ol>
-</div>
-<div id="sec:imputationRandomConditionalMean" class="section level3" number="3.4.3">
-<h3><span class="header-section-number">3.4.3</span> Imputation of missing outcome data</h3>
+</section>
+<section id="sec:imputationRandomConditionalMean" class="level3">
+<h3 class="anchored" data-anchor-id="sec:imputationRandomConditionalMean">Imputation of missing outcome data</h3>
 <p>The joint marginal multivariate normal imputation distribution of subject <span class="math inline">\(i\)</span>’s observed and missing outcome data has mean <span class="math inline">\(\tilde{\mu}_i\)</span> and covariance matrix <span class="math inline">\(\tilde{\Sigma}_i\)</span> as defined above. The actual imputation of the missing outcome data is obtained by conditioning this marginal distribution on the subject’s observed outcome data. Of note, this approach is valid regardless whether the subject has intermittent or terminal missing data.</p>
-<p>The conditional distribution used for the imputation is again a multivariate normal distribution and explicit formulas for the conditional mean and covariance are readily available. For completeness, we report them here with the notation and terminology of our setting. The marginal distribution for the outcome of patient <span class="math inline">\(i\)</span> is <span class="math inline">\(Y_i \sim N(\tilde{\mu}_i, \tilde{\Sigma}_i)\)</span> and the outcome <span class="math inline">\(Y_i\)</span> can be decomposed in the observed (<span class="math inline">\(Y_{i,!}\)</span>) and the unobserved (<span class="math inline">\(Y_{i,?}\)</span>) components. Analogously the mean <span class="math inline">\(\tilde{\mu}_i\)</span> can be decomposed as <span class="math inline">\((\tilde{\mu}_{i,!},\tilde{\mu}_{i,?})\)</span> and the covariance <span class="math inline">\(\tilde{\Sigma}_i\)</span> as:
-<span class="math display">\[
+<p>The conditional distribution used for the imputation is again a multivariate normal distribution and explicit formulas for the conditional mean and covariance are readily available. For completeness, we report them here with the notation and terminology of our setting. The marginal distribution for the outcome of patient <span class="math inline">\(i\)</span> is <span class="math inline">\(Y_i \sim N(\tilde{\mu}_i, \tilde{\Sigma}_i)\)</span> and the outcome <span class="math inline">\(Y_i\)</span> can be decomposed in the observed (<span class="math inline">\(Y_{i,!}\)</span>) and the unobserved (<span class="math inline">\(Y_{i,?}\)</span>) components. Analogously the mean <span class="math inline">\(\tilde{\mu}_i\)</span> can be decomposed as <span class="math inline">\((\tilde{\mu}_{i,!},\tilde{\mu}_{i,?})\)</span> and the covariance <span class="math inline">\(\tilde{\Sigma}_i\)</span> as: <span class="math display">\[
 \tilde{\Sigma}_i =
 \begin{bmatrix}
 \tilde{\Sigma}_{i, !!} &amp; \tilde{\Sigma}_{i,!?} \\
 \tilde{\Sigma}_{i, ?!} &amp; \tilde{\Sigma}_{i, ??}
 \end{bmatrix}.
-\]</span>
-The conditional distribution of <span class="math inline">\(Y_{i,?}\)</span> conditional on <span class="math inline">\(Y_{i,!}\)</span> is then a multivariate normal distribution with expectation
-<span class="math display">\[
+\]</span> The conditional distribution of <span class="math inline">\(Y_{i,?}\)</span> conditional on <span class="math inline">\(Y_{i,!}\)</span> is then a multivariate normal distribution with expectation <span class="math display">\[
 E(Y_{i,?} \vert Y_{i,!})= \tilde{\mu}_{i,?} + \tilde{\Sigma}_{i, ?!} \tilde{\Sigma}_{i,!!}^{-1} (Y_{i,!} - \tilde{\mu}_{i,!})
-\]</span>
-and covariance matrix
-<span class="math display">\[
+\]</span> and covariance matrix <span class="math display">\[
 Cov(Y_{i,?} \vert Y_{i,!}) = \tilde{\Sigma}_{i,??} - \tilde{\Sigma}_{i,?!} \tilde{\Sigma}_{i,!!}^{-1} \tilde{\Sigma}_{i,!?}.
 \]</span></p>
 <p>Conventional random imputation consists in sampling from this conditional multivariate normal distribution. Conditional mean imputation imputes missing values with the deterministic conditional expectation <span class="math inline">\(E(Y_{i,?} \vert Y_{i,!})\)</span>.</p>
-</div>
-</div>
-<div id="sec:deltaAdjustment" class="section level2" number="3.5">
-<h2><span class="header-section-number">3.5</span> <span class="math inline">\(\delta\)</span>-adjustment</h2>
-<p>A <em>marginal</em> <span class="math inline">\(\delta\)</span>-adjustment approach similar to the “five macros” in SAS is implemented (<span class="citation">Roger (<a href="#ref-FiveMacros">2021</a>)</span>), i.e. fixed non-stochastic values are added after the multivariate normal imputation step and prior to the analysis.
-This is relevant for sensitivity analyses in order to make imputed data systematically worse or better, respectively, than observed data. In addition, some authors have suggested <span class="math inline">\(\delta\)</span>-type adjustments to implement a composite strategy for continuous outcomes (<span class="citation">Darken et al. (<a href="#ref-Darken2020">2020</a>)</span>).</p>
-<p>The implementation provides full flexibility regarding the specific implementation of the <span class="math inline">\(\delta\)</span>-adjustment, i.e. the value that is added may depend on the randomized treatment group, the timing of the subject’s ICE, and other factors. For suggestions and case studies regarding this topic, we refer to <span class="citation">Cro et al. (<a href="#ref-CroEtAlTutorial2020">2020</a>)</span>.</p>
-</div>
-<div id="sec:analysis" class="section level2" number="3.6">
-<h2><span class="header-section-number">3.6</span> Analysis step</h2>
+</section>
+</section>
+<section id="sec:deltaAdjustment" class="level2">
+<h2 class="anchored" data-anchor-id="sec:deltaAdjustment"><span class="math inline">\(\delta\)</span>-adjustment</h2>
+<p>A <em>marginal</em> <span class="math inline">\(\delta\)</span>-adjustment approach similar to the “five macros” in SAS is implemented (<span class="citation" data-cites="FiveMacros">Roger (<a href="#ref-FiveMacros" role="doc-biblioref">2021</a>)</span>), i.e.&nbsp;fixed non-stochastic values are added after the multivariate normal imputation step and prior to the analysis. This is relevant for sensitivity analyses in order to make imputed data systematically worse or better, respectively, than observed data. In addition, some authors have suggested <span class="math inline">\(\delta\)</span>-type adjustments to implement a composite strategy for continuous outcomes (<span class="citation" data-cites="Darken2020">Darken et al. (<a href="#ref-Darken2020" role="doc-biblioref">2020</a>)</span>).</p>
+<p>The implementation provides full flexibility regarding the specific implementation of the <span class="math inline">\(\delta\)</span>-adjustment, i.e.&nbsp;the value that is added may depend on the randomized treatment group, the timing of the subject’s ICE, and other factors. For suggestions and case studies regarding this topic, we refer to <span class="citation" data-cites="CroEtAlTutorial2020">Cro et al. (<a href="#ref-CroEtAlTutorial2020" role="doc-biblioref">2020</a>)</span>.</p>
+</section>
+<section id="sec:analysis" class="level2">
+<h2 class="anchored" data-anchor-id="sec:analysis">Analysis step</h2>
 <p>After data imputation, a standard analysis model can be applied to the completed data resulting in a treatment effect estimate. As the imputed data no longer contains missing values, the analysis model is often simple. For example, it can be an analysis of covariance (ANCOVA) model with the outcome (or the change in the outcome from baseline) at a specific visit j as the dependent variable, the randomized treatment group as the primary covariate and, typically, adjustment for the same baseline covariates as for the imputation model.</p>
-</div>
-<div id="sec:pooling" class="section level2" number="3.7">
-<h2><span class="header-section-number">3.7</span> Pooling step for inference of (approximate) Bayesian MI and Rubin’s rules</h2>
+</section>
+<section id="sec:pooling" class="level2">
+<h2 class="anchored" data-anchor-id="sec:pooling">Pooling step for inference of (approximate) Bayesian MI and Rubin’s rules</h2>
 <p>Assume that the analysis model has been applied to <span class="math inline">\(M\)</span> multiple imputed random datasets which resulted in <span class="math inline">\(m\)</span> treatment effect estimates <span class="math inline">\(\hat{\theta}_m\)</span> (<span class="math inline">\(m=1,\ldots,M\)</span>) with corresponding standard error <span class="math inline">\(SE_m\)</span> and (if available) degrees of freedom <span class="math inline">\(\nu_{com}\)</span>. If degrees of freedom are not available for an analysis model, set <span class="math inline">\(\nu_{com}=\infty\)</span> for inference based on the normal distribution.</p>
-<p>Rubin’s rules are used for pooling the treatment effect estimates and corresponding variances estimates from the analysis steps across the <span class="math inline">\(M\)</span> multiple imputed datasets. According to Rubin’s rules, the final estimate of the treatment effect is calculated as the sample mean over the <span class="math inline">\(M\)</span> treatment effect estimates:
-<span class="math display">\[
+<p>Rubin’s rules are used for pooling the treatment effect estimates and corresponding variances estimates from the analysis steps across the <span class="math inline">\(M\)</span> multiple imputed datasets. According to Rubin’s rules, the final estimate of the treatment effect is calculated as the sample mean over the <span class="math inline">\(M\)</span> treatment effect estimates: <span class="math display">\[
 \hat{\theta} = \frac{1}{M} \sum_{m = 1}^M \hat{\theta}_m.
-\]</span>
-The pooled variance is based on two components that reflect the within and the between variance of the treatment effects across the multiple imputed datasets:
-<span class="math display">\[
+\]</span> The pooled variance is based on two components that reflect the within and the between variance of the treatment effects across the multiple imputed datasets: <span class="math display">\[
 V(\hat{\theta}) = V_W(\hat{\theta}) + (1 + \frac{1}{M}) V_B(\hat{\theta})
-\]</span>
-where <span class="math inline">\(V_W(\hat{\theta}) = \frac{1}{M}\sum_{m = 1}^M SE^2_m\)</span> is the within-variance and <span class="math inline">\(V_B(\hat{\theta}) = \frac{1}{M-1} \sum_{m = 1}^M (\hat{\theta}_m - \hat{\theta})^2\)</span> is the between-variance.</p>
+\]</span> where <span class="math inline">\(V_W(\hat{\theta}) = \frac{1}{M}\sum_{m = 1}^M SE^2_m\)</span> is the within-variance and <span class="math inline">\(V_B(\hat{\theta}) = \frac{1}{M-1} \sum_{m = 1}^M (\hat{\theta}_m - \hat{\theta})^2\)</span> is the between-variance.</p>
 <p>Confidence intervals and tests of the null hypothesis <span class="math inline">\(H_0: \theta=\theta_0\)</span> are based on the <span class="math inline">\(t\)</span>-statistics <span class="math inline">\(T\)</span>:</p>
-<p><span class="math display">\[ T= (\hat{\theta}-\theta_0)/\sqrt{V(\hat{\theta})}. \]</span>
-Under the null hypothesis, <span class="math inline">\(T\)</span> has an approximate <span class="math inline">\(t\)</span>-distribution with <span class="math inline">\(\nu\)</span> degrees of freedom. <span class="math inline">\(\nu\)</span> is calculated according to the Barnard and Rubin approximation, see <span class="citation">Barnard and Rubin (<a href="#ref-Barnard1999">1999</a>)</span> (formula 3) or <span class="citation">Little and Rubin (<a href="#ref-LittleRubin1992">2002</a>)</span> (formula (5.24), page 87):</p>
+<p><span class="math display">\[ T= (\hat{\theta}-\theta_0)/\sqrt{V(\hat{\theta})}. \]</span> Under the null hypothesis, <span class="math inline">\(T\)</span> has an approximate <span class="math inline">\(t\)</span>-distribution with <span class="math inline">\(\nu\)</span> degrees of freedom. <span class="math inline">\(\nu\)</span> is calculated according to the Barnard and Rubin approximation, see <span class="citation" data-cites="Barnard1999">Barnard and Rubin (<a href="#ref-Barnard1999" role="doc-biblioref">1999</a>)</span> (formula 3) or <span class="citation" data-cites="LittleRubin1992">Little and Rubin (<a href="#ref-LittleRubin1992" role="doc-biblioref">2002</a>)</span> (formula (5.24), page 87):</p>
 <p><span class="math display">\[
 \nu = \frac{\nu_{old}* \nu_{obs}}{\nu_{old} + \nu_{obs}}
-\]</span>
-with
-<span class="math display">\[
+\]</span> with <span class="math display">\[
 \nu_{old} = \frac{M-1}{\lambda^2} \quad\mbox{and}\quad \nu_{obs} = \frac{\nu_{com} + 1}{\nu_{com} + 3} \nu_{com} (1 - \lambda)
-\]</span>
-where <span class="math inline">\(\lambda = \frac{(1 + \frac{1}{M})V_B(\hat{\theta})}{V(\hat{\theta})}\)</span> is the fraction of missing information.</p>
-</div>
-<div id="sec:bootInference" class="section level2" number="3.8">
-<h2><span class="header-section-number">3.8</span> Bootstrap and jackknife inference for conditional mean imputation</h2>
-<div id="point-estimate-of-the-treatment-effect" class="section level3" number="3.8.1">
-<h3><span class="header-section-number">3.8.1</span> Point estimate of the treatment effect</h3>
-<p>The point estimator is obtained by applying the analysis model (Section <a href="#sec:analysis">3.6</a>) to a single conditional mean imputation of the missing data (see Section <a href="#sec:imputationRandomConditionalMean">3.4.3</a>) based on the REML estimator of the parameters of the imputation model (see Section <a href="#sec:imputationModelREML">3.3.2</a>). We denote this treatment effect estimator by <span class="math inline">\(\hat{\theta}\)</span>.</p>
-<p>As demonstrated in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span> (Section 2.4), this treatment effect estimator is valid if the analysis model is an ANCOVA model or, more generally, if the treatment effect estimator is a linear function of the imputed outcome vector. Indeed, if this is the case, then the estimator is identical to the pooled treatment effect across multiple random REML imputation with an infinite number of imputations and corresponds to a computationally efficient implementation of a proposal by <span class="citation">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021">2021</a>)</span>. We expect that the conditional mean imputation method is also applicable to some other analysis models (e.g. for general MMRM analysis models) but this has not been formally justified.</p>
-</div>
-<div id="jackknife-standard-errors-confidence-intervals-ci-and-tests-for-the-treatment-effect" class="section level3" number="3.8.2">
-<h3><span class="header-section-number">3.8.2</span> Jackknife standard errors, confidence intervals (CI) and tests for the treatment effect</h3>
-<p>For a dataset containing <span class="math inline">\(n\)</span> subjects, the jackknife standard error depends on treatment effect estimates <span class="math inline">\(\hat{\theta}_{(-b)}\)</span> (<span class="math inline">\(b=1,\ldots,n\)</span>) from samples of the original dataset which leave out the observation from subject <span class="math inline">\(b\)</span>. As described previously, to obtain treatment effect estimates for leave-one-subject-out datasets, all
-steps of the imputation procedure (i.e. imputation, conditional mean imputation, and analysis steps) need to be repeated on this new dataset.</p>
-<p>Then, the <em>jackknife standard error</em> is defined as
-<span class="math display">\[\hat{se}_{jack}=[\frac{(n-1)}{n}\cdot\sum_{b=1}^{n} (\hat{\theta}_{(-b)}-\bar{\theta}_{(.)})^2]^{1/2}\]</span>
-where <span class="math inline">\(\bar{\theta}_{(.)}\)</span> denotes the mean of all jackknife estimates (<span class="citation">Efron and Tibshirani (<a href="#ref-EfronTibs1994">1994</a>)</span>, chapter 10). The corresponding two-sided normal approximation <span class="math inline">\(1-\alpha\)</span> CI is defined as <span class="math inline">\(\hat{\theta}\pm z^{1-\alpha/2}\cdot \hat{se}_{jack}\)</span> where <span class="math inline">\(\hat{\theta}\)</span> is the treatment effect estimate from the original dataset. Tests of the null hypothesis <span class="math inline">\(H_0: \theta=\theta_0\)</span> are then based on the <span class="math inline">\(Z\)</span>-score <span class="math inline">\(Z=(\hat{\theta}-\theta_0)/\hat{se}_{jack}\)</span> using a standard normal approximation.</p>
-<p>A simulation study reported in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span> demonstrated exact protection of the type I error for jackknife-based inference with a relatively low sample size (n = 100 per group) and a substantial amount of missing data (&gt;25% of subjects with an ICE).</p>
-</div>
-<div id="bootstrap-standard-errors-confidence-intervals-ci-and-tests-for-the-treatment-effect" class="section level3" number="3.8.3">
-<h3><span class="header-section-number">3.8.3</span> Bootstrap standard errors, confidence intervals (CI) and tests for the treatment effect</h3>
-<p>As an alternative to the jackknife, the bootstrap has also been implemented in <code>rbmi</code> (<span class="citation">Efron and Tibshirani (<a href="#ref-EfronTibs1994">1994</a>)</span>, <span class="citation">Davison and Hinkley (<a href="#ref-DavisonHinkley1997">1997</a>)</span>).</p>
-<p>Two different bootstrap methods are implemented in <code>rbmi</code>: Methods based on the <em>bootstrap standard error and the normal approximation</em> and <em>percentile bootstrap methods</em>. Denote the treatment effect estimates from <span class="math inline">\(B\)</span> bootstrap samples by <span class="math inline">\(\hat{\theta}^*_b\)</span> (<span class="math inline">\(b=1,\ldots,B\)</span>). The <em>bootstrap standard error</em> <span class="math inline">\(\hat{se}_{boot}\)</span> is defined as the empirical standard deviation of the bootstrapped treatment effect estimates. Confidence intervals and tests based on the bootstrap standard error can then be constructed in the same way as for the jackknife. Confidence intervals using the <em>percentile bootstrap</em> are based on empirical quantiles of the bootstrap distribution and corresponding statistical tests are implemented in <code>rbmi</code> via inversion of the confidence interval. Explicit formulas for bootstrap inference as implemented in the <code>rbmi</code> package and some considerations regarding the required number of bootstrap samples are included in the Appendix of <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>.</p>
-<p>A simulation study reported in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span> demonstrated a small inflation of the type I error rate for inference based on the bootstrap standard error (up to <span class="math inline">\(5.3\%\)</span> for a nominal type I error rate of <span class="math inline">\(5\%\)</span>) for a sample size of n = 100 per group and a substantial amount of missing data (&gt;25% of subjects with an ICE). Based on this simulations, we recommend the jackknife over the bootstrap for inference because it performed better in our simulation study and is typically much faster to
-compute than the bootstrap.</p>
-</div>
-</div>
-<div id="sec:poolbmlmi" class="section level2" number="3.9">
-<h2><span class="header-section-number">3.9</span> Pooling step for inference of the bootstrapped MI methods</h2>
+\]</span> where <span class="math inline">\(\lambda = \frac{(1 + \frac{1}{M})V_B(\hat{\theta})}{V(\hat{\theta})}\)</span> is the fraction of missing information.</p>
+<section id="monte-carlo-standard-error" class="level3">
+<h3 class="anchored" data-anchor-id="monte-carlo-standard-error">Monte Carlo standard error</h3>
+<p>The Bayesian approach to multiple imputation yields probabilistic results. The precision of the MC algorithm can be quantified through the MC standard error (MCSE). Such quantification is important for judging the scientific reproducibility of the results, e.g., when computational parameters such as the seed are changed. For the treatment effect estimates <span class="math inline">\(\hat{\theta}\)</span> obtained through Rubin’s rule as described above, a closed-form expression for the MCSE exists <span class="citation" data-cites="Royston2009">(<a href="#ref-Royston2009" role="doc-biblioref">Royston, Carlin, and White 2009</a>)</span>:</p>
+<p><span class="math display">\[
+\text{MCSE}(\hat{\theta}) = \sqrt{V_B(\hat{\theta}) / M}
+\]</span></p>
+<p>However, since decisions are generally based not just on the treatment effect estimate but also on the p-value, it is important to calculate the corresponding MCSE. No closed-form expression exists for the MCSE of the p-value, but as argued by <span class="citation" data-cites="Royston2009">Royston, Carlin, and White (<a href="#ref-Royston2009" role="doc-biblioref">2009</a>)</span>, the Jackknife method could be used to estimate the MCSE. Let <span class="math inline">\(\theta\)</span> be the parameter of interest (e.g.&nbsp;the p-value) and let <span class="math inline">\(\hat{\theta}_{(-m)}\)</span> be the pooled treatment effect estimate from the <span class="math inline">\(M-1\)</span> imputed datasets after removing the <span class="math inline">\(m\)</span>-th imputed dataset. The MCSE of the overall estimate <span class="math inline">\(\hat{\theta}\)</span> is then given by:</p>
+<p><span class="math display">\[
+\text{MCSE}(\hat{\theta}) = \sqrt{\frac{1}{M(M-1)} \sum_{m=1}^{M} (\hat{\theta}_{(-m)} - \hat{\theta})^2}
+\]</span></p>
+</section>
+</section>
+<section id="sec:bootInference" class="level2">
+<h2 class="anchored" data-anchor-id="sec:bootInference">Bootstrap and jackknife inference for conditional mean imputation</h2>
+<section id="point-estimate-of-the-treatment-effect" class="level3">
+<h3 class="anchored" data-anchor-id="point-estimate-of-the-treatment-effect">Point estimate of the treatment effect</h3>
+<p>The point estimator is obtained by applying the analysis model (Section @ref(sec:analysis)) to a single conditional mean imputation of the missing data (see Section @ref(sec:imputationRandomConditionalMean)) based on the REML estimator of the parameters of the imputation model (see Section @ref(sec:imputationModelREML)). We denote this treatment effect estimator by <span class="math inline">\(\hat{\theta}\)</span>.</p>
+<p>As demonstrated in <span class="citation" data-cites="Wolbers2021">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span> (Section 2.4), this treatment effect estimator is valid if the analysis model is an ANCOVA model or, more generally, if the treatment effect estimator is a linear function of the imputed outcome vector. Indeed, if this is the case, then the estimator is identical to the pooled treatment effect across multiple random REML imputation with an infinite number of imputations and corresponds to a computationally efficient implementation of a proposal by <span class="citation" data-cites="vonHippelBartlett2021">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021" role="doc-biblioref">2021</a>)</span>. We expect that the conditional mean imputation method is also applicable to some other analysis models (e.g.&nbsp;for general MMRM analysis models) but this has not been formally justified.</p>
+</section>
+<section id="jackknife-standard-errors-confidence-intervals-ci-and-tests-for-the-treatment-effect" class="level3">
+<h3 class="anchored" data-anchor-id="jackknife-standard-errors-confidence-intervals-ci-and-tests-for-the-treatment-effect">Jackknife standard errors, confidence intervals (CI) and tests for the treatment effect</h3>
+<p>For a dataset containing <span class="math inline">\(n\)</span> subjects, the jackknife standard error depends on treatment effect estimates <span class="math inline">\(\hat{\theta}_{(-b)}\)</span> (<span class="math inline">\(b=1,\ldots,n\)</span>) from samples of the original dataset which leave out the observation from subject <span class="math inline">\(b\)</span>. As described previously, to obtain treatment effect estimates for leave-one-subject-out datasets, all steps of the imputation procedure (i.e.&nbsp;imputation, conditional mean imputation, and analysis steps) need to be repeated on this new dataset.</p>
+<p>Then, the <em>jackknife standard error</em> is defined as <span class="math display">\[\hat{se}_{jack}=[\frac{(n-1)}{n}\cdot\sum_{b=1}^{n} (\hat{\theta}_{(-b)}-\bar{\theta}_{(.)})^2]^{1/2}\]</span> where <span class="math inline">\(\bar{\theta}_{(.)}\)</span> denotes the mean of all jackknife estimates (<span class="citation" data-cites="EfronTibs1994">Efron and Tibshirani (<a href="#ref-EfronTibs1994" role="doc-biblioref">1994</a>)</span>, chapter 10). The corresponding two-sided normal approximation <span class="math inline">\(1-\alpha\)</span> CI is defined as <span class="math inline">\(\hat{\theta}\pm z^{1-\alpha/2}\cdot \hat{se}_{jack}\)</span> where <span class="math inline">\(\hat{\theta}\)</span> is the treatment effect estimate from the original dataset. Tests of the null hypothesis <span class="math inline">\(H_0: \theta=\theta_0\)</span> are then based on the <span class="math inline">\(Z\)</span>-score <span class="math inline">\(Z=(\hat{\theta}-\theta_0)/\hat{se}_{jack}\)</span> using a standard normal approximation.</p>
+<p>A simulation study reported in <span class="citation" data-cites="Wolbers2021">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span> demonstrated exact protection of the type I error for jackknife-based inference with a relatively low sample size (n = 100 per group) and a substantial amount of missing data (&gt;25% of subjects with an ICE).</p>
+</section>
+<section id="bootstrap-standard-errors-confidence-intervals-ci-and-tests-for-the-treatment-effect" class="level3">
+<h3 class="anchored" data-anchor-id="bootstrap-standard-errors-confidence-intervals-ci-and-tests-for-the-treatment-effect">Bootstrap standard errors, confidence intervals (CI) and tests for the treatment effect</h3>
+<p>As an alternative to the jackknife, the bootstrap has also been implemented in <code>rbmi</code> (<span class="citation" data-cites="EfronTibs1994">Efron and Tibshirani (<a href="#ref-EfronTibs1994" role="doc-biblioref">1994</a>)</span>, <span class="citation" data-cites="DavisonHinkley1997">Davison and Hinkley (<a href="#ref-DavisonHinkley1997" role="doc-biblioref">1997</a>)</span>).</p>
+<p>Two different bootstrap methods are implemented in <code>rbmi</code>: Methods based on the <em>bootstrap standard error and the normal approximation</em> and <em>percentile bootstrap methods</em>. Denote the treatment effect estimates from <span class="math inline">\(B\)</span> bootstrap samples by <span class="math inline">\(\hat{\theta}^*_b\)</span> (<span class="math inline">\(b=1,\ldots,B\)</span>). The <em>bootstrap standard error</em> <span class="math inline">\(\hat{se}_{boot}\)</span> is defined as the empirical standard deviation of the bootstrapped treatment effect estimates. Confidence intervals and tests based on the bootstrap standard error can then be constructed in the same way as for the jackknife. Confidence intervals using the <em>percentile bootstrap</em> are based on empirical quantiles of the bootstrap distribution and corresponding statistical tests are implemented in <code>rbmi</code> via inversion of the confidence interval. Explicit formulas for bootstrap inference as implemented in the <code>rbmi</code> package and some considerations regarding the required number of bootstrap samples are included in the Appendix of <span class="citation" data-cites="Wolbers2021">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span>.</p>
+<p>A simulation study reported in <span class="citation" data-cites="Wolbers2021">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span> demonstrated a small inflation of the type I error rate for inference based on the bootstrap standard error (up to <span class="math inline">\(5.3\%\)</span> for a nominal type I error rate of <span class="math inline">\(5\%\)</span>) for a sample size of n = 100 per group and a substantial amount of missing data (&gt;25% of subjects with an ICE). Based on this simulations, we recommend the jackknife over the bootstrap for inference because it performed better in our simulation study and is typically much faster to compute than the bootstrap.</p>
+</section>
+</section>
+<section id="sec:poolbmlmi" class="level2">
+<h2 class="anchored" data-anchor-id="sec:poolbmlmi">Pooling step for inference of the bootstrapped MI methods</h2>
 <p>Assume that the analysis model has been applied to <span class="math inline">\(B\times D\)</span> multiple imputed random datasets which resulted in <span class="math inline">\(B\times D\)</span> treatment effect estimates <span class="math inline">\(\hat{\theta}_{bd}\)</span> (<span class="math inline">\(b=1,\ldots,B\)</span>; <span class="math inline">\(d=1,\ldots,D\)</span>).</p>
-<p>The final estimate of the treatment effect is calculated as the sample mean over the <span class="math inline">\(B*D\)</span> treatment effect estimates:
-<span class="math display">\[
+<p>The final estimate of the treatment effect is calculated as the sample mean over the <span class="math inline">\(B*D\)</span> treatment effect estimates: <span class="math display">\[
 \hat{\theta} = \frac{1}{BD} \sum_{b = 1}^B \sum_{d = 1}^D \hat{\theta}_{bd}.
-\]</span>
-The pooled variance is based on two components that reflect the variability within and between imputed bootstrap samples (<span class="citation">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021">2021</a>)</span>, formula 8.4):
-<span class="math display">\[
+\]</span> The pooled variance is based on two components that reflect the variability within and between imputed bootstrap samples (<span class="citation" data-cites="vonHippelBartlett2021">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021" role="doc-biblioref">2021</a>)</span>, formula 8.4): <span class="math display">\[
 V(\hat{\theta}) = (1 + \frac{1}{B})\frac{MSB - MSW}{D} + \frac{MSW}{BD}
 \]</span></p>
 <p>where <span class="math inline">\(MSB\)</span> is the mean square between the bootstrapped datasets, and <span class="math inline">\(MSW\)</span> is the mean square within the bootstrapped datasets and between the imputed datasets:</p>
@@ -680,187 +429,579 @@ V(\hat{\theta}) = (1 + \frac{1}{B})\frac{MSB - MSW}{D} + \frac{MSW}{BD}
 MSB &amp;= \frac{D}{B-1} \sum_{b = 1}^B (\bar{\theta_{b}} - \hat{\theta})^2 \\
 MSW &amp;= \frac{1}{B(D-1)} \sum_{b = 1}^B \sum_{d = 1}^D (\theta_{bd} - \bar{\theta_b})^2
 \end{align*}
-\]</span>
-where <span class="math inline">\(\bar{\theta_{b}}\)</span> is the mean across the <span class="math inline">\(D\)</span> estimates obtained from random imputation of the <span class="math inline">\(b\)</span>-th bootstrap sample.</p>
-<p>The degrees of freedom are estimated with the following formula (<span class="citation">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021">2021</a>)</span>, formula 8.6):</p>
+\]</span> where <span class="math inline">\(\bar{\theta_{b}}\)</span> is the mean across the <span class="math inline">\(D\)</span> estimates obtained from random imputation of the <span class="math inline">\(b\)</span>-th bootstrap sample.</p>
+<p>The degrees of freedom are estimated with the following formula (<span class="citation" data-cites="vonHippelBartlett2021">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021" role="doc-biblioref">2021</a>)</span>, formula 8.6):</p>
 <p><span class="math display">\[
 \nu = \frac{(MSB\cdot (B+1) - MSW\cdot B)^2}{\frac{MSB^2\cdot (B+1)^2}{B-1} + \frac{MSW^2\cdot B}{D-1}}
 \]</span></p>
 <p>Confidence intervals and tests of the null hypothesis <span class="math inline">\(H_0: \theta=\theta_0\)</span> are based on the <span class="math inline">\(t\)</span>-statistics <span class="math inline">\(T\)</span>:</p>
-<p><span class="math display">\[ T= (\hat{\theta}-\theta_0)/\sqrt{V(\hat{\theta})}. \]</span>
-Under the null hypothesis, <span class="math inline">\(T\)</span> has an approximate <span class="math inline">\(t\)</span>-distribution with <span class="math inline">\(\nu\)</span> degrees of freedom.</p>
-</div>
-<div id="sec:methodsComparison" class="section level2" number="3.10">
-<h2><span class="header-section-number">3.10</span> Comparison between the implemented approaches</h2>
-<div id="treatment-effect-estimation" class="section level3" number="3.10.1">
-<h3><span class="header-section-number">3.10.1</span> Treatment effect estimation</h3>
-<p>All approaches provide consistent treatment effect estimates for standard and reference-based imputation methods in case the analysis model of the completed datasets is a general linear model such as ANCOVA. Methods other than conditional mean imputation should also be valid for other analysis models. The validity of conditional mean imputation has only been formally demonstrated for analyses using the general linear model (<span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022, sec. 2.4</a>)</span>) though it may also be applicable more widely (e.g. for general MMRM analysis models).</p>
+<p><span class="math display">\[ T= (\hat{\theta}-\theta_0)/\sqrt{V(\hat{\theta})}. \]</span> Under the null hypothesis, <span class="math inline">\(T\)</span> has an approximate <span class="math inline">\(t\)</span>-distribution with <span class="math inline">\(\nu\)</span> degrees of freedom.</p>
+</section>
+<section id="sec:methodsComparison" class="level2">
+<h2 class="anchored" data-anchor-id="sec:methodsComparison">Comparison between the implemented approaches</h2>
+<section id="treatment-effect-estimation" class="level3">
+<h3 class="anchored" data-anchor-id="treatment-effect-estimation">Treatment effect estimation</h3>
+<p>All approaches provide consistent treatment effect estimates for standard and reference-based imputation methods in case the analysis model of the completed datasets is a general linear model such as ANCOVA. Methods other than conditional mean imputation should also be valid for other analysis models. The validity of conditional mean imputation has only been formally demonstrated for analyses using the general linear model (<span class="citation" data-cites="Wolbers2021">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022, sec. 2.4</a>)</span>) though it may also be applicable more widely (e.g.&nbsp;for general MMRM analysis models).</p>
 <p>Treatment effects based on conditional mean imputation are deterministic. All other methods are affected by Monte Carlo sampling error and the precision of estimates depends on the number of imputations or bootstrap samples, respectively.</p>
-</div>
-<div id="standard-errors-of-the-treatment-effect" class="section level3" number="3.10.2">
-<h3><span class="header-section-number">3.10.2</span> Standard errors of the treatment effect</h3>
+</section>
+<section id="standard-errors-of-the-treatment-effect" class="level3">
+<h3 class="anchored" data-anchor-id="standard-errors-of-the-treatment-effect">Standard errors of the treatment effect</h3>
 <p>All approaches for imputation under a MAR assumption provide consistent estimates of the frequentist standard error.</p>
-<p>For reference-based imputation methods, the situation is more complicated and two different types of variance estimators have been proposed in the statistical literature (<span class="citation">Bartlett (<a href="#ref-Bartlett2021">2023</a>)</span>).
-The first is the frequentist variance which describes the actual repeated sampling variability of the estimator.
-If the reference-based missing data assumption is correctly specified, then the resulting inference based on this variance is correct in the frequentist sense, i.e. hypothesis tests have asymptotically correct type I error control and confidence intervals have correct coverage probabilities under repeated sampling (<span class="citation">Bartlett (<a href="#ref-Bartlett2021">2023</a>)</span>, <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>).
-Reference-based missing data assumptions are strong and borrow information from the reference arm for imputation in the active arm. As a consequence, the size of frequentist standard errors for treatment effects may decrease with increasing amounts of missing data.
-The second proposal is the so-called “information-anchored” variance which was originally proposed in the context of sensitivity analyses (<span class="citation">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019">2019</a>)</span>). This variance estimator is based on disentangling point estimation and variance estimation altogether.
-The information-anchoring principle described in <span class="citation">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019">2019</a>)</span> states that the relative increase in the variance of the treatment effect estimator under MAR imputation with increasing amounts of missing data should be preserved for reference-based imputation methods.
-The resulting information-anchored variance is typically very similar to the variance under MAR imputation and typically increases with increasing amounts of missing data.
-However, the information-anchored variance does not reflect the actual variability of the reference-based estimator under repeated sampling and the resulting inference is highly conservative resulting in a substantial power loss (<span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>).
-Moreover, to date, no Bayesian or frequentist framework has been developed under which the information-anchored variance provides correct inference for reference-based missingness assumptions, nor is it clear whether such a framework can even be developed.</p>
-<p>Reference-based conditional mean imputation (<code>method_condmean()</code>) and bootstrapped likelihood-based multiple methods (<code>method = method_bmlmi()</code>) obtain standard errors via resampling and hence target the frequentist variance (<span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>, <span class="citation">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021">2021</a>)</span>).
-For finite samples, simulations for a sample size of <span class="math inline">\(n=100\)</span> per group reported in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span> demonstrated that conditional mean imputation combined with the jackknife (<code>method_condmean(type = &quot;jackknife&quot;)</code>) provided exact protection of the type one error rate whereas the bootstrap (<code>method_condmean(type = &quot;bootstrap&quot;)</code>) was associated with a small type I error inflation (between 5.1% to 5.3% for a nominal level of 5%).
-For reference-based conditional mean imputation, an alternative information-anchored variance can be obtained by following a proposal by <span class="citation">Lu (<a href="#ref-Lu2021">2021</a>)</span>.
-The basic idea of <span class="citation">Lu (<a href="#ref-Lu2021">2021</a>)</span> is to obtain the information-anchored variance via a MAR imputation combined with a delta-adjustment where delta is selected in a data-driven way to match the reference-based estimator.
-For conditional mean imputation, the proposal by <span class="citation">Lu (<a href="#ref-Lu2021">2021</a>)</span> can be implemented by choosing the delta-adjustment as the difference between the conditional mean imputation under the chosen reference-based assumption and MAR on the original dataset.
-An illustration of how the different variances can be obtained for conditional mean imputation in <code>rbmi</code> is provided in the vignette “Frequentist and information-anchored inference for reference-based conditional mean imputation” (<code>vignette(topic = &quot;CondMean_Inference&quot;, package = &quot;rbmi&quot;)</code>).</p>
-<p>Reference-based Bayesian (or approximate Bayesian) multiple imputation methods combined with Rubin’s rules (<code>method_bayes()</code> and <code>method_approxbayes()</code>) target the information-anchored variance (<span class="citation">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019">2019</a>)</span>).
-A frequentist variance for these methods could in principle be obtained via bootstrap or jackknife re-sampling of the treatment effect estimates but this would be very computationally intensive and is not directly supported by <code>rbmi</code>.</p>
-<p>Our view is that for primary analyses, accurate type I error control (which can be obtained by using the frequentist variance) is more important than adherence to the information anchoring principle which, to us, is
-not fully compatible with the strong reference-based assumptions. In any case, if reference-based imputation is used for the primary analysis, it is critical that the chosen
-reference-based assumption can be clinically justified, and that suitable sensitivity analyses are conducted to stress-test these assumptions.</p>
+<p>For reference-based imputation methods, the situation is more complicated and two different types of variance estimators have been proposed in the statistical literature (<span class="citation" data-cites="Bartlett2021">Bartlett (<a href="#ref-Bartlett2021" role="doc-biblioref">2023</a>)</span>). The first is the frequentist variance which describes the actual repeated sampling variability of the estimator. If the reference-based missing data assumption is correctly specified, then the resulting inference based on this variance is correct in the frequentist sense, i.e.&nbsp;hypothesis tests have asymptotically correct type I error control and confidence intervals have correct coverage probabilities under repeated sampling (<span class="citation" data-cites="Bartlett2021">Bartlett (<a href="#ref-Bartlett2021" role="doc-biblioref">2023</a>)</span>, <span class="citation" data-cites="Wolbers2021">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span>). Reference-based missing data assumptions are strong and borrow information from the reference arm for imputation in the active arm. As a consequence, the size of frequentist standard errors for treatment effects may decrease with increasing amounts of missing data. The second proposal is the so-called “information-anchored” variance which was originally proposed in the context of sensitivity analyses (<span class="citation" data-cites="CroEtAl2019">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019" role="doc-biblioref">2019</a>)</span>). This variance estimator is based on disentangling point estimation and variance estimation altogether. The information-anchoring principle described in <span class="citation" data-cites="CroEtAl2019">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019" role="doc-biblioref">2019</a>)</span> states that the relative increase in the variance of the treatment effect estimator under MAR imputation with increasing amounts of missing data should be preserved for reference-based imputation methods. The resulting information-anchored variance is typically very similar to the variance under MAR imputation and typically increases with increasing amounts of missing data. However, the information-anchored variance does not reflect the actual variability of the reference-based estimator under repeated sampling and the resulting inference is highly conservative resulting in a substantial power loss (<span class="citation" data-cites="Wolbers2021">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span>). Moreover, to date, no Bayesian or frequentist framework has been developed under which the information-anchored variance provides correct inference for reference-based missingness assumptions, nor is it clear whether such a framework can even be developed.</p>
+<p>Reference-based conditional mean imputation (<code>method_condmean()</code>) and bootstrapped likelihood-based multiple methods (<code>method = method_bmlmi()</code>) obtain standard errors via resampling and hence target the frequentist variance (<span class="citation" data-cites="Wolbers2021">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span>, <span class="citation" data-cites="vonHippelBartlett2021">von Hippel and Bartlett (<a href="#ref-vonHippelBartlett2021" role="doc-biblioref">2021</a>)</span>). For finite samples, simulations for a sample size of <span class="math inline">\(n=100\)</span> per group reported in <span class="citation" data-cites="Wolbers2021">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span> demonstrated that conditional mean imputation combined with the jackknife (<code>method_condmean(type = "jackknife")</code>) provided exact protection of the type one error rate whereas the bootstrap (<code>method_condmean(type = "bootstrap")</code>) was associated with a small type I error inflation (between 5.1% to 5.3% for a nominal level of 5%). For reference-based conditional mean imputation, an alternative information-anchored variance can be obtained by following a proposal by <span class="citation" data-cites="Lu2021">Lu (<a href="#ref-Lu2021" role="doc-biblioref">2021</a>)</span>. The basic idea of <span class="citation" data-cites="Lu2021">Lu (<a href="#ref-Lu2021" role="doc-biblioref">2021</a>)</span> is to obtain the information-anchored variance via a MAR imputation combined with a delta-adjustment where delta is selected in a data-driven way to match the reference-based estimator. For conditional mean imputation, the proposal by <span class="citation" data-cites="Lu2021">Lu (<a href="#ref-Lu2021" role="doc-biblioref">2021</a>)</span> can be implemented by choosing the delta-adjustment as the difference between the conditional mean imputation under the chosen reference-based assumption and MAR on the original dataset. An illustration of how the different variances can be obtained for conditional mean imputation in <code>rbmi</code> is provided in the vignette “Frequentist and information-anchored inference for reference-based conditional mean imputation” (<code>vignette(topic = "CondMean_Inference", package = "rbmi")</code>).</p>
+<p>Reference-based Bayesian (or approximate Bayesian) multiple imputation methods combined with Rubin’s rules (<code>method_bayes()</code> and <code>method_approxbayes()</code>) target the information-anchored variance (<span class="citation" data-cites="CroEtAl2019">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019" role="doc-biblioref">2019</a>)</span>). A frequentist variance for these methods could in principle be obtained via bootstrap or jackknife re-sampling of the treatment effect estimates but this would be very computationally intensive and is not directly supported by <code>rbmi</code>.</p>
+<p>Our view is that for primary analyses, accurate type I error control (which can be obtained by using the frequentist variance) is more important than adherence to the information anchoring principle which, to us, is not fully compatible with the strong reference-based assumptions. In any case, if reference-based imputation is used for the primary analysis, it is critical that the chosen reference-based assumption can be clinically justified, and that suitable sensitivity analyses are conducted to stress-test these assumptions.</p>
 <p>Conditional mean imputation combined with the jackknife is the only method which leads to deterministic standard error estimates and, consequently, confidence intervals and <span class="math inline">\(p\)</span>-values are also deterministic. This is particularly important in a regulatory setting where it is important to ascertain whether a calculated <span class="math inline">\(p\)</span>-value which is close to the critical boundary of 5% is truly below or above that threshold rather than being uncertain about this because of Monte Carlo error.</p>
-</div>
-<div id="computational-complexity" class="section level3" number="3.10.3">
-<h3><span class="header-section-number">3.10.3</span> Computational complexity</h3>
-<p>Bayesian MI methods rely on the specification of prior distributions and the usage of Markov chain Monte Carlo (MCMC) methods.
-All other methods based on multiple imputation or bootstrapping require no other tuning parameters than the specification of the number of imputations <span class="math inline">\(M\)</span> or bootstrap samples <span class="math inline">\(B\)</span> and rely on numerical optimization for fitting the MMRM imputation models via REML. Conditional mean imputation combined with the jackknife has no tuning parameters.</p>
-<p>In our <code>rbmi</code> implementation, the fitting of the MMRM imputation model via REML is computationally most expensive. MCMC sampling using <code>rstan</code> (<span class="citation">Stan Development Team (<a href="#ref-Rstan">2020</a>)</span>) is typically relatively fast in our setting and requires only a small warmup phase and thinning of the chains. In addition, the number of random imputations for reliable inference using Rubin’s rules is often smaller than the number of resamples required for the jackknife or the bootstrap (see e.g. the discussions in <span class="citation">I. R. White, Royston, and Wood (<a href="#ref-White2011multiple">2011, sec. 7</a>)</span> for Bayesian MI and the Appendix of <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span> for the bootstrap). Thus, for many applications, we expect that conventional MI based on Bayesian posterior draws will be fastest, followed by conventional MI using approximate Bayesian posterior draws and conditional mean imputation combined with the jackknife. Conditional mean imputation combined with the bootstrap and bootstrapped MI methods will typically be most computationally demanding. Of note, all implemented methods are conceptually straightforward to parallelise and some parallelisation support is provided by <code>rbmi</code>.</p>
-</div>
-</div>
-</div>
-<div id="sec:rbmiFunctions" class="section level1" number="4">
-<h1><span class="header-section-number">4</span> Mapping of statistical methods to <code>rbmi</code> functions</h1>
+</section>
+<section id="computational-complexity" class="level3">
+<h3 class="anchored" data-anchor-id="computational-complexity">Computational complexity</h3>
+<p>Bayesian MI methods rely on the specification of prior distributions and the usage of Markov chain Monte Carlo (MCMC) methods. All other methods based on multiple imputation or bootstrapping require no other tuning parameters than the specification of the number of imputations <span class="math inline">\(M\)</span> or bootstrap samples <span class="math inline">\(B\)</span> and rely on numerical optimization for fitting the MMRM imputation models via REML. Conditional mean imputation combined with the jackknife has no tuning parameters.</p>
+<p>In our <code>rbmi</code> implementation, the fitting of the MMRM imputation model via REML is computationally most expensive. MCMC sampling using <code>rstan</code> (<span class="citation" data-cites="Rstan">Stan Development Team (<a href="#ref-Rstan" role="doc-biblioref">2020</a>)</span>) is typically relatively fast in our setting and requires only a small warmup phase and thinning of the chains. In addition, the number of random imputations for reliable inference using Rubin’s rules is often smaller than the number of resamples required for the jackknife or the bootstrap (see e.g.&nbsp;the discussions in <span class="citation" data-cites="White2011multiple">I. R. White, Royston, and Wood (<a href="#ref-White2011multiple" role="doc-biblioref">2011, sec. 7</a>)</span> for Bayesian MI and the Appendix of <span class="citation" data-cites="Wolbers2021">Wolbers et al. (<a href="#ref-Wolbers2021" role="doc-biblioref">2022</a>)</span> for the bootstrap). Thus, for many applications, we expect that conventional MI based on Bayesian posterior draws will be fastest, followed by conventional MI using approximate Bayesian posterior draws and conditional mean imputation combined with the jackknife. Conditional mean imputation combined with the bootstrap and bootstrapped MI methods will typically be most computationally demanding. Of note, all implemented methods are conceptually straightforward to parallelise and some parallelisation support is provided by <code>rbmi</code>.</p>
+</section>
+</section>
+</section>
+<section id="sec:rbmiFunctions" class="level1">
+<h1>Mapping of statistical methods to <code>rbmi</code> functions</h1>
 <p>For a full documentation of the <code>rbmi</code> package functionality we refer to the help pages of all functions and to the other package vignettes. Here we only give a brief overview of how the different steps of the imputation procedure are mapped to <code>rbmi</code> functions:</p>
 <ul>
 <li>The base imputation model fitting step is implemented in the function <code>draws()</code>. The chosen MI approach can be set using the argument <code>method</code> and should be one of the following:
 <ul>
 <li>Bayesian posterior parameter draws from the imputation model are obtained via the argument <code>method = method_bayes()</code>.</li>
 <li>Approximate Bayesian posterior parameter draws from the imputation model are obtained via argument <code>method = method_approxbayes()</code>.</li>
-<li>ML or REML parameter estimates of the imputation model parameters for the original dataset and all leave-one-subject-out datasets (as required for the jackknife) are obtained via argument <code>method = method_condmean(type = &quot;jackknife&quot;)</code>.</li>
-<li>ML or REML parameter estimates of the imputation model parameters for the original dataset and bootstrapped datasets are obtained via argument <code>method = method_condmean(type = &quot;bootstrap&quot;)</code>.</li>
+<li>ML or REML parameter estimates of the imputation model parameters for the original dataset and all leave-one-subject-out datasets (as required for the jackknife) are obtained via argument <code>method = method_condmean(type = "jackknife")</code>.</li>
+<li>ML or REML parameter estimates of the imputation model parameters for the original dataset and bootstrapped datasets are obtained via argument <code>method = method_condmean(type = "bootstrap")</code>.</li>
 <li>Bootstrapped MI methods are obtained via argument <code>method = method_bmlmi(B=B, D=D)</code> where <span class="math inline">\(B\)</span> refers to the number of bootstrap samples and <span class="math inline">\(D\)</span> to the number of random imputations for each bootstrap sample.</li>
 </ul></li>
-<li>The imputation step using random imputation or deterministic conditional mean imputation, respectively, is implemented in function <code>impute()</code>. Imputation can be performed assuming the already implemented imputation strategies as presented in section <a href="#sec:imputationStep">3.4</a>. Additionally, user-defined imputation strategies are also supported.</li>
+<li>The imputation step using random imputation or deterministic conditional mean imputation, respectively, is implemented in function <code>impute()</code>. Imputation can be performed assuming the already implemented imputation strategies as presented in section @ref(sec:imputationStep). Additionally, user-defined imputation strategies are also supported.</li>
 <li>The analysis step is implemented in function <code>analyse()</code> and applies the analysis model to all imputed datasets. By default, the analysis model (argument <code>fun</code>) is the <code>ancova()</code> function but alternative analysis functions can also be provided by the user. The <code>analyse()</code> function also allows for <span class="math inline">\(\delta\)</span>-adjustments to the imputed datasets prior to the analysis via argument <code>delta</code>.</li>
-<li>The inference step is implemented in function <code>pool()</code> which pools the results across imputed datasets. The Rubin and Bernard rule is applied in case of (approximate) Bayesian MI. For conditional mean imputation, jackknife and bootstrap (normal approximation or percentile) inference is supported. For BMLMI, the pooling and inference steps are performed via <code>pool()</code> which in this case implements the method described in Section <a href="#sec:poolbmlmi">3.9</a>.</li>
+<li>The inference step is implemented in function <code>pool()</code> which pools the results across imputed datasets. The Rubin and Bernard rule is applied in case of (approximate) Bayesian MI. For conditional mean imputation, jackknife and bootstrap (normal approximation or percentile) inference is supported. For BMLMI, the pooling and inference steps are performed via <code>pool()</code> which in this case implements the method described in Section @ref(sec:poolbmlmi).</li>
 </ul>
-</div>
-<div id="sec:otherSoftware" class="section level1" number="5">
-<h1><span class="header-section-number">5</span> Comparison to other software implementations</h1>
-<p>An established software implementation of reference-based imputation in SAS are the so-called “five macros” by James Roger (<span class="citation">Roger (<a href="#ref-FiveMacros">2021</a>)</span>). An alternative <code>R</code> implementation which is also currently under development is the R package <code>RefBasedMI</code> (<span class="citation">McGrath and White (<a href="#ref-RefbasedMIpackage">2021</a>)</span>).</p>
+</section>
+<section id="sec:otherSoftware" class="level1">
+<h1>Comparison to other software implementations</h1>
+<p>An established software implementation of reference-based imputation in SAS are the so-called “five macros” by James Roger (<span class="citation" data-cites="FiveMacros">Roger (<a href="#ref-FiveMacros" role="doc-biblioref">2021</a>)</span>). An alternative <code>R</code> implementation which is also currently under development is the R package <code>RefBasedMI</code> (<span class="citation" data-cites="RefbasedMIpackage">McGrath and White (<a href="#ref-RefbasedMIpackage" role="doc-biblioref">2021</a>)</span>).</p>
 <p><code>rbmi</code> has several features which are not supported by the other implementations:</p>
-<ol style="list-style-type: decimal">
+<ol type="1">
 <li><p>In addition to the Bayesian MI approach implemented also in the other packages, our implementation provides three alternative MI approaches: approximate Bayesian MI, conditional mean imputation combined with resampling, and bootstrapped MI.</p></li>
 <li><p><code>rbmi</code> allows for the usage of data collected after an ICE. For example, suppose that we want to adopt a treatment policy strategy for the ICE “treatment discontinuation”. A possible implementation of this strategy is to use the observed outcome data for subjects who remain in the study after the ICE and to use reference-based imputation in case the subject drops out. In our implementation, this is implemented by excluding observed post ICE data from the imputation model which assumes MAR missingness but including them in the analysis model. To our knowledge, this is not directly supported by the other implementations.</p></li>
 <li><p><code>RefBasedMI</code> fits the imputation model to data from each treatment group separately which implies covariate-treatment group interactions for all covariates for the pooled data from both treatment groups. In contrast, Roger’s five macros assume a joint model including data from all the randomized groups and covariate-treatment interactions covariates are not allowed. We also chose to implement a joint model but use a flexible model for the linear predictor which may or may not include an interaction term between any covariate and the treatment group. In addition, our imputation model also allows for the inclusion of time-varying covariates.</p></li>
 <li><p>In our implementation, the grouping of the subjects for the purpose of the imputation model (and the definition of the reference group) does not need to correspond to the assigned treatment groups. This provides additional flexibility for the imputation procedure. It is not clear to us whether this feature is supported by Roger’s five macros or <code>RefBasedMI</code>.</p></li>
 <li><p>We believe that our R-based implementation is more modular than <code>RefBasedMI</code> which should facilitate further package enhancements.</p></li>
 </ol>
-<p>In contrast, the more general causal model introduced by <span class="citation">I. White, Royes, and Best (<a href="#ref-White2020causal">2020</a>)</span> is available in the other implementations but is currently not supported by ours.</p>
-</div>
-<div id="references" class="section level1 unnumbered">
-<h1>References</h1>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
-<div id="ref-Barnard1999" class="csl-entry">
+<p>In contrast, the more general causal model introduced by <span class="citation" data-cites="White2020causal">I. White, Royes, and Best (<a href="#ref-White2020causal" role="doc-biblioref">2020</a>)</span> is available in the other implementations but is currently not supported by ours.</p>
+</section>
+<section id="references" class="level1 unnumbered">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Barnard1999" class="csl-entry" role="listitem">
 Barnard, John, and Donald B Rubin. 1999. <span>“Miscellanea. Small-Sample Degrees of Freedom with Multiple Imputation.”</span> <em>Biometrika</em> 86 (4): 948–55.
 </div>
-<div id="ref-Bartlett2021" class="csl-entry">
+<div id="ref-Bartlett2021" class="csl-entry" role="listitem">
 Bartlett, Jonathan W. 2023. <span>“Reference-Based Multiple Imputation - What Is the Right Variance and How to Estimate It.”</span> <em>Statistics in Biopharmaceutical Research</em> 15 (1): 178–86.
 </div>
-<div id="ref-Bell2024" class="csl-entry">
+<div id="ref-Bell2024" class="csl-entry" role="listitem">
 Bell, James, Thomas Drury, Tobias Mütze, Christian Bressen Pipper, Lorenzo Guizzaro, Marian Mitroiu, Khadija Rerhou Rantell, Marcel Wolbers, and David Wright. 2024. <span>“Estimation Methods for Estimands Using the Treatment Policy Strategy; a Simulation Study Based on the PIONEER 1 Trial.”</span> <em>arXiv Preprint</em>. <a href="https://arxiv.org/abs/2402.12850">https://arxiv.org/abs/2402.12850</a>.
 </div>
-<div id="ref-CarpenterEtAl2013" class="csl-entry">
+<div id="ref-CarpenterEtAl2013" class="csl-entry" role="listitem">
 Carpenter, James R, James H Roger, and Michael G Kenward. 2013. <span>“Analysis of Longitudinal Trials with Protocol Deviation: A Framework for Relevant, Accessible Assumptions, and Inference via Multiple Imputation.”</span> <em>Journal of Biopharmaceutical Statistics</em> 23 (6): 1352–71.
 </div>
-<div id="ref-CroEtAl2019" class="csl-entry">
+<div id="ref-CroEtAl2019" class="csl-entry" role="listitem">
 Cro, Suzie, James R Carpenter, and Michael G Kenward. 2019. <span>“Information-Anchored Sensitivity Analysis: Theory and Application.”</span> <em>Journal of the Royal Statistical Society: Series A (Statistics in Society)</em> 182 (2): 623–45.
 </div>
-<div id="ref-CroEtAlTutorial2020" class="csl-entry">
+<div id="ref-CroEtAlTutorial2020" class="csl-entry" role="listitem">
 Cro, Suzie, Tim P Morris, Michael G Kenward, and James R Carpenter. 2020. <span>“Sensitivity Analysis for Clinical Trials with Missing Continuous Outcome Data Using Controlled Multiple Imputation: A Practical Guide.”</span> <em>Statistics in Medicine</em> 39 (21): 2815–42.
 </div>
-<div id="ref-Darken2020" class="csl-entry">
+<div id="ref-Darken2020" class="csl-entry" role="listitem">
 Darken, Patrick, Jack Nyberg, Shaila Ballal, and David Wright. 2020. <span>“The Attributable Estimand: A New Approach to Account for Intercurrent Events.”</span> <em>Pharmaceutical Statistics</em> 19 (5): 626–35.
 </div>
-<div id="ref-DavisonHinkley1997" class="csl-entry">
+<div id="ref-DavisonHinkley1997" class="csl-entry" role="listitem">
 Davison, Anthony C, and David V Hinkley. 1997. <em>Bootstrap Methods and Their Application</em>. Cambridge University Press.
 </div>
-<div id="ref-Drury2024" class="csl-entry">
+<div id="ref-Drury2024" class="csl-entry" role="listitem">
 Drury, Thomas, Juan J Abellan, Nicky Best, and Ian R White. 2024. <span>“Estimation of Treatment Policy Estimands for Continuous Outcomes Using Off-Treatment Sequential Multiple Imputation.”</span> <em>Pharmaceutical Statistics</em>.
 </div>
-<div id="ref-Efron1994" class="csl-entry">
+<div id="ref-Efron1994" class="csl-entry" role="listitem">
 Efron, Bradley. 1994. <span>“Missing Data, Imputation, and the Bootstrap.”</span> <em>Journal of the American Statistical Association</em> 89 (426): 463–75.
 </div>
-<div id="ref-EfronTibs1994" class="csl-entry">
+<div id="ref-EfronTibs1994" class="csl-entry" role="listitem">
 Efron, Bradley, and Robert J Tibshirani. 1994. <em>An Introduction to the Bootstrap</em>. CRC press.
 </div>
-<div id="ref-Guizzaro2021" class="csl-entry">
+<div id="ref-Guizzaro2021" class="csl-entry" role="listitem">
 Guizzaro, Lorenzo, Frank Pétavy, Robin Ristl, and Ciro Gallo. 2021. <span>“The Use of a Variable Representing Compliance Improves Accuracy of Estimation of the Effect of Treatment Allocation Regardless of Discontinuation in Trials with Incomplete Follow-up.”</span> <em>Statistics in Biopharmaceutical Research</em> 13 (1): 119–27.
 </div>
-<div id="ref-Honaker2010" class="csl-entry">
+<div id="ref-Honaker2010" class="csl-entry" role="listitem">
 Honaker, James, and Gary King. 2010. <span>“What to Do about Missing Values in Time-Series Cross-Section Data.”</span> <em>American Journal of Political Science</em> 54 (2): 561–81.
 </div>
-<div id="ref-iche9r1" class="csl-entry">
+<div id="ref-iche9r1" class="csl-entry" role="listitem">
 ICH E9 working group. 2019. <span>“<span class="nocase">ICH E9 (R1): Addendum on estimands and sensitivity analysis in clinical trials to the guideline on statistical principles for clinical trials.</span>”</span> International Council for Harmonisation of Technical Requirements for Pharmaceuticals for Human Use. 2019. <a href="https://database.ich.org/sites/default/files/E9-R1_Step4_Guideline_2019_1203.pdf">https://database.ich.org/sites/default/files/E9-R1_Step4_Guideline_2019_1203.pdf</a>.
 </div>
-<div id="ref-LittleRubin1992" class="csl-entry">
+<div id="ref-LittleRubin1992" class="csl-entry" role="listitem">
 Little, Roderick JA, and Donald B Rubin. 2002. <em>Statistical Analysis with Missing Data, Second Edition</em>. John Wiley &amp; Sons.
 </div>
-<div id="ref-Lu2021" class="csl-entry">
+<div id="ref-Lu2021" class="csl-entry" role="listitem">
 Lu, Kaifeng. 2021. <span>“An Alternative Implementation of Reference-Based Controlled Imputation Procedures.”</span> <em>Statistics in Biopharmaceutical Research</em> 13 (4): 483–91.
 </div>
-<div id="ref-Mallinckrodt2020" class="csl-entry">
+<div id="ref-Mallinckrodt2020" class="csl-entry" role="listitem">
 Mallinckrodt, CH, J Bell, G Liu, B Ratitch, M O’Kelly, I Lipkovich, P Singh, L Xu, and G Molenberghs. 2020. <span>“Aligning Estimators with Estimands in Clinical Trials: Putting the ICH E9 (R1) Guidelines into Practice.”</span> <em>Therapeutic Innovation &amp; Regulatory Science</em> 54 (2): 353–64.
 </div>
-<div id="ref-RefbasedMIpackage" class="csl-entry">
+<div id="ref-RefbasedMIpackage" class="csl-entry" role="listitem">
 McGrath, Kevin, and Ian White. 2021. <span>“RefBasedMI: Reference-Based Imputation for Longitudinal Clinical Trials with Protocol Deviation.”</span> <a href="https://github.com/UCL/RefbasedMI">https://github.com/UCL/RefbasedMI</a>.
 </div>
-<div id="ref-Noci2021" class="csl-entry">
+<div id="ref-Noci2021" class="csl-entry" role="listitem">
 Noci, Alessandro, Marcel Wolbers, Markus Abt, Corine Baayen, Hans Ulrich Burger, Man Jin, and Weining Zhao Robieson. 2023. <span>“A Comparison of Estimand and Estimation Strategies for Clinical Trials in Early Parkinson’s Disease.”</span> <em>Statistics in Biopharmaceutical Research</em> 15 (3): 491–501.
 </div>
-<div id="ref-Patterson1971" class="csl-entry">
+<div id="ref-Patterson1971" class="csl-entry" role="listitem">
 Patterson, H Desmond, and Robin Thompson. 1971. <span>“Recovery of Inter-Block Information When Block Sizes Are Unequal.”</span> <em>Biometrika</em> 58 (3): 545–54.
 </div>
-<div id="ref-PolverejanDragalin2020" class="csl-entry">
+<div id="ref-PolverejanDragalin2020" class="csl-entry" role="listitem">
 Polverejan, Elena, and Vladimir Dragalin. 2020. <span>“Aligning Treatment Policy Estimands and Estimators—a Simulation Study in Alzheimer’s Disease.”</span> <em>Statistics in Biopharmaceutical Research</em> 12 (2): 142–54.
 </div>
-<div id="ref-FiveMacros" class="csl-entry">
+<div id="ref-FiveMacros" class="csl-entry" role="listitem">
 Roger, James. 2021. <span>“Reference-Based MI via Multivariate Normal RM (the <span>‘Five Macros’</span> and MIWithD).”</span> <a href="https://www.lshtm.ac.uk/research/centres-projects-groups/missing-data#dia-missing-data">https://www.lshtm.ac.uk/research/centres-projects-groups/missing-data#dia-missing-data</a>.
 </div>
-<div id="ref-Rstan" class="csl-entry">
+<div id="ref-Royston2009" class="csl-entry" role="listitem">
+Royston, Patrick, John B. Carlin, and Ian R. White. 2009. <span>“Multiple Imputation of Missing Values: New Features for Mim.”</span> <em>The Stata Journal</em> 9 (2): 252–64.
+</div>
+<div id="ref-Rstan" class="csl-entry" role="listitem">
 Stan Development Team. 2020. <span>“<span>RStan</span>: The <span>R</span> Interface to <span>Stan</span>.”</span> <a href="https://mc-stan.org/">https://mc-stan.org/</a>.
 </div>
-<div id="ref-vonHippelBartlett2021" class="csl-entry">
+<div id="ref-vonHippelBartlett2021" class="csl-entry" role="listitem">
 von Hippel, Paul T, and Jonathan W Bartlett. 2021. <span>“Maximum Likelihood Multiple Imputation: Faster Imputations and Consistent Standard Errors Without Posterior Draws.”</span> <em>Statistical Science</em> 36 (3): 400–420.
 </div>
-<div id="ref-White2011multiple" class="csl-entry">
+<div id="ref-White2011multiple" class="csl-entry" role="listitem">
 White, Ian R, Patrick Royston, and Angela M Wood. 2011. <span>“Multiple Imputation Using Chained Equations: Issues and Guidance for Practice.”</span> <em>Statistics in Medicine</em> 30 (4): 377–99.
 </div>
-<div id="ref-White2020causal" class="csl-entry">
+<div id="ref-White2020causal" class="csl-entry" role="listitem">
 White, Ian, Joseph Royes, and Nicky Best. 2020. <span>“A Causal Modelling Framework for Reference-Based Imputation and Tipping Point Analysis in Clinical Trials with Quantitative Outcome.”</span> <em>Journal of Biopharmaceutical Statistics</em> 30 (2): 334–50.
 </div>
-<div id="ref-Wolbers2021" class="csl-entry">
+<div id="ref-Wolbers2021" class="csl-entry" role="listitem">
 Wolbers, Marcel, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, and Jonathan W Bartlett. 2022. <span>“Standard and Reference-Based Conditional Mean Imputation.”</span> <em>Pharmaceutical Statistics</em> 21 (6): 1246–57.
 </div>
-</div>
-</div>
-
-
-
-<!-- code folding -->
-
-
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-    document.getElementsByTagName("head")[0].appendChild(script);
-  })();
+</div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
 </script>
+</div> <!-- /content -->
 
-</body>
-</html>
+
+
+
+</body></html>
