@@ -381,7 +381,7 @@ $$
 However, since decisions are generally based not just on the treatment effect estimate but also on the p-value, it is important to calculate the corresponding MCSE. No closed-form expression exists for the MCSE of the p-value, but as argued by @Royston2009, the Jackknife method could be used to estimate the MCSE. Let $\theta$ be the parameter of interest (e.g. the p-value) and let $\hat{\theta}_{(-m)}$ be the pooled treatment effect estimate from the $M-1$ imputed datasets after removing the $m$-th imputed dataset. The MCSE of the overall estimate $\hat{\theta}$ is then given by:
 
 $$
-\text{MCSE}(\hat{\theta}) = \sqrt{\frac{1}{M(M-1)} \sum_{m=1}^{M} (\hat{\theta}_{(-m)} - \hat{\theta})^2}
+\text{MCSE}(\hat{\theta}) = \sqrt{\frac{1}{M(M-1)} \sum_{m=1}^{M} \left(M\hat{\theta} - (M - 1)\hat{\theta}_{(-m)}\right)^2}
 $$
 
 ## Bootstrap and jackknife inference for conditional mean imputation {#sec:bootInference}

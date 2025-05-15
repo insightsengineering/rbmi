@@ -391,7 +391,7 @@ V(\hat{\theta}) = V_W(\hat{\theta}) + (1 + \frac{1}{M}) V_B(\hat{\theta})
 \]</span></p>
 <p>However, since decisions are generally based not just on the treatment effect estimate but also on the p-value, it is important to calculate the corresponding MCSE. No closed-form expression exists for the MCSE of the p-value, but as argued by <span class="citation" data-cites="Royston2009">Royston, Carlin, and White (<a href="#ref-Royston2009" role="doc-biblioref">2009</a>)</span>, the Jackknife method could be used to estimate the MCSE. Let <span class="math inline">\(\theta\)</span> be the parameter of interest (e.g.&nbsp;the p-value) and let <span class="math inline">\(\hat{\theta}_{(-m)}\)</span> be the pooled treatment effect estimate from the <span class="math inline">\(M-1\)</span> imputed datasets after removing the <span class="math inline">\(m\)</span>-th imputed dataset. The MCSE of the overall estimate <span class="math inline">\(\hat{\theta}\)</span> is then given by:</p>
 <p><span class="math display">\[
-\text{MCSE}(\hat{\theta}) = \sqrt{\frac{1}{M(M-1)} \sum_{m=1}^{M} (\hat{\theta}_{(-m)} - \hat{\theta})^2}
+\text{MCSE}(\hat{\theta}) = \sqrt{\frac{1}{M(M-1)} \sum_{m=1}^{M} \left(M\hat{\theta} - (M - 1)\hat{\theta}_{(-m)}\right)^2}
 \]</span></p>
 </section>
 </section>
@@ -563,7 +563,7 @@ Polverejan, Elena, and Vladimir Dragalin. 2020. <span>“Aligning Treatment Poli
 Roger, James. 2021. <span>“Reference-Based MI via Multivariate Normal RM (the <span>‘Five Macros’</span> and MIWithD).”</span> <a href="https://www.lshtm.ac.uk/research/centres-projects-groups/missing-data#dia-missing-data">https://www.lshtm.ac.uk/research/centres-projects-groups/missing-data#dia-missing-data</a>.
 </div>
 <div id="ref-Royston2009" class="csl-entry" role="listitem">
-Royston, Patrick, John B. Carlin, and Ian R. White. 2009. <span>“Multiple Imputation of Missing Values: New Features for Mim.”</span> <em>The Stata Journal</em> 9 (2): 252–64.
+Royston, Patrick, John B. Carlin, and Ian R. White. 2009. <span>“Multiple Imputation of Missing Values: New Features for Mim.”</span> <em>The Stata Journal</em> 9 (2): 252–64. <a href="https://journals.sagepub.com/doi/pdf/10.1177/1536867X0900900205">https://journals.sagepub.com/doi/pdf/10.1177/1536867X0900900205</a>.
 </div>
 <div id="ref-Rstan" class="csl-entry" role="listitem">
 Stan Development Team. 2020. <span>“<span>RStan</span>: The <span>R</span> Interface to <span>Stan</span>.”</span> <a href="https://mc-stan.org/">https://mc-stan.org/</a>.
