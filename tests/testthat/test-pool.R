@@ -858,4 +858,13 @@ test_that("mcse works as expected", {
     poolObj <- pool(anaObj)
 
     result <- mcse(poolObj, anaObj)
+
+    expect_true(is.list(result))
+
+    result_df <- expect_silent(as.data.frame(result))
+
+    expect_true(is.data.frame(result_df))
+    expect_true(nrow(result_df) == length(poolObj$pars))
+
+    expect_snapshot(print(result), cran = TRUE)
 })

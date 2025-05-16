@@ -4,6 +4,9 @@
 \alias{pool}
 \alias{as.data.frame.pool}
 \alias{print.pool}
+\alias{mcse}
+\alias{as.data.frame.mcse}
+\alias{print.mcse}
 \title{Pool analysis results obtained from the imputed datasets}
 \usage{
 pool(
@@ -16,6 +19,12 @@ pool(
 \method{as.data.frame}{pool}(x, ...)
 
 \method{print}{pool}(x, ...)
+
+mcse(x, results)
+
+\method{as.data.frame}{mcse}(x, ...)
+
+\method{print}{mcse}(x, ...)
 }
 \arguments{
 \item{results}{an analysis object created by \code{\link[=analyse]{analyse()}}.}
@@ -47,6 +56,9 @@ call to \code{\link[=draws]{draws()}}; In particular:
 \item \code{method_approxbayes()} & \code{method_bayes()} both use Rubin's rules to pool estimates
 and variances across multiple imputed datasets, and the Barnard-Rubin rule to pool
 degree's of freedom; see Little & Rubin (2002).
+Here, the \code{mcse()} function can compute the Monte Carlo standard error (MCSE) of the
+pooled estimates, via a Jackknife variance estimator for all parameters; see Royston,
+Carlin & White (2009).
 \item \code{method_condmean(type = "bootstrap")} uses percentile or normal approximation;
 see Efron & Tibshirani (1994). Note that for the percentile bootstrap, no standard error is
 calculated, i.e. the standard errors will be \code{NA} in the object / \code{data.frame}.
@@ -62,6 +74,9 @@ press, 1994. [Section 11]
 
 Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing
 Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. [Section 5.4]
+
+Royston, P., Carlin, J. B., & White, I. R. Multiple imputation of missing values:
+New features for mim. Stata Journal, 9(2): 252-264, 2009.
 
 Von Hippel, Paul T and Bartlett, Jonathan W.
 Maximum likelihood multiple imputation: Faster imputations and consistent standard

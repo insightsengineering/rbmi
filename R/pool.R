@@ -27,6 +27,9 @@
 #' - `method_approxbayes()` & `method_bayes()` both use Rubin's rules to pool estimates
 #'  and variances across multiple imputed datasets, and the Barnard-Rubin rule to pool
 #'  degree's of freedom; see Little & Rubin (2002).
+#'  Here, the `mcse()` function can compute the Monte Carlo standard error (MCSE) of the
+#'  pooled estimates, via a Jackknife variance estimator for all parameters; see Royston,
+#'  Carlin & White (2009).
 #' - `method_condmean(type = "bootstrap")` uses percentile or normal approximation;
 #' see Efron & Tibshirani (1994). Note that for the percentile bootstrap, no standard error is
 #' calculated, i.e. the standard errors will be `NA` in the object / `data.frame`.
@@ -41,6 +44,9 @@
 #'
 #' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing
 #' Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. \[Section 5.4\]
+#'
+#' Royston, P., Carlin, J. B., & White, I. R. Multiple imputation of missing values:
+#' New features for mim. Stata Journal, 9(2): 252-264, 2009.
 #'
 #' Von Hippel, Paul T and Bartlett, Jonathan W.
 #' Maximum likelihood multiple imputation: Faster imputations and consistent standard
@@ -659,10 +665,15 @@ transpose_results <- function(results, components) {
     return(results_transpose)
 }
 
-
-#' @rdname pool
+#' @keywords internal
 #' @export
-as.data.frame.pool <- function(x, ...) {
+as_data_frame_internal <- function(x) {
+    assert_that(
+        has_class(x, "pool") ||
+            has_class(x, "mcse"),
+        msg = "`x` must be a pool or mcse object"
+    )
+
     data.frame(
         parameter = names(x$pars),
         est = vapply(x$pars, function(x) x$est, numeric(1)),
@@ -673,6 +684,13 @@ as.data.frame.pool <- function(x, ...) {
         stringsAsFactors = FALSE,
         row.names = NULL
     )
+}
+
+
+#' @rdname pool
+#' @export
+as.data.frame.pool <- function(x, ...) {
+    as_data_frame_internal(x)
 }
 
 
@@ -711,7 +729,7 @@ print.pool <- function(x, ...) {
 
 #' @inheritParams pool
 #' @param omit_index the index of the result to omit.
-#' @describeIn mcse_internal omits a single result from the analysis and return the parameter results.
+#' @rdname mcse_internal
 #' @export
 mcse_jackknife <- function(results, omit_index, conf.level, alternative) {
     assert_that(
@@ -737,48 +755,40 @@ mcse_jackknife <- function(results, omit_index, conf.level, alternative) {
     reduced_pooled$pars
 }
 
-#' @param pars_reduced the numeric vector of the reduced results.
-#' @param par_full the single number of the full results.
-#' @describeIn mcse_internal combines the results of a single parameter into the MCSE.
+#' @param pars_jackknife the numeric vector of the jackknife results.
+#' @rdname mcse_internal
 #' @export
-mcse_combine_single_par <- function(pars_reduced, par_full) {
+jackknife_se <- function(pars_jackknife) {
     assert_that(
-        is.numeric(pars_reduced),
-        is.numeric(par_full),
-        length(pars_reduced) > 1,
-        length(par_full) == 1
+        is.numeric(pars_jackknife),
+        length(pars_jackknife) > 1
     )
 
-    M <- length(pars_reduced)
-    pseudo_vals <- M * par_full - (M - 1) * pars_reduced
-    mean_squared_pseudo_vals <- mean(pseudo_vals^2)
-    sqrt(mean_squared_pseudo_vals / (M - 1))
+    M <- length(pars_jackknife)
+    var_jackknife <- var(pars_jackknife)
+    scaling_factor <- (M - 1)^2 / M
+    sqrt(scaling_factor * var_jackknife)
 }
 
-#' @describeIn mcse_internal combines the results of all parameters to obtain their MCSE.
+#' @rdname mcse_internal
+#' @param jackknife_results the list of jackknife results of all parameters, in the same format as
+#'   the pooled parameter estimates.
 #' @export
-mcse_combine_all_pars <- function(jackknife_results, pooled_results) {
+mcse_combine_all_pars <- function(jackknife_results) {
     assert_that(
-        is.list(jackknife_results),
-        is.list(pooled_results),
-        all(vapply(jackknife_results, length, 1L) == length(pooled_results))
+        is.list(jackknife_results)
     )
 
-    mcse_results <- pooled_results
-    for (par in names(pooled_results)) {
-        this_par_res <- pooled_results[[par]]
-        for (stat in names(this_par_res)) {
-            this_stat_res <- this_par_res[[stat]]
-            for (i in seq_along(this_stat_res)) {
-                single_res <- this_stat_res[i]
-                mcse_results[[par]][[stat]][i] <- mcse_combine_single_par(
-                    pars_reduced = vapply(
-                        jackknife_results,
-                        \(x) x[[par]][[stat]][i],
-                        1.0
-                    ),
-                    par_full = single_res
+    mcse_results <- jackknife_results[[1]]
+    for (par in names(mcse_results)) {
+        for (stat in names(mcse_results[[par]])) {
+            for (i in seq_along(mcse_results[[par]][[stat]])) {
+                pars_jackknife <- vapply(
+                    jackknife_results,
+                    \(x) x[[par]][[stat]][i],
+                    1.0
                 )
+                mcse_results[[par]][[stat]][i] <- jackknife_se(pars_jackknife)
             }
         }
     }
@@ -786,38 +796,58 @@ mcse_combine_all_pars <- function(jackknife_results, pooled_results) {
 }
 
 #' @rdname pool
-#'
-#' @param pooled the `pool` object created by [pool()].
-#'
-#' @details
-#' The [mcse()] function computes the Monte Carlo standard error (MCSE) of the pooled estimates,
-#' via a closed formula for treatment effect estimates (`est`) and via a Jackknife variance estimator
-#' for any other estimates, including p-values.
-#'
 #' @export
-mcse <- function(pooled, results) {
+mcse <- function(x, results) {
     assert_that(
-        has_class(pooled, "pool"),
+        has_class(x, "pool"),
         has_class(results, "analysis"),
         has_class(results$method, "approxbayes") ||
             has_class(results$method, "bayes")
     )
     assert_that(
-        pooled$N == length(results$results),
-        msg = "Number of results in `pooled` and `results` do not match"
+        x$N == length(results$results),
+        msg = "Number of results in `x` and `results` do not match"
     )
 
     jackknife_results <- lapply(
-        seq_len(pooled$N),
+        seq_len(x$N),
         mcse_jackknife,
         results = results,
-        conf.level = pooled$conf.level,
-        alternative = pooled$alternative
+        conf.level = x$conf.level,
+        alternative = x$alternative
     )
-    ret <- mcse_combine_all_pars(
-        jackknife_results = jackknife_results,
-        pooled_results = pooled$pars
+    ret <- list(
+        pars = mcse_combine_all_pars(jackknife_results),
+        N = x$N
     )
-    class(ret) <- "mcse"
-    return(ret)
+    structure(
+        ret,
+        class = "mcse"
+    )
+}
+
+#' @rdname pool
+#' @export
+as.data.frame.mcse <- function(x, ...) {
+    as_data_frame_internal(x)
+}
+
+#' @rdname pool
+#' @export
+print.mcse <- function(x, ...) {
+    n_string <- as.character(x$N)
+
+    string <- c(
+        "",
+        "Monte Carlo Standard Errors for Pooled Estimates (mcse Object)",
+        "-----------",
+        sprintf("Number of Results Combined: %s", n_string),
+        "",
+        "Results:",
+        as_ascii_table(as.data.frame(x)),
+        ""
+    )
+
+    cat(string, sep = "\n")
+    return(invisible(x))
 }

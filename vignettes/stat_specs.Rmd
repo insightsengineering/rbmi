@@ -385,6 +385,8 @@ $$
 \text{MCSE}(\hat{\theta}) = \sqrt{\frac{M - 1}{M} \sum_{m=1}^{M} \left(\hat{\theta}_{(-m)} - \overline{\theta}_{(\cdot)}\right)^2}
 $$
 
+For simplicity, only the latter MCSE formula is implemented for all parameters.
+
 ## Bootstrap and jackknife inference for conditional mean imputation {#sec:bootInference}
 
 ### Point estimate of the treatment effect
