@@ -36,7 +36,7 @@ Useful links:
 
 Authors:
 \itemize{
-  \item Craig Gower-Page \email{craig.gower-page@roche.com}
+  \item Craig Gower-Page \email{craig.gower-page@novartis.com}
   \item Alessandro Noci \email{alessandro.noci@roche.com}
   \item Daniel Sabanes Bove \email{daniel.sabanes_bove@rconis.com}
 }
