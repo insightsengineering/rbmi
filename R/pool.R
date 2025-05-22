@@ -835,10 +835,29 @@ as.data.frame.mcse <- function(x, ...) {
 }
 
 #' @rdname pool
+#' @param pval_digits number of significant digits to print for p-values' MCSE.
+#' @param pval_eps the minimum p-values' MCSE to print.
+#' @param pval_nsmall the minimum number of digits to print for p-values' MCSE.
 #' @export
-print.mcse <- function(x, ...) {
+print.mcse <- function(
+    x,
+    ...,
+    pval_digits = 2,
+    pval_eps = 1e-6,
+    pval_nsmall = 5
+) {
     n_string <- as.character(x$N)
 
+    df <- as.data.frame(x)
+    # Handle the p-value formatting here in the data frame,
+    # so as_ascii_table() does not have to do it.
+    df$pval <- format.pval(
+        df$pval,
+        digits = pval_digits,
+        eps = pval_eps,
+        nsmall = pval_nsmall,
+        scientific = FALSE
+    )
     string <- c(
         "",
         "Monte Carlo Standard Errors for Pooled Estimates (mcse Object)",
@@ -846,7 +865,7 @@ print.mcse <- function(x, ...) {
         sprintf("Number of Results Combined: %s", n_string),
         "",
         "Results:",
-        as_ascii_table(as.data.frame(x)),
+        as_ascii_table(df),
         ""
     )
 
