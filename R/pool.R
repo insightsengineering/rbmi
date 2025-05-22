@@ -28,8 +28,8 @@
 #'  and variances across multiple imputed datasets, and the Barnard-Rubin rule to pool
 #'  degree's of freedom; see Little & Rubin (2002).
 #'  Here, the `mcse()` function can compute the Monte Carlo standard error (MCSE) of the
-#'  pooled estimates, via a Jackknife variance estimator for all parameters; see Royston,
-#'  Carlin & White (2009).
+#'  pooled estimates, via a Jackknife variance estimator for all parameters; see
+#'  Efron & Gong (1983) and Royston, Carlin & White (2009).
 #' - `method_condmean(type = "bootstrap")` uses percentile or normal approximation;
 #' see Efron & Tibshirani (1994). Note that for the percentile bootstrap, no standard error is
 #' calculated, i.e. the standard errors will be `NA` in the object / `data.frame`.
@@ -41,6 +41,9 @@
 #' @references
 #' Bradley Efron and Robert J Tibshirani. An introduction to the bootstrap. CRC
 #' press, 1994. \[Section 11\]
+#'
+#' Bradley Efron and Gail Gong. A leisurely look at the bootstrap, the jackknife,
+#' and cross-validation. The American Statistician, 37(1):36-48, 1983.
 #'
 #' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing
 #' Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. \[Section 5.4\]
@@ -666,7 +669,6 @@ transpose_results <- function(results, components) {
 }
 
 #' @keywords internal
-#' @export
 as_data_frame_internal <- function(x) {
     assert_that(
         has_class(x, "pool") ||

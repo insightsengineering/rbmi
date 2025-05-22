@@ -389,10 +389,11 @@ V(\hat{\theta}) = V_W(\hat{\theta}) + (1 + \frac{1}{M}) V_B(\hat{\theta})
 <p><span class="math display">\[
 \text{MCSE}(\hat{\theta}) = \sqrt{V_B(\hat{\theta}) / M}
 \]</span></p>
-<p>However, since decisions are generally based not just on the treatment effect estimate but also on the p-value, it is important to calculate the corresponding MCSE. No closed-form expression exists for the MCSE of the p-value, but as argued by <span class="citation" data-cites="Royston2009">Royston, Carlin, and White (<a href="#ref-Royston2009" role="doc-biblioref">2009</a>)</span>, the jackknife method could be used to estimate the MCSE. Let <span class="math inline">\(\theta\)</span> be the parameter of interest (e.g.&nbsp;the p-value) and let <span class="math inline">\(\hat{\theta}_{(-m)}\)</span> be the jackknife parameter estimate, obtained from the <span class="math inline">\(M-1\)</span> imputed datasets after removing the <span class="math inline">\(m\)</span>-th imputed dataset. Also let <span class="math inline">\(\overline{\theta}_{(\cdot)} = \sum_{m = 1}^{M} \hat{\theta}_{(-m)} / M\)</span> be the average of the jackknife parameter estimates. The MCSE of the overall estimate <span class="math inline">\(\hat{\theta}\)</span> is then given by:</p>
+<p>However, since decisions are generally based not just on the treatment effect estimate but also on the p-value, it is important to calculate the corresponding MCSE. No closed-form expression exists for the MCSE of the p-value, but as argued by <span class="citation" data-cites="Royston2009">Royston, Carlin, and White (<a href="#ref-Royston2009" role="doc-biblioref">2009</a>)</span>, the jackknife method could be used to estimate the MCSE <span class="citation" data-cites="EfronGong1983">(<a href="#ref-EfronGong1983" role="doc-biblioref">Efron and Gong 1983</a>)</span>. Let <span class="math inline">\(\theta\)</span> be the parameter of interest (e.g.&nbsp;the p-value) and let <span class="math inline">\(\hat{\theta}_{(-m)}\)</span> be the jackknife parameter estimate, obtained from the <span class="math inline">\(M-1\)</span> imputed datasets after removing the <span class="math inline">\(m\)</span>-th imputed dataset. Also let <span class="math inline">\(\overline{\theta}_{(\cdot)} = \sum_{m = 1}^{M} \hat{\theta}_{(-m)} / M\)</span> be the average of the jackknife parameter estimates. The MCSE of the overall estimate <span class="math inline">\(\hat{\theta}\)</span> is then given by:</p>
 <p><span class="math display">\[
 \text{MCSE}(\hat{\theta}) = \sqrt{\frac{M - 1}{M} \sum_{m=1}^{M} \left(\hat{\theta}_{(-m)} - \overline{\theta}_{(\cdot)}\right)^2}
 \]</span></p>
+<p>For simplicity, only the latter MCSE formula is implemented for all parameters.</p>
 </section>
 </section>
 <section id="sec:bootInference" class="level2">
@@ -474,7 +475,7 @@ MSW &amp;= \frac{1}{B(D-1)} \sum_{b = 1}^B \sum_{d = 1}^D (\theta_{bd} - \bar{\t
 </ul></li>
 <li>The imputation step using random imputation or deterministic conditional mean imputation, respectively, is implemented in function <code>impute()</code>. Imputation can be performed assuming the already implemented imputation strategies as presented in section @ref(sec:imputationStep). Additionally, user-defined imputation strategies are also supported.</li>
 <li>The analysis step is implemented in function <code>analyse()</code> and applies the analysis model to all imputed datasets. By default, the analysis model (argument <code>fun</code>) is the <code>ancova()</code> function but alternative analysis functions can also be provided by the user. The <code>analyse()</code> function also allows for <span class="math inline">\(\delta\)</span>-adjustments to the imputed datasets prior to the analysis via argument <code>delta</code>.</li>
-<li>The inference step is implemented in function <code>pool()</code> which pools the results across imputed datasets. The Rubin and Bernard rule is applied in case of (approximate) Bayesian MI. For conditional mean imputation, jackknife and bootstrap (normal approximation or percentile) inference is supported. For BMLMI, the pooling and inference steps are performed via <code>pool()</code> which in this case implements the method described in Section @ref(sec:poolbmlmi).</li>
+<li>The inference step is implemented in function <code>pool()</code> which pools the results across imputed datasets. The Rubin and Bernard rule is applied in case of (approximate) Bayesian MI, with <code>mcse()</code> implementing the MCSE. For conditional mean imputation, jackknife and bootstrap (normal approximation or percentile) inference is supported. For BMLMI, the pooling and inference steps are performed via <code>pool()</code> which in this case implements the method described in Section @ref(sec:poolbmlmi).</li>
 </ul>
 </section>
 <section id="sec:otherSoftware" class="level1">
@@ -525,6 +526,9 @@ Drury, Thomas, Juan J Abellan, Nicky Best, and Ian R White. 2024. <span>“Estim
 </div>
 <div id="ref-Efron1994" class="csl-entry" role="listitem">
 Efron, Bradley. 1994. <span>“Missing Data, Imputation, and the Bootstrap.”</span> <em>Journal of the American Statistical Association</em> 89 (426): 463–75.
+</div>
+<div id="ref-EfronGong1983" class="csl-entry" role="listitem">
+Efron, Bradley, and Gail Gong. 1983. <span>“A Leisurely Look at the Bootstrap, the Jackknife, and Cross-Validation.”</span> <em>The American Statistician</em> 37 (1): 36–48. <a href="https://www.tandfonline.com/doi/abs/10.1080/00031305.1983.10483087">https://www.tandfonline.com/doi/abs/10.1080/00031305.1983.10483087</a>.
 </div>
 <div id="ref-EfronTibs1994" class="csl-entry" role="listitem">
 Efron, Bradley, and Robert J Tibshirani. 1994. <em>An Introduction to the Bootstrap</em>. CRC press.
