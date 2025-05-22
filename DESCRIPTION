@@ -1,6 +1,6 @@
 Package: rbmi
 Title: Reference Based Multiple Imputation
-Version: 1.4.2
+Version: 1.4.9000
 Authors@R: c(
     person("Isaac", "Gravestock", email = "isaac.gravestock@roche.com", role = c("aut", "cre")),
     person("Craig", "Gower-Page", email = "craig.gower-page@novartis.com", role = c("aut")),
