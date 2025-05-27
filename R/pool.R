@@ -1,5 +1,3 @@
-
-
 #' Pool analysis results obtained from the imputed datasets
 #'
 #' @param results an analysis object created by [analyse()].
@@ -29,6 +27,9 @@
 #' - `method_approxbayes()` & `method_bayes()` both use Rubin's rules to pool estimates
 #'  and variances across multiple imputed datasets, and the Barnard-Rubin rule to pool
 #'  degree's of freedom; see Little & Rubin (2002).
+#'  Here, the `mcse()` function can compute the Monte Carlo standard error (MCSE) of the
+#'  pooled estimates, via a Jackknife variance estimator for all parameters; see
+#'  Efron & Gong (1983) and Royston, Carlin & White (2009).
 #' - `method_condmean(type = "bootstrap")` uses percentile or normal approximation;
 #' see Efron & Tibshirani (1994). Note that for the percentile bootstrap, no standard error is
 #' calculated, i.e. the standard errors will be `NA` in the object / `data.frame`.
@@ -41,8 +42,14 @@
 #' Bradley Efron and Robert J Tibshirani. An introduction to the bootstrap. CRC
 #' press, 1994. \[Section 11\]
 #'
+#' Bradley Efron and Gail Gong. A leisurely look at the bootstrap, the jackknife,
+#' and cross-validation. The American Statistician, 37(1):36-48, 1983.
+#'
 #' Roderick J. A. Little and Donald B. Rubin. Statistical Analysis with Missing
 #' Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. \[Section 5.4\]
+#'
+#' Royston, P., Carlin, J. B., & White, I. R. Multiple imputation of missing values:
+#' New features for mim. Stata Journal, 9(2): 252-264, 2009.
 #'
 #' Von Hippel, Paul T and Bartlett, Jonathan W.
 #' Maximum likelihood multiple imputation: Faster imputations and consistent standard
@@ -55,7 +62,6 @@ pool <- function(
     alternative = c("two.sided", "less", "greater"),
     type = c("percentile", "normal")
 ) {
-
     assert_that(
         has_class(results, "analysis")
     )
@@ -113,7 +119,8 @@ pool <- function(
 #' @param x Character name of the analysis method, must one of
 #' either `"rubin"`, `"jackknife"`, "`bootstrap"` or `"bmlmi"`.
 get_pool_components <- function(x) {
-    switch(x,
+    switch(
+        x,
         "rubin" = c("est", "df", "se"),
         "jackknife" = c("est"),
         "bootstrap" = c("est"),
@@ -155,7 +162,6 @@ pool_internal.jackknife <- function(results, conf.level, alternative, type, D) {
 }
 
 
-
 #' @rdname pool_internal
 #' @export
 pool_internal.bootstrap <- function(
@@ -187,7 +193,6 @@ pool_internal.bmlmi <- function(
     type,
     D
 ) {
-
     ests <- results$est
     alpha <- 1 - conf.level
 
@@ -227,7 +232,6 @@ pool_internal.bmlmi <- function(
 #'   Maximum likelihood multiple imputation: Faster imputations and consistent standard errors
 #' without posterior draws. 2021
 get_ests_bmlmi <- function(ests, D) {
-
     l <- length(ests)
 
     assert_that(
@@ -254,7 +258,9 @@ get_ests_bmlmi <- function(ests, D) {
     randIntVar <- (MSB - MSW) / D
 
     est_var <- (1 + 1 / B) * randIntVar + resVar / (B * D)
-    df <- (est_var^2) / ((((B + 1) / (B * D))^2 * MSB^2 / (B - 1)) + MSW^2 / (B * D^2 * (D - 1)))
+    df <- (est_var^2) /
+        ((((B + 1) / (B * D))^2 * MSB^2 / (B - 1)) +
+            MSW^2 / (B * D^2 * (D - 1)))
     df <- max(3, df)
 
     ret_obj <- list(
@@ -320,7 +326,6 @@ pool_internal.rubin <- function(results, conf.level, alternative, type, D) {
 #'   Barnard, J. and Rubin, D.B. (1999).
 #'   Small sample degrees of freedom with multiple imputation. Biometrika, 86, 948-955.
 rubin_df <- function(v_com, var_b, var_t, M) {
-
     if (is.na(v_com) || (is.infinite(v_com) && var_b == 0)) {
         df <- Inf
     } else {
@@ -331,7 +336,7 @@ rubin_df <- function(v_com, var_b, var_t, M) {
         }
 
         if (lambda != 0) {
-            v_old <- (M - 1)  / lambda^2
+            v_old <- (M - 1) / lambda^2
             df <- if (is.infinite(v_com)) {
                 v_old
             } else {
@@ -379,7 +384,6 @@ rubin_df <- function(v_com, var_b, var_t, M) {
 #' Data, Second Edition. John Wiley & Sons, Hoboken, New Jersey, 2002. \[Section 5.4\]
 #' @importFrom stats var
 rubin_rules <- function(ests, ses, v_com) {
-
     M <- length(ests)
     est_point <- mean(ests)
 
@@ -414,11 +418,6 @@ rubin_rules <- function(ests, ses, v_com) {
 }
 
 
-
-
-
-
-
 #' Bootstrap Pooling via Percentiles
 #' @description
 #' Get point estimate, confidence interval and p-value using
@@ -433,9 +432,10 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
     est_orig <- est[1]
     est <- est[-1]
 
-    if (length(est) == 0) { # if n_samples = 0 we cannot estimate pvalue and CIs
+    if (length(est) == 0) {
+        # if n_samples = 0 we cannot estimate pvalue and CIs
         ret <- list(
-            est = est_orig,  # First estimate should be original dataset
+            est = est_orig, # First estimate should be original dataset
             ci = c(NA, NA),
             se = NA,
             pvalue = NA
@@ -476,7 +476,7 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
     )
 
     ret <- list(
-        est = est_orig,  # First estimate should be original dataset
+        est = est_orig, # First estimate should be original dataset
         ci = ci,
         se = NA,
         pvalue = min(min(pvals[index]) * length(pvals[index]), 1)
@@ -501,7 +501,6 @@ pool_bootstrap_percentile <- function(est, conf.level, alternative) {
 #'
 #' @importFrom stats uniroot
 pval_percentile <- function(est) {
-
     if (all(est == 0)) {
         ret <- c(1, 1)
     } else if (min(est) > 0) {
@@ -547,7 +546,6 @@ pool_bootstrap_normal <- function(est, conf.level, alternative) {
 }
 
 
-
 #' Calculate parametric confidence intervals
 #'
 #' @description
@@ -574,9 +572,11 @@ parametric_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
     ci <- switch(
         alternative,
         two.sided = c(-1, 1) * qfun(1 - alpha / 2, ...),
-        greater =  c(-Inf, 1) *  qfun(1 - alpha, ...),
+        greater = c(-Inf, 1) * qfun(1 - alpha, ...),
         less = c(-1, Inf) * qfun(1 - alpha, ...)
-    ) * se + point
+    ) *
+        se +
+        point
 
     pvals <- c(
         pfun(point / se, lower.tail = TRUE, ...),
@@ -598,9 +598,6 @@ parametric_ci <- function(point, se, alpha, alternative, qfun, pfun, ...) {
     )
     return(ret)
 }
-
-
-
 
 
 #' Transpose results object
@@ -671,10 +668,14 @@ transpose_results <- function(results, components) {
     return(results_transpose)
 }
 
+#' @keywords internal
+as_data_frame_internal <- function(x) {
+    assert_that(
+        has_class(x, "pool") ||
+            has_class(x, "mcse"),
+        msg = "`x` must be a pool or mcse object"
+    )
 
-#' @rdname pool
-#' @export
-as.data.frame.pool <- function(x, ...) {
     data.frame(
         parameter = names(x$pars),
         est = vapply(x$pars, function(x) x$est, numeric(1)),
@@ -690,8 +691,14 @@ as.data.frame.pool <- function(x, ...) {
 
 #' @rdname pool
 #' @export
-print.pool <- function(x, ...) {
+as.data.frame.pool <- function(x, ...) {
+    as_data_frame_internal(x)
+}
 
+
+#' @rdname pool
+#' @export
+print.pool <- function(x, ...) {
     n_string <- ife(
         x$method %in% c("rubin", "bmlmi"),
         as.character(x$N),
@@ -709,6 +716,159 @@ print.pool <- function(x, ...) {
         "",
         "Results:",
         as_ascii_table(as.data.frame(x), pcol = "pval"),
+        ""
+    )
+
+    cat(string, sep = "\n")
+    return(invisible(x))
+}
+
+#' Internal MCSE Computations
+#'
+#' These functions are used by [mcse()] to compute the Monte Carlo standard error using the Jackknife approach.
+#'
+#' @name mcse_internal
+
+#' @inheritParams pool
+#' @param omit_index the index of the result to omit.
+#' @rdname mcse_internal
+#' @export
+mcse_jackknife <- function(results, omit_index, conf.level, alternative) {
+    assert_that(
+        has_class(results, "analysis"),
+        is.integer(omit_index),
+        length(omit_index) == 1,
+        omit_index <= length(results$results),
+        omit_index > 0
+    )
+
+    reduced_results <- results
+    reduced_results$results <- structure(
+        results$results[-omit_index], # Class attributes get lost here,
+        class = class(results$results) # therefore recovering them.
+    )
+    reduced_results$method$n_samples <- results$method$n_samples - 1L
+
+    reduced_pooled <- pool(
+        results = reduced_results,
+        conf.level = conf.level,
+        alternative = alternative
+    )
+    reduced_pooled$pars
+}
+
+#' @param pars_jackknife the numeric vector of the jackknife results.
+#' @rdname mcse_internal
+#' @export
+jackknife_se <- function(pars_jackknife) {
+    assert_that(
+        is.numeric(pars_jackknife),
+        length(pars_jackknife) > 1
+    )
+
+    M <- length(pars_jackknife)
+    var_jackknife <- var(pars_jackknife)
+    scaling_factor <- (M - 1)^2 / M
+    sqrt(scaling_factor * var_jackknife)
+}
+
+#' @rdname mcse_internal
+#' @param jackknife_results the list of jackknife results of all parameters, in the same format as
+#'   the pooled parameter estimates.
+#' @export
+mcse_combine_all_pars <- function(jackknife_results) {
+    assert_that(
+        is.list(jackknife_results)
+    )
+
+    mcse_results <- jackknife_results[[1]]
+    for (par in names(mcse_results)) {
+        for (stat in names(mcse_results[[par]])) {
+            for (i in seq_along(mcse_results[[par]][[stat]])) {
+                pars_jackknife <- vapply(
+                    jackknife_results,
+                    function(x) x[[par]][[stat]][i],
+                    1.0
+                )
+                mcse_results[[par]][[stat]][i] <- jackknife_se(pars_jackknife)
+            }
+        }
+    }
+    mcse_results
+}
+
+#' @rdname pool
+#' @export
+mcse <- function(x, results) {
+    assert_that(
+        has_class(x, "pool"),
+        has_class(results, "analysis")
+    )
+    assert_that(
+        has_class(results$method, "approxbayes") ||
+            has_class(results$method, "bayes"),
+        msg = "The `mcse()` function can only be used if `method_bayes()` or `method_approxbayes()` was selected"
+    )
+    assert_that(
+        x$N == length(results$results),
+        msg = "Number of results in `x` and `results` do not match"
+    )
+
+    jackknife_results <- lapply(
+        seq_len(x$N),
+        mcse_jackknife,
+        results = results,
+        conf.level = x$conf.level,
+        alternative = x$alternative
+    )
+    ret <- list(
+        pars = mcse_combine_all_pars(jackknife_results),
+        N = x$N
+    )
+    structure(
+        ret,
+        class = "mcse"
+    )
+}
+
+#' @rdname pool
+#' @export
+as.data.frame.mcse <- function(x, ...) {
+    as_data_frame_internal(x)
+}
+
+#' @rdname pool
+#' @param pval_digits number of significant digits to print for p-values' MCSE.
+#' @param pval_eps the minimum p-values' MCSE to print.
+#' @param pval_nsmall the minimum number of digits to print for p-values' MCSE.
+#' @export
+print.mcse <- function(
+    x,
+    ...,
+    pval_digits = 2,
+    pval_eps = 1e-6,
+    pval_nsmall = 5
+) {
+    n_string <- as.character(x$N)
+
+    df <- as.data.frame(x)
+    # Handle the p-value formatting here in the data frame,
+    # so as_ascii_table() does not have to do it.
+    df$pval <- format.pval(
+        df$pval,
+        digits = pval_digits,
+        eps = pval_eps,
+        nsmall = pval_nsmall,
+        scientific = FALSE
+    )
+    string <- c(
+        "",
+        "Monte Carlo Standard Errors for Pooled Estimates (mcse Object)",
+        "-----------",
+        sprintf("Number of Results Combined: %s", n_string),
+        "",
+        "Results:",
+        as_ascii_table(df),
         ""
     )
 

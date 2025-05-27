@@ -370,6 +370,22 @@ $$
 $$
 where $\lambda = \frac{(1 + \frac{1}{M})V_B(\hat{\theta})}{V(\hat{\theta})}$ is the fraction of missing information.
 
+### Monte Carlo standard error
+
+The Bayesian approach to multiple imputation yields probabilistic results. The precision of the MC algorithm can be quantified through the MC standard error (MCSE). Such quantification is important for judging the scientific reproducibility of the results, e.g., when computational parameters such as the seed are changed. For the treatment effect estimates $\hat{\theta}$ obtained through Rubin's rule as described above, a closed-form expression for the MCSE exists [@Royston2009]: 
+
+$$
+\text{MCSE}(\hat{\theta}) = \sqrt{V_B(\hat{\theta}) / M}
+$$
+
+However, since decisions are generally based not just on the treatment effect estimate but also on the p-value, it is important to calculate the corresponding MCSE. No closed-form expression exists for the MCSE of the p-value, but as argued by @Royston2009, the jackknife method could be used to estimate the MCSE [@EfronGong1983]. Let $\theta$ be the parameter of interest (e.g. the p-value) and let $\hat{\theta}_{(-m)}$ be the jackknife parameter estimate, obtained from the $M-1$ imputed datasets after removing the $m$-th imputed dataset. Also let $\overline{\theta}_{(\cdot)} = \sum_{m = 1}^{M} \hat{\theta}_{(-m)} / M$ be the average of the jackknife parameter estimates. The MCSE of the overall estimate $\hat{\theta}$ is then given by:
+
+$$
+\text{MCSE}(\hat{\theta}) = \sqrt{\frac{M - 1}{M} \sum_{m=1}^{M} \left(\hat{\theta}_{(-m)} - \overline{\theta}_{(\cdot)}\right)^2}
+$$
+
+For simplicity, only the latter MCSE formula is implemented for all parameters.
+
 ## Bootstrap and jackknife inference for conditional mean imputation {#sec:bootInference}
 
 ### Point estimate of the treatment effect
@@ -385,7 +401,8 @@ steps of the imputation procedure (i.e. imputation, conditional mean imputation,
 
 Then, the *jackknife standard error* is defined as 
 $$\hat{se}_{jack}=[\frac{(n-1)}{n}\cdot\sum_{b=1}^{n} (\hat{\theta}_{(-b)}-\bar{\theta}_{(.)})^2]^{1/2}$$ 
-where $\bar{\theta}_{(.)}$ denotes the mean of all jackknife estimates (@EfronTibs1994, chapter 10). The corresponding two-sided normal approximation $1-\alpha$ CI is defined as $\hat{\theta}\pm z^{1-\alpha/2}\cdot \hat{se}_{jack}$ where $\hat{\theta}$ is the treatment effect estimate from the original dataset. Tests of the null hypothesis $H_0: \theta=\theta_0$ are then based on the $Z$-score $Z=(\hat{\theta}-\theta_0)/\hat{se}_{jack}$ using a standard normal approximation.
+where $\bar{\theta}_{(.)}$ denotes the mean of all jackknife estimates (@EfronTibs1994, chapter 10). (Note that this is the same formula as it is used for the MCSE above.) 
+The corresponding two-sided normal approximation $1-\alpha$ CI is defined as $\hat{\theta}\pm z^{1-\alpha/2}\cdot \hat{se}_{jack}$ where $\hat{\theta}$ is the treatment effect estimate from the original dataset. Tests of the null hypothesis $H_0: \theta=\theta_0$ are then based on the $Z$-score $Z=(\hat{\theta}-\theta_0)/\hat{se}_{jack}$ using a standard normal approximation.
 
 A simulation study reported in @Wolbers2021 demonstrated exact protection of the type I error for jackknife-based inference with a relatively low sample size (n = 100 per group) and a substantial amount of missing data (>25% of subjects with an ICE).
 
@@ -489,7 +506,7 @@ For a full documentation of the `rbmi` package functionality we refer to the hel
   + Bootstrapped MI methods are obtained via argument `method = method_bmlmi(B=B, D=D)` where $B$ refers to the number of bootstrap samples and $D$ to the number of random imputations for each bootstrap sample. 
 - The imputation step using random imputation or deterministic conditional mean imputation, respectively, is implemented in function `impute()`. Imputation can be performed assuming the already implemented imputation strategies as presented in section \@ref(sec:imputationStep). Additionally, user-defined imputation strategies are also supported.
 - The analysis step is implemented in function `analyse()` and applies the analysis model to all imputed datasets. By default, the analysis model (argument `fun`) is the `ancova()` function but alternative analysis functions can also be provided by the user. The `analyse()` function also allows for $\delta$-adjustments to the imputed datasets prior to the analysis via argument `delta`.
-- The inference step is implemented in function `pool()` which pools the results across imputed datasets. The Rubin and Bernard rule is applied in case of (approximate) Bayesian MI. For conditional mean imputation, jackknife and bootstrap (normal approximation or percentile) inference is supported. For BMLMI, the pooling and inference steps are performed via `pool()` which in this case implements the method described in Section \@ref(sec:poolbmlmi).
+- The inference step is implemented in function `pool()` which pools the results across imputed datasets. The Rubin and Bernard rule is applied in case of (approximate) Bayesian MI, with `mcse()` implementing the MCSE. For conditional mean imputation, jackknife and bootstrap (normal approximation or percentile) inference is supported. For BMLMI, the pooling and inference steps are performed via `pool()` which in this case implements the method described in Section \@ref(sec:poolbmlmi).
 
 #  Comparison to other software implementations {#sec:otherSoftware}
 
