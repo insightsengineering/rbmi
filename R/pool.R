@@ -787,7 +787,7 @@ mcse_combine_all_pars <- function(jackknife_results) {
             for (i in seq_along(mcse_results[[par]][[stat]])) {
                 pars_jackknife <- vapply(
                     jackknife_results,
-                    \(x) x[[par]][[stat]][i],
+                    function(x) x[[par]][[stat]][i],
                     1.0
                 )
                 mcse_results[[par]][[stat]][i] <- jackknife_se(pars_jackknife)
