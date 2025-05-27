@@ -846,7 +846,7 @@ print.mcse <- function(
     x,
     ...,
     pval_digits = 2,
-    pval_eps = 1e-5,
+    pval_eps = 1e-6,
     pval_nsmall = 5
 ) {
     n_string <- as.character(x$N)
@@ -861,7 +861,6 @@ print.mcse <- function(
         nsmall = pval_nsmall,
         scientific = FALSE
     )
-    df$pval <- left_pad(df$pval)
     string <- c(
         "",
         "Monte Carlo Standard Errors for Pooled Estimates (mcse Object)",

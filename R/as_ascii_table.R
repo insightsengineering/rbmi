@@ -13,22 +13,6 @@ string_pad <- function(x, width) {
 }
 
 
-#' left_pad
-#'
-#' Utility function to left pad a given string vector to ensure it is right justified
-#' @param x the string vector to pad
-#' @param width the desired width that the string should be padded to. If -1 then the strings will
-#' be padded to the length of the longest string in the vector
-#' @param pad the character to pad out the string with
-left_pad <- function(x, width = -1, pad = " ") {
-    if (width == -1) {
-        width <- max(nchar(x))
-    }
-    n_pad <- pmax(0, width - nchar(x))
-    paste0(strrep(pad, n_pad), x)
-}
-
-
 #' recursive_reduce
 #'
 #' Utility function used to replicated purrr::reduce. Recursively applies a
