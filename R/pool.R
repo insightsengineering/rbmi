@@ -802,9 +802,12 @@ mcse_combine_all_pars <- function(jackknife_results) {
 mcse <- function(x, results) {
     assert_that(
         has_class(x, "pool"),
-        has_class(results, "analysis"),
+        has_class(results, "analysis")
+    )
+    assert_that(
         has_class(results$method, "approxbayes") ||
-            has_class(results$method, "bayes")
+            has_class(results$method, "bayes"),
+        msg = "The `mcse()` function can only be used if `method_bayes()` or `method_approxbayes()` was selected"
     )
     assert_that(
         x$N == length(results$results),
@@ -843,7 +846,7 @@ print.mcse <- function(
     x,
     ...,
     pval_digits = 2,
-    pval_eps = 1e-6,
+    pval_eps = 1e-5,
     pval_nsmall = 5
 ) {
     n_string <- as.character(x$N)
@@ -858,6 +861,7 @@ print.mcse <- function(
         nsmall = pval_nsmall,
         scientific = FALSE
     )
+    df$pval <- left_pad(df$pval)
     string <- c(
         "",
         "Monte Carlo Standard Errors for Pooled Estimates (mcse Object)",

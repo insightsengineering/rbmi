@@ -293,3 +293,13 @@ test_that("format_method_descriptions", {
         fixed = TRUE
     )
 })
+
+test_that("left_pad() works as expected", {
+    actual <- left_pad(c("< 0.000001", "0.23457", "0.0021"))
+    expected <- c(
+        "< 0.000001",
+        "   0.23457",
+        "    0.0021"
+    )
+    expect_equal(actual, expected)
+})
