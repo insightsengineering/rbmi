@@ -1,4 +1,4 @@
-# rbmi (Development version)
+# rbmi 1.4.9000
 
 * New function `mcse()` to calculate the Monte Carlo standard error for pooled estimates from (approximate) Bayesian imputation. (#493)
 
