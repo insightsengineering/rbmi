@@ -89,14 +89,19 @@ fit_mcmc <- function(
         mmrm_initial$sigma
     )
 
+    # We perform thinning after the rstan::sampling call,
+    # so that we keep the whole chain in the stan fit object.
+    thin <- method$control$thin
+    method$control$thin <- 1
+
     control <- complete_control_bayes(
         control = method$control,
-        n_samples = method$n_samples,
+        n_samples = method$n_samples * thin,
         quiet = quiet,
         stan_data = stan_data,
         mmrm_initial = mmrm_initial
     )
-    
+
     sampling_args <- c(
         list(
             object = get_stan_model(),
@@ -128,7 +133,10 @@ fit_mcmc <- function(
     fit <- stan_fit$results
     check_mcmc(fit, method$n_samples)
 
-    draws <- extract_draws(fit, method$n_samples)
+    draws <- extract_draws(fit, method$n_samples * thin)
+    # Perform thinning on parameter draws
+    draws$beta <- draws$beta[seq(1, method$n_samples * thin, by = thin)]
+    draws$sigma <- draws$sigma[seq(1, method$n_samples * thin, by = thin)]
 
     ret_obj <- list(
         "samples" = draws,
