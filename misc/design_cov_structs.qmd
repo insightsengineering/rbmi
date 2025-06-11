@@ -1,0 +1,34 @@
+# Design doc for additional covariance structures
+
+## Objectives
+
+- Add the additional structured covariance models as options also for `method_bayes` via argument `covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph")`
+- Use pragmatic default priors, based on the initial frequentist model fit, for the covariance model parameters, with the possibility to add multiple prior choices
+  - In particular, add the LKJ prior as an option for the unstructured covariance model (good to have a precedent for the additional flexibility, plus we have seen better performance with LKJ vs. InvWish)
+- Avoid duplicated code in the backend Stan implementation, e.g. via using experience from the `jmpost` and/or `brms` packages' Stan code templating mechanisms
+
+## User interface
+
+The changes to the user interface are restricted to the `method_bayes` function. The proposal is to have the new signature:
+
+```r
+method_bayes(
+    covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
+    same_cov = TRUE,
+    prior_cov = c("default", "lkj"),
+    n_samples = 20,
+    control = control_bayes()    
+)
+```
+
+- Note that we could use this update of the package to remove the previously deprecated arguments `burn_in` and `burn_between` from the `method_bayes` function. Thereby we avoid having too many arguments in the function signature.
+- The new argument `covariance` is finally aligning this function's signature to the other `method_*` functions, which all have the same `covariance` argument already.
+
+### Specifying the prior on the covariance model parameters 
+
+The new argument `prior_cov` allows the user to choose between the default priors (which apply to all covariance structures and are detailed in the function documentation and statistical specifications vignette) and the LKJ prior, which is only available for the unstructured covariance model. In the future, additional options (which might only be available for a subset of covariance structures) could be added here. Generally, we don't aim here for full flexibility (unlike the `brms` package e.g.), but rather a pragmatic set of default options with a few predefined alternatives, which are likely only used by experts in specific situations.
+
+We have here a slight disadvantage in that the `covariance` and `prior_cov` arguments are not fully independent, and this needs to be cross-checked internally in the function with informative error messages if the user tries to use the LKJ prior with a covariance structure other than "us". However, like this we can keep the user interface in line with the other `method_*` functions. 
+
+An alternative would be to move the `prior_cov` argument to the `control_bayes` function, but it seems out of place there, as it is not about controlling the MCMC sampling process, but rather about the prior specification for the covariance model.
+
