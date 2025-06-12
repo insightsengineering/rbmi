@@ -10,8 +10,14 @@ get_mcmc_sim_dat <- function(n, mcoefs, sigma) {
     covars <- tibble::tibble(
         id = paste0("P", seq_len(n)),
         age = rnorm(n),
-        group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),
-        sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F"))
+        group = factor(
+            sample(c("A", "B"), size = n, replace = TRUE),
+            levels = c("A", "B")
+        ),
+        sex = factor(
+            sample(c("M", "F"), size = n, replace = TRUE),
+            levels = c("M", "F")
+        )
     )
 
     dat <- mvtnorm::rmvnorm(n, sigma = sigma) %>%
@@ -46,23 +52,27 @@ get_within <- function(x, real) {
             uci = quantile(val, 0.995)
         ) %>%
         mutate(real = real) %>%
-        mutate(inside = real >= lci &  real <= uci)
+        mutate(inside = real >= lci & real <= uci)
 }
 
 test_extract_draws <- function(draws_extracted, same_cov, n_groups, n_visits) {
-
     expect_type(draws_extracted, "list")
     expect_length(draws_extracted, 2)
     expect_true(all(names(draws_extracted) %in% c("beta", "sigma")))
 
     if (same_cov) {
-        expect_true(all(sapply(draws_extracted$sigma, function(x) length(x) == 1)))
+        expect_true(all(sapply(draws_extracted$sigma, function(x) {
+            length(x) == 1
+        })))
     } else {
-        expect_true(all(sapply(draws_extracted$sigma, function(x) length(x) == n_groups)))
+        expect_true(all(sapply(draws_extracted$sigma, function(x) {
+            length(x) == n_groups
+        })))
     }
 
-    expect_true(all(sapply(draws_extracted$sigma, function(x) sapply(x, function(y) dim(y) == c(n_visits, n_visits)))))
-
+    expect_true(all(sapply(draws_extracted$sigma, function(x) {
+        sapply(x, function(y) dim(y) == c(n_visits, n_visits))
+    })))
 }
 
 
@@ -79,10 +89,7 @@ test_that("split_dim creates a list from an array as expected", {
 })
 
 
-
-
 test_that("Verbose suppression works", {
-
     set.seed(301)
     sigma <- as_vcov(c(6, 4, 4), c(0.5, 0.2, 0.3))
     dat <- get_sim_data(50, sigma)
@@ -105,29 +112,36 @@ test_that("Verbose suppression works", {
 
     suppressWarnings({
         msg <- capture.output({
-            x <- draws(dat, dat_ice, vars, method_bayes(n_samples = 2), quiet = FALSE)
+            x <- draws(
+                dat,
+                dat_ice,
+                vars,
+                method_bayes(n_samples = 2),
+                quiet = FALSE
+            )
         })
     })
     expect_true(length(msg) > 0)
 
-
     suppressWarnings({
         msg <- capture.output({
-            x <- draws(dat, dat_ice, vars, method_bayes(n_samples = 2), quiet = TRUE)
+            x <- draws(
+                dat,
+                dat_ice,
+                vars,
+                method_bayes(n_samples = 2),
+                quiet = TRUE
+            )
         })
     })
     expect_true(length(msg) == 0)
 })
 
 
-
-
 test_that("as_indicies", {
-
     result_actual <- as_indices(c("1100"))
     result_expected <- list(c(1, 2, 999, 999))
     expect_equal(result_actual, result_expected)
-
 
     result_actual <- as_indices(c(
         "10101",
@@ -162,11 +176,7 @@ test_that("as_indicies", {
     expect_error(as_indices(c("12")), "must be 0 or 1")
     expect_error(as_indices(c("11", "1")), "same length")
     expect_error(as_indices(c("11", "111")), "same length")
-
 })
-
-
-
 
 
 test_that("get_pattern_groups", {
@@ -187,8 +197,6 @@ test_that("get_pattern_groups", {
     )
     expect_equal(results_actual, results_expected)
 
-
-
     dat <- tibble(
         subjid = c("1", "1", "2", "2", "3", "3"),
         visit = c(1, 2, 1, 2, 1, 2),
@@ -203,8 +211,6 @@ test_that("get_pattern_groups", {
         pgroup = c(1, 2, 3)
     )
     expect_equal(results_actual, results_expected)
-
-
 
     dat <- tibble(
         subjid = c("1", "1", "2", "2", "3", "3"),
@@ -221,8 +227,6 @@ test_that("get_pattern_groups", {
     )
     expect_equal(results_actual, results_expected)
 
-
-
     dat <- tibble(
         subjid = c("1", "2", "3", "1", "2", "3"),
         visit = c(1, 1, 1, 2, 2, 2),
@@ -238,10 +242,6 @@ test_that("get_pattern_groups", {
     )
     expect_equal(results_actual, results_expected)
 })
-
-
-
-
 
 
 test_that("get_pattern_groups_unique", {
@@ -261,8 +261,6 @@ test_that("get_pattern_groups_unique", {
     )
     expect_equal(results_actual, results_expected)
 
-
-
     dat <- tibble(
         subjid = c("1", "2", "4", "5"),
         group = factor(c("a", "a", "a", "b")),
@@ -279,8 +277,6 @@ test_that("get_pattern_groups_unique", {
     )
     expect_equal(results_actual, results_expected)
 
-
-
     dat <- tibble(
         subjid = c("1", "2", "4", "5"),
         group = factor(c("a", "a", "b", "b")),
@@ -296,8 +292,6 @@ test_that("get_pattern_groups_unique", {
         n_avail = c(2, 2, 1)
     )
     expect_equal(results_actual, results_expected)
-
-
 
     dat <- tibble(
         subjid = c("1", "2", "4", "5"),
@@ -317,13 +311,7 @@ test_that("get_pattern_groups_unique", {
 })
 
 
-
-
-
-
-
-test_that("fit_mcmc can recover known values with same_cov = TRUE", {
-
+test_that("prepare_prior_param works for AR1", {
     skip_if_not(is_full_test())
 
     set.seed(2151)
@@ -337,7 +325,81 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
     sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
 
     dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
-    mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    # Same cov across groups.
+    mmrm_initial <- fit_mmrm(
+        designmat = mat,
+        outcome = dat$outcome,
+        subjid = dat$id,
+        visit = dat$visit,
+        group = dat$group,
+        cov_struct = "ar1",
+        REML = TRUE,
+        same_cov = TRUE
+    )
+
+    result <- prepare_prior_param(
+        stan_data = list(),
+        covariance = "ar1",
+        prior_cov = "default",
+        mmrm_initial = mmrm_initial,
+        same_cov = TRUE
+    )
+    expect_true(
+        is.list(result) && identical(names(result), c("sd_par", "rho_par"))
+    )
+    expect_true(is.list(result$sd_par) && length(result$sd_par) == 1)
+    expect_true(is.list(result$rho_par) && length(result$rho_par) == 1)
+
+    # Separate cov across groups.
+    mmrm_initial <- fit_mmrm(
+        designmat = mat,
+        outcome = dat$outcome,
+        subjid = dat$id,
+        visit = dat$visit,
+        group = dat$group,
+        cov_struct = "ar1",
+        REML = TRUE,
+        same_cov = FALSE
+    )
+
+    result <- prepare_prior_param(
+        stan_data = list(),
+        covariance = "ar1",
+        prior_cov = "default",
+        mmrm_initial = mmrm_initial,
+        same_cov = FALSE
+    )
+    expect_true(
+        is.list(result) && identical(names(result), c("sd_par", "rho_par"))
+    )
+    expect_true(is.list(result$sd_par) && length(result$sd_par) == 2)
+    expect_true(is.list(result$rho_par) && length(result$rho_par) == 2)
+})
+
+
+test_that("fit_mcmc can recover known values with same_cov = TRUE", {
+    skip_if_not(is_full_test())
+
+    set.seed(2151)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
 
     method <- method_bayes(
         n_samples = 200,
@@ -373,9 +435,6 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         n_visits = 3
     )
 
-
-
-
     ### Random missingness patterns
     set.seed(3190)
     dat2 <- dat %>%
@@ -405,15 +464,19 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         n_visits = 3
     )
 
-
     ### Missingness affecting specific groups
     set.seed(3190)
     dat2 <- dat %>%
-        mutate(outcome = if_else(
-            rbinom(n(), 1, 0.5) == 1 & visit != "visit_1" & group == "B" & age > 0.3,
-            NA_real_,
-            outcome
-        ))
+        mutate(
+            outcome = if_else(
+                rbinom(n(), 1, 0.5) == 1 &
+                    visit != "visit_1" &
+                    group == "B" &
+                    age > 0.3,
+                NA_real_,
+                outcome
+            )
+        )
 
     fit <- fit_mcmc(
         designmat = mat,
@@ -438,7 +501,6 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         n_groups = 2,
         n_visits = 3
     )
-
 })
 
 
@@ -454,7 +516,10 @@ test_that("fit_mcmc returns error if mmrm on original sample fails", {
     sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
 
     dat <- get_mcmc_sim_dat(100, mcoefs, sigma)
-    mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
     mat[, 2] <- 1
 
     method <- method_bayes(
@@ -471,8 +536,7 @@ test_that("fit_mcmc returns error if mmrm on original sample fails", {
             visit = dat$visit,
             method = method,
             quiet = TRUE
-        )
-        ,
+        ),
         "Fitting MMRM to original dataset failed"
     )
 
@@ -491,16 +555,13 @@ test_that("fit_mcmc returns error if mmrm on original sample fails", {
             visit = dat$visit,
             method = method,
             quiet = TRUE
-        )
-        ,
+        ),
         "Fitting MMRM to original dataset failed"
     )
 })
 
 
-
 test_that("fit_mcmc can recover known values with same_cov = FALSE", {
-
     skip_if_not(is_full_test())
 
     set.seed(151)
@@ -524,7 +585,10 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
             mutate(id = paste0(id, "B"))
     )
 
-    mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
 
     method <- method_bayes(
         n_samples = 250,
@@ -565,8 +629,6 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
         n_visits = 3
     )
 
-
-
     ### Random missingness patterns
     set.seed(4812)
     dat2 <- dat %>%
@@ -600,9 +662,6 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
         n_groups = 2,
         n_visits = 3
     )
-
-
-
 })
 
 
@@ -631,7 +690,6 @@ test_that("burn_in and burn_between arguments to method_bayes are deprecated", {
 })
 
 test_that("fit_mcmc works with multiple chains", {
-
     skip_if_not(is_full_test())
 
     set.seed(3459)
@@ -645,7 +703,10 @@ test_that("fit_mcmc works with multiple chains", {
     sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
 
     dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
-    mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
 
     method <- method_bayes(
         n_samples = 200,

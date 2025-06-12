@@ -45,9 +45,9 @@ Now it returns a list with the additional elements `covariance` and `prior_cov`,
 While the signature is unchanged, internally the function uses the new elements of the `method` argument:
 
 - The initial `fit_mmrm()` call passes the `covariance` choice to the `cov_struct` argument.
-- The currently directly included assignment of the `Sigma_init` element of `stan_data` is replaced by a call to a `prepare_prior_param` function, which modifies the `stan_data` list to include the required prior parameters for the covariance model, based on the `covariance` and `prior_cov` arguments as well as the result from `mmrm_initial`.
+- The currently directly included assignment of the `Sigma_init` element of `stan_data` is replaced by a call to a `prepare_prior_params` function, which modifies the `stan_data` list to include the required prior parameters for the covariance model, based on the `covariance` and `prior_cov` arguments as well as the result from `mmrm_initial`.
   - For example, for the `ar1` covariance structure, instead of `Sigma_init`, `rho` and `sd` parameters will be assigned in the `stan_data` list. 
-  - Ideally we can avoid the `_init` wording in the new code, because it is confusing - the `Sigma_init` so far here is the center of the inverse Wishart prior distribution, and just coincidentally also the initial value for the MCMC sampling
+  - Ideally we can avoid the `_init` wording in the new code, because it is confusing - the `Sigma_init` so far here is the center of the inverse Wishart prior distribution, and just coincidentally also the initial value for the MCMC sampling. E.g. we can use a `_par` suffix instead.
 - The most significant change will be the actual Stan model that is returned by `get_stan_model`, now the call will need to accept the `covariance` and `prior_cov` arguments.
 - Choosing the parameters to return the samples for, we can add the relevant covariance model parameters to the `pars` element of the `sampling_args` list. This can be nice later for debugging purposes or more advanced print statements of the model object e.g.
 - Note that the `extract_draws` function does not need to be modified and can focus on the `beta` and `Sigma` samples going forward. For debugging purposes, the user could still investigate the returned `fit` element of the list which will have the additional model parameter samples, too.
@@ -60,9 +60,17 @@ The code part where the `init` element of the `control` list is assigned in case
 
 New function that prepares the initial values for the covariance model parameters based on the `covariance` and `prior_cov` arguments. This function will be called in the `complete_control_bayes` function to set the initial values in the `control` list.
 
-### `prepare_prior_param`
+### `prepare_prior_params`
 
 New function that prepares the prior parameters for the covariance model based on the `covariance` and `prior_cov` arguments. This function will be called in the `fit_mcmc` function to set the prior parameters in the `stan_data` list.
+
+### `fit_mmrm`
+
+Slight modifications are needed here because for structured covariance models we will need to extract additional parameter estimates from the initial frequentist model fit, e.g. for the `ar1` covariance structure we will need to extract the `rho` and `sd` parameters in addition to `sigma`.
+
+### `extract_params`
+
+The actual extraction will be implemented here. Note that the conversion of `theta` parameters to covariance parameters could be moved into the `{mmrm}` package for the actual implementation, because it is of general interest. 
 
 ### `get_stan_model`
 
@@ -76,8 +84,12 @@ We will keep things simpler here, because we don't need the full flexibility to 
 ## Prototypes
 
 Because we need to modify Stan code files, it seems simpler in this case to show the prototypes in a separate branch of the `rbmi` package, which can then later be used as a starting point for the full implementation.
+
 We use the branch `501_prototype_cov_structs` for this purpose, where we show how to:
 
 1. Implement the new `covariance` argument with the simple `ar1` alternative choice.
 1. Implement the `prior_cov` argument with the default and LKJ prior choices.
 
+The dedicated, temporary test file `test-prototype.R` contains the show cases for above.
+
+We have not yet adjusted the documentation there - this will be done once the design doc is merged and actual implementation starts. 

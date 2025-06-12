@@ -1,6 +1,3 @@
-
-
-
 #' Construct random effects formula
 #'
 #' Constructs a character representation of the random effects formula
@@ -23,7 +20,17 @@
 #' `"ad"`, `"adh"`, `"ar1"`, `"ar1h"`, `"cs"`, `"csh"`, `"toep"`, or `"toeph"`)
 #' @param cov_by_group Boolean - Whenever or not to use separate covariances per each group level
 random_effects_expr <- function(
-    cov_struct = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
+    cov_struct = c(
+        "us",
+        "ad",
+        "adh",
+        "ar1",
+        "ar1h",
+        "cs",
+        "csh",
+        "toep",
+        "toeph"
+    ),
     cov_by_group = FALSE
 ) {
     match.arg(cov_struct)
@@ -47,12 +54,10 @@ random_effects_expr <- function(
 #' - If provided will also insert the group variable into the `data.frame` named as `group`
 #'
 #' @inheritParams fit_mmrm
-as_mmrm_df <- function(designmat,
-                       outcome,
-                       visit,
-                       subjid,
-                       group = NULL) {
-    if (length(group) == 0) group <- NULL
+as_mmrm_df <- function(designmat, outcome, visit, subjid, group = NULL) {
+    if (length(group) == 0) {
+        group <- NULL
+    }
 
     dmat <- as.data.frame(designmat)
     colnames(dmat) <- paste0("V", seq_len(ncol(dmat)))
@@ -97,8 +102,12 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
     g_names <- grep("^group$", dfnames, value = TRUE)
     v_names <- grep("^V", dfnames, value = TRUE)
 
-    assert_that(all(dfnames %in% c("outcome", "visit", "subjid", g_names, v_names)))
-    assert_that(all(c("outcome", "visit", "subjid", g_names, v_names) %in% dfnames))
+    assert_that(all(
+        dfnames %in% c("outcome", "visit", "subjid", g_names, v_names)
+    ))
+    assert_that(all(
+        c("outcome", "visit", "subjid", g_names, v_names) %in% dfnames
+    ))
 
     # random effects for covariance structure
     expr_randeff <- random_effects_expr(
@@ -108,17 +117,26 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
 
     # paste and create formula object
     formula <- as.formula(
-        sprintf("outcome ~ %s - 1", paste0(c(v_names, expr_randeff), collapse = " + "))
+        sprintf(
+            "outcome ~ %s - 1",
+            paste0(c(v_names, expr_randeff), collapse = " + ")
+        )
     )
 
     return(formula)
 }
 
+theta_to_cor <- function(theta) {
+    theta / sqrt(1 + theta^2)
+}
 
 #' Extract parameters from a MMRM model
 #'
 #' Extracts the beta and sigma coefficients from an MMRM model created
 #' by [mmrm::mmrm()].
+#'
+#' For structured covariance models, additional parameter estimates will be returned, based on the type
+#' of the covariance model.
 #'
 #' @importFrom mmrm VarCorr
 #' @param fit an object created by [mmrm::mmrm()]
@@ -128,7 +146,8 @@ extract_params <- function(fit) {
     names(beta) <- NULL
 
     sigma <- VarCorr(fit)
-    if (!is.list(sigma)) {
+    same_cov <- !is.list(sigma)
+    if (same_cov) {
         sigma <- list(sigma)
     }
     sigma <- lapply(sigma, function(mat) {
@@ -136,15 +155,28 @@ extract_params <- function(fit) {
         rownames(mat) <- NULL
         return(mat)
     })
-
     params <- list(
         beta = beta,
         sigma = sigma
     )
+
+    cov_type <- mmrm::component(fit, "cov_type")
+    theta_est <- mmrm::component(fit, "theta_est")
+    theta_est <- if (same_cov) {
+        list(theta_est)
+    } else {
+        groups <- names(sigma)
+        n_par_per_group <- length(theta_est) / length(groups)
+        split(theta_est, rep(groups, each = n_par_per_group))
+    }
+
+    if (cov_type == "ar1") {
+        params$sd <- lapply(theta_est, \(theta) exp(theta[1]))
+        params$rho <- lapply(theta_est, \(theta) theta_to_cor(theta[2]))
+    }
+
     return(params)
 }
-
-
 
 
 #' Fit a MMRM model
@@ -178,7 +210,17 @@ fit_mmrm <- function(
     subjid,
     visit,
     group,
-    cov_struct = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
+    cov_struct = c(
+        "us",
+        "ad",
+        "adh",
+        "ar1",
+        "ar1h",
+        "cs",
+        "csh",
+        "toep",
+        "toeph"
+    ),
     REML = TRUE,
     same_cov = TRUE
 ) {
@@ -206,25 +248,27 @@ fit_mmrm <- function(
         return(fit)
     }
 
-    # extract regression coefficients and covariance matrices
+    # Extract regression coefficients and covariance parameters.
     params <- extract_params(fit)
+    cov_param_names <- setdiff(names(params), "beta")
     params$failed <- fit$failed
 
-    # adjust covariance matrix
+    # Replicate covariance parameter estimates across groups if
+    # same covariance is used across groups.
     if (same_cov) {
-        assert_that(length(params$sigma) == 1)
-        params$sigma <- replicate(
-            length(levels(group)),
-            params$sigma[[1]],
-            simplify = FALSE
-        )
+        for (cov_param in cov_param_names) {
+            assert_that(length(params[[cov_param]]) == 1)
+            params[[cov_param]] <- replicate(
+                length(levels(group)),
+                params[[cov_param]][[1]],
+                simplify = FALSE
+            )
+            names(params[[cov_param]]) <- levels(group)
+        }
     }
-    names(params$sigma) <- levels(group)
 
     return(params)
 }
-
-
 
 
 #' Evaluate a call to mmrm
@@ -251,7 +295,6 @@ fit_mmrm <- function(
 #' @seealso [record()]
 #'
 eval_mmrm <- function(expr) {
-
     default <- list(failed = TRUE)
 
     fit_record <- record(expr)
