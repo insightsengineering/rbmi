@@ -76,14 +76,22 @@ control_bayes <- function(
 
 # Prepare initial values for the MCMC sampler in case of the default `init = "mmrm"`
 # initial values choice.
-prepare_init_vals <- function(stan_data, mmrm_initial) {
+prepare_init_vals <- function(stan_data, mmrm_initial, chains) {
     cov_param_names <- attr(mmrm_initial, "cov_param_names")
-    c(
+    init_vals <- c(
         list(
             theta = as.vector(stan_data$R %*% mmrm_initial$beta)
         ),
         mmrm_initial[cov_param_names]
     )
+    if (chains > 1) {
+        init_vals <- replicate(
+            chains,
+            init_vals,
+            simplify = FALSE
+        )
+    }
+    init_vals
 }
 
 complete_control_bayes <- function(
@@ -122,7 +130,8 @@ complete_control_bayes <- function(
         identical(control$init, "mmrm"),
         prepare_init_vals(
             stan_data = stan_data,
-            mmrm_initial = mmrm_initial
+            mmrm_initial = mmrm_initial,
+            chains = control$chains
         ),
         control$init
     )

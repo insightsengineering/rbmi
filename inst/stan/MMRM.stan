@@ -78,7 +78,7 @@ parameters {
         array[G] cov_matrix[n_visit] Sigma; // covariance matrix(s)
     {% else if covariance == "ar1" %}
         array[G] real<lower=-1,upper=1> rho; // AR(1) correlation coefficient
-        array[G] real<lower={{ machine_double_eps }}> var_const; // constant variance
+        array[G] real<lower={{ machine_double_eps }}> sd; // homogeneous standard deviation
     {% endif %}
 }
 
@@ -91,6 +91,13 @@ transformed parameters {
             Sigma[g] = var_const[g] * ar1_correlation_matrix(n_visit, rho[g]);
         {% endif %}
     }
+
+    {% if covariance == "ar1" %}
+        // We need a change of variable here such that the prior is easy below.
+        // But we will need a Jacobian adjustment in the model block for this.  
+        array[G] real<lower={{ machine_double_eps }}> var_const;
+        var_const = sd .* sd; // convert sd to variance
+    {% endif %}
 }
 {% endif %}
 
@@ -107,6 +114,10 @@ model {
             // Note that we pass the estimated sd, not sd^2 here as 
             // the scale parameter of the scaled inverse Chi-Square distribution.
             var_const[g] ~ scaled_inv_chi_square(1, sd_par[g]);
+            // Jacobian adjustment for the change of variable:
+            // log of the absolute derivative of the transform.
+            // log(|d(var_const)/d(sd)|) = log(2 * sd) = log(2) + log(sd)
+            target += log(2) + log(sd[g]);
         {% endif %}
     }
     

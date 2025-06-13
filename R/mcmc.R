@@ -1,8 +1,16 @@
-one_list_element <- function(same_cov, param_list) {
+adjust_dimensions <- function(same_cov, param_list) {
     ife(
         isTRUE(same_cov),
-        list(param_list[[1]]),
-        param_list
+        ife(
+            is.matrix(param_list[[1]]),
+            list(param_list[[1]]),
+            array(param_list[[1]], dim = length(param_list[[1]]))
+        ),
+        ife(
+            is.numeric(param_list[[1]]) && length(param_list[[1]]) == 1,
+            unlist(param_list),
+            param_list
+        )
     )
 }
 
@@ -13,11 +21,11 @@ prepare_prior_params <- function(
     mmrm_initial,
     same_cov
 ) {
-    if (covariance == "unstructured") {
-        stan_data$Sigma_par <- one_list_element(same_cov, mmrm_initial$sigma)
+    if (covariance == "us") {
+        stan_data$Sigma_par <- adjust_dimensions(same_cov, mmrm_initial$sigma)
     } else if (covariance == "ar1") {
-        stan_data$sd_par <- one_list_element(same_cov, mmrm_initial$sd)
-        stan_data$rho_par <- one_list_element(same_cov, mmrm_initial$rho)
+        stan_data$sd_par <- adjust_dimensions(same_cov, mmrm_initial$sd)
+        stan_data$rho_par <- adjust_dimensions(same_cov, mmrm_initial$rho)
     }
     stan_data
 }
