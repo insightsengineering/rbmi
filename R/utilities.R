@@ -1,4 +1,3 @@
-
 #' Set Class
 #'
 #' Utility function to set an objects class.
@@ -65,7 +64,6 @@ as_simple_formula <- function(outcome, covars) {
 }
 
 
-
 #' Expand `data.frame` into a design matrix
 #'
 #' Expands out a `data.frame` using a formula to create a design matrix.
@@ -78,7 +76,6 @@ as_simple_formula <- function(outcome, covars) {
 #' @param dat a data.frame
 #' @param frm a formula
 as_model_df <- function(dat, frm) {
-
     outcome <- as.character(attr(stats::terms(frm), "variables")[[2]])
     is_missing <- is.na(dat[[outcome]])
     dat[[outcome]][is_missing] <- 999
@@ -96,7 +93,6 @@ as_model_df <- function(dat, frm) {
     class(design) <- class(dat)
     return(design)
 }
-
 
 
 #' Convert character variables to factor
@@ -123,7 +119,6 @@ char2fct <- function(data, vars = NULL) {
 }
 
 
-
 #' if else
 #'
 #' A wrapper around `if() else()` to prevent unexpected
@@ -144,7 +139,6 @@ ife <- function(x, a, b) {
         return(b)
     }
 }
-
 
 
 #' Sample random values from the multivariate normal distribution
@@ -170,7 +164,6 @@ sample_mvnorm <- function(mu, sigma) {
     x <- rnorm(nrow(sigma), mean = 0, sd = 1)
     (x %*% chol(sigma)) + as.vector(mu)
 }
-
 
 
 #' Capture all Output
@@ -258,7 +251,6 @@ is_absent <- function(x, na = TRUE, blank = TRUE) {
 }
 
 
-
 #' Extract Variables from string vector
 #'
 #' Takes a string including potentially model terms like `*` and `:` and
@@ -268,14 +260,15 @@ is_absent <- function(x, na = TRUE, blank = TRUE) {
 #'
 #' @param x string of variable names potentially including interaction terms
 extract_covariates <- function(x) {
-    if (is.null(x)) return(x)
+    if (is.null(x)) {
+        return(x)
+    }
     x_split <- strsplit(x, ":|\\*")
     x_vec <- unlist(x_split, use.names = FALSE)
     x_nws <- trimws(x_vec)
     x_uni <- unique(x_nws)
     return(x_uni)
 }
-
 
 
 #' Does a string contain a substring
@@ -295,15 +288,18 @@ extract_covariates <- function(x) {
 str_contains <- function(x, subs) {
     strings <- x
     res_list <- lapply(subs, function(x) grepl(x, strings, fixed = TRUE))
-    res_matrix <- matrix(unlist(res_list), nrow = length(res_list), byrow = TRUE)
-    res <- unlist(apply(res_matrix, MARGIN = 2, any, simplify = FALSE), use.names = TRUE)
+    res_matrix <- matrix(
+        unlist(res_list),
+        nrow = length(res_list),
+        byrow = TRUE
+    )
+    res <- unlist(
+        apply(res_matrix, MARGIN = 2, any, simplify = FALSE),
+        use.names = TRUE
+    )
     assert_that(length(res) == length(strings))
     return(res)
 }
-
-
-
-
 
 
 #' Sort `data.frame`
@@ -335,9 +331,6 @@ sort_by <- function(df, vars = NULL, decreasing = FALSE) {
     assert_that(nrow(df) == nrow(df2), ncol(df) == ncol(df2))
     return(df2)
 }
-
-
-
 
 
 #' Set key variables
@@ -421,7 +414,6 @@ set_vars <- function(
 }
 
 
-
 #' Validate inputs for `vars`
 #'
 #' Checks that the required variable names are defined within `vars` and
@@ -431,7 +423,6 @@ set_vars <- function(
 #' @param ... not used
 #' @export
 validate.ivars <- function(x, ...) {
-
     assert_that(
         is_char_one(x$outcome),
         msg = "`vars$outcome` should be a length 1 character"
@@ -549,7 +540,6 @@ as_dataframe <- function(x) {
 }
 
 
-
 #' Ensure `rstan` exists
 #'
 #' Checks to see if rstan exists and if not throws a helpful error message
@@ -568,17 +558,27 @@ ensure_rstan <- function() {
 }
 
 #' Get session hash
-#' 
-#' Gets a unique string based on the current R version and relevant packages.
+#'
+#' Gets a unique string based on the current R version and relevant packages as well as the
+#' choice of covariance structure and prior covariance structure.
+#'
 #' @importFrom utils sessionInfo
 #' @keywords internal
-get_session_hash <- function() {
+get_session_hash <- function(covariance, prior_cov) {
     pkg_versions <- vapply(
         sessionInfo(c("rbmi", "rstan", "Rcpp", "RcppEigen"))[["otherPkgs"]],
         function(x) x[["Version"]],
         character(1L)
     )
-    version_string <- paste0(R.version.string, paste0(names(pkg_versions), pkg_versions, collapse = ":"))
+    version_string <- paste0(
+        R.version.string,
+        "-",
+        paste0(names(pkg_versions), pkg_versions, collapse = ":"),
+        "-",
+        covariance,
+        "-",
+        prior_cov
+    )
     temp_file <- tempfile()
     writeLines(version_string, temp_file)
     hash <- tools::md5sum(temp_file)
@@ -587,17 +587,21 @@ get_session_hash <- function() {
 }
 
 clear_model_cache <- function(cache_dir = getOption("rbmi.cache_dir")) {
-    files <- list.files(cache_dir, pattern = "(rbmi_MMRM_).*(\\.stan|\\.rds)", full.names = TRUE)
+    files <- list.files(
+        cache_dir,
+        pattern = "(rbmi_MMRM_).*(\\.stan|\\.rds)",
+        full.names = TRUE
+    )
     unlink(files)
 }
 
-
 #' Get Compiled Stan Object
 #'
-#' Gets a compiled Stan object that can be used with `rstan::sampling()`
+#' Gets a compiled Stan object that can be used with `rstan::sampling()`,
+#' based on the choice of the covariance structure and the prior on the parameters.
+#'
 #' @keywords internal
-get_stan_model <- function() {
-
+get_stan_model <- function(covariance, prior_cov) {
     # Compiling Stan models updates the current seed state. This can lead to
     # non-reproducibility as compiling is conditional on wether there is a cached
     # model available or not. Thus we save the current seed state and restore it
@@ -608,14 +612,23 @@ get_stan_model <- function() {
     # has been generated.
     current_seed_state <- globalenv()$.Random.seed
     on.exit({
-        if (is.null(current_seed_state) && exists(".Random.seed", envir = globalenv())) {
+        if (
+            is.null(current_seed_state) &&
+                exists(".Random.seed", envir = globalenv())
+        ) {
             rm(".Random.seed", envir = globalenv(), inherits = FALSE)
         } else {
-            assign(".Random.seed", value = current_seed_state, envir = globalenv(), inherits = FALSE)
+            assign(
+                ".Random.seed",
+                value = current_seed_state,
+                envir = globalenv(),
+                inherits = FALSE
+            )
         }
     })
 
     ensure_rstan()
+    # Find the correct MMRM.stan template file.
     local_file <- file.path("inst", "stan", "MMRM.stan")
     system_file <- system.file(file.path("stan", "MMRM.stan"), package = "rbmi")
     file_loc <- if (file.exists(local_file)) {
@@ -625,13 +638,34 @@ get_stan_model <- function() {
     } else {
         stop("Unable to find MMRM.stan; Please report this as a bug")
     }
+
+    # Decide file location for the final Stan model file.
     cache_dir <- getOption("rbmi.cache_dir")
     dir.create(cache_dir, showWarnings = FALSE, recursive = TRUE)
-    model_file <- file.path(cache_dir, paste0("rbmi_MMRM_", get_session_hash(), ".stan"))
+    session_hash <- get_session_hash(covariance, prior_cov)
+    model_file <- file.path(
+        cache_dir,
+        paste0("rbmi_MMRM_", session_hash, ".stan")
+    )
 
+    # If it does not exist yet, create the model file from the template
+    # and save it to the cache directory.
     if (!file.exists(model_file)) {
+        model_template <- jinjar::parse_template(
+            fs::path(file_loc),
+            .config = jinjar::jinjar_config(
+                trim_blocks = TRUE,
+                lstrip_blocks = TRUE
+            )
+        )
+        model_string <- jinjar::render(
+            .x = model_template,
+            covariance = covariance,
+            prior_cov = prior_cov,
+            machine_double_eps = .Machine$double.eps
+        )
         clear_model_cache()
-        file.copy(file_loc, model_file, overwrite = TRUE)
+        writeLines(model_string, model_file)
     }
 
     model <- rstan::stan_model(
@@ -642,7 +676,6 @@ get_stan_model <- function() {
 
     return(model)
 }
-
 
 
 #' rbmi settings
@@ -671,11 +704,11 @@ get_stan_model <- function() {
 #' ```
 #' options("rbmi.cache_dir" = tempdir(check = TRUE))
 #' ```
-#' 
+#'
 #' ## `rbmi.enable_cache`
-#' 
+#'
 #' Default = `TRUE`
-#' 
+#'
 #' If `TRUE` then the package will attempt to cache compiled Stan models to the
 #' `rbmi.cache_dir` directory. If `FALSE` then the package will re-compile the
 #' Stan model each time it is required. If the environment variable `RBMI_ENABLE_CACHE`
@@ -687,9 +720,14 @@ get_stan_model <- function() {
 #' }
 #' @name rbmi-settings
 set_options <- function() {
-
-    cache_dir <- Sys.getenv("RBMI_CACHE_DIR", unset = tools::R_user_dir("rbmi", which = "cache"))
-    enable_cache <- isTRUE(as.logical(Sys.getenv("RBMI_ENABLE_CACHE", unset = "TRUE")))
+    cache_dir <- Sys.getenv(
+        "RBMI_CACHE_DIR",
+        unset = tools::R_user_dir("rbmi", which = "cache")
+    )
+    enable_cache <- isTRUE(as.logical(Sys.getenv(
+        "RBMI_ENABLE_CACHE",
+        unset = "TRUE"
+    )))
 
     current_opts <- names(options())
     rbmi_opts <- list(

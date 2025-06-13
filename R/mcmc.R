@@ -124,7 +124,10 @@ fit_mcmc <- function(
 
     sampling_args <- c(
         list(
-            object = get_stan_model(),
+            object = get_stan_model(
+                covariance = method$covariance,
+                prior_cov = method$prior_cov
+            ),
             data = stan_data,
             pars = c("beta", "Sigma")
         ),

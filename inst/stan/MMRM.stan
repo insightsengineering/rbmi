@@ -22,6 +22,23 @@ functions {
         }
         return(res);
     }
+
+    {% if covariance == "ar1" %}
+        // Create the AR(1) correlation matrix of dimension n with correlation rho.
+        matrix ar1_correlation_matrix(int n, real rho) {
+            matrix[n, n] L;
+            for (i in 1:n) {
+                for (j in 1:n) {
+                if (i == j) {
+                    L[i, j] = 1;
+                } else {
+                    L[i, j] = rho^abs(j - i);
+                }
+                }
+            }
+            return L;
+        }
+    {% endif %}
 }
 
 
@@ -40,7 +57,13 @@ data {
     vector[N] y;                            // outcome variable
     matrix[N,P] Q;                          // design matrix (After QR decomp)
     matrix[P,P] R;                          // R matrix (from QR decomp)
-    array[G] matrix[n_visit, n_visit] Sigma_par; // covariance matrix estimated from MMRM
+
+    {% if covariance == "us" %}    
+        array[G] matrix[n_visit, n_visit] Sigma_par; // covariance matrix
+    {% else if covariance == "ar1" %}
+        array[G] real<lower={{ machine_double_eps }}> sd_par; // standard deviation
+        array[G] real<lower=-1, upper=1> rho_par; // correlation
+    {% endif %}
 }
 
 
@@ -49,20 +72,42 @@ transformed data {
 }
 
 
-
 parameters {
     vector[P] theta;              // coefficients of linear model on covariates
-    array[G] cov_matrix[n_visit] Sigma; // covariance matrix(s)
+    {% if covariance == "us" %}
+        array[G] cov_matrix[n_visit] Sigma; // covariance matrix(s)
+    {% else if covariance == "ar1" %}
+        array[G] real<lower=-1,upper=1> rho; // AR(1) correlation coefficient
+        array[G] real<lower={{ machine_double_eps }}> var_const; // constant variance
+    {% endif %}
 }
 
+{% if covariance != "us" %}
+transformed parameters {
+    array[G] cov_matrix[n_visit] Sigma;
+    
+    for(g in 1:G){
+        {% if covariance == "ar1" %}
+            Sigma[g] = var_const[g] * ar1_correlation_matrix(n_visit, rho[g]);
+        {% endif %}
+    }
+}
+{% endif %}
 
 model {
     int data_start_row = 1;
     
-    vector[N] mu =  Q * theta;
+    vector[N] mu = Q * theta;
     
     for(g in 1:G){
-        Sigma[g] ~ inv_wishart(n_visit+2, Sigma_par[g]);
+        {% if covariance == "us" %}        
+            Sigma[g] ~ inv_wishart(n_visit+2, Sigma_par[g]);
+        {% else if covariance == "ar1" %}
+            // We use an implicit uniform prior on rho.
+            // Note that we pass the estimated sd, not sd^2 here as 
+            // the scale parameter of the scaled inverse Chi-Square distribution.
+            var_const[g] ~ scaled_inv_chi_square(1, sd_par[g]);
+        {% endif %}
     }
     
     for(i in 1:n_pat) {

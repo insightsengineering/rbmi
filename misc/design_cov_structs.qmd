@@ -81,6 +81,20 @@ Currently, this function just finds the fixed Stan model file `stan/MMRM.stan`, 
 Now, we can work with building blocks of the Stan code, which are then combined using the `jinjar` templating mechanism, similar to how it is done in the `jmpost` package using the `decorated_render` function (which is wrapping the `jinjar` function).
 We will keep things simpler here, because we don't need the full flexibility to provide user-defined Stan code snippets, but rather just a few predefined options for the covariance structures and priors.
 
+Specifically, it seems like we could still have a single `MMRM.stan` file, which is templated, see e.g. [`lm-gsf/model.stan`](https://github.com/Genentech/jmpost/blob/main/inst/stan/lm-gsf/model.stan) for comparison. Since with `jinjar` we can also perform string comparisons (see [here](https://davidchall.github.io/jinjar/articles/template-syntax.html#comparisons)) we can use this to include the relevant code snippets for the covariance structures and priors based on the `covariance` and `prior_cov` string arguments.
+
+### `get_session_hash`
+
+This needs now to also take into account the `covariance` and `prior_cov` arguments, because with them the final Stan model code will change, and thus the cache key needs to be different.
+
+### `MMRM.stan`
+
+This is now a templated Stan model file, which includes the relevant code snippets for the covariance structures and priors based on the `covariance` and `prior_cov` arguments.
+
+Relevant function definitions are only included if needed to keep the Stan model compilation time minimal.
+
+We note that the rendered Stan model file will not have perfect indentation. However, we prefer to keep the template file readable, with indentations for the `jinjar` control flow. 
+
 ## Prototypes
 
 Because we need to modify Stan code files, it seems simpler in this case to show the prototypes in a separate branch of the `rbmi` package, which can then later be used as a starting point for the full implementation.

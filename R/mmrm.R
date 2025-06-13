@@ -267,7 +267,10 @@ fit_mmrm <- function(
         }
     }
 
-    return(params)
+    structure(
+        params,
+        cov_param_names = cov_param_names
+    )
 }
 
 
