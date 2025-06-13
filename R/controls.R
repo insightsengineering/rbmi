@@ -84,14 +84,11 @@ prepare_init_vals <- function(stan_data, mmrm_initial, chains) {
         ),
         mmrm_initial[cov_param_names]
     )
-    if (chains > 1) {
-        init_vals <- replicate(
-            chains,
-            init_vals,
-            simplify = FALSE
-        )
-    }
-    init_vals
+    replicate(
+        chains,
+        init_vals,
+        simplify = FALSE
+    )
 }
 
 complete_control_bayes <- function(

@@ -104,6 +104,6 @@ We use the branch `501_prototype_cov_structs` for this purpose, where we show ho
 1. Implement the new `covariance` argument with the simple `ar1` alternative choice.
 1. Implement the `prior_cov` argument with the default and LKJ prior choices.
 
-The dedicated, temporary test file `test-prototype.R` contains the show cases for above.
+Additional tests have been added to demonstrate the functionality. In particular, full usage tests have been added to `test-fullusage.R`.
 
 We have not yet adjusted the documentation there - this will be done once the design doc is merged and actual implementation starts. 
