@@ -15,7 +15,7 @@
 #' @param n_samples a numeric that determines how many imputed datasets are generated.
 #' In the case of `method_condmean(type = "jackknife")` this argument
 #' must be set to `NULL`. See details.
-#' 
+#'
 #' @param control a list which specifies further lower level details of the computations.
 #' Currently only used by `method_bayes()`, please see [control_bayes()] for details and
 #' default settings.
@@ -94,24 +94,38 @@
 #'
 #' @export
 method_bayes <- function(
+    covariance = c(
+        "us",
+        "ad",
+        "adh",
+        "ar1",
+        "ar1h",
+        "cs",
+        "csh",
+        "toep",
+        "toeph"
+    ),
     same_cov = TRUE,
     n_samples = 20,
-    control = control_bayes(),
-    burn_in = NULL,
-    burn_between = NULL
+    prior_cov = c("default", "lkj"),
+    control = control_bayes()
 ) {
-    assertthat::assert_that(
-        is.null(burn_in) && is.null(burn_between),
+    covariance <- match.arg(covariance)
+    prior_cov <- match.arg(prior_cov)
+
+    assert_that(
+        covariance == "us" || prior_cov == "default",
         msg = paste(
-            "The `burn_in` and `burn_between` arguments to `method_bayes()` have been deprecated;",
-            "please use the `warmup` and `thin` arguments inside `control_bayes()` instead.",
-            collapse = " "
+            "The LKJ prior (`prior_cov = \"lkj\"`) can only be used with the",
+            "unstructured covariance model (`covariance = \"us\"`)"
         )
     )
 
     x <- list(
+        covariance = covariance,
         same_cov = same_cov,
         n_samples = n_samples,
+        prior_cov = prior_cov,
         control = control
     )
     return(as_class(x, c("method", "bayes")))
@@ -121,7 +135,17 @@ method_bayes <- function(
 #' @rdname method
 #' @export
 method_approxbayes <- function(
-    covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
+    covariance = c(
+        "us",
+        "ad",
+        "adh",
+        "ar1",
+        "ar1h",
+        "cs",
+        "csh",
+        "toep",
+        "toeph"
+    ),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
@@ -143,7 +167,17 @@ method_approxbayes <- function(
 #' @rdname method
 #' @export
 method_condmean <- function(
-    covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
+    covariance = c(
+        "us",
+        "ad",
+        "adh",
+        "ar1",
+        "ar1h",
+        "cs",
+        "csh",
+        "toep",
+        "toeph"
+    ),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
@@ -186,7 +220,17 @@ method_condmean <- function(
 #' @rdname method
 #' @export
 method_bmlmi <- function(
-    covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
+    covariance = c(
+        "us",
+        "ad",
+        "adh",
+        "ar1",
+        "ar1h",
+        "cs",
+        "csh",
+        "toep",
+        "toeph"
+    ),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,

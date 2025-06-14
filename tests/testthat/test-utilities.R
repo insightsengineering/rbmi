@@ -6,7 +6,6 @@ suppressPackageStartupMessages({
 
 
 test_that("as_model_df", {
-
     x <- tibble(
         x = c(NA, 1, 2, 3),
         y = c(5, 6, 7, 8),
@@ -56,14 +55,16 @@ test_that("as_model_df fails if formula has one factor variable", {
 
 
 test_that("as_simple_formula", {
-
     vars <- list(
         outcome = "outcome",
         group = "group",
         visit = "visit"
     )
 
-    actual <- as_simple_formula(vars$outcome, c(vars$group, vars$visit, vars$covariates))
+    actual <- as_simple_formula(
+        vars$outcome,
+        c(vars$group, vars$visit, vars$covariates)
+    )
     expected <- as.formula(outcome ~ 1 + group + visit)
 
     expect_true(actual == expected)
@@ -71,7 +72,6 @@ test_that("as_simple_formula", {
 
 
 test_that("sample_mvnorm", {
-
     # Sample singe value
     set.seed(3516)
     m <- 10
@@ -86,7 +86,6 @@ test_that("sample_mvnorm", {
     expect_true(all(abs(xm - m) < (m - (m * 0.99))))
     expect_true(all(abs(xv - z) < (z - (z * 0.95))))
 
-
     # Sample multiple values
     set.seed(351)
     z <- as_vcov(c(5, 3, 4, 2), c(0.2, 0.4, 0.6, 0.3, 0.1, 0.7))
@@ -96,7 +95,9 @@ test_that("sample_mvnorm", {
     expect_true(nrow(x) == 1)
     expect_true(ncol(x) == 4)
 
-    vals <- replicate(n = 100000, { sample_mvnorm(m, z) })
+    vals <- replicate(n = 100000, {
+        sample_mvnorm(m, z)
+    })
     x2 <- matrix(unlist(vals), ncol = ncol(z), byrow = TRUE)
     x2_v <- var(x2)
     x2_m <- apply(x2, 2, mean)
@@ -110,20 +111,21 @@ test_that("sample_mvnorm", {
     expect_true(all(
         abs(as.vector(x2_v - z)) < (z_vec - (z_vec * 0.95))
     ))
-
 })
 
 
-
 test_that("record", {
-
     fun <- function(x) {
         return(x)
     }
     result_actual <- record(fun(iris))
-    result_expected <- list(results = iris, warnings = NULL, errors = NULL, messages = NULL)
+    result_expected <- list(
+        results = iris,
+        warnings = NULL,
+        errors = NULL,
+        messages = NULL
+    )
     expect_equal(result_actual, result_expected)
-
 
     fun <- function(x) {
         warning("w1")
@@ -131,9 +133,13 @@ test_that("record", {
         return(x)
     }
     result_actual <- record(fun(2))
-    result_expected <- list(results = 2, warnings = c("w1", "w2"), errors = NULL, messages = NULL)
+    result_expected <- list(
+        results = 2,
+        warnings = c("w1", "w2"),
+        errors = NULL,
+        messages = NULL
+    )
     expect_equal(result_actual, result_expected)
-
 
     fun <- function(x) {
         warning("w1")
@@ -145,15 +151,17 @@ test_that("record", {
     }
     expect_equal(
         record(fun(3)),
-        list(results = list(), warnings = c("w1", "w2"), errors = c("an error"), messages = "hi1\n")
+        list(
+            results = list(),
+            warnings = c("w1", "w2"),
+            errors = c("an error"),
+            messages = "hi1\n"
+        )
     )
 })
 
 
-
 test_that("is_absent", {
-
-
     expect_true(is_absent(NULL))
     expect_true(is_absent(NA))
     expect_true(is_absent(""))
@@ -172,12 +180,10 @@ test_that("is_absent", {
     expect_false(is_absent(1))
     expect_false(is_absent(c(1, 2, 3, NA)))
     expect_false(is_absent(factor(c("A", ""))))
-
 })
 
 
 test_that("str_contains", {
-
     expect_equal(
         str_contains(c("abcde", "xyzj", "faiwx"), c("x")),
         c(FALSE, TRUE, TRUE)
@@ -198,7 +204,6 @@ test_that("str_contains", {
         str_contains(c("abcde", "xyzj$", "^faiwx"), c("xyzj", "awdawd")),
         c(FALSE, TRUE, FALSE)
     )
-
 })
 
 
@@ -218,10 +223,11 @@ test_that("sort_by", {
     expect_equal(x, sort_by(x2, c("x", "y")))
 
     expect_equal(arrange(x, desc(z)), sort_by(x, "z", TRUE))
-    expect_equal(arrange(x, x, desc(y)), sort_by(x, c("x", "y"), c(FALSE, TRUE)))
+    expect_equal(
+        arrange(x, x, desc(y)),
+        sort_by(x, c("x", "y"), c(FALSE, TRUE))
+    )
 })
-
-
 
 
 test_that("Stack", {
@@ -255,7 +261,7 @@ test_that("clear_model_cache", {
     expect_equal(file.create(files), rep(TRUE, 5))
     clear_model_cache(td)
     expect_equal(
-        file.exists(files), 
+        file.exists(files),
         c(FALSE, FALSE, FALSE, FALSE, TRUE)
     )
     file.remove(files[5])
@@ -283,13 +289,23 @@ test_that("format_method_descriptions", {
     result <- format_method_descriptions(method)
     expect_true(is.character(result) && length(result) == 2)
     expect_match(
-        result[1], 
+        result[1],
         "init: list(list(theta = 1, sigma = 2), list(theta = 3, sigma = 4))",
         fixed = TRUE
     )
     expect_match(
-        result[2], 
+        result[2],
         "init2: function (chain_id)",
         fixed = TRUE
     )
+})
+
+test_that("get_stan_model works as expected depending on covariance and prior on parameters", {
+    skip_if_not(is_full_test())
+
+    model <- expect_silent(get_stan_model("us", "default"))
+    expect_snapshot(model)
+
+    model <- expect_silent(get_stan_model("ar1", "default"))
+    expect_snapshot(model)
 })

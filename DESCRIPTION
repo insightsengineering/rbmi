@@ -45,7 +45,9 @@ Imports:
     tools,
     methods,
     R6,
-    assertthat
+    assertthat,
+    jinjar,
+    fs
 Depends: 
     R (>= 3.4.0)
 License: Apache License (>= 2)
