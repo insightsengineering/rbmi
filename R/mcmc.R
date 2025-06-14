@@ -127,7 +127,9 @@ fit_mcmc <- function(
         n_samples = method$n_samples,
         quiet = quiet,
         stan_data = stan_data,
-        mmrm_initial = mmrm_initial
+        mmrm_initial = mmrm_initial,
+        covariance = method$covariance,
+        prior_cov = method$prior_cov
     )
 
     sampling_args <- c(

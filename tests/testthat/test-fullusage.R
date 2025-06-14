@@ -290,6 +290,101 @@ test_that("Advanced Usage - Bayesian with AR1 covariance model", {
     expect_pool_est(poolobj, 8)
 })
 
+test_that("Advanced Usage - Bayesian with unstructured covariance model and LKJ prior", {
+    skip_if_not(is_full_test())
+
+    set.seed(5123)
+
+    dat <- get_sim_data(bign, sigma, trt = 8) %>%
+        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
+        select(-is_miss)
+
+    dat_ice <- dat %>%
+        group_by(id) %>%
+        arrange(id, visit) %>%
+        filter(is.na(outcome)) %>%
+        slice(1) %>%
+        ungroup() %>%
+        select(id, visit) %>%
+        mutate(strategy = "MAR")
+
+    vars <- set_vars(
+        outcome = "outcome",
+        group = "group",
+        strategy = "strategy",
+        subjid = "id",
+        visit = "visit",
+        covariates = c("age", "sex", "visit * group")
+    )
+
+    drawobj <- draws(
+        data = dat,
+        data_ice = dat_ice,
+        vars = vars,
+        method = method_bayes(
+            n_samples = nsamp,
+            covariance = "us",
+            prior_cov = "lkj",
+            control = control_bayes(init = "mmrm")
+        ),
+        quiet = TRUE,
+        ncores = NCORES
+    )
+
+    ### Check to see if updating ice works and if it impacts the original values
+    updated_ice <- dat_ice %>%
+        mutate(strategy = "JR")
+
+    imputeobj_upd <- impute(
+        draws = drawobj,
+        references = c("A" = "B", "B" = "B"),
+        update_strategy = updated_ice
+    )
+
+    imputeobj <- impute(
+        draws = drawobj,
+        references = c("A" = "B", "B" = "B")
+    )
+
+    vars2 <- vars
+    vars2$covariates <- c("age", "sex")
+
+    anaobj <- analyse(
+        imputeobj,
+        fun = rbmi::ancova,
+        vars = vars2,
+        visits = "visit_3"
+    )
+
+    anaobj_upd <- analyse(
+        imputeobj_upd,
+        fun = rbmi::ancova,
+        vars = vars2,
+        visits = "visit_3"
+    )
+
+    poolobj_upd <- pool(
+        results = anaobj_upd,
+        conf.level = 0.99,
+        alternative = "two.sided"
+    )
+
+    poolobj <- pool(
+        results = anaobj,
+        conf.level = 0.99,
+        alternative = "two.sided"
+    )
+
+    expect_pool_est(poolobj_upd, 4)
+    expect_pool_est(poolobj, 8)
+})
 
 test_that("Basic Usage - Condmean", {
     skip_if_not(is_full_test())

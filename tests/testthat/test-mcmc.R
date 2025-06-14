@@ -893,3 +893,177 @@ test_that("fit_mcmc works with AR1 covariance model and group specific estimates
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
     assert_that(all(beta_within$inside))
 })
+
+test_that("fit_mcmc works with unstructured covariance model with LKJ prior", {
+    skip_if_not(is_full_test())
+
+    set.seed(3459)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    method <- method_bayes(
+        covariance = "us",
+        prior_cov = "lkj",
+        n_samples = 200,
+        same_cov = TRUE,
+        control = control_bayes(
+            warmup = 200,
+            thin = 3,
+            chains = 3
+        )
+    )
+
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat$outcome,
+        group = dat$group,
+        subjid = dat$id,
+        visit = dat$visit,
+        method = method,
+        quiet = TRUE
+    )
+    expect_true(length(fit$samples$beta) == method$n_samples)
+    expect_true(length(fit$samples$sigma) == method$n_samples)
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    assert_that(all(sigma_within$inside))
+
+    # check extract_draws() worked properly
+    test_extract_draws(
+        extract_draws(fit$fit, method$n_samples),
+        same_cov = TRUE,
+        n_groups = 2,
+        n_visits = 3
+    )
+})
+
+test_that("fit_mcmc works with unstructured covariance model with LKJ prior and MMRM start values", {
+    skip_if_not(is_full_test())
+
+    set.seed(3459)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    method <- method_bayes(
+        covariance = "us",
+        prior_cov = "lkj",
+        n_samples = 200,
+        same_cov = TRUE,
+        control = control_bayes(
+            warmup = 500,
+            thin = 3,
+            chains = 3,
+            init = "mmrm"
+        )
+    )
+
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat$outcome,
+        group = dat$group,
+        subjid = dat$id,
+        visit = dat$visit,
+        method = method,
+        quiet = TRUE
+    )
+
+    expect_true(length(fit$samples$beta) == method$n_samples)
+    expect_true(length(fit$samples$sigma) == method$n_samples)
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    assert_that(all(sigma_within$inside))
+
+    # check extract_draws() worked properly
+    test_extract_draws(
+        extract_draws(fit$fit, method$n_samples),
+        same_cov = TRUE,
+        n_groups = 2,
+        n_visits = 3
+    )
+})
+
+test_that("fit_mcmc works with unstructured covariance model with LKJ prior and group specific estimates", {
+    skip_if_not(is_full_test())
+
+    set.seed(3459)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    method <- method_bayes(
+        covariance = "us",
+        prior_cov = "lkj",
+        n_samples = 500,
+        same_cov = FALSE,
+        control = control_bayes(
+            warmup = 200,
+            thin = 3,
+            chains = 3
+        )
+    )
+
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat$outcome,
+        group = dat$group,
+        subjid = dat$id,
+        visit = dat$visit,
+        method = method,
+        quiet = TRUE
+    )
+
+    expect_true(length(fit$samples$beta) == method$n_samples)
+    expect_true(length(fit$samples$sigma) == method$n_samples)
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    # check extract_draws() worked properly
+    test_extract_draws(
+        extract_draws(fit$fit, method$n_samples),
+        same_cov = FALSE,
+        n_groups = 2,
+        n_visits = 3
+    )
+})

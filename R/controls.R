@@ -76,7 +76,13 @@ control_bayes <- function(
 
 # Prepare initial values for the MCMC sampler in case of the default `init = "mmrm"`
 # initial values choice.
-prepare_init_vals <- function(stan_data, mmrm_initial, chains) {
+prepare_init_vals <- function(
+    stan_data,
+    mmrm_initial,
+    chains,
+    covariance,
+    prior_cov
+) {
     cov_param_names <- attr(mmrm_initial, "cov_param_names")
     init_vals <- c(
         list(
@@ -84,6 +90,16 @@ prepare_init_vals <- function(stan_data, mmrm_initial, chains) {
         ),
         mmrm_initial[cov_param_names]
     )
+    if (covariance == "us" && prior_cov == "lkj") {
+        init_vals$sds <- lapply(
+            mmrm_initial$sigma,
+            function(sigma) sqrt(diag(sigma))
+        )
+        init_vals$corr_chol <- lapply(
+            mmrm_initial$sigma,
+            function(sigma) t(chol(cov2cor(sigma)))
+        )
+    }
     replicate(
         chains,
         init_vals,
@@ -96,7 +112,9 @@ complete_control_bayes <- function(
     n_samples,
     quiet,
     stan_data,
-    mmrm_initial
+    mmrm_initial,
+    covariance,
+    prior_cov
 ) {
     assertthat::assert_that(is.list(control))
     control_pars <- names(control)
@@ -128,7 +146,9 @@ complete_control_bayes <- function(
         prepare_init_vals(
             stan_data = stan_data,
             mmrm_initial = mmrm_initial,
-            chains = control$chains
+            chains = control$chains,
+            covariance = covariance,
+            prior_cov = prior_cov
         ),
         control$init
     )

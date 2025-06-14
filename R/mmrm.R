@@ -171,8 +171,8 @@ extract_params <- function(fit) {
     }
 
     if (cov_type == "ar1") {
-        params$sd <- lapply(theta_est, \(theta) exp(theta[1]))
-        params$rho <- lapply(theta_est, \(theta) theta_to_cor(theta[2]))
+        params$sd <- lapply(theta_est, function(theta) exp(theta[1]))
+        params$rho <- lapply(theta_est, function(theta) theta_to_cor(theta[2]))
     }
 
     return(params)

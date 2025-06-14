@@ -5,6 +5,7 @@
 - Add the additional structured covariance models as options also for `method_bayes` via argument `covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph")`
 - Use pragmatic default priors, based on the initial frequentist model fit, for the covariance model parameters, with the possibility to add multiple prior choices
   - In particular, add the LKJ prior as an option for the unstructured covariance model (good to have a precedent for the additional flexibility, plus we have seen better performance with LKJ vs. InvWish)
+  - Note that for now we don't allow a specification of the `eta` parameter of the LKJ prior, this could be added later in a future update if needed, and would then be an expert option inside `control_bayes()`. Here we just set `eta = 1` for the LKJ prior, which is the default and most commonly used value.
 - Avoid duplicated code in the backend Stan implementation, e.g. via using experience from the `jmpost` and/or `brms` packages' Stan code templating mechanisms
 
 ## User interface
