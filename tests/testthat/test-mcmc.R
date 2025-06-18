@@ -683,3 +683,45 @@ test_that("fit_mcmc works with multiple chains", {
         n_visits = 3
     )
 })
+
+test_that("full chain (before thinning) is retained in the stan fit object", {
+
+    skip_if_not(is_full_test())
+
+    set.seed(7251)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(data = dat, ~ 1 + sex + age + group + visit + group * visit)
+
+    method <- method_bayes(
+        n_samples = 150,
+        same_cov = TRUE,
+        control = control_bayes(
+            warmup = 200,
+            thin = 3,
+        )
+    )
+
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat$outcome,
+        group = dat$group,
+        subjid = dat$id,
+        visit = dat$visit,
+        method = method,
+        quiet = TRUE
+    )
+    # Samples are thinned
+    expect_true(length(fit$samples$beta) == method$n_samples)
+    expect_true(length(fit$samples$sigma) == method$n_samples)
+    # Stan fit object retains unthinned samples
+    expect_true(nrow(as.matrix(fit$fit)) == method$n_samples * method$control$thin)
+})
