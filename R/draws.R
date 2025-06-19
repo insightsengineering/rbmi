@@ -174,7 +174,8 @@
 #'
 #' Marcel Wolbers, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, Jonathan W. Bartlett.
 #' Standard and reference-based
-#' conditional mean imputation. \url{https://arxiv.org/abs/2109.11162}, 2022.
+#' conditional mean imputation. Pharmaceutical Statistics. 21(6): 1246-1257, 2022.
+#' doi:\url{https://doi.org/10.1002/pst.2234}
 #'
 #' Von Hippel, Paul T and Bartlett, Jonathan W.
 #' Maximum likelihood multiple imputation: Faster imputations and consistent standard errors without
