@@ -2,3 +2,15 @@ url: ~
 template:
   math-rendering: mathjax
   bootstrap: 5
+
+
+articles:
+  - title: Articles
+    navbar: ~
+    contents:
+        - quickstart
+        - '`stat_specs`'
+        - advanced
+        - '`retrieved_dropout`'
+        - '`CondMean_Inference`'
+        - FAQ
