@@ -559,12 +559,10 @@ ensure_rstan <- function() {
 
 #' Get session hash
 #'
-#' Gets a unique string based on the current R version and relevant packages as well as the
-#' choice of covariance structure and prior covariance structure.
-#'
+#' Gets a unique string based on the current R version and relevant packages.
 #' @importFrom utils sessionInfo
 #' @keywords internal
-get_session_hash <- function(covariance, prior_cov) {
+get_session_hash <- function() {
     pkg_versions <- vapply(
         sessionInfo(c("rbmi", "rstan", "Rcpp", "RcppEigen"))[["otherPkgs"]],
         function(x) x[["Version"]],
@@ -572,12 +570,7 @@ get_session_hash <- function(covariance, prior_cov) {
     )
     version_string <- paste0(
         R.version.string,
-        "-",
-        paste0(names(pkg_versions), pkg_versions, collapse = ":"),
-        "-",
-        covariance,
-        "-",
-        prior_cov
+        paste0(names(pkg_versions), pkg_versions, collapse = ":")
     )
     temp_file <- tempfile()
     writeLines(version_string, temp_file)
@@ -586,13 +579,23 @@ get_session_hash <- function(covariance, prior_cov) {
     return(hash)
 }
 
-clear_model_cache <- function(cache_dir = getOption("rbmi.cache_dir")) {
-    files <- list.files(
+#' Clear Model Cache
+#'
+#' Clears the compiled Stan model cache, keeping only the models that match the `keep` argument.
+#'
+#' @param keep A character string that specifies which models to keep in the cache.
+#' @param cache_dir The directory where the compiled Stan models are cached. Defaults to the option `rbmi.cache_dir`.
+#' @keywords internal
+clear_model_cache <- function(keep, cache_dir = getOption("rbmi.cache_dir")) {
+    assert_that(is.string(keep))
+    all_model_files <- list.files(
         cache_dir,
         pattern = "(rbmi_MMRM_).*(\\.stan|\\.rds)",
         full.names = TRUE
     )
-    unlink(files)
+    should_keep <- grepl(pattern = keep, x = all_model_files, fixed = TRUE)
+    old_model_files <- all_model_files[!should_keep]
+    unlink(old_model_files)
 }
 
 #' Get Compiled Stan Object
@@ -642,10 +645,18 @@ get_stan_model <- function(covariance, prior_cov) {
     # Decide file location for the final Stan model file.
     cache_dir <- getOption("rbmi.cache_dir")
     dir.create(cache_dir, showWarnings = FALSE, recursive = TRUE)
-    session_hash <- get_session_hash(covariance, prior_cov)
+    session_hash <- get_session_hash()
     model_file <- file.path(
         cache_dir,
-        paste0("rbmi_MMRM_", session_hash, ".stan")
+        paste0(
+            "rbmi_MMRM_",
+            session_hash,
+            "_",
+            covariance,
+            "_",
+            prior_cov,
+            ".stan"
+        )
     )
 
     # If it does not exist yet, create the model file from the template
@@ -664,7 +675,7 @@ get_stan_model <- function(covariance, prior_cov) {
             prior_cov = prior_cov,
             machine_double_eps = .Machine$double.eps
         )
-        clear_model_cache()
+        clear_model_cache(keep = session_hash)
         writeLines(model_string, model_file)
     }
 
