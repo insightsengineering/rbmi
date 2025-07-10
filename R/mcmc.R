@@ -1,3 +1,12 @@
+#' Adjust Dimensions of Prior Parameters for Stan Usage
+#'
+#' This function adjusts the dimensions of prior parameters based on whether
+#' the same covariance structure is used for all groups, and whether the parameters
+#' are lists of matrices or numeric vectors. This is really only necessary to deal with
+#' some peculiarities of how Stan handles arrays and vectors. See [prepare_prior_params()]
+#' where this is used.
+#'
+#' @keywords internal
 adjust_dimensions <- function(same_cov, param_list) {
     ife(
         isTRUE(same_cov),
@@ -14,6 +23,20 @@ adjust_dimensions <- function(same_cov, param_list) {
     )
 }
 
+#' Prepare Prior Parameters for Covariance Model Prior Distribution
+#'
+#' Based on the `covariance` and `prior_cov` choices, this function prepares the prior parameters
+#' for the covariance model.
+#'
+#' @param stan_data A list containing the Stan data, to which the prior parameters will be added.
+#' @param covariance A character string indicating the covariance structure (e.g., "us", "ar1").
+#' @param prior_cov A character string indicating the prior covariance type (e.g., "default", "lkj").
+#' @param mmrm_initial A list containing the initial MMRM fit results, which includes
+#'   the relevant frequentist estimates.
+#' @param same_cov A logical indicating whether to use the same covariance structure for all groups.
+#' @return Modified `stan_data` with prior parameters added.
+#'
+#' @keywords internal
 prepare_prior_params <- function(
     stan_data,
     covariance,

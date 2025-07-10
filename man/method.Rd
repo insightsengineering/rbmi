@@ -13,7 +13,9 @@ method_bayes(
   same_cov = TRUE,
   n_samples = 20,
   prior_cov = c("default", "lkj"),
-  control = control_bayes()
+  control = control_bayes(),
+  burn_in = NULL,
+  burn_between = NULL
 )
 
 method_approxbayes(
@@ -60,6 +62,10 @@ must be set to \code{NULL}. See details.}
 Currently only used by \code{method_bayes()}, please see \code{\link[=control_bayes]{control_bayes()}} for details and
 default settings.}
 
+\item{burn_in}{deprecated. Please use the \code{warmup} argument in \code{\link[=control_bayes]{control_bayes()}} instead.}
+
+\item{burn_between}{deprecated. Please use the \code{thin} argument in \code{\link[=control_bayes]{control_bayes()}} instead.}
+
 \item{threshold}{a numeric between 0 and 1, specifies the proportion of bootstrap
 datasets that can fail to produce valid samples before an error is thrown.
 See details.}
@@ -75,10 +81,6 @@ Must be one of \code{"bootstrap"} or \code{"jackknife"}.}
 
 \item{D}{a numeric that determines the number of random imputations for each bootstrap sample.
 Needed for \code{method_bmlmi()}.}
-
-\item{burn_in}{deprecated. Please use the \code{warmup} argument in \code{\link[=control_bayes]{control_bayes()}} instead.}
-
-\item{burn_between}{deprecated. Please use the \code{thin} argument in \code{\link[=control_bayes]{control_bayes()}} instead.}
 }
 \description{
 These functions determine what methods \code{rbmi} should use when creating
