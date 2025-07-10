@@ -587,7 +587,7 @@ get_session_hash <- function() {
 #' @param cache_dir The directory where the compiled Stan models are cached. Defaults to the option `rbmi.cache_dir`.
 #' @keywords internal
 clear_model_cache <- function(keep, cache_dir = getOption("rbmi.cache_dir")) {
-    assert_that(is.string(keep))
+    assert_that(assertthat::is.string(keep))
     all_model_files <- list.files(
         cache_dir,
         pattern = "(rbmi_MMRM_).*(\\.stan|\\.rds)",
