@@ -4,9 +4,10 @@
 \alias{get_stan_model}
 \title{Get Compiled Stan Object}
 \usage{
-get_stan_model()
+get_stan_model(covariance, prior_cov)
 }
 \description{
-Gets a compiled Stan object that can be used with \code{rstan::sampling()}
+Gets a compiled Stan object that can be used with \code{rstan::sampling()},
+based on the choice of the covariance structure and the prior on the parameters.
 }
 \keyword{internal}

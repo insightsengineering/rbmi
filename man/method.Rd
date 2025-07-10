@@ -9,11 +9,11 @@
 \title{Set the multiple imputation methodology}
 \usage{
 method_bayes(
+  covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
   same_cov = TRUE,
   n_samples = 20,
-  control = control_bayes(),
-  burn_in = NULL,
-  burn_between = NULL
+  prior_cov = c("default", "lkj"),
+  control = control_bayes()
 )
 
 method_approxbayes(
@@ -43,6 +43,10 @@ method_bmlmi(
 )
 }
 \arguments{
+\item{covariance}{a character string that specifies the structure of the covariance
+matrix to be used in the imputation model. Must be one of \code{"us"} (default), \code{"ad"},
+\code{"adh"}, \code{"ar1"}, \code{"ar1h"}, \code{"cs"}, \code{"csh"}, \code{"toep"}, or \code{"toeph"}). See details.}
+
 \item{same_cov}{a logical, if \code{TRUE} the imputation model will be fitted using a single
 shared covariance matrix for all observations. If \code{FALSE} a separate covariance
 matrix will be fit for each group as determined by the \code{group} argument of
@@ -55,14 +59,6 @@ must be set to \code{NULL}. See details.}
 \item{control}{a list which specifies further lower level details of the computations.
 Currently only used by \code{method_bayes()}, please see \code{\link[=control_bayes]{control_bayes()}} for details and
 default settings.}
-
-\item{burn_in}{deprecated. Please use the \code{warmup} argument in \code{\link[=control_bayes]{control_bayes()}} instead.}
-
-\item{burn_between}{deprecated. Please use the \code{thin} argument in \code{\link[=control_bayes]{control_bayes()}} instead.}
-
-\item{covariance}{a character string that specifies the structure of the covariance
-matrix to be used in the imputation model. Must be one of \code{"us"} (default), \code{"ad"},
-\code{"adh"}, \code{"ar1"}, \code{"ar1h"}, \code{"cs"}, \code{"csh"}, \code{"toep"}, or \code{"toeph"}). See details.}
 
 \item{threshold}{a numeric between 0 and 1, specifies the proportion of bootstrap
 datasets that can fail to produce valid samples before an error is thrown.
@@ -79,6 +75,10 @@ Must be one of \code{"bootstrap"} or \code{"jackknife"}.}
 
 \item{D}{a numeric that determines the number of random imputations for each bootstrap sample.
 Needed for \code{method_bmlmi()}.}
+
+\item{burn_in}{deprecated. Please use the \code{warmup} argument in \code{\link[=control_bayes]{control_bayes()}} instead.}
+
+\item{burn_between}{deprecated. Please use the \code{thin} argument in \code{\link[=control_bayes]{control_bayes()}} instead.}
 }
 \description{
 These functions determine what methods \code{rbmi} should use when creating

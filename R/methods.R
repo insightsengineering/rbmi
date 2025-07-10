@@ -108,8 +108,19 @@ method_bayes <- function(
     same_cov = TRUE,
     n_samples = 20,
     prior_cov = c("default", "lkj"),
-    control = control_bayes()
+    control = control_bayes(),
+    burn_in = NULL,
+    burn_between = NULL
 ) {
+    assertthat::assert_that(
+        is.null(burn_in) && is.null(burn_between),
+        msg = paste(
+            "The `burn_in` and `burn_between` arguments to `method_bayes()` have been deprecated;",
+            "please use the `warmup` and `thin` arguments inside `control_bayes()` instead.",
+            collapse = " "
+        )
+    )
+
     covariance <- match.arg(covariance)
     prior_cov <- match.arg(prior_cov)
 

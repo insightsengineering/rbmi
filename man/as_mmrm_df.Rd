@@ -18,7 +18,8 @@ any missing values}
 \item{subjid}{a character / factor vector. The subject identifier used to link separate visits
 that belong to the same subject.}
 
-\item{group}{a character / factor vector. Indicates which treatment group the patient belongs to.}
+\item{group}{a character / factor vector. Indicates which treatment group the patient belongs to.
+Will internally be converted to a factor if it is not already.}
 }
 \description{
 Converts a design matrix + key variables into a common format

@@ -13,3 +13,7 @@ extract_params(fit)
 Extracts the beta and sigma coefficients from an MMRM model created
 by \code{\link[mmrm:mmrm]{mmrm::mmrm()}}.
 }
+\details{
+For structured covariance models, additional parameter estimates will be returned, based on the type
+of the covariance model.
+}
