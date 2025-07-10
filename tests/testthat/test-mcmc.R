@@ -311,7 +311,7 @@ test_that("get_pattern_groups_unique", {
 })
 
 
-test_that("prepare_prior_param works for AR1", {
+test_that("prepare_prior_params works for AR1", {
     skip_if_not(is_full_test())
 
     set.seed(2151)
@@ -342,7 +342,7 @@ test_that("prepare_prior_param works for AR1", {
         same_cov = TRUE
     )
 
-    result <- prepare_prior_param(
+    result <- prepare_prior_params(
         stan_data = list(),
         covariance = "ar1",
         prior_cov = "default",
@@ -352,8 +352,8 @@ test_that("prepare_prior_param works for AR1", {
     expect_true(
         is.list(result) && identical(names(result), c("sd_par", "rho_par"))
     )
-    expect_true(is.list(result$sd_par) && length(result$sd_par) == 1)
-    expect_true(is.list(result$rho_par) && length(result$rho_par) == 1)
+    expect_true(is.numeric(result$sd_par) && length(result$sd_par) == 1)
+    expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 1)
 
     # Separate cov across groups.
     mmrm_initial <- fit_mmrm(
@@ -367,7 +367,7 @@ test_that("prepare_prior_param works for AR1", {
         same_cov = FALSE
     )
 
-    result <- prepare_prior_param(
+    result <- prepare_prior_params(
         stan_data = list(),
         covariance = "ar1",
         prior_cov = "default",
@@ -377,8 +377,8 @@ test_that("prepare_prior_param works for AR1", {
     expect_true(
         is.list(result) && identical(names(result), c("sd_par", "rho_par"))
     )
-    expect_true(is.list(result$sd_par) && length(result$sd_par) == 2)
-    expect_true(is.list(result$rho_par) && length(result$rho_par) == 2)
+    expect_true(is.numeric(result$sd_par) && length(result$sd_par) == 2)
+    expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 2)
 })
 
 
