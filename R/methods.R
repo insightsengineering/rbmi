@@ -113,12 +113,10 @@ method_bayes <- function(
     covariance <- match.arg(covariance)
     prior_cov <- match.arg(prior_cov)
 
+    valid_prior <- is_valid_covariance_prior(prior_cov, covariance)
     assert_that(
-        covariance == "us" || prior_cov == "default",
-        msg = paste(
-            "The LKJ prior (`prior_cov = \"lkj\"`) can only be used with the",
-            "unstructured covariance model (`covariance = \"us\"`)"
-        )
+        valid_prior,
+        msg = attr(valid_prior, "msg")
     )
 
     x <- list(
@@ -131,6 +129,34 @@ method_bayes <- function(
     return(as_class(x, c("method", "bayes")))
 }
 
+#' Check for Valid Covariance and Prior Combination
+#'
+#' This function checks if the specified covariance structure and prior combination
+#' is valid.
+#'
+#' @param prior_cov A character string indicating the prior covariance type.
+#' @param covariance A character string indicating the covariance structure.
+#' @return Logical scalar indicating if the combination is valid, with a `msg` attribute in case it is not.
+#'
+#' @keywords internal
+is_valid_covariance_prior <- function(prior_cov, covariance) {
+    msg <- if (prior_cov == "default") {
+        NULL
+    } else if (prior_cov == "lkj") {
+        if (covariance == "us") {
+            NULL
+        } else {
+            paste(
+                "The LKJ prior (`prior_cov = \"lkj\"`) can only be used with the",
+                "unstructured covariance model (`covariance = \"us\"`)"
+            )
+        }
+    }
+    structure(
+        is.null(msg),
+        msg = msg
+    )
+}
 
 #' @rdname method
 #' @export
