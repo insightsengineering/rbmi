@@ -75,11 +75,11 @@ parameters {
             array[G] cov_matrix[n_visit] Sigma; // covariance matrix(s)
         {% else if prior_cov == "lkj" %}
             array[G] cholesky_factor_corr[n_visit] corr_chol; // Cholesky factors for correlation matrix
-            array[G] vector<lower={{ machine_double_eps }}>[n_visit] sds; // one standard deviation for each visit
+            array[G] vector<lower={{ machine_double_eps }}>[n_visit] vars; // one variance for each visit
         {% endif %}
     {% else if covariance == "ar1" %}
         array[G] real<lower=-1,upper=1> rho; // AR(1) correlation coefficient
-        array[G] real<lower={{ machine_double_eps }}> sd; // homogeneous standard deviation
+        array[G] real<lower={{ machine_double_eps }}> var_const; // homogeneous variance across visits
     {% endif %}
 }
 
@@ -87,17 +87,11 @@ parameters {
 transformed parameters {
     array[G] cov_matrix[n_visit] Sigma;
     
-    // We need a change of variable here from standard deviations to variances,
-    // such that the prior on the variances is easy below.
-    // But we will need a Jacobian adjustment in the model block for this.  
     {% if covariance == "us" and prior_cov == "lkj" %}
-        array[G] vector<lower={{ machine_double_eps }}>[n_visit] vars;
+        array[G] vector<lower={{ machine_double_eps }}>[n_visit] sds;
         for (g in 1:G) {
-            vars[g] = sds[g] .* sds[g]; // convert sds to variances per group
+            sds[g] = sqrt(vars[g]); 
         }
-    {% else if covariance == "ar1" %}        
-        array[G] real<lower={{ machine_double_eps }}> var_const;
-        var_const = sd .* sd; // convert sd to variance per group
     {% endif %}
 
     for(g in 1:G){
@@ -125,10 +119,6 @@ model {
                     // Note that we pass the estimated sigma, not sigma^2 here as 
                     // the scale parameter.
                     vars[g][i] ~ scaled_inv_chi_square(1, sqrt(Sigma_par[g][i,i]));
-                    // Jacobian adjustment for the change of variable:
-                    // log of the absolute derivative of the transform.
-                    // log(|d(vars[i])/d(sd[i])|) = log(2 * sd[i]) = log(2) + log(sd[i])
-                    target += log(2) + log(sds[g][i]);
                 }
             {% endif %}            
         {% else if covariance == "ar1" %}
@@ -136,10 +126,6 @@ model {
             // Note that we pass the estimated sd, not sd^2 here as 
             // the scale parameter of the scaled inverse Chi-Square distribution.
             var_const[g] ~ scaled_inv_chi_square(1, sd_par[g]);
-            // Jacobian adjustment for the change of variable:
-            // log of the absolute derivative of the transform.
-            // log(|d(var_const)/d(sd)|) = log(2 * sd) = log(2) + log(sd)
-            target += log(2) + log(sd[g]);
         {% endif %}
     }
     
