@@ -29,11 +29,7 @@ functions {
             matrix[n, n] L;
             for (i in 1:n) {
                 for (j in 1:n) {
-                if (i == j) {
-                    L[i, j] = 1;
-                } else {
                     L[i, j] = rho^abs(j - i);
-                }
                 }
             }
             return L;
@@ -91,14 +87,6 @@ parameters {
 transformed parameters {
     array[G] cov_matrix[n_visit] Sigma;
     
-    for(g in 1:G){
-        {% if covariance == "us" and prior_cov == "lkj" %}
-            Sigma[g] = multiply_lower_tri_self_transpose(diag_pre_multiply(sds[g], corr_chol[g]));
-        {% else if covariance == "ar1" %}
-            Sigma[g] = var_const[g] * ar1_correlation_matrix(n_visit, rho[g]);
-        {% endif %}
-    }
-
     // We need a change of variable here from standard deviations to variances,
     // such that the prior on the variances is easy below.
     // But we will need a Jacobian adjustment in the model block for this.  
@@ -111,6 +99,14 @@ transformed parameters {
         array[G] real<lower={{ machine_double_eps }}> var_const;
         var_const = sd .* sd; // convert sd to variance per group
     {% endif %}
+
+    for(g in 1:G){
+        {% if covariance == "us" and prior_cov == "lkj" %}
+            Sigma[g] = multiply_lower_tri_self_transpose(diag_pre_multiply(sds[g], corr_chol[g]));
+        {% else if covariance == "ar1" %}
+            Sigma[g] = var_const[g] * ar1_correlation_matrix(n_visit, rho[g]);
+        {% endif %}
+    }
 }
 {% endif %}
 
