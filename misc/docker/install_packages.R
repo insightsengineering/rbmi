@@ -35,7 +35,7 @@ if (!requireNamespace("desc", quietly = TRUE)) {
 pkgs <- desc::desc("DESCRIPTION")$get_deps()$package |> unique()
 
 # Add on additional packages that might be needed in the future
-pkgs <- c(pkgs, "tidyverse", "devtools")
+pkgs <- c(pkgs, "tidyverse", "devtools", "jinjar", "tidymodels", "languageserver")
 
 
 # R will error if you try to update the base packages so remove them
