@@ -22,7 +22,7 @@ method_bayes(
 )
 ```
 
-- Note that we could use this update of the package to remove the previously deprecated arguments `burn_in` and `burn_between` from the `method_bayes` function. Thereby we avoid having too many arguments in the function signature.
+- Note that we could use this update of the package to remove the previously deprecated arguments `burn_in` and `burn_between` from the `method_bayes` function. However, we still keep them, in order to allow for enough time to update existing code that uses these arguments. So they will only be removed in a future update.
 - The new argument `covariance` is finally aligning this function's signature to the other `method_*` functions, which all have the same `covariance` argument already.
 
 ### Specifying the prior on the covariance model parameters 
@@ -39,7 +39,9 @@ Let's think about how to implement the use of the covariance structures with the
 
 ### `method_bayes`
 
-Now it returns a list with the additional elements `covariance` and `prior_cov`, which are set to the values of the respective arguments. The function also checks that the `prior_cov` argument is only used with the unstructured covariance model, and throws an informative error message otherwise.
+Now it returns a list with the additional elements `covariance` and `prior_cov`, which are set to the values of the respective arguments. The function also checks that the `prior_cov` argument is only used with the unstructured covariance model, and throws an informative error message otherwise. 
+
+We implement this via a `validate` method for the `method_bayes` return value (i.e. class `bayes`), such that it can be rechecked flexibly further downstream. That said, we can also have a `validate` method for the `method` class in general, which checks more general properties of the method object.
 
 ### `fit_mcmc`
 
@@ -86,7 +88,11 @@ Specifically, it seems like we could still have a single `MMRM.stan` file, which
 
 ### `get_session_hash`
 
-This needs now to also take into account the `covariance` and `prior_cov` arguments, because with them the final Stan model code will change, and thus the cache key needs to be different.
+This function can stay as it is currently, because the covariance and prior strings will be added to the Stan file name. 
+
+### `clear_model_cache`
+
+This function is updated with a `keep` argument, such that files matching this string in their name will not be deleted from the cache directory. This allows different Stan files for different covariance structures and priors to be cached separately in the same session, which is identified by the hash string and pass to `keep`. Then only files from old sessions will be deleted, but no files from the current session.
 
 ### `MMRM.stan`
 
