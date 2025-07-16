@@ -65,5 +65,5 @@ jobs:
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}:${{ steps.vars.outputs.tag }}
           build-args: |
-          cache-from: type=registry,ref=user/app:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ github.repository_owner }}:latest
           cache-to: type=inline
