@@ -17,19 +17,23 @@ adjust_dimensions <- function(same_cov, param_list) {
     assert_that(is.logical(same_cov) && assertthat::is.scalar(same_cov))
     assert_that(is.list(param_list) && length(param_list) > 0)
 
-    ife(
-        isTRUE(same_cov),
-        ife(
-            is.matrix(param_list[[1]]),
-            list(param_list[[1]]),
-            array(param_list[[1]], dim = length(param_list[[1]]))
-        ),
-        ife(
-            is.numeric(param_list[[1]]) && length(param_list[[1]]) == 1,
-            unlist(param_list),
-            param_list
-        )
+    first_element <- param_list[[1]]
+    assert_that(
+        is.matrix(first_element) ||
+            (is.vector(first_element) & length(first_element) == 1),
+        msg = "Function currently only supports list elements of matrices or length-1 scalars"
     )
+    if (same_cov) {
+        # Assume for same_cov=TRUE that the first element is the value to be used for everything
+        param_list <- list(first_element)
+    }
+    if (is.vector(first_element)) {
+        # Stan treats a R-vector of length 1 as a scalar.
+        # Thus for a Stan-array of length 1 Rstan needs the data to be an R-array with dim=1
+        # This arises when we have same_cov=TRUE as G=1 e.g. `array[G] real sd_par;`
+        param_list <- array(unlist(param_list), dim = length(param_list))
+    }
+    param_list
 }
 
 #' Prepare Prior Parameters for Covariance Model Prior Distribution

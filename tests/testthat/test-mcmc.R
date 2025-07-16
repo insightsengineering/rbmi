@@ -183,7 +183,7 @@ test_that("Verbose suppression works", {
 })
 
 
-test_that("as_indicies", {
+test_that("as_indices", {
     result_actual <- as_indices(c("1100"))
     result_expected <- list(c(1, 2, 999, 999))
     expect_equal(result_actual, result_expected)
