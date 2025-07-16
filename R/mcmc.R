@@ -6,8 +6,17 @@
 #' some peculiarities of how Stan handles arrays and vectors. See [prepare_prior_params()]
 #' where this is used.
 #'
+#' @param same_cov A logical indicating whether the same covariance structure is used for all groups.
+#'   If `TRUE`, the function will return the parameters only once.
+#' @param param_list A list of parameters, which can be matrices or numeric vectors. Note that this
+#'   contains one element for each group, independent of `same_cov`.
+#' @return The parameters adjusted to the appropriate dimensions for Stan.
+#'
 #' @keywords internal
 adjust_dimensions <- function(same_cov, param_list) {
+    assert_that(is.logical(same_cov) && assertthat::is.scalar(same_cov))
+    assert_that(is.list(param_list) && length(param_list) > 0)
+
     ife(
         isTRUE(same_cov),
         ife(

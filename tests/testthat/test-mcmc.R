@@ -75,6 +75,51 @@ test_extract_draws <- function(draws_extracted, same_cov, n_groups, n_visits) {
     })))
 }
 
+test_that("adjust_dimensions works with same covariance and matrix parameter", {
+    result <- adjust_dimensions(
+        same_cov = TRUE,
+        param_list = list(
+            matrix(1:4, 2, 2),
+            matrix(1:4, 2, 2)
+        )
+    )
+    expected <- list(matrix(1:4, 2, 2))
+    expect_equal(result, expected)
+})
+
+test_that("adjust_dimensions works with same covariance and scalar parameter", {
+    result <- adjust_dimensions(
+        same_cov = TRUE,
+        param_list = list(1, 1)
+    )
+    expected <- array(1, dim = 1)
+    expect_equal(result, expected)
+})
+
+test_that("adjust_dimensions works with different covariance and matrix parameter", {
+    result <- adjust_dimensions(
+        same_cov = FALSE,
+        param_list = list(
+            matrix(1:4, 2, 2),
+            matrix(2:5, 2, 2)
+        )
+    )
+    expected <- list(
+        # Unchanged.
+        matrix(1:4, 2, 2),
+        matrix(2:5, 2, 2)
+    )
+    expect_equal(result, expected)
+})
+
+test_that("adjust_dimensions works with different covariance and scalar parameter", {
+    result <- adjust_dimensions(
+        same_cov = FALSE,
+        param_list = list(1, 2)
+    )
+    expected <- c(1, 2)
+    expect_equal(result, expected)
+})
 
 test_that("split_dim creates a list from an array as expected", {
     mat <- rbind(c(1, 0.2), c(0.2, 1))
