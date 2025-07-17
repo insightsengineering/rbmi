@@ -10,8 +10,14 @@ nv <- 3
 covars <- tibble(
     subjid = 1:n,
     age = rnorm(n),
-    group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),
-    sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F")),
+    group = factor(
+        sample(c("A", "B"), size = n, replace = TRUE),
+        levels = c("A", "B")
+    ),
+    sex = factor(
+        sample(c("M", "F"), size = n, replace = TRUE),
+        levels = c("M", "F")
+    ),
     strata = c("A", "A", "A", "A", "A", "A", "A", "A", "B", "B")
 )
 
@@ -19,14 +25,16 @@ dat <- tibble(
     subjid = rep.int(1:n, nv)
 ) %>%
     left_join(covars, by = "subjid") %>%
-    mutate(outcome = rnorm(
-        n(),
-        age * 3 + (as.numeric(sex) - 1) * 3 + (as.numeric(group) - 1) * 4,
-        sd = 3
-    )) %>%
+    mutate(
+        outcome = rnorm(
+            n(),
+            age * 3 + (as.numeric(sex) - 1) * 3 + (as.numeric(group) - 1) * 4,
+            sd = 3
+        )
+    ) %>%
     arrange(subjid) %>%
     group_by(subjid) %>%
-    mutate(visit = factor(paste0("Visit ", seq_len(n()))))  %>%
+    mutate(visit = factor(paste0("Visit ", seq_len(n())))) %>%
     ungroup() %>%
     mutate(subjid = factor(subjid))
 
@@ -44,7 +52,6 @@ vars <- set_vars(
 )
 
 
-
 test_that("extract_covariates", {
     expect_equal(extract_covariates("age"), "age")
     expect_equal(extract_covariates(c("age", "sex")), c("age", "sex"))
@@ -59,11 +66,7 @@ test_that("extract_covariates", {
 })
 
 
-
-
-
 test_that("validate.ivars", {
-
     expect_true(validate(vars))
 
     vars2 <- vars
@@ -77,7 +80,6 @@ test_that("validate.ivars", {
     vars2 <- vars
     vars2$group <- NULL
     expect_error(validate(vars2))
-
 
     vars2 <- vars
     vars2$visit <- NULL
@@ -105,10 +107,7 @@ test_that("validate.ivars", {
 })
 
 
-
-
 test_that("validate_datalong_varExists", {
-
     expect_true(validate_datalong_varExists(dat, vars))
 
     dat2 <- dat
@@ -138,17 +137,11 @@ test_that("validate_datalong_varExists", {
     dat2 <- dat
     dat2$visit <- NULL
     expect_error(validate_datalong_varExists(dat2, vars))
-
 })
 
 
-
-
 test_that("validate_datalong_types", {
-
-
     expect_true(validate_datalong_types(dat, vars))
-
 
     dat2 <- dat
     dat2$subjid <- rnorm(nrow(dat))
@@ -162,7 +155,6 @@ test_that("validate_datalong_types", {
     dat2$subjid <- factor(dat$subjid)
     expect_true(validate_datalong_types(dat2, vars))
 
-
     dat2 <- dat
     dat2$group <- rnorm(nrow(dat))
     expect_error(validate_datalong_types(dat2, vars))
@@ -171,7 +163,6 @@ test_that("validate_datalong_types", {
     dat2$group <- factor(dat$subjid)
     expect_true(validate_datalong_types(dat2, vars))
 
-
     dat2 <- dat
     dat2$outcome <- as.character(dat$outcome)
     expect_error(validate_datalong_types(dat2, vars))
@@ -179,7 +170,6 @@ test_that("validate_datalong_types", {
     dat2 <- dat
     dat2$outcome <- as.factor(dat$outcome)
     expect_error(validate_datalong_types(dat2, vars))
-
 
     dat2 <- dat
     dat2$visit <- rnorm(nrow(dat))
@@ -231,7 +221,6 @@ test_that("validate_datalong_types", {
 
 
 test_that("validate_datalong_notMissing", {
-
     expect_true(validate_datalong_notMissing(dat, vars))
 
     dat2 <- dat
@@ -257,13 +246,10 @@ test_that("validate_datalong_notMissing", {
     dat2 <- dat
     dat2$strata[c(1, 2, 3)] <- NA
     expect_error(validate_datalong_notMissing(dat2, vars))
-
 })
 
 
-
 test_that("validate_datalong_complete", {
-
     expect_true(validate_datalong_complete(dat, vars))
 
     ### Duplicate visits per patient
@@ -281,7 +267,6 @@ test_that("validate_datalong_complete", {
 
 
 test_that("validate_datalong_unifromStrata", {
-
     expect_true(validate_datalong_unifromStrata(dat, vars))
 
     vars2 <- vars
@@ -291,7 +276,6 @@ test_that("validate_datalong_unifromStrata", {
     dat2 <- dat
     dat2$strata[[1]] <- "AXS"
     expect_error(validate_datalong_unifromStrata(dat2, vars))
-
 })
 
 
@@ -301,7 +285,6 @@ test_that("validate_data_long", {
 
 
 test_that("validate_data_ice", {
-
     di <- data.frame(
         subjid = c("1", "1"),
         strategy = c("MAR", "MAR"),
@@ -309,7 +292,10 @@ test_that("validate_data_ice", {
         stringsAsFactors = FALSE
     )
 
-    expect_error(validate_dataice(dat, di, vars), regexp = "must contain at most 1 row per")
+    expect_error(
+        validate_dataice(dat, di, vars),
+        regexp = "must contain at most 1 row per"
+    )
 
     di <- data.frame(
         subjid = c("1", "2"),
@@ -318,7 +304,10 @@ test_that("validate_data_ice", {
         stringsAsFactors = FALSE
     )
 
-    expect_error(validate_dataice(dat, di, vars),  regexp = "vars\\$visit.*contains values that are")
+    expect_error(
+        validate_dataice(dat, di, vars),
+        regexp = "vars\\$visit.*contains values that are"
+    )
 
     di <- data.frame(
         subjid = c("1", "2"),
@@ -327,7 +316,10 @@ test_that("validate_data_ice", {
         stringsAsFactors = FALSE
     )
 
-    expect_error(validate_dataice(dat, di, vars),  regexp = "vars\\$strategy.* must be a non")
+    expect_error(
+        validate_dataice(dat, di, vars),
+        regexp = "vars\\$strategy.* must be a non"
+    )
 
     di <- data.frame(
         subjid = c("1", "abc"),
@@ -336,7 +328,10 @@ test_that("validate_data_ice", {
         stringsAsFactors = FALSE
     )
 
-    expect_error(validate_dataice(dat, di, vars),  regexp = "vars\\$subjid.* contains values that aren't")
+    expect_error(
+        validate_dataice(dat, di, vars),
+        regexp = "vars\\$subjid.* contains values that aren't"
+    )
 
     di <- data.frame(
         subjid = c("1", "2"),
@@ -355,5 +350,4 @@ test_that("validate_data_ice", {
     )
 
     expect_true(validate_dataice(dat, di, vars, update = TRUE))
-
 })

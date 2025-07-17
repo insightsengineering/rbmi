@@ -47,7 +47,8 @@ Stack <- R6::R6Class(
 #' @param method A `method` object
 #' @param stack A [Stack()] object (this is only exposed for unit testing purposes)
 get_bootstrap_stack <- function(longdata, method, stack = Stack$new()) {
-    max_samples <- ceiling(method$threshold * method$n_samples) + method$n_samples
+    max_samples <- ceiling(method$threshold * method$n_samples) +
+        method$n_samples
     stack$add(replicate(
         n = max_samples,
         expr = {

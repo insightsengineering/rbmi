@@ -15,12 +15,12 @@ x <- content(resp, type = "raw")
 ### Save zip file to a temporary directory
 tdir <- tempdir()
 tfile <- file.path(tdir, "temp.zip")
-tmp <- file(tfile, raw = TRUE, open='w+b')
+tmp <- file(tfile, raw = TRUE, open = 'w+b')
 writeBin(x, tmp)
 close.connection(tmp)
 
 ### Extract zip file
-unzip(zipfile = tfile,  overwrite= TRUE, exdir = tdir)
+unzip(zipfile = tfile, overwrite = TRUE, exdir = tdir)
 
 ### Identify extracted sas dataset
 sasfile <- list.files(tdir, pattern = "sas7bdat$", full.names = TRUE)

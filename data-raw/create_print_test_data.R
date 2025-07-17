@@ -20,10 +20,15 @@ get_data <- function(n) {
 
     dat <- get_sim_data(n, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         select(-is_miss) %>%
         mutate(group = factor(group, labels = c("Placebo", "TRT")))
-
 
     dat_ice <- dat %>%
         group_by(id) %>%
@@ -33,7 +38,6 @@ get_data <- function(n) {
         ungroup() %>%
         select(id, visit) %>%
         mutate(strategy = "JR")
-
 
     vars <- set_vars(
         outcome = "outcome",
@@ -47,16 +51,11 @@ get_data <- function(n) {
 }
 
 
-
-
-
-
 #########################
 #
 # Approximate Bayesian
 #
 #
-
 
 set.seed(3123)
 dobj <- get_data(40)
@@ -94,14 +93,11 @@ pool_ab <- pool(analysis_ab, conf.level = 0.9, alternative = "less")
 )
 
 
-
-
 #########################
 #
 # Bayesian
 #
 #
-
 
 set.seed(413)
 dobj <- get_data(40)
@@ -141,8 +137,6 @@ pool_b <- pool(analysis_b)
 .test_print$bayes <- list(
     pool = pool_b
 )
-
-
 
 
 #########################
@@ -191,8 +185,6 @@ pool_cmb_n <- pool(analysis_cmb, alternative = "greater", type = "normal")
         normal = pool_cmb_n
     )
 )
-
-
 
 
 #########################
@@ -244,7 +236,6 @@ pool_cmj <- pool(analysis_cmj, conf.level = 0.9)
 #
 #
 
-
 set.seed(2413)
 dobj <- get_data(40)
 
@@ -282,7 +273,6 @@ pool_bml <- pool(analysis_bml, conf.level = 0.9)
 .test_print$bmlmi <- list(
     pool = pool_bml
 )
-
 
 
 usethis::use_data(.test_print, internal = TRUE, overwrite = TRUE)

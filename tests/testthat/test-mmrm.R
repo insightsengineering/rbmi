@@ -4,9 +4,9 @@ suppressPackageStartupMessages({
 })
 
 
-
 compute_n_params <- function(cov_struct, nv) {
-    n_params <- switch(cov_struct,
+    n_params <- switch(
+        cov_struct,
         "ad" = nv,
         "adh" = 2 * nv - 1,
         "ar1" = 2,
@@ -21,17 +21,13 @@ compute_n_params <- function(cov_struct, nv) {
 }
 
 
-
 # function for checking whether x is a formula object
 is.formula <- function(x) {
     is.call(x) && x[[1]] == quote(`~`)
 }
 
 
-
-
 expect_valid_fit_object <- function(fit, cov_struct, nv, same_cov) {
-
     expect_type(fit, "list")
     expect_length(fit, 3)
 
@@ -51,9 +47,7 @@ expect_valid_fit_object <- function(fit, cov_struct, nv, same_cov) {
 }
 
 
-
 extract_test_fit <- function(mod) {
-
     beta <- coef(mod)
     names(beta) <- NULL
 
@@ -85,10 +79,7 @@ extract_test_fit <- function(mod) {
 }
 
 
-
-
 test_mmrm_numeric <- function(dat, formula_expr, same_cov, scale = FALSE) {
-
     formula <- as.formula(formula_expr)
     designmat <- as_model_df(dat, formula)
 
@@ -113,7 +104,9 @@ test_mmrm_numeric <- function(dat, formula_expr, same_cov, scale = FALSE) {
 
     if (scale) {
         fit_actual$beta <- scaler$unscale_beta(fit_actual$beta)
-        fit_actual$sigma <- lapply(fit_actual$sigma, function(x) scaler$unscale_sigma(x))
+        fit_actual$sigma <- lapply(fit_actual$sigma, function(x) {
+            scaler$unscale_sigma(x)
+        })
     }
 
     covariance <- ife(
@@ -141,13 +134,10 @@ test_mmrm_numeric <- function(dat, formula_expr, same_cov, scale = FALSE) {
         expect_true(all(
             abs(fit_actual$sigma[["B"]] - fit_expected$sigma[["B"]]) < 0.01
         ))
-
     } else {
         expect_equal(fit_actual, fit_expected)
     }
 }
-
-
 
 
 set.seed(101)
@@ -181,12 +171,9 @@ args_default <- list(
 )
 
 
-
 test_that("as_mmrm_df & as_mmrm_formula", {
-
     sigma <- as_vcov(c(2, 6, 3), c(0.4, 0.7, 0.5))
     dat <- get_sim_data(100, sigma)
-
 
     #### Without Groupings
     x <- as_mmrm_df(
@@ -204,9 +191,9 @@ test_that("as_mmrm_df & as_mmrm_formula", {
     expect_equal(nrow(x), nrow(dat))
 
     frm_actual <- as_mmrm_formula(x, "us")
-    frm_expected <- outcome ~ V1 + V2 + V3 + V4 + V5 + V6 + us(visit | subjid) - 1
+    frm_expected <- outcome ~
+        V1 + V2 + V3 + V4 + V5 + V6 + us(visit | subjid) - 1
     expect_equal(frm_expected, frm_actual, ignore_attr = TRUE)
-
 
     #### With Groupings
     x <- as_mmrm_df(
@@ -220,37 +207,52 @@ test_that("as_mmrm_df & as_mmrm_formula", {
     expect_equal(ncol(x), ncol(dat) + 4)
     expect_equal(
         colnames(x),
-        c(paste0("V", seq_len(ncol(dat))), "outcome", "visit", "subjid", "group")
+        c(
+            paste0("V", seq_len(ncol(dat))),
+            "outcome",
+            "visit",
+            "subjid",
+            "group"
+        )
     )
     expect_equal(nrow(x), nrow(dat))
 
-
     frm_actual <- as_mmrm_formula(x, "us")
-    frm_expected <- outcome ~ V1 + V2 + V3 + V4 + V5 + V6 + us(visit | group / subjid) - 1
+    frm_expected <- outcome ~
+        V1 + V2 + V3 + V4 + V5 + V6 + us(visit | group / subjid) - 1
     expect_equal(frm_expected, frm_actual, ignore_attr = TRUE)
 
-
     frm_actual <- as_mmrm_formula(x, "toep")
-    frm_expected <- outcome ~ V1 + V2 + V3 + V4 + V5 + V6 + toep(visit | group / subjid) - 1
+    frm_expected <- outcome ~
+        V1 + V2 + V3 + V4 + V5 + V6 + toep(visit | group / subjid) - 1
     expect_equal(frm_expected, frm_actual, ignore_attr = TRUE)
     expect_error(as_mmrm_formula(x, "toep2"), regexp = "'arg' should be one of")
 })
 
 
-
-
 test_that("MMRM model fit has expected output structure", {
-    for (struct in c("ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph", "us")) {
-
+    for (struct in c(
+        "ad",
+        "adh",
+        "ar1",
+        "ar1h",
+        "cs",
+        "csh",
+        "toep",
+        "toeph",
+        "us"
+    )) {
         ## First for same covariance per group
         args <- args_default
         args$cov_struct <- struct
         fit <- do.call(fit_mmrm, args = args)
         expect_valid_fit_object(fit, struct, 3, TRUE)
 
-
         mod <- mmrm::mmrm(
-            formula = as.formula(sprintf("outcome ~ sex + age + visit * group + %s(visit | id)", struct)),
+            formula = as.formula(sprintf(
+                "outcome ~ sex + age + visit * group + %s(visit | id)",
+                struct
+            )),
             data = dat,
             reml = TRUE
         )
@@ -266,7 +268,10 @@ test_that("MMRM model fit has expected output structure", {
         expect_valid_fit_object(fit, struct, 3, FALSE)
 
         mod <- mmrm::mmrm(
-            formula = as.formula(sprintf("outcome ~ sex + age + visit * group + %s(visit | group / id)", struct)),
+            formula = as.formula(sprintf(
+                "outcome ~ sex + age + visit * group + %s(visit | group / id)",
+                struct
+            )),
             data = dat,
             reml = TRUE
         )
@@ -293,9 +298,6 @@ test_that("MMRM model fit has expected output structure (REML = FALSE)", {
 })
 
 
-
-
-
 test_that("MMRM returns expected estimates (same_cov = TRUE)", {
     args <- args_default
     fit <- do.call(fit_mmrm, args = args)
@@ -312,7 +314,6 @@ test_that("MMRM returns expected estimates (same_cov = TRUE)", {
 
 
 test_that("MMRM returns expected estimates (same_cov = FALSE)", {
-
     args <- args_default
     args$same_cov <- FALSE
     fit <- do.call(fit_mmrm, args = args)
@@ -329,11 +330,7 @@ test_that("MMRM returns expected estimates (same_cov = FALSE)", {
 })
 
 
-
-
-
 test_that("MMRM returns expected estimates under different model specifications", {
-
     testthat::skip_on_cran()
 
     set.seed(4101)
@@ -349,9 +346,7 @@ test_that("MMRM returns expected estimates under different model specifications"
     dat <- dat %>%
         mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 1, NA_real_, outcome))
 
-
     runtests <- function(same_cov, scale) {
-
         formula_expr <- "outcome ~ sex*visit + age*visit + visit*group"
         test_mmrm_numeric(dat, formula_expr, same_cov, scale)
 
@@ -380,7 +375,6 @@ test_that("MMRM returns expected estimates under different model specifications"
     runtests(TRUE, TRUE)
     runtests(FALSE, FALSE)
     runtests(FALSE, TRUE)
-
 })
 
 
@@ -391,13 +385,20 @@ test_that("visit & group factor levels / order doesn't break model extraction", 
         c(2, 1, 0.7),
         c(
             0.3,
-            0.4, 0.2
+            0.4,
+            0.2
         )
     )
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         select(-is_miss)
 
     mod <- mmrm::mmrm(
@@ -408,8 +409,6 @@ test_that("visit & group factor levels / order doesn't break model extraction", 
     rownames(expected) <- NULL
     colnames(expected) <- NULL
     expect_equal(expected, extract_params(mod)$sigma$A)
-
-
 
     dat_modified <- dat %>%
         mutate(group = relevel(group, "B"))
@@ -423,9 +422,6 @@ test_that("visit & group factor levels / order doesn't break model extraction", 
     colnames(expected) <- NULL
     expect_equal(expected, extract_params(mod)$sigma$A)
 
-
-
-
     dat_modified <- dat %>%
         mutate(visit = relevel(visit, "visit_3"))
 
@@ -437,5 +433,4 @@ test_that("visit & group factor levels / order doesn't break model extraction", 
     rownames(expected) <- NULL
     colnames(expected) <- NULL
     expect_equal(expected, extract_params(mod)$sigma$A)
-
 })

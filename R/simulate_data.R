@@ -42,14 +42,15 @@
 #'
 #' @export
 set_simul_pars <- function(
-    mu, sigma, n,
+    mu,
+    sigma,
+    n,
     prob_ice1 = 0,
     or_outcome_ice1 = 1,
     prob_post_ice1_dropout = 0,
     prob_ice2 = 0,
     prob_miss = 0
 ) {
-
     x <- list(
         mu = mu,
         sigma = sigma,
@@ -73,10 +74,15 @@ set_simul_pars <- function(
 #'
 #' @export
 validate.simul_pars <- function(x, ...) {
-
     expected_names <- c(
-        "mu", "sigma", "n", "prob_ice1", "or_outcome_ice1",
-        "prob_post_ice1_dropout", "prob_ice2", "prob_miss"
+        "mu",
+        "sigma",
+        "n",
+        "prob_ice1",
+        "or_outcome_ice1",
+        "prob_post_ice1_dropout",
+        "prob_ice2",
+        "prob_miss"
     )
 
     assert_that(
@@ -219,8 +225,12 @@ validate.simul_pars <- function(x, ...) {
 #' and the intermittent missing values.
 #'
 #' @export
-simulate_data <- function(pars_c, pars_t, post_ice1_traj, strategies = getStrategies()) {
-
+simulate_data <- function(
+    pars_c,
+    pars_t,
+    post_ice1_traj,
+    strategies = getStrategies()
+) {
     assert_that(
         has_class(pars_c, "simul_pars"),
         has_class(pars_t, "simul_pars"),
@@ -289,18 +299,30 @@ simulate_data <- function(pars_c, pars_t, post_ice1_traj, strategies = getStrate
 #' @inherit simulate_data return
 #'
 #' @seealso [simulate_data()].
-generate_data_single <- function(pars_group, strategy_fun = NULL, distr_pars_ref = NULL) {
-
+generate_data_single <- function(
+    pars_group,
+    strategy_fun = NULL,
+    distr_pars_ref = NULL
+) {
     n_visits <- length(pars_group$mu)
 
     data <- data.frame(
-        id = as.factor(rep(paste0("id_", seq.int(pars_group$n)), each = n_visits)),
+        id = as.factor(rep(
+            paste0("id_", seq.int(pars_group$n)),
+            each = n_visits
+        )),
         visit = as.factor(rep(seq.int(n_visits) - 1, pars_group$n)),
         group = as.factor(rep("g", pars_group$n)),
         outcome_bl = NA,
-        outcome_noICE = c(replicate(pars_group$n, sample_mvnorm(pars_group$mu, pars_group$sigma)))
+        outcome_noICE = c(replicate(
+            pars_group$n,
+            sample_mvnorm(pars_group$mu, pars_group$sigma)
+        ))
     )
-    data$outcome_bl <- rep(data$outcome_noICE[data$visit == "0"], each = n_visits)
+    data$outcome_bl <- rep(
+        data$outcome_noICE[data$visit == "0"],
+        each = n_visits
+    )
 
     data$id <- factor(data$id, levels = unique(data$id))
 
@@ -358,7 +380,10 @@ generate_data_single <- function(pars_group, strategy_fun = NULL, distr_pars_ref
 
     if (!is.null(strategy_fun)) {
         data$outcome <- adjust_trajectories(
-            distr_pars_group = list(mu = pars_group$mu, sigma = pars_group$sigma),
+            distr_pars_group = list(
+                mu = pars_group$mu,
+                sigma = pars_group$sigma
+            ),
             outcome = data$outcome_noICE,
             ids = data$id,
             ind_ice = data$ind_ice1,
@@ -371,7 +396,11 @@ generate_data_single <- function(pars_group, strategy_fun = NULL, distr_pars_ref
 
     data$outcome[data$dropout_ice1 == 1 | data$ind_ice2 == 1] <- NA
 
-    rand_miss <- rbinom(n = pars_group$n * (n_visits - 1), size = 1, prob = pars_group$prob_miss)
+    rand_miss <- rbinom(
+        n = pars_group$n * (n_visits - 1),
+        size = 1,
+        prob = pars_group$prob_miss
+    )
     data$outcome[data$visit != "0"][rand_miss == 1] <- NA
 
     return(data)
@@ -408,8 +437,14 @@ generate_data_single <- function(pars_group, strategy_fun = NULL, distr_pars_ref
 #' by the ICE and `0` otherwise.
 #'
 #' @importFrom stats rbinom model.matrix binomial
-simulate_ice <- function(outcome, visits, ids, prob_ice, or_outcome_ice, baseline_mean) {
-
+simulate_ice <- function(
+    outcome,
+    visits,
+    ids,
+    prob_ice,
+    or_outcome_ice,
+    baseline_mean
+) {
     assert_that(
         is.factor(visits) && length(visits) == length(outcome),
         msg = "`visits` must be a factor of length equal to the length of `outcome`"
@@ -443,7 +478,8 @@ simulate_ice <- function(outcome, visits, ids, prob_ice, or_outcome_ice, baselin
     ind_ice <- rbinom(n = length(probs_ice), size = 1, prob = probs_ice)
     ind_ice <- unlist(
         tapply(
-            ind_ice, ids[no_lastvisit],
+            ind_ice,
+            ids[no_lastvisit],
             function(x) c(0, cummax(x))
         ),
         use.names = FALSE
@@ -476,8 +512,6 @@ simulate_ice <- function(outcome, visits, ids, prob_ice, or_outcome_ice, baselin
 #'
 #' @importFrom stats rbinom
 simulate_dropout <- function(prob_dropout, ids, subset = rep(1, length(ids))) {
-
-
     # baseline values cannot be missing
     subset <- unlist(tapply(subset, ids, function(x) {
         x[1] <- 0
@@ -485,7 +519,11 @@ simulate_dropout <- function(prob_dropout, ids, subset = rep(1, length(ids))) {
     }))
 
     dropout <- rep(0, length(ids))
-    dropout[subset == 1] <- rbinom(n = sum(subset), size = 1, prob = prob_dropout)
+    dropout[subset == 1] <- rbinom(
+        n = sum(subset),
+        size = 1,
+        prob = prob_dropout
+    )
     dropout <- unlist(
         tapply(
             dropout,
@@ -529,7 +567,6 @@ adjust_trajectories <- function(
     strategy_fun,
     distr_pars_ref = NULL
 ) {
-
     assert_that(
         all(!is.na(outcome)),
         msg = "`outcome` contains missing values"
@@ -584,7 +621,6 @@ adjust_trajectories_single <- function(
     strategy_fun,
     distr_pars_ref = NULL
 ) {
-
     is_post_ice <- is.na(outcome)
     if (all(!is_post_ice)) {
         return(outcome)
@@ -645,7 +681,6 @@ adjust_trajectories_single <- function(
 #'
 #' @export
 get_example_data <- function() {
-
     n <- 100
     time <- c(0, 2, 4, 6, 8, 10, 12)
 
@@ -662,7 +697,10 @@ get_example_data <- function() {
         c(6.25, 25.0)
     )
 
-    Sigma <- cbind(1, time / 12) %*% covRE %*% rbind(1, time / 12) + diag(sd_error^2, nrow = length(time))
+    Sigma <- cbind(1, time / 12) %*%
+        covRE %*%
+        rbind(1, time / 12) +
+        diag(sd_error^2, nrow = length(time))
 
     # Set probability of discontinuation
     probDisc_C <- 0.02

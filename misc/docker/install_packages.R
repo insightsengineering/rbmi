@@ -1,5 +1,3 @@
-
-
 # Determine which OS we are on
 # Rocker images are Ubuntu based so should be jammy / focal / etc
 OS_CODENAME <- system(
@@ -19,7 +17,12 @@ options(
     "HTTPUserAgent" = sprintf(
         "R/%s R (%s)",
         getRversion(),
-        paste(getRversion(), R.version["platform"], R.version["arch"], R.version["os"])
+        paste(
+            getRversion(),
+            R.version["platform"],
+            R.version["arch"],
+            R.version["os"]
+        )
     )
 )
 
@@ -35,17 +38,51 @@ if (!requireNamespace("desc", quietly = TRUE)) {
 pkgs <- desc::desc("DESCRIPTION")$get_deps()$package |> unique()
 
 # Add on additional packages that might be needed in the future
-pkgs <- c(pkgs, "tidyverse", "devtools", "jinjar", "tidymodels", "languageserver", "fs", "assertthat")
+pkgs <- c(
+    pkgs,
+    "tidyverse",
+    "devtools",
+    "jinjar",
+    "tidymodels",
+    "languageserver",
+    "fs",
+    "assertthat"
+)
 
 
 # R will error if you try to update the base packages so remove them
 # if they are in any of the imports / suggests / depends list
 base_pkgs <- c(
-    "KernSmooth", "class", "foreign", "methods", "rpart", "survival",
-    "MASS", "cluster", "grDevices", "mgcv", "spatial", "tcltk",
-    "Matrix", "codetools", "graphics", "nlme", "splines", "tools",
-    "base", "compiler", "grid", "nnet", "stats", "translations",
-    "boot", "datasets", "lattice", "parallel", "stats4", "utils",
+    "KernSmooth",
+    "class",
+    "foreign",
+    "methods",
+    "rpart",
+    "survival",
+    "MASS",
+    "cluster",
+    "grDevices",
+    "mgcv",
+    "spatial",
+    "tcltk",
+    "Matrix",
+    "codetools",
+    "graphics",
+    "nlme",
+    "splines",
+    "tools",
+    "base",
+    "compiler",
+    "grid",
+    "nnet",
+    "stats",
+    "translations",
+    "boot",
+    "datasets",
+    "lattice",
+    "parallel",
+    "stats4",
+    "utils",
     "R"
 )
 pkgs <- pkgs[!pkgs %in% base_pkgs]

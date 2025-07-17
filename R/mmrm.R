@@ -1,6 +1,3 @@
-
-
-
 #' Construct random effects formula
 #'
 #' Constructs a character representation of the random effects formula
@@ -23,7 +20,17 @@
 #' `"ad"`, `"adh"`, `"ar1"`, `"ar1h"`, `"cs"`, `"csh"`, `"toep"`, or `"toeph"`)
 #' @param cov_by_group Boolean - Whenever or not to use separate covariances per each group level
 random_effects_expr <- function(
-    cov_struct = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
+    cov_struct = c(
+        "us",
+        "ad",
+        "adh",
+        "ar1",
+        "ar1h",
+        "cs",
+        "csh",
+        "toep",
+        "toeph"
+    ),
     cov_by_group = FALSE
 ) {
     match.arg(cov_struct)
@@ -47,12 +54,10 @@ random_effects_expr <- function(
 #' - If provided will also insert the group variable into the `data.frame` named as `group`
 #'
 #' @inheritParams fit_mmrm
-as_mmrm_df <- function(designmat,
-                       outcome,
-                       visit,
-                       subjid,
-                       group = NULL) {
-    if (length(group) == 0) group <- NULL
+as_mmrm_df <- function(designmat, outcome, visit, subjid, group = NULL) {
+    if (length(group) == 0) {
+        group <- NULL
+    }
 
     dmat <- as.data.frame(designmat)
     colnames(dmat) <- paste0("V", seq_len(ncol(dmat)))
@@ -97,8 +102,12 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
     g_names <- grep("^group$", dfnames, value = TRUE)
     v_names <- grep("^V", dfnames, value = TRUE)
 
-    assert_that(all(dfnames %in% c("outcome", "visit", "subjid", g_names, v_names)))
-    assert_that(all(c("outcome", "visit", "subjid", g_names, v_names) %in% dfnames))
+    assert_that(all(
+        dfnames %in% c("outcome", "visit", "subjid", g_names, v_names)
+    ))
+    assert_that(all(
+        c("outcome", "visit", "subjid", g_names, v_names) %in% dfnames
+    ))
 
     # random effects for covariance structure
     expr_randeff <- random_effects_expr(
@@ -108,7 +117,10 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
 
     # paste and create formula object
     formula <- as.formula(
-        sprintf("outcome ~ %s - 1", paste0(c(v_names, expr_randeff), collapse = " + "))
+        sprintf(
+            "outcome ~ %s - 1",
+            paste0(c(v_names, expr_randeff), collapse = " + ")
+        )
     )
 
     return(formula)
@@ -145,8 +157,6 @@ extract_params <- function(fit) {
 }
 
 
-
-
 #' Fit a MMRM model
 #'
 #' @description
@@ -178,7 +188,17 @@ fit_mmrm <- function(
     subjid,
     visit,
     group,
-    cov_struct = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
+    cov_struct = c(
+        "us",
+        "ad",
+        "adh",
+        "ar1",
+        "ar1h",
+        "cs",
+        "csh",
+        "toep",
+        "toeph"
+    ),
     REML = TRUE,
     same_cov = TRUE
 ) {
@@ -225,8 +245,6 @@ fit_mmrm <- function(
 }
 
 
-
-
 #' Evaluate a call to mmrm
 #'
 #' This is a utility function that attempts to evaluate a call to mmrm
@@ -251,7 +269,6 @@ fit_mmrm <- function(
 #' @seealso [record()]
 #'
 eval_mmrm <- function(expr) {
-
     default <- list(failed = TRUE)
 
     fit_record <- record(expr)

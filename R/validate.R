@@ -1,4 +1,3 @@
-
 #' Generic validation method
 #'
 #' This function is used to perform assertions that an object

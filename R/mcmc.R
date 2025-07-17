@@ -1,4 +1,3 @@
-
 #' Fit the base imputation model using a Bayesian approach
 #'
 #' @description
@@ -77,8 +76,8 @@ fit_mcmc <- function(
         visit = visit,
         outcome = outcome,
         group = ife(
-            isTRUE(method$same_cov), 
-            rep(1, length(group)), 
+            isTRUE(method$same_cov),
+            rep(1, length(group)),
             group
         )
     )
@@ -96,7 +95,7 @@ fit_mcmc <- function(
         stan_data = stan_data,
         mmrm_initial = mmrm_initial
     )
-    
+
     sampling_args <- c(
         list(
             object = get_stan_model(),
@@ -123,7 +122,9 @@ fit_mcmc <- function(
     # 1) the warning is not in ignorable_warnings
     warnings <- stan_fit$warnings
     warnings_not_allowed <- warnings[!warnings %in% ignorable_warnings]
-    for (i in warnings_not_allowed) warning(warnings_not_allowed)
+    for (i in warnings_not_allowed) {
+        warning(warnings_not_allowed)
+    }
 
     fit <- stan_fit$results
     check_mcmc(fit, method$n_samples)
@@ -137,8 +138,6 @@ fit_mcmc <- function(
 
     return(ret_obj)
 }
-
-
 
 
 #' Transform array into list of arrays
@@ -214,7 +213,7 @@ split_dim <- function(a, n) {
 #' and then convert the arrays into lists.
 #'
 #' @param stan_fit A `stanfit` object.
-#' 
+#'
 #' @param n_samples Number of MCMC draws.
 #'
 #' @return
@@ -259,7 +258,9 @@ extract_draws <- function(stan_fit, n_samples) {
 #' A named vector containing the ESS for each parameter of the model.
 #'
 get_ESS <- function(stan_fit) {
-    return(rstan::summary(stan_fit, pars = c("beta", "Sigma"))$summary[, "n_eff"])
+    return(rstan::summary(stan_fit, pars = c("beta", "Sigma"))$summary[,
+        "n_eff"
+    ])
 }
 
 
@@ -282,7 +283,6 @@ get_ESS <- function(stan_fit) {
 #' @inherit check_mcmc return
 #'
 check_ESS <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
-
     ESS <- get_ESS(stan_fit)
 
     n_low_ESS <- sum((ESS / n_draws) < threshold_lowESS)
@@ -319,7 +319,6 @@ check_ESS <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
 #' @inherit check_mcmc return
 #'
 check_hmc_diagn <- function(stan_fit) {
-
     if (
         any(rstan::get_divergent_iterations(stan_fit)) || # draws "out of the distribution"
             isTRUE(rstan::get_bfmi(stan_fit) < 0.2) || # exploring well the target distribution
@@ -350,7 +349,6 @@ check_hmc_diagn <- function(stan_fit) {
 #' A warning message in case of detected problems.
 #'
 check_mcmc <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
-
     check_ESS(
         stan_fit = stan_fit,
         n_draws = n_draws,
@@ -361,7 +359,6 @@ check_mcmc <- function(stan_fit, n_draws, threshold_lowESS = 0.4) {
 
     return(invisible(NULL))
 }
-
 
 
 #' QR decomposition
@@ -384,7 +381,6 @@ QR_decomp <- function(mat) {
 
     return(ret_obj)
 }
-
 
 
 #' Prepare input data to run the Stan model
@@ -420,7 +416,6 @@ QR_decomp <- function(mat) {
 #' - Q - design matrix (after QR decomposition)
 #' - R - R matrix from the QR decomposition of the design matrix
 prepare_stan_data <- function(ddat, subjid, visit, outcome, group) {
-
     assert_that(
         is.factor(group) | is.numeric(group),
         is.factor(visit) | is.numeric(visit),
@@ -517,7 +512,11 @@ get_pattern_groups_unique <- function(patterns) {
 #' @details
 #' - The column `is_avail` must be a character or numeric `0` or `1`
 get_pattern_groups <- function(ddat) {
-    ddat <- sort_by(ddat, c("subjid", "visit"))[, c("subjid", "group", "is_avail")]
+    ddat <- sort_by(ddat, c("subjid", "visit"))[, c(
+        "subjid",
+        "group",
+        "is_avail"
+    )]
 
     pt_pattern <- tapply(ddat$is_avail, ddat$subjid, paste0, collapse = "")
     dat_pattern <- data.frame(
@@ -554,7 +553,6 @@ get_pattern_groups <- function(ddat) {
 #' @param x a character vector whose values are all either "0" or "1". All elements of
 #' the vector must be the same length
 as_indices <- function(x) {
-
     assert_that(
         length(unique(nchar(x))) == 1,
         msg = "all values of x must be the same length"
@@ -631,7 +629,11 @@ validate.stan_data <- function(x, ...) {
         length(x$pat_G) == length(x$pat_sigma_index),
         length(unique(lapply(x$pat_sigma_index, length))) == 1,
         length(x$pat_sigma_index[[1]]) == x$n_visit,
-        all(vapply(x$pat_sigma_index, function(z) all(z %in% c(seq_len(x$n_visit), 999)), logical(1))),
+        all(vapply(
+            x$pat_sigma_index,
+            function(z) all(z %in% c(seq_len(x$n_visit), 999)),
+            logical(1)
+        )),
         msg = "Invalid Stan Data Object"
     )
 }

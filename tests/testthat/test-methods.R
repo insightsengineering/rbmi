@@ -1,9 +1,4 @@
-
-
-
-
 test_that("methods", {
-
     expect_error(
         method_condmean(type = "bootstrap"),
         regexp = "n_samples must be numeric"

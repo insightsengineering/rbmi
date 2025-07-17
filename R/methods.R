@@ -15,7 +15,7 @@
 #' @param n_samples a numeric that determines how many imputed datasets are generated.
 #' In the case of `method_condmean(type = "jackknife")` this argument
 #' must be set to `NULL`. See details.
-#' 
+#'
 #' @param control a list which specifies further lower level details of the computations.
 #' Currently only used by `method_bayes()`, please see [control_bayes()] for details and
 #' default settings.
@@ -121,7 +121,17 @@ method_bayes <- function(
 #' @rdname method
 #' @export
 method_approxbayes <- function(
-    covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
+    covariance = c(
+        "us",
+        "ad",
+        "adh",
+        "ar1",
+        "ar1h",
+        "cs",
+        "csh",
+        "toep",
+        "toeph"
+    ),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
@@ -143,7 +153,17 @@ method_approxbayes <- function(
 #' @rdname method
 #' @export
 method_condmean <- function(
-    covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
+    covariance = c(
+        "us",
+        "ad",
+        "adh",
+        "ar1",
+        "ar1h",
+        "cs",
+        "csh",
+        "toep",
+        "toeph"
+    ),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,
@@ -186,7 +206,17 @@ method_condmean <- function(
 #' @rdname method
 #' @export
 method_bmlmi <- function(
-    covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh", "toep", "toeph"),
+    covariance = c(
+        "us",
+        "ad",
+        "adh",
+        "ar1",
+        "ar1h",
+        "cs",
+        "csh",
+        "toep",
+        "toeph"
+    ),
     threshold = 0.01,
     same_cov = TRUE,
     REML = TRUE,

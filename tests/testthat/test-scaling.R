@@ -3,7 +3,6 @@ suppressPackageStartupMessages({
 })
 
 test_that("scaler", {
-
     set.seed(101)
     mysig <- as_vcov(
         sd = c(1, 3, 5),
@@ -22,7 +21,7 @@ test_that("scaler", {
     sdat <- scaler$scale(mod_dat_2)
 
     mod_original <- lm(data = dat_2, outcome ~ age + group + sex + visit)
-    mod_scaled <- lm(outcome ~ .  - 1, data = sdat)
+    mod_scaled <- lm(outcome ~ . - 1, data = sdat)
 
     expect_equal(
         coef(mod_original) %>% strip_names(),
@@ -38,9 +37,7 @@ test_that("scaler", {
         scaler$unscale_sigma(summary(mod_scaled)$sigma^2) %>% strip_names()
     )
 
-
     ######## Multivariate via GLS
-
 
     mod_dat_2 <- as_model_df(dat_2, outcome ~ age + group + sex + visit)
     sdat <- scaler$scale(mod_dat_2)
@@ -77,6 +74,8 @@ test_that("scaler", {
 
     expect_equal(
         nlme::getVarCov(mod_original) %>% strip_names() %>% trunctate(2),
-        scaler$unscale_sigma(nlme::getVarCov(mod_scaled)) %>% strip_names() %>% trunctate(2)
+        scaler$unscale_sigma(nlme::getVarCov(mod_scaled)) %>%
+            strip_names() %>%
+            trunctate(2)
     )
 })

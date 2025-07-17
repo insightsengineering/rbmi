@@ -3,7 +3,6 @@
 # Has to be specified in both the ".asis" file as well as the ".Rmd" file.
 # This is because pkgdown only supports ".Rmd" https://github.com/r-lib/pkgdown/issues/781
 
-
 devtools::install(dependencies = FALSE)
 
 
@@ -42,4 +41,3 @@ rmarkdown::render(
     output_dir = "./vignettes/",
     output_file = "retrieved_dropout.html"
 )
-
