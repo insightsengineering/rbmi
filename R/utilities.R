@@ -598,6 +598,133 @@ clear_model_cache <- function(keep, cache_dir = getOption("rbmi.cache_dir")) {
     unlink(old_model_files)
 }
 
+#' List of Stan Blocks
+#'
+#' @description
+#' A list with 1 element per standard Stan program blocks.
+#' This object is mostly used internally as a reference for
+#' what blocks are parsed from a covariance / prior Stan definition file.
+#'
+#' @export
+STAN_BLOCKS <- list(
+    functions = "functions",
+    data = "data",
+    parameters = "parameters",
+    transformed_parameters = "transformed parameters",
+    model = "model"
+)
+
+#' Conversion of Character Vector into Stan Code Block List
+#'
+#' @param x the single Stan code vector.
+#' @param stan_blocks reference list of stan blocks.
+#'
+#' @return A list with the Stan code blocks.
+#'
+#' @author Craig Gower-Page (from `jmpost` R package)
+#' @details
+#' Function only works if code is in format
+#' ```
+#' data {
+#'     <code>
+#' }
+#' model {
+#'     <code>
+#' }
+#' ```
+#' That is to say we do not support code in inline format i.e.
+#' ```
+#' data { <code> }
+#' model { <code> }
+#' ```
+#'
+#' @keywords internal
+as_stan_fragments <- function(x, stan_blocks = STAN_BLOCKS) {
+    code <- unlist(stringr::str_split(x, "\n"))
+
+    errmsg <- paste(
+        "There were problems parsing the `%s` block.",
+        "Please consult the `Formatting Stan Files` section of the",
+        "`Extending jmpost` vignette"
+    )
+
+    # Check to see if any block openings exist that have code on the same line
+    # e.g.  `data { int i;}`. This is unsupported so we throw an error
+    for (block in stan_blocks) {
+        regex <- sprintf("^\\s*%s\\s*\\{\\s*[^\\s-]+", block)
+        if (any(grepl(regex, code, perl = TRUE))) {
+            stop(sprintf(errmsg, block))
+        }
+    }
+
+    # We first look to identify the opening of a block e.g.  `data {`
+    # We then regard all lines that follow as belonging to that block
+    # until we see another block being opened e.g. `model{`
+    results <- list()
+    target <- NULL
+    for (line in code) {
+        for (block in names(stan_blocks)) {
+            regex <- sprintf("^\\s*%s\\s*\\{\\s*$", stan_blocks[[block]])
+            if (stringr::str_detect(line, regex)) {
+                target <- block
+                line <- NULL
+                break
+            }
+        }
+        if (!is.null(target)) {
+            # This is memory inefficient but given the relatively small size of
+            # stan files its regarded as a acceptable simplification to ease the
+            # code burden
+            results[[target]] <- c(results[[target]], line)
+        }
+    }
+
+    # Loop over each block to remove trailing "}".
+    for (block in names(results)) {
+        block_length <- length(results[[block]])
+        # The following processing is only required if the block actually has content
+        if (block_length == 1 && results[[block]] == "") {
+            next
+        }
+        has_removed_char <- FALSE
+        # Walk backwards to find the closing `}` that corresponds to the `<block> {`
+        for (index in rev(seq_len(block_length))) {
+            line <- results[[block]][[index]]
+            # This code will exit the for loop as soon as it hits the closing `}`
+            # thus if we ever see a line that ends in text/numbers it means
+            # somethings gone wrong
+            if (stringr::str_detect(line, "[\\w\\d]+\\s*$")) {
+                stop(sprintf(errmsg, block))
+            }
+            if (stringr::str_detect(line, "\\}\\s*$")) {
+                new_line <- stringr::str_replace(line, "\\s*\\}\\s*$", "")
+                # If the line is now blank after removing the closing `}` then drop the line
+                keep_offset <- if (nchar(new_line) == 0) -1 else 0
+                # Only keep lines from the start of the block to the closing `}`
+                # this is to ensure we drop blank lines that were between the end
+                # of the block and the start of the next
+                keep_range <- seq_len(index + keep_offset)
+                results[[block]][[index]] <- new_line
+                results[[block]] <- results[[block]][keep_range]
+                has_removed_char <- TRUE
+                break
+            }
+        }
+        # If we haven't actually removed a closing `}` then something has gone wrong...
+        if (!has_removed_char) {
+            stop(sprintf(errmsg, block))
+        }
+    }
+
+    # Add any missing blocks back in
+    for (block in names(stan_blocks)) {
+        if (is.null(results[[block]])) {
+            results[[block]] <- ""
+        }
+    }
+    results
+}
+
 #' Get Compiled Stan Object
 #'
 #' Gets a compiled Stan object that can be used with `rstan::sampling()`,
