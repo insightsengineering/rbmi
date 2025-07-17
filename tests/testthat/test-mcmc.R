@@ -117,7 +117,7 @@ test_that("adjust_dimensions works with different covariance and scalar paramete
         same_cov = FALSE,
         param_list = list(1, 2)
     )
-    expected <- array(c(1, 2), dim = 1)
+    expected <- array(c(1, 2), dim = 2)
     expect_equal(result, expected)
 })
 

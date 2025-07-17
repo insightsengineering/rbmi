@@ -251,8 +251,10 @@
       Imputation Type: random
       Method:
           name: Bayes
+          covariance: us
           same_cov: TRUE
           n_samples: 50
+          prior_cov: default
       Controls:
           warmup: 200
           thin: 1

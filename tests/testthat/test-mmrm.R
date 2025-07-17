@@ -29,9 +29,9 @@ is.formula <- function(x) {
 
 expect_valid_fit_object <- function(fit, cov_struct, nv, same_cov) {
     expect_type(fit, "list")
-    expect_length(fit, 3)
+    expect_true(length(fit) >= 3)
 
-    expect_true(all(names(fit) %in% c("beta", "sigma", "failed")))
+    expect_true(all(names(fit) %in% c("beta", "sigma", "sd", "rho", "failed")))
 
     expect_vector(fit$beta)
     expect_length(fit$beta, 8)
@@ -472,7 +472,7 @@ test_that("fit_mmrm works with ar1 structure", {
     )
 
     # Same cov across groups.
-    mmrm_initial <- fit_mmrm(
+    result <- fit_mmrm(
         designmat = mat,
         outcome = dat$outcome,
         subjid = dat$id,
@@ -488,7 +488,7 @@ test_that("fit_mmrm works with ar1 structure", {
     expect_true(is.list(result$rho) && length(result$rho) == 2)
 
     # Separate cov per group.
-    mmrm_initial <- fit_mmrm(
+    result <- fit_mmrm(
         designmat = mat,
         outcome = dat$outcome,
         subjid = dat$id,
