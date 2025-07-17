@@ -725,6 +725,33 @@ as_stan_fragments <- function(x, stan_blocks = STAN_BLOCKS) {
     results
 }
 
+#' Find Stan File
+#'
+#' Finds a Stan file either in the local `inst/stan` directory or in the system package directory.
+#'
+#' @param file The name of the Stan file to find.
+#' @param subdir Optional subdirectory within `inst/stan` where the file might be located.
+#' @return The full path to the Stan file if found, otherwise an error is raised.
+#'
+#' @keywords internal
+find_stan_file <- function(file, subdir = "") {
+    assert_that(assertthat::is.string(file))
+    assert_that(assertthat::is.string(subdir))
+
+    local_file <- file.path("inst", "stan", subdir, file)
+    system_file <- system.file(
+        file.path("stan", subdir, file),
+        package = "rbmi"
+    )
+    if (file.exists(local_file)) {
+        local_file
+    } else if (file.exists(system_file)) {
+        system_file
+    } else {
+        stop(paste0("Unable to find ", file, "; Please report this as a bug"))
+    }
+}
+
 #' Get Compiled Stan Object
 #'
 #' Gets a compiled Stan object that can be used with `rstan::sampling()`,
@@ -758,16 +785,26 @@ get_stan_model <- function(covariance, prior_cov) {
     })
 
     ensure_rstan()
-    # Find the correct MMRM.stan template file.
-    local_file <- file.path("inst", "stan", "MMRM.stan")
-    system_file <- system.file(file.path("stan", "MMRM.stan"), package = "rbmi")
-    file_loc <- if (file.exists(local_file)) {
-        local_file
-    } else if (file.exists(system_file)) {
-        system_file
-    } else {
-        stop("Unable to find MMRM.stan; Please report this as a bug")
-    }
+
+    # Find the correct MMRM and covariance prior model Stan files.
+    file_loc_mmrm <- find_stan_file("MMRM.stan")
+    cov_prior_file <- paste0(covariance, "_", prior_cov, ".stan")
+    file_loc_cov_prior <- find_stan_file(
+        cov_prior_file,
+        subdir = "covariance_priors"
+    )
+
+    # Replace constants in the covariance prior file and parse it
+    # into a list of Stan code blocks.
+    cov_prior_template <- jinjar::parse_template(
+        fs::path(file_loc_cov_prior)
+    )
+    cov_prior_string <- jinjar::render(
+        .x = cov_prior_template,
+        machine_double_eps = .Machine$double.eps
+    )
+    cov_prior_blocks <- as_stan_fragments(cov_prior_string)
+    cov_prior_blocks <- lapply(cov_prior_blocks, paste, collapse = "\n")
 
     # Decide file location for the final Stan model file.
     cache_dir <- getOption("rbmi.cache_dir")
@@ -779,10 +816,7 @@ get_stan_model <- function(covariance, prior_cov) {
             "rbmi_MMRM_",
             session_hash,
             "_",
-            covariance,
-            "_",
-            prior_cov,
-            ".stan"
+            cov_prior_file
         )
     )
 
@@ -790,29 +824,29 @@ get_stan_model <- function(covariance, prior_cov) {
     # and save it to the cache directory.
     if (!file.exists(model_file)) {
         model_template <- jinjar::parse_template(
-            fs::path(file_loc),
+            fs::path(file_loc_mmrm),
             .config = jinjar::jinjar_config(
                 trim_blocks = TRUE,
                 lstrip_blocks = TRUE
             )
         )
+        model_data <- c(
+            cov_prior_blocks,
+            machine_double_eps = .Machine$double.eps
+        )
         model_string <- jinjar::render(
             .x = model_template,
-            covariance = covariance,
-            prior_cov = prior_cov,
-            machine_double_eps = .Machine$double.eps
+            !!!model_data
         )
         clear_model_cache(keep = session_hash)
         writeLines(model_string, model_file)
     }
 
-    model <- rstan::stan_model(
+    rstan::stan_model(
         file = model_file,
         auto_write = getOption("rbmi.enable_cache"),
-        model_name = "rbmi_mmrm"
+        model_name = paste0("rbmi_mmrm_", covariance, "_", prior_cov)
     )
-
-    return(model)
 }
 
 

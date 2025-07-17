@@ -11,7 +11,8 @@ parameters {
 
 transformed parameters {
     array[G] vector<lower={{ machine_double_eps }}>[n_visit] sds;
-
+    array[G] cov_matrix[n_visit] Sigma;
+    
     // Construct covariance matrix from Cholesky factors and variances.
     for(g in 1:G){
         sds[g] = sqrt(vars[g]);
