@@ -58,6 +58,10 @@ matrix will be fit for each group as determined by the \code{group} argument of
 In the case of \code{method_condmean(type = "jackknife")} this argument
 must be set to \code{NULL}. See details.}
 
+\item{prior_cov}{a character string that specifies the prior used for the covariance model
+parameters. Must be one of \code{"default"} (default) or \code{"lkj"} (for the unstructured covariance
+model). See the Statistical Specifications vignette for details.}
+
 \item{control}{a list which specifies further lower level details of the computations.
 Currently only used by \code{method_bayes()}, please see \code{\link[=control_bayes]{control_bayes()}} for details and
 default settings.}
@@ -112,8 +116,6 @@ argument. Currently supported structures include:
 }
 
 For full details please see \code{\link[mmrm:covariance_types]{mmrm::cov_types()}}.
-
-Note that at present Bayesian methods only support unstructured.
 
 In the case of \code{method_condmean(type = "bootstrap")}, \code{method_approxbayes()} and \code{method_bmlmi()} repeated
 bootstrap samples of the original dataset are taken with an MMRM fitted to each sample.

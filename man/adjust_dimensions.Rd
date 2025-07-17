@@ -6,6 +6,16 @@
 \usage{
 adjust_dimensions(same_cov, param_list)
 }
+\arguments{
+\item{same_cov}{A logical indicating whether the same covariance structure is used for all groups.
+If \code{TRUE}, the function will return the parameters only once.}
+
+\item{param_list}{A list of parameters, which can be matrices or numeric vectors. Note that this
+contains one element for each group, independent of \code{same_cov}.}
+}
+\value{
+The parameters adjusted to the appropriate dimensions for Stan.
+}
 \description{
 This function adjusts the dimensions of prior parameters based on whether
 the same covariance structure is used for all groups, and whether the parameters

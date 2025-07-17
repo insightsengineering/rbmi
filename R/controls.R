@@ -97,7 +97,7 @@ prepare_init_vals <- function(
         )
         init_vals$corr_chol <- lapply(
             mmrm_initial$sigma,
-            function(sigma) t(chol(cov2cor(sigma)))
+            function(sigma) t(chol(stats::cov2cor(sigma)))
         )
     }
     replicate(

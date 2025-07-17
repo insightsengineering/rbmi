@@ -47,7 +47,8 @@ Imports:
     R6,
     assertthat,
     jinjar,
-    fs
+    fs,
+    stringr
 Depends: 
     R (>= 3.4.0)
 License: Apache License (>= 2)

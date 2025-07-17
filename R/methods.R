@@ -16,6 +16,10 @@
 #' In the case of `method_condmean(type = "jackknife")` this argument
 #' must be set to `NULL`. See details.
 #'
+#' @param prior_cov a character string that specifies the prior used for the covariance model
+#' parameters. Must be one of `"default"` (default) or `"lkj"` (for the unstructured covariance
+#' model). See the Statistical Specifications vignette for details.
+#'
 #' @param control a list which specifies further lower level details of the computations.
 #' Currently only used by `method_bayes()`, please see [control_bayes()] for details and
 #' default settings.
@@ -70,8 +74,6 @@
 #' - Heterogeneous Toeplitz (`"toeph"`)
 #'
 #' For full details please see [`mmrm::cov_types()`].
-#'
-#' Note that at present Bayesian methods only support unstructured.
 #'
 #' In the case of `method_condmean(type = "bootstrap")`, `method_approxbayes()` and `method_bmlmi()` repeated
 #' bootstrap samples of the original dataset are taken with an MMRM fitted to each sample.
