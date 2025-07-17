@@ -24,11 +24,15 @@ runs:
       uses: actions/cache@v3
       with:
         path: local/*
-        key: ${{ hashFiles('.github/meta.txt') }}-${{ hashFiles('inst/stan/MMRM.stan') }}
+        key: ${{ hashFiles('.github/meta.txt') }}-${{ hashFiles('inst/stan/MMRM.stan') }}-${{ hashFiles('inst/stan/covariance_priors/*.stan') }}
 
     - name: Build if needed
       shell: bash
       env:
         RBMI_CACHE_DIR: local
       run: |
-        Rscript -e "pkgload::load_all(); get_stan_model()"
+        Rscript -e "pkgload::load_all();
+          get_stan_model('us', 'default');
+          get_stan_model('us', 'lkj');
+          get_stan_model('ar1', 'default');
+        "
