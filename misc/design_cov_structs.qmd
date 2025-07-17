@@ -75,16 +75,42 @@ Slight modifications are needed here because for structured covariance models we
 
 The actual extraction will be implemented here. Note that the conversion of `theta` parameters to covariance parameters could be moved into the `{mmrm}` package for the actual implementation, because it is of general interest. 
 
+
+### Covariance and prior code snippets
+
+In a separate directory `stan/covariance_prior`, we will have the following files:
+
+- `us_default.stan`
+- `us_lkj.stan`
+- `ar1_default.stan`
+- etc.
+
+Each of these contain the Stan code snippets for the respective covariance structure and prior combination:
+
+- `functions`: Potential functions that are needed for the covariance structure (e.g. for the `ar1` covariance structure we will need a function to calculate the covariance matrix from the `rho` and `sd` parameters).
+- `data`: What is the input data needed, that is the prior parameters.
+- `parameters`: Definition of the covariance model parameters
+- `transformed parameters`: mostly calculating Sigma from the covariance model parameters.
+- `model`: priors on the covariance model parameters.
+
+### `as_stan_fragments()` 
+
+This function is adapted from the `jmpost` package. Since this package is also copyright by Roche, like `rbmi`, and Craig is the author of this functions, this is not a problem. Nevertheless it is acknowledged in an `@author` roxygen field.
+
+It can parse the Stan code snippets from the `stan/covariance_prior` directory and return a list of Stan code fragments.
+These are then each concatenated to single strings, such that they can be used to parametrize the `MMRM.stan` file.
+
+### `MMRM.stan`
+
+This is now a templated Stan model file, which includes `jinjar` placeholders for the relevant code snippets based on the `covariance` and `prior_cov` arguments.
+
+We note that the rendered Stan model file will not have perfect indentation, but this is not a problem for the Stan compiler, and it is more important that the code is readable in the source file.
+
 ### `get_stan_model`
 
 Now this takes the `covariance` and `prior_cov` arguments and returns the appropriate Stan model code based on these arguments.
 
-Currently, this function just finds the fixed Stan model file `stan/MMRM.stan`, copies it to the cache directory, and then creates the `rstan` model object from it and returns it.
-
-Now, we can work with building blocks of the Stan code, which are then combined using the `jinjar` templating mechanism, similar to how it is done in the `jmpost` package using the `decorated_render` function (which is wrapping the `jinjar` function).
-We will keep things simpler here, because we don't need the full flexibility to provide user-defined Stan code snippets, but rather just a few predefined options for the covariance structures and priors.
-
-Specifically, it seems like we could still have a single `MMRM.stan` file, which is templated, see e.g. [`lm-gsf/model.stan`](https://github.com/Genentech/jmpost/blob/main/inst/stan/lm-gsf/model.stan) for comparison. Since with `jinjar` we can also perform string comparisons (see [here](https://davidchall.github.io/jinjar/articles/template-syntax.html#comparisons)) we can use this to include the relevant code snippets for the covariance structures and priors based on the `covariance` and `prior_cov` string arguments.
+This function locates both the covariance/prior Stan fragment file as well as the master template file `MMRM.stan`. These are then combined correctly. It copies the resulting full Stan code file to the cache directory, and then creates the `rstan` model object from it and returns it.
 
 ### `get_session_hash`
 
@@ -93,14 +119,6 @@ This function can stay as it is currently, because the covariance and prior stri
 ### `clear_model_cache`
 
 This function is updated with a `keep` argument, such that files matching this string in their name will not be deleted from the cache directory. This allows different Stan files for different covariance structures and priors to be cached separately in the same session, which is identified by the hash string and pass to `keep`. Then only files from old sessions will be deleted, but no files from the current session.
-
-### `MMRM.stan`
-
-This is now a templated Stan model file, which includes the relevant code snippets for the covariance structures and priors based on the `covariance` and `prior_cov` arguments.
-
-Relevant function definitions are only included if needed to keep the Stan model compilation time minimal.
-
-We note that the rendered Stan model file will not have perfect indentation. However, we prefer to keep the template file readable, with indentations for the `jinjar` control flow. 
 
 ## Prototypes
 
