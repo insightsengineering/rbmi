@@ -70,10 +70,13 @@ extract_test_fit <- function(mod) {
 
     converged <- attr(mod, "converged")
 
-    output_expected <- list(
-        beta = beta,
-        sigma = sigma,
-        failed = !converged
+    output_expected <- structure(
+        list(
+            beta = beta,
+            sigma = sigma,
+            failed = !converged
+        ),
+        cov_param_names = "sigma"
     )
     return(output_expected)
 }

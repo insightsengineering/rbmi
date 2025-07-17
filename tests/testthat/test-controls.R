@@ -52,7 +52,9 @@ test_that("complete_control_bayes works as expected", {
         n_samples = 1000,
         quiet = TRUE,
         stan_data = stan_data,
-        mmrm_initial = mmrm_initial
+        mmrm_initial = mmrm_initial,
+        covariance = "us",
+        prior_cov = "default"
     )
     expect_true(is.list(result))
     expect_true(

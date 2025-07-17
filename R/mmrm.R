@@ -172,7 +172,7 @@ extract_params <- function(fit) {
 
     if (cov_type == "ar1") {
         lapply(theta_est, function(theta) {
-            assert_that(identical(length(theta), 2))
+            assert_that(identical(length(theta), 2L))
         })
         params$sd <- lapply(theta_est, function(theta) exp(theta[1]))
         params$rho <- lapply(theta_est, function(theta) theta_to_cor(theta[2]))
