@@ -36,7 +36,8 @@ Suggests:
     purrr,
     ggplot2,
     rstan (>= 2.26.0),
-    R.rsp
+    R.rsp,
+    withr
 Config/testthat/edition: 3
 Imports:
     mmrm,

@@ -234,7 +234,7 @@ test_that("Advanced Usage - Bayesian with AR1 covariance model", {
         data_ice = dat_ice,
         vars = vars,
         method = method_bayes(
-            n_samples = nsamp,
+            n_samples = nsamp * 2,
             covariance = "ar1",
             control = control_bayes(init = "mmrm")
         ),
