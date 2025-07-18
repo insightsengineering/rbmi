@@ -1,4 +1,3 @@
-
 #' @description
 #'
 #' The `rbmi` package is used to perform reference based multiple imputation. The package

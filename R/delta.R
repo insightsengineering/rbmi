@@ -1,5 +1,3 @@
-
-
 #' Create a delta `data.frame` template
 #'
 #' @description
@@ -136,12 +134,14 @@
 delta_template <- function(
     imputations,
     delta = NULL,
-    dlag =  NULL,
+    dlag = NULL,
     missing_only = TRUE
 ) {
     dat <- get_delta_template(imputations)
 
-    if (is.null(delta)) return(dat)
+    if (is.null(delta)) {
+        return(dat)
+    }
 
     ld <- imputations$data
 
@@ -183,7 +183,6 @@ delta_template <- function(
 
     return(dat)
 }
-
 
 
 #' Get delta utility variables
@@ -251,7 +250,6 @@ get_delta_template <- function(imputations) {
 #' @details
 #' See [delta_template()] for full details on how this calculation is performed.
 d_lagscale <- function(delta, dlag, is_post_ice) {
-
     assert_that(
         is.numeric(dlag),
         is.numeric(delta),
@@ -277,7 +275,6 @@ d_lagscale <- function(delta, dlag, is_post_ice) {
 }
 
 
-
 #' Applies delta adjustment
 #'
 #' @description
@@ -290,7 +287,6 @@ d_lagscale <- function(delta, dlag, is_post_ice) {
 #' to merge the 2 data.frames together by.
 #' @param outcome character, name of the outcome variable in `data`.
 apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL) {
-
     assert_that(
         is.character(group),
         length(group) >= 1,
@@ -347,7 +343,7 @@ apply_delta <- function(data, delta = NULL, group = NULL, outcome = NULL) {
 
     # Restore sort order and remove variable
     data2 <- data2[order(data2[[sort_var]]), ]
-    data[[sort_var]] <- NULL  # As we rely on the names of data later to reduce data2
+    data[[sort_var]] <- NULL # As we rely on the names of data later to reduce data2
 
     data2[is.na(data2[["delta"]]), "delta"] <- 0
     data2[[outcome]] <- data2[[outcome]] + data2[["delta"]]

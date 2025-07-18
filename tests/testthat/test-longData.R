@@ -1,4 +1,3 @@
-
 suppressPackageStartupMessages({
     library(dplyr)
     library(testthat)
@@ -7,7 +6,6 @@ suppressPackageStartupMessages({
 
 
 ld_2_list <- function(ld) {
-
     vars <- c(
         "visits",
         "is_mar",
@@ -35,7 +33,6 @@ ld_2_list <- function(ld) {
 }
 
 
-
 get_ld <- function() {
     n <- 4
     nv <- 3
@@ -43,8 +40,14 @@ get_ld <- function() {
     covars <- tibble(
         subjid = 1:n,
         age = rnorm(n),
-        group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),
-        sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F")),
+        group = factor(
+            sample(c("A", "B"), size = n, replace = TRUE),
+            levels = c("A", "B")
+        ),
+        sex = factor(
+            sample(c("M", "F"), size = n, replace = TRUE),
+            levels = c("M", "F")
+        ),
         strata = c("A", "A", "A", "B")
     )
 
@@ -52,19 +55,23 @@ get_ld <- function() {
         subjid = rep.int(1:n, nv)
     ) %>%
         left_join(covars, by = "subjid") %>%
-        mutate(outcome = rnorm(
-            n(),
-            age * 3 + (as.numeric(sex) - 1) * 3 + (as.numeric(group) - 1) * 4,
-            sd = 3
-        )) %>%
+        mutate(
+            outcome = rnorm(
+                n(),
+                age *
+                    3 +
+                    (as.numeric(sex) - 1) * 3 +
+                    (as.numeric(group) - 1) * 4,
+                sd = 3
+            )
+        ) %>%
         arrange(subjid) %>%
         group_by(subjid) %>%
-        mutate(visit = factor(paste0("Visit ", seq_len(n()))))  %>%
+        mutate(visit = factor(paste0("Visit ", seq_len(n())))) %>%
         ungroup() %>%
         mutate(subjid = factor(subjid))
 
     dat[c(1, 2, 3, 4, 6, 7), "outcome"] <- NA
-
 
     vars <- set_vars(
         outcome = "outcome",
@@ -92,10 +99,15 @@ get_data <- function(n) {
 
     dat <- get_sim_data(n, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         select(-is_miss) %>%
         mutate(group = factor(group, labels = c("Placebo", "TRT")))
-
 
     dat_ice <- dat %>%
         group_by(id) %>%
@@ -105,7 +117,6 @@ get_data <- function(n) {
         ungroup() %>%
         select(id, visit) %>%
         mutate(strategy = "JR")
-
 
     vars <- set_vars(
         outcome = "outcome",
@@ -119,9 +130,7 @@ get_data <- function(n) {
 }
 
 
-
 test_that("longData - Basics", {
-
     set.seed(123)
     dobj <- get_ld()
     ld <- dobj$ld
@@ -132,16 +141,24 @@ test_that("longData - Basics", {
     expect_equal(names(ld$is_missing), subject_names)
     expect_equal(ld$ids, subject_names)
 
-    expect_equal(ld$visits,  levels(dat$visit))
+    expect_equal(ld$visits, levels(dat$visit))
     expect_length(ld$strata, length(unique(dat$subjid)))
 
     expect_equal(
         unlist(ld$is_missing, use.names = FALSE),
         c(
-            TRUE, TRUE, TRUE,
-            TRUE, FALSE, TRUE,
-            TRUE, FALSE, FALSE,
-            FALSE, FALSE, FALSE
+            TRUE,
+            TRUE,
+            TRUE,
+            TRUE,
+            FALSE,
+            TRUE,
+            TRUE,
+            FALSE,
+            FALSE,
+            FALSE,
+            FALSE,
+            FALSE
         )
     )
 
@@ -149,13 +166,10 @@ test_that("longData - Basics", {
         unlist(ld$is_mar, use.names = FALSE),
         rep(TRUE, dobj$n * dobj$nv)
     )
-
 })
 
 
-
 test_that("longData - Sampling", {
-
     set.seed(145)
     dobj <- get_ld()
     ld <- dobj$ld
@@ -175,7 +189,9 @@ test_that("longData - Sampling", {
     expect_true(all(samps[4, ] == "4"))
 
     ### Looking to see that re-sampling is working i.e. samples contain duplicates
-    expect_true(any(apply(samps, 2, function(x) length(unique(x))) %in% c(1, 2)))
+    expect_true(any(
+        apply(samps, 2, function(x) length(unique(x))) %in% c(1, 2)
+    ))
 
     expect_error(
         ld$get_data("-1231"),
@@ -194,8 +210,6 @@ test_that("longData - Sampling", {
         select(y, -subjid) %>% as.data.frame()
     )
     expect_true(all(x$subjid != y$subjid))
-
-
 
     imputes <- imputation_df(
         imputation_single(id = "1", values = c(1, 2, 3)),
@@ -223,8 +237,6 @@ test_that("longData - Sampling", {
     )
     expect_true(all(x$subjid != y$subjid))
 
-
-
     x <- ld$get_data(c("1", "1", "1", "2"), na.rm = TRUE)
 
     pt2_val <- dat %>% filter(subjid == "2") %>% pull(outcome)
@@ -240,9 +252,6 @@ test_that("longData - Sampling", {
         select(y, -subjid) %>% as.data.frame()
     )
     expect_true(all(x$subjid != y$subjid))
-
-
-
 
     ilist <- imputation_df(
         imputation_single(id = "1", values = c(1, 2)),
@@ -264,7 +273,6 @@ test_that("longData - Sampling", {
         "Number of missing values doesn't equal"
     )
 })
-
 
 
 test_that("Stratification works as expected", {
@@ -302,9 +310,7 @@ test_that("Stratification works as expected", {
 })
 
 
-
 test_that("Group is a stratification variable by default", {
-
     set.seed(5176)
     dobj <- get_data(60)
     dat <- dobj$dat
@@ -328,8 +334,6 @@ test_that("Group is a stratification variable by default", {
         expect_equal(real, sampled)
     }
 
-
-
     vars <- set_vars(
         subjid = "id",
         visit = "visit",
@@ -349,9 +353,7 @@ test_that("Group is a stratification variable by default", {
 })
 
 
-
 test_that("Strategies", {
-
     set.seed(178)
     dobj <- get_ld()
     ld <- dobj$ld
@@ -368,10 +370,18 @@ test_that("Strategies", {
     )
 
     dat_ice <- tribble(
-        ~visit, ~subjid, ~strategy,
-        "Visit 1", "1",  "ABC",
-        "Visit 2",  "2",  "MAR",
-        "Visit 3",  "3",  "XYZ"
+        ~visit,
+        ~subjid,
+        ~strategy,
+        "Visit 1",
+        "1",
+        "ABC",
+        "Visit 2",
+        "2",
+        "MAR",
+        "Visit 3",
+        "3",
+        "XYZ"
     )
 
     ld$set_strategies(dat_ice)
@@ -389,10 +399,18 @@ test_that("Strategies", {
     expect_equal(
         unlist(ld$is_mar, use.names = FALSE),
         c(
-            FALSE, FALSE, FALSE,
-            TRUE, TRUE, TRUE,
-            TRUE, TRUE, FALSE,
-            TRUE, TRUE, TRUE
+            FALSE,
+            FALSE,
+            FALSE,
+            TRUE,
+            TRUE,
+            TRUE,
+            TRUE,
+            TRUE,
+            FALSE,
+            TRUE,
+            TRUE,
+            TRUE
         )
     )
 
@@ -402,10 +420,14 @@ test_that("Strategies", {
     )
 
     dat_ice <- tribble(
-        ~subjid, ~strategy,
-        "1",  "ABC",
-        "2",  "MAR",
-        "3",  "ABC"
+        ~subjid,
+        ~strategy,
+        "1",
+        "ABC",
+        "2",
+        "MAR",
+        "3",
+        "ABC"
     )
     ld$update_strategies(dat_ice)
 
@@ -417,10 +439,18 @@ test_that("Strategies", {
     expect_equal(
         unlist(ld$is_mar, use.names = FALSE),
         c(
-            FALSE, FALSE, FALSE,
-            TRUE, TRUE, TRUE,
-            TRUE, TRUE, FALSE,
-            TRUE, TRUE, TRUE
+            FALSE,
+            FALSE,
+            FALSE,
+            TRUE,
+            TRUE,
+            TRUE,
+            TRUE,
+            TRUE,
+            FALSE,
+            TRUE,
+            TRUE,
+            TRUE
         )
     )
 
@@ -430,8 +460,12 @@ test_that("Strategies", {
     )
 
     dat_ice <- tribble(
-        ~visit, ~subjid, ~strategy,
-        "Visit 1", "2",  "ABC",
+        ~visit,
+        ~subjid,
+        ~strategy,
+        "Visit 1",
+        "2",
+        "ABC",
     )
     expect_error(
         ld$update_strategies(dat_ice),
@@ -439,8 +473,10 @@ test_that("Strategies", {
     )
 
     dat_ice <- tribble(
-        ~subjid, ~strategy,
-        "3",  "MAR",
+        ~subjid,
+        ~strategy,
+        "3",
+        "MAR",
     )
 
     expect_warning(
@@ -448,34 +484,44 @@ test_that("Strategies", {
         "from non-MAR to MAR"
     )
 
-
     # Ensure that only 1 warning is issued when converting non-MAR to MAR data
     dat_ice <- tribble(
-        ~visit, ~subjid, ~strategy,
-        "Visit 1", "1",  "ABC",
-        "Visit 1",  "2",  "ABC",
-        "Visit 3",  "3",  "XYZ"
+        ~visit,
+        ~subjid,
+        ~strategy,
+        "Visit 1",
+        "1",
+        "ABC",
+        "Visit 1",
+        "2",
+        "ABC",
+        "Visit 3",
+        "3",
+        "XYZ"
     )
 
     ld$set_strategies(dat_ice)
 
     upd_dat_ice <- tribble(
-        ~subjid, ~strategy,
-        "2",  "MAR",
-        "3",  "MAR",
+        ~subjid,
+        ~strategy,
+        "2",
+        "MAR",
+        "3",
+        "MAR",
     )
 
     recorded_result <- record(ld$update_strategies(upd_dat_ice))
     expect_length(recorded_result$warnings, 1)
     expect_length(recorded_result$errors, 0)
-    expect_true(grepl("Updating strategies from non-MAR to MAR", recorded_result$warnings))
+    expect_true(grepl(
+        "Updating strategies from non-MAR to MAR",
+        recorded_result$warnings
+    ))
 })
 
 
-
-
 test_that("strategies part 2", {
-
     # Here we check to see that using `update_strategies` only updates the strategy and not
     # the visits (or anything else for that matter)
 
@@ -484,35 +530,54 @@ test_that("strategies part 2", {
     ld <- dobj$ld
     dat <- dobj$dat
 
-
     dat_ice <- tribble(
-        ~visit, ~subjid, ~strategy,
-        "Visit 1", "1",  "ABC",
-        "Visit 2",  "2",  "MAR",
-        "Visit 3",  "3",  "XYZ"
+        ~visit,
+        ~subjid,
+        ~strategy,
+        "Visit 1",
+        "1",
+        "ABC",
+        "Visit 2",
+        "2",
+        "MAR",
+        "Visit 3",
+        "3",
+        "XYZ"
     )
 
     ld$set_strategies(dat_ice)
     pre_update_ld <- ld_2_list(ld)
 
-
     dat_ice <- tribble(
-        ~subjid, ~strategy, ~visit,
-        "1", "ABC", "Visit 2",
-        "2", "MAR", "Visit 7",
-        "3", "XYZ", "Visit 1"
+        ~subjid,
+        ~strategy,
+        ~visit,
+        "1",
+        "ABC",
+        "Visit 2",
+        "2",
+        "MAR",
+        "Visit 7",
+        "3",
+        "XYZ",
+        "Visit 1"
     )
     ld$update_strategies(dat_ice)
     expect_equal(ld_2_list(ld), pre_update_ld)
 
-
-
-
     dat_ice <- tribble(
-        ~subjid, ~strategy, ~visit,
-        "1", "LKJ", "Visit 2",
-        "2", "MAR", "Visit 7",
-        "3", "XYZ", "Visit 1"
+        ~subjid,
+        ~strategy,
+        ~visit,
+        "1",
+        "LKJ",
+        "Visit 2",
+        "2",
+        "MAR",
+        "Visit 7",
+        "3",
+        "XYZ",
+        "Visit 1"
     )
 
     ld$update_strategies(dat_ice)
@@ -532,7 +597,6 @@ test_that("strategies part 2", {
         c("LKJ", "MAR", "XYZ", "MAR")
     )
 
-
     #### Show that not setting an ICE doesn't affect the ice_visit_index
     dobj <- get_ld()
     ld <- dobj$ld
@@ -540,10 +604,18 @@ test_that("strategies part 2", {
     ld$set_strategies()
 
     dat_ice <- tribble(
-        ~subjid, ~strategy, ~visit,
-        "1", "LKJ", "Visit 2",
-        "2", "MAR", "Visit 7",
-        "3", "XYZ", "Visit 1"
+        ~subjid,
+        ~strategy,
+        ~visit,
+        "1",
+        "LKJ",
+        "Visit 2",
+        "2",
+        "MAR",
+        "Visit 7",
+        "3",
+        "XYZ",
+        "Visit 1"
     )
     ld$update_strategies(dat_ice)
 
@@ -555,11 +627,7 @@ test_that("strategies part 2", {
         unlist(ld$strategies, use.names = FALSE),
         c("LKJ", "MAR", "XYZ", "MAR")
     )
-
 })
-
-
-
 
 
 test_that("sample_ids", {
@@ -584,7 +652,9 @@ test_that("sample_ids", {
     )
 
     ### Looking to see that re-sampling is working i.e. samples contain duplicates
-    expect_true(any(apply(samps, 2, function(x) length(unique(x))) %in% c(1, 2)))
+    expect_true(any(
+        apply(samps, 2, function(x) length(unique(x))) %in% c(1, 2)
+    ))
 
     ### Assuming random sampling the mean should converge to ~2
     samps_mean <- apply(samps, 1, mean)
@@ -599,7 +669,6 @@ test_that("as_strata", {
     expect_equal(as_strata(c("a", "b", "c"), c("a", "a", "a")), c(1, 2, 3))
     expect_equal(as_strata(c("a", "a", "c"), c("a", "a", "a")), c(1, 1, 2))
 })
-
 
 
 test_that("idmap", {
@@ -634,11 +703,12 @@ test_that("idmap", {
 })
 
 
-
 test_that("longdata can handle data that isn't sorted", {
-
     dat <- tibble(
-        visit = factor(c("v1", "v2", "v3", "v3", "v1", "v2"), levels = c("v1", "v2", "v3")),
+        visit = factor(
+            c("v1", "v2", "v3", "v3", "v1", "v2"),
+            levels = c("v1", "v2", "v3")
+        ),
         id = factor(c("1", "1", "1", "2", "2", "2")),
         group = factor(c("A", "A", "A", "B", "B", "B")),
         outcome = c(1, 2, 3, 4, 5, NA)
@@ -665,8 +735,14 @@ test_that("longdata can handle data that isn't sorted", {
     ld$set_strategies(dat_ice)
 
     expect_equal(ld$values, list("1" = c(1, 2, 3), "2" = c(5, NA, 4)))
-    expect_equal(ld$is_missing, list("1" = c(FALSE, FALSE, FALSE), "2" = c(FALSE, TRUE, FALSE)))
-    expect_equal(ld$is_mar, list("1" = c(TRUE, TRUE, TRUE), "2" = c(TRUE, FALSE, FALSE)))
+    expect_equal(
+        ld$is_missing,
+        list("1" = c(FALSE, FALSE, FALSE), "2" = c(FALSE, TRUE, FALSE))
+    )
+    expect_equal(
+        ld$is_mar,
+        list("1" = c(TRUE, TRUE, TRUE), "2" = c(TRUE, FALSE, FALSE))
+    )
 
     dat2 <- dat %>%
         arrange(id, visit) %>%
@@ -679,10 +755,7 @@ test_that("longdata can handle data that isn't sorted", {
 })
 
 
-
-
 test_that("longdata rejects data that has no useable observations for a visit", {
-
     vars <- set_vars(
         outcome = "outcome",
         visit = "visit",
@@ -692,7 +765,10 @@ test_that("longdata rejects data that has no useable observations for a visit", 
     )
 
     dat <- tibble(
-        visit = factor(c("v1", "v2", "v3", "v1", "v2", "v3"), levels = c("v1", "v2", "v3")),
+        visit = factor(
+            c("v1", "v2", "v3", "v1", "v2", "v3"),
+            levels = c("v1", "v2", "v3")
+        ),
         id = factor(c("1", "1", "1", "2", "2", "2")),
         group = factor(c("A", "A", "A", "B", "B", "B")),
         outcome = c(1, 2, NA, 4, 5, NA)
@@ -704,7 +780,10 @@ test_that("longdata rejects data that has no useable observations for a visit", 
     )
 
     dat <- tibble(
-        visit = factor(c("v1", "v2", "v3", "v1", "v2", "v3"), levels = c("v1", "v2", "v3")),
+        visit = factor(
+            c("v1", "v2", "v3", "v1", "v2", "v3"),
+            levels = c("v1", "v2", "v3")
+        ),
         id = factor(c("1", "1", "1", "2", "2", "2")),
         group = factor(c("A", "A", "A", "B", "B", "B")),
         outcome = c(1, 2, 3, 4, 5, NA)
@@ -721,36 +800,28 @@ test_that("longdata rejects data that has no useable observations for a visit", 
         ld$set_strategies(dat_ice),
         regexp = "has resulted in the `v2`, `v3` visit"
     )
-
 })
 
 
+test_that("Validate `is_mar` object", {
+    index_mar <- as_class(c(TRUE, TRUE, FALSE, FALSE), "is_mar")
+    expect_true(validate(index_mar))
 
-test_that(
-    "Validate `is_mar` object", {
+    index_mar <- as_class(c(TRUE, TRUE, TRUE, TRUE), "is_mar")
+    expect_true(validate(index_mar))
 
-        index_mar <- as_class(c(TRUE, TRUE, FALSE, FALSE), "is_mar")
-        expect_true(validate(index_mar))
+    index_mar <- as_class(c(FALSE, FALSE, FALSE, FALSE), "is_mar")
+    expect_true(validate(index_mar))
 
-        index_mar <- as_class(c(TRUE, TRUE, TRUE, TRUE), "is_mar")
-        expect_true(validate(index_mar))
+    index_mar <- as_class(c(TRUE, TRUE, FALSE, TRUE), "is_mar")
+    expect_error(validate(index_mar))
 
-        index_mar <- as_class(c(FALSE, FALSE, FALSE, FALSE), "is_mar")
-        expect_true(validate(index_mar))
-
-        index_mar <- as_class(c(TRUE, TRUE, FALSE, TRUE), "is_mar")
-        expect_error(validate(index_mar))
-
-        index_mar <- as_class(c(FALSE, FALSE, TRUE, TRUE), "is_mar")
-        expect_error(validate(index_mar))
-
-    }
-)
-
+    index_mar <- as_class(c(FALSE, FALSE, TRUE, TRUE), "is_mar")
+    expect_error(validate(index_mar))
+})
 
 
 test_that("Formula is created properly", {
-
     vars <- set_vars(
         outcome = "outcome",
         visit = "visit",
@@ -762,17 +833,34 @@ test_that("Formula is created properly", {
     )
 
     dat <- tibble(
-        subjid = factor(rep(c("Tom", "Harry", "Phil", "Ben"), each = 3), levels = c("Tom", "Harry", "Phil", "Ben")),
+        subjid = factor(
+            rep(c("Tom", "Harry", "Phil", "Ben"), each = 3),
+            levels = c("Tom", "Harry", "Phil", "Ben")
+        ),
         age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
-        group = factor(rep(c("B", "B", "A", "A"), each = 3), levels = c("A", "B")),
-        sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),
+        group = factor(
+            rep(c("B", "B", "A", "A"), each = 3),
+            levels = c("A", "B")
+        ),
+        sex = factor(
+            rep(c("F", "M", "M", "F"), each = 3),
+            levels = c("M", "F")
+        ),
         strata = rep(c("A", "A", "A", "B"), each = 3),
         visit = factor(rep(c("Visit 1", "Visit 2", "Visit 3"), 4)),
         outcome = c(
-            NA, NA, NA,
-            NA, 4.14, NA,
-            NA, -1.34, 2.41,
-            -1.53, 1.03, 2.58
+            NA,
+            NA,
+            NA,
+            NA,
+            4.14,
+            NA,
+            NA,
+            -1.34,
+            2.41,
+            -1.53,
+            1.03,
+            2.58
         )
     )
     ld <- longDataConstructor$new(
@@ -780,21 +868,34 @@ test_that("Formula is created properly", {
         vars = vars
     )
     formula_actual <- outcome ~ 1 + group + visit + sex + age
-    expect_true(formula_actual  == ld$formula)
-
+    expect_true(formula_actual == ld$formula)
 
     dat <- tibble(
-        subjid = factor(rep(c("Tom", "Harry", "Phil", "Ben"), each = 3), levels = c("Tom", "Harry", "Phil", "Ben")),
+        subjid = factor(
+            rep(c("Tom", "Harry", "Phil", "Ben"), each = 3),
+            levels = c("Tom", "Harry", "Phil", "Ben")
+        ),
         age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
         group = factor(rep(c("B", "B", "B", "B"), each = 3), levels = c("B")),
-        sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),
+        sex = factor(
+            rep(c("F", "M", "M", "F"), each = 3),
+            levels = c("M", "F")
+        ),
         strata = rep(c("A", "A", "A", "B"), each = 3),
         visit = factor(rep(c("Visit 1", "Visit 2", "Visit 3"), 4)),
         outcome = c(
-            NA, NA, NA,
-            NA, 4.14, NA,
-            NA, -1.34, 2.41,
-            -1.53, 1.03, 2.58
+            NA,
+            NA,
+            NA,
+            NA,
+            4.14,
+            NA,
+            NA,
+            -1.34,
+            2.41,
+            -1.53,
+            1.03,
+            2.58
         )
     )
     ld <- longDataConstructor$new(
@@ -802,21 +903,37 @@ test_that("Formula is created properly", {
         vars = vars
     )
     formula_actual <- outcome ~ 1 + visit + sex + age
-    expect_true(formula_actual  == ld$formula)
-
+    expect_true(formula_actual == ld$formula)
 
     dat <- tibble(
-        subjid = factor(rep(c("Tom", "Harry", "Phil", "Ben"), each = 3), levels = c("Tom", "Harry", "Phil", "Ben")),
+        subjid = factor(
+            rep(c("Tom", "Harry", "Phil", "Ben"), each = 3),
+            levels = c("Tom", "Harry", "Phil", "Ben")
+        ),
         age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
-        group = factor(rep(c("A", "B", "C", "D"), each = 3), levels = c("A", "B", "C", "D")),
-        sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),
+        group = factor(
+            rep(c("A", "B", "C", "D"), each = 3),
+            levels = c("A", "B", "C", "D")
+        ),
+        sex = factor(
+            rep(c("F", "M", "M", "F"), each = 3),
+            levels = c("M", "F")
+        ),
         strata = rep(c("A", "A", "A", "B"), each = 3),
         visit = factor(rep(c("Visit 1", "Visit 2", "Visit 3"), 4)),
         outcome = c(
-            NA, NA, NA,
-            NA, 4.14, NA,
-            NA, -1.34, 2.41,
-            -1.53, 1.03, 2.58
+            NA,
+            NA,
+            NA,
+            NA,
+            4.14,
+            NA,
+            NA,
+            -1.34,
+            2.41,
+            -1.53,
+            1.03,
+            2.58
         )
     )
     ld <- longDataConstructor$new(
@@ -824,21 +941,24 @@ test_that("Formula is created properly", {
         vars = vars
     )
     formula_actual <- outcome ~ 1 + group + visit + sex + age
-    expect_true(formula_actual  == ld$formula)
+    expect_true(formula_actual == ld$formula)
 })
 
 
-
-
 test_that("check_has_data_at_each_visit() catches the correct visit that has no data", {
-
     visits <- c("V", "I", "S", "T")
 
     dat <- tibble(
-        pt = factor(c("A", "A", "A", "A", "B", "B", "B", "B"), levels = c("A", "B")),
+        pt = factor(
+            c("A", "A", "A", "A", "B", "B", "B", "B"),
+            levels = c("A", "B")
+        ),
         vis = factor(rep(visits, 2), levels = visits),
         out = c(NA, 4, 5, 3, 6, NA, 1, NA),
-        group = factor(c("G", "G", "G", "G", "F", "F", "F", "F"), levels = c("G", "F")),
+        group = factor(
+            c("G", "G", "G", "G", "F", "F", "F", "F"),
+            levels = c("G", "F")
+        ),
         age = rnorm(8)
     )
 
@@ -864,15 +984,19 @@ test_that("check_has_data_at_each_visit() catches the correct visit that has no 
         regexp = "`T` visit"
     )
 
-
-
     visits <- c(5, 6, 8, 1)
 
     dat <- tibble(
-        pt = factor(c("A", "A", "A", "A", "B", "B", "B", "B"), levels = c("A", "B")),
+        pt = factor(
+            c("A", "A", "A", "A", "B", "B", "B", "B"),
+            levels = c("A", "B")
+        ),
         vis = factor(rep(visits, 2), levels = visits),
         out = c(NA, 4, 5, 3, 6, NA, 1, NA),
-        group = factor(c("G", "G", "G", "G", "F", "F", "F", "F"), levels = c("G", "F")),
+        group = factor(
+            c("G", "G", "G", "G", "F", "F", "F", "F"),
+            levels = c("G", "F")
+        ),
         age = rnorm(8)
     )
 
@@ -898,8 +1022,6 @@ test_that("check_has_data_at_each_visit() catches the correct visit that has no 
         regexp = "`1` visit"
     )
 
-
-
     ld <- longDataConstructor$new(dat, vars)
 
     dat_ice <- tibble(
@@ -909,14 +1031,10 @@ test_that("check_has_data_at_each_visit() catches the correct visit that has no 
     )
 
     expect_true(ld$set_strategies(dat_ice))
-
 })
 
 
-
-
 test_that("get_data() uses na.rm and nmar.rm correctly", {
-
     #
     # This test proves that the bug identified in
     # https://github.com/insightsengineering/rbmi/issues/347
@@ -928,10 +1046,19 @@ test_that("get_data() uses na.rm and nmar.rm correctly", {
     visits <- c("V", "I", "S", "T")
 
     dat <- tibble(
-        pt = factor(c("B", "B", "A", "A", "B", "B", "A", "A"), levels = c("A", "B")),
-        vis = factor(c("V", "T", "T", "S", "I", "S", "I", "V"), levels = visits),
-        out = c(NA, 4,    5, NA,     6, 5,     5, 5),
-        group = factor(c("G", "G", "F", "F", "G", "G", "F", "F"), levels = c("G", "F")),
+        pt = factor(
+            c("B", "B", "A", "A", "B", "B", "A", "A"),
+            levels = c("A", "B")
+        ),
+        vis = factor(
+            c("V", "T", "T", "S", "I", "S", "I", "V"),
+            levels = visits
+        ),
+        out = c(NA, 4, 5, NA, 6, 5, 5, 5),
+        group = factor(
+            c("G", "G", "F", "F", "G", "G", "F", "F"),
+            levels = c("G", "F")
+        ),
         age = rnorm(8)
     )
 
@@ -942,7 +1069,6 @@ test_that("get_data() uses na.rm and nmar.rm correctly", {
         dat %>% arrange(pt, vis) %>% filter(pt == "A")
     ) %>%
         mutate(pt = rep(paste0("new_pt_", 1:3), each = 4))
-
 
     vars <- set_vars(
         outcome = "out",
@@ -979,7 +1105,6 @@ test_that("get_data() uses na.rm and nmar.rm correctly", {
 
     ### Pre-strategies (with ids) (everything is MAR atm)
 
-
     expect_equal(
         ld$get_data(IDS),
         dat2 %>% as.data.frame()
@@ -1011,7 +1136,6 @@ test_that("get_data() uses na.rm and nmar.rm correctly", {
         strategy = c("JR", "MAR")
     )
     ld$set_strategies(dat_ice)
-
 
     ### Post-strategies (without ids)
 
@@ -1065,7 +1189,9 @@ test_that("get_data() uses na.rm and nmar.rm correctly", {
     expect_equal(
         ld$get_data(IDS, nmar.rm = TRUE),
         dat2 %>%
-            filter(!(as.numeric(vis) >= 2 & pt %in% c("new_pt_1", "new_pt_3"))) %>%
+            filter(
+                !(as.numeric(vis) >= 2 & pt %in% c("new_pt_1", "new_pt_3"))
+            ) %>%
             as.data.frame()
     )
 
@@ -1073,10 +1199,11 @@ test_that("get_data() uses na.rm and nmar.rm correctly", {
         ld$get_data(IDS, na.rm = TRUE, nmar.rm = TRUE),
         dat2 %>%
             filter(!is.na(out)) %>%
-            filter(!(as.numeric(vis) >= 2 & pt %in% c("new_pt_1", "new_pt_3"))) %>%
+            filter(
+                !(as.numeric(vis) >= 2 & pt %in% c("new_pt_1", "new_pt_3"))
+            ) %>%
             as.data.frame()
     )
-
 })
 
 
@@ -1091,10 +1218,19 @@ test_that("Warnings/errors are thrown when strategies are incorrectly updated", 
     )
 
     dat <- tibble(
-        pt = factor(c("A", "A", "A", "B", "B", "B", "C", "C", "C"), levels = c("A", "B", "C")),
-        vis = factor(c("V1", "V2", "V3", "V1", "V2", "V3", "V1", "V2", "V3"), levels = c("V1", "V2", "V3")),
+        pt = factor(
+            c("A", "A", "A", "B", "B", "B", "C", "C", "C"),
+            levels = c("A", "B", "C")
+        ),
+        vis = factor(
+            c("V1", "V2", "V3", "V1", "V2", "V3", "V1", "V2", "V3"),
+            levels = c("V1", "V2", "V3")
+        ),
         out = c(1, 2, 3, 4, 5, 6, 7, 8, 9),
-        group = factor(c("T", "T", "T", "C", "C", "C", "T", "T", "T"), levels = c("C", "T")),
+        group = factor(
+            c("T", "T", "T", "C", "C", "C", "T", "T", "T"),
+            levels = c("C", "T")
+        ),
         age = rnorm(9)
     )
     dat_ice <- tibble(
@@ -1151,10 +1287,19 @@ test_that("Missing data_ices are handled correctly", {
         covariates = c("age")
     )
     dat <- tibble(
-        pt = factor(c("A", "A", "A", "B", "B", "B", "C", "C", "C"), levels = c("A", "B", "C")),
-        vis = factor(c("V1", "V2", "V3", "V1", "V2", "V3", "V1", "V2", "V3"), levels = c("V1", "V2", "V3")),
+        pt = factor(
+            c("A", "A", "A", "B", "B", "B", "C", "C", "C"),
+            levels = c("A", "B", "C")
+        ),
+        vis = factor(
+            c("V1", "V2", "V3", "V1", "V2", "V3", "V1", "V2", "V3"),
+            levels = c("V1", "V2", "V3")
+        ),
         out = c(1, 2, 3, 4, 5, 6, 7, 8, 9),
-        group = factor(c("T", "T", "T", "C", "C", "C", "T", "T", "T"), levels = c("C", "T")),
+        group = factor(
+            c("T", "T", "T", "C", "C", "C", "T", "T", "T"),
+            levels = c("C", "T")
+        ),
         age = rnorm(9)
     )
     dat_ice <- tibble(

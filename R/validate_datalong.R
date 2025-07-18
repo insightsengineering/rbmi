@@ -1,5 +1,3 @@
-
-
 #' Validate a longdata object
 #'
 #' @name validate_datalong
@@ -43,13 +41,8 @@ validate_datalong <- function(data, vars) {
 }
 
 
-
-
-
 #' @rdname validate_datalong
 validate_datalong_varExists <- function(data, vars) {
-
-
     assert_that(
         vars$outcome %in% names(data),
         msg = sprintf("Cannot find %s in `data`", vars$outcome)
@@ -130,7 +123,10 @@ validate_datalong_types <- function(data, vars) {
         for (var in additional_vars) {
             assert_that(
                 is_num_char_fact(data[[var]]),
-                msg = sprintf("Variable `%s` should be of type numeric, factor or character", var)
+                msg = sprintf(
+                    "Variable `%s` should be of type numeric, factor or character",
+                    var
+                )
             )
         }
         for (var in covars) {
@@ -190,7 +186,8 @@ validate_datalong_unifromStrata <- function(data, vars) {
         )
         if (!all(x == 1)) {
             stop(
-                "Stratification variable '", var,
+                "Stratification variable '",
+                var,
                 "' is not constant within at least one subject"
             )
         }
@@ -199,11 +196,8 @@ validate_datalong_unifromStrata <- function(data, vars) {
 }
 
 
-
-
 #' @rdname validate_datalong
 validate_dataice <- function(data, data_ice, vars, update = FALSE) {
-
     validate(vars)
 
     strategy <- vars$strategy

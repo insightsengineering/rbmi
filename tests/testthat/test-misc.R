@@ -1,11 +1,4 @@
-
-
-
-
-
-
 test_that("rbmi can handle 'grouped' dplyr data", {
-
     dat <- simulate_test_data(100) %>%
         as_tibble() %>%
         mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 1, NA_real_, outcome))
@@ -56,8 +49,6 @@ test_that("rbmi can handle 'grouped' dplyr data", {
     anaObj <- analyse(imputeObj, vars = vars2)
     poolObj_1 <- pool(anaObj)
 
-
-
     devnull <- capture.output({
         print(drawObj)
         print(imputeObj)
@@ -65,7 +56,6 @@ test_that("rbmi can handle 'grouped' dplyr data", {
         print(poolObj_1)
     })
     expect_true(length(devnull) >= 1)
-
 
     set.seed(987)
     drawObj <- draws(
@@ -87,13 +77,20 @@ test_that("rbmi can handle 'grouped' dplyr data", {
 })
 
 
-
-
 test_that("`rbmi` can handle character data", {
     dat <- simulate_test_data(100) %>%
         as_tibble() %>%
-        mutate(outcome = if_else(rbinom(n(), 1, 0.2) == 1, NA_real_, outcome)) %>%
-        mutate(charvar = sample(c("A", "B", "C"), size = nrow(.), replace = TRUE, prob = c(0.4, 0.2, 0.1)))
+        mutate(
+            outcome = if_else(rbinom(n(), 1, 0.2) == 1, NA_real_, outcome)
+        ) %>%
+        mutate(
+            charvar = sample(
+                c("A", "B", "C"),
+                size = nrow(.),
+                replace = TRUE,
+                prob = c(0.4, 0.2, 0.1)
+            )
+        )
 
     dat2 <- expand_locf(
         dat,

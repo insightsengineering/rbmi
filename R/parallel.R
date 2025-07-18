@@ -1,4 +1,3 @@
-
 #' Create a `rbmi` ready cluster
 #'
 #' @param ncores Number of parallel processes to use or an existing cluster to make use of
@@ -32,7 +31,6 @@
 #' }
 #' @export
 make_rbmi_cluster <- function(ncores = 1, objects = NULL, packages = NULL) {
-
     if (is.numeric(ncores) && ncores == 1) {
         return(NULL)
     } else if (is.numeric(ncores)) {
@@ -58,7 +56,9 @@ make_rbmi_cluster <- function(ncores = 1, objects = NULL, packages = NULL) {
     packages <- setdiff(packages, "rbmi")
     devnull <- parallel::clusterCall(
         cl,
-        function(pkgs) lapply(pkgs, function(x) library(x, character.only = TRUE)),
+        function(pkgs) {
+            lapply(pkgs, function(x) library(x, character.only = TRUE))
+        },
         as.list(packages)
     )
 
@@ -66,7 +66,10 @@ make_rbmi_cluster <- function(ncores = 1, objects = NULL, packages = NULL) {
     parallel::clusterSetRNGStream(cl, sample.int(1))
 
     # If user has previously configured `rbmi` sub-processes then early exit
-    exported_rbmi <- unlist(parallel::clusterEvalQ(cl, exists("..exported..parallel..rbmi")))
+    exported_rbmi <- unlist(parallel::clusterEvalQ(
+        cl,
+        exists("..exported..parallel..rbmi")
+    ))
     if (all(exported_rbmi)) {
         return(cl)
     }
@@ -113,12 +116,14 @@ is_in_rbmi_development <- function() {
     if (path == "") {
         return(FALSE)
     }
-    if (pkgload::pkg_name() == "rbmi" && file.exists(file.path(path, "misc/do_not_delete.txt"))) {
+    if (
+        pkgload::pkg_name() == "rbmi" &&
+            file.exists(file.path(path, "misc/do_not_delete.txt"))
+    ) {
         return(TRUE)
     }
     return(FALSE)
 }
-
 
 
 #' Parallelise Lapply

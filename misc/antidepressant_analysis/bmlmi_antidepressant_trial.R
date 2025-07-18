@@ -28,7 +28,7 @@ dat_ice <- dat %>%
 # In this dataset, subject 3618 has an intermittent missing values which does not correspond
 # to a study drug discontinuation. We therefore remove this subject from `dat_ice`.
 # (In the later imputation step, it will automatically be imputed under the default MAR assumption.)
-dat_ice <- dat_ice[-which(dat_ice$PATIENT == 3618),]
+dat_ice <- dat_ice[-which(dat_ice$PATIENT == 3618), ]
 
 # Define the names of key variables in our dataset using `set_vars()`
 # Note that the covariates argument can also include interaction terms

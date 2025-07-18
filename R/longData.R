@@ -1,4 +1,3 @@
-
 #' R6 Class for Storing / Accessing & Sampling Longitudinal Data
 #'
 #' @description
@@ -23,27 +22,20 @@ longDataConstructor <- R6::R6Class(
     classname = "longdata",
 
     public = list(
-
-
         #' @field data The original dataset passed to the constructor (sorted by id and visit)
         data = NULL,
-
 
         #' @field vars The vars object (list of key variables) passed to the constructor
         vars = NULL,
 
-
         #' @field visits A character vector containing the distinct visit levels
         visits = NULL,
-
 
         #' @field ids A character vector containing the unique ids of each subject in `self$data`
         ids = NULL,
 
-
         #' @field formula A formula expressing how the design matrix for the data should be constructed
         formula = NULL,
-
 
         #' @field strata A numeric vector indicating which strata each corresponding value of
         #' `self$ids` belongs to.
@@ -54,16 +46,13 @@ longDataConstructor <- R6::R6Class(
         #' sampling
         strata = NULL,
 
-
         #' @field ice_visit_index A list indexed by subject storing the index number of the first visit
         #' affected by the ICE. If there is no ICE then it is set equal to the number of visits plus 1.
         ice_visit_index = list(),
 
-
         #' @field values A list indexed by subject storing a numeric vector of the
         #' original (unimputed) outcome values
         values = list(),
-
 
         #' @field group A list indexed by subject storing a single character
         #' indicating which imputation group the subject belongs to as defined
@@ -71,7 +60,6 @@ longDataConstructor <- R6::R6Class(
         #' It is used
         #' to determine what reference group should be used when imputing the subjects data.
         group = list(),
-
 
         #' @field is_mar A list indexed by subject storing logical values indicating
         #' if the subjects outcome values are MAR or not.
@@ -82,14 +70,12 @@ longDataConstructor <- R6::R6Class(
         #' or are post the ICE visit and have an imputation strategy of MAR
         is_mar = list(),
 
-
         #' @field strategies A list indexed by subject storing a single character
         #' value indicating the imputation
         #' strategy assigned to that subject. This list is defaulted to "MAR"
         #' for all subjects and is then
         #' modified by calls to either `self$set_strategies()` or `self$update_strategies()`
         strategies = list(),
-
 
         #' @field strategy_lock A list indexed by subject storing a single
         #' logical value indicating whether a
@@ -101,7 +87,6 @@ longDataConstructor <- R6::R6Class(
         #' has non-missing after their ICE date. This list is populated by a call to
         #' `self$set_strategies()`.
         strategy_lock = list(),
-
 
         #' @field indexes A list indexed by subject storing a numeric vector of
         #' indexes which specify which rows in the
@@ -117,13 +102,11 @@ longDataConstructor <- R6::R6Class(
         #' This list is populated during the object initialisation.
         indexes = list(),
 
-
         #' @field is_missing A list indexed by subject storing a logical vector
         #' indicating whether the corresponding
         #' outcome of a subject is missing. This list is populated during the
         #' object initialisation.
         is_missing = list(),
-
 
         #' @field is_post_ice A list indexed by subject storing a logical vector
         #' indicating whether the corresponding
@@ -131,7 +114,6 @@ longDataConstructor <- R6::R6Class(
         #' been provided this defaults to False
         #' for all observations. This list is populated by a call to `self$set_strategies()`.
         is_post_ice = list(),
-
 
         #' @description
         #'
@@ -183,8 +165,12 @@ longDataConstructor <- R6::R6Class(
         #' @return
         #'
         #' A `data.frame`.
-        get_data = function(obj = NULL, nmar.rm = FALSE, na.rm = FALSE, idmap = FALSE) {
-
+        get_data = function(
+            obj = NULL,
+            nmar.rm = FALSE,
+            na.rm = FALSE,
+            idmap = FALSE
+        ) {
             if (is.null(obj)) {
                 if (nmar.rm == FALSE & na.rm == FALSE) {
                     return(self$data)
@@ -193,13 +179,13 @@ longDataConstructor <- R6::R6Class(
                     list_flag <- FALSE
                     orig_data_flag <- TRUE
                 }
-
             } else {
-
                 orig_data_flag <- FALSE
 
-                if (! any(c("imputation_df", "character") %in% class(obj))) {
-                    stop("Object must be an imputation_df or a character vector")
+                if (!any(c("imputation_df", "character") %in% class(obj))) {
+                    stop(
+                        "Object must be an imputation_df or a character vector"
+                    )
                 }
 
                 list_flag <- "imputation_df" %in% class(obj)
@@ -209,8 +195,16 @@ longDataConstructor <- R6::R6Class(
                     ids <- obj_expanded$ids
                     values <- obj_expanded$values
 
-                    n_miss <- vapply(self$is_missing[ids], function(x) sum(x), numeric(1))
-                    n_values <- vapply(obj, function(x) length(x$values), numeric(1))
+                    n_miss <- vapply(
+                        self$is_missing[ids],
+                        function(x) sum(x),
+                        numeric(1)
+                    )
+                    n_values <- vapply(
+                        obj,
+                        function(x) length(x$values),
+                        numeric(1)
+                    )
                     assert_that(
                         all(n_miss == n_values),
                         msg = "Number of missing values doesn't equal number of imputed values"
@@ -227,7 +221,6 @@ longDataConstructor <- R6::R6Class(
                 is_miss <- unlist(self$is_missing[ids], use.names = FALSE)
                 is_mar <- unlist(self$is_mar[ids], use.names = FALSE)
             }
-
 
             indexes_vec <- unlist(indexes, use.names = FALSE)
 
@@ -251,7 +244,7 @@ longDataConstructor <- R6::R6Class(
             if (nmar.rm | na.rm) {
                 remove_nmar <- !is_mar & nmar.rm
                 remove_na <- is_miss & na.rm
-                keep <-  !remove_nmar & !remove_na
+                keep <- !remove_nmar & !remove_na
                 new_data <- new_data[keep, ]
             }
 
@@ -268,14 +261,12 @@ longDataConstructor <- R6::R6Class(
             return(as_dataframe(new_data))
         },
 
-
         #' @description
         #' This function decomposes a patient data from `self$data` and populates
         #' all the corresponding lists i.e. `self$is_missing`, `self$values`, `self$group`, etc.
         #' This function is only called upon the objects initialization.
         #' @param id Character subject id that exists within `self$data`.
         add_subject = function(id) {
-
             ids <- self$data[[self$vars$subjid]]
             indexes <- which(ids == id)
             data_subject <- self$data[indexes, ]
@@ -304,7 +295,10 @@ longDataConstructor <- R6::R6Class(
 
             assert_that(
                 length(is_missing) == length(indexes),
-                msg = sprintf("Subject %s has a mismatch between number of expected values", id)
+                msg = sprintf(
+                    "Subject %s has a mismatch between number of expected values",
+                    id
+                )
             )
 
             assert_that(
@@ -323,7 +317,6 @@ longDataConstructor <- R6::R6Class(
             self$ice_visit_index[[id]] <- length(self$visits) + 1
         },
 
-
         #' @description
         #' Throws an error if any element of `ids` is not within the source data `self$data`.
         #' @param ids A character vector of ids.
@@ -336,7 +329,6 @@ longDataConstructor <- R6::R6Class(
             return(invisible(self))
         },
 
-
         #' @description
         #' Performs random stratified sampling of patient ids (with replacement)
         #' Each patient has an equal weight of being picked within their strata (i.e is not dependent on
@@ -345,7 +337,6 @@ longDataConstructor <- R6::R6Class(
         sample_ids = function() {
             sample_ids(self$ids, self$strata)
         },
-
 
         #' @description
         #' Returns a list of key information for a given subject. Is a convenience wrapper
@@ -363,7 +354,6 @@ longDataConstructor <- R6::R6Class(
             )
         },
 
-
         #' @description
         #' Convenience function to run self$set_strategies(dat_ice, update=TRUE)
         #' kept for legacy reasons.
@@ -371,7 +361,6 @@ longDataConstructor <- R6::R6Class(
         update_strategies = function(dat_ice) {
             self$set_strategies(dat_ice, update = TRUE)
         },
-
 
         #' @description
         #' Updates the `self$strategies`, `self$is_mar`, `self$is_post_ice` variables based upon the provided ICE
@@ -384,9 +373,6 @@ longDataConstructor <- R6::R6Class(
         #' @param dat_ice a `data.frame` containing ICE information. See details.
         #' @param update Logical, indicates that the ICE data should be used as an update. See details.
         set_strategies = function(dat_ice = NULL, update = FALSE) {
-
-
-
             if (is.null(dat_ice)) {
                 return(self)
             }
@@ -400,19 +386,23 @@ longDataConstructor <- R6::R6Class(
             has_nonMAR_to_MAR <- FALSE
 
             for (subject in dat_ice[[self$vars$subjid]]) {
-
                 dat_ice_pt <- dat_ice[dat_ice[[self$vars$subjid]] == subject, ]
 
                 assert_that(
                     nrow(dat_ice_pt) == 1,
-                    msg = sprintf("Subject %s has more than 1 row in the ice dataset", subject)
+                    msg = sprintf(
+                        "Subject %s has more than 1 row in the ice dataset",
+                        subject
+                    )
                 )
 
                 new_strategy <- dat_ice_pt[[self$vars$strategy]]
 
                 if (!update) {
                     visit <- dat_ice_pt[[self$vars$visit]]
-                    self$ice_visit_index[[subject]] <- which(self$visits == visit)
+                    self$ice_visit_index[[subject]] <- which(
+                        self$visits == visit
+                    )
                 } else {
                     if (self$strategy_lock[[subject]]) {
                         current_strategy <- self$strategies[[subject]]
@@ -438,7 +428,9 @@ longDataConstructor <- R6::R6Class(
                     self$is_mar[[subject]] <- rep(TRUE, length(self$visits))
                 }
 
-                if (update) next()
+                if (update) {
+                    next()
+                }
 
                 is_post_ice <- seq_along(self$visits) >= index
                 self$is_post_ice[[subject]] <- is_post_ice
@@ -461,7 +453,6 @@ longDataConstructor <- R6::R6Class(
 
             self$check_has_data_at_each_visit()
         },
-
 
         #' @description
         #' Ensures that all visits have at least 1 observed "MAR" observation. Throws
@@ -486,14 +477,17 @@ longDataConstructor <- R6::R6Class(
                 msg = paste(
                     sprintf(
                         "The data combined with the current ICE strategy has resulted in the %s visit(s)",
-                        paste0("`", paste0(no_data_visits, collapse = "`, `"), "`")
+                        paste0(
+                            "`",
+                            paste0(no_data_visits, collapse = "`, `"),
+                            "`"
+                        )
                     ),
                     "not having any available observations to construct the imputation model on. Please either drop",
                     "these visit(s) or choose a different ICE strategy."
                 )
             )
         },
-
 
         #' @description
         #' Populates the `self$strata` variable. If the user has specified stratification variables
@@ -515,8 +509,6 @@ longDataConstructor <- R6::R6Class(
             }
         },
 
-
-
         #' @description
         #' Constructor function.
         #' @param data longitudinal dataset.
@@ -525,24 +517,35 @@ longDataConstructor <- R6::R6Class(
             data_raw <- as_dataframe(data)
             validate(vars)
             validate_datalong(data_raw, vars)
-            data_nochar <- char2fct(data_raw, extract_covariates(vars$covariates))
+            data_nochar <- char2fct(
+                data_raw,
+                extract_covariates(vars$covariates)
+            )
             # rerun as_dataframe to reset the rownames
-            self$data <- as_dataframe(sort_by(data_nochar, c(vars$subjid, vars$visit)))
+            self$data <- as_dataframe(sort_by(
+                data_nochar,
+                c(vars$subjid, vars$visit)
+            ))
             self$vars <- vars
             self$visits <- levels(self$data[[self$vars$visit]])
             frmvars <- c(
-                ife(nlevels(self$data[[vars$group]]) >= 2, vars$group, character()),
+                ife(
+                    nlevels(self$data[[vars$group]]) >= 2,
+                    vars$group,
+                    character()
+                ),
                 vars$visit,
                 vars$covariates
             )
             self$formula <- as_simple_formula(vars$outcome, frmvars)
             subjects <- levels(self$data[[self$vars$subjid]])
-            for (id in subjects) self$add_subject(id)
+            for (id in subjects) {
+                self$add_subject(id)
+            }
             self$ids <- subjects
             self$set_strata()
             self$check_has_data_at_each_visit()
         }
-
     )
 )
 
@@ -586,7 +589,6 @@ transpose_imputations <- function(imputations) {
     )
     return(result)
 }
-
 
 
 #' Validate `is_mar` for a given subject

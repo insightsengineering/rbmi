@@ -5,23 +5,36 @@ suppressPackageStartupMessages({
 })
 
 
-
-
-
 test_that("Basic Usage", {
-
     dat <- tibble(
-        subjid = factor(rep(c("Tom", "Harry", "Phil", "Ben"), each = 3), levels = c("Tom", "Harry", "Phil", "Ben")),
+        subjid = factor(
+            rep(c("Tom", "Harry", "Phil", "Ben"), each = 3),
+            levels = c("Tom", "Harry", "Phil", "Ben")
+        ),
         age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
-        group = factor(rep(c("B", "B", "A", "A"), each = 3), levels = c("A", "B")),
-        sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),
+        group = factor(
+            rep(c("B", "B", "A", "A"), each = 3),
+            levels = c("A", "B")
+        ),
+        sex = factor(
+            rep(c("F", "M", "M", "F"), each = 3),
+            levels = c("M", "F")
+        ),
         strata = rep(c("A", "A", "A", "B"), each = 3),
         visit = factor(rep(c("Visit 1", "Visit 2", "Visit 3"), 4)),
         outcome = c(
-            NA, NA, NA,
-            NA, 4.14, NA,
-            NA, -1.34, 2.41,
-            -1.53, 1.03, 2.58
+            NA,
+            NA,
+            NA,
+            NA,
+            4.14,
+            NA,
+            NA,
+            -1.34,
+            2.41,
+            -1.53,
+            1.03,
+            2.58
         )
     )
 
@@ -43,8 +56,14 @@ test_that("Basic Usage", {
     beta <- c(-2.80, 4.93, 2.01, 4.66, 1.27, 3.14)
 
     sigma <- list(
-        "A" = structure(c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9), .Dim = c(3L, 3L)),
-        "B" = structure(c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9), .Dim = c(3L, 3L))
+        "A" = structure(
+            c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9),
+            .Dim = c(3L, 3L)
+        ),
+        "B" = structure(
+            c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9),
+            .Dim = c(3L, 3L)
+        )
     )
 
     draws_args <- list(
@@ -101,7 +120,6 @@ test_that("Basic Usage", {
     expect_false(identical(x1, x2))
     expect_false(identical(x2, x3))
 
-
     ### That the sample names match those requested
     samp_1_names <- vapply(x1$imputations[[1]], function(x) x$id, character(1))
     samp_2_names <- vapply(x1$imputations[[2]], function(x) x$id, character(1))
@@ -142,7 +160,6 @@ test_that("Basic Usage", {
 
 
 test_that("`references` is handled as expected", {
-
     set.seed(123)
     n <- 8
     nv <- 3
@@ -157,7 +174,10 @@ test_that("`references` is handled as expected", {
 
     dat <- data.frame(
         subjid = factor(rep(1:(2 * n), each = nv), levels = 1:(2 * n)),
-        group = factor(rep(c("Control", "Intervention"), each = nv * n), levels = c("Control", "Intervention")),
+        group = factor(
+            rep(c("Control", "Intervention"), each = nv * n),
+            levels = c("Control", "Intervention")
+        ),
         visit = factor(rep(c("1", "2", "3"), 2 * n), levels = c("1", "2", "3")),
         outcome = c(
             replicate(n, sample_mvnorm(muC, covC)),
@@ -206,20 +226,13 @@ test_that("`references` is handled as expected", {
         references,
         imputeObj$references
     )
-
 })
 
 
-
-
-
-
-
 test_that("transpose_samples", {
-
     input <- list(
         list(
-            ids =  c("Tom", "Harry", "Phil", "Ben"),
+            ids = c("Tom", "Harry", "Phil", "Ben"),
             beta = c(1, 2, 3),
             sigma = list("A" = 9, "B" = 8, "C" = 7)
         ),
@@ -255,12 +268,7 @@ test_that("transpose_samples", {
 })
 
 
-
-
-
-
 test_that("invert_indexes", {
-
     input <- list(
         c("Tom", "Harry", "Phil", "Ben", "Harry"),
         c("Adam", "Ben", "Ben", "Phil")
@@ -277,16 +285,10 @@ test_that("invert_indexes", {
     )
 
     expect_equal(output_actual, output_expected)
-
 })
 
 
-
-
-
-
 test_that("split_imputations", {
-
     input_imputes <- list(
         imputation_single("Ben", numeric(0)),
         imputation_single("Ben", numeric(0)),
@@ -319,7 +321,6 @@ test_that("split_imputations", {
     )
     expect_equal(output_actual, output_expected)
 
-
     sample_ids <- list(
         c("Ben"),
         c("Ben", "Ben", "Phil"),
@@ -346,8 +347,6 @@ test_that("split_imputations", {
     )
     expect_equal(output_actual, output_expected)
 
-
-
     sample_ids <- list(
         c("Ben"),
         c("Ben", "Ben", "Phil", "Phil"),
@@ -359,7 +358,6 @@ test_that("split_imputations", {
         "index is not compatible with the object"
     )
 
-
     sample_ids <- list(
         c("James"),
         c("Ben", "Ben", "Phil"),
@@ -370,7 +368,6 @@ test_that("split_imputations", {
         split_imputations(input_imputes, sample_ids),
         "index is not compatible with the object"
     )
-
 
     sample_ids <- list(
         c("Ben", "Phil"),
@@ -424,28 +421,28 @@ test_that("split_imputations", {
     )
     expect_equal(output_actual_1, output_expected)
     expect_equal(output_actual_2, output_expected)
-
 })
 
 
-
-
-
 test_that("get_conditional_parameters", {
-
     input_pars <- list(
         "mu" = c(2, 3, 4),
-        "sigma" = structure(c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9), .Dim = c(3L, 3L))
+        "sigma" = structure(
+            c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9),
+            .Dim = c(3L, 3L)
+        )
     )
 
     input_values <- c(NA, NA, 8)
     output_actual <- get_conditional_parameters(input_pars, input_values)
     output_expected <- list(
         mu = structure(c(2.53333333333333, 4.6), .Dim = c(2L, 1L)),
-        sigma = structure(c(0.84,  -0.0799999999999999, -0.08, 2.56), .Dim = c(2L, 2L))
+        sigma = structure(
+            c(0.84, -0.0799999999999999, -0.08, 2.56),
+            .Dim = c(2L, 2L)
+        )
     )
     expect_equal(output_actual, output_expected)
-
 
     input_values <- c(NA, 8, NA)
     output_actual <- get_conditional_parameters(input_pars, input_values)
@@ -455,7 +452,6 @@ test_that("get_conditional_parameters", {
     )
     expect_equal(output_actual, output_expected)
 
-
     input_values <- c(1, NA, 2)
     output_actual <- get_conditional_parameters(input_pars, input_values)
     output_expected <- list(
@@ -464,14 +460,12 @@ test_that("get_conditional_parameters", {
     )
     expect_equal(output_actual, output_expected)
 
-
     ### If all values are unknown then it should just return the full
     ### distribution as there is nothing to condition over
     input_values <- c(NA, NA, NA)
     output_actual <- get_conditional_parameters(input_pars, input_values)
     output_expected <- input_pars
     expect_equal(output_actual, output_expected)
-
 
     ### If all values are already available then return nothing as
     ### nothing needs to be imputed
@@ -482,12 +476,7 @@ test_that("get_conditional_parameters", {
 })
 
 
-
-
-
 test_that("impute_outcome", {
-
-
     ##### Univariate
     x <- impute_outcome(list(mu = 5, sigma = 10))
     expect_length(x[[1]], 1)
@@ -497,17 +486,18 @@ test_that("impute_outcome", {
     x <- unlist(replicate(n = 20000, impute_outcome(list(mu = 5, sigma = 10))))
     mu <- mean(x)
     sig <- sd(x)^2
-    expect_true(4.9 <= mu  & mu <= 5.1)
+    expect_true(4.9 <= mu & mu <= 5.1)
     expect_true(9.8 <= sig & sig <= 10.2)
-
-
 
     ##### Multivariate
 
     # as_vcov( c(2, 4, 6), c(0.3, 0.5, 0.7)) %>% dput
     pars <- list(
         mu = c(8, 10, 12),
-        sigma = structure(c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36), .Dim = c(3L, 3L))
+        sigma = structure(
+            c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36),
+            .Dim = c(3L, 3L)
+        )
     )
 
     x <- unlist(impute_outcome(pars))
@@ -520,7 +510,7 @@ test_that("impute_outcome", {
 
     # Means
     mu <- apply(x, 2, mean)
-    expect_true(all((pars$mu - 0.1) <= mu  & mu <= (pars$mu + 0.1)))
+    expect_true(all((pars$mu - 0.1) <= mu & mu <= (pars$mu + 0.1)))
 
     # Variances
     sig <- apply(x, 2, sd)
@@ -531,29 +521,34 @@ test_that("impute_outcome", {
     corr <- cor(x)
     corr_expec <- c(0.3, 0.5, 0.7)
     corr_obs <- c(corr[1, 2], corr[1, 3], corr[2, 3])
-    expect_true(all((corr_obs - 0.1) <= corr_expec & corr_expec <= (corr_obs + 0.1)))
-
+    expect_true(all(
+        (corr_obs - 0.1) <= corr_expec & corr_expec <= (corr_obs + 0.1)
+    ))
 
     ###### Non-compatible matrices
     pars <- list(
         mu = c(8, 10),
-        sigma = structure(c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36), .Dim = c(3L, 3L))
+        sigma = structure(
+            c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36),
+            .Dim = c(3L, 3L)
+        )
     )
     expect_error(
         impute_outcome(pars),
         regexp = "not of compatible sizes"
     )
-
 
     pars <- list(
         mu = c(8),
-        sigma = structure(c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36), .Dim = c(3L, 3L))
+        sigma = structure(
+            c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36),
+            .Dim = c(3L, 3L)
+        )
     )
     expect_error(
         impute_outcome(pars),
         regexp = "not of compatible sizes"
     )
-
 
     pars <- list(
         mu = c(8, 2),
@@ -563,7 +558,6 @@ test_that("impute_outcome", {
         impute_outcome(pars),
         regexp = "not of compatible sizes"
     )
-
 
     ##### Missing value handling
     pars <- list(
@@ -575,16 +569,17 @@ test_that("impute_outcome", {
         regexp = "contain missing values"
     )
 
-
     pars <- list(
         mu = c(1, 2, 4),
-        sigma = structure(c(4, 2.4, 6, 2.4, NA, 16.8, 6, 16.8, 36), .Dim = c(3L, 3L))
+        sigma = structure(
+            c(4, 2.4, 6, 2.4, NA, 16.8, 6, 16.8, 36),
+            .Dim = c(3L, 3L)
+        )
     )
     expect_error(
         impute_outcome(pars),
         regexp = "contain missing values"
     )
-
 
     pars <- list(
         mu = c(NA),
@@ -594,7 +589,6 @@ test_that("impute_outcome", {
         impute_outcome(pars),
         regexp = "contain missing values"
     )
-
 
     pars <- list(
         mu = c(1),
@@ -607,11 +601,7 @@ test_that("impute_outcome", {
 })
 
 
-
-
-
 test_that("get_visit_distribution_parameters", {
-
     beta <- list(c(1, 2, 3), c(4, 5, 6))
     dat <- data.frame(a = c(1, 2), b = c(3, 4), c = c(5, 6))
     sigma <- list(1, 5)
@@ -619,11 +609,11 @@ test_that("get_visit_distribution_parameters", {
     x <- get_visit_distribution_parameters(dat, beta, sigma)
     expect_equal(
         x[[1]]$mu,
-        c(1 * 1 + 2 * 3 + 3 * 5,  1 * 2 + 2 * 4 + 3 * 6)
+        c(1 * 1 + 2 * 3 + 3 * 5, 1 * 2 + 2 * 4 + 3 * 6)
     )
     expect_equal(
         x[[2]]$mu,
-        c(4 * 1 + 5 * 3 + 6 * 5,  4 * 2 + 5 * 4 + 6 * 6)
+        c(4 * 1 + 5 * 3 + 6 * 5, 4 * 2 + 5 * 4 + 6 * 6)
     )
     expect_equal(x[[1]]$sigma, 1)
     expect_equal(x[[2]]$sigma, 5)
@@ -650,22 +640,36 @@ test_that("get_visit_distribution_parameters", {
 })
 
 
-
-
 test_that("validate_strategies", {
-
     dat <- tibble(
-        subjid = factor(rep(c("Tom", "Harry", "Phil", "Ben"), each = 3), levels = c("Tom", "Harry", "Phil", "Ben")),
+        subjid = factor(
+            rep(c("Tom", "Harry", "Phil", "Ben"), each = 3),
+            levels = c("Tom", "Harry", "Phil", "Ben")
+        ),
         age = rep(c(0.04, -0.14, -0.03, -0.33), each = 3),
-        group = factor(rep(c("B", "B", "A", "A"), each = 3), levels = c("A", "B")),
-        sex = factor(rep(c("F", "M", "M", "F"), each = 3), levels = c("M", "F")),
+        group = factor(
+            rep(c("B", "B", "A", "A"), each = 3),
+            levels = c("A", "B")
+        ),
+        sex = factor(
+            rep(c("F", "M", "M", "F"), each = 3),
+            levels = c("M", "F")
+        ),
         strata = rep(c("A", "A", "A", "B"), each = 3),
         visit = factor(rep(c("Visit 1", "Visit 2", "Visit 3"), 4)),
         outcome = c(
-            NA, NA, NA,
-            NA, 4.14, NA,
-            NA, -1.34, 2.41,
-            -1.53, 1.03, 2.58
+            NA,
+            NA,
+            NA,
+            NA,
+            4.14,
+            NA,
+            NA,
+            -1.34,
+            2.41,
+            -1.53,
+            1.03,
+            2.58
         )
     )
 
@@ -697,24 +701,19 @@ test_that("validate_strategies", {
 
     strats <- c("NMAR")
     expect_error(validate_strategies(strats, "NMAR"))
-
 })
 
 
-
-
-
 test_that("validate_references", {
-
     control <- factor(c("A", "B", "C"), levels = c("A", "B", "C", "D"))
 
     ref <- c("A" = "B") %>% as_class("references")
     expect_true(validate(ref, control))
 
-    ref <- c("A" = "B", "C" = "A")  %>% as_class("references")
+    ref <- c("A" = "B", "C" = "A") %>% as_class("references")
     expect_true(validate(ref, control))
 
-    ref <- c("A" = "B", "B" = "B", "C" = "C")  %>% as_class("references")
+    ref <- c("A" = "B", "B" = "B", "C" = "C") %>% as_class("references")
     expect_true(validate(ref, control))
 
     ref <- c("X" = "A") %>% as_class("references")
@@ -732,7 +731,7 @@ test_that("validate_references", {
     ref <- factor("A") %>% as_class("references")
     expect_error(validate(ref, control))
 
-    ref <- c("A" = NA,  "B" = "C") %>% as_class("references")
+    ref <- c("A" = NA, "B" = "C") %>% as_class("references")
     expect_error(validate(ref, control))
 
     ref <- c("A", "B" = "C") %>% as_class("references")
@@ -743,14 +742,7 @@ test_that("validate_references", {
 })
 
 
-
-
-
-
-
-
 test_that("impute can recover known values", {
-
     vars <- set_vars(
         outcome = "outcome",
         visit = "visit",
@@ -761,13 +753,15 @@ test_that("impute can recover known values", {
     )
 
     dat <- tibble(
-        visit = factor(rep(c("v1", "v2", "v3"), 4), levels = c("v1", "v2", "v3")),
+        visit = factor(
+            rep(c("v1", "v2", "v3"), 4),
+            levels = c("v1", "v2", "v3")
+        ),
         id = factor(rep(c("1", "2", "3", "4"), each = 3)),
         group = factor(rep(c("A", "B"), each = 6)),
-        cov1 =    c(1, 1, 1,      2, 2, 2,     3, 3, 3,    4, 4, 4),
-        outcome = c(1, NA, NA,    4, 3, 6,     1, 1, 1,    5, NA, 6)
+        cov1 = c(1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4),
+        outcome = c(1, NA, NA, 4, 3, 6, 1, 1, 1, 5, NA, 6)
     )
-
 
     ld <- longDataConstructor$new(dat, vars)
 
@@ -799,7 +793,6 @@ test_that("impute can recover known values", {
     )
     expect_equal(x$imputations, output_expected)
 
-
     dobj$samples[[1]]$ids <- c("4", "4", "1", "3")
     x <- impute(dobj, c("A" = "B", "B" = "B"))
     output_expected <- imputation_list_df(
@@ -811,8 +804,6 @@ test_that("impute can recover known values", {
         )
     )
     expect_equal(x$imputations, output_expected)
-
-
 
     dobj$samples[[2]] <- sample_single(
         ids = c("2", "1", "4"),
@@ -837,8 +828,6 @@ test_that("impute can recover known values", {
         )
     )
     expect_equal(x$imputations, output_expected)
-
-
 
     dat_ice <- tibble(
         visit = "v3",
@@ -877,11 +866,7 @@ test_that("impute can recover known values", {
 })
 
 
-
-
 test_that("convert_to_imputation_list_df works as expected", {
-
-
     ### Basic Usage
     imputes <- list(
         imputation_list_single(
@@ -933,7 +918,6 @@ test_that("convert_to_imputation_list_df works as expected", {
         expected_output
     )
 
-
     ## Error handling
     sample_ids <- list(
         c("Tom", "Harry", "Dave"),
@@ -964,18 +948,10 @@ test_that("convert_to_imputation_list_df works as expected", {
         convert_to_imputation_list_df(imputes, sample_ids),
         regexp = "index is not compatible with the object"
     )
-
 })
 
 
-
-
-
-
-
-
 test_that("method_bmlmi is working as expected in combination with impute", {
-
     vars <- set_vars(
         outcome = "outcome",
         visit = "visit",
@@ -986,25 +962,28 @@ test_that("method_bmlmi is working as expected in combination with impute", {
     )
 
     dat <- tibble(
-        visit = factor(rep(c("v1", "v2", "v3"), 4), levels = c("v1", "v2", "v3")),
+        visit = factor(
+            rep(c("v1", "v2", "v3"), 4),
+            levels = c("v1", "v2", "v3")
+        ),
         id = factor(rep(c("PA", "PB", "PC", "PD"), each = 3)),
         group = factor(rep(c("A", "B"), each = 6)),
-        cov1 =    c(1, 1, 1,      2, 2, 2,     3, 3, 3,    4, 4, 4),
-        outcome = c(1, NA, NA,    4, 3, 6,     1, 1, 1,    5, NA, 6)
+        cov1 = c(1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4),
+        outcome = c(1, NA, NA, 4, 3, 6, 1, 1, 1, 5, NA, 6)
     )
-
-
 
     sample_1_coef <- c(4, 2, 3, 4, 1, 2)
     sample_2_coef <- c(9, 1, 1, 3, 4, 5)
 
-    model_mat <- model.matrix(~ 1 + group + visit + cov1 + cov1 * group, data = dat)
+    model_mat <- model.matrix(
+        ~ 1 + group + visit + cov1 + cov1 * group,
+        data = dat
+    )
 
     # Convienance dataset so we know what numbers to put down in the expected outcomes
     dat2 <- dat %>%
         mutate(expected_1 = model_mat %*% sample_1_coef %>% as.vector) %>%
         mutate(expected_2 = model_mat %*% sample_2_coef %>% as.vector)
-
 
     ld <- longDataConstructor$new(dat, vars)
 

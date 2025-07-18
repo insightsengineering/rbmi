@@ -1,8 +1,8 @@
-if(isFALSE(file.exists("Results"))) {
+if (isFALSE(file.exists("Results"))) {
     dir.create("Results")
 }
 
-if(isFALSE(file.exists("Results/Res_each_sim"))) {
+if (isFALSE(file.exists("Results/Res_each_sim"))) {
     dir.create("Results/Res_each_sim")
 }
 
@@ -11,32 +11,44 @@ library(MASS)
 library(dplyr)
 
 run_simul <- function(H0) {
-
     source("simul_functions.R")
 
     # TODO: double check whether patients in the control arm are imputed under MAR or ref-based
     create_data_ice <- function(data, imp_drug, imp_placebo) {
-
         levels_visit <- levels(data$visit)
         J <- length(levels_visit)
 
         data_hasICE <- data %>%
             group_by(patnum) %>%
-            mutate(hasICE = any(!trt_stop_visit %in% c(levels_visit[J], "Inf"))) %>%
+            mutate(
+                hasICE = any(!trt_stop_visit %in% c(levels_visit[J], "Inf"))
+            ) %>%
             filter(hasICE) %>%
             select(-hasICE)
 
         data_ice <- data_hasICE %>%
             group_by(patnum) %>%
             summarise(
-                "strategy" = ifelse(group[1] == "Intervention", imp_drug, imp_placebo),
-                "visit" = levels_visit[which(trt_stop_visit[1] == levels_visit) + 1])
+                "strategy" = ifelse(
+                    group[1] == "Intervention",
+                    imp_drug,
+                    imp_placebo
+                ),
+                "visit" = levels_visit[
+                    which(trt_stop_visit[1] == levels_visit) + 1
+                ]
+            )
 
         return(data_ice)
     }
 
-    impute_analyze_pool <- function(draws_obj, data_ice, references, vars, visit_analysis) {
-
+    impute_analyze_pool <- function(
+        draws_obj,
+        data_ice,
+        references,
+        vars,
+        visit_analysis
+    ) {
         res_imp <- impute(
             draws = draws_obj,
             data_ice = data_ice,
@@ -51,7 +63,7 @@ run_simul <- function(H0) {
             visit_level = visit_analysis
         )
 
-        if(class(draws_obj) == "condmean") {
+        if (class(draws_obj) == "condmean") {
             res <- pool(
                 analyze_res,
                 alternative = "two.sided",
@@ -70,10 +82,21 @@ run_simul <- function(H0) {
     # simulate data: 100 subjects per arm, assume a non-zero treatment effect
     data <- simul_data(n = 100, H0 = H0)
 
-    factor_vars <- c("patnum", "group", "visit", "time", "trt_stop_visit", "dropout_visit", "time_off_trt")
+    factor_vars <- c(
+        "patnum",
+        "group",
+        "visit",
+        "time",
+        "trt_stop_visit",
+        "dropout_visit",
+        "time_off_trt"
+    )
     numeric_vars <- c("y_bl", "y_noICE", "y_noDropout", "y")
-    data[,factor_vars] <- as.data.frame(lapply(data[,factor_vars], as.factor))
-    data[,numeric_vars] <- as.data.frame(lapply(data[,numeric_vars], as.numeric))
+    data[, factor_vars] <- as.data.frame(lapply(data[, factor_vars], as.factor))
+    data[, numeric_vars] <- as.data.frame(lapply(
+        data[, numeric_vars],
+        as.numeric
+    ))
 
     data_ice_MAR <- create_data_ice(data, "MAR", "MAR")
     data_ice_JR <- create_data_ice(data, "JR", "JR")
@@ -81,13 +104,18 @@ run_simul <- function(H0) {
     data_ice_CIR <- create_data_ice(data, "CIR", "CIR")
 
     # remove baseline
-    data <- data[data$visit != "0",]
+    data <- data[data$visit != "0", ]
     data$visit <- factor(data$visit, levels = levels(data$visit)[-1])
     levels_visit = levels(data$visit)
     J = nlevels(data$visit)
 
     # compute change from baseline
-    data[,c("y_noICE", "y_noDropout", "y")] <- data[,c("y_noICE", "y_noDropout", "y")] - data$y_bl
+    data[, c("y_noICE", "y_noDropout", "y")] <- data[, c(
+        "y_noICE",
+        "y_noDropout",
+        "y"
+    )] -
+        data$y_bl
     data <- as.data.frame(data)
 
     vars <- set_vars(
@@ -104,7 +132,6 @@ run_simul <- function(H0) {
     n_imputations_bayes <- 100
 
     references <- c("Control" = "Control", "Intervention" = "Control")
-
 
     ############################# CONDITIONAL MEAN IMPUTATION (BOOTSTRAP)
 
@@ -159,8 +186,6 @@ run_simul <- function(H0) {
         visit_analysis = levels_visit[J]
     )
 
-
-
     ############################# CONDITIONAL MEAN IMPUTATION (JACKKNIFE)
 
     print("Running conditional mean imputation (jackknife)")
@@ -212,8 +237,6 @@ run_simul <- function(H0) {
         vars,
         visit_analysis = levels_visit[J]
     )
-
-
 
     ############################# BAYESIAN MULTIPLE IMPUTATION
 
@@ -294,16 +317,30 @@ run_simul <- function(H0) {
 
 runsim <- function(i, H0) {
     xx <- run_simul(H0)
-    saveRDS(c(i=i, H0=H0, xx), file = file.path('Results/Res_each_sim', paste('res', i, H0, '.rds', sep = '_')))
+    saveRDS(
+        c(i = i, H0 = H0, xx),
+        file = file.path(
+            'Results/Res_each_sim',
+            paste('res', i, H0, '.rds', sep = '_')
+        )
+    )
 }
 
 
 N <- 10000
 
 ######### simulation example using parallel computing, under H0 = TRUE
-parallel::mclapply(seq.int(N), runsim, H0=TRUE, mc.cores = parallel::detectCores())
+parallel::mclapply(
+    seq.int(N),
+    runsim,
+    H0 = TRUE,
+    mc.cores = parallel::detectCores()
+)
 
 li <- list.files('Results', pattern = '.*\\.rds$', full.names = TRUE)
-saveRDS(bind_rows(lapply(li, function(X) unlist(readRDS(X)))), file = "results.rds")
+saveRDS(
+    bind_rows(lapply(li, function(X) unlist(readRDS(X)))),
+    file = "results.rds"
+)
 
 # results can be seen at Wolbers et al 2022 (https://doi.org/10.1002/pst.2234, tables 2,3)

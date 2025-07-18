@@ -48,7 +48,6 @@ sample_single <- function(
 #' @param ... Not used.
 #' @export
 validate.sample_single <- function(x, ...) {
-
     assert_that(
         x$failed %in% c(TRUE, FALSE),
         is.character(x$ids),
@@ -73,12 +72,6 @@ validate.sample_single <- function(x, ...) {
         )
     }
 }
-
-
-
-
-
-
 
 
 #' Create and validate a `sample_list` object
@@ -114,11 +107,6 @@ validate.sample_list <- function(x, ...) {
 }
 
 
-
-
-
-
-
 #' Create a valid `imputation_single` object
 #'
 #' @param id a character string specifying the subject id.
@@ -135,11 +123,6 @@ print.imputation_single <- function(x, ...) {
 }
 
 
-
-
-
-
-
 #' Create a valid `imputation_df` object
 #'
 #' @param ... a list of `imputation_single`.
@@ -154,10 +137,13 @@ imputation_df <- function(...) {
 
 #' @export
 validate.imputation_df <- function(x, ...) {
-
     assert_that(
         is.null(names(x)),
-        all(vapply(x, function(x) class(x)[[1]] == "imputation_single", logical(1)))
+        all(vapply(
+            x,
+            function(x) class(x)[[1]] == "imputation_single",
+            logical(1)
+        ))
     )
 
     is_valid_imputation_single <- function(x) {
@@ -182,12 +168,6 @@ print.imputation_df <- function(x, ...) {
 }
 
 
-
-
-
-
-
-
 #' A collection of `imputation_singles()` grouped by a single subjid ID
 #'
 #' @param imputations a list of [imputation_single()] objects ordered so that repetitions
@@ -202,7 +182,6 @@ print.imputation_df <- function(x, ...) {
 #' The `id` attribute is determined by extracting the `id` attribute from the contributing
 #' [imputation_single()] objects. An error is throw if multiple `id` are detected
 imputation_list_single <- function(imputations, D = 1) {
-
     ids <- vapply(imputations, `[[`, character(1), "id")
     id <- unique(ids)
 
@@ -227,7 +206,9 @@ validate.imputation_list_single <- function(x, ...) {
         is.character(x$id),
         length(x$id) == 1,
         is.matrix(x$imputations),
-        all(apply(x$imputations, c(1, 2), function(z) has_class(z[[1]], "imputation_single"))),
+        all(apply(x$imputations, c(1, 2), function(z) {
+            has_class(z[[1]], "imputation_single")
+        })),
         all(vapply(x$imputations, `[[`, character(1), "id") == x$id)
     )
     return(TRUE)
@@ -238,14 +219,12 @@ print.imputation_list_single <- function(x, ...) {
     validate(x)
     cat(sprintf("imputation_list_single:\n"))
     cat(sprintf("  id: %s\n", x$id))
-    cat(sprintf("  imputations: %s by %s matrix\n", nrow(x$imputations), ncol(x$imputations)))
+    cat(sprintf(
+        "  imputations: %s by %s matrix\n",
+        nrow(x$imputations),
+        ncol(x$imputations)
+    ))
 }
-
-
-
-
-
-
 
 
 #' List of imputations_df
@@ -277,8 +256,6 @@ print.imputation_list_df <- function(x, ...) {
         cat(sprintf("  imputation_df: %s imputation_single's\n", i))
     }
 }
-
-
 
 
 repr <- function(x, ...) {

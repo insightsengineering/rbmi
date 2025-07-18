@@ -1,4 +1,3 @@
-
 #' Analysis of Covariance
 #'
 #' Performs an analysis of covariance between two groups returning the estimated
@@ -62,7 +61,6 @@ ancova <- function(
     visits = NULL,
     weights = c("counterfactual", "equal", "proportional_em", "proportional")
 ) {
-
     outcome <- vars[["outcome"]]
     group <- vars[["group"]]
     covariates <- vars[["covariates"]]
@@ -72,7 +70,7 @@ ancova <- function(
     expected_vars <- c(extract_covariates(covariates), outcome, group)
 
     assert_that(
-        ! any(visit %in% expected_vars),
+        !any(visit %in% expected_vars),
         msg = paste0(
             "The `vars$visit` variable cannot be a covariate in an ANCOVA model. ",
             "Please adjust `vars$covariates` accordingly"
@@ -121,7 +119,10 @@ ancova <- function(
     for (i in visits) {
         assert_that(
             i %in% data[[visit]],
-            msg = sprintf("Visit `%s` does not appear in `data[[vars$visit]]`", i)
+            msg = sprintf(
+                "Visit `%s` does not appear in `data[[vars$visit]]`",
+                i
+            )
         )
     }
 
@@ -136,7 +137,6 @@ ancova <- function(
     )
     return(unlist(res, recursive = FALSE))
 }
-
 
 
 #' Implements an Analysis of Covariance (ANCOVA)
@@ -171,7 +171,6 @@ ancova_single <- function(
     covariates,
     weights = c("counterfactual", "equal", "proportional_em", "proportional")
 ) {
-
     weights <- match.arg(weights)
     assert_that(
         is.factor(data[[group]]),

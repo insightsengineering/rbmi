@@ -4,7 +4,6 @@ suppressPackageStartupMessages({
 
 
 test_that("Parallisation works as expected", {
-
     skip_if_not(is_full_test())
 
     bign <- 150
@@ -12,15 +11,27 @@ test_that("Parallisation works as expected", {
         c(2, 1, 0.7, 3, 4),
         c(
             0.3,
-            0.4, 0.2,
-            0.5, 0.3, 0.2,
-            0.1, 0.2, 0.3, 0.5
+            0.4,
+            0.2,
+            0.5,
+            0.3,
+            0.2,
+            0.1,
+            0.2,
+            0.3,
+            0.5
         )
     )
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         select(-is_miss)
 
     dat_ice <- dat %>%
@@ -93,7 +104,6 @@ test_that("Parallisation works as expected", {
     x2 <- test_parallel(method_condmean(n_samples = 120))
     x3 <- test_parallel(method_condmean(type = "jackknife"))
     x4 <- test_parallel(method_bmlmi(B = 70, D = 2))
-
 })
 
 
@@ -104,12 +114,19 @@ test_that("Basic parallisation works as expected", {
         c(2, 1, 0.7),
         c(
             0.3,
-            0.4, 0.2
+            0.4,
+            0.2
         )
     )
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         select(-is_miss)
 
     dat_ice <- dat %>%
@@ -155,7 +172,6 @@ test_that("Basic parallisation works as expected", {
     # being used
     # https://github.com/openpharma/mmrm/issues/151
     expect_equal(x1, x2, tolerance = 0.0001)
-
 })
 
 
@@ -185,9 +201,6 @@ test_that("Basic parallisation works as expected", {
 #     )
 # })
 
-
-
-
 test_that("Creation and management of user defined clusters works as expected", {
     # Setup a function to be run on the parallel cluster that requires
     # global objects (namely the `inner_fun` and environment `e`) as well
@@ -211,7 +224,11 @@ test_that("Creation and management of user defined clusters works as expected", 
 
     # Check that function can be run (e.g. all elements are correctly exported)
     set.seed(1223)
-    cl1 <- make_rbmi_cluster(2, list(inner_fun = inner_fun, e = e), c("lubridate", "nlme", "dplyr"))
+    cl1 <- make_rbmi_cluster(
+        2,
+        list(inner_fun = inner_fun, e = e),
+        c("lubridate", "nlme", "dplyr")
+    )
     res_1_a <- parallel::clusterCall(cl1, rnorm, 200)
     res_1_b <- parallel::clusterApplyLB(cl1, c(4, 5), outer_fun)
     expect_equal(res_1_b, list(34, 35))
@@ -219,7 +236,11 @@ test_that("Creation and management of user defined clusters works as expected", 
     # Test that re-using an existing cluster is quick to load
     time <- time_it({
         set.seed(1223)
-        cl2 <- make_rbmi_cluster(cl1, list(inner_fun = inner_fun, e = e), c("lubridate", "nlme"))
+        cl2 <- make_rbmi_cluster(
+            cl1,
+            list(inner_fun = inner_fun, e = e),
+            c("lubridate", "nlme")
+        )
     })
     expect_true(as.numeric(time) <= 2)
 
@@ -234,10 +255,13 @@ test_that("Creation and management of user defined clusters works as expected", 
     expect_true(is_cluster_closed(cl1))
     expect_true(is_cluster_closed(cl2))
 
-
     # Check that seed ensures reproducibility
     set.seed(1223)
-    cl <- make_rbmi_cluster(2, list(inner_fun = inner_fun, e = e), c("lubridate", "nlme"))
+    cl <- make_rbmi_cluster(
+        2,
+        list(inner_fun = inner_fun, e = e),
+        c("lubridate", "nlme")
+    )
     res_3_a <- parallel::clusterCall(cl1, rnorm, 200)
     expect_equal(res_3_a, res_1_a)
     parallel::stopCluster(cl)

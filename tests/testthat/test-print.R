@@ -10,13 +10,14 @@ suppressPackageStartupMessages({
 test_that("print - Pool Method", {
     expect_snapshot(print(.test_print$bayes$pool), cran = TRUE)
     expect_snapshot(print(.test_print$approxbayes$pool), cran = TRUE)
-    expect_snapshot(print(.test_print$condmean_boot$pool$percentile), cran = TRUE)
+    expect_snapshot(
+        print(.test_print$condmean_boot$pool$percentile),
+        cran = TRUE
+    )
     expect_snapshot(print(.test_print$condmean_boot$pool$normal), cran = TRUE)
     expect_snapshot(print(.test_print$condmean_jack$pool), cran = TRUE)
     expect_snapshot(print(.test_print$bmlmi$pool), cran = TRUE)
 })
-
-
 
 
 test_print_get_data <- function(n) {
@@ -26,10 +27,15 @@ test_print_get_data <- function(n) {
 
     dat <- get_sim_data(n, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         select(-is_miss) %>%
         mutate(group = factor(group, labels = c("Placebo", "TRT")))
-
 
     dat_ice <- dat %>%
         group_by(id) %>%
@@ -39,7 +45,6 @@ test_print_get_data <- function(n) {
         ungroup() %>%
         select(id, visit) %>%
         mutate(strategy = "JR")
-
 
     vars <- set_vars(
         outcome = "outcome",
@@ -51,8 +56,6 @@ test_print_get_data <- function(n) {
     )
     list(dat = dat, dat_ice = dat_ice, vars = vars)
 }
-
-
 
 
 test_that("print - approx bayes", {
@@ -91,9 +94,6 @@ test_that("print - approx bayes", {
 })
 
 
-
-
-
 test_that("print - bayesian", {
     set.seed(413)
     dobj <- test_print_get_data(40)
@@ -107,7 +107,7 @@ test_that("print - bayesian", {
                 n_samples = 50,
                 control = control_bayes(
                     thin = 1,
-                    init = function (chain_id) {
+                    init = function(chain_id) {
                         list(
                             b0 = chain_id,
                             b1 = chain_id
@@ -143,9 +143,6 @@ test_that("print - bayesian", {
 })
 
 
-
-
-
 test_that("print - condmean bootstrap", {
     set.seed(313)
     dobj <- test_print_get_data(40)
@@ -155,12 +152,12 @@ test_that("print - condmean bootstrap", {
         data_ice = dobj$dat_ice,
         vars = dobj$vars,
         method = method_condmean(
-            n_samples = 0,     # Original dataset only (no samples)
+            n_samples = 0, # Original dataset only (no samples)
             threshold = 0.2,
             type = "bootstrap",
             same_cov = TRUE,
             REML = TRUE,
-            covariance = "ar1"   # Partial completion of argument name
+            covariance = "ar1" # Partial completion of argument name
         ),
         quiet = TRUE
     )
@@ -189,9 +186,6 @@ test_that("print - condmean bootstrap", {
 })
 
 
-
-
-
 test_that("print - condmean jackknife", {
     set.seed(89513)
     dobj <- test_print_get_data(35)
@@ -216,7 +210,6 @@ test_that("print - condmean jackknife", {
     )
     expect_snapshot(print(impute_cmj), cran = TRUE)
 
-
     v2 <- dobj$vars
     v2$covariates <- c("sex*age")
     analysis_cmj <- analyse(
@@ -226,8 +219,6 @@ test_that("print - condmean jackknife", {
     )
     expect_snapshot(print(analysis_cmj), cran = TRUE)
 })
-
-
 
 
 test_that("print - bmlmi", {

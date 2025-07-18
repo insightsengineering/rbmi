@@ -1,4 +1,3 @@
-
 #' Least Square Means
 #'
 #'
@@ -113,7 +112,8 @@ lsmeans <- function(
         )
     }
 
-    design_fun <- switch(.weights,
+    design_fun <- switch(
+        .weights,
         counterfactual = ls_design_counterfactual,
         proportional = ls_design_counterfactual,
         equal = ls_design_equal,
@@ -128,7 +128,6 @@ lsmeans <- function(
         df = df.residual(model)
     )
 }
-
 
 
 collapse_values <- function(x) {
@@ -181,7 +180,10 @@ ls_design_equal <- function(data, frm, fix) {
         if (is.numeric(data2[[var]])) {
             collection[[var]] <- fix[[var]]
         } else if (is.factor(data2[[var]])) {
-            collection[[var]] <- factor(fix[[var]], levels = levels(data2[[var]]))
+            collection[[var]] <- factor(
+                fix[[var]],
+                levels = levels(data2[[var]])
+            )
         }
     }
 
@@ -232,7 +234,10 @@ ls_design_proportional <- function(data, frm, fix) {
             collection[[var]] <- fix[[var]]
         } else if (is.factor(dat2[[var]])) {
             dat2[[var]] <- factor(fix[[var]], levels = levels(dat2[[var]]))
-            collection[[var]] <- factor(fix[[var]], levels = levels(dat2[[var]]))
+            collection[[var]] <- factor(
+                fix[[var]],
+                levels = levels(dat2[[var]])
+            )
         }
     }
 
@@ -241,7 +246,8 @@ ls_design_proportional <- function(data, frm, fix) {
 
     categorical_vars_fl <- vapply(
         dat2,
-        function(x) is.character(x) || is.factor(x), logical(1)
+        function(x) is.character(x) || is.factor(x),
+        logical(1)
     )
     categorical_vars <- names(which(categorical_vars_fl))
 
@@ -251,7 +257,10 @@ ls_design_proportional <- function(data, frm, fix) {
         length
     )
     assert_that(
-        all.equal(wgts[, categorical_vars], all_combinations[, categorical_vars])
+        all.equal(
+            wgts[, categorical_vars],
+            all_combinations[, categorical_vars]
+        )
     )
 
     wgts_scaled <- wgts[["x"]] / sum(wgts[["x"]])

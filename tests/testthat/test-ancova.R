@@ -5,10 +5,7 @@ suppressPackageStartupMessages({
 })
 
 
-
-
 test_that("ancova", {
-
     ##################
     #
     # Basic usage
@@ -23,7 +20,7 @@ test_that("ancova", {
         age1 = rnorm(n),
         age2 = rnorm(n),
         grp = factor(sample(c("A", "B"), size = n, replace = TRUE)),
-        out = rnorm(n, mean = 50 + 3 * f2n(grp) + 4 * age1 + 8 * age2,  sd = 20)
+        out = rnorm(n, mean = 50 + 3 * f2n(grp) + 4 * age1 + 8 * age2, sd = 20)
     )
 
     mod <- lm(out ~ age1 + age2 + grp, data = dat)
@@ -37,11 +34,15 @@ test_that("ancova", {
     )
     result_actual <- ancova(
         dat,
-        list(outcome = "out", group = "grp", covariates = c("age1", "age2"), visit = "visit")
+        list(
+            outcome = "out",
+            group = "grp",
+            covariates = c("age1", "age2"),
+            visit = "visit"
+        )
     )["trt_vis1"]
 
     expect_equal(result_expected, result_actual)
-
 
     ##################
     #
@@ -57,7 +58,7 @@ test_that("ancova", {
         age1 = rnorm(n),
         age2 = rnorm(n),
         grp = factor(sample(c("A", "B"), size = n, replace = TRUE)),
-        out = rnorm(n, mean = 50 + 3 * f2n(grp) + 4 * age1 + 8 * age2,  sd = 20)
+        out = rnorm(n, mean = 50 + 3 * f2n(grp) + 4 * age1 + 8 * age2, sd = 20)
     )
 
     mod <- lm(out ~ grp, data = dat)
@@ -69,11 +70,12 @@ test_that("ancova", {
             "df" = df.residual(mod)
         )
     )
-    result_actual <- ancova(dat, list(outcome = "out", group = "grp", visit = "ivis"))["trt_ 1"]
+    result_actual <- ancova(
+        dat,
+        list(outcome = "out", group = "grp", visit = "ivis")
+    )["trt_ 1"]
 
     expect_equal(result_expected, result_actual)
-
-
 
     ##################
     #
@@ -87,7 +89,7 @@ test_that("ancova", {
         age2 = rnorm(n),
         vis = "visit 1",
         grp = factor(sample(c("A", "B"), size = n, replace = TRUE)),
-        out = rnorm(n, mean = 50 + 3 * f2n(grp) + 4 * age1 + 8 * age2,  sd = 20)
+        out = rnorm(n, mean = 50 + 3 * f2n(grp) + 4 * age1 + 8 * age2, sd = 20)
     )
 
     mod <- lm(out ~ age1 + age2 + grp, data = dat)
@@ -113,7 +115,6 @@ test_that("ancova", {
 
     expect_equal(result_expected, result_actual)
 
-
     ##################
     #
     # Multiple Visits
@@ -126,7 +127,7 @@ test_that("ancova", {
         age2 = rnorm(n),
         vis = sample(c("visit 1", "visit 2"), size = n, replace = TRUE),
         grp = factor(sample(c("A", "B"), size = n, replace = TRUE)),
-        out = rnorm(n, mean = 50 + 3 * f2n(grp) + 4 * age1 + 8 * age2,  sd = 20)
+        out = rnorm(n, mean = 50 + 3 * f2n(grp) + 4 * age1 + 8 * age2, sd = 20)
     )
 
     mod <- lm(out ~ age1 + age2 + grp, data = filter(dat, vis == "visit 1"))
@@ -191,8 +192,12 @@ test_that("ancova", {
     expect_equal(
         names(result_actual),
         c(
-            "trt_visit 1", "lsm_ref_visit 1", "lsm_alt_visit 1",
-            "trt_visit 2", "lsm_ref_visit 2", "lsm_alt_visit 2"
+            "trt_visit 1",
+            "lsm_ref_visit 1",
+            "lsm_alt_visit 1",
+            "trt_visit 2",
+            "lsm_ref_visit 2",
+            "lsm_alt_visit 2"
         )
     )
 
@@ -208,7 +213,7 @@ test_that("ancova", {
         age2 = rnorm(n),
         vis = sample(c("visit 1", "visit 2"), size = n, replace = TRUE),
         grp = factor(sample(c("A", "B"), size = n, replace = TRUE)),
-        out = rnorm(n, mean = 50 + 3 * f2n(grp) + 4 * age1 + 8 * age2,  sd = 20)
+        out = rnorm(n, mean = 50 + 3 * f2n(grp) + 4 * age1 + 8 * age2, sd = 20)
     )
 
     vars <- set_vars(
