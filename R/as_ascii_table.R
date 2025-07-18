@@ -102,21 +102,14 @@ as_ascii_table <- function(dat, line_prefix = "  ", pcol = NULL) {
     FVALS <- paste0(line_prefix, tvals, collapse = "\n")
 
     ### Output table
-    paste0(
+    # fmt: skip
+    paste0( 
         "\n",
-        line_prefix,
-        TLINE,
-        "\n",
-        line_prefix,
-        thead,
-        "\n",
-        line_prefix,
-        LINE,
-        "\n",
-        FVALS,
-        "\n",
-        line_prefix,
-        LINE
+        line_prefix, TLINE, "\n",
+        line_prefix, thead, "\n",
+        line_prefix, LINE,  "\n",
+        FVALS, "\n",
+        line_prefix, LINE
     )
 }
 
