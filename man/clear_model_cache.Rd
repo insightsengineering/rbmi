@@ -11,6 +11,9 @@ clear_model_cache(keep, cache_dir = getOption("rbmi.cache_dir"))
 
 \item{cache_dir}{The directory where the compiled Stan models are cached. Defaults to the option \code{rbmi.cache_dir}.}
 }
+\value{
+See \code{\link[=unlink]{unlink()}} for details on the return value regarding the deletion of the old model files.
+}
 \description{
 Clears the compiled Stan model cache, keeping only the models that match the \code{keep} argument.
 }

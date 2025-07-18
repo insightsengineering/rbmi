@@ -28,7 +28,7 @@ that belong to the same subject.}
 \item{visit}{a character / factor vector. Indicates which visit the outcome value occurred on.}
 
 \item{group}{a character / factor vector. Indicates which treatment group the patient belongs to.
-Will internally be converted to a factor if it is not already.}
+Will internally be converted to a factor if it is a character vector.}
 
 \item{cov_struct}{a character value. Specifies which covariance structure to use. Must be one of \code{"us"} (default),
 \code{"ad"}, \code{"adh"}, \code{"ar1"}, \code{"ar1h"}, \code{"cs"}, \code{"csh"}, \code{"toep"}, or \code{"toeph"})}

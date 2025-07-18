@@ -19,7 +19,7 @@ any missing values}
 that belong to the same subject.}
 
 \item{group}{a character / factor vector. Indicates which treatment group the patient belongs to.
-Will internally be converted to a factor if it is not already.}
+Will internally be converted to a factor if it is a character vector.}
 }
 \description{
 Converts a design matrix + key variables into a common format

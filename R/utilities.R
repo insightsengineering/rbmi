@@ -585,6 +585,8 @@ get_session_hash <- function() {
 #'
 #' @param keep A character string that specifies which models to keep in the cache.
 #' @param cache_dir The directory where the compiled Stan models are cached. Defaults to the option `rbmi.cache_dir`.
+#' @return See [unlink()] for details on the return value regarding the deletion of the old model files.
+#'
 #' @keywords internal
 clear_model_cache <- function(keep, cache_dir = getOption("rbmi.cache_dir")) {
     assert_that(assertthat::is.string(keep))
@@ -757,6 +759,10 @@ find_stan_file <- function(file, subdir = "") {
 #' Gets a compiled Stan object that can be used with `rstan::sampling()`,
 #' based on the choice of the covariance structure and the prior on the parameters.
 #'
+#' @param covariance A string indicating the covariance structure to be used.
+#' @param prior_cov A string indicating the prior on the covariance parameters.
+#' @return The compiled Stan model object.
+#'
 #' @keywords internal
 get_stan_model <- function(covariance, prior_cov) {
     # Compiling Stan models updates the current seed state. This can lead to
@@ -848,7 +854,6 @@ get_stan_model <- function(covariance, prior_cov) {
         model_name = paste0("rbmi_mmrm_", covariance, "_", prior_cov)
     )
 }
-
 
 #' rbmi settings
 #'

@@ -74,8 +74,19 @@ control_bayes <- function(
     )
 }
 
-# Prepare initial values for the MCMC sampler in case of the default `init = "mmrm"`
-# initial values choice.
+#' Preparation of Initial Values for MCMC Sampler
+#'
+#' This function is used by [complete_control_bayes()] when the `init` argument is set to `"mmrm"`.
+#'
+#' @param stan_data A list containing the Stan data.
+#' @param mmrm_initial A list containing the initial values from the MMRM, including attribute `cov_param_names`
+#'   specifying the names of the covariance parameters.
+#' @param chains The number of chains.
+#' @param covariance A character string indicating the type of covariance structure.
+#' @param prior_cov A character string indicating the type of prior for the covariance parameters.
+#' @return A list of initial values for the MCMC sampler.
+#'
+#' @keywords internal
 prepare_init_vals <- function(
     stan_data,
     mmrm_initial,
@@ -83,6 +94,12 @@ prepare_init_vals <- function(
     covariance,
     prior_cov
 ) {
+    assert_that(is.list(stan_data))
+    assert_that(is.list(mmrm_initial))
+    assert_that(assertthat::is.count(chains))
+    assert_that(assertthat::is.string(covariance))
+    assert_that(assertthat::is.string(prior_cov))
+
     cov_param_names <- attr(mmrm_initial, "cov_param_names")
     init_vals <- c(
         list(
@@ -107,6 +124,22 @@ prepare_init_vals <- function(
     )
 }
 
+#' Completion of the Control Options List
+#'
+#' This function completes the control options list for Bayesian methods by setting
+#' the number of iterations, refresh rate, and initial values based on the provided arguments.
+#'
+#' @param control A list containing part of the control options. Must not contain
+#'   `iter`, `refresh`, `object`, `data`, or `pars`.
+#' @param n_samples Number of samples to be drawn.
+#' @param quiet A logical indicating whether to suppress output during sampling.
+#' @param stan_data A list containing the Stan data.
+#' @param mmrm_initial A list containing the initial values from the MMRM.
+#' @param covariance A character string indicating the type of covariance structure.
+#' @param prior_cov A character string indicating the type of prior for the covariance parameters.
+#' @return A completed control options list with the necessary parameters for Bayesian sampling.
+#'
+#' @keywords internal
 complete_control_bayes <- function(
     control,
     n_samples,

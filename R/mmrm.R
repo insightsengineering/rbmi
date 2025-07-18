@@ -126,6 +126,12 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
     return(formula)
 }
 
+#' Convert Transformed Correlation to Correlation
+#'
+#' @param theta The transformed correlation parameter.
+#' @return The correlation value.
+#'
+#' @keywords internal
 theta_to_cor <- function(theta) {
     theta / sqrt(1 + theta^2)
 }
@@ -199,7 +205,7 @@ extract_params <- function(fit) {
 #' that belong to the same subject.
 #' @param visit a character / factor vector. Indicates which visit the outcome value occurred on.
 #' @param group a character / factor vector. Indicates which treatment group the patient belongs to.
-#'   Will internally be converted to a factor if it is not already.
+#'   Will internally be converted to a factor if it is a character vector.
 #' @param cov_struct a character value. Specifies which covariance structure to use. Must be one of `"us"` (default),
 #' `"ad"`, `"adh"`, `"ar1"`, `"ar1h"`, `"cs"`, `"csh"`, `"toep"`, or `"toeph"`)
 #' @param REML logical. Specifies whether restricted maximum likelihood should be used
