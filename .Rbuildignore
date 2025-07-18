@@ -13,6 +13,7 @@
 ^pkgdown$
 ^data-raw$
 ^.DS_Store$
+^air\.toml$
 
 ^CRAN-SUBMISSION$
 ^cran-comments\.md$
