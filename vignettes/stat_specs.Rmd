@@ -251,12 +251,11 @@ $$
 \frac{(1 / 2)^{1/2}}      {\Gamma(1 / 2)} \, \sigma \,
 y^{-(3/2)} \, \exp \! \left( \!    - \, \frac{1}{2} \, 
 \sigma^2 \, \frac{1}{y} \right) 
- (\#eq:scaledInvChiSquare)
 $$ 
 
 #### Autoregressive order 1 covariance structure
 
-For the time-homogeneous version of the AR(1) covariance structure, we use a flat prior on the correlation parameter $\rho$ and a scaled inverse chi-squared prior for the variance parameter $\sigma^2$, as described in \@ref{eq:scaledInvChiSquare}.
+For the time-homogeneous version of the AR(1) covariance structure, we use a flat prior on the correlation parameter $\rho$ and a scaled inverse chi-squared prior for the variance parameter $\sigma^2$, as described above.
 
 #### Further options
 
