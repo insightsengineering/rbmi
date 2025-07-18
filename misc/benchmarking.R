@@ -1,5 +1,3 @@
-
-
 devtools::load_all()
 
 library(dplyr)
@@ -12,7 +10,7 @@ sigma <- as_vcov(
 dat <- get_sim_data(n = 300, sigma)
 
 
-get_na_prob <- function(x){
+get_na_prob <- function(x) {
     case_when(
         x == "visit_1" ~ 0,
         x == "visit_2" ~ 0.2,
@@ -78,7 +76,6 @@ time_it({
 })
 
 
-
 time_it({
     drawobj <- draws(
         data = dat3,
@@ -108,16 +105,12 @@ time_it({
     pool(anaobj)
 })
 
-
-
 ### 500 subjects with 5 visits  with  2 covariates (and interaction) using JR
 #
 #  20 samples = 18sec  (0.9 sec per samp)
 #  50 samples = 45sec  (0.9 sec per samp)
 # 100 samples = 88sec  (0.9 sec per samp)
 #
-
-
 
 ### 1000 subjects with 5 visits  with  2 covariates (and interaction) using JR
 #
@@ -126,4 +119,3 @@ time_it({
 # 100 samples = 155sec  (1.5 sec per samp)
 #
 # The rest (impute/analyse/pool) on 100 samples = 13.2sec
-

@@ -5,7 +5,9 @@
 #' @param x string
 #' @param width desired length
 string_pad <- function(x, width) {
-    if (nchar(x) >= width) return(x)
+    if (nchar(x) >= width) {
+        return(x)
+    }
     width <- width - nchar(x)
     left <- paste0(rep(" ", floor(width / 2)), collapse = "")
     right <- paste0(rep(" ", ceiling(width / 2)), collapse = "")
@@ -58,7 +60,6 @@ invert <- function(x) {
 #' @param line_prefix Symbols to prefix infront of every line of the table
 #' @param pcol name of column to be handled as a p-value. Sets the value to <0.001 if the value is 0 after rounding
 as_ascii_table <- function(dat, line_prefix = "  ", pcol = NULL) {
-
     dat <- as.data.frame(
         lapply(
             dat,
@@ -85,22 +86,23 @@ as_ascii_table <- function(dat, line_prefix = "  ", pcol = NULL) {
 
         hold[[COL]] <- list()
         hold[[COL]]$WIDTH <- WIDTH
-        hold[[COL]]$VALUES <- sapply(VALUES, string_pad,  width = WIDTH)
-        hold[[COL]]$HEADER <- sapply(COL, string_pad,  width = WIDTH)
+        hold[[COL]]$VALUES <- sapply(VALUES, string_pad, width = WIDTH)
+        hold[[COL]]$HEADER <- sapply(COL, string_pad, width = WIDTH)
     }
 
     ### Collapse into a single value per component ( title , values, width )
-    thold  <- invert(hold)
-    tvals  <- recursive_reduce(thold$VALUES, paste0)
-    thead  <- recursive_reduce(thold$HEADER, paste0)
+    thold <- invert(hold)
+    tvals <- recursive_reduce(thold$VALUES, paste0)
+    thead <- recursive_reduce(thold$HEADER, paste0)
     twidth <- recursive_reduce(thold$WIDTH, sum)
 
     ### Create header and footer lines
     TLINE <- paste0(rep("=", twidth), collapse = "")
-    LINE  <- paste0(rep("-", twidth), collapse = "")
+    LINE <- paste0(rep("-", twidth), collapse = "")
     FVALS <- paste0(line_prefix, tvals, collapse = "\n")
 
     ### Output table
+    # fmt: skip
     paste0(
         "\n",
         line_prefix, TLINE, "\n",
@@ -112,7 +114,6 @@ as_ascii_table <- function(dat, line_prefix = "  ", pcol = NULL) {
 }
 
 
-
 #' as_cropped_char
 #'
 #' Makes any character string above x chars
@@ -120,8 +121,7 @@ as_ascii_table <- function(dat, line_prefix = "  ", pcol = NULL) {
 #' @param inval a single element value
 #' @param crop_at character limit
 #' @param ndp Number of decimal places to display
-as_cropped_char <- function(inval, crop_at = 30, ndp = 3)  {
-
+as_cropped_char <- function(inval, crop_at = 30, ndp = 3) {
     if (is.null(inval)) {
         inval <- "<NULL>"
     } else if (is.na(inval)) {

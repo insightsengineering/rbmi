@@ -14,10 +14,12 @@ ids <- as.factor(rep(paste0("id_", seq.int(n)), each = n_visits))
 visits <- as.factor(rep(seq.int(n_visits) - 1, n))
 
 test_data_basics <- function(res, n_visits, n) {
-
     expect_true(is.data.frame(res))
     expect_true(all(sapply(res[, c("id", "group", "visit")], is.factor)))
-    expect_true(all(sapply(res[, ! colnames(res) %in% c("id", "group", "visit")], is.numeric)))
+    expect_true(all(sapply(
+        res[, !colnames(res) %in% c("id", "group", "visit")],
+        is.numeric
+    )))
     expect_equal(nrow(res), n_visits * n)
     expect_equal(nlevels(res$visit), n_visits)
     expect_length(unique(res$id), n)
@@ -34,13 +36,18 @@ test_data_basics <- function(res, n_visits, n) {
     expect_true(all(!is.na(res$outcome_noICE)))
 
     outcome_baseline <- unique(res$outcome_bl)
-    expect_equal(res$outcome_noICE[seq(from = 1, to = n_visits * n, by = n_visits)], outcome_baseline)
-    expect_equal(res$outcome[seq(from = 1, to = n_visits * n, by = n_visits)], outcome_baseline)
+    expect_equal(
+        res$outcome_noICE[seq(from = 1, to = n_visits * n, by = n_visits)],
+        outcome_baseline
+    )
+    expect_equal(
+        res$outcome[seq(from = 1, to = n_visits * n, by = n_visits)],
+        outcome_baseline
+    )
 }
 
 
 test_that("set_simul_pars", {
-
     pars <- set_simul_pars(
         mu = mu,
         sigma = sigma,
@@ -50,7 +57,15 @@ test_that("set_simul_pars", {
     expect_equal(list(pars$mu, pars$sigma, pars$n), list(mu, sigma, n))
 
     expect_true(
-        all(c(pars$prob_ice1, pars$prob_post_ice1_dropout, pars$prob_ice2, pars$prob_miss) == 0)
+        all(
+            c(
+                pars$prob_ice1,
+                pars$prob_post_ice1_dropout,
+                pars$prob_ice2,
+                pars$prob_miss
+            ) ==
+                0
+        )
     )
     expect_true(
         pars$or_outcome_ice1 == 1
@@ -82,12 +97,10 @@ test_that("set_simul_pars", {
     expect_error(validate(pars))
 
     expect_error(set_simul_pars(mu = mu))
-
 })
 
 
 test_that("simulate_dropout", {
-
     prob_dropout <- 0
     res <- simulate_dropout(prob_dropout, ids)
     expect_equal(res, rep(0, length(ids)))
@@ -128,61 +141,98 @@ test_that("simulate_dropout", {
     subset <- rep(c(1, 1, 1), n)
     res <- simulate_dropout(prob_dropout, ids, subset)
     expect_equal(res, rep(0, length(ids)))
-
 })
 
 
 test_that("simulate_ice", {
-
     pars <- set_simul_pars(mu, sigma, n)
-    res <- simulate_ice(outcome, visits, ids, pars$prob_ice1, pars$or_outcome_ice1, baseline_mean)
+    res <- simulate_ice(
+        outcome,
+        visits,
+        ids,
+        pars$prob_ice1,
+        pars$or_outcome_ice1,
+        baseline_mean
+    )
     expect_equal(res, rep(0, length(ids)))
 
     pars$prob_ice1 <- 1
-    res <- simulate_ice(outcome, visits, ids, pars$prob_ice1, pars$or_outcome_ice1, baseline_mean)
+    res <- simulate_ice(
+        outcome,
+        visits,
+        ids,
+        pars$prob_ice1,
+        pars$or_outcome_ice1,
+        baseline_mean
+    )
     expect_equal(res, rep(c(0, 1, 1), n))
 
     pars$prob_ice1 <- rep(1, n_visits - 1)
-    res <- simulate_ice(outcome, visits, ids, pars$prob_ice1, pars$or_outcome_ice1, baseline_mean)
+    res <- simulate_ice(
+        outcome,
+        visits,
+        ids,
+        pars$prob_ice1,
+        pars$or_outcome_ice1,
+        baseline_mean
+    )
     expect_equal(res, rep(c(0, 1, 1), n))
 
     pars$prob_ice1 <- 0.1
     pars$or_outcome_ice1 <- 3
-    res <- simulate_ice(outcome, visits, ids, pars$prob_ice1, pars$or_outcome_ice1, baseline_mean)
+    res <- simulate_ice(
+        outcome,
+        visits,
+        ids,
+        pars$prob_ice1,
+        pars$or_outcome_ice1,
+        baseline_mean
+    )
     expect_length(res, length(ids))
     expect_true(all(res %in% c(0, 1)))
     expect_true(all(res[seq(from = 1, to = length(ids), by = n_visits)] == 0))
-
 })
 
 
 test_that("adjust_trajectories_single", {
-
     outcome <- outcome[1:3]
     distr_pars_group <- list(mu = mu, sigma = sigma)
     strategy_fun <- getStrategies()$CIR
 
     # no missing values
-    res <- adjust_trajectories_single(distr_pars_group, outcome, strategy_fun, distr_pars_ref = NULL)
+    res <- adjust_trajectories_single(
+        distr_pars_group,
+        outcome,
+        strategy_fun,
+        distr_pars_ref = NULL
+    )
     expect_equal(res, outcome)
 
     distr_pars_ref <- distr_pars_group
     distr_pars_ref$sigma[1, 1] <- 1
     distr_pars_ref$mu <- c(3, 6, 9)
-    res <- adjust_trajectories_single(distr_pars_group, outcome, strategy_fun, distr_pars_ref)
+    res <- adjust_trajectories_single(
+        distr_pars_group,
+        outcome,
+        strategy_fun,
+        distr_pars_ref
+    )
     expect_equal(res, outcome)
 
     # missing values
     outcome[2:3] <- NA
-    res <- adjust_trajectories_single(distr_pars_group, outcome, strategy_fun, distr_pars_ref)
+    res <- adjust_trajectories_single(
+        distr_pars_group,
+        outcome,
+        strategy_fun,
+        distr_pars_ref
+    )
     expect_true(all(!is.na(res)))
     expect_equal(res[1], outcome[1])
-
 })
 
 
 test_that("adjust_trajectories", {
-
     ind_ice <- unlist(
         tapply(
             rep(0, length(ids)),
@@ -209,7 +259,8 @@ test_that("adjust_trajectories", {
         outcome,
         ids,
         ind_ice = rep(0, length(ids)),
-        strategy_fun, distr_pars_ref = NULL
+        strategy_fun,
+        distr_pars_ref = NULL
     )
     expect_equal(res, outcome)
 
@@ -243,7 +294,6 @@ test_that("adjust_trajectories", {
 
 
 test_that("generate_data_single", {
-
     pars_group <- set_simul_pars(
         mu = mu,
         sigma = sigma,
@@ -270,7 +320,9 @@ test_that("generate_data_single", {
     res <- generate_data_single(pars_group, strategy_fun, distr_pars_ref = NULL)
     test_data_basics(res, n_visits, n)
     expect_equal(res$dropout_ice1, rep(c(0, 1, 1), n))
-    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits * n, by = n_visits)])))
+    expect_true(all(is.na(res$outcome[
+        -seq(from = 1, to = n_visits * n, by = n_visits)
+    ])))
 
     # only ice2
     pars_group$prob_ice1 <- 0
@@ -279,7 +331,9 @@ test_that("generate_data_single", {
     res <- generate_data_single(pars_group, strategy_fun, distr_pars_ref = NULL)
     test_data_basics(res, n_visits, n)
     expect_equal(res$ind_ice2, rep(c(0, 1, 1), n))
-    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits * n, by = n_visits)])))
+    expect_true(all(is.na(res$outcome[
+        -seq(from = 1, to = n_visits * n, by = n_visits)
+    ])))
 
     # both ice1 and ice2 have prob 1 -> expect only ice1
     pars_group$prob_ice1 <- 1
@@ -295,7 +349,9 @@ test_that("generate_data_single", {
     test_data_basics(res, n_visits, n)
     expect_equal(res$ind_ice2, rep(c(0, 0, 0), n))
     expect_equal(res$ind_ice1, rep(c(0, 1, 1), n))
-    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits * n, by = n_visits)])))
+    expect_true(all(is.na(res$outcome[
+        -seq(from = 1, to = n_visits * n, by = n_visits)
+    ])))
 
     # prob of both ICEs different than 0 or 1
     pars_group$prob_ice1 <- 0.7
@@ -303,14 +359,15 @@ test_that("generate_data_single", {
     res <- generate_data_single(pars_group, strategy_fun, distr_pars_ref = NULL)
     test_data_basics(res, n_visits, n)
     expect_true(all(res$ind_ice2 * res$ind_ice1 == 0)) # they cannot both happen
-    expect_true(all(is.na(res$outcome[(pars_group$prob_ice1 == 1 &
-                                           pars_group$prob_post_ice1_dropout == 1) |
-                                          pars_group$prob_ice2 == 1])))
+    expect_true(all(is.na(res$outcome[
+        (pars_group$prob_ice1 == 1 &
+            pars_group$prob_post_ice1_dropout == 1) |
+            pars_group$prob_ice2 == 1
+    ])))
 })
 
 
 test_that("simulate_data", {
-
     pars_t <- set_simul_pars(
         mu = mu,
         sigma = sigma,
@@ -336,10 +393,17 @@ test_that("simulate_data", {
     test_data_basics(res, n_visits, 2 * n)
 
     # custom function
-    myfun <- function(pars_group, pars_ref, index_mar) return(strategy_CIR(pars_group, pars_ref, index_mar))
+    myfun <- function(pars_group, pars_ref, index_mar) {
+        return(strategy_CIR(pars_group, pars_ref, index_mar))
+    }
     post_ice1_traj <- "myfun"
     set.seed(123)
-    res_cir <- simulate_data(pars_c, pars_t, post_ice1_traj, strategies = getStrategies(myfun = myfun))
+    res_cir <- simulate_data(
+        pars_c,
+        pars_t,
+        post_ice1_traj,
+        strategies = getStrategies(myfun = myfun)
+    )
     test_data_basics(res, n_visits, 2 * n)
     expect_equal(res, res_cir) # custom function is just CIR
 
@@ -351,7 +415,9 @@ test_that("simulate_data", {
     )
     post_ice1_traj <- "JR"
     res <- simulate_data(pars_c, pars_t, post_ice1_traj)
-    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits * 2 * n, by = n_visits)])))
+    expect_true(all(is.na(res$outcome[
+        -seq(from = 1, to = n_visits * 2 * n, by = n_visits)
+    ])))
 
     pars_c <- pars_t <- set_simul_pars(
         mu = mu,
@@ -360,19 +426,16 @@ test_that("simulate_data", {
         prob_ice2 = 1
     )
     res <- simulate_data(pars_c, pars_t, post_ice1_traj)
-    expect_true(all(is.na(res$outcome[-seq(from = 1, to = n_visits * 2 * n, by = n_visits)])))
+    expect_true(all(is.na(res$outcome[
+        -seq(from = 1, to = n_visits * 2 * n, by = n_visits)
+    ])))
 
     class(pars_c) <- NULL
     expect_error(simulate_data(pars_c, pars_t, post_ice1_traj))
-
 })
 
 
-
-
-
 test_that("generic tests to ensure simulate_data is working as expected", {
-
     expect_around <- function(x, e, margin = 0.05) {
         expect_true(
             all(c(
@@ -423,7 +486,6 @@ test_that("generic tests to ensure simulate_data is working as expected", {
     ) %>%
         as_tibble()
 
-
     count <- dat %>%
         group_by(group) %>%
         tally() %>%
@@ -433,7 +495,6 @@ test_that("generic tests to ensure simulate_data is working as expected", {
         count,
         c(simpar_c$n, simpar_t$n) * 3
     )
-
 
     control_nrow <- dat %>%
         filter(group == "Control") %>%
@@ -446,8 +507,6 @@ test_that("generic tests to ensure simulate_data is working as expected", {
         0
     )
 
-
-
     stat_c <- dat %>%
         filter(group == "Control") %>%
         group_by(visit) %>%
@@ -458,7 +517,6 @@ test_that("generic tests to ensure simulate_data is working as expected", {
             nm = mean(is.na(outcome))
         )
 
-
     stat_t <- dat %>%
         filter(group == "Intervention") %>%
         group_by(visit) %>%
@@ -468,11 +526,9 @@ test_that("generic tests to ensure simulate_data is working as expected", {
             nd = mean(ind_ice1)
         )
 
-
     pt <- c(0, simpar_t$prob_ice1)
     cum_pt <- 1 - cumprod(1 - pt)
     e_mean <- (simpar_t$mu * (1 - cum_pt)) + (simpar_c$mu * cum_pt)
-
 
     expect_around(stat_t$m, e_mean)
     expect_around(stat_t$v, diag(simpar_t$sigma))
@@ -488,5 +544,4 @@ test_that("generic tests to ensure simulate_data is working as expected", {
     pc <- c(0, rep(simpar_c$prob_ice1, length(simpar_c$mu) - 1))
     cum_pc <- 1 - cumprod(1 - pc)
     expect_around(stat_c$nd, cum_pc)
-
 })

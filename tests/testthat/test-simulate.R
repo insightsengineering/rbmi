@@ -1,5 +1,3 @@
-
-
 suppressPackageStartupMessages({
     library(dplyr)
 })
@@ -31,7 +29,6 @@ test_that("simulate data", {
     expect_true(identical(x, y))
     expect_false(identical(x, z))
 
-
     # Show that we can recover known values
     set.seed(3918)
     dat <- simulate_test_data(
@@ -61,23 +58,18 @@ test_that("simulate data", {
 })
 
 
-
 test_that("vcov", {
     actual <- as_vcov(c(1, 2), 0)
     expected <- matrix(c(1, 0, 0, 4), byrow = TRUE, nrow = 2)
     expect_equal(actual, expected)
 
-
     actual <- as_vcov(c(2, 4), 0.5)
     expected <- matrix(c(4, 4, 4, 16), byrow = TRUE, nrow = 2)
     expect_equal(actual, expected)
 
-
     actual <- as_vcov(c(2, 4, 8), c(0.4, 0.5, 0.6))
     expected <- matrix(
-        c(4, 3.2, 8,
-          3.2, 16, 19.2,
-          8, 19.2, 64),
+        c(4, 3.2, 8, 3.2, 16, 19.2, 8, 19.2, 64),
         byrow = TRUE,
         nrow = 3
     )

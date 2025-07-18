@@ -1,4 +1,3 @@
-
 #' R6 Class for scaling (and un-scaling) design matrices
 #'
 #' @description
@@ -18,7 +17,6 @@
 scalerConstructor <- R6::R6Class(
     classname = "scaler",
     public = list(
-
         #' @field centre Vector of column means. The first value is the outcome
         #' variable, all other variables are the predictors.
         centre = NULL,
@@ -26,7 +24,6 @@ scalerConstructor <- R6::R6Class(
         #' @field scales Vector of column standard deviations. The first value is the outcome
         #' variable, all other variables are the predictors.
         scales = NULL,
-
 
         #' @description
         #' Uses `dat` to determine the relevant column means and standard deviations to use
@@ -39,7 +36,6 @@ scalerConstructor <- R6::R6Class(
         #' will not be scaled. This is achieved by setting the corresponding values of centre
         #' to `0` and scale to `1`.
         initialize = function(dat) {
-
             assert_that(
                 is.data.frame(dat) | is.matrix(dat),
                 all(vapply(dat, is.numeric, logical(1))),
@@ -73,7 +69,6 @@ scalerConstructor <- R6::R6Class(
             self$scales <- scales
         },
 
-
         #' @description
         #' Scales a dataset so that all continuous variables have a mean of 0 and a
         #' standard deviation of 1.
@@ -81,7 +76,6 @@ scalerConstructor <- R6::R6Class(
         #' variables have all been expanded out) and whose columns are in the same
         #' order as the dataset used in the initialization function.
         scale = function(dat) {
-
             assert_that(
                 is.data.frame(dat) | is.matrix(dat),
                 all(vapply(dat, is.numeric, logical(1))),
@@ -114,7 +108,6 @@ scalerConstructor <- R6::R6Class(
             return(dat2)
         },
 
-
         #' @description
         #' Unscales a sigma value (or matrix) as estimated by a linear model
         #' using a design matrix scaled by this object. This function only
@@ -130,7 +123,6 @@ scalerConstructor <- R6::R6Class(
             return(sigma * self$scales[[1]]^2)
         },
 
-
         #' @description
         #' Unscales a beta value (or vector) as estimated by a linear model
         #' using a design matrix scaled by this object. This function only
@@ -139,13 +131,15 @@ scalerConstructor <- R6::R6Class(
         #' @param beta A numeric vector of beta coefficients as estimated from a linear model.
         #' @return A numeric vector.
         unscale_beta = function(beta) {
-
             len <- length(self$centre) - 1
 
             assert_that(
                 is.numeric(beta),
                 length(beta) == len,
-                msg = sprintf("`beta` must be a numeric vector of length %s", len)
+                msg = sprintf(
+                    "`beta` must be a numeric vector of length %s",
+                    len
+                )
             )
 
             b_0 <- beta[1]

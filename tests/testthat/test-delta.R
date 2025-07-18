@@ -18,7 +18,10 @@ test_that("delta_template & delta_lagscale", {
     n_vis <- length(visits)
 
     dat <- tibble(
-        pt = factor(rep(c("Tom", "Harry"), each = n_vis), levels = c("Tom", "Harry")),
+        pt = factor(
+            rep(c("Tom", "Harry"), each = n_vis),
+            levels = c("Tom", "Harry")
+        ),
         out = c(1, NA, 3, NA, NA, NA, 5, NA, 6, 7),
         vis = factor(rep(visits, 2), levels = visits),
         grp = factor(rep(c("A", "B"), each = n_vis)),
@@ -52,10 +55,43 @@ test_that("delta_template & delta_lagscale", {
 
     output_expected <- select(dat, pt, vis, grp) %>%
         mutate(
-            is_mar  =     c(TRUE, TRUE, TRUE, FALSE, FALSE,    TRUE, TRUE, TRUE, TRUE, TRUE),
-            is_missing =  c(FALSE, TRUE, FALSE, TRUE, TRUE,    TRUE, FALSE, TRUE, FALSE, FALSE),
-            is_post_ice = c(FALSE, FALSE, FALSE, TRUE, TRUE,    FALSE, TRUE, TRUE, TRUE, TRUE),
-            strategy = c(NA, "MAR", NA, "JTR", "JTR",    "MAR", NA, "MAR", NA, NA),
+            is_mar = c(
+                TRUE,
+                TRUE,
+                TRUE,
+                FALSE,
+                FALSE,
+                TRUE,
+                TRUE,
+                TRUE,
+                TRUE,
+                TRUE
+            ),
+            is_missing = c(
+                FALSE,
+                TRUE,
+                FALSE,
+                TRUE,
+                TRUE,
+                TRUE,
+                FALSE,
+                TRUE,
+                FALSE,
+                FALSE
+            ),
+            is_post_ice = c(
+                FALSE,
+                FALSE,
+                FALSE,
+                TRUE,
+                TRUE,
+                FALSE,
+                TRUE,
+                TRUE,
+                TRUE,
+                TRUE
+            ),
+            strategy = c(NA, "MAR", NA, "JTR", "JTR", "MAR", NA, "MAR", NA, NA),
             delta = rep(0, n_vis * 2)
         ) %>%
         as.data.frame()
@@ -69,7 +105,7 @@ test_that("delta_template & delta_lagscale", {
     delta <- c(-3, -6, -6, -12, 1)
 
     output_expected2 <- output_expected %>%
-        mutate(delta = c(0, 0, 0, -12, -10,     0, 0, -18, 0, 0))
+        mutate(delta = c(0, 0, 0, -12, -10, 0, 0, -18, 0, 0))
 
     expect_equal(
         delta_template(list(data = longd), delta, dlag),
@@ -79,7 +115,6 @@ test_that("delta_template & delta_lagscale", {
 
 
 test_that("d_lagscale", {
-
     dlag <- c(1, 1, 1, 1)
     delta <- c(-3, -6, -6, -12)
 
@@ -120,7 +155,6 @@ test_that("d_lagscale", {
         c(0, 0, 0, 0)
     )
 
-
     dlag <- c(1, 0, 0, 0)
     delta <- c(10, 10, 10, 10)
 
@@ -140,16 +174,10 @@ test_that("d_lagscale", {
         d_lagscale(delta, dlag, c(FALSE, FALSE, FALSE, TRUE)),
         c(0, 0, 0, 10)
     )
-
-
 })
 
 
-
-
-
 test_that("apply_delta", {
-
     ### Using delta = NULL results in no changes
     d1 <- tibble(
         out = c(1, 2, 3),
@@ -164,7 +192,6 @@ test_that("apply_delta", {
     output_actual <- apply_delta(d1, delta, group = "id", outcome = "out")
     expect_equal(d1, output_actual)
 
-
     ### Changes happen as expected
     delta <- tibble(
         id = c("b", "a", "d"),
@@ -175,7 +202,6 @@ test_that("apply_delta", {
     output_actual <- apply_delta(d1, delta, group = "id", outcome = "out")
     expect_equal(output_expected, output_actual, ignore_attr = TRUE)
 
-
     ### Changes based on multigroup
     delta <- tibble(
         id = c("b", "a", "d"),
@@ -184,9 +210,13 @@ test_that("apply_delta", {
     )
     output_expected <- d1
     output_expected$out <- c(1, 3, 3)
-    output_actual <- apply_delta(d1, delta, group = c("id", "v1"), outcome = "out")
+    output_actual <- apply_delta(
+        d1,
+        delta,
+        group = c("id", "v1"),
+        outcome = "out"
+    )
     expect_equal(output_expected, output_actual, ignore_attr = TRUE)
-
 
     ### Duplicate IDs in original dataset work as expected
     d1 <- tibble(
@@ -215,7 +245,12 @@ test_that("apply_delta", {
     )
     output_expected <- d1
     output_expected$out <- c(1, 3, 3, 4)
-    output_actual <- apply_delta(d1, delta, group = c("id", "v1"), outcome = "out")
+    output_actual <- apply_delta(
+        d1,
+        delta,
+        group = c("id", "v1"),
+        outcome = "out"
+    )
     expect_equal(output_expected, output_actual, ignore_attr = TRUE)
 
     delta <- tibble(
@@ -225,9 +260,13 @@ test_that("apply_delta", {
     )
     output_expected <- d1
     output_expected$out <- c(1, 11, 3, 5)
-    output_actual <- apply_delta(d1, delta, group = c("id", "v1"), outcome = "out")
+    output_actual <- apply_delta(
+        d1,
+        delta,
+        group = c("id", "v1"),
+        outcome = "out"
+    )
     expect_equal(output_expected, output_actual, ignore_attr = TRUE)
-
 
     ### Duplicate Ids result in an error
     delta <- tibble(
@@ -241,9 +280,7 @@ test_that("apply_delta", {
 })
 
 
-
 test_that("extract_imputed_dfs + delta", {
-
     set.seed(301)
     sigma <- as_vcov(c(6, 4, 4), c(0.5, 0.2, 0.3))
     dat <- get_sim_data(50, sigma)
@@ -282,13 +319,12 @@ test_that("extract_imputed_dfs + delta", {
     d1 <- extract_imputed_dfs(iobj, 1)[[1]]
     d2 <- extract_imputed_dfs(iobj, 1, delta = delta)[[1]]
 
-    d1$outcome[c(4, 6)] <- d1$outcome[c(4, 6)]  + c(7, 4)
+    d1$outcome[c(4, 6)] <- d1$outcome[c(4, 6)] + c(7, 4)
     expect_equal(d1, d2)
 
     ### check that extraction / imputation hasn't changed sort order
     d1 <- extract_imputed_dfs(iobj, 1)[[1]] %>%
         select(-id)
 
-    expect_equal(d1, select(dat, -id) %>%  as.data.frame)
-
+    expect_equal(d1, select(dat, -id) %>% as.data.frame)
 })

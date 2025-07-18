@@ -11,10 +11,15 @@ get_data <- function(n) {
 
     dat <- get_sim_data(n, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         select(-is_miss) %>%
         mutate(group = factor(group, labels = c("Placebo", "TRT")))
-
 
     dat_ice <- dat %>%
         group_by(id) %>%
@@ -24,7 +29,6 @@ get_data <- function(n) {
         ungroup() %>%
         select(id, visit) %>%
         mutate(strategy = "JR")
-
 
     vars <- set_vars(
         outcome = "outcome",
@@ -39,16 +43,35 @@ get_data <- function(n) {
 
 
 standard_checks <- function(dobj, d, meth) {
-    expect_true(all(c("samples", "formula", "data", "method", "fit", "n_failures") %in% names(dobj)))
+    expect_true(all(
+        c("samples", "formula", "data", "method", "fit", "n_failures") %in%
+            names(dobj)
+    ))
     expect_true(class(dobj)[[1]] == "draws")
     expect_true(class(dobj$formula) == "formula")
     expect_equal(meth, dobj$method)
     expect_true(all(vapply(dobj$samples, function(x) !x$failed, logical(1))))
     expect_true(class(dobj$samples)[[1]] == "sample_list")
-    expect_true(all(vapply(dobj$samples, function(x) length(x$sigma) == 2, logical(1))))
-    expect_true(all(vapply(dobj$samples, function(x) identical(x$sigma[[1]], x$sigma[[2]]), logical(1))))
-    expect_true(all(vapply(dobj$samples, function(x) length(x$beta) == 8, logical(1))))
-    expect_true(all(vapply(dobj$samples, function(x) all(!is.na(x$beta)), logical(1))))
+    expect_true(all(vapply(
+        dobj$samples,
+        function(x) length(x$sigma) == 2,
+        logical(1)
+    )))
+    expect_true(all(vapply(
+        dobj$samples,
+        function(x) identical(x$sigma[[1]], x$sigma[[2]]),
+        logical(1)
+    )))
+    expect_true(all(vapply(
+        dobj$samples,
+        function(x) length(x$beta) == 8,
+        logical(1)
+    )))
+    expect_true(all(vapply(
+        dobj$samples,
+        function(x) all(!is.na(x$beta)),
+        logical(1)
+    )))
 
     validate(dobj$samples)
     for (samp in dobj$samples) {
@@ -58,7 +81,6 @@ standard_checks <- function(dobj, d, meth) {
 
 
 test_that("approxbayes", {
-
     set.seed(40123)
     d <- get_data(80)
     meth <- method_approxbayes(n_samples = 2)
@@ -73,7 +95,6 @@ test_that("approxbayes", {
 
 
 test_that("condmean - bootstrap", {
-
     set.seed(40123)
     d <- get_data(70)
     meth <- method_condmean(n_samples = 1)
@@ -97,7 +118,6 @@ test_that("condmean - bootstrap", {
     expect_equal(dobj2$samples[[1]], dobj$samples[[1]])
     expect_true(!identical(dobj$samples[[2]], dobj2$samples[[2]]))
 
-
     set.seed(623)
     meth <- method_condmean(n_samples = 1)
     dobj3 <- draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
@@ -109,9 +129,7 @@ test_that("condmean - bootstrap", {
 })
 
 
-
 test_that("condmean - jackknife", {
-
     skip_if_not(is_full_test())
 
     set.seed(40123)
@@ -123,7 +141,11 @@ test_that("condmean - jackknife", {
 
     expect_length(dobj$samples, N + 1)
     expect_equal(dobj$samples[[1]]$ids, levels(d$dat$id))
-    expect_true(all(vapply(dobj$samples[-1], function(x) length(x$ids) == N - 1, logical(1))))
+    expect_true(all(vapply(
+        dobj$samples[-1],
+        function(x) length(x$ids) == N - 1,
+        logical(1)
+    )))
     for (i in seq_len(N)) {
         expect_equal(dobj$samples[-1][[i]]$ids, levels(d$dat$id)[-i])
     }
@@ -134,22 +156,25 @@ test_that("condmean - jackknife", {
 })
 
 
-
-
 test_that("bayes", {
     set.seed(40123)
     d <- get_data(140)
-    meth <- method_bayes(n_samples = 2, control = control_bayes(warmup = 200, thin = 2, seed = 123))
+    meth <- method_bayes(
+        n_samples = 2,
+        control = control_bayes(warmup = 200, thin = 2, seed = 123)
+    )
     dobj <- suppressWarnings({
         draws(d$dat, d$dat_ice, d$vars, meth, quiet = TRUE)
     })
     standard_checks(dobj, d, meth)
 
     expect_length(dobj$samples, 2)
-    expect_true(all(vapply(dobj$samples, function(x) all(x$ids == levels(d$dat$id)), logical(1))))
+    expect_true(all(vapply(
+        dobj$samples,
+        function(x) all(x$ids == levels(d$dat$id)),
+        logical(1)
+    )))
 })
-
-
 
 
 test_that("nmar data is removed as expected", {
@@ -169,7 +194,13 @@ test_that("nmar data is removed as expected", {
     nmar_ids <- sample(unique(dat$id), size = 4)
 
     dat2 <- dat %>%
-        mutate(outcome = if_else(id %in% nmar_ids & visit %in% c("visit_2", "visit_3"), NA_real_, outcome))
+        mutate(
+            outcome = if_else(
+                id %in% nmar_ids & visit %in% c("visit_2", "visit_3"),
+                NA_real_,
+                outcome
+            )
+        )
 
     dat_ice <- tibble(
         id = nmar_ids,
@@ -193,12 +224,10 @@ test_that("nmar data is removed as expected", {
     set.seed(101)
     d2 <- draws(dat2, dat_ice, vars, method, quiet = TRUE)
     expect_equal(d1$samples, d2$samples)
-
 })
 
 
 test_that("NULL data_ice works uses MAR by default", {
-
     set.seed(314)
     dat <- simulate_test_data(n = 100)
 
@@ -224,23 +253,27 @@ test_that("NULL data_ice works uses MAR by default", {
 })
 
 
-
-
 test_that("Failure is handled properly", {
-
     set.seed(521)
     bign <- 80
     sigma <- as_vcov(
         c(2, 1, 0.7),
         c(
             0.3,
-            0.4, 0.2
+            0.4,
+            0.2
         )
     )
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         select(-is_miss)
 
     dat_ice <- dat %>%
@@ -261,7 +294,8 @@ test_that("Failure is handled properly", {
         covariates = c("age", "sex", "visit * group")
     )
 
-    MockLongData <- R6Class("MockLongData",
+    MockLongData <- R6Class(
+        "MockLongData",
         inherit = longDataConstructor,
         public = list(
             failure_index = 0,
@@ -282,7 +316,6 @@ test_that("Failure is handled properly", {
 
     ld <- MockLongData$new(dat, vars)
     ld$set_strategies(dat_ice)
-
 
     ##################
     #
@@ -307,8 +340,6 @@ test_that("Failure is handled properly", {
     expect_equal(ld$tracker, 15)
     expect_length(stack$stack, 1)
 
-
-
     method <- method_approxbayes(n_samples = 10, threshold = 0.3)
     ld$set_failed_sample_index(2:5)
     stack <- get_bootstrap_stack(ld, method)
@@ -327,8 +358,6 @@ test_that("Failure is handled properly", {
     )
     expect_equal(ld$tracker, 13)
     expect_length(stack$stack, 8)
-
-
 
     ##################
     #
@@ -353,9 +382,6 @@ test_that("Failure is handled properly", {
     expect_equal(ld$tracker, 15)
     expect_length(stack$stack, 1)
 
-
-
-
     method <- method_approxbayes(n_samples = 10, threshold = 0.3)
     ld$set_failed_sample_index(2:5)
     stack <- get_bootstrap_stack(ld, method)
@@ -374,7 +400,6 @@ test_that("Failure is handled properly", {
     )
     expect_equal(ld$tracker, 13)
     expect_length(stack$stack, 13 - 6)
-
 
     ##################
     #
@@ -402,7 +427,6 @@ test_that("Failure is handled properly", {
     )
     expect_length(stack$stack, length(ld$ids) - 5)
 
-
     method <- method_condmean(type = "jackknife")
     stack <- get_jackknife_stack(ld)
     for (i in 5:10) {
@@ -423,12 +447,7 @@ test_that("Failure is handled properly", {
         regex = "after removing subject '4'"
     )
     expect_length(stack$stack, length(ld$ids) - 6)
-
 })
-
-
-
-
 
 
 test_that("draws is calling get_mmrm_sample properly", {
@@ -437,13 +456,20 @@ test_that("draws is calling get_mmrm_sample properly", {
         c(2, 1, 0.7),
         c(
             0.3,
-            0.4, 0.2
+            0.4,
+            0.2
         )
     )
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         select(-is_miss)
 
     dat_ice <- dat %>%
@@ -464,12 +490,10 @@ test_that("draws is calling get_mmrm_sample properly", {
         covariates = c("age", "sex", "visit * group")
     )
 
-
     ##################################
     #
     #  Conditional Mean
     #
-
 
     method <- method_condmean(n_samples = 2)
     ld <- longDataConstructor$new(dat, vars)
@@ -484,7 +508,6 @@ test_that("draws is calling get_mmrm_sample properly", {
     expect_equal(ld$ids, x$samples[[1]]$ids)
     expect_equal(s1, x$samples[[1]])
 
-
     s2 <- get_mmrm_sample(
         ids = x$samples[[2]]$ids,
         longdata = ld,
@@ -494,14 +517,10 @@ test_that("draws is calling get_mmrm_sample properly", {
     expect_true(length(ld$ids) == length(x$samples[[2]]$ids))
     expect_equal(s2, x$samples[[2]])
 
-
-
-
     ##################################
     #
     #  Approx Bayesian
     #
-
 
     method <- method_approxbayes(n_samples = 2)
     ld <- longDataConstructor$new(dat, vars)
@@ -525,8 +544,6 @@ test_that("draws is calling get_mmrm_sample properly", {
     expect_true(length(ld$ids) == length(x$samples[[1]]$ids))
     expect_equal(s1, x$samples[[1]])
 
-
-
     s2 <- get_mmrm_sample(
         ids = x$samples[[2]]$ids_samp,
         longdata = ld,
@@ -540,22 +557,27 @@ test_that("draws is calling get_mmrm_sample properly", {
 })
 
 
-
 test_that("draws.bmlmi works as expected", {
-
     set.seed(3812)
     bign <- 120
     sigma <- as_vcov(
         c(2, 1, 0.7),
         c(
             0.3,
-            0.4, 0.2
+            0.4,
+            0.2
         )
     )
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         select(-is_miss)
 
     dat_ice <- dat %>%
@@ -602,8 +624,12 @@ test_that("draws.bmlmi works as expected", {
     # being used
     # https://github.com/openpharma/mmrm/issues/151
     expect_equal(
-        lapply(x1$samples, function(x) x[c("beta", "sigma", "theta", "failed")]),
-        lapply(x2$samples, function(x) x[c("beta", "sigma", "theta", "failed")]),
+        lapply(x1$samples, function(x) {
+            x[c("beta", "sigma", "theta", "failed")]
+        }),
+        lapply(x2$samples, function(x) {
+            x[c("beta", "sigma", "theta", "failed")]
+        }),
         tolerance = 0.0001
     )
 
@@ -615,22 +641,26 @@ test_that("draws.bmlmi works as expected", {
 })
 
 
-
-
 test_that("quiet suppress progress messages", {
-
     bign <- 90
     sigma <- as_vcov(
         c(2, 1, 0.7),
         c(
             0.3,
-            0.4, 0.2
+            0.4,
+            0.2
         )
     )
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         select(-is_miss)
 
     dat_ice <- dat %>%
@@ -662,7 +692,6 @@ test_that("quiet suppress progress messages", {
     })
     expect_true(any(grepl("Estimated running time", x)))
     expect_true(any(grepl("Progress: ", x)))
-
 
     set.seed(3013)
     x <- capture.output({

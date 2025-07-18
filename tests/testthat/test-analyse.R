@@ -1,11 +1,9 @@
-
 suppressPackageStartupMessages({
     library(dplyr)
 })
 
 
 test_that("basic constructions of `analysis` work as expected", {
-
     oldopt <- getOption("warnPartialMatchDollar")
     options(warnPartialMatchDollar = TRUE)
 
@@ -18,7 +16,6 @@ test_that("basic constructions of `analysis` work as expected", {
     )
     expect_true(validate(x))
 
-
     x <- as_analysis(
         results = list(
             list(p1 = list("est" = 1)),
@@ -28,7 +25,6 @@ test_that("basic constructions of `analysis` work as expected", {
     )
     expect_true(validate(x))
 
-
     x <- as_analysis(
         results = list(
             list(p1 = list("est" = 1, "df" = 4, "se" = 1)),
@@ -37,7 +33,6 @@ test_that("basic constructions of `analysis` work as expected", {
         method = method_bayes(n_samples = 2)
     )
     expect_true(validate(x))
-
 
     x <- as_analysis(
         results = list(
@@ -48,7 +43,6 @@ test_that("basic constructions of `analysis` work as expected", {
     )
     expect_true(validate(x))
 
-
     x <- as_analysis(
         results = list(
             list(p1 = list("est" = 1, "df" = 4, "se" = NA)),
@@ -57,7 +51,6 @@ test_that("basic constructions of `analysis` work as expected", {
         method = method_bayes(n_samples = 2)
     )
     expect_true(validate(x))
-
 
     x <- as_analysis(
         results = list(
@@ -73,7 +66,6 @@ test_that("basic constructions of `analysis` work as expected", {
 
 
 test_that("incorrect constructions of as_analysis fail", {
-
     #### Incorrect number of samples
     expect_error(
         as_analysis(
@@ -107,7 +99,6 @@ test_that("incorrect constructions of as_analysis fail", {
         ),
         "not equal to nsamp"
     )
-
 
     ### Incorrect analysis parameters
     expect_error(
@@ -164,7 +155,6 @@ test_that("incorrect constructions of as_analysis fail", {
         ),
         "`est`"
     )
-
 
     ### Inconsistent analysis parameters
     expect_error(
@@ -242,11 +232,7 @@ test_that("incorrect constructions of as_analysis fail", {
         method = method_condmean(n_sample = 1)
     )
     expect_true(validate(x))
-
 })
-
-
-
 
 
 test_that("Parallisation works with analyse and produces identical results", {
@@ -256,7 +242,13 @@ test_that("Parallisation works with analyse and produces identical results", {
         c(0.5, 0.3, 0.2, 0.3, 0.5, 0.4)
     )
     dat <- get_sim_data(200, sigma, trt = 8) %>%
-        mutate(outcome = if_else(rbinom(n(), 1, 0.3) == 1 & group == "A", NA_real_, outcome))
+        mutate(
+            outcome = if_else(
+                rbinom(n(), 1, 0.3) == 1 & group == "A",
+                NA_real_,
+                outcome
+            )
+        )
 
     dat_ice <- dat %>%
         group_by(id) %>%
@@ -290,12 +282,10 @@ test_that("Parallisation works with analyse and produces identical results", {
         references = c("A" = "B", "B" = "B")
     )
 
-
     #
     # Here we set up a bunch of different analysis objects using different
     # of parallelisation methods and different dat_delta objects
     #
-
 
     ### Delta 1
 
@@ -329,7 +319,11 @@ test_that("Parallisation works with analyse and produces identical results", {
         inner_fun(...)
     }
 
-    cl <- make_rbmi_cluster(2, objects = list(var = var, inner_fun = inner_fun), "lubridate")
+    cl <- make_rbmi_cluster(
+        2,
+        objects = list(var = var, inner_fun = inner_fun),
+        "lubridate"
+    )
     anaobj_d1_t3 <- analyse(
         imputeobj,
         fun = rbmi::ancova,
@@ -337,7 +331,6 @@ test_that("Parallisation works with analyse and produces identical results", {
         delta = dat_delta_1,
         ncores = cl
     )
-
 
     ### Delta 2
 
@@ -357,7 +350,6 @@ test_that("Parallisation works with analyse and produces identical results", {
         delta = dat_delta_2,
         ncores = cl
     )
-
 
     ### Delta 3 (no delta)
 
@@ -381,7 +373,6 @@ test_that("Parallisation works with analyse and produces identical results", {
     expect_equal(anaobj_d2_t1, anaobj_d2_t3)
 
     expect_equal(anaobj_d3_t1, anaobj_d3_t3)
-
 
     ## Check that they differ (as different deltas have been used)
     ## Main thing is sanity checking that the embedded delta

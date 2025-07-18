@@ -1,5 +1,3 @@
-
-
 #' Create vector of Stratas
 #'
 #' Collapse multiple categorical variables into distinct unique categories.

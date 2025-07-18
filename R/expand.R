@@ -1,6 +1,3 @@
-
-
-
 #' Last Observation Carried Forward
 #'
 #' Returns a vector after applied last observation carried forward imputation.
@@ -16,9 +13,6 @@ locf <- function(x) {
     x[inds > 0L] <- x[!is.na(x)][inds]
     x
 }
-
-
-
 
 
 #' Expand and fill in missing `data.frame` rows
@@ -125,10 +119,13 @@ expand <- function(data, ...) {
 
         assert_that(
             all(df_val %in% vars[[var]]),
-            msg = sprintf(paste(
-                "Variable `%s` contains values/levels that were not specified.",
-                "Please remove any levels that are not required prior to using this function"
-            ), var)
+            msg = sprintf(
+                paste(
+                    "Variable `%s` contains values/levels that were not specified.",
+                    "Please remove any levels that are not required prior to using this function"
+                ),
+                var
+            )
         )
     }
     reference <- expand.grid(vars, stringsAsFactors = FALSE)
@@ -145,12 +142,9 @@ expand <- function(data, ...) {
 }
 
 
-
-
 #' @rdname expand
 #' @export
 fill_locf <- function(data, vars, group = NULL, order = NULL) {
-
     if (!is.null(group)) {
         assert_that(
             is.character(group),
@@ -172,7 +166,10 @@ fill_locf <- function(data, vars, group = NULL, order = NULL) {
     if (is.null(c(group, order))) {
         ord <- seq_len(nrow(data))
     } else {
-        ord <- do.call(base::order, data[, unique(c(group, order)), drop = FALSE])
+        ord <- do.call(
+            base::order,
+            data[, unique(c(group, order)), drop = FALSE]
+        )
     }
 
     data_sorted <- data[ord, ]
@@ -202,7 +199,6 @@ fill_locf <- function(data, vars, group = NULL, order = NULL) {
         data_sorted[[var]] <- new_vals
     }
 
-
     if (length(warn_vars) > 0) {
         warn <- sprintf(
             paste(
@@ -219,7 +215,6 @@ fill_locf <- function(data, vars, group = NULL, order = NULL) {
     ## Restore orginal data sorting
     data_return <- data_sorted[base::order(ord), ]
     return(data_return)
-
 }
 
 
@@ -230,7 +225,6 @@ fill_locf <- function(data, vars, group = NULL, order = NULL) {
 #' @param data a data.frame
 #' @param vars a character vector of variable names
 assert_variables_exist <- function(data, vars) {
-
     assert_that(
         is.data.frame(data)
     )
@@ -249,8 +243,6 @@ assert_variables_exist <- function(data, vars) {
     }
     return(TRUE)
 }
-
-
 
 
 #' @rdname expand

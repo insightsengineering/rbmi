@@ -1,6 +1,3 @@
-
-
-
 #' Compute covariance matrix for some reference-based methods (JR, CIR)
 #'
 #' @description
@@ -23,7 +20,6 @@
 #' inference via multiple imputation." Journal of Biopharmaceutical statistics 23.6 (2013):
 #' 1352-1371.
 compute_sigma <- function(sigma_group, sigma_ref, index_mar) {
-
     if (identical(sigma_group, sigma_ref)) {
         return(sigma_ref)
     }
@@ -49,10 +45,10 @@ compute_sigma <- function(sigma_group, sigma_ref, index_mar) {
 
     sigma_22 <- sigma_ref[!index_mar, !index_mar] -
         sigma_ref[!index_mar, index_mar] %*%
-        inv_R_11 %*%
-        (sigma_ref[index_mar, index_mar] - T_11) %*%
-        inv_R_11 %*%
-        sigma_ref[index_mar, !index_mar]
+            inv_R_11 %*%
+            (sigma_ref[index_mar, index_mar] - T_11) %*%
+            inv_R_11 %*%
+            sigma_ref[index_mar, !index_mar]
 
     sigma <- rbind(
         cbind(sigma_11, sigma_12),
@@ -61,7 +57,6 @@ compute_sigma <- function(sigma_group, sigma_ref, index_mar) {
 
     return(sigma)
 }
-
 
 
 #' Strategies
@@ -108,11 +103,9 @@ strategy_MAR <- function(pars_group, pars_ref, index_mar) {
 }
 
 
-
 #' @rdname strategies
 #' @export
 strategy_JR <- function(pars_group, pars_ref, index_mar) {
-
     if (all(index_mar)) {
         return(pars_group)
     } else if (all(!index_mar)) {
@@ -144,11 +137,9 @@ strategy_CR <- function(pars_group, pars_ref, index_mar) {
 }
 
 
-
 #' @rdname strategies
 #' @export
 strategy_CIR <- function(pars_group, pars_ref, index_mar) {
-
     if (all(index_mar)) {
         return(pars_group)
     } else if (all(!index_mar)) {
@@ -157,7 +148,8 @@ strategy_CIR <- function(pars_group, pars_ref, index_mar) {
 
     mu <- pars_group$mu
     last_mar <- which(!index_mar)[1] - 1
-    increments_from_last_mar_ref <- pars_ref$mu[!index_mar] - pars_ref$mu[last_mar]
+    increments_from_last_mar_ref <- pars_ref$mu[!index_mar] -
+        pars_ref$mu[last_mar]
     mu[!index_mar] <- mu[last_mar] + increments_from_last_mar_ref
 
     sigma <- compute_sigma(
@@ -195,7 +187,6 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar) {
 
     return(pars)
 }
-
 
 
 #' Get imputation strategies

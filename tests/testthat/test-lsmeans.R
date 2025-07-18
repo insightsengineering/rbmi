@@ -2,7 +2,6 @@ library(dplyr)
 library(testthat)
 
 test_that("Least square means works as expected", {
-
     ##### Check that treatment effect is unaffected
     set.seed(101)
     n <- 20
@@ -10,7 +9,7 @@ test_that("Least square means works as expected", {
         c1 = rnorm(n),
         c2 = rnorm(n),
         grp = factor(sample(c("A", "B"), size = n, replace = TRUE)),
-        out = rnorm(n, mean = 50 + 3 * f2n(grp) + 4 * c1 + 8 * c2,  sd = 4),
+        out = rnorm(n, mean = 50 + 3 * f2n(grp) + 4 * c1 + 8 * c2, sd = 4),
         vis = 1
     )
 
@@ -30,7 +29,6 @@ test_that("Least square means works as expected", {
         coef(mod)[["grpB"]],
         mod2$lsm_alt_1$est - mod2$lsm_ref_1$est
     )
-
 
     ####### Comparing directly to emmeans (pre-computed values)
 
@@ -52,7 +50,6 @@ test_that("Least square means works as expected", {
         lsmeans(mod, group = "A"),
         regex = "`group`"
     )
-
 })
 
 
@@ -84,7 +81,11 @@ test_that("LSmeans (proportional) from rbmi equals means of average prediction",
 
     d$trt <- factor(rep(c("Control", "Intervention"), c(10, n - 10)))
 
-    d$y <- 1 * d$x1 + 2 * (d$x2 == "(-1,0]") + 3 * (d$trt == "Intervention") + rnorm(n)
+    d$y <- 1 *
+        d$x1 +
+        2 * (d$x2 == "(-1,0]") +
+        3 * (d$trt == "Intervention") +
+        rnorm(n)
 
     # LSmeans by hand (predict -> average)
     fit <- lm(y ~ trt + x1 + x2 + x3 + x4, data = d)
@@ -96,7 +97,6 @@ test_that("LSmeans (proportional) from rbmi equals means of average prediction",
     d_interv <- d
     d_interv$trt <- "Intervention"
     lsmeans_interv <- mean(predict(fit, newdata = d_interv))
-
 
     # LSmeans using rbmi (average -> predict)
 
@@ -117,7 +117,12 @@ test_that("LSmeans(proportional) returns equivalent results to 'counterfactual'"
         v3 = rnorm(n),
         c1 = sample(c("A", "B"), size = n, replace = TRUE, prob = c(0.8, 0.2)),
         c2 = sample(c("Y", "X"), size = n, replace = TRUE, prob = c(0.6, 0.4)),
-        c3 = sample(c("L", "K", "J"), size = n, replace = TRUE, prob = c(0.2, 0.5, 0.3)),
+        c3 = sample(
+            c("L", "K", "J"),
+            size = n,
+            replace = TRUE,
+            prob = c(0.2, 0.5, 0.3)
+        ),
         error = rnorm(n, 0, 4),
         outcome = 30 +
             5 * v1 +
@@ -138,7 +143,6 @@ test_that("LSmeans(proportional) returns equivalent results to 'counterfactual'"
     dat$c2 <- factor(dat$c2, levels = c("Y", "X"))
     dat$c3 <- factor(dat$c3, levels = c("L", "K", "J"))
     mod <- lm(outcome ~ (v1 * v2 * v3) + (c1 * c2) + (v1 * c1) + c3, data = dat)
-
 
     #
     #
@@ -162,7 +166,6 @@ test_that("LSmeans(proportional) returns equivalent results to 'counterfactual'"
     )
     expect_equal(actual, expected)
 
-
     #
     #
     # Proportional
@@ -184,7 +187,6 @@ test_that("LSmeans(proportional) returns equivalent results to 'counterfactual'"
         "df" = c(lsm1$df, lsm2$df)
     )
     expect_equal(actual, expected)
-
 
     #
     #
@@ -212,12 +214,10 @@ test_that("LSmeans(proportional) returns equivalent results to 'counterfactual'"
         lsmeans(mod, c1 = "A", .weights = "proportional"),
         "NOTE: The `proportional` weighting scheme is an alias for `counterfactual`"
     )
-
 })
 
 
 test_that("lsmeans correctly handles case when only using 1 categorical (#412)", {
-
     set.seed(2412)
     n <- 4000
     dat <- tibble(
@@ -239,7 +239,6 @@ test_that("lsmeans correctly handles case when only using 1 categorical (#412)",
             error
     )
     mod <- lm(outcome ~ (v1 * v2 * v3) + (c1), data = dat)
-
 
     #
     #
@@ -263,7 +262,6 @@ test_that("lsmeans correctly handles case when only using 1 categorical (#412)",
     )
     expect_equal(actual, expected)
 
-
     #
     #
     # Proportional
@@ -285,7 +283,6 @@ test_that("lsmeans correctly handles case when only using 1 categorical (#412)",
         "df" = c(lsm1$df, lsm2$df)
     )
     expect_equal(actual, expected)
-
 
     #
     #
@@ -309,4 +306,3 @@ test_that("lsmeans correctly handles case when only using 1 categorical (#412)",
     )
     expect_equal(actual, expected)
 })
-

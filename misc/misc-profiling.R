@@ -1,16 +1,13 @@
-
-
-
 devtools::load_all()
 library(dplyr)
 library(testthat)
 library(tibble)
 
-sigma <- as_vcov(c(2, 1, 0.7,3,0.1), c(0.5, 0.3, 0.2, 0.1, 0.2, 0.3, 0.5, 0.6,0.1, 0.3))
+sigma <- as_vcov(
+    c(2, 1, 0.7, 3, 0.1),
+    c(0.5, 0.3, 0.2, 0.1, 0.2, 0.3, 0.5, 0.6, 0.1, 0.3)
+)
 nsamp <- 500
-
-
-
 
 
 set.seed(1512)
@@ -40,12 +37,12 @@ vars <- set_vars(
     covariates = c("age", "sex", "visit * group")
 )
 # profvis::profvis({
-    drawobj <- draws(
-        data = dat,
-        data_ice = dat_ice,
-        vars = vars,
-        method = method_bmlmi(B = 30, D = 10)
-    )
+drawobj <- draws(
+    data = dat,
+    data_ice = dat_ice,
+    vars = vars,
+    method = method_bmlmi(B = 30, D = 10)
+)
 # })
 
 # 84 seconds
@@ -58,9 +55,6 @@ profvis::profvis({
         method = method_approxbayes(n_samples = 100)
     )
 })
-
-
-
 
 
 # 3 seconds
@@ -95,26 +89,21 @@ poolobj <- pool(
 expect_pool_est(poolobj, 4)
 
 
-
-
-
-
-
-
-
-
-
 test_that("Basic Usage - Bayesian", {
-
     skip_if_not(is_nightly())
 
     set.seed(5123)
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         select(-is_miss)
-
 
     dat_ice <- dat %>%
         group_by(id) %>%
@@ -124,7 +113,6 @@ test_that("Basic Usage - Bayesian", {
         ungroup() %>%
         select(id, visit) %>%
         mutate(strategy = "MAR")
-
 
     vars <- set_vars(
         outcome = "outcome",
@@ -191,20 +179,21 @@ test_that("Basic Usage - Bayesian", {
 })
 
 
-
-
-
 test_that("Basic Usage - Condmean", {
-
     skip_if_not(is_nightly())
 
     set.seed(4642)
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         select(-is_miss)
-
 
     dat_ice <- dat %>%
         group_by(id) %>%
@@ -214,7 +203,6 @@ test_that("Basic Usage - Condmean", {
         ungroup() %>%
         select(id, visit) %>%
         mutate(strategy = "JR")
-
 
     vars <- set_vars(
         outcome = "outcome",
@@ -277,23 +265,21 @@ test_that("Basic Usage - Condmean", {
 })
 
 
-
-
-
-
-
-
 test_that("Custom Strategies and Custom analysis functions", {
-
     skip_if_not(is_nightly())
 
     set.seed(8368)
 
     dat <- get_sim_data(bign, sigma, trt = 8) %>%
         mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(outcome = if_else(is_miss == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         select(-is_miss)
-
 
     dat_ice <- dat %>%
         group_by(id) %>%
@@ -304,7 +290,6 @@ test_that("Custom Strategies and Custom analysis functions", {
         select(id, visit) %>%
         mutate(strategy = "XX")
 
-
     vars <- set_vars(
         outcome = "outcome",
         group = "group",
@@ -314,7 +299,6 @@ test_that("Custom Strategies and Custom analysis functions", {
         covariates = c("age", "sex", "visit * group")
     )
 
-
     drawobj <- draws(
         data = dat,
         data_ice = dat_ice,
@@ -322,20 +306,19 @@ test_that("Custom Strategies and Custom analysis functions", {
         method = method_condmean(n_samples = nsamp)
     )
 
-
     imputeobj <- impute(
         draws = drawobj,
         references = c("A" = "B", "B" = "B"),
         strategies = getStrategies("XX" = strategy_JR)
     )
 
-    myfun <- function(dat){
+    myfun <- function(dat) {
         dat <- dat %>% filter(visit == "visit_3")
         mod <- lm(data = dat, outcome ~ group + age + sex)
         list(
             "treatment_effect" = list(
                 "est" = coef(mod)[[2]],
-                "se" = sqrt(vcov(mod)[2,2]),
+                "se" = sqrt(vcov(mod)[2, 2]),
                 "df" = df.residual(mod)
             )
         )
@@ -353,8 +336,6 @@ test_that("Custom Strategies and Custom analysis functions", {
         4 + c(-0.3, 0.3)
     )
 
-
-
     dat_delta <- delta_template(imputeobj) %>%
         as_tibble() %>%
         mutate(delta = if_else(group == "B" & is_missing, 20, 0))
@@ -369,12 +350,9 @@ test_that("Custom Strategies and Custom analysis functions", {
 
     expect_pool_est(poolobj_delta, 14, "treatment_effect")
 
-
-
     dat_delta <- delta_template(imputeobj) %>%
         as_tibble() %>%
         mutate(delta = if_else(group == "B" & is_missing, 40, 0))
-
 
     anaobj_delta <- analyse(
         imputeobj,
@@ -385,9 +363,6 @@ test_that("Custom Strategies and Custom analysis functions", {
     poolobj_delta <- pool(anaobj_delta)
 
     expect_pool_est(poolobj_delta, 24, "treatment_effect")
-
-
-
 
     ddat <- tibble(
         id = "1",
@@ -411,9 +386,7 @@ test_that("Custom Strategies and Custom analysis functions", {
 })
 
 
-
 test_that("Sorting doesn't change results", {
-
     skip_if_not(is_nightly())
 
     set.seed(4642)
@@ -463,10 +436,9 @@ test_that("Sorting doesn't change results", {
         vars = vars,
         method = method
     )
-    imputeobj <- impute( draws = drawobj, references = c("A" = "B", "B" = "B"))
-    anaobj <- analyse( imputeobj, fun = rbmi::ancova, vars = vars2)
+    imputeobj <- impute(draws = drawobj, references = c("A" = "B", "B" = "B"))
+    anaobj <- analyse(imputeobj, fun = rbmi::ancova, vars = vars2)
     poolobj <- pool(results = anaobj)
-
 
     set.seed(984)
     drawobj2 <- draws(
@@ -475,8 +447,8 @@ test_that("Sorting doesn't change results", {
         vars = vars,
         method = method
     )
-    imputeobj2 <- impute( draws = drawobj2, references = c("A" = "B", "B" = "B"))
-    anaobj2 <- analyse( imputeobj2, fun = rbmi::ancova, vars = vars2)
+    imputeobj2 <- impute(draws = drawobj2, references = c("A" = "B", "B" = "B"))
+    anaobj2 <- analyse(imputeobj2, fun = rbmi::ancova, vars = vars2)
     poolobj2 <- pool(results = anaobj2)
 
     ## Tidy up things that will never be the same:
@@ -492,13 +464,7 @@ test_that("Sorting doesn't change results", {
 })
 
 
-
-
-
-
-
 test_that("Multiple imputation references / groups work as expected (end to end checks)", {
-
     skip_if_not(is_nightly())
 
     extract_ci <- function(x, ref) {
@@ -521,7 +487,7 @@ test_that("Multiple imputation references / groups work as expected (end to end 
     mcoefs_c <- list("int" = 10, "age" = 3, "sex" = 6, "trt" = s2, "visit" = 2)
     mcoefs_d <- list("int" = 10, "age" = 3, "sex" = 6, "trt" = s3, "visit" = 2)
 
-    sigma_sd <-c(2, 2, 2)
+    sigma_sd <- c(2, 2, 2)
     sigma_cor <- c(0.1, 0.5, 0.3)
 
     n <- 100
@@ -539,7 +505,13 @@ test_that("Multiple imputation references / groups work as expected (end to end 
             mutate(group2 = if_else(group == "A", "A", "D")) %>%
             mutate(id = paste0(id, "C"))
     ) %>%
-        mutate(outcome = if_else(rbinom(n(), 1, 0.5) == 1 & visit == "visit_3", NA_real_, outcome)) %>%
+        mutate(
+            outcome = if_else(
+                rbinom(n(), 1, 0.5) == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
         mutate(id = factor(id)) %>%
         mutate(group2 = factor(group2, levels = c("A", "B", "C", "D")))
 
@@ -564,7 +536,7 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         data_ice = dat_ice,
         vars = vars,
         method = method_bayes(
-            same_cov = FALSE,            
+            same_cov = FALSE,
             n_samples = 150,
             control = control_bayes(
                 warmup = 25,
@@ -574,13 +546,10 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         quiet = TRUE
     )
 
-
     lm(
         data = dat %>% filter(visit == "visit_3"),
         outcome ~ sex + age + group
     )
-
-
 
     t1 <- (s1 + 0) / 2
     t2 <- (s2 + 0) / 2
@@ -605,7 +574,6 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         mean(c(t1, t2, t3)),
         extract_ci(x, c("A" = "A", "B" = "C", "C" = "C", "D" = "C"))
     )
-
 
     x <- draws(
         data = dat,
@@ -654,4 +622,3 @@ test_that("Multiple imputation references / groups work as expected (end to end 
         extract_ci(x, c("A" = "A", "B" = "C", "C" = "C", "D" = "C"))
     )
 })
-

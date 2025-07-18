@@ -12,8 +12,6 @@ set_col_names <- function(x, nam) {
 f2n <- function(x) as.numeric(x) - 1
 
 
-
-
 strip_names <- function(x) {
     names(x) <- NULL
     colnames(x) <- NULL
@@ -29,17 +27,20 @@ is_cluster_closed <- function(cl) {
     if (!is(cl, "cluster")) {
         stop("`cl` is not a cluster object")
     }
-    result <- tryCatch({
-        parallel::clusterCall(cl, function() Sys.info())
-        FALSE
-    }, error = function(e) {
-        TRUE
-    })
+    result <- tryCatch(
+        {
+            parallel::clusterCall(cl, function() Sys.info())
+            FALSE
+        },
+        error = function(e) {
+            TRUE
+        }
+    )
 }
 
 
 trunctate <- function(x, n) {
-    floor(x * 10 ^ n) / 10 ^ n
+    floor(x * 10^n) / 10^n
 }
 
 
@@ -53,8 +54,14 @@ get_sim_data <- function(n, sigma, trt = 4) {
     covars <- tibble::tibble(
         id = 1:n,
         age = rnorm(n),
-        group = factor(sample(c("A", "B"), size = n, replace = TRUE), levels = c("A", "B")),
-        sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F"))
+        group = factor(
+            sample(c("A", "B"), size = n, replace = TRUE),
+            levels = c("A", "B")
+        ),
+        sex = factor(
+            sample(c("M", "F"), size = n, replace = TRUE),
+            levels = c("M", "F")
+        )
     )
 
     dat <- mvtnorm::rmvnorm(n, sigma = sigma) %>%
@@ -65,12 +72,17 @@ get_sim_data <- function(n, sigma, trt = 4) {
         dplyr::mutate(visit = factor(.data$visit)) %>%
         dplyr::arrange(id, .data$visit) %>%
         dplyr::left_join(covars, by = "id") %>%
-        dplyr::mutate(outcome = .data$outcome + 5 + 3 * .data$age + 3 * f2n(.data$sex) + trt * f2n(.data$group)) %>%
+        dplyr::mutate(
+            outcome = .data$outcome +
+                5 +
+                3 * .data$age +
+                3 * f2n(.data$sex) +
+                trt * f2n(.data$group)
+        ) %>%
         dplyr::mutate(id = as.factor(id))
 
     return(dat)
 }
-
 
 
 time_it <- function(expr) {
@@ -79,7 +91,6 @@ time_it <- function(expr) {
     stop <- Sys.time()
     difftime(stop, start, units = "secs")
 }
-
 
 
 expect_within <- function(x, bounds) {
@@ -98,7 +109,6 @@ is_full_test <- function() {
 }
 
 
-
 # Simple function to enable 1 function mocks
 with_mocking <- function(expr, ..., where) {
     x <- list(...)
@@ -107,7 +117,9 @@ with_mocking <- function(expr, ..., where) {
     assertthat::assert_that(length(x) == 1)
     hold <- get(nam, envir = where)
     islocked <- bindingIsLocked(nam, where)
-    if (islocked) unlockBinding(nam, where)
+    if (islocked) {
+        unlockBinding(nam, where)
+    }
     assign(nam, fun, envir = where)
 
     x <- tryCatch(

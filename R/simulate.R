@@ -1,6 +1,3 @@
-
-
-
 #' Create simulated datasets
 #'
 #' @description
@@ -57,9 +54,14 @@ simulate_test_data <- function(
     n = 200,
     sd = c(3, 5, 7),
     cor = c(0.1, 0.7, 0.4),
-    mu = list("int" = 10, "age" = 3, "sex" = 2, "trt" = c(0, 4, 8), "visit" = c(0, 1, 2))
+    mu = list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 2,
+        "trt" = c(0, 4, 8),
+        "visit" = c(0, 1, 2)
+    )
 ) {
-
     nv <- length(sd)
     assert_that(
         n %% 2 == 0,
@@ -92,7 +94,10 @@ simulate_test_data <- function(
         id = pt_ids,
         age = rnorm(n),
         group = factor(rep(c("A", "B"), each = n / 2), levels = c("A", "B")),
-        sex = factor(sample(c("M", "F"), size = n, replace = TRUE), levels = c("M", "F")),
+        sex = factor(
+            sample(c("M", "F"), size = n, replace = TRUE),
+            levels = c("M", "F")
+        ),
         stringsAsFactors = FALSE
     )
 
@@ -107,12 +112,15 @@ simulate_test_data <- function(
     samps_dat <- as.data.frame(samps_mat)
     samps_dat$id <- pt_ids
 
-    dat <- Reduce(rbind, lapply(vis_ids, function(vis) {
-        x <- samps_dat[, c("id", vis)]
-        colnames(x) <- c("id", "outcome")
-        x[["visit"]] <- vis
-        as.data.frame(x)
-    }))
+    dat <- Reduce(
+        rbind,
+        lapply(vis_ids, function(vis) {
+            x <- samps_dat[, c("id", vis)]
+            colnames(x) <- c("id", "outcome")
+            x[["visit"]] <- vis
+            as.data.frame(x)
+        })
+    )
 
     dat$visit <- factor(dat$visit)
     dat <- sort_by(dat, c("id", "visit"))
@@ -137,7 +145,6 @@ simulate_test_data <- function(
 
     return(dat2)
 }
-
 
 
 #' @rdname simulate_test_data
