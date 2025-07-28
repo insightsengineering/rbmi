@@ -33,8 +33,8 @@ transformed parameters {
 }
 
 model {
-    // We use an implicit uniform prior on rho.
     for(g in 1:G){
+        rho[g] ~ uniform(-1, 1);
         // Note that we pass the estimated sd, not sd^2 here as 
         // the scale parameter of the scaled inverse Chi-Square distribution.
         var_const[g] ~ scaled_inv_chi_square(1, sd_par[g]);
