@@ -255,7 +255,7 @@ $$
 
 #### Autoregressive order 1 covariance structure
 
-For the time-homogeneous version of the AR(1) covariance structure, we use a flat prior on the correlation parameter $\rho$ and a scaled inverse chi-squared prior for the variance parameter $\sigma^2$, as described above.
+For the time-homogeneous version of the AR(1) covariance structure, we use a uniform prior on the correlation parameter $\rho$ and a scaled inverse chi-squared prior for the variance parameter $\sigma^2$, as described above.
 
 #### Further options
 
