@@ -321,7 +321,6 @@ test_that("get_stan_model works as expected depending on covariance and prior on
 
     local_cache_dir <- withr::local_tempdir()
     withr::local_options(rbmi.cache_dir = local_cache_dir)
-    clear_model_cache(keep = "none", cache_dir = local_cache_dir)
 
     model <- expect_silent(get_stan_model("us", "lkj"))
     expect_snapshot(model)
