@@ -837,9 +837,12 @@ get_stan_model <- function(covariance, prior_cov) {
             cov_prior_blocks,
             machine_double_eps = .Machine$double.eps
         )
-        model_string <- jinjar::render(
-            .x = model_template,
-            !!!model_data
+        model_string <- do.call(
+            jinjar::render,
+            c(
+                list(.x = model_template),
+                model_data
+            )
         )
         clear_model_cache(keep = session_hash)
         writeLines(model_string, model_file)
