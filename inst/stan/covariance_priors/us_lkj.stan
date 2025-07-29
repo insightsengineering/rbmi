@@ -27,7 +27,7 @@ model {
         for(i in 1:n_visit) {
             // Note that we need to pass the estimated sigma, not sigma^2 here as 
             // the scale parameter.
-            vars[g][i] ~ scaled_inv_chi_square(1, sqrt(Sigma_par[g][i,i]));
+            vars[g][i] ~ scaled_inv_chi_square(3, sqrt(Sigma_par[g][i,i]));
         }
     }
 }
