@@ -80,7 +80,7 @@ test_that("adjust_dimensions works with same covariance and matrix parameter", {
         same_cov = TRUE,
         param_list = list(
             matrix(1:4, 2, 2),
-            matrix(1:4, 2, 2)
+            matrix(5:8, 2, 2)
         )
     )
     expected <- list(matrix(1:4, 2, 2))
@@ -90,7 +90,7 @@ test_that("adjust_dimensions works with same covariance and matrix parameter", {
 test_that("adjust_dimensions works with same covariance and scalar parameter", {
     result <- adjust_dimensions(
         same_cov = TRUE,
-        param_list = list(1, 1)
+        param_list = list(1, 2)
     )
     expected <- array(1, dim = 1)
     expect_equal(result, expected)
