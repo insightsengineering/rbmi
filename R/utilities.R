@@ -606,8 +606,6 @@ clear_model_cache <- function(keep, cache_dir = getOption("rbmi.cache_dir")) {
 #' A list with 1 element per standard Stan program blocks.
 #' This object is mostly used internally as a reference for
 #' what blocks are parsed from a covariance / prior Stan definition file.
-#'
-#' @export
 STAN_BLOCKS <- list(
     functions = "functions",
     data = "data",
@@ -646,8 +644,7 @@ as_stan_fragments <- function(x, stan_blocks = STAN_BLOCKS) {
 
     errmsg <- paste(
         "There were problems parsing the `%s` block.",
-        "Please consult the `Formatting Stan Files` section of the",
-        "`Extending jmpost` vignette"
+        "Please report this as a bug."
     )
 
     # Check to see if any block openings exist that have code on the same line
