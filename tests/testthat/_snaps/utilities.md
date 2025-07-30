@@ -24,7 +24,7 @@
     Code
       model
     Output
-      S4 class stanmodel 'rbmi_mmrm_us_lkj' coded as follows:
+      S4 class stanmodel 'rbmi_MMRM_us_lkj' coded as follows:
       functions {
           int integer_division(int a, int b) {
               // perform a/b ensuring return value is also an int
@@ -132,7 +132,7 @@
     Code
       model
     Output
-      S4 class stanmodel 'rbmi_mmrm_us_default' coded as follows:
+      S4 class stanmodel 'rbmi_MMRM_us_default' coded as follows:
       functions {
           int integer_division(int a, int b) {
               // perform a/b ensuring return value is also an int
@@ -226,7 +226,7 @@
     Code
       model
     Output
-      S4 class stanmodel 'rbmi_mmrm_ar1_default' coded as follows:
+      S4 class stanmodel 'rbmi_MMRM_ar1_default' coded as follows:
       functions {
           int integer_division(int a, int b) {
               // perform a/b ensuring return value is also an int
