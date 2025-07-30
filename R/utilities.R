@@ -813,12 +813,8 @@ get_stan_model <- function(covariance, prior_cov) {
     cache_dir <- getOption("rbmi.cache_dir")
     dir.create(cache_dir, showWarnings = FALSE, recursive = TRUE)
     session_hash <- get_session_hash()
-    file_name <- paste0(
-        "rbmi_MMRM_",
-        session_hash,
-        "_",
-        cov_prior_file
-    )
+    model_name <- paste0("rbmi_MMRM_", covariance, "_", prior_cov)
+    file_name <- paste0(model_name, "_", session_hash, ".stan")
     model_file <- file.path(cache_dir, file_name)
 
     # If it does not exist yet, create the model file from the template
@@ -848,7 +844,8 @@ get_stan_model <- function(covariance, prior_cov) {
 
     rstan::stan_model(
         file = model_file,
-        auto_write = getOption("rbmi.enable_cache")
+        auto_write = getOption("rbmi.enable_cache"),
+        model_name = model_name
     )
 }
 
