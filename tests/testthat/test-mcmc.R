@@ -801,7 +801,10 @@ test_that("fit_mcmc works with AR1 covariance model", {
         "sex" = 6,
         "trtslope" = 7
     )
-    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+    rho <- 0.5
+    ar1_corr <- ar1_matrix(rho, 3)
+    sd <- 2
+    sigma <- sd^2 * ar1_corr
 
     dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
     mat <- model.matrix(
@@ -835,6 +838,9 @@ test_that("fit_mcmc works with AR1 covariance model", {
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
     assert_that(all(beta_within$inside))
 
+    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    assert_that(all(sigma_within$inside))
+
     # check extract_draws() worked properly
     test_extract_draws(
         extract_draws(fit$fit, method$n_samples),
@@ -855,7 +861,10 @@ test_that("fit_mcmc works with AR1 covariance model and MMRM start values", {
         "sex" = 6,
         "trtslope" = 7
     )
-    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+    rho <- 0.3
+    ar1_corr <- ar1_matrix(rho, 3)
+    sd <- 3
+    sigma <- sd^2 * ar1_corr
 
     dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
     mat <- model.matrix(
@@ -890,6 +899,9 @@ test_that("fit_mcmc works with AR1 covariance model and MMRM start values", {
 
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
     assert_that(all(beta_within$inside))
+
+    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    assert_that(all(sigma_within$inside))
 })
 
 test_that("fit_mcmc works with AR1 covariance model and group specific estimates", {
@@ -903,7 +915,9 @@ test_that("fit_mcmc works with AR1 covariance model and group specific estimates
         "sex" = 6,
         "trtslope" = 7
     )
-    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+    ar1_corr <- ar1_matrix(0.4, 3)
+    sd <- 2
+    sigma <- sd^2 * ar1_corr
 
     dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
     mat <- model.matrix(
