@@ -848,8 +848,7 @@ get_stan_model <- function(covariance, prior_cov) {
 
     rstan::stan_model(
         file = model_file,
-        auto_write = getOption("rbmi.enable_cache"),
-        model_name = paste0("rbmi_mmrm_", covariance, "_", prior_cov)
+        auto_write = getOption("rbmi.enable_cache")
     )
 }
 
