@@ -814,7 +814,7 @@ test_that("fit_mcmc works with AR1 covariance model", {
 
     method <- method_bayes(
         covariance = "ar1",
-        n_samples = 200,
+        n_samples = 500,
         same_cov = TRUE,
         control = control_bayes(
             warmup = 200,
@@ -874,7 +874,7 @@ test_that("fit_mcmc works with AR1 covariance model and MMRM start values", {
 
     method <- method_bayes(
         covariance = "ar1",
-        n_samples = 200,
+        n_samples = 500,
         same_cov = TRUE,
         control = control_bayes(
             warmup = 200,
