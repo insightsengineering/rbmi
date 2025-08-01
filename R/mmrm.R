@@ -126,11 +126,23 @@ as_mmrm_formula <- function(mmrm_df, cov_struct) {
     return(formula)
 }
 
+#' Convert Transformed Correlation to Correlation
+#'
+#' @param theta The transformed correlation parameter.
+#' @return The correlation value.
+#'
+#' @keywords internal
+theta_to_cor <- function(theta) {
+    theta / sqrt(1 + theta^2)
+}
 
 #' Extract parameters from a MMRM model
 #'
 #' Extracts the beta and sigma coefficients from an MMRM model created
 #' by [mmrm::mmrm()].
+#'
+#' For structured covariance models, additional parameter estimates will be returned, based on the type
+#' of the covariance model.
 #'
 #' @importFrom mmrm VarCorr
 #' @param fit an object created by [mmrm::mmrm()]
@@ -140,7 +152,8 @@ extract_params <- function(fit) {
     names(beta) <- NULL
 
     sigma <- VarCorr(fit)
-    if (!is.list(sigma)) {
+    same_cov <- !is.list(sigma)
+    if (same_cov) {
         sigma <- list(sigma)
     }
     sigma <- lapply(sigma, function(mat) {
@@ -148,11 +161,29 @@ extract_params <- function(fit) {
         rownames(mat) <- NULL
         return(mat)
     })
-
     params <- list(
         beta = beta,
         sigma = sigma
     )
+
+    cov_type <- mmrm::component(fit, "cov_type")
+    theta_est <- mmrm::component(fit, "theta_est")
+    theta_est <- if (same_cov) {
+        list(theta_est)
+    } else {
+        groups <- names(sigma)
+        n_par_per_group <- length(theta_est) / length(groups)
+        split(theta_est, rep(groups, each = n_par_per_group))
+    }
+
+    if (cov_type == "ar1") {
+        lapply(theta_est, function(theta) {
+            assert_that(identical(length(theta), 2L))
+        })
+        params$sd <- lapply(theta_est, function(theta) exp(theta[1]))
+        params$rho <- lapply(theta_est, function(theta) theta_to_cor(theta[2]))
+    }
+
     return(params)
 }
 
@@ -174,6 +205,7 @@ extract_params <- function(fit) {
 #' that belong to the same subject.
 #' @param visit a character / factor vector. Indicates which visit the outcome value occurred on.
 #' @param group a character / factor vector. Indicates which treatment group the patient belongs to.
+#'   Will internally be converted to a factor if it is a character vector.
 #' @param cov_struct a character value. Specifies which covariance structure to use. Must be one of `"us"` (default),
 #' `"ad"`, `"adh"`, `"ar1"`, `"ar1h"`, `"cs"`, `"csh"`, `"toep"`, or `"toeph"`)
 #' @param REML logical. Specifies whether restricted maximum likelihood should be used
@@ -202,6 +234,10 @@ fit_mmrm <- function(
     REML = TRUE,
     same_cov = TRUE
 ) {
+    if (!is.factor(group)) {
+        assert_that(is.character(group))
+        group <- factor(group)
+    }
     dat_mmrm <- as_mmrm_df(
         designmat = designmat,
         outcome = outcome,
@@ -226,22 +262,29 @@ fit_mmrm <- function(
         return(fit)
     }
 
-    # extract regression coefficients and covariance matrices
+    # Extract regression coefficients and covariance parameters.
     params <- extract_params(fit)
+    cov_param_names <- setdiff(names(params), "beta")
     params$failed <- fit$failed
 
-    # adjust covariance matrix
+    # Replicate covariance parameter estimates across groups if
+    # same covariance is used across groups.
     if (same_cov) {
-        assert_that(length(params$sigma) == 1)
-        params$sigma <- replicate(
-            length(levels(group)),
-            params$sigma[[1]],
-            simplify = FALSE
-        )
+        for (cov_param in cov_param_names) {
+            assert_that(length(params[[cov_param]]) == 1)
+            params[[cov_param]] <- replicate(
+                length(levels(group)),
+                params[[cov_param]][[1]],
+                simplify = FALSE
+            )
+            names(params[[cov_param]]) <- levels(group)
+        }
     }
-    names(params$sigma) <- levels(group)
 
-    return(params)
+    structure(
+        params,
+        cov_param_names = cov_param_names
+    )
 }
 
 

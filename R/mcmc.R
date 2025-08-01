@@ -1,3 +1,71 @@
+#' Adjust Dimensions of Prior Parameters for Stan Usage
+#'
+#' This function adjusts the dimensions of prior parameters based on whether
+#' the same covariance structure is used for all groups, and whether the parameters
+#' are lists of matrices or numeric vectors. This is really only necessary to deal with
+#' some peculiarities of how Stan handles arrays and vectors. See [prepare_prior_params()]
+#' where this is used.
+#'
+#' @param same_cov A logical indicating whether the same covariance structure is used for all groups.
+#'   If `TRUE`, the function will return the parameters only once.
+#' @param param_list A list of parameters, which can be matrices or numeric vectors. Note that this
+#'   contains one element for each group, independent of `same_cov`.
+#' @return The parameters adjusted to the appropriate dimensions for Stan.
+#'
+#' @keywords internal
+adjust_dimensions <- function(same_cov, param_list) {
+    assert_that(is.logical(same_cov) && assertthat::is.scalar(same_cov))
+    assert_that(is.list(param_list) && length(param_list) > 0)
+
+    first_element <- param_list[[1]]
+    assert_that(
+        is.matrix(first_element) ||
+            (is.vector(first_element) & length(first_element) == 1),
+        msg = "Function currently only supports list elements of matrices or length-1 scalars"
+    )
+    if (same_cov) {
+        # Assume for same_cov=TRUE that the first element is the value to be used for everything
+        param_list <- list(first_element)
+    }
+    if (is.vector(first_element)) {
+        # Stan treats a R-vector of length 1 as a scalar.
+        # Thus for a Stan-array of length 1 Rstan needs the data to be an R-array with dim=1
+        # This arises when we have same_cov=TRUE as G=1 e.g. `array[G] real sd_par;`
+        param_list <- array(unlist(param_list), dim = length(param_list))
+    }
+    param_list
+}
+
+#' Prepare Prior Parameters for Covariance Model Prior Distribution
+#'
+#' Based on the `covariance` and `prior_cov` choices, this function prepares the prior parameters
+#' for the covariance model.
+#'
+#' @param stan_data A list containing the Stan data, to which the prior parameters will be added.
+#' @param covariance A character string indicating the covariance structure (e.g., "us", "ar1").
+#' @param prior_cov A character string indicating the prior covariance type (e.g., "default", "lkj").
+#' @param mmrm_initial A list containing the initial MMRM fit results, which includes
+#'   the relevant frequentist estimates.
+#' @param same_cov A logical indicating whether to use the same covariance structure for all groups.
+#' @return Modified `stan_data` with prior parameters added.
+#'
+#' @keywords internal
+prepare_prior_params <- function(
+    stan_data,
+    covariance,
+    prior_cov,
+    mmrm_initial,
+    same_cov
+) {
+    if (covariance == "us") {
+        stan_data$Sigma_par <- adjust_dimensions(same_cov, mmrm_initial$sigma)
+    } else if (covariance == "ar1") {
+        stan_data$sd_par <- adjust_dimensions(same_cov, mmrm_initial$sd)
+        stan_data$rho_par <- adjust_dimensions(same_cov, mmrm_initial$rho)
+    }
+    stan_data
+}
+
 #' Fit the base imputation model using a Bayesian approach
 #'
 #' @description
@@ -54,14 +122,14 @@ fit_mcmc <- function(
     method,
     quiet = FALSE
 ) {
-    # Fit MMRM (needed for Sigma prior parameter and possibly initial values).
+    # Fit MMRM (needed for prior parameters and possibly initial values).
     mmrm_initial <- fit_mmrm(
         designmat = designmat,
         outcome = outcome,
         subjid = subjid,
         visit = visit,
         group = group,
-        cov_struct = "us",
+        cov_struct = method$covariance,
         REML = TRUE,
         same_cov = method$same_cov
     )
@@ -82,10 +150,12 @@ fit_mcmc <- function(
         )
     )
 
-    stan_data$Sigma_init <- ife(
-        isTRUE(method$same_cov),
-        list(mmrm_initial$sigma[[1]]),
-        mmrm_initial$sigma
+    stan_data <- prepare_prior_params(
+        stan_data = stan_data,
+        covariance = method$covariance,
+        prior_cov = method$prior_cov,
+        mmrm_initial = mmrm_initial,
+        same_cov = method$same_cov
     )
 
     control <- complete_control_bayes(
@@ -93,12 +163,17 @@ fit_mcmc <- function(
         n_samples = method$n_samples,
         quiet = quiet,
         stan_data = stan_data,
-        mmrm_initial = mmrm_initial
+        mmrm_initial = mmrm_initial,
+        covariance = method$covariance,
+        prior_cov = method$prior_cov
     )
 
     sampling_args <- c(
         list(
-            object = get_stan_model(),
+            object = get_stan_model(
+                covariance = method$covariance,
+                prior_cov = method$prior_cov
+            ),
             data = stan_data,
             pars = c("beta", "Sigma")
         ),

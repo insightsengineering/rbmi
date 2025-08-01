@@ -227,9 +227,15 @@ Frequentist parameter estimation for the base imputation is based on REML. The u
 
 The Bayesian imputation model is fitted with the R package `rstan` (@Rstan). `rstan` is the R interface of Stan. Stan is a powerful and flexible statistical software developed by a dedicated team and implements Bayesian inference with state-of-the-art MCMC sampling procedures. The multivariate normal model with missing data specified in section \@ref(sec:imputationModelSpecs) can be considered a generalization of the models described in the Stan user's guide (see @Rstan [section 3.5]).
 
-The same prior distributions as in the SAS implementation of the "five macros" are used (@FiveMacros), i.e. an improper flat priors for the regression coefficients and a weakly informative inverse Wishart prior for the covariance matrix (or matrices). Specifically, let $S \in \mathbb{R}^{J \times J}$ be a symmetric positive definite matrix and $\nu \in (J-1, \infty)$. Then the symmetric positive definite matrix $x \in \mathbb{R}^{J \times J}$ has density:
+As in the "five macros", the MCMC algorithm is initialized at the parameters from a frequentist REML fit (see section \@ref(sec:imputationModelREML)). As described below, we are using only weakly informative priors for the parameters. Therefore, the Markov chain is essentially starting from the targeted stationary posterior distribution and only a minimal amount of burn-in of the chain is required. 
+
+We now describe the available combinations of covariance models and prior specifications.
+
+#### Inverse Wishart prior for unstructured covariance matrix
+
+By default, the same prior distributions as in the SAS implementation of the "five macros" are used (@FiveMacros), i.e. an improper flat priors for the regression coefficients and a weakly informative inverse Wishart prior for the covariance matrix (or matrices). Specifically, let $S \in \mathbb{R}^{J \times J}$ be a symmetric positive definite matrix and $\nu \in (J-1, \infty)$. Then the symmetric positive definite matrix $x \in \mathbb{R}^{J \times J}$ has density:
 $$
-\text{InvWish}(x \vert \nu, S) = \frac{1}{2^{\nu J/2}} \frac{1}{\Gamma_J(\frac{\nu}{2})} \vert S \vert^{\nu/2} \vert x \vert ^{-(\nu + J + 1)/2} \text{exp}(-\frac{1}{2} \text{tr}(Sx^{-1})).
+\text{InvWish}(x \vert \nu, S) = \frac{1}{2^{\nu J/2}} \frac{1}{\Gamma_J(\frac{\nu}{2})} \vert S \vert^{\nu/2} \vert x \vert ^{-(\nu + J + 1)/2} \text{exp}\left(-\frac{1}{2} \text{tr}(Sx^{-1})\right).
 $$
 For $\nu > J+1$ the mean is given by: 
 $$
@@ -237,7 +243,26 @@ E[x] = \frac{S}{\nu - J - 1}.
 $$
 We choose $S$ equal to the estimated covariance matrix from the frequentist REML fit and $\nu = J+2$ as these are the lowest degrees of freedom that guarantee a finite mean. Setting the degrees of freedom with such a low $\nu$ ensures that the prior has little impact on the posterior. Moreover, this choice allows to interpret the parameter $S$ as the mean of the prior distribution.
 
-As in the "five macros", the MCMC algorithm is initialized at the parameters from a frequentist REML fit (see section \@ref(sec:imputationModelREML)). As described above, we are using only weakly informative priors for the parameters. Therefore, the Markov chain is essentially starting from the targeted stationary posterior distribution and only a minimal amount of burn-in of the chain is required. 
+#### LKJ and scaled inverse chi-squared priors for unstructured covariance matrix
+
+Alternatively, the user can specify to use an LKJ prior for the unstructured correlation matrix, combined with independent scaled inverse chi-squared priors for the variances. The LKJ prior has density proportional to 1, i.e. it is a uniform prior on the space of correlation matrices. 
+
+For a single variance $y$, we use a scaled inverse chi-square prior with density given by:
+
+$$
+\text{ScaledInvChiSquare}(y \vert \nu,\sigma) =
+\frac{(\nu / 2)^{1\nu/2}}{\Gamma(\nu / 2)} \, \sigma^\nu \,
+y^{-(\nu/2 + 1)} \, \exp \! \left( \!    - \, \frac{1}{2} \, \nu\, 
+\sigma^2 \, \frac{1}{y} \right) 
+$$ 
+
+This distribution is a special case of the inverse-Wishart distribution for a univariate random variable. Similarly as above, also here we use $\nu = 3$ degrees of freedom to guarantee a finite mean. The scale parameter $\sigma$ is set to the estimated standard deviation from the frequentist REML fit, which leads to the prior mean for the variance $y$ to be equal to the estimated variance from the frequentist REML fit.
+
+#### Autoregressive order 1 covariance structure
+
+For the time-homogeneous version of the AR(1) covariance structure, we use a uniform prior on the correlation parameter $\rho$ and a scaled inverse chi-square prior for the variance parameter $\sigma^2$, as described above.
+
+#### Further options
 
 The initial values and other expert options for the MCMC sampling can be defined via the `control` argument to `method_bayes`, which is simplified with the corresponding `control_bayes()` function call.
 With the default initial values, i.e. when using `init = "mmrm"` in the `control` list, then for obtaining reproducible results an external `set.seed()` call is required before running `draws()`. In particular, please note that it is not sufficient to just set the `seed` option in the `control` list.

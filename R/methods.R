@@ -16,6 +16,10 @@
 #' In the case of `method_condmean(type = "jackknife")` this argument
 #' must be set to `NULL`. See details.
 #'
+#' @param prior_cov a character string that specifies the prior used for the covariance model
+#' parameters. Must be one of `"default"` (default) or `"lkj"` (for the unstructured covariance
+#' model). See the Statistical Specifications vignette for details.
+#'
 #' @param control a list which specifies further lower level details of the computations.
 #' Currently only used by `method_bayes()`, please see [control_bayes()] for details and
 #' default settings.
@@ -71,8 +75,6 @@
 #'
 #' For full details please see [`mmrm::cov_types()`].
 #'
-#' Note that at present Bayesian methods only support unstructured.
-#'
 #' In the case of `method_condmean(type = "bootstrap")`, `method_approxbayes()` and `method_bmlmi()` repeated
 #' bootstrap samples of the original dataset are taken with an MMRM fitted to each sample.
 #' Due to the randomness of these sampled datasets, as well as limitations in the optimisers
@@ -94,8 +96,13 @@
 #'
 #' @export
 method_bayes <- function(
+    covariance = c(
+        "us",
+        "ar1"
+    ),
     same_cov = TRUE,
     n_samples = 20,
+    prior_cov = c("default", "lkj"),
     control = control_bayes(),
     burn_in = NULL,
     burn_between = NULL
@@ -109,14 +116,53 @@ method_bayes <- function(
         )
     )
 
+    covariance <- match.arg(covariance)
+    prior_cov <- match.arg(prior_cov)
+
+    valid_prior <- is_valid_covariance_prior(prior_cov, covariance)
+    assert_that(
+        valid_prior,
+        msg = attr(valid_prior, "msg")
+    )
+
     x <- list(
+        covariance = covariance,
         same_cov = same_cov,
         n_samples = n_samples,
+        prior_cov = prior_cov,
         control = control
     )
     return(as_class(x, c("method", "bayes")))
 }
 
+#' Check for Valid Covariance and Prior Combination
+#'
+#' This function checks if the specified covariance structure and prior combination
+#' is valid.
+#'
+#' @param prior_cov A character string indicating the prior covariance type.
+#' @param covariance A character string indicating the covariance structure.
+#' @return Logical scalar indicating if the combination is valid, with a `msg` attribute in case it is not.
+#'
+#' @keywords internal
+is_valid_covariance_prior <- function(prior_cov, covariance) {
+    msg <- if (prior_cov == "default") {
+        NULL
+    } else if (prior_cov == "lkj") {
+        if (covariance == "us") {
+            NULL
+        } else {
+            paste(
+                "The LKJ prior (`prior_cov = \"lkj\"`) can only be used with the",
+                "unstructured covariance model (`covariance = \"us\"`)"
+            )
+        }
+    }
+    structure(
+        is.null(msg),
+        msg = msg
+    )
+}
 
 #' @rdname method
 #' @export

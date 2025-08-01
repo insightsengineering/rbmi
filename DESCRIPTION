@@ -36,7 +36,8 @@ Suggests:
     purrr,
     ggplot2,
     rstan (>= 2.26.0),
-    R.rsp
+    R.rsp,
+    withr
 Config/testthat/edition: 3
 Imports:
     mmrm,
@@ -45,7 +46,10 @@ Imports:
     tools,
     methods,
     R6,
-    assertthat
+    assertthat,
+    jinjar,
+    fs,
+    stringr
 Depends: 
     R (>= 3.4.0)
 License: Apache License (>= 2)

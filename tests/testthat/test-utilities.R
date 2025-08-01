@@ -248,7 +248,6 @@ test_that("Stack", {
     expect_error(mstack$pop(1), "items to return")
 })
 
-
 test_that("clear_model_cache", {
     td <- tempdir()
     files <- c(
@@ -259,10 +258,10 @@ test_that("clear_model_cache", {
         file.path(td, "rbmi_MMRM_456.log")
     )
     expect_equal(file.create(files), rep(TRUE, 5))
-    clear_model_cache(td)
+    clear_model_cache(keep = "456", cache_dir = td)
     expect_equal(
         file.exists(files),
-        c(FALSE, FALSE, FALSE, FALSE, TRUE)
+        c(FALSE, FALSE, TRUE, TRUE, TRUE)
     )
     file.remove(files[5])
 })
@@ -298,4 +297,37 @@ test_that("format_method_descriptions", {
         "init2: function (chain_id)",
         fixed = TRUE
     )
+})
+
+test_that("as_stan_fragments works as expected", {
+    x <- c(
+        "data {",
+        "  int<lower=0> N;",
+        "  vector[N] y;",
+        "}",
+        "parameters {",
+        "  real mu;",
+        "}",
+        "model {",
+        "  y ~ normal(mu, 1);",
+        "}"
+    )
+    result <- as_stan_fragments(x)
+    expect_snapshot(result)
+})
+
+test_that("get_stan_model works as expected depending on covariance and prior on parameters", {
+    skip_if_not(is_full_test())
+
+    local_cache_dir <- withr::local_tempdir()
+    withr::local_options(rbmi.cache_dir = local_cache_dir)
+
+    model <- expect_silent(get_stan_model("us", "lkj"))
+    expect_snapshot(model)
+
+    model <- expect_silent(get_stan_model("us", "default"))
+    expect_snapshot(model)
+
+    model <- expect_silent(get_stan_model("ar1", "default"))
+    expect_snapshot(model)
 })

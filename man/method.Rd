@@ -9,8 +9,10 @@
 \title{Set the multiple imputation methodology}
 \usage{
 method_bayes(
+  covariance = c("us", "ar1"),
   same_cov = TRUE,
   n_samples = 20,
+  prior_cov = c("default", "lkj"),
   control = control_bayes(),
   burn_in = NULL,
   burn_between = NULL
@@ -43,6 +45,10 @@ method_bmlmi(
 )
 }
 \arguments{
+\item{covariance}{a character string that specifies the structure of the covariance
+matrix to be used in the imputation model. Must be one of \code{"us"} (default), \code{"ad"},
+\code{"adh"}, \code{"ar1"}, \code{"ar1h"}, \code{"cs"}, \code{"csh"}, \code{"toep"}, or \code{"toeph"}). See details.}
+
 \item{same_cov}{a logical, if \code{TRUE} the imputation model will be fitted using a single
 shared covariance matrix for all observations. If \code{FALSE} a separate covariance
 matrix will be fit for each group as determined by the \code{group} argument of
@@ -52,6 +58,10 @@ matrix will be fit for each group as determined by the \code{group} argument of
 In the case of \code{method_condmean(type = "jackknife")} this argument
 must be set to \code{NULL}. See details.}
 
+\item{prior_cov}{a character string that specifies the prior used for the covariance model
+parameters. Must be one of \code{"default"} (default) or \code{"lkj"} (for the unstructured covariance
+model). See the Statistical Specifications vignette for details.}
+
 \item{control}{a list which specifies further lower level details of the computations.
 Currently only used by \code{method_bayes()}, please see \code{\link[=control_bayes]{control_bayes()}} for details and
 default settings.}
@@ -59,10 +69,6 @@ default settings.}
 \item{burn_in}{deprecated. Please use the \code{warmup} argument in \code{\link[=control_bayes]{control_bayes()}} instead.}
 
 \item{burn_between}{deprecated. Please use the \code{thin} argument in \code{\link[=control_bayes]{control_bayes()}} instead.}
-
-\item{covariance}{a character string that specifies the structure of the covariance
-matrix to be used in the imputation model. Must be one of \code{"us"} (default), \code{"ad"},
-\code{"adh"}, \code{"ar1"}, \code{"ar1h"}, \code{"cs"}, \code{"csh"}, \code{"toep"}, or \code{"toeph"}). See details.}
 
 \item{threshold}{a numeric between 0 and 1, specifies the proportion of bootstrap
 datasets that can fail to produce valid samples before an error is thrown.
@@ -110,8 +116,6 @@ argument. Currently supported structures include:
 }
 
 For full details please see \code{\link[mmrm:covariance_types]{mmrm::cov_types()}}.
-
-Note that at present Bayesian methods only support unstructured.
 
 In the case of \code{method_condmean(type = "bootstrap")}, \code{method_approxbayes()} and \code{method_bmlmi()} repeated
 bootstrap samples of the original dataset are taken with an MMRM fitted to each sample.

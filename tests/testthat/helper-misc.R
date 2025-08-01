@@ -131,3 +131,13 @@ with_mocking <- function(expr, ..., where) {
     )
     return(x)
 }
+
+ar1_matrix <- function(rho, n) {
+    corr_matrix <- matrix(0, nrow = n, ncol = n)
+    for (i in 1:n) {
+        for (j in 1:n) {
+            corr_matrix[i, j] <- rho^abs(i - j)
+        }
+    }
+    corr_matrix
+}

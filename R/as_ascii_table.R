@@ -103,7 +103,7 @@ as_ascii_table <- function(dat, line_prefix = "  ", pcol = NULL) {
 
     ### Output table
     # fmt: skip
-    paste0( 
+    paste0(
         "\n",
         line_prefix, TLINE, "\n",
         line_prefix, thead, "\n",
