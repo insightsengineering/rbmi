@@ -13,8 +13,10 @@
 <url><loc>https://insightsengineering.github.io/rbmi/index.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/news/index.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/QR_decomp.html</loc></url>
+<url><loc>https://insightsengineering.github.io/rbmi/reference/STAN_BLOCKS.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/Stack.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/add_class.html</loc></url>
+<url><loc>https://insightsengineering.github.io/rbmi/reference/adjust_dimensions.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/adjust_trajectories.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/adjust_trajectories_single.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/analyse.html</loc></url>
@@ -35,12 +37,15 @@
 <url><loc>https://insightsengineering.github.io/rbmi/reference/as_model_df.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/as_simple_formula.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/as_stan_array.html</loc></url>
+<url><loc>https://insightsengineering.github.io/rbmi/reference/as_stan_fragments.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/as_strata.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/assert_variables_exist.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/char2fct.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/check_ESS.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/check_hmc_diagn.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/check_mcmc.html</loc></url>
+<url><loc>https://insightsengineering.github.io/rbmi/reference/clear_model_cache.html</loc></url>
+<url><loc>https://insightsengineering.github.io/rbmi/reference/complete_control_bayes.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/compute_sigma.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/control.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/convert_to_imputation_list_df.html</loc></url>
@@ -56,6 +61,7 @@
 <url><loc>https://insightsengineering.github.io/rbmi/reference/extract_imputed_df.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/extract_imputed_dfs.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/extract_params.html</loc></url>
+<url><loc>https://insightsengineering.github.io/rbmi/reference/find_stan_file.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/fit_mcmc.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/fit_mmrm.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/format_method_descriptions.html</loc></url>
@@ -94,6 +100,7 @@
 <url><loc>https://insightsengineering.github.io/rbmi/reference/is_char_one.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/is_in_rbmi_development.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/is_num_char_fact.html</loc></url>
+<url><loc>https://insightsengineering.github.io/rbmi/reference/is_valid_covariance_prior.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/locf.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/longDataConstructor.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/ls_design.html</loc></url>
@@ -107,6 +114,8 @@
 <url><loc>https://insightsengineering.github.io/rbmi/reference/pool_bootstrap_normal.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/pool_bootstrap_percentile.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/pool_internal.html</loc></url>
+<url><loc>https://insightsengineering.github.io/rbmi/reference/prepare_init_vals.html</loc></url>
+<url><loc>https://insightsengineering.github.io/rbmi/reference/prepare_prior_params.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/prepare_stan_data.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/print.analysis.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/print.draws.html</loc></url>
@@ -138,6 +147,7 @@
 <url><loc>https://insightsengineering.github.io/rbmi/reference/str_contains.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/strategies.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/string_pad.html</loc></url>
+<url><loc>https://insightsengineering.github.io/rbmi/reference/theta_to_cor.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/transpose_imputations.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/transpose_results.html</loc></url>
 <url><loc>https://insightsengineering.github.io/rbmi/reference/transpose_samples.html</loc></url>
