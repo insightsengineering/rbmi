@@ -159,7 +159,7 @@ extract_params <- function(fit) {
     sigma <- lapply(sigma, function(mat) {
         colnames(mat) <- NULL
         rownames(mat) <- NULL
-        return(mat)
+        mat
     })
     params <- list(
         beta = beta,
@@ -168,6 +168,8 @@ extract_params <- function(fit) {
 
     cov_type <- mmrm::component(fit, "cov_type")
     theta_est <- mmrm::component(fit, "theta_est")
+    n_visits <- mmrm::component(fit, "n_timepoints")
+
     theta_est <- if (same_cov) {
         list(theta_est)
     } else {
@@ -182,9 +184,16 @@ extract_params <- function(fit) {
         })
         params$sd <- lapply(theta_est, function(theta) exp(theta[1]))
         params$rho <- lapply(theta_est, function(theta) theta_to_cor(theta[2]))
+    } else if (cov_type == "ar1h") {
+        lapply(theta_est, function(theta) {
+            assert_that(identical(length(theta), n_visits + 1L))
+        })
+        params$sds <- lapply(theta_est, function(theta) exp(theta[1:n_visits]))
+        params$rho <- lapply(theta_est, function(theta) {
+            theta_to_cor(theta[n_visits + 1])
+        })
     }
-
-    return(params)
+    params
 }
 
 

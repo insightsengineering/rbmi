@@ -261,6 +261,7 @@ This distribution is a special case of the inverse-Wishart distribution for a un
 #### Autoregressive order 1 covariance structure
 
 For the time-homogeneous version of the AR(1) covariance structure, we use a uniform prior on the correlation parameter $\rho$ and a scaled inverse chi-square prior for the variance parameter $\sigma^2$, as described above.
+For the time-heterogeneous version, we simply use independent scaled inverse chi-square priors for the time-point specific variances, which are centered around the respective estimated variances from the frequentist REML fit. 
 
 #### Further options
 

@@ -19,15 +19,14 @@ adjust_dimensions <- function(same_cov, param_list) {
 
     first_element <- param_list[[1]]
     assert_that(
-        is.matrix(first_element) ||
-            (is.vector(first_element) & length(first_element) == 1),
-        msg = "Function currently only supports list elements of matrices or length-1 scalars"
+        is.matrix(first_element) || is.numeric(first_element),
+        msg = "Function currently only supports list elements of matrices or numeric vectors"
     )
     if (same_cov) {
         # Assume for same_cov=TRUE that the first element is the value to be used for everything
         param_list <- list(first_element)
     }
-    if (is.vector(first_element)) {
+    if (is.vector(first_element) && length(first_element) == 1) {
         # Stan treats a R-vector of length 1 as a scalar.
         # Thus for a Stan-array of length 1 Rstan needs the data to be an R-array with dim=1
         # This arises when we have same_cov=TRUE as G=1 e.g. `array[G] real sd_par;`
@@ -61,6 +60,9 @@ prepare_prior_params <- function(
         stan_data$Sigma_par <- adjust_dimensions(same_cov, mmrm_initial$sigma)
     } else if (covariance == "ar1") {
         stan_data$sd_par <- adjust_dimensions(same_cov, mmrm_initial$sd)
+        stan_data$rho_par <- adjust_dimensions(same_cov, mmrm_initial$rho)
+    } else if (covariance == "ar1h") {
+        stan_data$sds_par <- adjust_dimensions(same_cov, mmrm_initial$sds)
         stan_data$rho_par <- adjust_dimensions(same_cov, mmrm_initial$rho)
     }
     stan_data

@@ -330,4 +330,7 @@ test_that("get_stan_model works as expected depending on covariance and prior on
 
     model <- expect_silent(get_stan_model("ar1", "default"))
     expect_snapshot(model)
+
+    model <- expect_silent(get_stan_model("ar1h", "default"))
+    expect_snapshot(model)
 })

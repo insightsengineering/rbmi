@@ -42,7 +42,7 @@ get_mcmc_sim_dat <- function(n, mcoefs, sigma) {
 
 get_within <- function(x, real) {
     x2 <- matrix(unlist(as.list(x)), nrow = length(x), byrow = TRUE)
-    colnames(x2) <- paste0("B", seq_len(ncol(x2)))
+    colnames(x2) <- sprintf("B%02d", seq_len(ncol(x2)))
 
     as_tibble(x2) %>%
         tidyr::gather(var, val) %>%
@@ -96,6 +96,15 @@ test_that("adjust_dimensions works with same covariance and scalar parameter", {
     expect_equal(result, expected)
 })
 
+test_that("adjust_dimensions works with same covariance and numeric parameter", {
+    result <- adjust_dimensions(
+        same_cov = TRUE,
+        param_list = list(1:3, 4:6)
+    )
+    expected <- list(1:3)
+    expect_equal(result, expected)
+})
+
 test_that("adjust_dimensions works with different covariance and matrix parameter", {
     result <- adjust_dimensions(
         same_cov = FALSE,
@@ -118,6 +127,16 @@ test_that("adjust_dimensions works with different covariance and scalar paramete
         param_list = list(1, 2)
     )
     expected <- array(c(1, 2), dim = 2)
+    expect_equal(result, expected)
+})
+
+test_that("adjust_dimensions works with different covariance and numeric parameter", {
+    result <- adjust_dimensions(
+        same_cov = FALSE,
+        param_list = list(1:3, 4:6)
+    )
+    # Unchanged.
+    expected <- list(1:3, 4:6)
     expect_equal(result, expected)
 })
 
@@ -426,6 +445,75 @@ test_that("prepare_prior_params works for AR1", {
     expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 2)
 })
 
+test_that("prepare_prior_params works for heterogeneous AR1", {
+    skip_if_not(is_full_test())
+
+    set.seed(2153)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    # Same cov across groups.
+    mmrm_initial <- fit_mmrm(
+        designmat = mat,
+        outcome = dat$outcome,
+        subjid = dat$id,
+        visit = dat$visit,
+        group = dat$group,
+        cov_struct = "ar1h",
+        REML = TRUE,
+        same_cov = TRUE
+    )
+
+    result <- prepare_prior_params(
+        stan_data = list(),
+        covariance = "ar1h",
+        prior_cov = "default",
+        mmrm_initial = mmrm_initial,
+        same_cov = TRUE
+    )
+    expect_true(
+        is.list(result) && identical(names(result), c("sds_par", "rho_par"))
+    )
+    expect_true(is.list(result$sds_par) && length(result$sds_par) == 1)
+    expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 1)
+
+    # Separate cov across groups.
+    mmrm_initial <- fit_mmrm(
+        designmat = mat,
+        outcome = dat$outcome,
+        subjid = dat$id,
+        visit = dat$visit,
+        group = dat$group,
+        cov_struct = "ar1h",
+        REML = TRUE,
+        same_cov = FALSE
+    )
+
+    result <- prepare_prior_params(
+        stan_data = list(),
+        covariance = "ar1h",
+        prior_cov = "default",
+        mmrm_initial = mmrm_initial,
+        same_cov = FALSE
+    )
+    expect_true(
+        is.list(result) && identical(names(result), c("sds_par", "rho_par"))
+    )
+    expect_true(is.list(result$sds_par) && length(result$sds_par) == 2)
+    expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 2)
+})
 
 test_that("fit_mcmc can recover known values with same_cov = TRUE", {
     skip_if_not(is_full_test())
@@ -547,7 +635,6 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         n_visits = 3
     )
 })
-
 
 test_that("fit_mcmc returns error if mmrm on original sample fails", {
     set.seed(101)
@@ -708,7 +795,6 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
         n_visits = 3
     )
 })
-
 
 test_that("burn_in and burn_between arguments to method_bayes are deprecated", {
     expect_error(
@@ -951,6 +1037,12 @@ test_that("fit_mcmc works with AR1 covariance model and group specific estimates
 
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
     assert_that(all(beta_within$inside))
+
+    sigma_within <- get_within(
+        fit$samples$sigma,
+        rep(unlist(as.list(sigma)), 2)
+    )
+    assert_that(all(sigma_within$inside))
 })
 
 test_that("fit_mcmc works with unstructured covariance model with LKJ prior", {
@@ -1118,6 +1210,12 @@ test_that("fit_mcmc works with unstructured covariance model with LKJ prior and 
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
     assert_that(all(beta_within$inside))
 
+    sigma_within <- get_within(
+        fit$samples$sigma,
+        rep(unlist(as.list(sigma)), 2)
+    )
+    assert_that(all(sigma_within$inside))
+
     # check extract_draws() worked properly
     test_extract_draws(
         extract_draws(fit$fit, method$n_samples),
@@ -1125,4 +1223,173 @@ test_that("fit_mcmc works with unstructured covariance model with LKJ prior and 
         n_groups = 2,
         n_visits = 3
     )
+})
+
+test_that("fit_mcmc works with heterogeneous AR1 covariance model", {
+    skip_if_not(is_full_test())
+
+    set.seed(3459)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    rho <- 0.5
+    ar1_corr <- ar1_matrix(rho, 3)
+    sds <- c(1, 2, 3)
+    sigma <- diag(sds) %*% ar1_corr %*% diag(sds)
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    method <- method_bayes(
+        covariance = "ar1h",
+        n_samples = 500,
+        same_cov = TRUE,
+        control = control_bayes(
+            warmup = 200,
+            thin = 3,
+            chains = 3
+        )
+    )
+
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat$outcome,
+        group = dat$group,
+        subjid = dat$id,
+        visit = dat$visit,
+        method = method,
+        quiet = TRUE
+    )
+    expect_true(length(fit$samples$beta) == method$n_samples)
+    expect_true(length(fit$samples$sigma) == method$n_samples)
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    assert_that(all(sigma_within$inside))
+
+    # check extract_draws() worked properly
+    test_extract_draws(
+        extract_draws(fit$fit, method$n_samples),
+        same_cov = TRUE,
+        n_groups = 2,
+        n_visits = 3
+    )
+})
+
+test_that("fit_mcmc works with heterogeneous AR1 covariance model and MMRM start values", {
+    skip_if_not(is_full_test())
+
+    set.seed(3459)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    rho <- 0.3
+    ar1_corr <- ar1_matrix(rho, 3)
+    sds <- c(1, 2, 3)
+    sigma <- diag(sds) %*% ar1_corr %*% diag(sds)
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    method <- method_bayes(
+        covariance = "ar1h",
+        n_samples = 500,
+        same_cov = TRUE,
+        control = control_bayes(
+            warmup = 200,
+            thin = 3,
+            chains = 3,
+            init = "mmrm"
+        )
+    )
+
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat$outcome,
+        group = dat$group,
+        subjid = dat$id,
+        visit = dat$visit,
+        method = method,
+        quiet = TRUE
+    )
+
+    expect_true(length(fit$samples$beta) == method$n_samples)
+    expect_true(length(fit$samples$sigma) == method$n_samples)
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    assert_that(all(sigma_within$inside))
+})
+
+test_that("fit_mcmc works with heterogeneous AR1 covariance model and group specific estimates", {
+    skip_if_not(is_full_test())
+
+    set.seed(3459)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    ar1_corr <- ar1_matrix(0.4, 3)
+    sds <- c(1, 2, 3)
+    sigma <- diag(sds) %*% ar1_corr %*% diag(sds)
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    method <- method_bayes(
+        covariance = "ar1h",
+        n_samples = 500,
+        same_cov = FALSE,
+        control = control_bayes(
+            warmup = 200,
+            thin = 3,
+            chains = 3
+        )
+    )
+
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat$outcome,
+        group = dat$group,
+        subjid = dat$id,
+        visit = dat$visit,
+        method = method,
+        quiet = TRUE
+    )
+
+    expect_true(length(fit$samples$beta) == method$n_samples)
+    expect_true(length(fit$samples$sigma) == method$n_samples)
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    sigma_within <- get_within(
+        fit$samples$sigma,
+        rep(unlist(as.list(sigma)), 2)
+    )
+    assert_that(all(sigma_within$inside))
 })
