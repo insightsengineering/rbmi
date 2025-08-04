@@ -4,7 +4,7 @@ suppressPackageStartupMessages({
 })
 
 compute_n_params <- function(cov_struct, nv) {
-    n_params <- switch(
+    switch(
         cov_struct,
         "ad" = nv,
         "adh" = 2 * nv - 1,
@@ -16,7 +16,6 @@ compute_n_params <- function(cov_struct, nv) {
         "toeph" = 2 * nv - 1,
         "us" = nv * (nv + 1) / 2
     )
-    return(n_params)
 }
 
 
@@ -531,4 +530,14 @@ test_that("fit_mmrm works with cs structure", {
 test_that("fit_mmrm works with csh structure", {
     set.seed(7970)
     test_fit_mmrm("csh")
+})
+
+test_that("fit_mmrm works with ad structure", {
+    set.seed(6907)
+    test_fit_mmrm("ad")
+})
+
+test_that("fit_mmrm works with adh structure", {
+    set.seed(7970)
+    test_fit_mmrm("adh")
 })

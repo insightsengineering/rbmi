@@ -374,12 +374,7 @@ test_that("get_pattern_groups_unique", {
     expect_equal(results_actual, results_expected)
 })
 
-
-test_that("prepare_prior_params works for AR1", {
-    skip_if_not(is_full_test())
-
-    set.seed(2151)
-
+test_prepare_prior_params <- function(cov_struct, expected_params) {
     mcoefs <- list(
         "int" = 10,
         "age" = 3,
@@ -401,23 +396,24 @@ test_that("prepare_prior_params works for AR1", {
         subjid = dat$id,
         visit = dat$visit,
         group = dat$group,
-        cov_struct = "ar1",
+        cov_struct = cov_struct,
         REML = TRUE,
         same_cov = TRUE
     )
 
     result <- prepare_prior_params(
         stan_data = list(),
-        covariance = "ar1",
+        covariance = cov_struct,
         prior_cov = "default",
         mmrm_initial = mmrm_initial,
         same_cov = TRUE
     )
     expect_true(
-        is.list(result) && identical(names(result), c("sd_par", "rho_par"))
+        is.list(result) && setequal(names(result), expected_params)
     )
-    expect_true(is.numeric(result$sd_par) && length(result$sd_par) == 1)
-    expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 1)
+    for (param in expected_params) {
+        expect_true(is.numeric(result[[param]]) && length(result[[param]]) == 1)
+    }
 
     # Separate cov across groups.
     mmrm_initial <- fit_mmrm(
@@ -426,163 +422,66 @@ test_that("prepare_prior_params works for AR1", {
         subjid = dat$id,
         visit = dat$visit,
         group = dat$group,
-        cov_struct = "ar1",
+        cov_struct = cov_struct,
         REML = TRUE,
         same_cov = FALSE
     )
 
     result <- prepare_prior_params(
         stan_data = list(),
-        covariance = "ar1",
+        covariance = cov_struct,
         prior_cov = "default",
         mmrm_initial = mmrm_initial,
         same_cov = FALSE
     )
     expect_true(
-        is.list(result) && identical(names(result), c("sd_par", "rho_par"))
+        is.list(result) && setequal(names(result), expected_params)
     )
-    expect_true(is.numeric(result$sd_par) && length(result$sd_par) == 2)
-    expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 2)
+    for (param in expected_params) {
+        expect_true(is.numeric(result[[param]]) && length(result[[param]]) == 2)
+    }
+}
+
+test_that("prepare_prior_params works for AR1", {
+    skip_if_not(is_full_test())
+
+    set.seed(2151)
+    test_prepare_prior_params("ar1", c("sd_par", "rho_par"))
 })
 
 test_that("prepare_prior_params works for heterogeneous AR1", {
     skip_if_not(is_full_test())
 
     set.seed(2153)
-
-    mcoefs <- list(
-        "int" = 10,
-        "age" = 3,
-        "sex" = 6,
-        "trtslope" = 7
-    )
-    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
-
-    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
-    mat <- model.matrix(
-        data = dat,
-        ~ 1 + sex + age + group + visit + group * visit
-    )
-
-    # Same cov across groups.
-    mmrm_initial <- fit_mmrm(
-        designmat = mat,
-        outcome = dat$outcome,
-        subjid = dat$id,
-        visit = dat$visit,
-        group = dat$group,
-        cov_struct = "ar1h",
-        REML = TRUE,
-        same_cov = TRUE
-    )
-
-    result <- prepare_prior_params(
-        stan_data = list(),
-        covariance = "ar1h",
-        prior_cov = "default",
-        mmrm_initial = mmrm_initial,
-        same_cov = TRUE
-    )
-    expect_true(
-        is.list(result) && identical(names(result), c("sds_par", "rho_par"))
-    )
-    expect_true(is.list(result$sds_par) && length(result$sds_par) == 1)
-    expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 1)
-
-    # Separate cov across groups.
-    mmrm_initial <- fit_mmrm(
-        designmat = mat,
-        outcome = dat$outcome,
-        subjid = dat$id,
-        visit = dat$visit,
-        group = dat$group,
-        cov_struct = "ar1h",
-        REML = TRUE,
-        same_cov = FALSE
-    )
-
-    result <- prepare_prior_params(
-        stan_data = list(),
-        covariance = "ar1h",
-        prior_cov = "default",
-        mmrm_initial = mmrm_initial,
-        same_cov = FALSE
-    )
-    expect_true(
-        is.list(result) && identical(names(result), c("sds_par", "rho_par"))
-    )
-    expect_true(is.list(result$sds_par) && length(result$sds_par) == 2)
-    expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 2)
+    test_prepare_prior_params("ar1h", c("sds_par", "rho_par"))
 })
 
 test_that("prepare_prior_params works for compound symmetry", {
     skip_if_not(is_full_test())
 
     set.seed(2151)
+    test_prepare_prior_params("cs", c("sd_par", "rho_par"))
+})
 
-    mcoefs <- list(
-        "int" = 10,
-        "age" = 3,
-        "sex" = 6,
-        "trtslope" = 7
-    )
-    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+test_that("prepare_prior_params works for heterogeneous compound symmetry", {
+    skip_if_not(is_full_test())
 
-    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
-    mat <- model.matrix(
-        data = dat,
-        ~ 1 + sex + age + group + visit + group * visit
-    )
+    set.seed(2153)
+    test_prepare_prior_params("csh", c("sds_par", "rho_par"))
+})
 
-    # Same cov across groups.
-    mmrm_initial <- fit_mmrm(
-        designmat = mat,
-        outcome = dat$outcome,
-        subjid = dat$id,
-        visit = dat$visit,
-        group = dat$group,
-        cov_struct = "cs",
-        REML = TRUE,
-        same_cov = TRUE
-    )
+test_that("prepare_prior_params works for antedependence", {
+    skip_if_not(is_full_test())
 
-    result <- prepare_prior_params(
-        stan_data = list(),
-        covariance = "cs",
-        prior_cov = "default",
-        mmrm_initial = mmrm_initial,
-        same_cov = TRUE
-    )
-    expect_true(
-        is.list(result) && identical(names(result), c("sd_par", "rho_par"))
-    )
-    expect_true(is.numeric(result$sd_par) && length(result$sd_par) == 1)
-    expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 1)
+    set.seed(2151)
+    test_prepare_prior_params("ad", c("sd_par", "rhos_par"))
+})
 
-    # Separate cov across groups.
-    mmrm_initial <- fit_mmrm(
-        designmat = mat,
-        outcome = dat$outcome,
-        subjid = dat$id,
-        visit = dat$visit,
-        group = dat$group,
-        cov_struct = "cs",
-        REML = TRUE,
-        same_cov = FALSE
-    )
+test_that("prepare_prior_params works for heterogeneous antedependence", {
+    skip_if_not(is_full_test())
 
-    result <- prepare_prior_params(
-        stan_data = list(),
-        covariance = "cs",
-        prior_cov = "default",
-        mmrm_initial = mmrm_initial,
-        same_cov = FALSE
-    )
-    expect_true(
-        is.list(result) && identical(names(result), c("sd_par", "rho_par"))
-    )
-    expect_true(is.numeric(result$sd_par) && length(result$sd_par) == 2)
-    expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 2)
+    set.seed(2153)
+    test_prepare_prior_params("adh", c("sds_par", "rhos_par"))
 })
 
 test_that("fit_mcmc can recover known values with same_cov = TRUE", {
@@ -1019,27 +918,9 @@ test_that("fit_mcmc works with AR1 covariance model", {
 
     set.seed(3459)
     test_fit_mcmc("ar1", sigma = sigma)
-})
-
-test_that("fit_mcmc works with AR1 covariance model and MMRM start values", {
-    skip_if_not(is_full_test())
-
-    rho <- 0.5
-    ar1_corr <- ar1_matrix(rho, 3)
-    sd <- 2
-    sigma <- sd^2 * ar1_corr
 
     set.seed(2492)
     test_fit_mcmc("ar1", sigma = sigma, init = "mmrm")
-})
-
-test_that("fit_mcmc works with AR1 covariance model and group specific estimates", {
-    skip_if_not(is_full_test())
-
-    rho <- 0.4
-    ar1_corr <- ar1_matrix(rho, 3)
-    sd <- 2
-    sigma <- sd^2 * ar1_corr
 
     set.seed(7399)
     test_fit_mcmc("ar1", sigma = sigma, init = "mmrm", same_cov = FALSE)
@@ -1052,21 +933,9 @@ test_that("fit_mcmc works with unstructured covariance model with LKJ prior", {
 
     set.seed(3459)
     test_fit_mcmc("us", sigma = sigma, prior_cov = "lkj")
-})
-
-test_that("fit_mcmc works with unstructured covariance model with LKJ prior and MMRM start values", {
-    skip_if_not(is_full_test())
-
-    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
 
     set.seed(3459)
     test_fit_mcmc("us", sigma = sigma, prior_cov = "lkj", init = "mmrm")
-})
-
-test_that("fit_mcmc works with unstructured covariance model with LKJ prior and group specific estimates", {
-    skip_if_not(is_full_test())
-
-    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
 
     set.seed(3459)
     test_fit_mcmc("us", sigma = sigma, prior_cov = "lkj", same_cov = FALSE)
@@ -1082,26 +951,9 @@ test_that("fit_mcmc works with heterogeneous AR1 covariance model", {
 
     set.seed(3459)
     test_fit_mcmc("ar1h", sigma = sigma)
-})
-
-test_that("fit_mcmc works with heterogeneous AR1 covariance model and MMRM start values", {
-    skip_if_not(is_full_test())
-
-    rho <- 0.3
-    ar1_corr <- ar1_matrix(rho, 3)
-    sds <- c(1, 2, 3)
-    sigma <- diag(sds) %*% ar1_corr %*% diag(sds)
 
     set.seed(3459)
     test_fit_mcmc("ar1h", sigma = sigma, init = "mmrm")
-})
-
-test_that("fit_mcmc works with heterogeneous AR1 covariance model and group specific estimates", {
-    skip_if_not(is_full_test())
-
-    ar1_corr <- ar1_matrix(0.4, 3)
-    sds <- c(1, 2, 3)
-    sigma <- diag(sds) %*% ar1_corr %*% diag(sds)
 
     set.seed(3459)
     test_fit_mcmc("ar1h", sigma = sigma, same_cov = FALSE)
@@ -1117,26 +969,9 @@ test_that("fit_mcmc works with compound symmetry covariance model", {
 
     set.seed(3459)
     test_fit_mcmc("cs", sigma = sigma)
-})
-
-test_that("fit_mcmc works with compound symmetry covariance model and MMRM start values", {
-    skip_if_not(is_full_test())
-
-    rho <- 0.3
-    cs_corr <- cs_matrix(rho, 3)
-    sd <- 3
-    sigma <- sd^2 * cs_corr
 
     set.seed(3459)
     test_fit_mcmc("cs", sigma = sigma, init = "mmrm")
-})
-
-test_that("fit_mcmc works with compound symmetry covariance model and group specific estimates", {
-    skip_if_not(is_full_test())
-
-    cs_corr <- cs_matrix(0.4, 3)
-    sd <- 2
-    sigma <- sd^2 * cs_corr
 
     set.seed(3459)
     test_fit_mcmc("cs", sigma = sigma, same_cov = FALSE)
@@ -1152,28 +987,46 @@ test_that("fit_mcmc works with heterogeneous compound symmetry covariance model"
 
     set.seed(3459)
     test_fit_mcmc("csh", sigma = sigma)
-})
-
-test_that("fit_mcmc works with heterogeneous compound symmetry covariance model and MMRM start values", {
-    skip_if_not(is_full_test())
-
-    rho <- 0.5
-    cs_corr <- cs_matrix(rho, 3)
-    sds <- c(1, 2, 3)
-    sigma <- diag(sds) %*% cs_corr %*% diag(sds)
 
     set.seed(3459)
     test_fit_mcmc("csh", sigma = sigma, init = "mmrm")
-})
-
-test_that("fit_mcmc works with heterogeneous compound symmetry covariance model and group specific estimates", {
-    skip_if_not(is_full_test())
-
-    rho <- 0.5
-    cs_corr <- cs_matrix(rho, 3)
-    sds <- c(1, 2, 3)
-    sigma <- diag(sds) %*% cs_corr %*% diag(sds)
 
     set.seed(3459)
     test_fit_mcmc("csh", sigma = sigma, same_cov = FALSE, init = "mmrm")
+})
+
+test_that("fit_mcmc works with antedependence covariance model", {
+    skip_if_not(is_full_test())
+
+    rhos <- c(0.5, 0.4)
+    ad_corr <- ad_matrix(rhos)
+    sd <- 2
+    sigma <- sd^2 * ad_corr
+
+    set.seed(3459)
+    test_fit_mcmc("ad", sigma = sigma)
+
+    set.seed(2355)
+    test_fit_mcmc("ad", sigma = sigma, init = "mmrm")
+
+    set.seed(3459)
+    test_fit_mcmc("ad", sigma = sigma, same_cov = FALSE)
+})
+
+test_that("fit_mcmc works with heterogeneous antedependence covariance model", {
+    skip_if_not(is_full_test())
+
+    rhos <- c(0.5, 0.4)
+    ad_corr <- ad_matrix(rhos)
+    sds <- c(1, 2, 3)
+    sigma <- diag(sds) %*% ad_corr %*% diag(sds)
+
+    set.seed(3459)
+    test_fit_mcmc("adh", sigma = sigma)
+
+    set.seed(2355)
+    test_fit_mcmc("adh", sigma = sigma, init = "mmrm")
+
+    set.seed(3459)
+    test_fit_mcmc("adh", sigma = sigma, same_cov = FALSE)
 })

@@ -98,6 +98,8 @@
 method_bayes <- function(
     covariance = c(
         "us",
+        "ad",
+        "adh",
         "ar1",
         "ar1h",
         "cs",

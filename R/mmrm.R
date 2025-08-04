@@ -219,6 +219,22 @@ extract_params <- function(fit) {
         params$rho <- lapply(theta_est, function(theta) {
             theta_to_cs_cor(theta[n_visits + 1], n_visits)
         })
+    } else if (cov_type == "ad") {
+        lapply(theta_est, function(theta) {
+            assert_that(identical(length(theta), n_visits))
+        })
+        params$sd <- lapply(theta_est, function(theta) exp(theta[1]))
+        params$rhos <- lapply(theta_est, function(theta) {
+            theta_to_cor(theta[-1])
+        })
+    } else if (cov_type == "adh") {
+        lapply(theta_est, function(theta) {
+            assert_that(length(theta) == 2 * n_visits - 1)
+        })
+        params$sds <- lapply(theta_est, function(theta) exp(theta[1:n_visits]))
+        params$rhos <- lapply(theta_est, function(theta) {
+            theta_to_cor(theta[-(1:n_visits)])
+        })
     }
     params
 }
@@ -365,5 +381,5 @@ eval_mmrm <- function(expr) {
     }
 
     fit_record$results$failed <- FALSE
-    return(fit_record$results)
+    fit_record$results
 }

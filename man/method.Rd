@@ -9,7 +9,7 @@
 \title{Set the multiple imputation methodology}
 \usage{
 method_bayes(
-  covariance = c("us", "ar1", "ar1h", "cs"),
+  covariance = c("us", "ad", "adh", "ar1", "ar1h", "cs", "csh"),
   same_cov = TRUE,
   n_samples = 20,
   prior_cov = c("default", "lkj"),

@@ -314,6 +314,27 @@ test_that("Advanced Usage - Bayesian with compound symmetry covariance model", {
     advanced_bayes_test("cs")
 })
 
+test_that("Advanced Usage - Bayesian with heterogeneous compound symmetry covariance model", {
+    skip_if_not(is_full_test())
+
+    set.seed(8579)
+    advanced_bayes_test("csh")
+})
+
+test_that("Advanced Usage - Bayesian with antedependence covariance model", {
+    skip_if_not(is_full_test())
+
+    set.seed(3546)
+    advanced_bayes_test("ad")
+})
+
+test_that("Advanced Usage - Bayesian with heterogeneous antedependence covariance model", {
+    skip_if_not(is_full_test())
+
+    set.seed(2341)
+    advanced_bayes_test("adh")
+})
+
 test_that("Basic Usage - Condmean", {
     skip_if_not(is_full_test())
 
