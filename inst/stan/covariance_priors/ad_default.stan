@@ -21,7 +21,7 @@ functions {
 
 data {
     array[G] real<lower={{ machine_double_eps }}> sd_par; // Standard deviation prior parameter.
-    array[G] vector<lower=-1, upper=1>[n_visit - 1] rho_pars; // Correlation prior parameters.
+    array[G] vector<lower=-1, upper=1>[n_visit - 1] rhos_par; // Correlation prior parameters.
 }
 
 parameters {
