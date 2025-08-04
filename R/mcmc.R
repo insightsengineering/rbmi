@@ -58,12 +58,14 @@ prepare_prior_params <- function(
 ) {
     if (covariance == "us") {
         stan_data$Sigma_par <- adjust_dimensions(same_cov, mmrm_initial$sigma)
-    } else if (covariance == "ar1") {
+    } else if (covariance %in% c("ar1", "cs")) {
         stan_data$sd_par <- adjust_dimensions(same_cov, mmrm_initial$sd)
         stan_data$rho_par <- adjust_dimensions(same_cov, mmrm_initial$rho)
     } else if (covariance == "ar1h") {
         stan_data$sds_par <- adjust_dimensions(same_cov, mmrm_initial$sds)
         stan_data$rho_par <- adjust_dimensions(same_cov, mmrm_initial$rho)
+    } else {
+        stop(sprintf("Unknown covariance structure: %s", covariance))
     }
     stan_data
 }

@@ -34,6 +34,97 @@ expect_pool_est <- function(po, expected, param = "trt_visit_3") {
     }
 }
 
+advanced_bayes_test <- function(cov_struct, ...) {
+    dat <- get_sim_data(bign, sigma, trt = 8) %>%
+        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
+        mutate(
+            outcome = if_else(
+                is_miss == 1 & visit == "visit_3",
+                NA_real_,
+                outcome
+            )
+        ) %>%
+        select(-is_miss)
+
+    dat_ice <- dat %>%
+        group_by(id) %>%
+        arrange(id, visit) %>%
+        filter(is.na(outcome)) %>%
+        slice(1) %>%
+        ungroup() %>%
+        select(id, visit) %>%
+        mutate(strategy = "MAR")
+
+    vars <- set_vars(
+        outcome = "outcome",
+        group = "group",
+        strategy = "strategy",
+        subjid = "id",
+        visit = "visit",
+        covariates = c("age", "sex", "visit * group")
+    )
+
+    drawobj <- draws(
+        data = dat,
+        data_ice = dat_ice,
+        vars = vars,
+        method = method_bayes(
+            n_samples = nsamp * 2,
+            covariance = cov_struct,
+            control = control_bayes(init = "mmrm"),
+            ...
+        ),
+        quiet = TRUE,
+        ncores = NCORES
+    )
+
+    ### Check to see if updating ice works and if it impacts the original values
+    updated_ice <- dat_ice %>%
+        mutate(strategy = "JR")
+
+    imputeobj_upd <- impute(
+        draws = drawobj,
+        references = c("A" = "B", "B" = "B"),
+        update_strategy = updated_ice
+    )
+
+    imputeobj <- impute(
+        draws = drawobj,
+        references = c("A" = "B", "B" = "B")
+    )
+
+    vars2 <- vars
+    vars2$covariates <- c("age", "sex")
+
+    anaobj <- analyse(
+        imputeobj,
+        fun = rbmi::ancova,
+        vars = vars2,
+        visits = "visit_3"
+    )
+
+    anaobj_upd <- analyse(
+        imputeobj_upd,
+        fun = rbmi::ancova,
+        vars = vars2,
+        visits = "visit_3"
+    )
+
+    poolobj_upd <- pool(
+        results = anaobj_upd,
+        conf.level = 0.99,
+        alternative = "two.sided"
+    )
+
+    poolobj <- pool(
+        results = anaobj,
+        conf.level = 0.99,
+        alternative = "two.sided"
+    )
+
+    expect_pool_est(poolobj_upd, 4)
+    expect_pool_est(poolobj, 8)
+}
 
 test_that("Basic Usage - Approx Bayes", {
     skip_if_not(is_full_test())
@@ -199,191 +290,28 @@ test_that("Advanced Usage - Bayesian with AR1 covariance model", {
     skip_if_not(is_full_test())
 
     set.seed(5123)
+    advanced_bayes_test("ar1")
+})
 
-    dat <- get_sim_data(bign, sigma, trt = 8) %>%
-        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(
-            outcome = if_else(
-                is_miss == 1 & visit == "visit_3",
-                NA_real_,
-                outcome
-            )
-        ) %>%
-        select(-is_miss)
+test_that("Advanced Usage - Bayesian with heterogeneous AR1 covariance model", {
+    skip_if_not(is_full_test())
 
-    dat_ice <- dat %>%
-        group_by(id) %>%
-        arrange(id, visit) %>%
-        filter(is.na(outcome)) %>%
-        slice(1) %>%
-        ungroup() %>%
-        select(id, visit) %>%
-        mutate(strategy = "MAR")
-
-    vars <- set_vars(
-        outcome = "outcome",
-        group = "group",
-        strategy = "strategy",
-        subjid = "id",
-        visit = "visit",
-        covariates = c("age", "sex", "visit * group")
-    )
-
-    drawobj <- draws(
-        data = dat,
-        data_ice = dat_ice,
-        vars = vars,
-        method = method_bayes(
-            n_samples = nsamp * 2,
-            covariance = "ar1",
-            control = control_bayes(init = "mmrm")
-        ),
-        quiet = TRUE,
-        ncores = NCORES
-    )
-
-    ### Check to see if updating ice works and if it impacts the original values
-    updated_ice <- dat_ice %>%
-        mutate(strategy = "JR")
-
-    imputeobj_upd <- impute(
-        draws = drawobj,
-        references = c("A" = "B", "B" = "B"),
-        update_strategy = updated_ice
-    )
-
-    imputeobj <- impute(
-        draws = drawobj,
-        references = c("A" = "B", "B" = "B")
-    )
-
-    vars2 <- vars
-    vars2$covariates <- c("age", "sex")
-
-    anaobj <- analyse(
-        imputeobj,
-        fun = rbmi::ancova,
-        vars = vars2,
-        visits = "visit_3"
-    )
-
-    anaobj_upd <- analyse(
-        imputeobj_upd,
-        fun = rbmi::ancova,
-        vars = vars2,
-        visits = "visit_3"
-    )
-
-    poolobj_upd <- pool(
-        results = anaobj_upd,
-        conf.level = 0.99,
-        alternative = "two.sided"
-    )
-
-    poolobj <- pool(
-        results = anaobj,
-        conf.level = 0.99,
-        alternative = "two.sided"
-    )
-
-    expect_pool_est(poolobj_upd, 4)
-    expect_pool_est(poolobj, 8)
+    set.seed(5521)
+    advanced_bayes_test("ar1h")
 })
 
 test_that("Advanced Usage - Bayesian with unstructured covariance model and LKJ prior", {
     skip_if_not(is_full_test())
 
-    set.seed(5123)
+    set.seed(5346)
+    advanced_bayes_test(cov_struct = "us", prior_cov = "lkj")
+})
 
-    dat <- get_sim_data(bign, sigma, trt = 8) %>%
-        mutate(is_miss = rbinom(n(), 1, 0.5)) %>%
-        mutate(
-            outcome = if_else(
-                is_miss == 1 & visit == "visit_3",
-                NA_real_,
-                outcome
-            )
-        ) %>%
-        select(-is_miss)
+test_that("Advanced Usage - Bayesian with compound symmetry covariance model", {
+    skip_if_not(is_full_test())
 
-    dat_ice <- dat %>%
-        group_by(id) %>%
-        arrange(id, visit) %>%
-        filter(is.na(outcome)) %>%
-        slice(1) %>%
-        ungroup() %>%
-        select(id, visit) %>%
-        mutate(strategy = "MAR")
-
-    vars <- set_vars(
-        outcome = "outcome",
-        group = "group",
-        strategy = "strategy",
-        subjid = "id",
-        visit = "visit",
-        covariates = c("age", "sex", "visit * group")
-    )
-
-    drawobj <- draws(
-        data = dat,
-        data_ice = dat_ice,
-        vars = vars,
-        method = method_bayes(
-            n_samples = nsamp,
-            covariance = "us",
-            prior_cov = "lkj",
-            control = control_bayes(init = "mmrm")
-        ),
-        quiet = TRUE,
-        ncores = NCORES
-    )
-
-    ### Check to see if updating ice works and if it impacts the original values
-    updated_ice <- dat_ice %>%
-        mutate(strategy = "JR")
-
-    imputeobj_upd <- impute(
-        draws = drawobj,
-        references = c("A" = "B", "B" = "B"),
-        update_strategy = updated_ice
-    )
-
-    imputeobj <- impute(
-        draws = drawobj,
-        references = c("A" = "B", "B" = "B")
-    )
-
-    vars2 <- vars
-    vars2$covariates <- c("age", "sex")
-
-    anaobj <- analyse(
-        imputeobj,
-        fun = rbmi::ancova,
-        vars = vars2,
-        visits = "visit_3"
-    )
-
-    anaobj_upd <- analyse(
-        imputeobj_upd,
-        fun = rbmi::ancova,
-        vars = vars2,
-        visits = "visit_3"
-    )
-
-    poolobj_upd <- pool(
-        results = anaobj_upd,
-        conf.level = 0.99,
-        alternative = "two.sided"
-    )
-
-    poolobj <- pool(
-        results = anaobj,
-        conf.level = 0.99,
-        alternative = "two.sided"
-    )
-
-    expect_pool_est(poolobj_upd, 4)
-    expect_pool_est(poolobj, 8)
+    set.seed(8579)
+    advanced_bayes_test("cs")
 })
 
 test_that("Basic Usage - Condmean", {

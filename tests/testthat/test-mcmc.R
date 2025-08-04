@@ -515,6 +515,76 @@ test_that("prepare_prior_params works for heterogeneous AR1", {
     expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 2)
 })
 
+test_that("prepare_prior_params works for compound symmetry", {
+    skip_if_not(is_full_test())
+
+    set.seed(2151)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    # Same cov across groups.
+    mmrm_initial <- fit_mmrm(
+        designmat = mat,
+        outcome = dat$outcome,
+        subjid = dat$id,
+        visit = dat$visit,
+        group = dat$group,
+        cov_struct = "cs",
+        REML = TRUE,
+        same_cov = TRUE
+    )
+
+    result <- prepare_prior_params(
+        stan_data = list(),
+        covariance = "cs",
+        prior_cov = "default",
+        mmrm_initial = mmrm_initial,
+        same_cov = TRUE
+    )
+    expect_true(
+        is.list(result) && identical(names(result), c("sd_par", "rho_par"))
+    )
+    expect_true(is.numeric(result$sd_par) && length(result$sd_par) == 1)
+    expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 1)
+
+    # Separate cov across groups.
+    mmrm_initial <- fit_mmrm(
+        designmat = mat,
+        outcome = dat$outcome,
+        subjid = dat$id,
+        visit = dat$visit,
+        group = dat$group,
+        cov_struct = "cs",
+        REML = TRUE,
+        same_cov = FALSE
+    )
+
+    result <- prepare_prior_params(
+        stan_data = list(),
+        covariance = "cs",
+        prior_cov = "default",
+        mmrm_initial = mmrm_initial,
+        same_cov = FALSE
+    )
+    expect_true(
+        is.list(result) && identical(names(result), c("sd_par", "rho_par"))
+    )
+    expect_true(is.numeric(result$sd_par) && length(result$sd_par) == 2)
+    expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 2)
+})
+
 test_that("fit_mcmc can recover known values with same_cov = TRUE", {
     skip_if_not(is_full_test())
 
@@ -1362,6 +1432,175 @@ test_that("fit_mcmc works with heterogeneous AR1 covariance model and group spec
 
     method <- method_bayes(
         covariance = "ar1h",
+        n_samples = 500,
+        same_cov = FALSE,
+        control = control_bayes(
+            warmup = 200,
+            thin = 3,
+            chains = 3
+        )
+    )
+
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat$outcome,
+        group = dat$group,
+        subjid = dat$id,
+        visit = dat$visit,
+        method = method,
+        quiet = TRUE
+    )
+
+    expect_true(length(fit$samples$beta) == method$n_samples)
+    expect_true(length(fit$samples$sigma) == method$n_samples)
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    sigma_within <- get_within(
+        fit$samples$sigma,
+        rep(unlist(as.list(sigma)), 2)
+    )
+    assert_that(all(sigma_within$inside))
+})
+
+test_that("fit_mcmc works with compound symmetry covariance model", {
+    skip_if_not(is_full_test())
+
+    set.seed(3459)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    rho <- 0.5
+    cs_corr <- cs_matrix(rho, 3)
+    sd <- 2
+    sigma <- sd^2 * cs_corr
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    method <- method_bayes(
+        covariance = "cs",
+        n_samples = 500,
+        same_cov = TRUE,
+        control = control_bayes(
+            warmup = 200,
+            thin = 3,
+            chains = 3
+        )
+    )
+
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat$outcome,
+        group = dat$group,
+        subjid = dat$id,
+        visit = dat$visit,
+        method = method,
+        quiet = TRUE
+    )
+    expect_true(length(fit$samples$beta) == method$n_samples)
+    expect_true(length(fit$samples$sigma) == method$n_samples)
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    assert_that(all(sigma_within$inside))
+
+    # check extract_draws() worked properly
+    test_extract_draws(
+        extract_draws(fit$fit, method$n_samples),
+        same_cov = TRUE,
+        n_groups = 2,
+        n_visits = 3
+    )
+})
+
+test_that("fit_mcmc works with compound symmetry covariance model and MMRM start values", {
+    skip_if_not(is_full_test())
+
+    set.seed(3459)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    rho <- 0.3
+    cs_corr <- cs_matrix(rho, 3)
+    sd <- 3
+    sigma <- sd^2 * cs_corr
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    method <- method_bayes(
+        covariance = "cs",
+        n_samples = 500,
+        same_cov = TRUE,
+        control = control_bayes(
+            warmup = 200,
+            thin = 3,
+            chains = 3,
+            init = "mmrm"
+        )
+    )
+
+    fit <- fit_mcmc(
+        designmat = mat,
+        outcome = dat$outcome,
+        group = dat$group,
+        subjid = dat$id,
+        visit = dat$visit,
+        method = method,
+        quiet = TRUE
+    )
+
+    expect_true(length(fit$samples$beta) == method$n_samples)
+    expect_true(length(fit$samples$sigma) == method$n_samples)
+
+    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
+    assert_that(all(beta_within$inside))
+
+    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    assert_that(all(sigma_within$inside))
+})
+
+test_that("fit_mcmc works with compound symmetry covariance model and group specific estimates", {
+    skip_if_not(is_full_test())
+
+    set.seed(3459)
+
+    mcoefs <- list(
+        "int" = 10,
+        "age" = 3,
+        "sex" = 6,
+        "trtslope" = 7
+    )
+    cs_corr <- cs_matrix(0.4, 3)
+    sd <- 2
+    sigma <- sd^2 * cs_corr
+
+    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    method <- method_bayes(
+        covariance = "cs",
         n_samples = 500,
         same_cov = FALSE,
         control = control_bayes(

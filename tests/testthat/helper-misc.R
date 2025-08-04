@@ -141,3 +141,9 @@ ar1_matrix <- function(rho, n) {
     }
     corr_matrix
 }
+
+cs_matrix <- function(rho, n) {
+    corr_matrix <- matrix(rho, nrow = n, ncol = n)
+    diag(corr_matrix) <- 1
+    corr_matrix
+}

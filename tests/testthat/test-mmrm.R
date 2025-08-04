@@ -3,7 +3,6 @@ suppressPackageStartupMessages({
     library(testthat)
 })
 
-
 compute_n_params <- function(cov_struct, nv) {
     n_params <- switch(
         cov_struct,
@@ -576,5 +575,60 @@ test_that("fit_mmrm works with ar1h structure", {
             identical(names(result$rho), c("A", "B")) &&
             length(result$rho$A) == 1 &&
             result$rho$A != result$rho$B
+    )
+})
+
+test_that("fit_mmrm works with cs structure", {
+    set.seed(1234)
+    sigma <- as_vcov(c(2, 1, 0.7), c(0.3, 0.4, 0.2))
+    dat <- get_sim_data(n = 100, sigma)
+
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    # Same cov across groups.
+    result <- fit_mmrm(
+        designmat = mat,
+        outcome = dat$outcome,
+        subjid = dat$id,
+        visit = dat$visit,
+        group = dat$group,
+        cov_struct = "cs",
+        REML = TRUE,
+        same_cov = TRUE
+    )
+
+    expect_true(is.list(result$sigma) && length(result$sigma) == 2)
+    expect_true(is.list(result$sd) && length(result$sd) == 2)
+    expect_true(is.list(result$rho) && length(result$rho) == 2)
+
+    # Separate cov per group.
+    result <- fit_mmrm(
+        designmat = mat,
+        outcome = dat$outcome,
+        subjid = dat$id,
+        visit = dat$visit,
+        group = dat$group,
+        cov_struct = "cs",
+        REML = TRUE,
+        same_cov = FALSE
+    )
+
+    expect_true(
+        is.list(result$sigma) &&
+            length(result$sigma) == 2 &&
+            identical(names(result$sigma), c("A", "B"))
+    )
+    expect_true(
+        is.list(result$sd) &&
+            length(result$sd) == 2 &&
+            identical(names(result$sd), c("A", "B"))
+    )
+    expect_true(
+        is.list(result$rho) &&
+            length(result$rho) == 2 &&
+            identical(names(result$rho), c("A", "B"))
     )
 })

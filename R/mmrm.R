@@ -136,6 +136,17 @@ theta_to_cor <- function(theta) {
     theta / sqrt(1 + theta^2)
 }
 
+#' Convert Transformed Compound Symmetry Correlation to Correlation
+#'
+#' @param theta The transformed compound symmetry correlation parameter.
+#' @return The correlation value.
+#'
+#' @keywords internal
+theta_to_cs_cor <- function(theta, n_visits) {
+    a <- 1 / (n_visits - 1)
+    plogis(theta) * (1 + a) - a
+}
+
 #' Extract parameters from a MMRM model
 #'
 #' Extracts the beta and sigma coefficients from an MMRM model created
@@ -192,6 +203,16 @@ extract_params <- function(fit) {
         params$rho <- lapply(theta_est, function(theta) {
             theta_to_cor(theta[n_visits + 1])
         })
+    } else if (cov_type == "cs") {
+        lapply(theta_est, function(theta) {
+            assert_that(identical(length(theta), 2L))
+        })
+        params$sd <- lapply(theta_est, function(theta) exp(theta[1]))
+        params$rho <- lapply(theta_est, function(theta) {
+            theta_to_cs_cor(theta[2], n_visits)
+        })
+    } else {
+        stop(sprintf("Unknown covariance type: %s", cov_type))
     }
     params
 }
