@@ -48,8 +48,8 @@ get_within <- function(x, real) {
         tidyr::gather(var, val) %>%
         group_by(var) %>%
         summarise(
-            lci = quantile(val, 0.005),
-            uci = quantile(val, 0.995)
+            lci = quantile(val, 0.0025),
+            uci = quantile(val, 0.9975)
         ) %>%
         mutate(real = real) %>%
         mutate(inside = real >= lci & real <= uci)

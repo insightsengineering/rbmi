@@ -61,7 +61,7 @@ prepare_prior_params <- function(
     } else if (covariance %in% c("ar1", "cs")) {
         stan_data$sd_par <- adjust_dimensions(same_cov, mmrm_initial$sd)
         stan_data$rho_par <- adjust_dimensions(same_cov, mmrm_initial$rho)
-    } else if (covariance == "ar1h") {
+    } else if (covariance %in% c("ar1h", "csh")) {
         stan_data$sds_par <- adjust_dimensions(same_cov, mmrm_initial$sds)
         stan_data$rho_par <- adjust_dimensions(same_cov, mmrm_initial$rho)
     } else {
