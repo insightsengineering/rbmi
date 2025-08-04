@@ -100,7 +100,8 @@ method_bayes <- function(
         "us",
         "ar1",
         "ar1h",
-        "cs"
+        "cs",
+        "csh"
     ),
     same_cov = TRUE,
     n_samples = 20,

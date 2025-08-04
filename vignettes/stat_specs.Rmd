@@ -266,7 +266,7 @@ For the time-heterogeneous version, we simply use independent scaled inverse chi
 #### Compound symmetry covariance structure
 
 For the compound symmetry covariance structure, we use a uniform prior on the correlation parameter $\rho$ in the allowed range $(-1/(J-1), 1)$. This is because for $\rho$ smaller than the lower boundary, the correlation matrix would not be positive definite any longer.
-For the variance parameter, we use again scaled inverse chi-square priors as described above.
+For the variance parameter(s), we use again scaled inverse chi-square priors as described above.
 
 #### Further options
 

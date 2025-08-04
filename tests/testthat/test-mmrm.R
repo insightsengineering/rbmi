@@ -30,7 +30,9 @@ expect_valid_fit_object <- function(fit, cov_struct, nv, same_cov) {
     expect_type(fit, "list")
     expect_true(length(fit) >= 3)
 
-    expect_true(all(names(fit) %in% c("beta", "sigma", "sd", "rho", "failed")))
+    expect_true(all(
+        names(fit) %in% c("beta", "sigma", "sd", "sds", "rho", "failed")
+    ))
 
     expect_vector(fit$beta)
     expect_length(fit$beta, 8)
@@ -141,6 +143,57 @@ test_mmrm_numeric <- function(dat, formula_expr, same_cov, scale = FALSE) {
     }
 }
 
+test_fit_mmrm <- function(cov_struct) {
+    sigma <- as_vcov(c(2, 1, 0.7), c(0.3, 0.4, 0.2))
+    dat <- get_sim_data(n = 100, sigma)
+
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    # Same cov across groups.
+    result <- fit_mmrm(
+        designmat = mat,
+        outcome = dat$outcome,
+        subjid = dat$id,
+        visit = dat$visit,
+        group = dat$group,
+        cov_struct = cov_struct,
+        REML = TRUE,
+        same_cov = TRUE
+    )
+
+    cov_param_names <- attr(result, "cov_param_names")
+
+    for (param in cov_param_names) {
+        expect_true(
+            is.list(result[[param]]) &&
+                length(result[[param]]) == 2 &&
+                all(result[[param]][[1]] == result[[param]][[2]])
+        )
+    }
+
+    # Separate cov per group.
+    result <- fit_mmrm(
+        designmat = mat,
+        outcome = dat$outcome,
+        subjid = dat$id,
+        visit = dat$visit,
+        group = dat$group,
+        cov_struct = cov_struct,
+        REML = TRUE,
+        same_cov = FALSE
+    )
+
+    for (param in cov_param_names) {
+        expect_true(
+            is.list(result[[param]]) &&
+                length(result[[param]]) == 2 &&
+                all(result[[param]][[1]] != result[[param]][[2]])
+        )
+    }
+}
 
 set.seed(101)
 
@@ -462,173 +515,20 @@ test_that("extract_params works with different covariance structures", {
 
 test_that("fit_mmrm works with ar1 structure", {
     set.seed(1234)
-    sigma <- as_vcov(c(2, 1, 0.7), c(0.3, 0.4, 0.2))
-    dat <- get_sim_data(n = 100, sigma)
-
-    mat <- model.matrix(
-        data = dat,
-        ~ 1 + sex + age + group + visit + group * visit
-    )
-
-    # Same cov across groups.
-    result <- fit_mmrm(
-        designmat = mat,
-        outcome = dat$outcome,
-        subjid = dat$id,
-        visit = dat$visit,
-        group = dat$group,
-        cov_struct = "ar1",
-        REML = TRUE,
-        same_cov = TRUE
-    )
-
-    expect_true(is.list(result$sigma) && length(result$sigma) == 2)
-    expect_true(is.list(result$sd) && length(result$sd) == 2)
-    expect_true(is.list(result$rho) && length(result$rho) == 2)
-
-    # Separate cov per group.
-    result <- fit_mmrm(
-        designmat = mat,
-        outcome = dat$outcome,
-        subjid = dat$id,
-        visit = dat$visit,
-        group = dat$group,
-        cov_struct = "ar1",
-        REML = TRUE,
-        same_cov = FALSE
-    )
-
-    expect_true(
-        is.list(result$sigma) &&
-            length(result$sigma) == 2 &&
-            identical(names(result$sigma), c("A", "B"))
-    )
-    expect_true(
-        is.list(result$sd) &&
-            length(result$sd) == 2 &&
-            identical(names(result$sd), c("A", "B"))
-    )
-    expect_true(
-        is.list(result$rho) &&
-            length(result$rho) == 2 &&
-            identical(names(result$rho), c("A", "B"))
-    )
+    test_fit_mmrm("ar1")
 })
 
 test_that("fit_mmrm works with ar1h structure", {
-    set.seed(1234)
-    sigma <- as_vcov(c(2, 1, 0.7), c(0.3, 0.4, 0.2))
-    dat <- get_sim_data(n = 100, sigma)
-
-    mat <- model.matrix(
-        data = dat,
-        ~ 1 + sex + age + group + visit + group * visit
-    )
-
-    # Same cov across groups.
-    result <- fit_mmrm(
-        designmat = mat,
-        outcome = dat$outcome,
-        subjid = dat$id,
-        visit = dat$visit,
-        group = dat$group,
-        cov_struct = "ar1h",
-        REML = TRUE,
-        same_cov = TRUE
-    )
-
-    expect_true(is.list(result$sigma) && length(result$sigma) == 2)
-    expect_true(
-        is.list(result$sds) &&
-            length(result$sds) == 2 &&
-            length(result$sds[[1]]) == 3
-    )
-    expect_true(is.list(result$rho) && length(result$rho) == 2)
-
-    # Separate cov per group.
-    result <- fit_mmrm(
-        designmat = mat,
-        outcome = dat$outcome,
-        subjid = dat$id,
-        visit = dat$visit,
-        group = dat$group,
-        cov_struct = "ar1h",
-        REML = TRUE,
-        same_cov = FALSE
-    )
-
-    expect_true(
-        is.list(result$sigma) &&
-            length(result$sigma) == 2 &&
-            identical(names(result$sigma), c("A", "B"))
-    )
-    expect_true(
-        is.list(result$sds) &&
-            length(result$sds) == 2 &&
-            identical(names(result$sds), c("A", "B")) &&
-            length(result$sds$A) == 3 &&
-            all(result$sds$A != result$sds$B)
-    )
-    expect_true(
-        is.list(result$rho) &&
-            length(result$rho) == 2 &&
-            identical(names(result$rho), c("A", "B")) &&
-            length(result$rho$A) == 1 &&
-            result$rho$A != result$rho$B
-    )
+    set.seed(9469)
+    test_fit_mmrm("ar1h")
 })
 
 test_that("fit_mmrm works with cs structure", {
-    set.seed(1234)
-    sigma <- as_vcov(c(2, 1, 0.7), c(0.3, 0.4, 0.2))
-    dat <- get_sim_data(n = 100, sigma)
+    set.seed(6907)
+    test_fit_mmrm("cs")
+})
 
-    mat <- model.matrix(
-        data = dat,
-        ~ 1 + sex + age + group + visit + group * visit
-    )
-
-    # Same cov across groups.
-    result <- fit_mmrm(
-        designmat = mat,
-        outcome = dat$outcome,
-        subjid = dat$id,
-        visit = dat$visit,
-        group = dat$group,
-        cov_struct = "cs",
-        REML = TRUE,
-        same_cov = TRUE
-    )
-
-    expect_true(is.list(result$sigma) && length(result$sigma) == 2)
-    expect_true(is.list(result$sd) && length(result$sd) == 2)
-    expect_true(is.list(result$rho) && length(result$rho) == 2)
-
-    # Separate cov per group.
-    result <- fit_mmrm(
-        designmat = mat,
-        outcome = dat$outcome,
-        subjid = dat$id,
-        visit = dat$visit,
-        group = dat$group,
-        cov_struct = "cs",
-        REML = TRUE,
-        same_cov = FALSE
-    )
-
-    expect_true(
-        is.list(result$sigma) &&
-            length(result$sigma) == 2 &&
-            identical(names(result$sigma), c("A", "B"))
-    )
-    expect_true(
-        is.list(result$sd) &&
-            length(result$sd) == 2 &&
-            identical(names(result$sd), c("A", "B"))
-    )
-    expect_true(
-        is.list(result$rho) &&
-            length(result$rho) == 2 &&
-            identical(names(result$rho), c("A", "B"))
-    )
+test_that("fit_mmrm works with csh structure", {
+    set.seed(7970)
+    test_fit_mmrm("csh")
 })

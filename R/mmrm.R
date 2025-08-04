@@ -211,8 +211,14 @@ extract_params <- function(fit) {
         params$rho <- lapply(theta_est, function(theta) {
             theta_to_cs_cor(theta[2], n_visits)
         })
-    } else {
-        stop(sprintf("Unknown covariance type: %s", cov_type))
+    } else if (cov_type == "csh") {
+        lapply(theta_est, function(theta) {
+            assert_that(identical(length(theta), n_visits + 1L))
+        })
+        params$sds <- lapply(theta_est, function(theta) exp(theta[1:n_visits]))
+        params$rho <- lapply(theta_est, function(theta) {
+            theta_to_cs_cor(theta[n_visits + 1], n_visits)
+        })
     }
     params
 }
