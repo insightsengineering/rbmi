@@ -335,6 +335,20 @@ test_that("Advanced Usage - Bayesian with heterogeneous antedependence covarianc
     advanced_bayes_test("adh")
 })
 
+test_that("Advanced Usage - Bayesian with Toeplitz covariance model", {
+    skip_if_not(is_full_test())
+
+    set.seed(3046)
+    advanced_bayes_test("toep")
+})
+
+test_that("Advanced Usage - Bayesian with heterogeneous Toeplitz covariance model", {
+    skip_if_not(is_full_test())
+
+    set.seed(1341)
+    advanced_bayes_test("toeph")
+})
+
 test_that("Basic Usage - Condmean", {
     skip_if_not(is_full_test())
 

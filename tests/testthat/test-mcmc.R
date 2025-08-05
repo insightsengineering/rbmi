@@ -1077,12 +1077,12 @@ test_that("fit_mcmc works with heterogeneous Toeplitz covariance model", {
     sds <- c(1, 2, 3)
     sigma <- diag(sds) %*% toep_corr %*% diag(sds)
 
-    set.seed(3459)
-    test_fit_mcmc("toep", sigma = sigma)
+    set.seed(1459)
+    test_fit_mcmc("toeph", sigma = sigma)
 
-    set.seed(2355)
-    test_fit_mcmc("toep", sigma = sigma, init = "mmrm")
+    set.seed(4355)
+    test_fit_mcmc("toeph", sigma = sigma, init = "mmrm")
 
-    set.seed(3459)
-    test_fit_mcmc("toep", sigma = sigma, same_cov = FALSE)
+    set.seed(6459)
+    test_fit_mcmc("toeph", sigma = sigma, same_cov = FALSE)
 })
