@@ -412,7 +412,10 @@ test_prepare_prior_params <- function(cov_struct, expected_params) {
         is.list(result) && setequal(names(result), expected_params)
     )
     for (param in expected_params) {
-        expect_true(is.numeric(result[[param]]) && length(result[[param]]) == 1)
+        is_list_res <- is.list(result[[param]]) && length(result[[param]]) == 1
+        is_array_res <- is.array(result[[param]]) &&
+            length(result[[param]]) == 1
+        expect_true(is_list_res || is_array_res)
     }
 
     # Separate cov across groups.
@@ -438,7 +441,10 @@ test_prepare_prior_params <- function(cov_struct, expected_params) {
         is.list(result) && setequal(names(result), expected_params)
     )
     for (param in expected_params) {
-        expect_true(is.numeric(result[[param]]) && length(result[[param]]) == 2)
+        is_list_res <- is.list(result[[param]]) && length(result[[param]]) == 2
+        is_array_res <- is.array(result[[param]]) &&
+            length(result[[param]]) == 2
+        expect_true(is_list_res || is_array_res)
     }
 }
 
@@ -482,6 +488,20 @@ test_that("prepare_prior_params works for heterogeneous antedependence", {
 
     set.seed(2153)
     test_prepare_prior_params("adh", c("sds_par", "rhos_par"))
+})
+
+test_that("prepare_prior_params works for Toeplitz", {
+    skip_if_not(is_full_test())
+
+    set.seed(2111)
+    test_prepare_prior_params("toep", c("sd_par", "rhos_par"))
+})
+
+test_that("prepare_prior_params works for heterogeneous Toeplitz", {
+    skip_if_not(is_full_test())
+
+    set.seed(2143)
+    test_prepare_prior_params("toeph", c("sds_par", "rhos_par"))
 })
 
 test_that("fit_mcmc can recover known values with same_cov = TRUE", {
@@ -1029,4 +1049,40 @@ test_that("fit_mcmc works with heterogeneous antedependence covariance model", {
 
     set.seed(3459)
     test_fit_mcmc("adh", sigma = sigma, same_cov = FALSE)
+})
+
+test_that("fit_mcmc works with Toeplitz covariance model", {
+    skip_if_not(is_full_test())
+
+    rhos <- c(0.5, 0.4)
+    toep_corr <- toep_matrix(rhos)
+    sd <- 2
+    sigma <- sd^2 * toep_corr
+
+    set.seed(3459)
+    test_fit_mcmc("toep", sigma = sigma)
+
+    set.seed(2355)
+    test_fit_mcmc("toep", sigma = sigma, init = "mmrm")
+
+    set.seed(3459)
+    test_fit_mcmc("toep", sigma = sigma, same_cov = FALSE)
+})
+
+test_that("fit_mcmc works with heterogeneous Toeplitz covariance model", {
+    skip_if_not(is_full_test())
+
+    rhos <- c(0.5, 0.4)
+    toep_corr <- toep_matrix(rhos)
+    sds <- c(1, 2, 3)
+    sigma <- diag(sds) %*% toep_corr %*% diag(sds)
+
+    set.seed(3459)
+    test_fit_mcmc("toep", sigma = sigma)
+
+    set.seed(2355)
+    test_fit_mcmc("toep", sigma = sigma, init = "mmrm")
+
+    set.seed(3459)
+    test_fit_mcmc("toep", sigma = sigma, same_cov = FALSE)
 })

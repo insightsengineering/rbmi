@@ -273,6 +273,11 @@ For the variance parameter(s), we use again scaled inverse chi-square priors as 
 For the antedependence covariance structure (see [here](https://openpharma.github.io/mmrm/latest-tag/articles/covariance.html#homogeneous-ad-and-heterogeneous-ante-dependence-adh)), we use uniform priors on the $J-1$ correlation parameters $\rho_{1}, \dotsc, \rho_{J-1}$ in the full range $(-1, 1)$.
 For the variance parameter(s), we use again scaled inverse chi-square priors as described above.
 
+#### Toeplitz covariance structure
+
+For the Toeplitz covariance structure (see [here](https://openpharma.github.io/mmrm/latest-tag/articles/covariance.html#homogeneous-toep-and-heterogeneous-toeplitz-toeph)), we use a uniform prior on the correlation parameters $\rho_{1}, \dotsc, \rho_{J-1}$ in the full range $(-1, 1)$.
+For the variance parameter(s), we use again scaled inverse chi-square priors as described above.
+
 #### Further options
 
 The initial values and other expert options for the MCMC sampling can be defined via the `control` argument to `method_bayes`, which is simplified with the corresponding `control_bayes()` function call.

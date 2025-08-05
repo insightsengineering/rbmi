@@ -323,7 +323,17 @@ test_that("get_stan_model works as expected depending on covariance and prior on
     withr::local_options(rbmi.cache_dir = local_cache_dir)
 
     # Test all covariance structures with their default priors.
-    for (covariance in c("us", "ar1", "ar1h", "cs", "csh", "ad", "adh")) {
+    for (covariance in c(
+        "us",
+        "ar1",
+        "ar1h",
+        "cs",
+        "csh",
+        "ad",
+        "adh",
+        "toep",
+        "toeph"
+    )) {
         model <- expect_silent(get_stan_model(covariance, "default"))
         expect_snapshot(model)
     }

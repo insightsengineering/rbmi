@@ -103,7 +103,9 @@ method_bayes <- function(
         "ar1",
         "ar1h",
         "cs",
-        "csh"
+        "csh",
+        "toep",
+        "toeph"
     ),
     same_cov = TRUE,
     n_samples = 20,

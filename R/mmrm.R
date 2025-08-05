@@ -219,7 +219,7 @@ extract_params <- function(fit) {
         params$rho <- lapply(theta_est, function(theta) {
             theta_to_cs_cor(theta[n_visits + 1], n_visits)
         })
-    } else if (cov_type == "ad") {
+    } else if (cov_type %in% c("ad", "toep")) {
         lapply(theta_est, function(theta) {
             assert_that(identical(length(theta), n_visits))
         })
@@ -227,7 +227,7 @@ extract_params <- function(fit) {
         params$rhos <- lapply(theta_est, function(theta) {
             theta_to_cor(theta[-1])
         })
-    } else if (cov_type == "adh") {
+    } else if (cov_type %in% c("adh", "toeph")) {
         lapply(theta_est, function(theta) {
             assert_that(length(theta) == 2 * n_visits - 1)
         })

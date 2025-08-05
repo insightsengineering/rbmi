@@ -167,3 +167,14 @@ ad_matrix <- function(rhos) {
     }
     corr_matrix
 }
+
+toep_matrix <- function(rhos) {
+    n <- length(rhos) + 1
+    corr_matrix <- matrix(0, nrow = n, ncol = n)
+    for (i in 1:n) {
+        for (j in 1:n) {
+            corr_matrix[i, j] <- if (i == j) 1 else rhos[abs(i - j)]
+        }
+    }
+    corr_matrix
+}

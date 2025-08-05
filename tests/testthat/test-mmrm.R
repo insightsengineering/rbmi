@@ -30,7 +30,7 @@ expect_valid_fit_object <- function(fit, cov_struct, nv, same_cov) {
     expect_true(length(fit) >= 3)
 
     expect_true(all(
-        names(fit) %in% c("beta", "sigma", "sd", "sds", "rho", "failed")
+        names(fit) %in% c("beta", "sigma", "sd", "sds", "rho", "rhos", "failed")
     ))
 
     expect_vector(fit$beta)
@@ -540,4 +540,14 @@ test_that("fit_mmrm works with ad structure", {
 test_that("fit_mmrm works with adh structure", {
     set.seed(7970)
     test_fit_mmrm("adh")
+})
+
+test_that("fit_mmrm works with toep structure", {
+    set.seed(6912)
+    test_fit_mmrm("toep")
+})
+
+test_that("fit_mmrm works with toeph structure", {
+    set.seed(7975)
+    test_fit_mmrm("toeph")
 })
