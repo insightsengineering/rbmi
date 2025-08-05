@@ -939,7 +939,7 @@ test_that("fit_mcmc works with AR1 covariance model", {
     set.seed(3459)
     test_fit_mcmc("ar1", sigma = sigma)
 
-    set.seed(2492)
+    set.seed(2412)
     test_fit_mcmc("ar1", sigma = sigma, init = "mmrm")
 
     set.seed(7399)
