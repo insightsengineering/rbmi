@@ -166,10 +166,10 @@ test_fit_mmrm <- function(cov_struct) {
     cov_param_names <- attr(result, "cov_param_names")
 
     for (param in cov_param_names) {
-        expect_true(
-            is.list(result[[param]]) &&
-                length(result[[param]]) == 2 &&
-                all(result[[param]][[1]] == result[[param]][[2]])
+        expect_snapshot_value(
+            result[[param]],
+            style = "deparse",
+            tolerance = 1e-3
         )
     }
 
@@ -186,10 +186,10 @@ test_fit_mmrm <- function(cov_struct) {
     )
 
     for (param in cov_param_names) {
-        expect_true(
-            is.list(result[[param]]) &&
-                length(result[[param]]) == 2 &&
-                all(result[[param]][[1]] != result[[param]][[2]])
+        expect_snapshot_value(
+            result[[param]],
+            style = "deparse",
+            tolerance = 1e-3
         )
     }
 }
