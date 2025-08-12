@@ -47,6 +47,8 @@ data {
 
 transformed data {
    matrix[P, P] R_inverse = inverse(R);
+
+   {{ transformed_data }}
 }
 
 parameters {

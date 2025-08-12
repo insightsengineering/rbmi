@@ -7,7 +7,7 @@ data {
 transformed data {
    array[G] vector<lower={{ machine_double_eps }}>[n_visit] sds_par; // Standard deviations for each visit.
    for(g in 1:G){
-       sds_par[g] = sqrt(diag(Sigma_par[g]));
+       sds_par[g] = sqrt(diagonal(Sigma_par[g]));
    }
 }
 
