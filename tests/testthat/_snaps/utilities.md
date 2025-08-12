@@ -15,6 +15,9 @@
       $functions
       [1] ""
       
+      $transformed_data
+      [1] ""
+      
       $transformed_parameters
       [1] ""
       
@@ -69,6 +72,7 @@
       }
       transformed data {
          matrix[P, P] R_inverse = inverse(R);
+      
       }
       parameters {
           vector[P] theta;              // coefficients of linear model on covariates
@@ -173,6 +177,7 @@
       }
       transformed data {
          matrix[P, P] R_inverse = inverse(R);
+      
       }
       parameters {
           vector[P] theta;              // coefficients of linear model on covariates
@@ -192,12 +197,11 @@
       
           vector[N] mu = Q * theta;
       
-              for(g in 1:G){
-              rho[g] ~ uniform(-1, 1);
-              // Note that we pass the estimated sd, not sd^2 here as
-              // the scale parameter of the scaled inverse Chi-Square distribution.
-              var_const[g] ~ scaled_inv_chi_square(3, sd_par[g]);
-          }
+              rho ~ uniform(-1, 1);
+          // Note that we pass the estimated sd, not sd^2 here as
+          // the scale parameter of the scaled inverse Chi-Square distribution.
+          // Note also the parallel vectorization in the var_const/sd_par elements.
+          var_const ~ scaled_inv_chi_square(3, sd_par);
       
           for(i in 1:n_pat) {
               // Index + size variables for current pat group
@@ -286,6 +290,7 @@
       }
       transformed data {
          matrix[P, P] R_inverse = inverse(R);
+      
       }
       parameters {
           vector[P] theta;              // coefficients of linear model on covariates
@@ -308,14 +313,12 @@
       
           vector[N] mu = Q * theta;
       
-              for(g in 1:G){
-              rho[g] ~ uniform(-1, 1);
-              // Scaled inverse chi-square priors for the variances.
-              for(i in 1:n_visit) {
-                  // Note that we need to pass the estimated standard deviation as
-                  // the scale parameter.
-                  vars[g][i] ~ scaled_inv_chi_square(3, sds_par[g][i]);
-              }
+              rho ~ uniform(-1, 1);
+          for(g in 1:G) {
+              // Note that we need to pass the estimated standard deviation as
+              // the scale parameter.
+              // Note also the parallel vectorization in the vars[g]/sds_par[g] elements.
+              vars[g] ~ scaled_inv_chi_square(3, sds_par[g]);
           }
       
           for(i in 1:n_pat) {
@@ -405,6 +408,7 @@
       }
       transformed data {
          matrix[P, P] R_inverse = inverse(R);
+      
       }
       parameters {
           vector[P] theta;              // coefficients of linear model on covariates
@@ -424,12 +428,11 @@
       
           vector[N] mu = Q * theta;
       
-              for(g in 1:G){
-              rho[g] ~ uniform(-1/(n_visit - 1), 1);
-              // Note that we pass the estimated sd, not sd^2 here as
-              // the scale parameter of the scaled inverse Chi-Square distribution.
-              var_const[g] ~ scaled_inv_chi_square(3, sd_par[g]);
-          }
+              rho ~ uniform(-1/(n_visit - 1), 1);
+          // Note that we pass the estimated sd, not sd^2 here as
+          // the scale parameter of the scaled inverse Chi-Square distribution.
+          // Note also the parallel vectorization in the var_const/sd_par elements.
+          var_const ~ scaled_inv_chi_square(3, sd_par);
       
           for(i in 1:n_pat) {
               // Index + size variables for current pat group
@@ -518,6 +521,7 @@
       }
       transformed data {
          matrix[P, P] R_inverse = inverse(R);
+      
       }
       parameters {
           vector[P] theta;              // coefficients of linear model on covariates
@@ -540,14 +544,12 @@
       
           vector[N] mu = Q * theta;
       
-              for(g in 1:G){
-              rho[g] ~ uniform(-1/(n_visit - 1), 1);
-              // Scaled inverse chi-square priors for the variances.
-              for(i in 1:n_visit) {
-                  // Note that we need to pass the estimated standard deviation as
-                  // the scale parameter.
-                  vars[g][i] ~ scaled_inv_chi_square(3, sds_par[g][i]);
-              }
+              rho ~ uniform(-1/(n_visit - 1), 1);
+          for(g in 1:G) {
+              // Note that we need to pass the estimated standard deviation as
+              // the scale parameter.
+              // Note also the parallel vectorization in the vars[g]/sds_par[g] elements.
+              vars[g] ~ scaled_inv_chi_square(3, sds_par[g]);
           }
       
           for(i in 1:n_pat) {
@@ -643,6 +645,7 @@
       }
       transformed data {
          matrix[P, P] R_inverse = inverse(R);
+      
       }
       parameters {
           vector[P] theta;              // coefficients of linear model on covariates
@@ -662,12 +665,14 @@
       
           vector[N] mu = Q * theta;
       
-              for(g in 1:G){
+              for(g in 1:G) {
               rhos[g] ~ uniform(-1, 1);
-              // Note that we pass the estimated sd, not sd^2 here as
-              // the scale parameter of the scaled inverse Chi-Square distribution.
-              var_const[g] ~ scaled_inv_chi_square(3, sd_par[g]);
           }
+      
+          // Note that we pass the estimated sd, not sd^2 here as
+          // the scale parameter of the scaled inverse Chi-Square distribution.
+          // Note also the parallel vectorization in the var_const/sd_par elements.
+          var_const ~ scaled_inv_chi_square(3, sd_par);
       
           for(i in 1:n_pat) {
               // Index + size variables for current pat group
@@ -762,6 +767,7 @@
       }
       transformed data {
          matrix[P, P] R_inverse = inverse(R);
+      
       }
       parameters {
           vector[P] theta;              // coefficients of linear model on covariates
@@ -784,14 +790,12 @@
       
           vector[N] mu = Q * theta;
       
-              for(g in 1:G){
+              for(g in 1:G) {
               rhos[g] ~ uniform(-1, 1);
-              // Scaled inverse chi-square priors for the variances.
-              for(i in 1:n_visit) {
-                  // Note that we need to pass the estimated standard deviation as
-                  // the scale parameter.
-                  vars[g][i] ~ scaled_inv_chi_square(3, sds_par[g][i]);
-              }
+              // Note that we need to pass the estimated standard deviation as
+              // the scale parameter.
+              // Note also the parallel vectorization in the vars[g]/sds_par[g] elements.
+              vars[g] ~ scaled_inv_chi_square(3, sds_par[g]);
           }
       
           for(i in 1:n_pat) {
@@ -886,6 +890,7 @@
       }
       transformed data {
          matrix[P, P] R_inverse = inverse(R);
+      
       }
       parameters {
           vector[P] theta;              // coefficients of linear model on covariates
@@ -905,12 +910,13 @@
       
           vector[N] mu = Q * theta;
       
-              for(g in 1:G){
+              for(g in 1:G) {
               rhos[g] ~ uniform(-1, 1);
-              // Note that we pass the estimated sd, not sd^2 here as
-              // the scale parameter of the scaled inverse Chi-Square distribution.
-              var_const[g] ~ scaled_inv_chi_square(3, sd_par[g]);
           }
+          // Note that we pass the estimated sd, not sd^2 here as
+          // the scale parameter of the scaled inverse Chi-Square distribution.
+          // Note also the parallel vectorization in the var_const/sd_par elements.
+          var_const ~ scaled_inv_chi_square(3, sd_par);
       
           for(i in 1:n_pat) {
               // Index + size variables for current pat group
@@ -1004,6 +1010,7 @@
       }
       transformed data {
          matrix[P, P] R_inverse = inverse(R);
+      
       }
       parameters {
           vector[P] theta;              // coefficients of linear model on covariates
@@ -1026,14 +1033,12 @@
       
           vector[N] mu = Q * theta;
       
-              for(g in 1:G){
+              for(g in 1:G) {
               rhos[g] ~ uniform(-1, 1);
-              // Scaled inverse chi-square priors for the variances.
-              for(i in 1:n_visit) {
-                  // Note that we need to pass the estimated standard deviation as
-                  // the scale parameter.
-                  vars[g][i] ~ scaled_inv_chi_square(3, sds_par[g][i]);
-              }
+              // Note that we need to pass the estimated standard deviation as
+              // the scale parameter.
+              // Note also the parallel vectorization in the vars[g]/sds_par[g] elements.
+              vars[g] ~ scaled_inv_chi_square(3, sds_par[g]);
           }
       
           for(i in 1:n_pat) {
@@ -1113,6 +1118,10 @@
       }
       transformed data {
          matrix[P, P] R_inverse = inverse(R);
+            array[G] vector<lower=2.2204e-16>[n_visit] sds_par; // Standard deviations for each visit.
+         for(g in 1:G){
+             sds_par[g] = sqrt(diagonal(Sigma_par[g]));
+         }
       }
       parameters {
           vector[P] theta;              // coefficients of linear model on covariates
@@ -1135,13 +1144,13 @@
           vector[N] mu = Q * theta;
       
               for(g in 1:G){
-              corr_chol[g] ~ lkj_corr_cholesky(1.0); // LKJ prior on correlation matrix.
-              // Scaled inverse chi-square priors for the variances.
-              for(i in 1:n_visit) {
-                  // Note that we need to pass the estimated sigma, not sigma^2 here as
-                  // the scale parameter.
-                  vars[g][i] ~ scaled_inv_chi_square(3, sqrt(Sigma_par[g][i,i]));
-              }
+              // Note that this is not vectorized in the matrices so we have to do this
+              // inside this loop.
+              corr_chol[g] ~ lkj_corr_cholesky(1.0);
+              // Note that we need to pass the estimated sigma, not sigma^2 here as
+              // the scale parameter.
+              // Note also the parallel vectorization in the vars[g]/sds_par[g] elements.
+              vars[g] ~ scaled_inv_chi_square(3, sds_par[g]);
           }
       
           for(i in 1:n_pat) {
