@@ -28,10 +28,10 @@ transformed parameters {
 }
 
 model {
-    // iid LKJ prior on correlation matrices.
-    corr_chol ~ lkj_corr_cholesky(1.0); 
-
     for(g in 1:G){
+        // Note that this is not vectorized in the matrices so we have to do this
+        // inside this loop.
+        corr_chol[g] ~ lkj_corr_cholesky(1.0); 
         // Note that we need to pass the estimated sigma, not sigma^2 here as 
         // the scale parameter.
         // Note also the parallel vectorization in the vars[g]/sds_par[g] elements.
