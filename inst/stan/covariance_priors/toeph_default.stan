@@ -41,10 +41,9 @@ transformed parameters {
 }
 
 model {
-    // iid uniform prior for rhos.
-    rhos ~ uniform(-1, 1);
+    for(g in 1:G) {
+        rhos[g] ~ uniform(-1, 1);
 
-    for(g in 1:G){
         // Note that we need to pass the estimated standard deviation as 
         // the scale parameter.
         // Note also the parallel vectorization in the vars[g]/sds_par[g] elements.

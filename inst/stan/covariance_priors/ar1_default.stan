@@ -33,7 +33,6 @@ transformed parameters {
 }
 
 model {
-    // iid uniform prior for rho.
     rho ~ uniform(-1, 1);
 
     // Note that we pass the estimated sd, not sd^2 here as 
