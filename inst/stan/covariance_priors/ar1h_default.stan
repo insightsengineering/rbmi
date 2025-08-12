@@ -36,13 +36,13 @@ transformed parameters {
 }
 
 model {
+    // iid uniform prior for rho.
+    rho ~ uniform(-1, 1);
+
     for(g in 1:G){
-        rho[g] ~ uniform(-1, 1);
-        // Scaled inverse chi-square priors for the variances.
-        for(i in 1:n_visit) {
-            // Note that we need to pass the estimated standard deviation as 
-            // the scale parameter.
-            vars[g][i] ~ scaled_inv_chi_square(3, sds_par[g][i]);
-        }
+        // Note that we need to pass the estimated standard deviation as 
+        // the scale parameter.
+        // Note also the parallel vectorization in the vars[g]/sds_par[g] elements.
+        vars[g] ~ scaled_inv_chi_square(3, sds_par[g]);
     }
 }

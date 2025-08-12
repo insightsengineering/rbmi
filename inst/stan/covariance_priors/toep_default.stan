@@ -38,10 +38,11 @@ transformed parameters {
 }
 
 model {
-    for(g in 1:G){
-        rhos[g] ~ uniform(-1, 1);
-        // Note that we pass the estimated sd, not sd^2 here as 
-        // the scale parameter of the scaled inverse Chi-Square distribution.
-        var_const[g] ~ scaled_inv_chi_square(3, sd_par[g]);
-    }
+    // iid uniform prior for rhos.
+    rhos ~ uniform(-1, 1);
+
+    // Note that we pass the estimated sd, not sd^2 here as
+    // the scale parameter of the scaled inverse Chi-Square distribution.
+    // Note also the parallel vectorization in the var_const/sd_par elements.
+    var_const ~ scaled_inv_chi_square(3, sd_par);
 }
