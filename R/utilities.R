@@ -610,6 +610,7 @@ STAN_BLOCKS <- list(
     functions = "functions",
     data = "data",
     parameters = "parameters",
+    transformed_data = "transformed data",
     transformed_parameters = "transformed parameters",
     model = "model"
 )
