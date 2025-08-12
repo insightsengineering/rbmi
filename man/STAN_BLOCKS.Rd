@@ -5,7 +5,7 @@
 \alias{STAN_BLOCKS}
 \title{List of Stan Blocks}
 \format{
-An object of class \code{list} of length 5.
+An object of class \code{list} of length 6.
 }
 \usage{
 STAN_BLOCKS
