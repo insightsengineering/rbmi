@@ -374,7 +374,7 @@ test_that("get_pattern_groups_unique", {
     expect_equal(results_actual, results_expected)
 })
 
-test_prepare_prior_params <- function(cov_struct, expected_params) {
+test_prepare_prior_params <- function(cov_struct, expected_params_dim) {
     mcoefs <- list(
         "int" = 10,
         "age" = 3,
@@ -408,6 +408,8 @@ test_prepare_prior_params <- function(cov_struct, expected_params) {
         mmrm_initial = mmrm_initial,
         same_cov = TRUE
     )
+
+    expected_params <- names(expected_params_dim)
     expect_true(
         is.list(result) && setequal(names(result), expected_params)
     )
@@ -415,7 +417,17 @@ test_prepare_prior_params <- function(cov_struct, expected_params) {
         is_list_res <- is.list(result[[param]]) && length(result[[param]]) == 1
         is_array_res <- is.array(result[[param]]) &&
             length(result[[param]]) == 1
-        expect_true(is_list_res || is_array_res)
+        if (is_list_res) {
+            expect_true(
+                length(result[[param]][[1]]) == expected_params_dim[param]
+            )
+        } else if (is_array_res) {
+            expect_true(
+                dim(result[[param]]) == expected_params_dim[param]
+            )
+        } else {
+            stop("Unexpected result type for parameter: ", param)
+        }
     }
 
     # Separate cov across groups.
@@ -452,56 +464,56 @@ test_that("prepare_prior_params works for AR1", {
     skip_if_not(is_full_test())
 
     set.seed(2151)
-    test_prepare_prior_params("ar1", c("sd_par", "rho_par"))
+    test_prepare_prior_params("ar1", c("sd_par" = 1, "rho_par" = 1))
 })
 
 test_that("prepare_prior_params works for heterogeneous AR1", {
     skip_if_not(is_full_test())
 
     set.seed(2153)
-    test_prepare_prior_params("ar1h", c("sds_par", "rho_par"))
+    test_prepare_prior_params("ar1h", c("sds_par" = 3, "rho_par" = 1))
 })
 
 test_that("prepare_prior_params works for compound symmetry", {
     skip_if_not(is_full_test())
 
     set.seed(2151)
-    test_prepare_prior_params("cs", c("sd_par", "rho_par"))
+    test_prepare_prior_params("cs", c("sd_par" = 1, "rho_par" = 1))
 })
 
 test_that("prepare_prior_params works for heterogeneous compound symmetry", {
     skip_if_not(is_full_test())
 
     set.seed(2153)
-    test_prepare_prior_params("csh", c("sds_par", "rho_par"))
+    test_prepare_prior_params("csh", c("sds_par" = 3, "rho_par" = 1))
 })
 
 test_that("prepare_prior_params works for antedependence", {
     skip_if_not(is_full_test())
 
     set.seed(2151)
-    test_prepare_prior_params("ad", c("sd_par", "rhos_par"))
+    test_prepare_prior_params("ad", c("sd_par" = 1, "rhos_par" = 2))
 })
 
 test_that("prepare_prior_params works for heterogeneous antedependence", {
     skip_if_not(is_full_test())
 
     set.seed(2153)
-    test_prepare_prior_params("adh", c("sds_par", "rhos_par"))
+    test_prepare_prior_params("adh", c("sds_par" = 3, "rhos_par" = 2))
 })
 
 test_that("prepare_prior_params works for Toeplitz", {
     skip_if_not(is_full_test())
 
     set.seed(2111)
-    test_prepare_prior_params("toep", c("sd_par", "rhos_par"))
+    test_prepare_prior_params("toep", c("sd_par" = 1, "rhos_par" = 2))
 })
 
 test_that("prepare_prior_params works for heterogeneous Toeplitz", {
     skip_if_not(is_full_test())
 
     set.seed(2143)
-    test_prepare_prior_params("toeph", c("sds_par", "rhos_par"))
+    test_prepare_prior_params("toeph", c("sds_par" = 3, "rhos_par" = 2))
 })
 
 test_that("fit_mcmc can recover known values with same_cov = TRUE", {
