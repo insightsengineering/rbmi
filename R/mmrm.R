@@ -368,10 +368,6 @@ eval_mmrm <- function(expr) {
 
     fit_record <- record(expr)
 
-    if (length(fit_record$warnings) > 0 || length(fit_record$errors) > 0) {
-        return(default)
-    }
-
     converged <- attributes(fit_record$results)$converged
     if (is.null(converged)) {
         return(default)
