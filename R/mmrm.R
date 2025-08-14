@@ -300,19 +300,13 @@ fit_mmrm <- function(
 
     frm_mmrm <- as_mmrm_formula(dat_mmrm, cov_struct)
 
-    fit <- eval_mmrm({
-        mmrm::mmrm(
-            formula = frm_mmrm,
-            data = dat_mmrm,
-            reml = REML,
-            n_cores = 1,
-            accept_singular = FALSE
-        )
-    })
-
-    if (fit$failed) {
-        return(fit)
-    }
+    fit <- mmrm::mmrm(
+        formula = frm_mmrm,
+        data = dat_mmrm,
+        reml = REML,
+        n_cores = 1,
+        accept_singular = FALSE
+    )
 
     # Extract regression coefficients and covariance parameters.
     params <- extract_params(fit)
@@ -337,49 +331,4 @@ fit_mmrm <- function(
         params,
         cov_param_names = cov_param_names
     )
-}
-
-
-#' Evaluate a call to mmrm
-#'
-#' This is a utility function that attempts to evaluate a call to mmrm
-#' managing any warnings or errors that are thrown. In particular
-#' this function attempts to catch any warnings or errors and instead
-#' of surfacing them it will simply add an additional element `failed`
-#' with a value of TRUE. This allows for multiple calls to be made
-#' without the program exiting.
-#'
-#' This function was originally developed for use with glmmTMB which needed
-#' more hand-holding and dropping of false-positive warnings. It is not
-#' as important now but is kept around encase we need to catch
-#' false-positive warnings again in the future.
-#'
-#' @examples
-#' \dontrun{
-#' eval_mmrm({
-#'     mmrm::mmrm(formula, data)
-#' })
-#' }
-#' @param expr An expression to be evaluated. Should be a call to [mmrm::mmrm()].
-#' @seealso [record()]
-#'
-eval_mmrm <- function(expr) {
-    default <- list(failed = TRUE)
-
-    fit_record <- record(expr)
-
-    if (length(fit_record$warnings) > 0 || length(fit_record$errors) > 0) {
-        return(default)
-    }
-
-    converged <- attributes(fit_record$results)$converged
-    if (is.null(converged)) {
-        return(default)
-    }
-    if (!converged) {
-        return(default)
-    }
-
-    fit_record$results$failed <- FALSE
-    fit_record$results
 }

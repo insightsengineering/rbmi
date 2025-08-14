@@ -144,10 +144,6 @@ fit_mcmc <- function(
         same_cov = method$same_cov
     )
 
-    if (mmrm_initial$failed) {
-        stop("Fitting MMRM to original dataset failed")
-    }
-
     stan_data <- prepare_stan_data(
         ddat = designmat,
         subjid = subjid,
