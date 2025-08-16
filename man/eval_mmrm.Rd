@@ -11,14 +11,10 @@ eval_mmrm(expr)
 }
 \description{
 This is a utility function that attempts to evaluate a call to mmrm
-managing any warnings or errors that are thrown. In particular
-this function attempts to catch any warnings or errors and instead
-of surfacing them it will simply add an additional element \code{failed}
-with a value of TRUE. This allows for multiple calls to be made
-without the program exiting.
+managing any warnings or errors that are thrown.
 }
 \details{
-This function was originally developed for use with glmmTMB which needed
+This function was originally developed for use with \code{glmmTMB} which needed
 more hand-holding and dropping of false-positive warnings. It is not
 as important now but is kept around encase we need to catch
 false-positive warnings again in the future.
