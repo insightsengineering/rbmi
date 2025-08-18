@@ -362,6 +362,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li><a href="#how-to-handle-missing-data-in-baseline-covariates-in-rbmi" id="toc-how-to-handle-missing-data-in-baseline-covariates-in-rbmi"><span class="toc-section-number">1.4</span> How to handle missing data in baseline covariates in <code>rbmi</code>?</a></li>
 <li><a href="#why-does-rbmi-by-default-use-an-ancova-analysis-model-and-not-an-mmrm-analysis-model" id="toc-why-does-rbmi-by-default-use-an-ancova-analysis-model-and-not-an-mmrm-analysis-model"><span class="toc-section-number">1.5</span> Why does <code>rbmi</code> by default use an ANCOVA analysis model and not an MMRM analysis model?</a></li>
 <li><a href="#how-can-i-analyse-the-change-from-baseline-in-the-analysis-model-when-imputation-was-done-on-the-original-outcomes" id="toc-how-can-i-analyse-the-change-from-baseline-in-the-analysis-model-when-imputation-was-done-on-the-original-outcomes"><span class="toc-section-number">1.6</span> How can I analyse the change-from-baseline in the analysis model when imputation was done on the original outcomes?</a></li>
+<li><a href="#is-ancova-on-more-than-2-treatment-groups-supported" id="toc-is-ancova-on-more-than-2-treatment-groups-supported"><span class="toc-section-number">1.7</span> Is ANCOVA on more than 2 treatment groups supported?</a></li>
 </ul></li>
 </ul>
 </div>
@@ -446,6 +447,20 @@ We expect that conditional mean imputation is also valid if a general MMRM model
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>    ancova_modified,</span>
 <span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>    <span class="at">vars =</span> vars</span>
 <span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a> )</span></code></pre></div>
+<p><br></p>
+</div>
+<div id="is-ancova-on-more-than-2-treatment-groups-supported" class="section level2" number="1.7">
+<h2><span class="header-section-number">1.7</span> Is ANCOVA on more than 2 treatment groups supported?</h2>
+<p>This can be implemented by using the <code>ancova_m_groups()</code> function instead of the default <code>ancova()</code> function e.g.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>anaObj <span class="ot">&lt;-</span> rbmi<span class="sc">::</span><span class="fu">analyse</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>    imputeObj,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>    ancova_m_groups,</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>    <span class="at">vars =</span> vars</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a> )</span></code></pre></div>
+<p>Please note that the object created by this function uses a different naming convention to
+that of the <code>ancova()</code> function which means any manual extraction code looking for specific
+names such as <code>&quot;lsm_alt&quot;</code> will need to be updated. Please see the documentation for <code>ancova_m_groups()</code>
+for more details.</p>
 <p><br></p>
 <div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-White2005" class="csl-entry">
