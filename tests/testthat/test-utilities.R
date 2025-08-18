@@ -364,6 +364,12 @@ test_that("frm_find_and_replace works as expected", {
     expect_equal(actual, expected)
 
 
-
+    # Special names / special characters
+    frm <- ~ ` .. !abc & `:x - 1 * x
+    actual <- frm_find_and_replace(frm, as.name(" .. !abc & "), as.name("bob"))
+    expected <-  ~ bob:x - 1 * x
+    environment(actual) <- globalenv()
+    environment(expected) <- globalenv()
+    expect_equal(actual, expected)
 })
 
