@@ -21,9 +21,10 @@ This function traverses a language object (such as an expression or call)
 and recursively replaces all occurrences of a specified symbol with another symbol.
 }
 \examples{
+\dontrun{
 expr <- quote(a + b * c)
 frm_find_and_replace(expr, as.name("b"), as.name("x"))
 # Returns: a + x * c
-
+}
 }
 \keyword{internal}

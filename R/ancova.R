@@ -71,6 +71,73 @@ ancova <- function(
 }
 
 
+#' Multi-Group Analysis of Covariance
+#'
+#' Performs an analysis of covariance with support for multiple treatment groups,
+#' returning treatment effects (contrasts between each non-reference group and the
+#' reference group) and least square means estimates for all groups.
+#'
+#' @inheritParams ancova
+#'
+#' @details
+#' This function extends [ancova()] to support more than two treatment groups.
+#' The function works as follows:
+#'
+#' 1. Select the first value from `visits`.
+#' 2. Subset the data to only the observations that occurred on this visit.
+#' 3. Fit a linear model as `vars$outcome ~ vars$group + vars$covariates`.
+#' 4. Extract treatment effects (each non-reference group vs reference) and
+#'    least square means for all treatment groups.
+#' 5. Repeat for all other values in `visits`.
+#'
+#' The reference group is determined by the first factor level of `vars$group`.
+#' Only pairwise comparisons between each non-reference group and the reference
+#' group are computed (not all pairwise comparisons between groups).
+#'
+#' @section Output Structure:
+#' Results are returned as a named list with elements suffixed by visit name:
+#' ```
+#' list(
+#'     trt_L1_L0_visit_1 = list(est = ...), # Group L1 vs L0 (reference)
+#'     trt_L2_L0_visit_1 = list(est = ...), # Group L2 vs L0 (reference)
+#'     lsm_L0_visit_1 = list(est = ...),    # LSMean for reference group L0
+#'     lsm_L1_visit_1 = list(est = ...),    # LSMean for group L1
+#'     lsm_L2_visit_1 = list(est = ...),    # LSMean for group L2
+#'     ...
+#' )
+#' ```
+#' Group levels are standardized to "L0", "L1", "L2", etc., where "L0" represents
+#' the reference group (first factor level).
+#'
+#' @inheritSection lsmeans Weighting
+#'
+#' @examples
+#' \dontrun{
+#' # 3-group analysis
+#' data$treatment <- factor(data$treatment, levels = c("Control", "Low", "High"))
+#' vars <- set_vars(
+#'     outcome = "response",
+#'     group = "treatment",
+#'     visit = "visit",
+#'     covariates = c("age", "sex")
+#' )
+#' result <- ancova_m_groups(data, vars)
+#'
+#' # With group interactions
+#' vars_int <- set_vars(
+#'     outcome = "response",
+#'     group = "treatment",
+#'     visit = "visit",
+#'     covariates = c("age", "sex", "treatment*age")
+#' )
+#' result_int <- ancova_m_groups(data, vars_int)
+#' }
+#'
+#' @seealso [ancova()] for two-group analysis
+#' @seealso [analyse()]
+#' @seealso [stats::lm()]
+#' @seealso [set_vars()]
+#' @export
 ancova_m_groups <- function(
     data,
     vars,
@@ -88,6 +155,19 @@ ancova_m_groups <- function(
 
 
 
+#' Core ANCOVA Implementation
+#'
+#' Internal function that provides common functionality for both two-group and
+#' multi-group ANCOVA analyses. This function handles input validation, visit
+#' processing, and delegates the actual analysis to the specified ancova function.
+#'
+#' @inheritParams ancova
+#' @param ancova_fun Function to perform the single-visit ANCOVA analysis.
+#'   Should be either [ancova_single()] for two-group analysis or
+#'   [ancova_single_m_group()] for multi-group analysis.
+#'
+#'
+#' @keywords internal
 ancova_core <- function(
     data,
     vars,
@@ -198,6 +278,7 @@ ancova_core <- function(
 #' }
 #' @seealso [ancova()]
 #' @importFrom stats lm coef vcov df.residual
+#' @keywords internal
 ancova_single <- function(
     data,
     outcome,
@@ -243,6 +324,52 @@ ancova_single <- function(
 
 
 
+#' Multi-Group ANCOVA Implementation for Single Visit
+#'
+#' Internal function that implements analysis of covariance for multiple treatment
+#' groups within a single visit. This function extends [ancova_single()] to handle
+#' more than two groups.
+#'
+#' @inheritParams ancova_single
+#'
+#' @details
+#' This function:
+#' - Accepts factor variables with 2 or more levels for the group parameter
+#' - Standardizes group level names to "L0", "L1", "L2", etc. for consistent output
+#' - Calculates treatment effects as contrasts between each non-reference group and the reference
+#' - Computes least square means for all groups using the specified weighting strategy
+#'
+#' The reference group is always the first factor level (standardized to "L0").
+#' Treatment effects compare each subsequent group ("L1", "L2", ...) against "L0".
+#'
+#' @section Reserved Variable Names:
+#' This function uses `"rbmiGroup"` as an internal variable name. If your dataset
+#' contains a variable with this name, the function will error.
+#'
+#' @return A named list containing:
+#' \itemize{
+#'   \item `trt_L1_L0`, `trt_L2_L0`, etc.: Treatment effects (each group vs reference)
+#'   \item `lsm_L0`, `lsm_L1`, `lsm_L2`, etc.: Least square means for all groups
+#' }
+#' Each element contains `est` (estimate), `se` (standard error), and `df` (degrees of freedom).
+#'
+#' @examples
+#' \dontrun{
+#' # Internal function - typically called via ancova_m_groups()
+#' data$grp <- factor(c("Control", "Treatment1", "Treatment2"))
+#' result <- ancova_single_m_group(
+#'     data = data,
+#'     outcome = "response",
+#'     group = "grp",
+#'     covariates = c("age", "sex"),
+#'     weights = "counterfactual"
+#' )
+#' }
+#'
+#' @seealso [ancova_single()] for two-group analysis
+#' @seealso [ancova_m_groups()] for the user-facing multi-group function
+#' @importFrom stats lm coef vcov df.residual
+#' @keywords internal
 ancova_single_m_group <- function(
     data,
     outcome,
