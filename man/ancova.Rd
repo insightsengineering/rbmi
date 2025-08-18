@@ -120,6 +120,8 @@ for \code{weights = "counterfactual"}.
 }
 
 \seealso{
+\code{\link[=ancova_m_groups]{ancova_m_groups()}} for multi-group analysis
+
 \code{\link[=analyse]{analyse()}}
 
 \code{\link[stats:lm]{stats::lm()}}

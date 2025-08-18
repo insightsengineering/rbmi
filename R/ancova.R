@@ -51,6 +51,7 @@
 #'
 #' @inheritSection lsmeans Weighting
 #'
+#' @seealso [ancova_m_groups()] for multi-group analysis
 #' @seealso [analyse()]
 #' @seealso [stats::lm()]
 #' @seealso [set_vars()]

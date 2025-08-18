@@ -58,6 +58,11 @@
 #' a linear transformation of the outcomes.
 #' Thus care is required when applying alternative analysis functions in this setting.
 #'
+#' Note that as of verion 1.4.2 rbmi provides the `ancova_m_groups()` function; this is an extension to
+#' the `ancova()` function which supports the analysis of more than 2 treatment arms.
+#' The `ancova()` function is left as the default for backwards compatibility as `ancova_m_groups()`
+#' uses a different naming structure.
+#'
 #' The `delta` argument can be used to specify offsets to be applied
 #' to the outcome variable in the imputed datasets prior to the analysis.
 #' This is typically used for sensitivity or tipping point analyses. The
