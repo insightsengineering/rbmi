@@ -820,10 +820,14 @@ validate_strategies <- function(strategies, reference) {
     for (ref in unique_references) {
         assert_that(
             ref %in% strat_names,
-            msg = sprintf("Required strategy `%s` has not been defined", ref)
+            msg = sprintf(
+                "No implementation for strategy `%s` is available. Available strategies include:\n%s",
+                ref,
+                paste(sprintf("  - %s", strat_names), collapse = "\n")
+            )
         )
     }
-    return(invisible(TRUE))
+    invisible(TRUE)
 }
 
 
