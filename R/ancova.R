@@ -255,7 +255,7 @@ ancova_single_m_group <- function(
         is.factor(data[[group]]),
         length(levels(data[[group]])) >= 2,
         length(unique(data[[group]])) == length(levels(data[[group]])),
-        msg = "`data[[vars$group]]` must be a factor variable with 2 levels"
+        msg = "`data[[vars$group]]` must be a factor variable with >=2 levels"
     )
 
     data2 <- data[, c(extract_covariates(covariates), outcome, group)]
@@ -264,9 +264,9 @@ ancova_single_m_group <- function(
     levels(data2[[group]]) <- paste0("L", seq_along(levels(data2[[group]])) - 1)
     assert_that(
         !"rbmiGroup" %in% names(data),
-        msg = c(
+        msg = paste(
             "`rbmiGroup` is a reserved variable name for internal use, please rename",
-            " your variable to avoid conflicts"
+            "your variable to avoid conflicts"
         )
     )
     data2[["rbmiGroup"]] <- data2[[group]]
