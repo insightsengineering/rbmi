@@ -616,5 +616,5 @@ test_that("ancova_m_groups - backward compatibility with 2-group case", {
         tolerance = 1e-10
     )
 
-    exptect_true(length(result_traditional) == length(result_multigroup))
+    expect_true(length(result_traditional) == length(result_multigroup))
 })
