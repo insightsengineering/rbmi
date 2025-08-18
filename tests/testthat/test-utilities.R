@@ -353,7 +353,7 @@ test_that("frm_find_and_replace works as expected", {
     #   - No arg functions  k()
     #   - 1-arg functions  h(z)
     #   - 2-arg functions  f(z, z)
-    #   - Constants   + 1
+    #   - Constants e.g. + 1
     #   - Data modification functions  I(z^2)
     #   - Name subset  e.g. zz doesn't get renamed (where we are searching for z)
     frm <- x + z ~ 1 + z + a + b + zz + z:a + a * z + a * b + h(z) + f(z, z) + k() + I(z^2)
@@ -372,4 +372,3 @@ test_that("frm_find_and_replace works as expected", {
     environment(expected) <- globalenv()
     expect_equal(actual, expected)
 })
-
