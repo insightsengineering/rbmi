@@ -61,6 +61,40 @@ ancova <- function(
     visits = NULL,
     weights = c("counterfactual", "equal", "proportional_em", "proportional")
 ) {
+    ancova_core(
+        data = data,
+        vars = vars,
+        visits = visits,
+        weights = weights,
+        ancova_fun = ancova_single
+    )
+}
+
+
+ancova_m_groups <- function(
+    data,
+    vars,
+    visits = NULL,
+    weights = c("counterfactual", "equal", "proportional_em", "proportional")
+) {
+    ancova_core(
+        data = data,
+        vars = vars,
+        visits = visits,
+        weights = weights,
+        ancova_fun = ancova_single_m_group
+    )
+}
+
+
+
+ancova_core <- function(
+    data,
+    vars,
+    visits = NULL,
+    weights = c("counterfactual", "equal", "proportional_em", "proportional"),
+    ancova_fun
+) {
     outcome <- vars[["outcome"]]
     group <- vars[["group"]]
     covariates <- vars[["covariates"]]
@@ -130,7 +164,7 @@ ancova <- function(
         visits,
         function(x) {
             data2 <- data[data[[visit]] == x, ]
-            res <- ancova_single(data2, outcome, group, covariates, weights)
+            res <- ancova_fun(data2, outcome, group, covariates, weights)
             names(res) <- paste0(names(res), "_", x)
             return(res)
         }
@@ -205,4 +239,84 @@ ancova_single <- function(
         lsm_alt = lsm1
     )
     return(x)
+}
+
+
+
+ancova_single_m_group <- function(
+    data,
+    outcome,
+    group,
+    covariates,
+    weights = c("counterfactual", "equal", "proportional_em", "proportional")
+) {
+    weights <- match.arg(weights)
+    assert_that(
+        is.factor(data[[group]]),
+        length(levels(data[[group]])) >= 2,
+        length(unique(data[[group]])) == length(levels(data[[group]])),
+        msg = "`data[[vars$group]]` must be a factor variable with 2 levels"
+    )
+
+    data2 <- data[, c(extract_covariates(covariates), outcome, group)]
+
+    # Standardise level names and group variable name to make extraction reliable
+    levels(data2[[group]]) <- paste0("L", seq_along(levels(data2[[group]])) - 1)
+    assert_that(
+        !"rbmiGroup" %in% names(data),
+        msg = c(
+            "`rbmiGroup` is a reserved variable name for internal use, please rename",
+            " your variable to avoid conflicts"
+        )
+    )
+    data2[["rbmiGroup"]] <- data2[[group]]
+    data2 <- data2[!names(data2) %in% group]
+
+    frm <- as_simple_formula(outcome, c(covariates, group))
+    frm_std <- frm_find_and_replace(frm, as.name(group), as.name("rbmiGroup"))
+
+    mod <- lm(formula = frm_std, data = data2)
+    args <- list(model = mod, .weights = weights)
+
+    lsm <- lapply(
+        levels(data2[["rbmiGroup"]]),
+        function(x) {
+            args[["rbmiGroup"]] <- x
+            do.call(lsmeans, args)
+        }
+    )
+    names(lsm) <- sprintf("lsm_%s", levels(data2[["rbmiGroup"]]))
+
+    trt <- lapply(
+        levels(data2[["rbmiGroup"]])[-1],
+        function(x) {
+            term <- sprintf("rbmiGroup%s", x)
+            list(
+                est = coef(mod)[[term]],
+                se = sqrt(vcov(mod)[term, term]),
+                df = df.residual(mod)
+            )
+        }
+    )
+    names(trt) <- sprintf("trt_%s_L0", levels(data2[["rbmiGroup"]])[-1])
+    append(trt, lsm)
+}
+
+
+frm_find_and_replace <- function(frm, find_sym, replace_sym) {
+    left <- frm[[2]]
+    right <- frm[[3]]
+    if (is.call(left)) {
+        left <- frm_find_and_replace(left, find_sym, replace_sym)
+    } else {
+        left <- ifelse(left == find_sym, replace_sym, left)
+    }
+    if (is.call(right)) {
+        right <- frm_find_and_replace(right, find_sym, replace_sym)
+    } else {
+        right <- ifelse(right == find_sym, replace_sym, right)
+    }
+    frm[[2]] <- left
+    frm[[3]] <- right
+    frm
 }
