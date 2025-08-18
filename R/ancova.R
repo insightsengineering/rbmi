@@ -304,19 +304,12 @@ ancova_single_m_group <- function(
 
 
 frm_find_and_replace <- function(frm, find_sym, replace_sym) {
-    left <- frm[[2]]
-    right <- frm[[3]]
-    if (is.call(left)) {
-        left <- frm_find_and_replace(left, find_sym, replace_sym)
-    } else {
-        left <- ifelse(left == find_sym, replace_sym, left)
+    for (i in seq_along(frm)) {
+        if (is.call(frm[[i]])) {
+            frm[[i]] <- frm_find_and_replace(frm[[i]], find_sym, replace_sym)
+        } else if (is.name(frm[[i]])) {
+            frm[[i]] <- ifelse(frm[[i]] == find_sym, replace_sym, frm[[i]])
+        }
     }
-    if (is.call(right)) {
-        right <- frm_find_and_replace(right, find_sym, replace_sym)
-    } else {
-        right <- ifelse(right == find_sym, replace_sym, right)
-    }
-    frm[[2]] <- left
-    frm[[3]] <- right
     frm
 }
