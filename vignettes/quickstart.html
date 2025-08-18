@@ -597,7 +597,7 @@ function which determines the names of the key variables within the data and the
 (in addition to the treatment group) for which the analysis model will be adjusted.</p>
 <p>Please also note that the names of the analysis estimates contain “ref” and “alt” to refer to the two treatment arms. In particular “ref” refers to the first factor level of <code>vars$group</code> which does not necessarily
 coincide with the control arm. In this example, since <code>levels(dat[[vars$group]]) = c(&quot;DRUG&quot;, PLACEBO</code>), the results associated with “ref” correspond to the intervention arm, while those associated with “alt” correspond to the control arm.</p>
-<p>Note that as of verion 1.4.2 rbmi provides the <code>ancova_m_groups()</code> function; this is an extension to
+<p>Note that as of verion 1.5.0 rbmi provides the <code>ancova_m_groups()</code> function; this is an extension to
 the <code>ancova()</code> function which supports the analysis of more than 2 treatment arms.
 The <code>ancova()</code> function is left as the default for backwards compatibility as <code>ancova_m_groups()</code>
 uses a different naming structure. That is, instead of <code>&quot;ref&quot;</code> and “<code>alt</code>” the values <code>&quot;L0&quot;</code>, <code>&quot;L1&quot;</code>, <code>&quot;L2&quot;</code>, …
