@@ -926,10 +926,11 @@ set_options <- function() {
 #' @return The modified language object with all instances of \code{find_sym} replaced by \code{replace_sym}.
 #'
 #' @examples
+#' \dontrun{
 #' expr <- quote(a + b * c)
 #' frm_find_and_replace(expr, as.name("b"), as.name("x"))
 #' # Returns: a + x * c
-#'
+#' }
 #' @keywords internal
 frm_find_and_replace <- function(frm, find_sym, replace_sym) {
     for (i in seq_along(frm)) {
