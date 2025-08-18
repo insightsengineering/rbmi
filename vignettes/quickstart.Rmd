@@ -229,6 +229,17 @@ function which determines the names of the key variables within the data and the
 Please also note that the names of the analysis estimates contain "ref" and "alt" to refer to the two treatment arms. In particular "ref" refers to the first factor level of `vars$group` which does not necessarily
 coincide with the control arm. In this example, since `levels(dat[[vars$group]]) = c("DRUG", PLACEBO`), the results associated with "ref" correspond to the intervention arm, while those associated with "alt" correspond to the control arm.
 
+Note that as of verion 1.5.0 rbmi provides the `ancova_m_groups()` function; this is an extension to
+the `ancova()` function which supports the analysis of more than 2 treatment arms.
+The `ancova()` function is left as the default for backwards compatibility as `ancova_m_groups()`
+uses a different naming structure. That is, instead of `"ref"` and "`alt`" the values `"L0"`, `"L1"`, `"L2"`, ...
+are used to represent the different arms where `"L0"` is the reference level and `"L1"` is the first
+offset group (e.g. the second factor level). That is the resulting list will contain entries such as:
+`lsm_L1_day40` which contains the least square mean for the second factor level at the `"day40"`
+visit. For treatment effects it will contain entries such as `trt_L1_L0_day40` which contains
+the treatment effect for the second factor level compared to the reference level at the `"day40"`
+visit. See the documentation for `ancova_m_groups()` for more details.
+
 Additionally, we can use the `delta` argument of `analyse()` to perform a delta adjustments of the imputed datasets prior to the analysis. 
 In brief, this is implemented by specifying a data.frame that contains the amount
 of adjustment to be added to each longitudinal outcome for each subject and visit, i.e. 

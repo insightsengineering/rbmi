@@ -4,6 +4,8 @@
 
 * All covariance structures are now also supported for Bayesian multiple imputation: `method_bayes()` gained additional `covariance` and `prior_cov` arguments to allow users to specify the covariance structure and prior for the Bayesian imputation model. Please see the updated statistical specifications vignette for details. (#501, #518)
 * New function `mcse()` to calculate the Monte Carlo standard error for pooled estimates from (approximate) Bayesian imputation. (#493)
+* Added support for multi-group ANCOVA analysis with `ancova_m_groups()` function. This enables analysis of covariance with more than two treatment groups, where each non-reference group is compared against the reference group. (#520)
+
 
 # rbmi 1.4.1
 

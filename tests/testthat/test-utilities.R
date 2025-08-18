@@ -342,3 +342,33 @@ test_that("get_stan_model works as expected depending on covariance and prior on
     model <- expect_silent(get_stan_model("us", "lkj"))
     expect_snapshot(model)
 })
+
+
+
+
+test_that("frm_find_and_replace works as expected", {
+    # Things being tested here include:
+    #   - Can change values on both sides of the formula
+    #   - Interactions e.g.  `*` and `:`
+    #   - No arg functions  k()
+    #   - 1-arg functions  h(z)
+    #   - 2-arg functions  f(z, z)
+    #   - Constants e.g. + 1
+    #   - Data modification functions  I(z^2)
+    #   - Name subset  e.g. zz doesn't get renamed (where we are searching for z)
+    frm <- x + z ~ 1 + z + a + b + zz + z:a + a * z + a * b + h(z) + f(z, z) + k() + I(z^2)
+    actual <- frm_find_and_replace(frm, as.name("z"), as.name("P"))
+    expected <- x + P ~ 1 + P + a + b + zz + P:a + a * P + a * b + h(P) + f(P, P) + k() + I(P^2)
+    environment(actual) <- globalenv()
+    environment(expected) <- globalenv()
+    expect_equal(actual, expected)
+
+
+    # Special names / special characters
+    frm <- ~ ` .. !abc & `:x - 1 * x
+    actual <- frm_find_and_replace(frm, as.name(" .. !abc & "), as.name("bob"))
+    expected <-  ~ bob:x - 1 * x
+    environment(actual) <- globalenv()
+    environment(expected) <- globalenv()
+    expect_equal(actual, expected)
+})

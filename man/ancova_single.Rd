@@ -98,3 +98,4 @@ ancova_single(iris2, "Sepal.Length", "Species", c("Petal.Length * Petal.Width"))
 \seealso{
 \code{\link[=ancova]{ancova()}}
 }
+\keyword{internal}

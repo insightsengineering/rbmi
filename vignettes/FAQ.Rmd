@@ -123,3 +123,24 @@ anaObj <- rbmi::analyse(
 ```
 
 <br>
+
+
+
+## Is ANCOVA on more than 2 treatment groups supported?
+
+This can be implemented by using the `ancova_m_groups()` function instead of the default `ancova()` function e.g.
+
+```r
+anaObj <- rbmi::analyse(
+    imputeObj,
+    ancova_m_groups,
+    vars = vars
+ )
+```
+
+Please note that the object created by this function uses a different naming convention to
+that of the `ancova()` function which means any manual extraction code looking for specific
+names such as `"lsm_alt"` will need to be updated. Please see the documentation for `ancova_m_groups()`
+for more details.
+
+<br>
