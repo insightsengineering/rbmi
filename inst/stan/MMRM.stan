@@ -26,7 +26,6 @@ functions {
     {{ functions }}
 }
 
-
 data {
     int<lower=1> N;                         // number of observations
     int<lower=1> P;                         // number of covariates (number of columns of design matrix)
@@ -46,11 +45,11 @@ data {
     {{ data }}
 }
 
-
 transformed data {
    matrix[P, P] R_inverse = inverse(R);
-}
 
+   {{ transformed_data }}
+}
 
 parameters {
     vector[P] theta;              // coefficients of linear model on covariates
@@ -92,7 +91,6 @@ model {
         data_start_row = data_stop_row + 1;
     }
 }
-
 
 generated quantities {
    vector[P] beta = R_inverse * theta; 

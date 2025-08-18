@@ -42,14 +42,14 @@ get_mcmc_sim_dat <- function(n, mcoefs, sigma) {
 
 get_within <- function(x, real) {
     x2 <- matrix(unlist(as.list(x)), nrow = length(x), byrow = TRUE)
-    colnames(x2) <- paste0("B", seq_len(ncol(x2)))
+    colnames(x2) <- sprintf("B%02d", seq_len(ncol(x2)))
 
     as_tibble(x2) %>%
         tidyr::gather(var, val) %>%
         group_by(var) %>%
         summarise(
-            lci = quantile(val, 0.005),
-            uci = quantile(val, 0.995)
+            lci = quantile(val, 0.0025),
+            uci = quantile(val, 0.9975)
         ) %>%
         mutate(real = real) %>%
         mutate(inside = real >= lci & real <= uci)
@@ -96,6 +96,15 @@ test_that("adjust_dimensions works with same covariance and scalar parameter", {
     expect_equal(result, expected)
 })
 
+test_that("adjust_dimensions works with same covariance and numeric parameter", {
+    result <- adjust_dimensions(
+        same_cov = TRUE,
+        param_list = list(1:3, 4:6)
+    )
+    expected <- list(1:3)
+    expect_equal(result, expected)
+})
+
 test_that("adjust_dimensions works with different covariance and matrix parameter", {
     result <- adjust_dimensions(
         same_cov = FALSE,
@@ -118,6 +127,16 @@ test_that("adjust_dimensions works with different covariance and scalar paramete
         param_list = list(1, 2)
     )
     expected <- array(c(1, 2), dim = 2)
+    expect_equal(result, expected)
+})
+
+test_that("adjust_dimensions works with different covariance and numeric parameter", {
+    result <- adjust_dimensions(
+        same_cov = FALSE,
+        param_list = list(1:3, 4:6)
+    )
+    # Unchanged.
+    expected <- list(1:3, 4:6)
     expect_equal(result, expected)
 })
 
@@ -355,12 +374,7 @@ test_that("get_pattern_groups_unique", {
     expect_equal(results_actual, results_expected)
 })
 
-
-test_that("prepare_prior_params works for AR1", {
-    skip_if_not(is_full_test())
-
-    set.seed(2151)
-
+test_prepare_prior_params <- function(cov_struct, expected_params_dim) {
     mcoefs <- list(
         "int" = 10,
         "age" = 3,
@@ -382,23 +396,39 @@ test_that("prepare_prior_params works for AR1", {
         subjid = dat$id,
         visit = dat$visit,
         group = dat$group,
-        cov_struct = "ar1",
+        cov_struct = cov_struct,
         REML = TRUE,
         same_cov = TRUE
     )
 
     result <- prepare_prior_params(
         stan_data = list(),
-        covariance = "ar1",
+        covariance = cov_struct,
         prior_cov = "default",
         mmrm_initial = mmrm_initial,
         same_cov = TRUE
     )
+
+    expected_params <- names(expected_params_dim)
     expect_true(
-        is.list(result) && identical(names(result), c("sd_par", "rho_par"))
+        is.list(result) && setequal(names(result), expected_params)
     )
-    expect_true(is.numeric(result$sd_par) && length(result$sd_par) == 1)
-    expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 1)
+    for (param in expected_params) {
+        is_list_res <- is.list(result[[param]]) && length(result[[param]]) == 1
+        is_array_res <- is.array(result[[param]]) &&
+            length(result[[param]]) == 1
+        if (is_list_res) {
+            expect_true(
+                length(result[[param]][[1]]) == expected_params_dim[param]
+            )
+        } else if (is_array_res) {
+            expect_true(
+                dim(result[[param]]) == expected_params_dim[param]
+            )
+        } else {
+            stop("Unexpected result type for parameter: ", param)
+        }
+    }
 
     # Separate cov across groups.
     mmrm_initial <- fit_mmrm(
@@ -407,25 +437,84 @@ test_that("prepare_prior_params works for AR1", {
         subjid = dat$id,
         visit = dat$visit,
         group = dat$group,
-        cov_struct = "ar1",
+        cov_struct = cov_struct,
         REML = TRUE,
         same_cov = FALSE
     )
 
     result <- prepare_prior_params(
         stan_data = list(),
-        covariance = "ar1",
+        covariance = cov_struct,
         prior_cov = "default",
         mmrm_initial = mmrm_initial,
         same_cov = FALSE
     )
     expect_true(
-        is.list(result) && identical(names(result), c("sd_par", "rho_par"))
+        is.list(result) && setequal(names(result), expected_params)
     )
-    expect_true(is.numeric(result$sd_par) && length(result$sd_par) == 2)
-    expect_true(is.numeric(result$rho_par) && length(result$rho_par) == 2)
+    for (param in expected_params) {
+        is_list_res <- is.list(result[[param]]) && length(result[[param]]) == 2
+        is_array_res <- is.array(result[[param]]) &&
+            length(result[[param]]) == 2
+        expect_true(is_list_res || is_array_res)
+    }
+}
+
+test_that("prepare_prior_params works for AR1", {
+    skip_if_not(is_full_test())
+
+    set.seed(2151)
+    test_prepare_prior_params("ar1", c("sd_par" = 1, "rho_par" = 1))
 })
 
+test_that("prepare_prior_params works for heterogeneous AR1", {
+    skip_if_not(is_full_test())
+
+    set.seed(2153)
+    test_prepare_prior_params("ar1h", c("sds_par" = 3, "rho_par" = 1))
+})
+
+test_that("prepare_prior_params works for compound symmetry", {
+    skip_if_not(is_full_test())
+
+    set.seed(2151)
+    test_prepare_prior_params("cs", c("sd_par" = 1, "rho_par" = 1))
+})
+
+test_that("prepare_prior_params works for heterogeneous compound symmetry", {
+    skip_if_not(is_full_test())
+
+    set.seed(2153)
+    test_prepare_prior_params("csh", c("sds_par" = 3, "rho_par" = 1))
+})
+
+test_that("prepare_prior_params works for antedependence", {
+    skip_if_not(is_full_test())
+
+    set.seed(2151)
+    test_prepare_prior_params("ad", c("sd_par" = 1, "rhos_par" = 2))
+})
+
+test_that("prepare_prior_params works for heterogeneous antedependence", {
+    skip_if_not(is_full_test())
+
+    set.seed(2153)
+    test_prepare_prior_params("adh", c("sds_par" = 3, "rhos_par" = 2))
+})
+
+test_that("prepare_prior_params works for Toeplitz", {
+    skip_if_not(is_full_test())
+
+    set.seed(2111)
+    test_prepare_prior_params("toep", c("sd_par" = 1, "rhos_par" = 2))
+})
+
+test_that("prepare_prior_params works for heterogeneous Toeplitz", {
+    skip_if_not(is_full_test())
+
+    set.seed(2143)
+    test_prepare_prior_params("toeph", c("sds_par" = 3, "rhos_par" = 2))
+})
 
 test_that("fit_mcmc can recover known values with same_cov = TRUE", {
     skip_if_not(is_full_test())
@@ -547,7 +636,6 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
         n_visits = 3
     )
 })
-
 
 test_that("fit_mcmc returns error if mmrm on original sample fails", {
     set.seed(101)
@@ -709,7 +797,6 @@ test_that("fit_mcmc can recover known values with same_cov = FALSE", {
     )
 })
 
-
 test_that("burn_in and burn_between arguments to method_bayes are deprecated", {
     expect_error(
         {
@@ -790,21 +877,19 @@ test_that("fit_mcmc works with multiple chains", {
     )
 })
 
-test_that("fit_mcmc works with AR1 covariance model", {
-    skip_if_not(is_full_test())
-
-    set.seed(3459)
-
+test_fit_mcmc <- function(
+    cov_struct,
+    sigma,
+    prior_cov = "default",
+    init = "random",
+    same_cov = FALSE
+) {
     mcoefs <- list(
         "int" = 10,
         "age" = 3,
         "sex" = 6,
         "trtslope" = 7
     )
-    rho <- 0.5
-    ar1_corr <- ar1_matrix(rho, 3)
-    sd <- 2
-    sigma <- sd^2 * ar1_corr
 
     dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
     mat <- model.matrix(
@@ -813,13 +898,15 @@ test_that("fit_mcmc works with AR1 covariance model", {
     )
 
     method <- method_bayes(
-        covariance = "ar1",
+        covariance = cov_struct,
         n_samples = 500,
-        same_cov = TRUE,
+        same_cov = same_cov,
+        prior_cov = prior_cov,
         control = control_bayes(
             warmup = 200,
             thin = 3,
-            chains = 3
+            chains = 3,
+            init = init
         )
     )
 
@@ -838,291 +925,176 @@ test_that("fit_mcmc works with AR1 covariance model", {
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
     assert_that(all(beta_within$inside))
 
-    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    sigma_within <- get_within(
+        fit$samples$sigma,
+        rep(unlist(as.list(sigma)), ifelse(same_cov, 1, 2))
+    )
     assert_that(all(sigma_within$inside))
 
     # check extract_draws() worked properly
     test_extract_draws(
         extract_draws(fit$fit, method$n_samples),
-        same_cov = TRUE,
+        same_cov = same_cov,
         n_groups = 2,
         n_visits = 3
     )
-})
+}
 
-test_that("fit_mcmc works with AR1 covariance model and MMRM start values", {
+test_that("fit_mcmc works with AR1 covariance model", {
     skip_if_not(is_full_test())
 
-    set.seed(3459)
-
-    mcoefs <- list(
-        "int" = 10,
-        "age" = 3,
-        "sex" = 6,
-        "trtslope" = 7
-    )
     rho <- 0.3
     ar1_corr <- ar1_matrix(rho, 3)
-    sd <- 3
-    sigma <- sd^2 * ar1_corr
-
-    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
-    mat <- model.matrix(
-        data = dat,
-        ~ 1 + sex + age + group + visit + group * visit
-    )
-
-    method <- method_bayes(
-        covariance = "ar1",
-        n_samples = 500,
-        same_cov = TRUE,
-        control = control_bayes(
-            warmup = 200,
-            thin = 3,
-            chains = 3,
-            init = "mmrm"
-        )
-    )
-
-    fit <- fit_mcmc(
-        designmat = mat,
-        outcome = dat$outcome,
-        group = dat$group,
-        subjid = dat$id,
-        visit = dat$visit,
-        method = method,
-        quiet = TRUE
-    )
-
-    expect_true(length(fit$samples$beta) == method$n_samples)
-    expect_true(length(fit$samples$sigma) == method$n_samples)
-
-    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
-    assert_that(all(beta_within$inside))
-
-    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
-    assert_that(all(sigma_within$inside))
-})
-
-test_that("fit_mcmc works with AR1 covariance model and group specific estimates", {
-    skip_if_not(is_full_test())
-
-    set.seed(3459)
-
-    mcoefs <- list(
-        "int" = 10,
-        "age" = 3,
-        "sex" = 6,
-        "trtslope" = 7
-    )
-    ar1_corr <- ar1_matrix(0.4, 3)
     sd <- 2
     sigma <- sd^2 * ar1_corr
 
-    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
-    mat <- model.matrix(
-        data = dat,
-        ~ 1 + sex + age + group + visit + group * visit
-    )
+    set.seed(3459)
+    test_fit_mcmc("ar1", sigma = sigma)
 
-    method <- method_bayes(
-        covariance = "ar1",
-        n_samples = 500,
-        same_cov = FALSE,
-        control = control_bayes(
-            warmup = 200,
-            thin = 3,
-            chains = 3
-        )
-    )
+    set.seed(2412)
+    test_fit_mcmc("ar1", sigma = sigma, init = "mmrm")
 
-    fit <- fit_mcmc(
-        designmat = mat,
-        outcome = dat$outcome,
-        group = dat$group,
-        subjid = dat$id,
-        visit = dat$visit,
-        method = method,
-        quiet = TRUE
-    )
-
-    expect_true(length(fit$samples$beta) == method$n_samples)
-    expect_true(length(fit$samples$sigma) == method$n_samples)
-
-    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
-    assert_that(all(beta_within$inside))
+    set.seed(7399)
+    test_fit_mcmc("ar1", sigma = sigma, init = "mmrm", same_cov = FALSE)
 })
 
 test_that("fit_mcmc works with unstructured covariance model with LKJ prior", {
     skip_if_not(is_full_test())
 
-    set.seed(3459)
-
-    mcoefs <- list(
-        "int" = 10,
-        "age" = 3,
-        "sex" = 6,
-        "trtslope" = 7
-    )
     sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
 
-    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
-    mat <- model.matrix(
-        data = dat,
-        ~ 1 + sex + age + group + visit + group * visit
-    )
+    set.seed(3459)
+    test_fit_mcmc("us", sigma = sigma, prior_cov = "lkj")
 
-    method <- method_bayes(
-        covariance = "us",
-        prior_cov = "lkj",
-        n_samples = 200,
-        same_cov = TRUE,
-        control = control_bayes(
-            warmup = 200,
-            thin = 3,
-            chains = 3
-        )
-    )
+    set.seed(3459)
+    test_fit_mcmc("us", sigma = sigma, prior_cov = "lkj", init = "mmrm")
 
-    fit <- fit_mcmc(
-        designmat = mat,
-        outcome = dat$outcome,
-        group = dat$group,
-        subjid = dat$id,
-        visit = dat$visit,
-        method = method,
-        quiet = TRUE
-    )
-    expect_true(length(fit$samples$beta) == method$n_samples)
-    expect_true(length(fit$samples$sigma) == method$n_samples)
-
-    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
-    assert_that(all(beta_within$inside))
-
-    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
-    assert_that(all(sigma_within$inside))
-
-    # check extract_draws() worked properly
-    test_extract_draws(
-        extract_draws(fit$fit, method$n_samples),
-        same_cov = TRUE,
-        n_groups = 2,
-        n_visits = 3
-    )
+    set.seed(3459)
+    test_fit_mcmc("us", sigma = sigma, prior_cov = "lkj", same_cov = FALSE)
 })
 
-test_that("fit_mcmc works with unstructured covariance model with LKJ prior and MMRM start values", {
+test_that("fit_mcmc works with heterogeneous AR1 covariance model", {
     skip_if_not(is_full_test())
 
+    rho <- 0.5
+    ar1_corr <- ar1_matrix(rho, 3)
+    sds <- c(1, 2, 3)
+    sigma <- diag(sds) %*% ar1_corr %*% diag(sds)
+
     set.seed(3459)
+    test_fit_mcmc("ar1h", sigma = sigma)
 
-    mcoefs <- list(
-        "int" = 10,
-        "age" = 3,
-        "sex" = 6,
-        "trtslope" = 7
-    )
-    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+    set.seed(3459)
+    test_fit_mcmc("ar1h", sigma = sigma, init = "mmrm")
 
-    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
-    mat <- model.matrix(
-        data = dat,
-        ~ 1 + sex + age + group + visit + group * visit
-    )
-
-    method <- method_bayes(
-        covariance = "us",
-        prior_cov = "lkj",
-        n_samples = 200,
-        same_cov = TRUE,
-        control = control_bayes(
-            warmup = 500,
-            thin = 3,
-            chains = 3,
-            init = "mmrm"
-        )
-    )
-
-    fit <- fit_mcmc(
-        designmat = mat,
-        outcome = dat$outcome,
-        group = dat$group,
-        subjid = dat$id,
-        visit = dat$visit,
-        method = method,
-        quiet = TRUE
-    )
-
-    expect_true(length(fit$samples$beta) == method$n_samples)
-    expect_true(length(fit$samples$sigma) == method$n_samples)
-
-    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
-    assert_that(all(beta_within$inside))
-
-    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
-    assert_that(all(sigma_within$inside))
-
-    # check extract_draws() worked properly
-    test_extract_draws(
-        extract_draws(fit$fit, method$n_samples),
-        same_cov = TRUE,
-        n_groups = 2,
-        n_visits = 3
-    )
+    set.seed(3459)
+    test_fit_mcmc("ar1h", sigma = sigma, same_cov = FALSE)
 })
 
-test_that("fit_mcmc works with unstructured covariance model with LKJ prior and group specific estimates", {
+test_that("fit_mcmc works with compound symmetry covariance model", {
     skip_if_not(is_full_test())
 
+    rho <- 0.5
+    cs_corr <- cs_matrix(rho, 3)
+    sd <- 2
+    sigma <- sd^2 * cs_corr
+
     set.seed(3459)
+    test_fit_mcmc("cs", sigma = sigma)
 
-    mcoefs <- list(
-        "int" = 10,
-        "age" = 3,
-        "sex" = 6,
-        "trtslope" = 7
-    )
-    sigma <- as_vcov(c(3, 5, 7), c(0.1, 0.4, 0.7))
+    set.seed(3459)
+    test_fit_mcmc("cs", sigma = sigma, init = "mmrm")
 
-    dat <- get_mcmc_sim_dat(1000, mcoefs, sigma)
-    mat <- model.matrix(
-        data = dat,
-        ~ 1 + sex + age + group + visit + group * visit
-    )
+    set.seed(3459)
+    test_fit_mcmc("cs", sigma = sigma, same_cov = FALSE)
+})
 
-    method <- method_bayes(
-        covariance = "us",
-        prior_cov = "lkj",
-        n_samples = 500,
-        same_cov = FALSE,
-        control = control_bayes(
-            warmup = 200,
-            thin = 3,
-            chains = 3
-        )
-    )
+test_that("fit_mcmc works with heterogeneous compound symmetry covariance model", {
+    skip_if_not(is_full_test())
 
-    fit <- fit_mcmc(
-        designmat = mat,
-        outcome = dat$outcome,
-        group = dat$group,
-        subjid = dat$id,
-        visit = dat$visit,
-        method = method,
-        quiet = TRUE
-    )
+    rho <- 0.5
+    cs_corr <- cs_matrix(rho, 3)
+    sds <- c(1, 2, 3)
+    sigma <- diag(sds) %*% cs_corr %*% diag(sds)
 
-    expect_true(length(fit$samples$beta) == method$n_samples)
-    expect_true(length(fit$samples$sigma) == method$n_samples)
+    set.seed(3459)
+    test_fit_mcmc("csh", sigma = sigma)
 
-    beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
-    assert_that(all(beta_within$inside))
+    set.seed(3459)
+    test_fit_mcmc("csh", sigma = sigma, init = "mmrm")
 
-    # check extract_draws() worked properly
-    test_extract_draws(
-        extract_draws(fit$fit, method$n_samples),
-        same_cov = FALSE,
-        n_groups = 2,
-        n_visits = 3
-    )
+    set.seed(3459)
+    test_fit_mcmc("csh", sigma = sigma, same_cov = FALSE, init = "mmrm")
+})
+
+test_that("fit_mcmc works with antedependence covariance model", {
+    skip_if_not(is_full_test())
+
+    rhos <- c(0.5, 0.4)
+    ad_corr <- ad_matrix(rhos)
+    sd <- 2
+    sigma <- sd^2 * ad_corr
+
+    set.seed(3459)
+    test_fit_mcmc("ad", sigma = sigma)
+
+    set.seed(2355)
+    test_fit_mcmc("ad", sigma = sigma, init = "mmrm")
+
+    set.seed(3459)
+    test_fit_mcmc("ad", sigma = sigma, same_cov = FALSE)
+})
+
+test_that("fit_mcmc works with heterogeneous antedependence covariance model", {
+    skip_if_not(is_full_test())
+
+    rhos <- c(0.5, 0.4)
+    ad_corr <- ad_matrix(rhos)
+    sds <- c(1, 2, 3)
+    sigma <- diag(sds) %*% ad_corr %*% diag(sds)
+
+    set.seed(3459)
+    test_fit_mcmc("adh", sigma = sigma)
+
+    set.seed(2355)
+    test_fit_mcmc("adh", sigma = sigma, init = "mmrm")
+
+    set.seed(3459)
+    test_fit_mcmc("adh", sigma = sigma, same_cov = FALSE)
+})
+
+test_that("fit_mcmc works with Toeplitz covariance model", {
+    skip_if_not(is_full_test())
+
+    rhos <- c(0.5, 0.4)
+    toep_corr <- toep_matrix(rhos)
+    sd <- 2
+    sigma <- sd^2 * toep_corr
+
+    set.seed(3459)
+    test_fit_mcmc("toep", sigma = sigma)
+
+    set.seed(2355)
+    test_fit_mcmc("toep", sigma = sigma, init = "mmrm")
+
+    set.seed(3459)
+    test_fit_mcmc("toep", sigma = sigma, same_cov = FALSE)
+})
+
+test_that("fit_mcmc works with heterogeneous Toeplitz covariance model", {
+    skip_if_not(is_full_test())
+
+    rhos <- c(0.5, 0.4)
+    toep_corr <- toep_matrix(rhos)
+    sds <- c(1, 2, 3)
+    sigma <- diag(sds) %*% toep_corr %*% diag(sds)
+
+    set.seed(1459)
+    test_fit_mcmc("toeph", sigma = sigma)
+
+    set.seed(4355)
+    test_fit_mcmc("toeph", sigma = sigma, init = "mmrm")
+
+    set.seed(6459)
+    test_fit_mcmc("toeph", sigma = sigma, same_cov = FALSE)
 })

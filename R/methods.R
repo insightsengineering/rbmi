@@ -98,7 +98,14 @@
 method_bayes <- function(
     covariance = c(
         "us",
-        "ar1"
+        "ad",
+        "adh",
+        "ar1",
+        "ar1h",
+        "cs",
+        "csh",
+        "toep",
+        "toeph"
     ),
     same_cov = TRUE,
     n_samples = 20,

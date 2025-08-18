@@ -136,6 +136,17 @@ theta_to_cor <- function(theta) {
     theta / sqrt(1 + theta^2)
 }
 
+#' Convert Transformed Compound Symmetry Correlation to Correlation
+#'
+#' @param theta The transformed compound symmetry correlation parameter.
+#' @return The correlation value.
+#'
+#' @keywords internal
+theta_to_cs_cor <- function(theta, n_visits) {
+    a <- 1 / (n_visits - 1)
+    plogis(theta) * (1 + a) - a
+}
+
 #' Extract parameters from a MMRM model
 #'
 #' Extracts the beta and sigma coefficients from an MMRM model created
@@ -159,7 +170,7 @@ extract_params <- function(fit) {
     sigma <- lapply(sigma, function(mat) {
         colnames(mat) <- NULL
         rownames(mat) <- NULL
-        return(mat)
+        mat
     })
     params <- list(
         beta = beta,
@@ -168,6 +179,8 @@ extract_params <- function(fit) {
 
     cov_type <- mmrm::component(fit, "cov_type")
     theta_est <- mmrm::component(fit, "theta_est")
+    n_visits <- mmrm::component(fit, "n_timepoints")
+
     theta_est <- if (same_cov) {
         list(theta_est)
     } else {
@@ -182,9 +195,48 @@ extract_params <- function(fit) {
         })
         params$sd <- lapply(theta_est, function(theta) exp(theta[1]))
         params$rho <- lapply(theta_est, function(theta) theta_to_cor(theta[2]))
+    } else if (cov_type == "ar1h") {
+        lapply(theta_est, function(theta) {
+            assert_that(identical(length(theta), n_visits + 1L))
+        })
+        params$sds <- lapply(theta_est, function(theta) exp(theta[1:n_visits]))
+        params$rho <- lapply(theta_est, function(theta) {
+            theta_to_cor(theta[n_visits + 1])
+        })
+    } else if (cov_type == "cs") {
+        lapply(theta_est, function(theta) {
+            assert_that(identical(length(theta), 2L))
+        })
+        params$sd <- lapply(theta_est, function(theta) exp(theta[1]))
+        params$rho <- lapply(theta_est, function(theta) {
+            theta_to_cs_cor(theta[2], n_visits)
+        })
+    } else if (cov_type == "csh") {
+        lapply(theta_est, function(theta) {
+            assert_that(identical(length(theta), n_visits + 1L))
+        })
+        params$sds <- lapply(theta_est, function(theta) exp(theta[1:n_visits]))
+        params$rho <- lapply(theta_est, function(theta) {
+            theta_to_cs_cor(theta[n_visits + 1], n_visits)
+        })
+    } else if (cov_type %in% c("ad", "toep")) {
+        lapply(theta_est, function(theta) {
+            assert_that(identical(length(theta), n_visits))
+        })
+        params$sd <- lapply(theta_est, function(theta) exp(theta[1]))
+        params$rhos <- lapply(theta_est, function(theta) {
+            theta_to_cor(theta[-1])
+        })
+    } else if (cov_type %in% c("adh", "toeph")) {
+        lapply(theta_est, function(theta) {
+            assert_that(length(theta) == 2 * n_visits - 1)
+        })
+        params$sds <- lapply(theta_est, function(theta) exp(theta[1:n_visits]))
+        params$rhos <- lapply(theta_est, function(theta) {
+            theta_to_cor(theta[-(1:n_visits)])
+        })
     }
-
-    return(params)
+    params
 }
 
 
@@ -287,17 +339,12 @@ fit_mmrm <- function(
     )
 }
 
-
 #' Evaluate a call to mmrm
 #'
 #' This is a utility function that attempts to evaluate a call to mmrm
-#' managing any warnings or errors that are thrown. In particular
-#' this function attempts to catch any warnings or errors and instead
-#' of surfacing them it will simply add an additional element `failed`
-#' with a value of TRUE. This allows for multiple calls to be made
-#' without the program exiting.
+#' managing any warnings or errors that are thrown.
 #'
-#' This function was originally developed for use with glmmTMB which needed
+#' This function was originally developed for use with `glmmTMB` which needed
 #' more hand-holding and dropping of false-positive warnings. It is not
 #' as important now but is kept around encase we need to catch
 #' false-positive warnings again in the future.
@@ -312,22 +359,13 @@ fit_mmrm <- function(
 #' @seealso [record()]
 #'
 eval_mmrm <- function(expr) {
-    default <- list(failed = TRUE)
-
     fit_record <- record(expr)
 
-    if (length(fit_record$warnings) > 0 || length(fit_record$errors) > 0) {
-        return(default)
+    if (!is(fit_record$results, "mmrm")) {
+        return(list(failed = TRUE))
     }
 
-    converged <- attributes(fit_record$results)$converged
-    if (is.null(converged)) {
-        return(default)
-    }
-    if (!converged) {
-        return(default)
-    }
-
-    fit_record$results$failed <- FALSE
-    return(fit_record$results)
+    has_converged <- attributes(fit_record$results)$converged
+    fit_record$results$failed <- ifelse(has_converged, FALSE, TRUE)
+    fit_record$results
 }

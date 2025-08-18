@@ -3,9 +3,8 @@ suppressPackageStartupMessages({
     library(testthat)
 })
 
-
 compute_n_params <- function(cov_struct, nv) {
-    n_params <- switch(
+    switch(
         cov_struct,
         "ad" = nv,
         "adh" = 2 * nv - 1,
@@ -17,7 +16,6 @@ compute_n_params <- function(cov_struct, nv) {
         "toeph" = 2 * nv - 1,
         "us" = nv * (nv + 1) / 2
     )
-    return(n_params)
 }
 
 
@@ -31,7 +29,9 @@ expect_valid_fit_object <- function(fit, cov_struct, nv, same_cov) {
     expect_type(fit, "list")
     expect_true(length(fit) >= 3)
 
-    expect_true(all(names(fit) %in% c("beta", "sigma", "sd", "rho", "failed")))
+    expect_true(all(
+        names(fit) %in% c("beta", "sigma", "sd", "sds", "rho", "rhos", "failed")
+    ))
 
     expect_vector(fit$beta)
     expect_length(fit$beta, 8)
@@ -142,6 +142,57 @@ test_mmrm_numeric <- function(dat, formula_expr, same_cov, scale = FALSE) {
     }
 }
 
+test_fit_mmrm <- function(cov_struct) {
+    sigma <- as_vcov(c(2, 1, 0.7), c(0.3, 0.4, 0.2))
+    dat <- get_sim_data(n = 100, sigma)
+
+    mat <- model.matrix(
+        data = dat,
+        ~ 1 + sex + age + group + visit + group * visit
+    )
+
+    # Same cov across groups.
+    result <- fit_mmrm(
+        designmat = mat,
+        outcome = dat$outcome,
+        subjid = dat$id,
+        visit = dat$visit,
+        group = dat$group,
+        cov_struct = cov_struct,
+        REML = TRUE,
+        same_cov = TRUE
+    )
+
+    cov_param_names <- attr(result, "cov_param_names")
+
+    for (param in cov_param_names) {
+        expect_snapshot_value(
+            result[[param]],
+            style = "deparse",
+            tolerance = 1e-3
+        )
+    }
+
+    # Separate cov per group.
+    result <- fit_mmrm(
+        designmat = mat,
+        outcome = dat$outcome,
+        subjid = dat$id,
+        visit = dat$visit,
+        group = dat$group,
+        cov_struct = cov_struct,
+        REML = TRUE,
+        same_cov = FALSE
+    )
+
+    for (param in cov_param_names) {
+        expect_snapshot_value(
+            result[[param]],
+            style = "deparse",
+            tolerance = 1e-3
+        )
+    }
+}
 
 set.seed(101)
 
@@ -463,55 +514,40 @@ test_that("extract_params works with different covariance structures", {
 
 test_that("fit_mmrm works with ar1 structure", {
     set.seed(1234)
-    sigma <- as_vcov(c(2, 1, 0.7), c(0.3, 0.4, 0.2))
-    dat <- get_sim_data(n = 100, sigma)
+    test_fit_mmrm("ar1")
+})
 
-    mat <- model.matrix(
-        data = dat,
-        ~ 1 + sex + age + group + visit + group * visit
-    )
+test_that("fit_mmrm works with ar1h structure", {
+    set.seed(9469)
+    test_fit_mmrm("ar1h")
+})
 
-    # Same cov across groups.
-    result <- fit_mmrm(
-        designmat = mat,
-        outcome = dat$outcome,
-        subjid = dat$id,
-        visit = dat$visit,
-        group = dat$group,
-        cov_struct = "ar1",
-        REML = TRUE,
-        same_cov = TRUE
-    )
+test_that("fit_mmrm works with cs structure", {
+    set.seed(6907)
+    test_fit_mmrm("cs")
+})
 
-    expect_true(is.list(result$sigma) && length(result$sigma) == 2)
-    expect_true(is.list(result$sd) && length(result$sd) == 2)
-    expect_true(is.list(result$rho) && length(result$rho) == 2)
+test_that("fit_mmrm works with csh structure", {
+    set.seed(7970)
+    test_fit_mmrm("csh")
+})
 
-    # Separate cov per group.
-    result <- fit_mmrm(
-        designmat = mat,
-        outcome = dat$outcome,
-        subjid = dat$id,
-        visit = dat$visit,
-        group = dat$group,
-        cov_struct = "ar1",
-        REML = TRUE,
-        same_cov = FALSE
-    )
+test_that("fit_mmrm works with ad structure", {
+    set.seed(6907)
+    test_fit_mmrm("ad")
+})
 
-    expect_true(
-        is.list(result$sigma) &&
-            length(result$sigma) == 2 &&
-            identical(names(result$sigma), c("A", "B"))
-    )
-    expect_true(
-        is.list(result$sd) &&
-            length(result$sd) == 2 &&
-            identical(names(result$sigma), c("A", "B"))
-    )
-    expect_true(
-        is.list(result$rho) &&
-            length(result$rho) == 2 &&
-            identical(names(result$sigma), c("A", "B"))
-    )
+test_that("fit_mmrm works with adh structure", {
+    set.seed(7970)
+    test_fit_mmrm("adh")
+})
+
+test_that("fit_mmrm works with toep structure", {
+    set.seed(6912)
+    test_fit_mmrm("toep")
+})
+
+test_that("fit_mmrm works with toeph structure", {
+    set.seed(7975)
+    test_fit_mmrm("toeph")
 })

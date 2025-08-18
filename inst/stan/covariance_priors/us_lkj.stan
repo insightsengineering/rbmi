@@ -4,6 +4,13 @@ data {
     array[G] matrix[n_visit, n_visit] Sigma_par; // Used to extract variance prior parameters.
 }
 
+transformed data {
+   array[G] vector<lower={{ machine_double_eps }}>[n_visit] sds_par; // Standard deviations for each visit.
+   for(g in 1:G){
+       sds_par[g] = sqrt(diagonal(Sigma_par[g]));
+   }
+}
+
 parameters {
     array[G] cholesky_factor_corr[n_visit] corr_chol; // Cholesky factors for correlation matrix.
     array[G] vector<lower={{ machine_double_eps }}>[n_visit] vars; // One variance for each visit.
@@ -22,12 +29,12 @@ transformed parameters {
 
 model {
     for(g in 1:G){
-        corr_chol[g] ~ lkj_corr_cholesky(1.0); // LKJ prior on correlation matrix.
-        // Scaled inverse chi-square priors for the variances.
-        for(i in 1:n_visit) {
-            // Note that we need to pass the estimated sigma, not sigma^2 here as 
-            // the scale parameter.
-            vars[g][i] ~ scaled_inv_chi_square(3, sqrt(Sigma_par[g][i,i]));
-        }
+        // Note that this is not vectorized in the matrices so we have to do this
+        // inside this loop.
+        corr_chol[g] ~ lkj_corr_cholesky(1.0); 
+        // Note that we need to pass the estimated sigma, not sigma^2 here as 
+        // the scale parameter.
+        // Note also the parallel vectorization in the vars[g]/sds_par[g] elements.
+        vars[g] ~ scaled_inv_chi_square(3, sds_par[g]);
     }
 }

@@ -217,7 +217,7 @@ The base imputation model for the observed outcomes is defined as:
 $$ Y'_{i!} = X'_{i!}\beta + \epsilon_{i!} \mbox{ with } \epsilon_{i!}\sim N(0,\Sigma_{i!!})$$
 where $\beta$ is the vector of regression coefficients and $\Sigma_{i!!}$ is a covariance matrix which is obtained from the complete-data $J\times J$-covariance matrix $\Sigma$ by omitting rows and columns corresponding to missing outcome assessments for subject $i$. 
 
-Typically, a common unstructured covariance matrix for all subjects is assumed for $\Sigma$ but separate covariate matrices per treatment group are also supported. Indeed, the implementation also supports the specification of separate covariate matrices according to an arbitrarily defined categorical variable which groups the subjects into disjoint subset. For example, this could be useful if different covariance matrices are suspected in different subject strata. Finally, for all imputation methods described below that do not rely on Bayesian model fitting through MCMC, there is further flexibility in the choice of the covariance structure, i.e. unstructured (default), heterogeneous Toeplitz, heterogeneous compound symmetry, and AR(1) covariance structures are supported. 
+Typically, a common unstructured covariance matrix for all subjects is assumed for $\Sigma$ but separate covariate matrices per treatment group are also supported. Indeed, the implementation also supports the specification of separate covariate matrices according to an arbitrarily defined categorical variable which groups the subjects into disjoint subset. For example, this could be useful if different covariance matrices are suspected in different subject strata. Finally, for all imputation methods described below, there is further flexibility in the choice of the covariance structure, i.e. unstructured (default), (heterogeneous) Toeplitz, (heterogeneous) compound symmetry, and (heterogeneous) AR(1) covariance structures are supported. 
 
 ### Restricted maximum likelihood estimation (REML) {#sec:imputationModelREML}
 
@@ -260,7 +260,23 @@ This distribution is a special case of the inverse-Wishart distribution for a un
 
 #### Autoregressive order 1 covariance structure
 
-For the time-homogeneous version of the AR(1) covariance structure, we use a uniform prior on the correlation parameter $\rho$ and a scaled inverse chi-square prior for the variance parameter $\sigma^2$, as described above.
+For the time-homogeneous version of the AR(1) covariance structure (see [here](https://openpharma.github.io/mmrm/latest-tag/articles/covariance.html#homogeneous-ar1-and-heterogeneous-ar1h-autoregressive)), we use a uniform prior on the correlation parameter $\rho$ and a scaled inverse chi-square prior for the variance parameter $\sigma^2$, as described above.
+For the time-heterogeneous version, we simply use independent scaled inverse chi-square priors for the time-point specific variances, which are centered around the respective estimated variances from the frequentist REML fit. 
+
+#### Compound symmetry covariance structure
+
+For the compound symmetry covariance structure (see [here](https://openpharma.github.io/mmrm/latest-tag/articles/covariance.html#homogeneous-cs-and-heterogeneous-csh-compound-symmetry)), we use a uniform prior on the correlation parameter $\rho$ in the allowed range $(-1/(J-1), 1)$. This is because for $\rho$ smaller than the lower boundary, the correlation matrix would not be positive definite any longer.
+For the variance parameter(s), we use again scaled inverse chi-square priors as described above.
+
+#### Antedependence covariance structure
+
+For the antedependence covariance structure (see [here](https://openpharma.github.io/mmrm/latest-tag/articles/covariance.html#homogeneous-ad-and-heterogeneous-ante-dependence-adh)), we use uniform priors on the $J-1$ correlation parameters $\rho_{1}, \dotsc, \rho_{J-1}$ in the full range $(-1, 1)$.
+For the variance parameter(s), we use again scaled inverse chi-square priors as described above.
+
+#### Toeplitz covariance structure
+
+For the Toeplitz covariance structure (see [here](https://openpharma.github.io/mmrm/latest-tag/articles/covariance.html#homogeneous-toep-and-heterogeneous-toeplitz-toeph)), we use a uniform prior on the correlation parameters $\rho_{1}, \dotsc, \rho_{J-1}$ in the full range $(-1, 1)$.
+For the variance parameter(s), we use again scaled inverse chi-square priors as described above.
 
 #### Further options
 

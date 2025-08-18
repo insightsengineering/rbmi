@@ -108,6 +108,10 @@ is_full_test <- function() {
     Sys.getenv("R_TEST_FULL") == "TRUE"
 }
 
+# For interactive development this is helpful.
+set_full_test <- function() {
+    Sys.setenv(R_TEST_FULL = "TRUE")
+}
 
 # Simple function to enable 1 function mocks
 with_mocking <- function(expr, ..., where) {
@@ -137,6 +141,39 @@ ar1_matrix <- function(rho, n) {
     for (i in 1:n) {
         for (j in 1:n) {
             corr_matrix[i, j] <- rho^abs(i - j)
+        }
+    }
+    corr_matrix
+}
+
+cs_matrix <- function(rho, n) {
+    corr_matrix <- matrix(rho, nrow = n, ncol = n)
+    diag(corr_matrix) <- 1
+    corr_matrix
+}
+
+ad_matrix <- function(rhos) {
+    n <- length(rhos) + 1
+    corr_matrix <- matrix(0, nrow = n, ncol = n)
+    for (i in 1:n) {
+        for (j in i:n) {
+            if (i == j) {
+                corr_matrix[i, j] <- 1
+            } else {
+                corr_matrix[i, j] <- prod(rhos[i:(j - 1)])
+                corr_matrix[j, i] <- corr_matrix[i, j]
+            }
+        }
+    }
+    corr_matrix
+}
+
+toep_matrix <- function(rhos) {
+    n <- length(rhos) + 1
+    corr_matrix <- matrix(0, nrow = n, ncol = n)
+    for (i in 1:n) {
+        for (j in 1:n) {
+            corr_matrix[i, j] <- if (i == j) 1 else rhos[abs(i - j)]
         }
     }
     corr_matrix
