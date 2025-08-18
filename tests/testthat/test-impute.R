@@ -701,6 +701,19 @@ test_that("validate_strategies", {
 
     strats <- c("NMAR")
     expect_error(validate_strategies(strats, "NMAR"))
+
+    # #513 - Test that more informative error message is created when providing an invalid
+    # strategy
+    strats <- list(
+        "A" = function(x) x,
+        "MAR" = function(x) x,
+        "AAA" = function(x) x
+    )
+    e <- tryCatch(
+        validate_strategies(strats, "NMAR"),
+        error = function(e) e
+    )
+    expect_snapshot(cat(e$message))
 })
 
 
