@@ -912,3 +912,32 @@ set_options <- function() {
         }
     }
 }
+
+
+#' Recursively find and replace symbols in a language object
+#'
+#' This function traverses a language object (such as an expression or call)
+#' and recursively replaces all occurrences of a specified symbol with another symbol.
+#'
+#' @param frm A language object (e.g., call, expression, or list of calls) to search and modify.
+#' @param find_sym A symbol (as a name) to find within \code{frm}.
+#' @param replace_sym A symbol (as a name) to replace \code{find_sym} with.
+#'
+#' @return The modified language object with all instances of \code{find_sym} replaced by \code{replace_sym}.
+#'
+#' @examples
+#' expr <- quote(a + b * c)
+#' frm_find_and_replace(expr, as.name("b"), as.name("x"))
+#' # Returns: a + x * c
+#'
+#' @keywords internal
+frm_find_and_replace <- function(frm, find_sym, replace_sym) {
+    for (i in seq_along(frm)) {
+        if (is.call(frm[[i]])) {
+            frm[[i]] <- frm_find_and_replace(frm[[i]], find_sym, replace_sym)
+        } else if (is.name(frm[[i]])) {
+            frm[[i]] <- ifelse(frm[[i]] == find_sym, replace_sym, frm[[i]])
+        }
+    }
+    frm
+}

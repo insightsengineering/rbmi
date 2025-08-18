@@ -301,15 +301,3 @@ ancova_single_m_group <- function(
     names(trt) <- sprintf("trt_%s_L0", levels(data2[["rbmiGroup"]])[-1])
     append(trt, lsm)
 }
-
-
-frm_find_and_replace <- function(frm, find_sym, replace_sym) {
-    for (i in seq_along(frm)) {
-        if (is.call(frm[[i]])) {
-            frm[[i]] <- frm_find_and_replace(frm[[i]], find_sym, replace_sym)
-        } else if (is.name(frm[[i]])) {
-            frm[[i]] <- ifelse(frm[[i]] == find_sym, replace_sym, frm[[i]])
-        }
-    }
-    frm
-}
