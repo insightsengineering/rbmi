@@ -141,6 +141,7 @@ theta_to_cor <- function(theta) {
 #' @param theta The transformed compound symmetry correlation parameter.
 #' @return The correlation value.
 #'
+#' @importFrom stats plogis
 #' @keywords internal
 theta_to_cs_cor <- function(theta, n_visits) {
     a <- 1 / (n_visits - 1)

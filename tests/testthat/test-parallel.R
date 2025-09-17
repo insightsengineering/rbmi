@@ -262,7 +262,7 @@ test_that("Creation and management of user defined clusters works as expected", 
         list(inner_fun = inner_fun, e = e),
         c("lubridate", "nlme")
     )
-    res_3_a <- parallel::clusterCall(cl1, rnorm, 200)
+    res_3_a <- parallel::clusterCall(cl, rnorm, 200)
     expect_equal(res_3_a, res_1_a)
     parallel::stopCluster(cl)
 })
