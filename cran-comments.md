@@ -1,22 +1,15 @@
 ## Summary of Submission
 
-This version of the package fixes the error of the Stan code failing to compile on machines using the C23 standard. The issue was the inclusion of a `#` character within in a comment in the Stan code which the compiler then interpreted as a preprocessor directive. Removing the `#` character resolved this issue. 
+This version of the package aims to resolve two issues with CRAN checks.
 
-Also within this release we have changed the maintainer.
+- ATLAS: A test failed in test-parallel.R. We could not reproduce this error but have identified that an incorrect 
+  cluster object was used. This has been corrected.
+  
+- donttest: A NOTE due to a .stan file that was left over after testing. This is now cleaned up.
 
 ## R CMD check results
 
-```
-Status: 1 NOTE
-
-❯ checking CRAN incoming feasibility ... [7s/39s] NOTE
-  Maintainer: ‘Isaac Gravestock <isaac.gravestock@roche.com>’
-  
-  New maintainer:
-    Isaac Gravestock <isaac.gravestock@roche.com>
-  Old maintainer(s):
-    Craig Gower-Page <craig.gower-page@roche.com>
-```
+No notes or warnings.
 
 ## Test environments
 
@@ -26,10 +19,12 @@ The package was tested in the following environments:
 - Windows, R release (Win-Builder)
 - MacOS, devel (macOS builder)
 - Ubuntu 22.04 LTS, devel (Rhub / GitHub Actions)
-
+- Fedora Linux 38 with ATLAS, devel (Rhub)
 
 ## Downstream dependencies
 
 The following reverse dependencies were checked:
 
 - term.rbmi - no issues detected
+- junco - no issues detected
+- rbmiUtils - no issues detected
