@@ -1,9 +1,14 @@
-# rbmi 1.4.9000
+# rbmi 1.4.2
 
 ## New Features
 
 * All covariance structures are now also supported for Bayesian multiple imputation: `method_bayes()` gained additional `covariance` and `prior_cov` arguments to allow users to specify the covariance structure and prior for the Bayesian imputation model. Please see the updated statistical specifications vignette for details. (#501, #518)
 * New function `mcse()` to calculate the Monte Carlo standard error for pooled estimates from (approximate) Bayesian imputation. (#493)
+
+## Bug Fixes
+
+* Fixed cluster used in parallel test and make sure tests clean up Stan files properly. (#523)
+* Small updates and fixes to documentation. (#504, #506, #498)
 
 # rbmi 1.4.1
 
