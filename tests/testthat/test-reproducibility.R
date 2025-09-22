@@ -126,6 +126,11 @@ test_that("bayes - set.seed produces identical results", {
         )
     )
 
+    old_cache <- options("rbmi.cache_dir")
+    tmp_dir <- tempfile(tmpdir = tempdir(check = TRUE))
+    dir.create(tmp_dir)
+    options("rbmi.cache_dir" = tmp_dir)
+
     set.seed(1234)
     x <- suppressWarnings({
         draws(dat, dat_ice, vars, meth, quiet = TRUE)
@@ -135,6 +140,9 @@ test_that("bayes - set.seed produces identical results", {
         draws(dat, dat_ice, vars, meth, quiet = TRUE)
     })
     expect_equal(x$samples, y$samples)
+
+    unlink(tmp_dir, recursive = TRUE)
+    options("rbmi.cache_dir" = old_cache)
 })
 
 
