@@ -1,6 +1,6 @@
 Package: rbmi
 Title: Reference Based Multiple Imputation
-Version: 1.4.9000
+Version: 1.5.0
 Authors@R: c(
     person("Isaac", "Gravestock", email = "isaac.gravestock@roche.com", role = c("aut", "cre")),
     person("Craig", "Gower-Page", email = "craig.gower-page@novartis.com", role = c("aut")),
@@ -20,7 +20,7 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 URL: https://insightsengineering.github.io/rbmi/, https://github.com/insightsengineering/rbmi
 BugReports: https://github.com/insightsengineering/rbmi/issues
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Suggests: 
     dplyr,
     tidyr,
