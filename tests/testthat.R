@@ -6,8 +6,6 @@ library(rbmi)
 #     options(rbmi.enable_cache = FALSE)
 # }
 
+test_check("rbmi")
 
-
-report_list <- test_check("rbmi", testthat::ListReporter)
-
-print(do.call(rbind, report_list)[, c("file", "test", "real")])
+# print(do.call(rbind, test_check("rbmi", testthat::ListReporter))[, c("file", "test", "real")])
