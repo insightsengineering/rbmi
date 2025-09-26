@@ -1,4 +1,4 @@
-# rbmi 1.5.0
+# rbmi 1.5.1
 
 ## New Features
 
