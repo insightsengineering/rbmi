@@ -1,5 +1,11 @@
 # rbmi 1.5.1
 
+## Bug Fixes
+
+* Modify caching in tests to speed up testing on CRAN.
+
+# rbmi 1.5.0
+
 ## New Features
 
 * All covariance structures are now also supported for Bayesian multiple imputation: `method_bayes()` gained additional `covariance` and `prior_cov` arguments to allow users to specify the covariance structure and prior for the Bayesian imputation model. Please see the updated statistical specifications vignette for details. (#501, #518)
