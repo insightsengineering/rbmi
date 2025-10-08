@@ -1,3 +1,9 @@
+# rbmi 1.5.1
+
+## Bug Fixes
+
+* Modify caching in tests to speed up testing on CRAN.
+
 # rbmi 1.5.0
 
 ## New Features
