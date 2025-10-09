@@ -137,7 +137,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
 div.csl-bib-body { }
 div.csl-entry {
 clear: both;
-margin-bottom: 0em;
 }
 .hanging div.csl-entry {
 margin-left:2em;
@@ -379,7 +378,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 The first is the frequentist variance which describes the actual repeated sampling variability of the estimator and results in inference which is correct in the frequentist sense, i.e. hypothesis tests have accurate type I error control and confidence intervals have correct coverage probabilities under repeated sampling if the reference-based assumption is correctly specified (<span class="citation">Bartlett (<a href="#ref-Bartlett2021">2023</a>)</span>, <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>).
 Reference-based missing data assumption are strong and borrow information from the control arm for imputation in the active arm.
 As a consequence, the size of frequentist standard errors for treatment effects may decrease with increasing amounts of missing data.
-The second is the so-called “information-anchored” variance which was originally proposed in the context of sensitivity analyses (<span class="citation">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019">2019</a>)</span>). This variance estimator is based on disentangling point estimation and variance estimation altogether.
+The second is the so-called “information-anchored” variance which was originally proposed in the context of sensitivity analyses (<span class="citation">Cro et al. (<a href="#ref-CroEtAl2019">2019</a>)</span>). This variance estimator is based on disentangling point estimation and variance estimation altogether.
 The resulting information-anchored variance is typically very similar to the variance under missing-at-random (MAR) imputation and increases with increasing amounts of missing data at approximately the same rate as MAR imputation.
 However, the information-anchored variance does not reflect the actual variability of the reference-based estimator and the resulting frequentist inference is highly conservative resulting in a substantial power loss.</p>
 <p>Reference-based conditional mean imputation combined with a resampling method such as the jackknife or the bootstrap was first introduced in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>.
@@ -388,7 +387,7 @@ However, an alternative information-anchored variance proposed by <span class="c
 The basic idea of <span class="citation">Lu (<a href="#ref-Lu2021">2021</a>)</span> is to obtain the information-anchored variance via a MAR imputation combined with a delta-adjustment where delta is selected in a data-driven way to match the reference-based estimator.
 For conditional mean imputation, the proposal by <span class="citation">Lu (<a href="#ref-Lu2021">2021</a>)</span> can be implemented by choosing the delta-adjustment as the difference between the conditional mean imputation under the chosen reference-based assumption and MAR on the original dataset.
 The variance can then be obtained via the jackknife or the bootstrap while keeping the delta-adjustment fixed. The resulting variance estimate is very similar to Rubin’s variance.
-Moreover, as shown in <span class="citation">Cro, Carpenter, and Kenward (<a href="#ref-CroEtAl2019">2019</a>)</span>, the variance of MAR-imputation combined with a delta-adjustment achieves even better information-anchoring properties than Rubin’s variance for reference-based imputation.
+Moreover, as shown in <span class="citation">Cro et al. (<a href="#ref-CroEtAl2019">2019</a>)</span>, the variance of MAR-imputation combined with a delta-adjustment achieves even better information-anchoring properties than Rubin’s variance for reference-based imputation.
 Reference-based missing data assumptions are strong and borrow information from the control arm for imputation in the active arm.</p>
 <p>This vignette demonstrates first how to obtain frequentist inference using reference-based conditional mean imputation using <code>rbmi</code>, and then shows that an information-anchored inference can also be easily implemented using the package.</p>
 </div>
@@ -800,7 +799,7 @@ Of note, as shown e.g. in <span class="citation">Wolbers et al. (<a href="#ref-
 </div>
 <div id="references" class="section level1 unnumbered unlisted">
 <h1>References</h1>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-Bartlett2021" class="csl-entry">
 Bartlett, Jonathan W. 2023. <span>“Reference-Based Multiple Imputation - What Is the Right Variance and How to Estimate It.”</span> <em>Statistics in Biopharmaceutical Research</em> 15 (1): 178–86.
 </div>
