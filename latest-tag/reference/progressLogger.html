@@ -7,11 +7,17 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>R6 Class for printing current sampling progress — progressLogger • rbmi</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
+  window.MathJax = {
+    chtml: {
+      fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
+    }
+  };
+</script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="../deps/MathJax-3.2.2/tex-chtml.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="R6 Class for printing current sampling progress — progressLogger">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="R6 Class for printing current sampling progress — progressLogger">
 <meta name="description" content="Object is initalised with total number of iterations that are expected to occur.
 User can then update the object with the add method to indicate how many more iterations
 have just occurred.
@@ -22,7 +28,7 @@ User can then update the object with the add method to indicate how many more it
 have just occurred.
 Every time step * 100 % of iterations have occurred a message is printed to the console.
 Use the quiet argument to prevent the object from printing anything at all">
-<meta property="og:image" content="/logo.png">
+<meta property="og:image" content="https://insightsengineering.github.io/rbmi/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -32,7 +38,7 @@ Use the quiet argument to prevent the object from printing anything at all">
 
     <a class="navbar-brand me-2" href="../index.html">rbmi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,12 +51,12 @@ Use the quiet argument to prevent the object from printing anything at all">
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/advanced.html">rbmi: Advanced Functionality</a></li>
+<li><a class="dropdown-item" href="../articles/quickstart.html">rbmi: Quickstart</a></li>
+    <li><a class="dropdown-item" href="../articles/stat_specs.html">rbmi: Statistical Specifications</a></li>
+    <li><a class="dropdown-item" href="../articles/advanced.html">rbmi: Advanced Functionality</a></li>
+    <li><a class="dropdown-item" href="../articles/retrieved_dropout.html">rbmi: Implementation of retrieved-dropout models using rbmi</a></li>
     <li><a class="dropdown-item" href="../articles/CondMean_Inference.html">rbmi: Inference with Conditional Mean Imputation</a></li>
     <li><a class="dropdown-item" href="../articles/FAQ.html">rbmi: Frequently Asked Questions</a></li>
-    <li><a class="dropdown-item" href="../articles/quickstart.html">rbmi: Quickstart</a></li>
-    <li><a class="dropdown-item" href="../articles/retrieved_dropout.html">rbmi: Implementation of retrieved-dropout models using rbmi</a></li>
-    <li><a class="dropdown-item" href="../articles/stat_specs.html">rbmi: Statistical Specifications</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -59,6 +65,7 @@ Use the quiet argument to prevent the object from printing anything at all">
     <div class="dropdown-menu" aria-labelledby="dropdown-versions">
     <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
+<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.5.1">v1.5.1</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.4.1">v1.4.1</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.4.0">v1.4.0</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.3.1">v1.3.1</a>
@@ -81,7 +88,7 @@ Use the quiet argument to prevent the object from printing anything at all">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>R6 Class for printing current sampling progress</h1>
-      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/v1.4.1/R/draws.R" class="external-link"><code>R/draws.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/v1.5.1/R/draws.R" class="external-link"><code>R/draws.R</code></a></small>
       <div class="d-none name"><code>progressLogger.Rd</code></div>
     </div>
 
@@ -276,11 +283,11 @@ This function will do nothing if <code>quiet</code> has been set to <code>TRUE</
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Isaac Gravestock, Craig Gower-Page, Alessandro Noci, Daniel Sabanes Bove, F. Hoffmann-La Roche AG.</p>
+  <p>Developed by Craig Gower-Page, Isaac Gravestock, Alessandro Noci, Daniel Sabanes Bove, F. Hoffmann-La Roche AG.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>

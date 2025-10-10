@@ -7,11 +7,17 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>rbmi: Inference with Conditional Mean Imputation • rbmi</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
+  window.MathJax = {
+    chtml: {
+      fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
+    }
+  };
+</script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="../deps/MathJax-3.2.2/tex-chtml.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="rbmi: Inference with Conditional Mean Imputation">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="rbmi: Inference with Conditional Mean Imputation">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -21,7 +27,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rbmi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,12 +40,12 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/advanced.html">rbmi: Advanced Functionality</a></li>
+<li><a class="dropdown-item" href="../articles/quickstart.html">rbmi: Quickstart</a></li>
+    <li><a class="dropdown-item" href="../articles/stat_specs.html">rbmi: Statistical Specifications</a></li>
+    <li><a class="dropdown-item" href="../articles/advanced.html">rbmi: Advanced Functionality</a></li>
+    <li><a class="dropdown-item" href="../articles/retrieved_dropout.html">rbmi: Implementation of retrieved-dropout models using rbmi</a></li>
     <li><a class="dropdown-item" href="../articles/CondMean_Inference.html">rbmi: Inference with Conditional Mean Imputation</a></li>
     <li><a class="dropdown-item" href="../articles/FAQ.html">rbmi: Frequently Asked Questions</a></li>
-    <li><a class="dropdown-item" href="../articles/quickstart.html">rbmi: Quickstart</a></li>
-    <li><a class="dropdown-item" href="../articles/retrieved_dropout.html">rbmi: Implementation of retrieved-dropout models using rbmi</a></li>
-    <li><a class="dropdown-item" href="../articles/stat_specs.html">rbmi: Statistical Specifications</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -48,6 +54,7 @@
     <div class="dropdown-menu" aria-labelledby="dropdown-versions">
     <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/main">main</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/latest-tag">latest-tag</a>
+<a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.5.1">v1.5.1</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.4.1">v1.4.1</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.4.0">v1.4.0</a>
 <a class="dropdown-item" data-toggle="tooltip" title="" href="https://insightsengineering.github.io/rbmi/v1.3.1">v1.3.1</a>
@@ -75,7 +82,7 @@
                         <h4 data-toc-skip class="author">Alessandro Noci, Marcel Wolbers, Craig Gower-Page</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/v1.4.1/vignettes/CondMean_Inference.Rmd" class="external-link"><code>vignettes/CondMean_Inference.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/insightsengineering/rbmi/blob/v1.5.1/vignettes/CondMean_Inference.Rmd" class="external-link"><code>vignettes/CondMean_Inference.Rmd</code></a></small>
       <div class="d-none name"><code>CondMean_Inference.Rmd</code></div>
     </div>
 
@@ -130,7 +137,7 @@ We therefore refer to that vignette and the help files for the individual functi
 <p>We will make use of <code><a href="../reference/expand.html">rbmi::expand_locf()</a></code> to expand the dataset in order to have one row per subject per visit with missing outcomes denoted as <code>NA</code>. We will then construct the <code>data_ice</code>, <code>vars</code> and <code>method</code> input arguments to the first core <code>rbmi</code> function, <code><a href="../reference/draws.html">draws()</a></code>.
 Finally, we call the function <code><a href="../reference/draws.html">draws()</a></code> to derive the parameter estimates of the base imputation model for the full dataset and all leave-one-subject-out samples.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://insightsengineering.github.io/rbmi/" class="external-link">rbmi</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://insightsengineering.github.io/rbmi/">rbmi</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
@@ -324,7 +331,7 @@ at the last visit with an associated p-value of 0.013.</p>
 <p>The code for the pre-processing of the dataset and for the “draws” step is equivalent to the code provided for the frequentist inference. Please refer to <a href="#draws">that section</a> for details about this step.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://insightsengineering.github.io/rbmi/" class="external-link">rbmi</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://insightsengineering.github.io/rbmi/">rbmi</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="va">antidepressant_data</span></span>
@@ -571,11 +578,11 @@ Wolbers, Marcel, Alessandro Noci, Paul Delmar, Craig Gower-Page, Sean Yiu, and J
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Isaac Gravestock, Craig Gower-Page, Alessandro Noci, Daniel Sabanes Bove, F. Hoffmann-La Roche AG.</p>
+  <p>Developed by Craig Gower-Page, Isaac Gravestock, Alessandro Noci, Daniel Sabanes Bove, F. Hoffmann-La Roche AG.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
