@@ -1,17 +1,6 @@
-## Summary of Submission (v1.5.1)
+## Summary of Submission (v1.5.2)
 
-This is a re-submission with some tweaks the caching of compiled Stan programs to improve the run time of the test scripts to keep them under CRANs 10-minute limit.
-
-Please note that in this submission we have changed the maintainer back to Craig Gower-Page (the original maintainer) albeit at a new email address.
-
-## Original submission notes (v1.5.0)
-
-This version of the package aims to resolve two issues with CRAN checks.
-
-- ATLAS: A test failed in test-parallel.R. We could not reproduce this error but have identified that an incorrect 
-  cluster object was used. This has been corrected.
-
-- donttest: A NOTE due to a .stan file that was left over after testing. This is now cleaned up.
+This submissions aims to fix a CRAN check failure (though it appears to have since run fine on a more recent re-run). We weren't able to re-produce or diagnose the exact issue but believe it related to how Stan caches models. As such we have removed all model caching on CRAN and have reduced the number of unit tests run on CRAN to ensure the code runs under 10 minutes. 
 
 ## R CMD check results
 
@@ -24,8 +13,7 @@ The package was tested in the following environments:
 - MacOS, R release (Local Machine)
 - Windows, R release (Win-Builder)
 - MacOS, devel (macOS builder)
-- Ubuntu 22.04 LTS, devel (Rhub / GitHub Actions)
-- Fedora Linux 38 with ATLAS, devel (Rhub)
+- Ubuntu 22.04 LTS, devel (GitHub Actions)
 
 ## Downstream dependencies
 

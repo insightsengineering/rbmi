@@ -154,6 +154,7 @@ test_that("split_dim creates a list from an array as expected", {
 
 
 test_that("Verbose suppression works", {
+    skip_if_not(is_local_test())
     set.seed(301)
     sigma <- as_vcov(c(6, 4, 4), c(0.5, 0.2, 0.3))
     dat <- get_sim_data(50, sigma)

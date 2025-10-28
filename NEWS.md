@@ -1,3 +1,10 @@
+
+# rbmi 1.5.2
+
+## Bug Fixes
+
+* Disable caching in tests on CRAN and reduce tests run on CRAN to conform to 10-minute limit
+
 # rbmi 1.5.1
 
 ## Bug Fixes
