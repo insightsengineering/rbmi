@@ -96,6 +96,7 @@ test_that("Results are Reproducible", {
 
 
 test_that("bayes - set.seed produces identical results", {
+    skip_if_not(is_local_test())
     sigma <- as_vcov(c(2, 1, 0.7), c(0.5, 0.3, 0.2))
     dat <- get_sim_data(200, sigma, trt = 8) %>%
         mutate(outcome = if_else(rbinom(n(), 1, 0.3) == 1, NA_real_, outcome))

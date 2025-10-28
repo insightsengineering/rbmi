@@ -103,14 +103,19 @@ expect_contains <- function(x, y) {
     expect_within(y, x)
 }
 
-
-is_full_test <- function() {
-    Sys.getenv("R_TEST_FULL") == "TRUE"
+is_envvar_true <- function(var) {
+    envvar <- Sys.getenv(var)
+    if (is.null(envvar)) return(FALSE)
+    if (is.na(envvar)) return(FALSE)
+    if (toupper(envvar) %in% c("T", "TRUE")) return(TRUE)
+    FALSE
 }
 
-# For interactive development this is helpful.
-set_full_test <- function() {
-    Sys.setenv(R_TEST_FULL = "TRUE")
+is_local_test <- function() {
+    is_envvar_true("R_TEST_LOCAL") || is_envvar_true("R_TEST_FULL")
+}
+is_full_test <- function() {
+    is_envvar_true("R_TEST_FULL")
 }
 
 # Simple function to enable 1 function mocks

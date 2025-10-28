@@ -4,52 +4,36 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build Vignettes",
-            "type": "shell",
-            "command": "Rscript vignettes/build.R",
-            "problemMatcher": [],
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "dedicated",
-                "showReuseMessage": true,
-                "clear": true
-            }
+            "label": "rbmi - Vignettes",
+            "command": "${workspaceFolder}/tests/scripts/vignettes.sh",
+            "group": "test",
+            "presentation": { "clear": true, "panel": "dedicated" },
+            "problemMatcher": "$testthat",
+            "options": { "cwd": "${workspaceFolder}" }
         },
         {
-            "label": "rbmi - testthat (local cache)",
+            "label": "rbmi - rcmdcheck",
+            "command": "${workspaceFolder}/tests/scripts/rcmdcheck.sh",
+            "group": "test",
+            "presentation": { "clear": true, "panel": "dedicated" },
             "problemMatcher": "$testthat",
-            "command": "Rscript",
-            "args" : [
-                "-e",
-                "devtools::test()"
-            ],
-            "options": {
-                "env": {
-                    "RBMI_CACHE_DIR" : "${workspaceFolder}/local"
-                }
-            },
+            "options": { "cwd": "${workspaceFolder}" }
+        },
+        {
+            "label": "rbmi - testthat",
+            "command": "${workspaceFolder}/tests/scripts/testthat.sh",
+            "group": "test",
+            "presentation": { "clear": true, "panel": "dedicated" },
+            "problemMatcher": "$testthat",
+            "options": { "cwd": "${workspaceFolder}" }
         },
         {
             "label": "rbmi - testthat (FULL)",
-            "command": "Rscript",
-            "options": {
-                "env": {
-                    "RBMI_CACHE_DIR" : "${workspaceFolder}/local",
-                    "R_TEST_FULL" : "TRUE"
-                }
-            },
-            "args": [
-                "-e",
-                "devtools::test()"
-            ],
+            "command": "${workspaceFolder}/tests/scripts/testthat-full.sh",
             "group": "test",
-            "presentation": {
-                "clear": true,
-                "panel": "dedicated"
-            },
-            "problemMatcher": "$testthat"
+            "presentation": { "clear": true, "panel": "dedicated" },
+            "problemMatcher": "$testthat",
+            "options": { "cwd": "${workspaceFolder}" }
         }
     ]
 }
