@@ -230,6 +230,52 @@ function which determines the names of the key variables within the data and the
 Please also note that the names of the analysis estimates contain `ref` and `alt` to refer to the two treatment arms. In particular `ref` refers to the first factor level of `vars$group` which does not necessarily
 coincide with the control arm. In this example, since `levels(dat[[vars$group]]) = c("DRUG", PLACEBO`), the results associated with `ref` correspond to the intervention arm, while those associated with `alt` correspond to the control arm.
 
+Note that `ancova()` supports the analysis of two or more treatment arms. For more than
+two arms the `ref` / `alt` naming scheme is extended so that `alt2`, `alt3`, ... represent
+the third, fourth, ... factor levels; e.g. the resulting list will contain entries such as
+`lsm_alt2_day40` (the least square mean for the third factor level at the `"day40"` visit)
+and, for treatment effects, `trt_alt2_day40` (the third factor level compared to the
+reference level at the `"day40"` visit). By default a treatment effect is estimated for
+every non-reference group versus the reference group; a bespoke set of contrasts can be
+requested via the `group_contrasts` argument of `set_vars()`. Custom contrasts must be
+named, and the names become the output parameter names. For example, with three arms
+`"Placebo"`, `"Low"` and `"High"`:
+
+```r
+vars <- set_vars(
+    outcome = "outcome",
+    group = "group",
+    visit = "visit",
+    covariates = c("BASVAL"),
+    group_contrasts = list(
+        low_vs_pbo  = c("Low", "Placebo"),
+        high_vs_pbo = c("High", "Placebo"),
+        high_vs_low = c("High", "Low")
+    )
+)
+anaObj <- analyse(imputeObj, ancova, vars = vars)
+```
+
+Contrasts need not be pairwise. A contrast can also be specified as a named numeric weight
+vector over the group levels (summing to zero) -- for example to compare the average of the
+two active arms against `"Placebo"`. The list name becomes the parameter name and is
+carried through to the `contrast_label` column of the `pool()` output:
+
+```r
+vars <- set_vars(
+    outcome = "outcome",
+    group = "group",
+    visit = "visit",
+    covariates = c("BASVAL"),
+    group_contrasts = list(
+        pooled_vs_pbo = c(Placebo = -1, Low = 0.5, High = 0.5)
+    )
+)
+anaObj <- analyse(imputeObj, ancova, vars = vars)
+```
+
+See the documentation for `ancova()` and `set_vars()` for more details.
+
 Additionally, we can use the `delta` argument of `analyse()` to perform a delta adjustments of the imputed datasets prior to the analysis. 
 In brief, this is implemented by specifying a data.frame that contains the amount
 of adjustment to be added to each longitudinal outcome for each subject and visit, i.e. 

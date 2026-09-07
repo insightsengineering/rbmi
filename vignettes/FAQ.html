@@ -361,6 +361,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li><a href="#how-to-handle-missing-data-in-baseline-covariates-in-rbmi" id="toc-how-to-handle-missing-data-in-baseline-covariates-in-rbmi"><span class="toc-section-number">1.4</span> How to handle missing data in baseline covariates in <code>rbmi</code>?</a></li>
 <li><a href="#why-does-rbmi-by-default-use-an-ancova-analysis-model-and-not-an-mmrm-analysis-model" id="toc-why-does-rbmi-by-default-use-an-ancova-analysis-model-and-not-an-mmrm-analysis-model"><span class="toc-section-number">1.5</span> Why does <code>rbmi</code> by default use an ANCOVA analysis model and not an MMRM analysis model?</a></li>
 <li><a href="#how-can-i-analyse-the-change-from-baseline-in-the-analysis-model-when-imputation-was-done-on-the-original-outcomes" id="toc-how-can-i-analyse-the-change-from-baseline-in-the-analysis-model-when-imputation-was-done-on-the-original-outcomes"><span class="toc-section-number">1.6</span> How can I analyse the change-from-baseline in the analysis model when imputation was done on the original outcomes?</a></li>
+<li><a href="#is-ancova-on-more-than-2-treatment-groups-supported" id="toc-is-ancova-on-more-than-2-treatment-groups-supported"><span class="toc-section-number">1.7</span> Is ANCOVA on more than 2 treatment groups supported?</a></li>
 </ul></li>
 </ul>
 </div>
@@ -445,6 +446,53 @@ We expect that conditional mean imputation is also valid if a general MMRM model
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>    ancova_modified,</span>
 <span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>    <span class="at">vars =</span> vars</span>
 <span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a> )</span></code></pre></div>
+<p><br></p>
+</div>
+<div id="is-ancova-on-more-than-2-treatment-groups-supported" class="section level2" number="1.7">
+<h2><span class="header-section-number">1.7</span> Is ANCOVA on more than 2 treatment groups supported?</h2>
+<p>Yes. The default <code>ancova()</code> function supports two or more treatment groups directly, so no
+special handling is required:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>anaObj <span class="ot">&lt;-</span> rbmi<span class="sc">::</span><span class="fu">analyse</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>    imputeObj,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>    <span class="at">vars =</span> vars</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a> )</span></code></pre></div>
+<p>For more than two groups the <code>ref</code> / <code>alt</code> naming scheme is extended with <code>alt2</code>, <code>alt3</code>,
+etc. (based on the factor levels of <code>vars$group</code>). By default a treatment effect is
+estimated for every non-reference group versus the reference group; the set of contrasts
+can be customised via the <code>group_contrasts</code> argument of <code>set_vars()</code>. Custom contrasts
+must be named, and the names become the output parameter names. For example, with three
+arms <code>&quot;Placebo&quot;</code>, <code>&quot;Low&quot;</code> and <code>&quot;High&quot;</code> you can request a bespoke set of pairwise
+contrasts:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>    <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>    <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>    <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL*VISIT&quot;</span>, <span class="st">&quot;THERAPY*VISIT&quot;</span>),</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>    <span class="at">group_contrasts =</span> <span class="fu">list</span>(</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>        <span class="at">low_vs_pbo  =</span> <span class="fu">c</span>(<span class="st">&quot;Low&quot;</span>, <span class="st">&quot;Placebo&quot;</span>),</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>        <span class="at">high_vs_pbo =</span> <span class="fu">c</span>(<span class="st">&quot;High&quot;</span>, <span class="st">&quot;Placebo&quot;</span>),</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>        <span class="at">high_vs_low =</span> <span class="fu">c</span>(<span class="st">&quot;High&quot;</span>, <span class="st">&quot;Low&quot;</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    )</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>)</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>anaObj <span class="ot">&lt;-</span> rbmi<span class="sc">::</span><span class="fu">analyse</span>(imputeObj, <span class="at">vars =</span> vars)</span></code></pre></div>
+<p>Contrasts are not restricted to pairwise comparisons. A contrast can also be given as a
+named numeric weight vector over the group levels (which must sum to zero), for example to
+compare the average of the two active arms against <code>&quot;Placebo&quot;</code>. The list name is used as
+the parameter name and is carried through to the <code>contrast_label</code> column of the <code>pool()</code>
+output:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>    <span class="at">subjid =</span> <span class="st">&quot;PATIENT&quot;</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    <span class="at">visit =</span> <span class="st">&quot;VISIT&quot;</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;CHANGE&quot;</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">&quot;THERAPY&quot;</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BASVAL*VISIT&quot;</span>, <span class="st">&quot;THERAPY*VISIT&quot;</span>),</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>    <span class="at">group_contrasts =</span> <span class="fu">list</span>(</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>        <span class="at">pooled_vs_pbo =</span> <span class="fu">c</span>(<span class="at">Placebo =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">Low =</span> <span class="fl">0.5</span>, <span class="at">High =</span> <span class="fl">0.5</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>    )</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>)</span></code></pre></div>
+<p>Please see the documentation for <code>ancova()</code> and <code>set_vars()</code> for more details.</p>
 <p><br></p>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-White2005" class="csl-entry">

@@ -96,6 +96,11 @@ method (\code{method = method_condmean()} in \code{\link[=draws]{draws()}}) reli
 a linear transformation of the outcomes.
 Thus care is required when applying alternative analysis functions in this setting.
 
+Note that \code{\link[=ancova]{ancova()}} supports the analysis of two or more treatment arms; for more than
+two arms it extends the \code{ref} / \code{alt} naming scheme with \code{alt2}, \code{alt3}, etc. The set of
+treatment-group contrasts to estimate can be customised via the \code{group_contrasts}
+argument of \code{\link[=set_vars]{set_vars()}}. See \code{\link[=ancova]{ancova()}} for full details.
+
 The \code{delta} argument can be used to specify offsets to be applied
 to the outcome variable in the imputed datasets prior to the analysis.
 This is typically used for sensitivity or tipping point analyses. The

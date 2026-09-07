@@ -66,7 +66,11 @@ standard error (\code{se}) and p-value (\code{pvalue}).
 
 The \code{as.data.frame()} method returns a \code{data.frame} with one row per
 parameter (columns \code{parameter}, \code{est}, \code{se}, \code{lci}, \code{uci}, \code{pval}) and the
-\code{print()} method returns its input invisibly.
+\code{print()} method returns its input invisibly. When the analysis function
+attached per-parameter metadata (as \code{\link[=ancova]{ancova()}} does), \code{as.data.frame()}
+additionally appends the metadata columns (\code{estimate_type}, \code{group},
+\code{group_level_1}, \code{group_level_2}, \code{visit}); the \code{print()} method still shows
+only the six classic columns for a compact display.
 
 \code{mcse()} returns an \code{mcse} object; a list of class \code{"mcse"} containing \code{pars}
 (the Monte Carlo standard errors of the pooled estimates, in the same

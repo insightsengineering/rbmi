@@ -54,7 +54,7 @@
 #' Von Hippel, Paul T and Bartlett, Jonathan W.
 #' Maximum likelihood multiple imputation: Faster imputations and consistent standard
 #' errors without posterior draws. 2021.
-
+#'
 #' @return
 #' A `pool` object; a list of class `"pool"` containing the pooled analysis
 #' results with the following elements:
@@ -68,7 +68,11 @@
 #'
 #' The `as.data.frame()` method returns a `data.frame` with one row per
 #' parameter (columns `parameter`, `est`, `se`, `lci`, `uci`, `pval`) and the
-#' `print()` method returns its input invisibly.
+#' `print()` method returns its input invisibly. When the analysis function
+#' attached per-parameter metadata (as [ancova()] does), `as.data.frame()`
+#' additionally appends the metadata columns (`estimate_type`, `group`,
+#' `group_level_1`, `group_level_2`, `visit`); the `print()` method still shows
+#' only the six classic columns for a compact display.
 #'
 #' @examples
 #' # Prepare the data: expand to one row per subject and visit
@@ -179,7 +183,8 @@ pool <- function(
         conf.level = conf.level,
         alternative = alternative,
         N = length(results$results),
-        method = method
+        method = method,
+        par_meta = results$par_meta
     )
     class(ret) <- "pool"
     return(ret)
@@ -758,7 +763,7 @@ as_data_frame_internal <- function(x) {
         msg = "`x` must be a pool or mcse object"
     )
 
-    data.frame(
+    df <- data.frame(
         parameter = names(x$pars),
         est = vapply(x$pars, function(x) x$est, numeric(1)),
         se = vapply(x$pars, function(x) x$se, numeric(1)),
@@ -768,6 +773,35 @@ as_data_frame_internal <- function(x) {
         stringsAsFactors = FALSE,
         row.names = NULL
     )
+
+    # If the analysis function supplied per-parameter metadata (e.g. `ancova()`)
+    # append it as explicit columns, keeping `parameter` for backwards compatibility.
+    par_meta <- x[["par_meta"]]
+    if (!is.null(par_meta)) {
+        idx <- match(df[["parameter"]], par_meta[["parameter"]])
+        assert_that(
+            !any(is.na(idx)),
+            msg = sprintf(
+                paste0(
+                    "Internal error: pooled parameter(s) without matching metadata: %s. ",
+                    "The metadata and pooled parameter names have drifted."
+                ),
+                paste(df[["parameter"]][is.na(idx)], collapse = ", ")
+            )
+        )
+        for (col in c(
+            "estimate_type",
+            "group",
+            "group_level_1",
+            "group_level_2",
+            "contrast_label",
+            "visit"
+        )) {
+            df[[col]] <- par_meta[[col]][idx]
+        }
+    }
+
+    df
 }
 
 
@@ -797,7 +831,17 @@ print.pool <- function(x, ...) {
         sprintf("Alternative: %s", x$alternative),
         "",
         "Results:",
-        as_ascii_table(as.data.frame(x), pcol = "pval"),
+        as_ascii_table(
+            as.data.frame(x)[, c(
+                "parameter",
+                "est",
+                "se",
+                "lci",
+                "uci",
+                "pval"
+            )],
+            pcol = "pval"
+        ),
         ""
     )
 

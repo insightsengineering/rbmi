@@ -28,15 +28,25 @@ Specifies the weighting strategy to be used when calculating the lsmeans.
 See the weighting section for more details.}
 }
 \value{
-A named list with one set of entries per visit. For each visit the list
-contains the estimated treatment effect (\verb{trt_<visit>}) and the least square
-means for the reference and alternative groups (\verb{lsm_ref_<visit>} and
-\verb{lsm_alt_<visit>}). Each of these elements is itself a list holding the
-estimate (\code{est}), standard error (\code{se}) and degrees of freedom (\code{df}).
+A named list with one set of entries per visit, each suffixed by the visit name.
+For each visit the list contains:
+\itemize{
+\item the estimated treatment effect(s). For the default (\code{group_contrasts = NULL}) these
+are \verb{trt_<visit>} for the \code{alt} vs \code{ref} comparison and \verb{trt_alt2_<visit>},
+\verb{trt_alt3_<visit>}, ... for further non-reference groups versus the reference group.
+When \code{group_contrasts} is supplied each contrast is named \verb{<name>_<visit>} using the
+list name given for that contrast. Also
+\item the least square means for each group (\verb{lsm_ref_<visit>}, \verb{lsm_alt_<visit>},
+\verb{lsm_alt2_<visit>}, ...).
+}
+
+For the common case of two groups this reduces to \verb{trt_<visit>}, \verb{lsm_ref_<visit>}
+and \verb{lsm_alt_<visit>}. Each of these elements is itself a list holding the estimate
+(\code{est}), standard error (\code{se}) and degrees of freedom (\code{df}).
 }
 \description{
-Performs an analysis of covariance between two groups returning the estimated
-"treatment effect" (i.e. the contrast between the two treatment groups) and
+Performs an analysis of covariance between two or more treatment groups returning the
+estimated "treatment effect" (i.e. the contrast between treatment groups) and
 the least square means estimates in each group.
 }
 \details{
@@ -66,13 +76,38 @@ into a single list suffixed by the visit name, e.g.:
 )
 }\if{html}{\out{</div>}}
 
-Please note that \code{ref} refers to the first factor level of \code{vars$group} which does not necessarily
-coincide with the control arm. Analogously, \code{alt} refers to the second factor level of \code{vars$group}.
-\code{trt} refers to the model contrast translating the mean difference between the second level and first level.
+\code{ancova()} supports two or more treatment groups. The group levels are referred to
+via a fixed naming scheme derived from the factor levels of \code{vars$group}: \code{ref} is the
+first factor level, \code{alt} the second, \code{alt2} the third, \code{alt3} the fourth, and so on.
+Note that \code{ref} does not necessarily coincide with the control arm; it is simply the
+first factor level.
+
+The least square means for each group are returned as \code{lsm_ref}, \code{lsm_alt}, \code{lsm_alt2},
+etc. Treatment effects (model contrasts) are returned as \code{trt} for the \code{alt} vs \code{ref}
+comparison, \code{trt_alt2} for \code{alt2} vs \code{ref}, and so on. For the common case of two groups
+this reduces to the original \code{trt}, \code{lsm_ref} and \code{lsm_alt} naming, ensuring backwards
+compatibility.
+
+By default a treatment effect is calculated for every non-reference group versus the
+reference group, using the \code{trt} / \code{trt_alt2} / ... names described above. Alternatively
+a bespoke set of contrasts can be requested via the \code{group_contrasts} argument of
+\code{\link[=set_vars]{set_vars()}}; see its documentation for details. Such contrasts must be named, and the
+supplied name is used as the \code{parameter} name and carried through to the
+\code{contrast_label} column of the \code{\link[=pool]{pool()}} output. Contrasts may be pairwise (a length-2
+\code{c(minuend, subtrahend)} character vector) or general linear contrasts (a named numeric
+weight vector over the group levels).
 
 If you want to include interaction terms in your model this can be done
 by providing them to the \code{covariates} argument of \code{\link[=set_vars]{set_vars()}}
 e.g. \code{set_vars(covariates = c("sex*age"))}.
+
+Note that the treatment effects (\code{trt}, \code{trt_alt2}, ...) are the relevant linear
+combinations of the model coefficients, i.e. the group main-effect contrasts evaluated
+at the reference level of any covariates. The least square means (\verb{lsm_*}) are instead
+computed according to the requested \code{weights}. When \code{group} interacts with a covariate
+these two quantities differ, so \code{trt} is not in general equal to \code{lsm_alt - lsm_ref}.
+This matches the behaviour of the original two-group implementation, where \code{trt} has
+always been the model coefficient.
 }
 \section{Weighting}{
 
@@ -148,6 +183,41 @@ vars <- set_vars(
 # In a full `rbmi` analysis, `ancova()` is passed to `analyse()` rather than
 # called directly; see [analyse()].
 ancova(dat, vars)
+
+# Multi-arm ANCOVA with a bespoke, named set of contrasts. With three groups
+# the default would compare each active arm against the reference ("Placebo");
+# here we additionally request the "High" vs "Low" contrast. Explicit contrasts
+# must be named, and the names become the output parameter names.
+set.seed(102)
+dat3 <- data.frame(
+    visit = factor("visit_1"),
+    group = factor(
+        rep(c("Placebo", "Low", "High"), each = 50),
+        levels = c("Placebo", "Low", "High")
+    ),
+    basval = rnorm(150)
+)
+dat3$outcome <- 5 +
+    2 * (dat3$group == "Low") +
+    4 * (dat3$group == "High") +
+    dat3$basval +
+    rnorm(150)
+
+vars3 <- set_vars(
+    outcome = "outcome",
+    group = "group",
+    visit = "visit",
+    covariates = "basval",
+    group_contrasts = list(
+        low_vs_pbo  = c("Low", "Placebo"),
+        high_vs_pbo = c("High", "Placebo"),
+        high_vs_low = c("High", "Low")
+    )
+)
+
+# Output names: `low_vs_pbo`, `high_vs_pbo`, `high_vs_low`, plus
+# `lsm_ref` / `lsm_alt` / `lsm_alt2`.
+names(ancova(dat3, vars3))
 
 }
 \seealso{

@@ -4,7 +4,14 @@
 \alias{as_analysis}
 \title{Construct an \code{analysis} object}
 \usage{
-as_analysis(results, method, delta = NULL, fun = NULL, fun_name = NULL)
+as_analysis(
+  results,
+  method,
+  delta = NULL,
+  fun = NULL,
+  fun_name = NULL,
+  par_meta = NULL
+)
 }
 \arguments{
 \item{results}{A list of lists contain the analysis results for each imputation
@@ -19,6 +26,10 @@ should be specified.}
 
 \item{fun_name}{The character name of the analysis function (used for printing)
 purposes.}
+
+\item{par_meta}{Optional \code{data.frame} of per-parameter metadata (e.g. the group
+levels and visit associated with each analysis parameter) as attached by the
+analysis function. May be \code{NULL}.}
 }
 \description{
 Creates an analysis object ensuring that all components are

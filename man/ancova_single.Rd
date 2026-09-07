@@ -9,7 +9,8 @@ ancova_single(
   outcome,
   group,
   covariates,
-  weights = c("counterfactual", "equal", "proportional_em", "proportional")
+  weights = c("counterfactual", "equal", "proportional_em", "proportional"),
+  group_contrasts = NULL
 )
 }
 \arguments{
@@ -26,16 +27,30 @@ to be included in the model as well as any interaction terms.}
 \code{"proportional_em"} or \code{"proportional"}.
 Specifies the weighting strategy to be used when calculating the lsmeans.
 See the weighting section for more details.}
+
+\item{group_contrasts}{Optional list specifying bespoke treatment-group contrasts.
+See \code{\link[=set_vars]{set_vars()}} and \code{\link[=ancova]{ancova()}} for details. If \code{NULL} (default) a contrast of each
+non-reference group versus the reference group is calculated.}
 }
 \description{
 Performance analysis of covariance. See \code{\link[=ancova]{ancova()}} for full details.
 }
 \details{
 \itemize{
-\item \code{group} must be a factor variable with only 2 levels.
+\item \code{group} must be a factor variable with two or more levels, all of which must be
+observed in the data.
 \item \code{outcome} must be a continuous numeric variable.
 }
+
+The group levels are mapped to a fixed set of labels (\code{ref}, \code{alt}, \code{alt2}, ...) based
+on the factor level ordering; see \code{\link[=ancova]{ancova()}} for the resulting naming scheme.
 }
+\section{Reserved Variable Names}{
+
+This function uses \code{"rbmiGroup"} as an internal variable name. If your dataset
+contains a variable with this name, the function will error.
+}
+
 \section{Weighting}{
 
 \subsection{Counterfactual}{
@@ -98,3 +113,4 @@ ancova_single(iris2, "Sepal.Length", "Species", c("Petal.Length * Petal.Width"))
 \seealso{
 \code{\link[=ancova]{ancova()}}
 }
+\keyword{internal}

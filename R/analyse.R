@@ -58,6 +58,11 @@
 #' a linear transformation of the outcomes.
 #' Thus care is required when applying alternative analysis functions in this setting.
 #'
+#' Note that [ancova()] supports the analysis of two or more treatment arms; for more than
+#' two arms it extends the `ref` / `alt` naming scheme with `alt2`, `alt3`, etc. The set of
+#' treatment-group contrasts to estimate can be customised via the `group_contrasts`
+#' argument of [set_vars()]. See [ancova()] for full details.
+#'
 #' The `delta` argument can be used to specify offsets to be applied
 #' to the outcome variable in the imputed datasets prior to the analysis.
 #' This is typically used for sensitivity or tipping point analyses. The
@@ -304,12 +309,21 @@ analyse <- function(
         fun_name <- "<NULL>"
     }
 
+    # Capture optional per-parameter metadata attached by the analysis function
+    # (e.g. by `ancova()`). Identical across samples, so the first is sufficient.
+    par_meta <- if (length(results) >= 1) {
+        attr(results[[1]], "rbmi_par_meta")
+    } else {
+        NULL
+    }
+
     ret <- as_analysis(
         results = results,
         fun_name = fun_name,
         delta = delta,
         fun = fun,
-        method = imputations$method
+        method = imputations$method,
+        par_meta = par_meta
     )
     validate(ret)
     return(ret)
@@ -425,12 +439,16 @@ extract_imputed_df <- function(imputation, ld, delta = NULL, idmap = FALSE) {
 #' @param fun The analysis function that was used.
 #' @param fun_name The character name of the analysis function (used for printing)
 #' purposes.
+#' @param par_meta Optional `data.frame` of per-parameter metadata (e.g. the group
+#' levels and visit associated with each analysis parameter) as attached by the
+#' analysis function. May be `NULL`.
 as_analysis <- function(
     results,
     method,
     delta = NULL,
     fun = NULL,
-    fun_name = NULL
+    fun_name = NULL,
+    par_meta = NULL
 ) {
     next_class <- switch(
         class(method)[[2]],
@@ -456,7 +474,8 @@ as_analysis <- function(
         delta = delta,
         fun = fun,
         fun_name = fun_name,
-        method = method
+        method = method,
+        par_meta = par_meta
     )
     class(x) <- c("analysis", "list")
     validate(x)
