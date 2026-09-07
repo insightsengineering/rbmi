@@ -4,15 +4,14 @@
 * `ancova()` now supports the analysis of two or more treatment groups. For more than two
   groups the `ref` / `alt` naming scheme is extended with `alt2`, `alt3`, etc. based on the
   factor levels of `vars$group`; the two-group output is unchanged (`trt`, `lsm_ref`,
-  `lsm_alt`) for backwards compatibility. (#520)
-* `set_vars()` gained a `group_contrasts` argument allowing users to specify a bespoke set
-  of treatment-group contrasts for `ancova()`. By default a contrast of each non-reference
-  group versus the reference group is estimated. Custom contrasts must be named (the name
-  becomes the output `parameter` name) and may be given as pairwise
-  `c(minuend, subtrahend)` character vectors or as general named numeric weight vectors
-  over the group levels (e.g. `c(Placebo = -1, A = 0.5, B = 0.5)` for a pooled comparison);
-  contrasts are evaluated in a contrast-coding-agnostic way. (#520)
-* The `data.frame` produced by `as.data.frame()` / `pool()` now includes explicit
+  `lsm_alt`) for backwards compatibility. `set_vars()` gained a `group_contrasts` argument
+  allowing users to specify a bespoke set of treatment-group contrasts for `ancova()`. By
+  default a contrast of each non-reference group versus the reference group is estimated.
+  Custom contrasts must be named (the name becomes the output `parameter` name) and may be
+  given as pairwise `c(minuend, subtrahend)` character vectors or as general named numeric
+  weight vectors over the group levels (e.g. `c(Placebo = -1, A = 0.5, B = 0.5)` for a
+  pooled comparison); contrasts are evaluated in a contrast-coding-agnostic way. The
+  `data.frame` produced by `as.data.frame()` / `pool()` now includes explicit
   `estimate_type`, `group`, `group_level_1`, `group_level_2`, `contrast_label` and `visit`
   columns when the analysis was performed with `ancova()`. The existing `parameter` column
   is retained for backwards compatibility. (#520)
