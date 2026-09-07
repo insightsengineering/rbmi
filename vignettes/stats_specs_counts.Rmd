@@ -1,0 +1,152 @@
+---
+title: "rbmi: Statistical Specifications for Count Outcomes"
+author: Daniel Sabanés Bové
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+    number_sections: true
+    citation_package: natbib
+    base_format: rmarkdown::html_vignette
+bibliography: "references.bib"
+link-citations: true   
+linkcolor: blue
+pkgdown:
+  as_is: true
+vignette: >
+  %\VignetteIndexEntry{rbmi: Statistical Specifications for Count Outcomes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Scope of this document
+
+This document describes the statistical methods implemented in the `rbmi` R package for multiple imputation of count outcomes. Please see the [separate vignette](stats_specs.html) for details on the implemented statistical methods for continuous outcomes.
+
+The package focuses on multiple imputation (MI) for count outcomes following these approaches:
+
+1. @keene2014 is the basic proposal for Bayesian MI for negative binomial count data, covering two time periods: before and after discontinuing the trial and treatment at the same time.
+1. @roger2019 extends this to more than two time periods, in particular a third time period where patients are still continuing the trial, but have stopped treatment already. This is the more general setting, which is implemented in `rbmi`.
+
+Note that time to recurrent events can also be analyzed with Andersen-Gill models, but this is not available in the package at this point.
+
+## Statistical methodology {#sec:statsMethods}
+
+### Notation
+
+We follow quite closely the notation in @roger2019.
+
+- We have $i = 1, \dotsc, N$ patients in the considered analysis population of the trial.
+- There are $m = 3$ periods for each patient:
+  - $j= 1$: the period on-treatment
+  - $j= 2$: the period after stopping treatment and before withdrawal from the study (off-treatment)
+  - $j= 3$: the period after withdrawal from the study (post-withdrawal)
+- Let $Y_{ij}$ be the number of events for patient $i$ in period $j$, $j = 1, 2, 3$.
+  - Note that we never observe $Y_{i3}$, but we always observe $Y_{i1}$ and $Y_{i2}$ for all patients.
+- Let $T_{ij}$ be the length of time for patient $i$ in period $j$, $j = 1, 2, 3$.
+  - We use here for simplicity a fixed duration trial, where according to the protocol all patients are followed for the same amount of time $t$.
+  - Therefore $T_{i1} + T_{i2} + T_{i3} = t$ for all $i$
+  - However, some of $T_{i2}$ and $T_{i3}$ may be zero, if the patient did not stop treatment (then $T_{i2} = T_{i3} = 0$), immediately withdrew when stopping treatment (then $T_{i2} = 0$ but $T_{i3} > 0$), or always stayed in the study after stopping treatment (then $T_{i2} > 0$ but $T_{i3} = 0$).
+
+### Model
+
+We want to model the number of events $Y_{ij}$ for patient $i$ in period $j$ using a joint [negative multinomial distribution](https://en.wikipedia.org/wiki/Negative_multinomial_distribution) [@keene2014]:
+
+$$
+\mathbb{P}(Y_{i} = (y_{i1}, y_{i2}, y_{i3})) =
+\frac{\Gamma(y_0 + \sum_{j=1}^3 y_{ij})}{\Gamma(y_0) \prod_{j=1}^3 \Gamma(y_{ij} + 1)}
+\prod_{j=0}^3 p_{ij}^{y_{ij}}
+$$
+
+where:
+
+- $y_0 = \phi^{-1}$ is the shape parameter in the negative multinomial representation, and $\phi$ is the dispersion parameter.
+- $\lambda_{ij}$ is the event rate for patient $i$ in period $j$ for $j = 1, 2, 3$.
+- $\mu_{ij} = t_{ij} \lambda_{ij}$ is the expected number of events for patient $i$ in period $j$, given that the patient stays for time $t_{ij}$ in that period.
+- $p_{ij} = \frac{\mu_{ij}}{\phi^{-1} + \sum_{k=1}^3 \mu_{ik}}$ is the probability of an event for patient $i$ in period $j$.
+- $p_{i0} = 1 - \sum_{j=1}^3 p_{ij}$ is the complementary probability of no event for patient $i$ in any of the three periods.
+
+We can model the event rate $\lambda_{ij}$ as:
+
+$$
+\lambda_{ij} = \exp(\eta_{ij} + u_{i})
+$$
+
+where $\eta_{ij} = x_{ij}^{\top} \beta$ is the linear predictor for patient $i$ in period $j$, given a vector of covariates $x_{ij}$ (which includes the treatment assignment and possibly other covariates) and the corresponding regression coefficient vector $\beta$. The random intercept $u_{i}$ models the patient-specific frailty term, often formulated as $\gamma_{i} = \exp(u_{i})$, which captures the unobserved heterogeneity between patients in their event rates.
+
+Conditional on a fixed frailty $\gamma_{i}$, $Y_{ij}$ has a Poisson distribution with mean $\mu_{ij} = t_{ij} \lambda_{ij} = t_{ij} \gamma_{i} \exp(\eta_{ij})$.
+If, on the other hand, we assume that $\gamma_i$ follow an iid gamma distribution with mean 1 and shape $\phi^{-1}$ for $i= 1, \dotsc, N$, then we obtain a Poisson-gamma mixture model. Integrating out $\gamma_i$ gives us a negative binomial distribution for each $Y_{ij}$, or the above negative multinomial distribution for the vector $Y_i$ with dispersion parameter $\phi$.
+
+For the implementation of this model we are using Stan. The negative multinomial distribution is not available as a built-in distribution. In principle, there is an option to add it as a custom distribution relatively easily (see [docs](https://mc-stan.org/docs/2_38/stan-users-guide/custom-probability.html)). Unfortunately, it is not possible to add it already now as a [custom family](https://cran.r-project.org/web/packages/brms/vignettes/brms_customfamilies.html) to `brms`, see the discussion in [here](https://github.com/paul-buerkner/brms/issues/1728). We therefore stay with the native Stan implementation. 
+
+### Priors
+
+We fit the above model with the following priors: 
+
+- For the regression coefficients $\beta$, an improper uniform prior is used.
+- For the dispersion parameter $\phi$, a gamma distribution $G(a, b)$ with shape $a$ and inverse scale $b$ parameters both equal to 0.0001 is used.
+
+We use a lower bound of $10^{-6}$ on `phi` as a numerical safeguard. It makes the gamma prior
+technically truncated, but at this value the negative binomial is, for these
+data, effectively at its Poisson limit. The safeguard is needed because the
+very diffuse gamma prior has an integrable singularity at zero; and unconstrained exploration can cause
+divergent transitions even though still smaller values are not practically
+distinguishable from the Poisson limit.
+
+Note that these priors are currently fixed in the package. In the future we might offer additional prior options for users to choose from.
+
+### Reference assumptions
+
+Depending how we structure the design matrix $X_i$ for each patient who withdrew from the study, we can use different assumptions for the imputation of $Y_{i3}$ when running the MCMC for the imputation model:
+
+- MAR: We keep the same randomised treatment assignment for the withdrawn patient in the design matrix for all three periods.
+- CR: We change the treatment assignment for the withdrawn patient in the design matrix for the whole trial to reflect the control arm, so we assume that this patient behaves as if they were in the control arm.
+- J2R: We change the treatment assignment for the withdrawn patient in the design matrix for period 3 to reflect the control arm, so we assume that this patient behaves as if they were in the control arm after stopping treatment, but not before stopping treatment.
+
+### Off-treatment Modeling
+
+As described in @roger2019, we can adapt the model for the off-treatment period (period 2) to reflect different assumptions about the treatment effect after stopping treatment, which will then also affect the imputation of $Y_{i3}$ for patients who withdrew later from the study:
+
+- Off-treatment arm levels can be introduced separately for each randomised treatment arm. This can be implemented by including an interaction term between the treatment arm and the off-treatment period indicator, which would apply to both periods 2 and 3.
+- The off-treatment arm level can also be shared across randomised treatment arms, which can be implemented by introducing a new factor level for the treatment arm variable, which is only active in periods 2 and 3, but not in period 1. This would correspond to the assumption that all patients behave the same after stopping treatment, regardless of their randomised treatment arm.
+
+### Imputation
+
+We use the negative multinomial model (i.e. with the frailty integrated out) for the observed data to get the MCMC samples for the regression coefficients $\beta$ and dispersion parameter $\phi$, and then use these to impute $Y_{i3}$ in a separate step. Note that we will only need to impute the missing values for $Y_{i3}$, as we observe $Y_{i1}$ and $Y_{i2}$ for all patients. 
+
+This is also described briefly in @roger2019 on p. 89. The required conditional distribution for $Y_{i3}$ given $Y_{i1}$ and $Y_{i2}$ can be derived from formula (7) in @keene2014:
+
+$$
+Y_{i3} | Y_{i1}, Y_{i2} \sim \text{NegativeBinomial}\left(
+  \frac{\phi^{-1} + \hat{\mu}_{i1} + \hat{\mu}_{i2}}{\phi^{-1} + \hat{\mu}_{i1} + \hat{\mu}_{i2} + \hat{\mu}_{i3}}, 
+  \phi^{-1} + y_{i1} + y_{i2}
+\right)
+$$ {#eq-impute-cond-dist}
+
+Here the quantities $\hat{\mu}_{ij}$ are the expected number of events for patient $i$ in period $j$ based on the regression coefficients $\beta$ and dispersion parameter $\phi$, and the covariates for patient $i$ in period $j$. Depending on which assumptions we use (MAR vs. CR vs. J2R) we would use different covariate values for patient $i$ in period 3 to calculate $\hat{\mu}_{i3}$.
+Similarly, depending on how we model the off-treatment periods 2 and 3, we would use different covariate values for patient $i$ in periods 2 and 3 to calculate $\hat{\mu}_{i2}$ and $\hat{\mu}_{i3}$. Therefore we still need to keep $y_{i2}$ and $y_{i3}$ as separate variables and don't combine them into a single stage.
+
+Note that in the second parameter of the negative binomial distribution we have the actually observed number of events $y_{i1}$ and $y_{i2}$.
+
+### Analysis
+
+The analysis model is actually simpler than the imputation model. Since we want to use a treatment policy estimand, we do not differentiate any longer between the three periods, and we just want to model the total number of events $Y_i = Y_{i1} + Y_{i2} + Y_{i3}$ for each patient $i$ using a negative binomial regression model with an offset for the total follow-up time $T_i = T_{i1} + T_{i2} + T_{i3}$.
+
+We note that all withdrawn patients will have the same total follow-up time $t \equiv T_i$ due to the fixed duration trial design and the fact that we impute for the same overall time. However, there might be patients who were not withdrawn who stayed slightly longer or shorter in the study. Therefore we still use offset terms $t_{i}$ for each patient $i$ in the analysis model.
+
+Patients should be analysed according to their assigned randomised treatment, in order to be aligned with the treatment policy estimand. This is regardless of the changes for the imputation model's design matrix in the Impute step.
+
+We fit this with maximum likelihood estimation for each imputed dataset (e.g. with `MASS::glm.nb`). The model should include the same covariates as the imputation model. 
+
+We need to be careful how to obtain the standard error. As reported in the CAMIS repository [here](https://psiaims.github.io/CAMIS/Comp/r-sas_negbin.html), we need to recalculate the variance-covariance matrix for the model parameters with a custom function in order to match the `SAS PROC GENMOD` results.
+
+### Pooling
+
+Finally, Rubin's rules are applied to pool the estimates (on the log-rate scale, i.e. the regression coefficients $\beta$) across the imputed datasets, and we can then exponentiate the pooled estimates and confidence intervals to get the results for the rate ratios.

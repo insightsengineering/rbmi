@@ -27,6 +27,7 @@ knitr::opts_chunk$set(
 ```
 
 Now we'll walk through how count data can be modeled using the `rbmi` package. The following sections will cover the necessary steps to prepare your data, draw parameter samples, impute missing values, and pool estimates across multiple imputations.
+For the statistical method details please see the [separate vignette](stat_specs_counts.html).
 
 ## The Data
 
