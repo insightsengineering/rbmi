@@ -87,31 +87,35 @@ import(methods)
 importFrom(assertthat,assert_that)
 importFrom(lifecycle,deprecated)
 importFrom(mmrm,VarCorr)
-importFrom(stats,aggregate)
-importFrom(stats,as.formula)
-importFrom(stats,binomial)
-importFrom(stats,coef)
-importFrom(stats,df.residual)
-importFrom(stats,lm)
-importFrom(stats,model.frame)
-importFrom(stats,model.matrix)
-importFrom(stats,plogis)
-importFrom(stats,pnorm)
-importFrom(stats,pt)
-importFrom(stats,qnorm)
-importFrom(stats,qt)
-importFrom(stats,quantile)
-importFrom(stats,rbinom)
-importFrom(stats,reformulate)
-importFrom(stats,rnorm)
-importFrom(stats,sd)
-importFrom(stats,setNames)
-importFrom(stats,terms)
-importFrom(stats,uniroot)
-importFrom(stats,update)
-importFrom(stats,var)
-importFrom(stats,vcov)
-importFrom(utils,capture.output)
-importFrom(utils,installed.packages)
-importFrom(utils,packageVersion)
-importFrom(utils,relist)
+importFrom(stats,
+  aggregate,
+  as.formula,
+  binomial,
+  coef,
+  df.residual,
+  lm,
+  model.frame,
+  model.matrix,
+  plogis,
+  pnorm,
+  pt,
+  qnorm,
+  qt,
+  quantile,
+  rbinom,
+  reformulate,
+  rnorm,
+  sd,
+  setNames,
+  terms,
+  uniroot,
+  update,
+  var,
+  vcov
+)
+importFrom(utils,
+  capture.output,
+  installed.packages,
+  packageVersion,
+  relist
+)
