@@ -184,60 +184,10 @@ complete_control_bayes_count <- function(
 #'
 #' @keywords internal
 get_stan_model_count <- function() {
-    # TODO: This should all go in general function
-
-    # Compiling Stan models updates the current seed state. This can lead to
-    # non-reproducibility as compiling is conditional on wether there is a cached
-    # model available or not. Thus we save the current seed state and restore it
-    # at the end of this function so that it is in the same state regardless of
-    # whether the model was compiled or not.
-    # See https://github.com/openpharma/rbmi/issues/469
-    # Note that .Random.seed is only set if the seed has been set or if a random number
-    # has been generated.
-    current_seed_state <- globalenv()$.Random.seed
-    on.exit({
-        if (
-            is.null(current_seed_state) &&
-                exists(".Random.seed", envir = globalenv())
-        ) {
-            rm(".Random.seed", envir = globalenv(), inherits = FALSE)
-        } else {
-            assign(
-                ".Random.seed",
-                value = current_seed_state,
-                envir = globalenv(),
-                inherits = FALSE
-            )
-        }
-    })
-
-    ensure_rstan()
-
-    # Find the correct Stan file for count outcome.
-    file_loc_count_model <- find_stan_file(
-        "count_model.stan"
+    model_string <- render_stan_model(
+        find_stan_file("count_model.stan")
     )
-    model_template <- jinjar::parse_template(
-        fs::path(file_loc_count_model),
-        .config = jinjar::jinjar_config(
-            trim_blocks = TRUE,
-            lstrip_blocks = TRUE
-        )
-    )
-    model_string <- jinjar::render(model_template)
-
-    model_name <- "rbmi_count_model"
-
-    # TODO: Enable caching but we need some general function for that
-
-    model <- rstan::stan_model(
-        model_code = model_string,
-        model_name = model_name,
-        auto_write = FALSE,
-        save_dso = FALSE
-    )
-
-    model
+    compile_stan_model(model_string, "rbmi_count_model")
 }
 
 

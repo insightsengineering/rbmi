@@ -333,6 +333,29 @@ test_that("as_stan_fragments works as expected", {
     expect_snapshot(result)
 })
 
+test_that("render_stan_model renders data with shared whitespace settings", {
+    template_file <- withr::local_tempfile(fileext = ".stan")
+    writeLines(
+        c(
+            "data {",
+            "{% if include_value %}",
+            "  real value;",
+            "{% endif %}",
+            "}"
+        ),
+        template_file
+    )
+
+    result <- render_stan_model(
+        template_file,
+        data = list(include_value = TRUE)
+    )
+
+    expect_identical(result, "data {\n  real value;\n}")
+    expect_error(render_stan_model(character(), list()))
+    expect_error(render_stan_model(template_file, "not a list"))
+})
+
 test_that("get_stan_model works as expected depending on covariance and prior on parameters", {
     skip_if_not(is_extended_test())
 

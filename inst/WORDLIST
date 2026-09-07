@@ -6,6 +6,7 @@ BFMI
 BMLMI
 Biometrika
 Bove
+CAMIS
 CMD
 CR
 Clin
@@ -36,8 +37,10 @@ MSB
 MSW
 Mallinckrodt
 Modeling
+NegativeBinomial
 NSDCR
 ORCID
+Poisson
 Psychopharmacol
 Quickstart
 RCTs
@@ -54,6 +57,7 @@ Unscales
 Wiltse
 Yiu
 antedependence
+analyzed
 anymore
 bd
 bmatrix
@@ -66,6 +70,8 @@ estimands
 etc
 frac
 geq
+ij
+ik
 infty
 ldots
 lsmean
@@ -83,5 +89,6 @@ sim
 th
 tr
 treedepth
+u
 un
 unimputed
