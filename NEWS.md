@@ -2,7 +2,7 @@
 
 ## New Features
 
-* Count outcomes are now supported. TODO add details
+* Count outcomes are now supported. Please see the new counts outcomes vignette, as well as the corresponding new statistical specifications for count outcomes vignette, for an introduction.
 
 # rbmi 1.6.1
 
