@@ -37,7 +37,8 @@
 #' `draws` performs the first step of the multiple imputation (MI) procedure: fitting the
 #' base imputation model. The goal is to estimate the parameters of interest needed
 #' for the imputation phase (i.e. the regression coefficients and the covariance matrices
-#' from a MMRM model).
+#' from a MMRM model in the continuous outcome setting, or the negative binomial regression
+#' coefficients in a count outcome setting).
 #'
 #' The function distinguishes between the following methods:
 #' - Bayesian MI based on MCMC sampling: `draws` returns the draws
@@ -144,14 +145,15 @@
 #'   Needed only for `method_condmean(type = "bootstrap")` and `method_approxbayes()`.
 #' - `strategy`: name of the column in `data_ice` which contains the subject-specific imputation strategy.
 #'
+#' The `outcome` argument allows to select either the continuous outcome or the count outcome.
+#' Please see the corresponding statistical specification vignettes for details on the methods.
+#'
 #' In our experience, Bayesian MI (`method = method_bayes()`) with a relatively low number of
 #' samples (e.g. `n_samples` below 100) frequently triggers STAN warnings about R-hat such as
 #' "The largest R-hat is X.XX, indicating chains have not mixed".  In many instances, this warning
 #' might be spurious, i.e. standard diagnostics analysis of the MCMC samples do not indicate any
 #' issues and results look reasonable. Increasing the number of samples to e.g. above 150 usually
 #' gets rid of the warning.
-#'
-#' TODO Document `outcome` argument
 #'
 #' @inherit as_draws return
 #'

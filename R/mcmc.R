@@ -231,8 +231,6 @@ fit_mcmc <- function(
             msg = "Currently only continuous and count outcomes are supported"
         )
 
-        # TODO: Do we need an initial MLE fit here? Maybe not?
-
         stan_data <- prepare_stan_data_count(
             ddat = designmat,
             subjid = subjid,
@@ -312,11 +310,14 @@ fit_mcmc <- function(
 
         if (!method$same_cov) {
             group_levels <- levels(group)
-            assert_that(all(vapply(
-                draws$phi,
-                length,
-                integer(1)
-            ) == length(group_levels)))
+            assert_that(all(
+                vapply(
+                    draws$phi,
+                    length,
+                    integer(1)
+                ) ==
+                    length(group_levels)
+            ))
             draws$phi <- lapply(
                 draws$phi,
                 stats::setNames,
