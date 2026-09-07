@@ -25,7 +25,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 This vignette describes how retrieved dropout models which include time-varying intercurrent event (ICE) indicators can be 
-implemented in the `rbmi` package.
+implemented for continuous outcomes in the `rbmi` package .
 
 # Retrieved dropout models in a nutshell
 
