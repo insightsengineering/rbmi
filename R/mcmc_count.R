@@ -167,47 +167,13 @@ complete_control_bayes_count <- function(
     quiet,
     stan_data
 ) {
-    # TODO: This general stuff we should move into general function
-    # for all outcome types.
-    assertthat::assert_that(is.list(control))
-    control_pars <- names(control)
-    if ("iter" %in% control_pars) {
-        stop(
-            "`method$control$iter` must not be specified directly, please use `method$n_samples`"
-        )
-    }
-    assertthat::assert_that(
-        assertthat::is.number(control$warmup),
-        assertthat::is.number(control$thin),
-        assertthat::is.number(control$chains),
-        assertthat::is.number(n_samples)
-    )
-    n_samples_per_chain <- ceiling(n_samples / control$chains)
-    control$iter <- control$warmup + control$thin * n_samples_per_chain
-    if ("refresh" %in% control_pars) {
-        stop(
-            "`method$control$refresh` must not be specified directly, please use `quiet`"
-        )
-    }
-    control$refresh <- ife(
-        quiet,
-        0,
-        ceiling(control$iter / 10)
+    control <- complete_control_bayes_common(
+        control = control,
+        n_samples = n_samples,
+        quiet = quiet
     )
 
-    # MMRM initial values are only defined for continuous outcomes. Preserve the
-    # user-facing default of control_bayes() by falling back to Stan's random
-    # initialisation for the count model.
-    if (identical(control$init, "mmrm")) {
-        control$init <- "random"
-    }
-
-    if (any(c("object", "data", "pars") %in% control_pars)) {
-        stop(
-            "The `object`, `data` and `pars` arguments must not be specified",
-            " in `method$control`"
-        )
-    }
+    control$init <- "random"
     control
 }
 

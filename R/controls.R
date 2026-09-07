@@ -142,30 +142,21 @@ prepare_init_vals <- function(
     )
 }
 
-#' Completion of the Control Options List
-#'
-#' This function completes the control options list for Bayesian methods by setting
-#' the number of iterations, refresh rate, and initial values based on the provided arguments.
+#' Complete Common Stan Control Options for Bayesian Methods
 #'
 #' @param control A list containing part of the control options. Must not contain
 #'   `iter`, `refresh`, `object`, `data`, or `pars`.
 #' @param n_samples Number of samples to be drawn.
 #' @param quiet A logical indicating whether to suppress output during sampling.
-#' @param stan_data A list containing the Stan data.
-#' @param mmrm_initial A list containing the initial values from the MMRM.
-#' @param covariance A character string indicating the type of covariance structure.
-#' @param prior_cov A character string indicating the type of prior for the covariance parameters.
-#' @return A completed control options list with the necessary parameters for Bayesian sampling.
+#'
+#' @return A completed control options list including computed `iter` and
+#'   `refresh` values.
 #'
 #' @keywords internal
-complete_control_bayes <- function(
+complete_control_bayes_common <- function(
     control,
     n_samples,
-    quiet,
-    stan_data,
-    mmrm_initial,
-    covariance,
-    prior_cov
+    quiet
 ) {
     assertthat::assert_that(is.list(control))
     control_pars <- names(control)
@@ -192,6 +183,45 @@ complete_control_bayes <- function(
         0,
         ceiling(control$iter / 10)
     )
+    if (any(c("object", "data", "pars") %in% control_pars)) {
+        stop(
+            "The `object`, `data` and `pars` arguments must not be specified",
+            " in `method$control`"
+        )
+    }
+    control
+}
+
+#' Completion of the Control Options List
+#'
+#' This function completes the control options list for Bayesian methods by setting
+#' the number of iterations, refresh rate, and initial values based on the provided arguments.
+#'
+#' @param control A list containing part of the control options. Must not contain
+#'   `iter`, `refresh`, `object`, `data`, or `pars`.
+#' @param n_samples Number of samples to be drawn.
+#' @param quiet A logical indicating whether to suppress output during sampling.
+#' @param stan_data A list containing the Stan data.
+#' @param mmrm_initial A list containing the initial values from the MMRM.
+#' @param covariance A character string indicating the type of covariance structure.
+#' @param prior_cov A character string indicating the type of prior for the covariance parameters.
+#' @return A completed control options list with the necessary parameters for Bayesian sampling.
+#'
+#' @keywords internal
+complete_control_bayes <- function(
+    control,
+    n_samples,
+    quiet,
+    stan_data,
+    mmrm_initial,
+    covariance,
+    prior_cov
+) {
+    control <- complete_control_bayes_common(
+        control = control,
+        n_samples = n_samples,
+        quiet = quiet
+    )
     control$init <- ife(
         identical(control$init, "mmrm"),
         prepare_init_vals(
@@ -203,11 +233,5 @@ complete_control_bayes <- function(
         ),
         control$init
     )
-    if (any(c("object", "data", "pars") %in% control_pars)) {
-        stop(
-            "The `object`, `data` and `pars` arguments must not be specified",
-            " in `method$control`"
-        )
-    }
     control
 }
