@@ -81,11 +81,9 @@ validate.sample_single_count <- function(x, ...) {
         all(is.finite(x$phi)),
         all(x$phi > 0),
         length(x$phi) == 1 ||
-            (
-                !is.null(names(x$phi)) &&
-                    all(nzchar(names(x$phi))) &&
-                    !anyDuplicated(names(x$phi))
-            )
+            (!is.null(names(x$phi)) &&
+                all(nzchar(names(x$phi))) &&
+                !anyDuplicated(names(x$phi)))
     )
     invisible(TRUE)
 }
@@ -137,8 +135,8 @@ sample_list <- function(...) {
         x <- x[[1]]
     }
     class(x) <- c("sample_list", "list")
-    # TODO turn on again
-    # validate(x)
+
+    validate(x)
     return(x)
 }
 
