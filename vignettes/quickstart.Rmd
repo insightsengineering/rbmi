@@ -229,7 +229,6 @@ function which determines the names of the key variables within the data and the
 
 Please also note that the names of the analysis estimates contain `ref` and `alt` to refer to the two treatment arms. In particular `ref` refers to the first factor level of `vars$group` which does not necessarily
 coincide with the control arm. In this example, since `levels(dat[[vars$group]]) = c("DRUG", PLACEBO`), the results associated with `ref` correspond to the intervention arm, while those associated with `alt` correspond to the control arm.
-<<<<<<< HEAD
 
 Note that `ancova()` supports the analysis of two or more treatment arms. For more than
 two arms the `ref` / `alt` naming scheme is extended so that `alt2`, `alt3`, ... represent
@@ -276,8 +275,6 @@ anaObj <- analyse(imputeObj, ancova, vars = vars)
 ```
 
 See the documentation for `ancova()` and `set_vars()` for more details.
-=======
->>>>>>> origin/main
 
 Additionally, we can use the `delta` argument of `analyse()` to perform a delta adjustments of the imputed datasets prior to the analysis. 
 In brief, this is implemented by specifying a data.frame that contains the amount
