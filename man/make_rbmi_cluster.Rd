@@ -22,6 +22,12 @@ If \code{ncores} is \code{1} this function will return \code{NULL}.
 If \code{ncores} is a cluster created via \code{parallel::makeCluster()} then this function
 just takes care of inserting the relevant \code{rbmi} objects into the existing cluster.}
 }
+\value{
+A parallel socket cluster object (as created by
+\code{parallel::makePSOCKcluster()}) configured for use with \code{rbmi}, or \code{NULL} if
+\code{ncores = 1}. When \code{ncores} is an existing cluster it is returned with the
+required \code{rbmi} objects and libraries loaded into it.
+}
 \description{
 Create a \code{rbmi} ready cluster
 }

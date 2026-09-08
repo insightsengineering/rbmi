@@ -205,6 +205,63 @@ might be spurious, i.e. standard diagnostics analysis of the MCMC samples do not
 issues and results look reasonable. Increasing the number of samples to e.g. above 150 usually
 gets rid of the warning.
 }
+\examples{
+# Prepare the data: expand to one row per subject and visit
+dat <- expand_locf(
+    antidepressant_data,
+    PATIENT = levels(antidepressant_data$PATIENT),
+    VISIT = levels(antidepressant_data$VISIT),
+    vars = c("BASVAL", "THERAPY"),
+    group = c("PATIENT"),
+    order = c("PATIENT", "VISIT")
+)
+
+# Derive data_ice: the first visit with a missing outcome for each patient is
+# imputed under the Jump To Reference (JR) strategy. Subject 3618 has only an
+# intermittent missing value and is removed (imputed under MAR by default).
+is_missing <- is.na(dat$CHANGE)
+dat_ice <- dat[is_missing, c("PATIENT", "VISIT")]
+dat_ice <- dat_ice[!duplicated(dat_ice$PATIENT), ]
+dat_ice$strategy <- "JR"
+dat_ice <- dat_ice[dat_ice$PATIENT != 3618, ]
+
+vars <- set_vars(
+    outcome = "CHANGE",
+    visit = "VISIT",
+    subjid = "PATIENT",
+    group = "THERAPY",
+    covariates = c("BASVAL*VISIT", "THERAPY*VISIT")
+)
+
+# Conditional mean imputation with jackknife resampling (no rstan required)
+\donttest{
+drawObj <- draws(
+    data = dat,
+    data_ice = dat_ice,
+    vars = vars,
+    method = method_condmean(type = "jackknife"),
+    quiet = TRUE
+)
+drawObj
+
+# Bayesian imputation instead requires the rstan package
+if (requireNamespace("rstan", quietly = TRUE)) {
+    set.seed(987)
+    drawObjBayes <- draws(
+        data = dat,
+        data_ice = dat_ice,
+        vars = vars,
+        method = method_bayes(
+            n_samples = 150,
+            control = control_bayes(warmup = 200, thin = 5, seed = 1821)
+        ),
+        quiet = TRUE
+    )
+    drawObjBayes
+}
+}
+
+}
 \references{
 James R Carpenter, James H Roger, and Michael G Kenward. Analysis of longitudinal trials with protocol deviation: a
 framework for relevant, accessible assumptions, and inference via multiple imputation. Journal of Biopharmaceutical

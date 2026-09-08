@@ -178,6 +178,12 @@
 #'     vars = vars
 #' )
 #' }
+#' @return
+#' An `analysis` object; a list of class `"analysis"` containing the analysis
+#' `results` (one entry per imputed dataset, each a named list of parameter
+#' estimates), the name of the analysis function (`fun_name`), the applied
+#' `delta` data.frame, the analysis function (`fun`) and the imputation `method`.
+#' This object is normally passed on to [pool()].
 #' @export
 analyse <- function(
     imputations,
@@ -558,6 +564,10 @@ validate.bmlmi <- function(x, ...) {
 #' @param pars A list of expected parameters in each of the analysis.
 #' lists i.e. `c("est", "se", "df")`.
 #'
+#' @return `TRUE` (invisibly) if `results` conforms to the expected structure;
+#' otherwise an error is thrown describing the first failed check.
+#'
+#' @keywords internal
 #' @export
 validate_analyse_pars <- function(results, pars) {
     assert_that(

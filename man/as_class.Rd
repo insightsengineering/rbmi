@@ -11,6 +11,10 @@ as_class(x, cls)
 
 \item{cls}{the class to be set.}
 }
+\value{
+\code{x} with its class attribute set to \code{cls}.
+}
 \description{
 Utility function to set an objects class.
 }
+\keyword{internal}

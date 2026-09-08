@@ -207,8 +207,8 @@ fit_mcmc <- function(
     # 1) the warning is not in ignorable_warnings
     warnings <- stan_fit$warnings
     warnings_not_allowed <- warnings[!warnings %in% ignorable_warnings]
-    for (i in warnings_not_allowed) {
-        warning(warnings_not_allowed)
+    for (warning_i in warnings_not_allowed) {
+        warning(warning_i, call. = FALSE)
     }
 
     fit <- stan_fit$results

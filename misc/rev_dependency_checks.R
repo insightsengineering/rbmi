@@ -16,7 +16,7 @@ update.packages(ask = FALSE)
 ### Install our current package updates (run just 1 of the following)
 ### If using dev package be sure to reset to CRAN afterwards
 # install.packages(mypkg)  # Use most recent CRAN pkg
-devtools::install()        # Use current dev package
+devtools::install() # Use current dev package
 
 # Get source tars for each pkg to run r-cmd-check against
 tmp_source <- tempfile()
@@ -25,7 +25,10 @@ source_files <- download.packages(pkgs = pkgs, destdir = tmp_source)
 
 r_cmd_check <- function(pkg, pkg_src, outdir) {
     cat(sprintf("Checking %s...\n", pkg))
-    cat(sprintf("  - %s\n\n", file.path(outdir, paste0(pkg, ".Rcheck"), "00check.log")))
+    cat(sprintf(
+        "  - %s\n\n",
+        file.path(outdir, paste0(pkg, ".Rcheck"), "00check.log")
+    ))
     stdout_file <- tempfile()
     stderr_file <- tempfile()
     exit_status <- system2(
@@ -41,7 +44,10 @@ r_cmd_check <- function(pkg, pkg_src, outdir) {
     cat(sprintf("  - exit status %s\n", exit_status))
     cat(sprintf("  - %s\n", results))
     cat(sprintf("  - %s\n", file.path(outdir, paste0(pkg, ".Rcheck"))))
-    cat(sprintf("  - %s\n\n", file.path(outdir, paste0(pkg, ".Rcheck"), "00check.log")))
+    cat(sprintf(
+        "  - %s\n\n",
+        file.path(outdir, paste0(pkg, ".Rcheck"), "00check.log")
+    ))
     return(results)
 }
 

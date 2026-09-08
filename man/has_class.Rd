@@ -20,3 +20,4 @@ Utility function to see if an object has a particular class.
 Useful when we don't know how many other classes the object may
 have.
 }
+\keyword{internal}

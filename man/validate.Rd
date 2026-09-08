@@ -11,8 +11,14 @@ validate(x, ...)
 
 \item{...}{additional arguments to pass to the specific validation method.}
 }
+\value{
+Called for its side effect of validating \code{x}. Throws an error if any check
+fails; otherwise returns invisibly (the exact value depends on the method,
+typically \code{invisible(TRUE)} or \code{invisible(NULL)}).
+}
 \description{
 This function is used to perform assertions that an object
 conforms to its expected structure and no basic assumptions
 have been violated. Will throw an error if checks do not pass.
 }
+\keyword{internal}

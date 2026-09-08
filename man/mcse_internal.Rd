@@ -29,6 +29,19 @@ must be one of \code{"two.sided"} (default), \code{"greater"} or \code{"less"}.}
 \item{jackknife_results}{the list of jackknife results of all parameters, in the same format as
 the pooled parameter estimates.}
 }
+\value{
+\code{mcse_jackknife()} returns the pooled parameter estimates (in the same
+structure as the \code{pars} element of a \code{\link[=pool]{pool()}} object) recomputed with the
+\code{omit_index}-th result left out.
+
+\code{jackknife_se()} returns the numeric scalar jackknife standard error
+computed from \code{pars_jackknife}.
+
+\code{mcse_combine_all_pars()} returns a list mirroring the structure of the
+pooled parameters in which each statistic is replaced by its jackknife
+Monte Carlo standard error.
+}
 \description{
 These functions are used by \code{\link[=mcse]{mcse()}} to compute the Monte Carlo standard error using the Jackknife approach.
 }
+\keyword{internal}

@@ -27,6 +27,11 @@ See details.}
 \item{mu}{the coefficients to use to construct the mean outcome value at each visit. Must
 be a named list with elements \code{int}, \code{age}, \code{sex}, \code{trt} & \code{visit}. See details.}
 }
+\value{
+\code{as_vcov()} returns a symmetric positive-definite covariance matrix (a numeric
+matrix) constructed from the vector of standard deviations \code{sd} and the
+correlation entries \code{cor}.
+}
 \description{
 Creates a longitudinal dataset in the format that \code{rbmi} was
 designed to analyse.
@@ -69,4 +74,13 @@ a  1  c  e
 b  c  1  f
 d  e  f  1
 }\if{html}{\out{</div>}}
+}
+\examples{
+# Construct a 3x3 covariance matrix from standard deviations and correlations.
+# `cor` gives the upper-triangular correlations in row-major order:
+# cor(1,2), cor(1,3), cor(2,3).
+as_vcov(
+    sd = c(1, 3, 2),
+    cor = c(0.4, 0.5, 0.45)
+)
 }

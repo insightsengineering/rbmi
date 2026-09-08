@@ -10,6 +10,12 @@ getStrategies(...)
 \item{...}{User defined methods to be added to the return list. Input must
 be a function.}
 }
+\value{
+A named list of imputation strategy functions. By default this contains the
+built-in strategies \code{JR}, \code{CR}, \code{CIR}, \code{LMCF} and \code{MAR}, together with (or
+overwritten by) any user-defined strategies supplied via \code{...}. Each element
+is a function taking \code{pars_group}, \code{pars_ref} and \code{index_mar}.
+}
 \description{
 Returns a list defining the imputation strategies to be used to create the
 multivariate normal distribution parameters by merging those of the source

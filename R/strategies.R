@@ -96,6 +96,34 @@ compute_sigma <- function(sigma_group, sigma_ref, index_mar) {
 #' - Copy Increments in Reference (CIR)
 #' - Last Mean Carried Forward (LMCF)
 #'
+#' @return
+#' A list with elements `mu` (a numeric vector of means) and `sigma` (a
+#' covariance matrix) giving the parameters of the subject's imputation
+#' distribution, formed by combining their own group's parameters (`pars_group`)
+#' with the reference group's parameters (`pars_ref`) according to the chosen
+#' strategy.
+#'
+#' @examples
+#' # Parameters of the subject's own group and of the reference group
+#' pars_group <- list(
+#'     mu = c(1, 2, 3),
+#'     sigma = as_vcov(c(1, 3, 2), c(0.4, 0.5, 0.45))
+#' )
+#' pars_ref <- list(
+#'     mu = c(5, 6, 7),
+#'     sigma = as_vcov(c(2, 1, 1), c(0.7, 0.8, 0.5))
+#' )
+#'
+#' # The first two visits meet the MAR assumption, the third does not
+#' index_mar <- c(TRUE, TRUE, FALSE)
+#'
+#' # Combine the parameters according to the different strategies
+#' strategy_MAR(pars_group, pars_ref, index_mar)
+#' strategy_JR(pars_group, pars_ref, index_mar)
+#' strategy_CR(pars_group, pars_ref, index_mar)
+#' strategy_CIR(pars_group, pars_ref, index_mar)
+#' strategy_LMCF(pars_group, pars_ref, index_mar)
+#'
 #' @name strategies
 #' @export
 strategy_MAR <- function(pars_group, pars_ref, index_mar) {
@@ -213,6 +241,12 @@ strategy_LMCF <- function(pars_group, pars_ref, index_mar) {
 #'
 #' @param ... User defined methods to be added to the return list. Input must
 #' be a function.
+#'
+#' @return
+#' A named list of imputation strategy functions. By default this contains the
+#' built-in strategies `JR`, `CR`, `CIR`, `LMCF` and `MAR`, together with (or
+#' overwritten by) any user-defined strategies supplied via `...`. Each element
+#' is a function taking `pars_group`, `pars_ref` and `index_mar`.
 #'
 #' @examples
 #' \dontrun{

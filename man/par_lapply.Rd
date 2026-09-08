@@ -16,6 +16,6 @@ par_lapply(cl, fun, x, ...)
 \item{...}{extra arguments passed to \code{fun}}
 }
 \description{
-Simple wrapper around \code{lapply} and \code{\link[parallel:clusterApply]{parallel::clusterApplyLB}} to abstract away
+Simple wrapper around \code{lapply} and \code{\link[parallel:clusterApplyLB]{parallel::clusterApplyLB}} to abstract away
 the logic of deciding which one to use
 }

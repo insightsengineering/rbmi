@@ -16,7 +16,13 @@
 #' be split out into more area specific objects / functions in the future. Further additions of functionality
 #' to this object should be avoided if possible.
 #'
+#' @return
+#' Call `longDataConstructor$new(data, vars)` to create a `longdata` R6 object
+#' which stores the longitudinal data and provides methods used internally by
+#' [draws()] to sample and reconstruct datasets.
+#'
 #' @import R6
+#' @keywords internal
 #' @export
 longDataConstructor <- R6::R6Class(
     classname = "longdata",

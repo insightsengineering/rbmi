@@ -19,133 +19,142 @@ with all other variables assumed to be post-transformation predictor variables (
 all dummy variables have already been expanded).
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{centre}}{Vector of column means. The first value is the outcome
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{centre}}{Vector of column means. The first value is the outcome
 variable, all other variables are the predictors.}
 
-\item{\code{scales}}{Vector of column standard deviations. The first value is the outcome
+    \item{\code{scales}}{Vector of column standard deviations. The first value is the outcome
 variable, all other variables are the predictors.}
-}
-\if{html}{\out{</div>}}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-scaler-new}{\code{scalerConstructor$new()}}
-\item \href{#method-scaler-scale}{\code{scalerConstructor$scale()}}
-\item \href{#method-scaler-unscale_sigma}{\code{scalerConstructor$unscale_sigma()}}
-\item \href{#method-scaler-unscale_beta}{\code{scalerConstructor$unscale_beta()}}
-\item \href{#method-scaler-clone}{\code{scalerConstructor$clone()}}
-}
+  \itemize{
+    \item \href{#method-scaler-initialize}{\code{scaler$new()}}
+    \item \href{#method-scaler-scale}{\code{scaler$scale()}}
+    \item \href{#method-scaler-unscale_sigma}{\code{scaler$unscale_sigma()}}
+    \item \href{#method-scaler-unscale_beta}{\code{scaler$unscale_beta()}}
+    \item \href{#method-scaler-clone}{\code{scaler$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-scaler-new"></a>}}
-\if{latex}{\out{\hypertarget{method-scaler-new}{}}}
-\subsection{Method \code{new()}}{
-Uses \code{dat} to determine the relevant column means and standard deviations to use
+\if{html}{\out{<a id="method-scaler-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-scaler-initialize}{}}}
+\subsection{\code{scaler$new()}}{
+  Uses \code{dat} to determine the relevant column means and standard deviations to use
 when scaling and un-scaling future datasets. Implicitly assumes that new datasets
 have the same column order as \code{dat}
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{scalerConstructor$new(dat)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{dat}}{A \code{data.frame} or matrix. All columns must be numeric (i.e dummy variables,
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{scaler$new(dat)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{dat}}{A \code{data.frame} or matrix. All columns must be numeric (i.e dummy variables,
 must have already been expanded out).}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-Categorical columns (as determined by those who's values are entirely \code{1} or \code{0})
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Details}{
+    Categorical columns (as determined by those who's values are entirely \code{1} or \code{0})
 will not be scaled. This is achieved by setting the corresponding values of centre
 to \code{0} and scale to \code{1}.
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-scaler-scale"></a>}}
 \if{latex}{\out{\hypertarget{method-scaler-scale}{}}}
-\subsection{Method \code{scale()}}{
-Scales a dataset so that all continuous variables have a mean of 0 and a
+\subsection{\code{scaler$scale()}}{
+  Scales a dataset so that all continuous variables have a mean of 0 and a
 standard deviation of 1.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{scalerConstructor$scale(dat)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{dat}}{A \code{data.frame} or matrix whose columns are all numeric (i.e. dummy
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{scaler$scale(dat)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{dat}}{A \code{data.frame} or matrix whose columns are all numeric (i.e. dummy
 variables have all been expanded out) and whose columns are in the same
 order as the dataset used in the initialization function.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
-\if{html}{\out{</div>}}
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-scaler-unscale_sigma"></a>}}
 \if{latex}{\out{\hypertarget{method-scaler-unscale_sigma}{}}}
-\subsection{Method \code{unscale_sigma()}}{
-Unscales a sigma value (or matrix) as estimated by a linear model
+\subsection{\code{scaler$unscale_sigma()}}{
+  Unscales a sigma value (or matrix) as estimated by a linear model
 using a design matrix scaled by this object. This function only
 works if the first column of the initialisation \code{data.frame} was the outcome
 variable.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{scalerConstructor$unscale_sigma(sigma)}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{scaler$unscale_sigma(sigma)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{sigma}}{A numeric value or matrix.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A numeric value or matrix
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{sigma}}{A numeric value or matrix.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A numeric value or matrix
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-scaler-unscale_beta"></a>}}
 \if{latex}{\out{\hypertarget{method-scaler-unscale_beta}{}}}
-\subsection{Method \code{unscale_beta()}}{
-Unscales a beta value (or vector) as estimated by a linear model
+\subsection{\code{scaler$unscale_beta()}}{
+  Unscales a beta value (or vector) as estimated by a linear model
 using a design matrix scaled by this object. This function only
 works if the first column of the initialization \code{data.frame} was the outcome
 variable.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{scalerConstructor$unscale_beta(beta)}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{scaler$unscale_beta(beta)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{beta}}{A numeric vector of beta coefficients as estimated from a linear model.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A numeric vector.
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{beta}}{A numeric vector of beta coefficients as estimated from a linear model.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A numeric vector.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-scaler-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-scaler-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{scalerConstructor$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{scaler$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{scaler$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

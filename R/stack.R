@@ -4,7 +4,13 @@
 #'
 #' This is a simple stack object offering add / pop functionality
 #'
+#' @return
+#' A `Stack` generator object (an [R6::R6Class] generator). Call `Stack$new()`
+#' to create an instance, which exposes `add()` and `pop()` methods for storing
+#' and retrieving elements in first-in-first-out order.
+#'
 #' @import R6
+#' @keywords internal
 #' @export
 Stack <- R6::R6Class(
     classname = "Stack",

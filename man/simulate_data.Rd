@@ -103,3 +103,45 @@ to \code{log(pars_c$or_outcome_ice1)} (\code{log(pars_t$or_outcome_ice1)}).
 
 Please note that the baseline outcome cannot be missing nor be affected by any ICEs.
 }
+\examples{
+set.seed(1392)
+
+time <- c(0, 3, 6, 9, 12)
+
+# Mean outcome trajectory in the control and intervention groups
+muC <- c(50.0, 52.5, 55.0, 57.5, 60.0)
+muT <- c(50.0, 52.5, 55.0, 56.25, 57.50)
+
+# Covariance matrix implied by a random intercept and slope model
+sd_error <- 2.5
+covRE <- rbind(
+    c(25.0, 6.25),
+    c(6.25, 25.0)
+)
+Sigma <- cbind(1, time / 12) \%*\% covRE \%*\% rbind(1, time / 12) +
+    diag(sd_error^2, nrow = length(time))
+
+# Simulation parameters of the control group
+parsC <- set_simul_pars(
+    mu = muC,
+    sigma = Sigma,
+    n = 100,
+    prob_ice1 = 0.03,
+    or_outcome_ice1 = 1.10,
+    prob_post_ice1_dropout = 0.5
+)
+
+# Simulation parameters of the intervention group
+parsT <- parsC
+parsT$mu <- muT
+parsT$prob_ice1 <- 0.04
+
+# Simulate a dataset with a copy-increments-in-reference post-ICE1 trajectory
+data <- simulate_data(
+    pars_c = parsC,
+    pars_t = parsT,
+    post_ice1_traj = "CIR"
+)
+head(data)
+
+}
