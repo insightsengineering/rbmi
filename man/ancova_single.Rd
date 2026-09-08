@@ -9,7 +9,8 @@ ancova_single(
   outcome,
   group,
   covariates,
-  weights = c("counterfactual", "equal", "proportional_em", "proportional")
+  weights = c("counterfactual", "equal", "proportional_em", "proportional"),
+  include_variance = FALSE
 )
 }
 \arguments{
@@ -26,6 +27,11 @@ to be included in the model as well as any interaction terms.}
 \code{"proportional_em"} or \code{"proportional"}.
 Specifies the weighting strategy to be used when calculating the lsmeans.
 See the weighting section for more details.}
+
+\item{include_variance}{Logical. If \code{TRUE}, a \verb{var_<visit>} entry is added to
+the results containing the residual variance estimate (\code{sigma^2}), its
+approximate standard error, and the residual degrees of freedom.
+Defaults to \code{FALSE}.}
 }
 \description{
 Performance analysis of covariance. See \code{\link[=ancova]{ancova()}} for full details.
