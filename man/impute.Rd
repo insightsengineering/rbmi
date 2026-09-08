@@ -44,6 +44,14 @@ information.}
 The names of the list should mirror the values specified in \code{strategy} column of \code{data_ice}.
 Default = \code{\link[=getStrategies]{getStrategies()}}. See \code{\link[=getStrategies]{getStrategies()}} for more details.}
 }
+\value{
+An \code{imputation} object; a list of class \code{"imputation"} containing the
+original longitudinal \code{data}, a list of imputations (one entry per imputed
+dataset, each recording the imputed values needed to reconstruct a completed
+dataset) and the \code{method} used. This object is typically passed on to
+\code{\link[=analyse]{analyse()}}; the completed datasets can be extracted with
+\code{\link[=extract_imputed_dfs]{extract_imputed_dfs()}}.
+}
 \description{
 \code{impute()} creates imputed datasets based upon the data and options specified in
 the call to \code{\link[=draws]{draws()}}. One imputed dataset is created per each "sample" created by

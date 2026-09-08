@@ -3,74 +3,86 @@
 \name{Stack}
 \alias{Stack}
 \title{R6 Class for a FIFO stack}
+\value{
+A \code{Stack} generator object (an \link[R6:R6Class]{R6::R6Class} generator). Call \code{Stack$new()}
+to create an instance, which exposes \code{add()} and \code{pop()} methods for storing
+and retrieving elements in first-in-first-out order.
+}
 \description{
 This is a simple stack object offering add / pop functionality
 }
+\keyword{internal}
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{stack}}{A list containing the current stack}
-}
-\if{html}{\out{</div>}}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{stack}}{A list containing the current stack}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-Stack-add}{\code{Stack$add()}}
-\item \href{#method-Stack-pop}{\code{Stack$pop()}}
-\item \href{#method-Stack-clone}{\code{Stack$clone()}}
-}
+  \itemize{
+    \item \href{#method-Stack-add}{\code{Stack$add()}}
+    \item \href{#method-Stack-pop}{\code{Stack$pop()}}
+    \item \href{#method-Stack-clone}{\code{Stack$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Stack-add"></a>}}
 \if{latex}{\out{\hypertarget{method-Stack-add}{}}}
-\subsection{Method \code{add()}}{
-Adds content to the end of the stack (must be a list)
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Stack$add(x)}\if{html}{\out{</div>}}
+\subsection{\code{Stack$add()}}{
+  Adds content to the end of the stack (must be a list)
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Stack$add(x)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{x}}{content to add to the stack}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{content to add to the stack}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Stack-pop"></a>}}
 \if{latex}{\out{\hypertarget{method-Stack-pop}{}}}
-\subsection{Method \code{pop()}}{
-Retrieve content from the stack
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Stack$pop(i)}\if{html}{\out{</div>}}
+\subsection{\code{Stack$pop()}}{
+  Retrieve content from the stack
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Stack$pop(i)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{i}}{the number of items to retrieve from the stack. If there are less than \code{i}
+items left on the stack it will just return everything that is left.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{i}}{the number of items to retrieve from the stack. If there are less than \code{i}
-items left on the stack it will just return everything that is left.}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Stack-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-Stack-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Stack$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{Stack$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Stack$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

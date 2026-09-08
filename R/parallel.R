@@ -29,6 +29,11 @@
 #' cl <- parallel::makeCluster(5)
 #' make_rbmi_cluster(cl)
 #' }
+#' @return
+#' A parallel socket cluster object (as created by
+#' `parallel::makePSOCKcluster()`) configured for use with `rbmi`, or `NULL` if
+#' `ncores = 1`. When `ncores` is an existing cluster it is returned with the
+#' required `rbmi` objects and libraries loaded into it.
 #' @export
 make_rbmi_cluster <- function(ncores = 1, objects = NULL, packages = NULL) {
     if (is.numeric(ncores) && ncores == 1) {

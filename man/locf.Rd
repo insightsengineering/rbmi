@@ -9,6 +9,11 @@ locf(x)
 \arguments{
 \item{x}{a vector.}
 }
+\value{
+A vector of the same length as \code{x} in which each \code{NA} has been
+replaced by the most recent preceding non-\code{NA} value. Leading \code{NA}s (those
+with no earlier value to carry forward) are left unchanged.
+}
 \description{
 Returns a vector after applied last observation carried forward imputation.
 }

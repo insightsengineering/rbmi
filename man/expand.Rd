@@ -26,6 +26,14 @@ by when performing LOCF imputation of \code{var}.}
 \item{order}{character vector containing the names of additional variables to sort the \code{data.frame}
 by before performing LOCF.}
 }
+\value{
+A \code{data.frame} (of the same class as the input \code{data}). \code{expand()} returns
+\code{data} with all missing combinations of the expanded variables inserted as
+new rows, with the expanded variables cast to factors. \code{fill_locf()} returns
+\code{data} with the named \code{vars} imputed by last observation carried forward
+(in the original row order). \code{expand_locf()} returns the result of applying
+\code{fill_locf()} to the output of \code{expand()}.
+}
 \description{
 These functions are essentially wrappers around \code{\link[base:expand.grid]{base::expand.grid()}} to ensure that missing
 combinations of data are inserted into a \code{data.frame} with imputation/fill methods for updating

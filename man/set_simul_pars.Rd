@@ -64,6 +64,32 @@ condition related (NSDCR) reasons and outcome data after ICE2 is always missing.
 \details{
 For the details, please see \code{\link[=simulate_data]{simulate_data()}}.
 }
+\examples{
+# Simulation parameters for a group with 5 visits (including baseline)
+time <- c(0, 3, 6, 9, 12)
+
+# Mean outcome trajectory
+mu <- c(50.0, 52.5, 55.0, 57.5, 60.0)
+
+# Covariance matrix implied by a random intercept and slope model
+sd_error <- 2.5
+covRE <- rbind(
+    c(25.0, 6.25),
+    c(6.25, 25.0)
+)
+sigma <- cbind(1, time / 12) \%*\% covRE \%*\% rbind(1, time / 12) +
+    diag(sd_error^2, nrow = length(time))
+
+set_simul_pars(
+    mu = mu,
+    sigma = sigma,
+    n = 100,
+    prob_ice1 = 0.03,
+    or_outcome_ice1 = 1.10,
+    prob_post_ice1_dropout = 0.5
+)
+
+}
 \seealso{
 \code{\link[=simulate_data]{simulate_data()}}
 }

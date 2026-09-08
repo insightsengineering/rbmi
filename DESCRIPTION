@@ -1,12 +1,12 @@
 Package: rbmi
 Title: Reference Based Multiple Imputation
-Version: 1.6.0.9000
+Version: 1.6.1.9000
 Authors@R: c(
     person("Lukas A.", "Widmer", email = "lukas_andreas.widmer@novartis.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-1471-3493")),
     person("Craig", "Gower-Page", email = "craig.gower-page@novartis.com", role = c("aut")),
     person("Isaac", "Gravestock", email = "isaac.gravestock@roche.com", role = c("aut"), comment = c(ORCID = "0000-0003-0283-2065")),
     person("Alessandro", "Noci", email = "alessandro.noci@roche.com", role = c("aut")),
-    person("Marcel", "Wolbers", email = "marcel.wolbers@roche.com", role = "aut", comment = c(ORCID = "0000-0003-4915-9015")),
+    person("Marcel", "Wolbers", email = "marcel.wolbers@bayer.com", role = "aut", comment = c(ORCID = "0000-0003-4915-9015")),
     person("Daniel", "Sabanes Bove", email = "daniel.sabanes_bove@rconis.com", role = c("aut"), comment = c(ORCID = "0000-0002-0176-9239")),
     person("F. Hoffmann-La Roche AG", role = c("cph", "fnd"))
     )
@@ -21,7 +21,7 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 URL: https://openpharma.github.io/rbmi/, https://github.com/openpharma/rbmi
 BugReports: https://github.com/openpharma/rbmi/issues
-RoxygenNote: 7.3.3
+RoxygenNote: 8.0.0
 Suggests: 
     dplyr,
     tidyr,
@@ -58,3 +58,4 @@ Depends:
 License: Apache License (>= 2)
 VignetteBuilder: R.rsp
 Language: en-GB
+Config/roxygen2/version: 8.0.0

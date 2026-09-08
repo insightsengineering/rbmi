@@ -58,11 +58,11 @@ test_that("Basic Usage", {
     sigma <- list(
         "A" = structure(
             c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9),
-            .Dim = c(3L, 3L)
+            dim = c(3L, 3L)
         ),
         "B" = structure(
             c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9),
-            .Dim = c(3L, 3L)
+            dim = c(3L, 3L)
         )
     )
 
@@ -429,17 +429,17 @@ test_that("get_conditional_parameters", {
         "mu" = c(2, 3, 4),
         "sigma" = structure(
             c(1, 0.4, 1.2, 0.4, 4, 3.6, 1.2, 3.6, 9),
-            .Dim = c(3L, 3L)
+            dim = c(3L, 3L)
         )
     )
 
     input_values <- c(NA, NA, 8)
     output_actual <- get_conditional_parameters(input_pars, input_values)
     output_expected <- list(
-        mu = structure(c(2.53333333333333, 4.6), .Dim = c(2L, 1L)),
+        mu = structure(c(2.53333333333333, 4.6), dim = c(2L, 1L)),
         sigma = structure(
             c(0.84, -0.0799999999999999, -0.08, 2.56),
-            .Dim = c(2L, 2L)
+            dim = c(2L, 2L)
         )
     )
     expect_equal(output_actual, output_expected)
@@ -447,16 +447,16 @@ test_that("get_conditional_parameters", {
     input_values <- c(NA, 8, NA)
     output_actual <- get_conditional_parameters(input_pars, input_values)
     output_expected <- list(
-        mu = structure(c(2.5, 8.5), .Dim = c(2L, 1L)),
-        sigma = structure(c(0.96, 0.84, 0.84, 5.76), .Dim = c(2L, 2L))
+        mu = structure(c(2.5, 8.5), dim = c(2L, 1L)),
+        sigma = structure(c(0.96, 0.84, 0.84, 5.76), dim = c(2L, 2L))
     )
     expect_equal(output_actual, output_expected)
 
     input_values <- c(1, NA, 2)
     output_actual <- get_conditional_parameters(input_pars, input_values)
     output_expected <- list(
-        mu = structure(c(2.26984126984127), .Dim = c(1L, 1L)),
-        sigma = structure(c(2.55238095238095), .Dim = c(1L, 1L))
+        mu = structure(c(2.26984126984127), dim = c(1L, 1L)),
+        sigma = structure(c(2.55238095238095), dim = c(1L, 1L))
     )
     expect_equal(output_actual, output_expected)
 
@@ -496,7 +496,7 @@ test_that("impute_outcome", {
         mu = c(8, 10, 12),
         sigma = structure(
             c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36),
-            .Dim = c(3L, 3L)
+            dim = c(3L, 3L)
         )
     )
 
@@ -530,7 +530,7 @@ test_that("impute_outcome", {
         mu = c(8, 10),
         sigma = structure(
             c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36),
-            .Dim = c(3L, 3L)
+            dim = c(3L, 3L)
         )
     )
     expect_error(
@@ -542,7 +542,7 @@ test_that("impute_outcome", {
         mu = c(8),
         sigma = structure(
             c(4, 2.4, 6, 2.4, 16, 16.8, 6, 16.8, 36),
-            .Dim = c(3L, 3L)
+            dim = c(3L, 3L)
         )
     )
     expect_error(
@@ -573,7 +573,7 @@ test_that("impute_outcome", {
         mu = c(1, 2, 4),
         sigma = structure(
             c(4, 2.4, 6, 2.4, NA, 16.8, 6, 16.8, 36),
-            .Dim = c(3L, 3L)
+            dim = c(3L, 3L)
         )
     )
     expect_error(

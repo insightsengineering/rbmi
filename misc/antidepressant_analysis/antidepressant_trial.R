@@ -41,7 +41,7 @@ impute_analyze_pool <- function(
         references = references
     )
 
-    vars$covariates = "basval"
+    vars$covariates <- "basval"
     analyze_res <- analyse(
         imputations = res_imp,
         fun = ancova,
@@ -88,8 +88,8 @@ run_analysis <- function(data, n_samples_boot, n_samples_bayes) {
 
     covariance <- "us"
 
-    levels_visit = levels(data$VISIT)
-    J = nlevels(data$VISIT)
+    levels_visit <- levels(data$VISIT)
+    J <- nlevels(data$VISIT)
 
     data_exp <- expand(
         data,

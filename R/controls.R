@@ -40,6 +40,24 @@
 #' before defining the `control` list, and calling the `draws()` function. It is not sufficient to
 #' merely set the `seed` argument in the `control` list.
 #'
+#' @return
+#' A named list of control parameters (`warmup`, `thin`, `chains`, `init`,
+#' `seed` and any additional arguments passed via `...`) that control the MCMC
+#' sampler used by [method_bayes()].
+#'
+#' @examples
+#' # Default control settings
+#' control_bayes()
+#'
+#' # Customise the warmup, thinning and seed used by the MCMC sampler
+#' control_bayes(warmup = 200, thin = 5, seed = 1821)
+#'
+#' # Pass the control settings on to method_bayes()
+#' method_bayes(
+#'     n_samples = 150,
+#'     control = control_bayes(warmup = 200, thin = 5, seed = 1821)
+#' )
+#'
 #' @export
 control_bayes <- function(
     warmup = 200,

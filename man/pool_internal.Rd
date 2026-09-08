@@ -42,7 +42,14 @@ in the original call to \code{\link[=draws]{draws()}}.}
 
 \item{D}{numeric representing the number of imputations between each bootstrap sample in the BMLMI method.}
 }
+\value{
+A list containing the pooled results for a single parameter with elements
+\code{est} (point estimate), \code{ci} (confidence interval), \code{se} (standard error)
+and \code{pvalue} (p-value). The specific computation is determined by the class
+of \code{results} via S3 dispatch.
+}
 \description{
 Dispatches pool methods based upon results object class. See
 \code{\link[=pool]{pool()}} for details.
 }
+\keyword{internal}

@@ -187,6 +187,9 @@ imputation_list_single <- function(imputations, D = 1) {
 
     assert_that(
         length(imputations) %% D == 0,
+        msg = "Number of imputations must be a multiple of `D`"
+    )
+    assert_that(
         length(id) == 1,
         msg = "multiple `ids` were detected"
     )

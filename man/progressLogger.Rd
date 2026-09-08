@@ -11,98 +11,104 @@ Every time \code{step} * 100 \% of iterations have occurred a message is printed
 Use the \code{quiet} argument to prevent the object from printing anything at all
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{step}}{real, percentage of iterations to allow before printing the
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{step}}{real, percentage of iterations to allow before printing the
 progress to the console}
 
-\item{\code{step_current}}{integer, the total number of iterations completed since
+    \item{\code{step_current}}{integer, the total number of iterations completed since
 progress was last printed to the console}
 
-\item{\code{n}}{integer, the current number of completed iterations}
+    \item{\code{n}}{integer, the current number of completed iterations}
 
-\item{\code{n_max}}{integer, total number of expected iterations to be completed
+    \item{\code{n_max}}{integer, total number of expected iterations to be completed
 acts as the denominator for calculating progress percentages}
 
-\item{\code{quiet}}{logical holds whether or not to print anything}
-}
-\if{html}{\out{</div>}}
+    \item{\code{quiet}}{logical holds whether or not to print anything}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-progressLogger-new}{\code{progressLogger$new()}}
-\item \href{#method-progressLogger-add}{\code{progressLogger$add()}}
-\item \href{#method-progressLogger-print_progress}{\code{progressLogger$print_progress()}}
-\item \href{#method-progressLogger-clone}{\code{progressLogger$clone()}}
-}
+  \itemize{
+    \item \href{#method-progressLogger-initialize}{\code{progressLogger$new()}}
+    \item \href{#method-progressLogger-add}{\code{progressLogger$add()}}
+    \item \href{#method-progressLogger-print_progress}{\code{progressLogger$print_progress()}}
+    \item \href{#method-progressLogger-clone}{\code{progressLogger$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-progressLogger-new"></a>}}
-\if{latex}{\out{\hypertarget{method-progressLogger-new}{}}}
-\subsection{Method \code{new()}}{
-Create \code{progressLogger} object
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{progressLogger$new(n_max, quiet = FALSE, step = 0.1)}\if{html}{\out{</div>}}
+\if{html}{\out{<a id="method-progressLogger-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-progressLogger-initialize}{}}}
+\subsection{\code{progressLogger$new()}}{
+  Create \code{progressLogger} object
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{progressLogger$new(n_max, quiet = FALSE, step = 0.1)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{n_max}}{integer, sets field \code{n_max}}
+      \item{\code{quiet}}{logical, sets field \code{quiet}}
+      \item{\code{step}}{real, sets field \code{step}}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{n_max}}{integer, sets field \code{n_max}}
-
-\item{\code{quiet}}{logical, sets field \code{quiet}}
-
-\item{\code{step}}{real, sets field \code{step}}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-progressLogger-add"></a>}}
 \if{latex}{\out{\hypertarget{method-progressLogger-add}{}}}
-\subsection{Method \code{add()}}{
-Records that \code{n} more iterations have been completed
+\subsection{\code{progressLogger$add()}}{
+  Records that \code{n} more iterations have been completed
 this will add that number to the current step count (\code{step_current}) and will
 print a progress message to the log if the step limit (\code{step}) has been reached.
 This function will do nothing if \code{quiet} has been set to \code{TRUE}
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{progressLogger$add(n)}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{progressLogger$add(n)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{n}}{the number of successfully complete iterations since \code{add()} was last called}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{n}}{the number of successfully complete iterations since \code{add()} was last called}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-progressLogger-print_progress"></a>}}
 \if{latex}{\out{\hypertarget{method-progressLogger-print_progress}{}}}
-\subsection{Method \code{print_progress()}}{
-method to print the current state of progress
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{progressLogger$print_progress()}\if{html}{\out{</div>}}
+\subsection{\code{progressLogger$print_progress()}}{
+  method to print the current state of progress
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{progressLogger$print_progress()}
+    \if{html}{\out{</div>}}
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-progressLogger-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-progressLogger-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{progressLogger$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{progressLogger$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{progressLogger$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

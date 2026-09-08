@@ -3,6 +3,11 @@
 \name{longDataConstructor}
 \alias{longDataConstructor}
 \title{R6 Class for Storing / Accessing & Sampling Longitudinal Data}
+\value{
+Call \code{longDataConstructor$new(data, vars)} to create a \code{longdata} R6 object
+which stores the longitudinal data and provides methods used internally by
+\code{\link[=draws]{draws()}} to sample and reconstruct datasets.
+}
 \description{
 A \code{longdata} object allows for efficient storage and recall of longitudinal datasets for use in
 bootstrap sampling. The object works by de-constructing the data into lists based upon subject id
@@ -17,20 +22,21 @@ It is recognised that this objects functionality is fairly overloaded and is hop
 be split out into more area specific objects / functions in the future. Further additions of functionality
 to this object should be avoided if possible.
 }
+\keyword{internal}
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{data}}{The original dataset passed to the constructor (sorted by id and visit)}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{data}}{The original dataset passed to the constructor (sorted by id and visit)}
 
-\item{\code{vars}}{The \code{vars} object (list of key variables) passed to the constructor}
+    \item{\code{vars}}{The \code{vars} object (list of key variables) passed to the constructor}
 
-\item{\code{visits}}{A character vector containing the distinct visit levels}
+    \item{\code{visits}}{A character vector containing the distinct visit levels}
 
-\item{\code{ids}}{A character vector containing the unique ids of each subject in \code{self$data}}
+    \item{\code{ids}}{A character vector containing the unique ids of each subject in \code{self$data}}
 
-\item{\code{formula}}{A formula expressing how the design matrix for the data should be constructed}
+    \item{\code{formula}}{A formula expressing how the design matrix for the data should be constructed}
 
-\item{\code{strata}}{A numeric vector indicating which strata each corresponding value of
+    \item{\code{strata}}{A numeric vector indicating which strata each corresponding value of
 \code{self$ids} belongs to.
 If no stratification variable is defined this will default to 1 for all subjects
 (i.e. same group).
@@ -38,19 +44,19 @@ This field is only used as part of the \code{self$sample_ids()} function to enab
 stratified bootstrap
 sampling}
 
-\item{\code{ice_visit_index}}{A list indexed by subject storing the index number of the first visit
+    \item{\code{ice_visit_index}}{A list indexed by subject storing the index number of the first visit
 affected by the ICE. If there is no ICE then it is set equal to the number of visits plus 1.}
 
-\item{\code{values}}{A list indexed by subject storing a numeric vector of the
+    \item{\code{values}}{A list indexed by subject storing a numeric vector of the
 original (unimputed) outcome values}
 
-\item{\code{group}}{A list indexed by subject storing a single character
+    \item{\code{group}}{A list indexed by subject storing a single character
 indicating which imputation group the subject belongs to as defined
 by \code{self$data[id, self$ivars$group]}
 It is used
 to determine what reference group should be used when imputing the subjects data.}
 
-\item{\code{is_mar}}{A list indexed by subject storing logical values indicating
+    \item{\code{is_mar}}{A list indexed by subject storing logical values indicating
 if the subjects outcome values are MAR or not.
 This list is defaulted to TRUE for all subjects & outcomes and is then
 modified by calls to \code{self$set_strategies()}.
@@ -58,13 +64,13 @@ Note that this does not indicate which values are missing, this variable
 is True for outcome values that either occurred before the ICE visit
 or are post the ICE visit and have an imputation strategy of MAR}
 
-\item{\code{strategies}}{A list indexed by subject storing a single character
+    \item{\code{strategies}}{A list indexed by subject storing a single character
 value indicating the imputation
 strategy assigned to that subject. This list is defaulted to "MAR"
 for all subjects and is then
 modified by calls to either \code{self$set_strategies()} or \code{self$update_strategies()}}
 
-\item{\code{strategy_lock}}{A list indexed by subject storing a single
+    \item{\code{strategy_lock}}{A list indexed by subject storing a single
 logical value indicating whether a
 patients imputation strategy is locked or not. If a strategy is
 locked it means that it can't change
@@ -74,7 +80,7 @@ Strategies are locked if the patient is assigned a MAR strategy and
 has non-missing after their ICE date. This list is populated by a call to
 \code{self$set_strategies()}.}
 
-\item{\code{indexes}}{A list indexed by subject storing a numeric vector of
+    \item{\code{indexes}}{A list indexed by subject storing a numeric vector of
 indexes which specify which rows in the
 original dataset belong to this subject i.e. to recover the full data
 for subject "pt3" you can use
@@ -88,75 +94,72 @@ self$data[indexes,]
 
 This list is populated during the object initialisation.}
 
-\item{\code{is_missing}}{A list indexed by subject storing a logical vector
+    \item{\code{is_missing}}{A list indexed by subject storing a logical vector
 indicating whether the corresponding
 outcome of a subject is missing. This list is populated during the
 object initialisation.}
 
-\item{\code{is_post_ice}}{A list indexed by subject storing a logical vector
+    \item{\code{is_post_ice}}{A list indexed by subject storing a logical vector
 indicating whether the corresponding
 outcome of a subject is post the date of their ICE. If no ICE data has
 been provided this defaults to False
 for all observations. This list is populated by a call to \code{self$set_strategies()}.}
-}
-\if{html}{\out{</div>}}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-longdata-get_data}{\code{longDataConstructor$get_data()}}
-\item \href{#method-longdata-add_subject}{\code{longDataConstructor$add_subject()}}
-\item \href{#method-longdata-validate_ids}{\code{longDataConstructor$validate_ids()}}
-\item \href{#method-longdata-sample_ids}{\code{longDataConstructor$sample_ids()}}
-\item \href{#method-longdata-extract_by_id}{\code{longDataConstructor$extract_by_id()}}
-\item \href{#method-longdata-update_strategies}{\code{longDataConstructor$update_strategies()}}
-\item \href{#method-longdata-set_strategies}{\code{longDataConstructor$set_strategies()}}
-\item \href{#method-longdata-check_has_data_at_each_visit}{\code{longDataConstructor$check_has_data_at_each_visit()}}
-\item \href{#method-longdata-set_strata}{\code{longDataConstructor$set_strata()}}
-\item \href{#method-longdata-new}{\code{longDataConstructor$new()}}
-\item \href{#method-longdata-clone}{\code{longDataConstructor$clone()}}
-}
+  \itemize{
+    \item \href{#method-longdata-get_data}{\code{longdata$get_data()}}
+    \item \href{#method-longdata-add_subject}{\code{longdata$add_subject()}}
+    \item \href{#method-longdata-validate_ids}{\code{longdata$validate_ids()}}
+    \item \href{#method-longdata-sample_ids}{\code{longdata$sample_ids()}}
+    \item \href{#method-longdata-extract_by_id}{\code{longdata$extract_by_id()}}
+    \item \href{#method-longdata-update_strategies}{\code{longdata$update_strategies()}}
+    \item \href{#method-longdata-set_strategies}{\code{longdata$set_strategies()}}
+    \item \href{#method-longdata-check_has_data_at_each_visit}{\code{longdata$check_has_data_at_each_visit()}}
+    \item \href{#method-longdata-set_strata}{\code{longdata$set_strata()}}
+    \item \href{#method-longdata-initialize}{\code{longdata$new()}}
+    \item \href{#method-longdata-clone}{\code{longdata$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-longdata-get_data"></a>}}
 \if{latex}{\out{\hypertarget{method-longdata-get_data}{}}}
-\subsection{Method \code{get_data()}}{
-Returns a \code{data.frame} based upon required subject IDs. Replaces missing
+\subsection{\code{longdata$get_data()}}{
+  Returns a \code{data.frame} based upon required subject IDs. Replaces missing
 values with new ones if provided.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$get_data(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{longdata$get_data(
   obj = NULL,
   nmar.rm = FALSE,
   mnar.rm = FALSE,
   na.rm = FALSE,
   idmap = FALSE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{obj}}{Either \code{NULL}, a character vector of subjects IDs or a
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{obj}}{Either \code{NULL}, a character vector of subjects IDs or a
 imputation list object. See details.}
-
-\item{\code{nmar.rm}}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Logical value.
+      \item{\code{nmar.rm}}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Logical value.
 If \code{TRUE} will remove observations that are
 not regarded as MAR (as determined from \code{self$is_mar}). Superseded
 by \code{mnar.rm} argument for nomenclature consistency.}
-
-\item{\code{mnar.rm}}{Logical value. If \code{TRUE} will remove observations that are
+      \item{\code{mnar.rm}}{Logical value. If \code{TRUE} will remove observations that are
 not regarded as MAR (as determined from \code{self$is_mar}).}
-
-\item{\code{na.rm}}{Logical value. If \code{TRUE} will remove outcome values that are
+      \item{\code{na.rm}}{Logical value. If \code{TRUE} will remove outcome values that are
 missing (as determined from \code{self$is_missing}).}
-
-\item{\code{idmap}}{Logical value. If \code{TRUE} will add an attribute \code{idmap} which
+      \item{\code{idmap}}{Logical value. If \code{TRUE} will add an attribute \code{idmap} which
 contains a mapping from the new subject ids to the old subject ids. See details.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-If \code{obj} is \code{NULL} then the full original dataset is returned.
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Details}{
+    If \code{obj} is \code{NULL} then the full original dataset is returned.
 
 If \code{obj} is a character vector then a new dataset consisting of just those subjects is
 returned; if the character vector contains duplicate entries then that subject will be
@@ -184,187 +187,204 @@ are unique
 i.e. If the \code{pt2} is requested twice then this process guarantees that each set of observations
 be have a unique subject ID number. The \code{idmap} attribute (if requested) can be used
 to map from the new ids back to the old ids.
+  }
+  \subsection{Returns}{
+    A \code{data.frame}.
+  }
 }
 
-\subsection{Returns}{
-A \code{data.frame}.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-longdata-add_subject"></a>}}
 \if{latex}{\out{\hypertarget{method-longdata-add_subject}{}}}
-\subsection{Method \code{add_subject()}}{
-This function decomposes a patient data from \code{self$data} and populates
+\subsection{\code{longdata$add_subject()}}{
+  This function decomposes a patient data from \code{self$data} and populates
 all the corresponding lists i.e. \code{self$is_missing}, \code{self$values}, \code{self$group}, etc.
 This function is only called upon the objects initialization.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$add_subject(id)}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{longdata$add_subject(id)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{id}}{Character subject id that exists within \code{self$data}.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{id}}{Character subject id that exists within \code{self$data}.}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-longdata-validate_ids"></a>}}
 \if{latex}{\out{\hypertarget{method-longdata-validate_ids}{}}}
-\subsection{Method \code{validate_ids()}}{
-Throws an error if any element of \code{ids} is not within the source data \code{self$data}.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$validate_ids(ids)}\if{html}{\out{</div>}}
+\subsection{\code{longdata$validate_ids()}}{
+  Throws an error if any element of \code{ids} is not within the source data \code{self$data}.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{longdata$validate_ids(ids)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{ids}}{A character vector of ids.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    TRUE
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{ids}}{A character vector of ids.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-TRUE
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-longdata-sample_ids"></a>}}
 \if{latex}{\out{\hypertarget{method-longdata-sample_ids}{}}}
-\subsection{Method \code{sample_ids()}}{
-Performs random stratified sampling of patient ids (with replacement)
+\subsection{\code{longdata$sample_ids()}}{
+  Performs random stratified sampling of patient ids (with replacement)
 Each patient has an equal weight of being picked within their strata (i.e is not dependent on
 how many non-missing visits they had).
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$sample_ids()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{longdata$sample_ids()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Character vector of ids.
+  }
 }
 
-\subsection{Returns}{
-Character vector of ids.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-longdata-extract_by_id"></a>}}
 \if{latex}{\out{\hypertarget{method-longdata-extract_by_id}{}}}
-\subsection{Method \code{extract_by_id()}}{
-Returns a list of key information for a given subject. Is a convenience wrapper
+\subsection{\code{longdata$extract_by_id()}}{
+  Returns a list of key information for a given subject. Is a convenience wrapper
 to save having to manually grab each element.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$extract_by_id(id)}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{longdata$extract_by_id(id)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{id}}{Character subject id that exists within \code{self$data}.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{id}}{Character subject id that exists within \code{self$data}.}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-longdata-update_strategies"></a>}}
 \if{latex}{\out{\hypertarget{method-longdata-update_strategies}{}}}
-\subsection{Method \code{update_strategies()}}{
-Convenience function to run \code{self$set_strategies(dat_ice, update=TRUE)}
+\subsection{\code{longdata$update_strategies()}}{
+  Convenience function to run \code{self$set_strategies(dat_ice, update=TRUE)}
 kept for legacy reasons.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$update_strategies(dat_ice)}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{longdata$update_strategies(dat_ice)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{dat_ice}}{A \code{data.frame} containing ICE information see \code{\link[=impute]{impute()}} for the format of this dataframe.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{dat_ice}}{A \code{data.frame} containing ICE information see \code{\link[=impute]{impute()}} for the format of this dataframe.}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-longdata-set_strategies"></a>}}
 \if{latex}{\out{\hypertarget{method-longdata-set_strategies}{}}}
-\subsection{Method \code{set_strategies()}}{
-Updates the \code{self$strategies}, \code{self$is_mar}, \code{self$is_post_ice} variables based upon the provided ICE
+\subsection{\code{longdata$set_strategies()}}{
+  Updates the \code{self$strategies}, \code{self$is_mar}, \code{self$is_post_ice} variables based upon the provided ICE
 information.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$set_strategies(dat_ice = NULL, update = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{dat_ice}}{a \code{data.frame} containing ICE information. See details.}
-
-\item{\code{update}}{Logical, indicates that the ICE data should be used as an update. See details.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-See \code{\link[=draws]{draws()}} for the specification of \code{dat_ice} if \code{update=FALSE}.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{longdata$set_strategies(dat_ice = NULL, update = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{dat_ice}}{a \code{data.frame} containing ICE information. See details.}
+      \item{\code{update}}{Logical, indicates that the ICE data should be used as an update. See details.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Details}{
+    See \code{\link[=draws]{draws()}} for the specification of \code{dat_ice} if \code{update=FALSE}.
 See \code{\link[=impute]{impute()}} for the format of \code{dat_ice} if \code{update=TRUE}.
 If \code{update=TRUE} this function ensures that MAR strategies cannot be changed to non-MAR in the presence
 of post-ICE observations.
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-longdata-check_has_data_at_each_visit"></a>}}
 \if{latex}{\out{\hypertarget{method-longdata-check_has_data_at_each_visit}{}}}
-\subsection{Method \code{check_has_data_at_each_visit()}}{
-Ensures that all visits have at least 1 observed "MAR" observation. Throws
+\subsection{\code{longdata$check_has_data_at_each_visit()}}{
+  Ensures that all visits have at least 1 observed "MAR" observation. Throws
 an error if this criteria is not met. This is to ensure that the initial
 MMRM can be resolved.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$check_has_data_at_each_visit()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{longdata$check_has_data_at_each_visit()}
+    \if{html}{\out{</div>}}
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-longdata-set_strata"></a>}}
 \if{latex}{\out{\hypertarget{method-longdata-set_strata}{}}}
-\subsection{Method \code{set_strata()}}{
-Populates the \code{self$strata} variable. If the user has specified stratification variables
+\subsection{\code{longdata$set_strata()}}{
+  Populates the \code{self$strata} variable. If the user has specified stratification variables
 The first visit is used to determine the value of those variables. If no stratification variables
 have been specified then everyone is defined as being in strata 1.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$set_strata()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{longdata$set_strata()}
+    \if{html}{\out{</div>}}
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-longdata-new"></a>}}
-\if{latex}{\out{\hypertarget{method-longdata-new}{}}}
-\subsection{Method \code{new()}}{
-Constructor function.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$new(data, vars)}\if{html}{\out{</div>}}
+\if{html}{\out{<a id="method-longdata-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-longdata-initialize}{}}}
+\subsection{\code{longdata$new()}}{
+  Constructor function.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{longdata$new(data, vars)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{data}}{longitudinal dataset.}
+      \item{\code{vars}}{an \code{ivars} object created by \code{\link[=set_vars]{set_vars()}}.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{data}}{longitudinal dataset.}
-
-\item{\code{vars}}{an \code{ivars} object created by \code{\link[=set_vars]{set_vars()}}.}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-longdata-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-longdata-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{longDataConstructor$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{longdata$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{longdata$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

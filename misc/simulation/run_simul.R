@@ -106,8 +106,8 @@ run_simul <- function(H0) {
     # remove baseline
     data <- data[data$visit != "0", ]
     data$visit <- factor(data$visit, levels = levels(data$visit)[-1])
-    levels_visit = levels(data$visit)
-    J = nlevels(data$visit)
+    levels_visit <- levels(data$visit)
+    J <- nlevels(data$visit)
 
     # compute change from baseline
     data[, c("y_noICE", "y_noDropout", "y")] <- data[, c(

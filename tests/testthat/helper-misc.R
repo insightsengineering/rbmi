@@ -105,9 +105,15 @@ expect_contains <- function(x, y) {
 
 is_envvar_true <- function(var) {
     envvar <- Sys.getenv(var, unset = "")
-    if (is.null(envvar)) return(FALSE)
-    if (is.na(envvar)) return(FALSE)
-    if (toupper(envvar) %in% c("T", "TRUE", "Y", "YES")) return(TRUE)
+    if (is.null(envvar)) {
+        return(FALSE)
+    }
+    if (is.na(envvar)) {
+        return(FALSE)
+    }
+    if (toupper(envvar) %in% c("T", "TRUE", "Y", "YES")) {
+        return(TRUE)
+    }
     FALSE
 }
 

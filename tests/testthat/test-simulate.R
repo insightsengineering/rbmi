@@ -75,3 +75,51 @@ test_that("vcov", {
     )
     expect_equal(actual, expected)
 })
+
+
+test_that("simulate_test_data errors reference the correct argument", {
+    skip_if_not(is_core_test())
+    # `n` must be even
+    expect_error(
+        simulate_test_data(n = 5),
+        "n must be even",
+        fixed = TRUE
+    )
+
+    # Wrong number of correlation parameters
+    expect_error(
+        simulate_test_data(sd = c(3, 5), cor = 0.1),
+        "There should be 1 correlation parameters",
+        fixed = TRUE
+    )
+
+    # `mu$trt` of invalid length reports `mu$trt` (and not `mu$visit`)
+    expect_error(
+        simulate_test_data(
+            mu = list(
+                int = 10,
+                age = 3,
+                sex = 2,
+                trt = c(1, 2),
+                visit = c(0, 1, 2)
+            )
+        ),
+        "`mu$trt` must be of length 1 or 3",
+        fixed = TRUE
+    )
+
+    # `mu$visit` of invalid length reports `mu$visit` (and not `mu$trt`)
+    expect_error(
+        simulate_test_data(
+            mu = list(
+                int = 10,
+                age = 3,
+                sex = 2,
+                trt = c(0, 4, 8),
+                visit = c(1, 2)
+            )
+        ),
+        "`mu$visit` must be of length 1 or 3",
+        fixed = TRUE
+    )
+})

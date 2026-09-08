@@ -11,7 +11,11 @@ add_class(x, cls)
 
 \item{cls}{the class to be added.}
 }
+\value{
+\code{x} with \code{cls} appended after its existing class attribute.
+}
 \description{
 Utility function to add a class to an object. Adds the new class
 after any existing classes.
 }
+\keyword{internal}

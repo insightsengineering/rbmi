@@ -28,6 +28,13 @@ strategy_LMCF(pars_group, pars_ref, index_mar)
 for the subject. I.e. this identifies the observations after a non-MAR
 intercurrent event (ICE).}
 }
+\value{
+A list with elements \code{mu} (a numeric vector of means) and \code{sigma} (a
+covariance matrix) giving the parameters of the subject's imputation
+distribution, formed by combining their own group's parameters (\code{pars_group})
+with the reference group's parameters (\code{pars_ref}) according to the chosen
+strategy.
+}
 \description{
 These functions are used to implement various reference based imputation
 strategies by combining a subjects own distribution with that of
@@ -55,4 +62,26 @@ strategies are available "out the box":
 \item Copy Increments in Reference (CIR)
 \item Last Mean Carried Forward (LMCF)
 }
+}
+\examples{
+# Parameters of the subject's own group and of the reference group
+pars_group <- list(
+    mu = c(1, 2, 3),
+    sigma = as_vcov(c(1, 3, 2), c(0.4, 0.5, 0.45))
+)
+pars_ref <- list(
+    mu = c(5, 6, 7),
+    sigma = as_vcov(c(2, 1, 1), c(0.7, 0.8, 0.5))
+)
+
+# The first two visits meet the MAR assumption, the third does not
+index_mar <- c(TRUE, TRUE, FALSE)
+
+# Combine the parameters according to the different strategies
+strategy_MAR(pars_group, pars_ref, index_mar)
+strategy_JR(pars_group, pars_ref, index_mar)
+strategy_CR(pars_group, pars_ref, index_mar)
+strategy_CIR(pars_group, pars_ref, index_mar)
+strategy_LMCF(pars_group, pars_ref, index_mar)
+
 }

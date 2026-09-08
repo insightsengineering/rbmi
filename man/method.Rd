@@ -86,6 +86,12 @@ Must be one of \code{"bootstrap"} or \code{"jackknife"}.}
 \item{D}{a numeric that determines the number of random imputations for each bootstrap sample.
 Needed for \code{method_bmlmi()}.}
 }
+\value{
+A \code{method} object; a named list of class \verb{c("method", <type>)} where \verb{<type>}
+is one of \code{"bayes"}, \code{"approxbayes"}, \code{"condmean"} or \code{"bmlmi"}. It stores the
+chosen imputation methodology and its settings and is passed to the \code{method}
+argument of \code{\link[=draws]{draws()}}.
+}
 \description{
 These functions determine what methods \code{rbmi} should use when creating
 the imputation models, generating imputed values and pooling the results.
@@ -115,7 +121,7 @@ argument. Currently supported structures include:
 \item Heterogeneous Toeplitz (\code{"toeph"})
 }
 
-For full details please see \code{\link[mmrm:covariance_types]{mmrm::cov_types()}}.
+For full details please see \code{\link[mmrm:cov_types]{mmrm::cov_types()}}.
 
 In the case of \code{method_condmean(type = "bootstrap")}, \code{method_approxbayes()} and \code{method_bmlmi()} repeated
 bootstrap samples of the original dataset are taken with an MMRM fitted to each sample.
@@ -135,4 +141,25 @@ reproducible samples across different operating systems even when the same seed 
 As such care must be taken when using Stan across different machines. For more information
 on this limitation please consult the Stan documentation
 \url{https://mc-stan.org/docs/2_27/reference-manual/reproducibility-chapter.html}
+}
+\examples{
+# Bayesian multiple imputation with 150 imputed datasets
+method_bayes(
+    n_samples = 150,
+    control = control_bayes(warmup = 200, thin = 5)
+)
+
+# Approximate Bayesian multiple imputation with 20 imputed datasets
+method_approxbayes(n_samples = 20)
+
+# Conditional mean imputation with jackknife resampling
+method_condmean(type = "jackknife")
+
+# Conditional mean imputation with 100 bootstrap samples
+method_condmean(type = "bootstrap", n_samples = 100)
+
+# Bootstrapped maximum likelihood multiple imputation with D = 2 random
+# imputations for each bootstrap sample and B = 20 bootstrap samples
+method_bmlmi(B = 20, D = 2)
+
 }

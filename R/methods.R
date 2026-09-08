@@ -94,6 +94,32 @@
 #' on this limitation please consult the Stan documentation
 #' <https://mc-stan.org/docs/2_27/reference-manual/reproducibility-chapter.html>
 #'
+#' @return
+#' A `method` object; a named list of class `c("method", <type>)` where `<type>`
+#' is one of `"bayes"`, `"approxbayes"`, `"condmean"` or `"bmlmi"`. It stores the
+#' chosen imputation methodology and its settings and is passed to the `method`
+#' argument of [draws()].
+#'
+#' @examples
+#' # Bayesian multiple imputation with 150 imputed datasets
+#' method_bayes(
+#'     n_samples = 150,
+#'     control = control_bayes(warmup = 200, thin = 5)
+#' )
+#'
+#' # Approximate Bayesian multiple imputation with 20 imputed datasets
+#' method_approxbayes(n_samples = 20)
+#'
+#' # Conditional mean imputation with jackknife resampling
+#' method_condmean(type = "jackknife")
+#'
+#' # Conditional mean imputation with 100 bootstrap samples
+#' method_condmean(type = "bootstrap", n_samples = 100)
+#'
+#' # Bootstrapped maximum likelihood multiple imputation with D = 2 random
+#' # imputations for each bootstrap sample and B = 20 bootstrap samples
+#' method_bmlmi(B = 20, D = 2)
+#'
 #' @export
 method_bayes <- function(
     covariance = c(

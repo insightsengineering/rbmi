@@ -58,6 +58,36 @@
 #' @seealso [analyse()]
 #' @seealso [stats::lm()]
 #' @seealso [set_vars()]
+#' @return
+#' A named list with one set of entries per visit. For each visit the list
+#' contains the estimated treatment effect (`trt_<visit>`) and the least square
+#' means for the reference and alternative groups (`lsm_ref_<visit>` and
+#' `lsm_alt_<visit>`). Each of these elements is itself a list holding the
+#' estimate (`est`), standard error (`se`) and degrees of freedom (`df`).
+#'
+#' @examples
+#' # Simulate a small dataset with a single visit, a treatment group and a
+#' # baseline covariate to adjust for.
+#' set.seed(101)
+#' dat <- data.frame(
+#'     visit = factor("visit_1"),
+#'     group = factor(rep(c("Control", "Intervention"), each = 50)),
+#'     basval = rnorm(100)
+#' )
+#' dat$outcome <- 5 + 2 * (dat$group == "Intervention") + dat$basval + rnorm(100)
+#'
+#' vars <- set_vars(
+#'     outcome = "outcome",
+#'     group = "group",
+#'     visit = "visit",
+#'     covariates = "basval"
+#' )
+#'
+#' # Estimated treatment effect and least square means for the single visit.
+#' # In a full `rbmi` analysis, `ancova()` is passed to `analyse()` rather than
+#' # called directly; see [analyse()].
+#' ancova(dat, vars)
+#'
 #' @export
 ancova <- function(
     data,

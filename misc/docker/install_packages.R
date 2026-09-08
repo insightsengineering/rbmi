@@ -1,4 +1,3 @@
-
 # Configure useragent to enable binary package installation from PPM
 options(
     repos = c(
