@@ -1,5 +1,8 @@
 # rbmi (development version)
 
+## Added
+* `ancova_single()` now return residual variance.
+
 ## Bug Fixes
 * Added en-GB spell-check and a corresponding test to the package
 * Fixed numerous spelling errors and standardised nomenclature for missing not

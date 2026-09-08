@@ -201,6 +201,32 @@ test_that("ancova", {
         )
     )
 
+    # include_variance = TRUE adds var_* entries
+    result_with_var <- ancova(
+        dat,
+        list(
+            outcome = "out",
+            group = "grp",
+            covariates = c("age1", "age2"),
+            visit = "vis"
+        ),
+        visits = c("visit 1", "visit 2"),
+        include_variance = TRUE
+    )
+    expect_equal(
+        names(result_with_var),
+        c(
+            "var_visit 1",
+            "trt_visit 1",
+            "lsm_ref_visit 1",
+            "lsm_alt_visit 1",
+            "var_visit 2",
+            "trt_visit 2",
+            "lsm_ref_visit 2",
+            "lsm_alt_visit 2"
+        )
+    )
+
     ##################
     #
     # Visit variable handling
