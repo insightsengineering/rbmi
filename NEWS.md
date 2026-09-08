@@ -1,6 +1,10 @@
 # rbmi (development version)
 
-## Added
+# rbmi 1.6.1
+
+## New Features
+* rbmi now uses the `lifecycle` package 
+* Added en-GB spell-check and a corresponding test to the package
 * `ancova_single()` now return residual variance.
 
 ## Bug Fixes
