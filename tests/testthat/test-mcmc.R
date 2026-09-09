@@ -157,6 +157,28 @@ test_that("split_dim creates a list from an array as expected", {
 })
 
 
+test_that("get_ESS excludes lp__ from the Stan summary", {
+    methods::setClass("stanfit_ess_test", slots = c(sim = "list"))
+    methods::setMethod(
+        "summary",
+        "stanfit_ess_test",
+        function(object, pars) {
+            expect_identical(pars, c("beta", "sigma"))
+            list(summary = cbind(n_eff = c(beta = 100, sigma = 200)))
+        }
+    )
+    withr::defer(methods::removeMethod("summary", "stanfit_ess_test"))
+    stan_fit <- methods::new(
+        "stanfit_ess_test",
+        sim = list(pars_oi = c("beta", "lp__", "sigma"))
+    )
+
+    ESS <- get_ESS(stan_fit)
+
+    expect_identical(ESS, c(beta = 100, sigma = 200))
+})
+
+
 test_that("count Stan data supports shared and group-specific dispersion", {
     subjid <- factor(rep(c("1", "2"), each = 3))
     period <- rep(as.character(1:3), 2)
