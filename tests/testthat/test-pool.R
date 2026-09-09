@@ -52,7 +52,39 @@ test_that("Rubin's rules", {
 })
 
 
-test_that("Rubin pooling uses normal inference for infinite complete-data df", {
+test_that("Rubin pooling uses t inference for continuous outcomes with infinite complete-data df", {
+    results <- structure(
+        list(
+            est = c(0.2, 0.7, 1.1, 0.5),
+            se = c(0.20, 0.25, 0.22, 0.24),
+            df = rep(Inf, 4)
+        ),
+        class = "rubin"
+    )
+    rubin <- rubin_rules(results$est, results$se, Inf)
+    expected_se <- sqrt(rubin$var_t)
+    expected <- list(
+        est = rubin$est_point,
+        ci = rubin$est_point + c(-1, 1) * qt(0.975, rubin$df) * expected_se,
+        se = expected_se,
+        pvalue = 2 * pt(-abs(rubin$est_point / expected_se), df = rubin$df)
+    )
+
+    observed <- pool_internal(
+        results,
+        conf.level = 0.95,
+        alternative = "two.sided",
+        type = "percentile",
+        D = NULL,
+        outcome_type = "continuous"
+    )
+
+    expect_equal(observed, expected)
+    expect_false(is.infinite(rubin$df))
+})
+
+
+test_that("Rubin pooling uses normal inference for non-continuous outcomes with infinite complete-data df", {
     results <- structure(
         list(
             est = c(0.2, 0.7, 1.1, 0.5),
@@ -75,11 +107,11 @@ test_that("Rubin pooling uses normal inference for infinite complete-data df", {
         conf.level = 0.95,
         alternative = "two.sided",
         type = "percentile",
-        D = NULL
+        D = NULL,
+        outcome_type = "count"
     )
 
     expect_equal(observed, expected)
-    expect_false(is.infinite(rubin$df))
 })
 
 
@@ -109,7 +141,8 @@ test_that("Rubin pooling retains t inference for finite complete-data df", {
         conf.level = 0.95,
         alternative = "two.sided",
         type = "percentile",
-        D = NULL
+        D = NULL,
+        outcome_type = "continuous"
     )
 
     expect_equal(observed, expected)

@@ -31,8 +31,10 @@
 #'
 #' - `method_approxbayes()` & `method_bayes()` both use Rubin's rules to pool estimates
 #'  and variances across multiple imputed datasets. Analyses with finite complete-data
-#'  degrees of freedom use the Barnard-Rubin rule and a t distribution; analyses with
-#'  infinite complete-data degrees of freedom use the standard normal distribution.
+#'  degrees of freedom, and continuous outcomes with infinite complete-data degrees
+#'  of freedom, use the Barnard-Rubin rule and a t distribution. Non-continuous
+#'  outcomes with infinite complete-data degrees of freedom use the standard normal
+#'  distribution.
 #'  See Little & Rubin (2002).
 #'  Here, the `mcse()` function can compute the Monte Carlo standard error (MCSE) of the
 #'  pooled estimates, via a Jackknife variance estimator for all parameters; see
@@ -165,6 +167,7 @@ pool <- function(
     )
 
     pool_type <- class(results$results)[[1]]
+    outcome_type <- if (has_class(results, "analysis_count")) "count" else "continuous"
 
     results_transpose <- transpose_results(
         results$results,
@@ -177,7 +180,8 @@ pool <- function(
         conf.level = conf.level,
         alternative = alternative,
         type = type,
-        D = results$method$D
+        D = results$method$D,
+        outcome_type = outcome_type
     )
 
     if (pool_type == "bootstrap") {
@@ -337,7 +341,15 @@ get_pool_components <- function(x) {
 #' @name pool_internal
 #' @keywords internal
 #' @export
-pool_internal <- function(results, conf.level, alternative, type, D) {
+#' @param outcome_type A character string specifying the endpoint type.
+pool_internal <- function(
+    results,
+    conf.level,
+    alternative,
+    type,
+    D,
+    outcome_type = "continuous"
+) {
     UseMethod("pool_internal")
 }
 
@@ -345,7 +357,14 @@ pool_internal <- function(results, conf.level, alternative, type, D) {
 #' @importFrom stats qnorm pnorm
 #' @rdname pool_internal
 #' @export
-pool_internal.jackknife <- function(results, conf.level, alternative, type, D) {
+pool_internal.jackknife <- function(
+    results,
+    conf.level,
+    alternative,
+    type,
+    D,
+    outcome_type = "continuous"
+) {
     alpha <- 1 - conf.level
     ests <- results$est
     est_point <- ests[1]
@@ -365,7 +384,8 @@ pool_internal.bootstrap <- function(
     conf.level,
     alternative,
     type = c("percentile", "normal"),
-    D
+    D,
+    outcome_type = "continuous"
 ) {
     type <- match.arg(type)
     bootfun <- switch(
@@ -387,7 +407,8 @@ pool_internal.bmlmi <- function(
     conf.level,
     alternative,
     type,
-    D
+    D,
+    outcome_type = "continuous"
 ) {
     ests <- results$est
     alpha <- 1 - conf.level
@@ -470,7 +491,14 @@ get_ests_bmlmi <- function(ests, D) {
 #' @importFrom stats qnorm pnorm qt pt
 #' @rdname pool_internal
 #' @export
-pool_internal.rubin <- function(results, conf.level, alternative, type, D) {
+pool_internal.rubin <- function(
+    results,
+    conf.level,
+    alternative,
+    type,
+    D,
+    outcome_type = "continuous"
+) {
     ests <- results$est
     ses <- results$se
     dfs <- results$df
@@ -489,7 +517,7 @@ pool_internal.rubin <- function(results, conf.level, alternative, type, D) {
         v_com = v_com
     )
 
-    if (is.infinite(v_com)) {
+    if (outcome_type != "continuous" && is.infinite(v_com)) {
         ret <- parametric_ci(
             point = res_rubin$est_point,
             se = sqrt(res_rubin$var_t),

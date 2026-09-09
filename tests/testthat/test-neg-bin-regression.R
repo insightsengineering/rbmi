@@ -112,7 +112,8 @@ test_that("negative binomial regression coefficients pool with normal inference"
     })
     analysis <- as_analysis(
         results = analysis_results,
-        method = method_bayes(n_samples = length(analysis_results))
+        method = method_bayes(n_samples = length(analysis_results)),
+        outcome_type = "count"
     )
 
     observed <- pool(analysis)

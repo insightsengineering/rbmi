@@ -15,6 +15,17 @@ test_that("basic constructions of `analysis` work as expected", {
         method = method_condmean(n_samples = 1)
     )
     expect_true(validate(x))
+    expect_s3_class(x, "analysis_continuous")
+
+    x_count <- as_analysis(
+        results = list(
+            list(p1 = list("est" = 1)),
+            list(p1 = list("est" = 2))
+        ),
+        method = method_condmean(n_samples = 1),
+        outcome_type = "count"
+    )
+    expect_s3_class(x_count, "analysis_count")
 
     x <- as_analysis(
         results = list(

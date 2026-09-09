@@ -10,7 +10,8 @@ as_analysis(
   delta = NULL,
   transform = NULL,
   fun = NULL,
-  fun_name = NULL
+  fun_name = NULL,
+  outcome_type = c("continuous", "count")
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ should be specified.}
 
 \item{fun_name}{The character name of the analysis function (used for printing)
 purposes.}
+
+\item{outcome_type}{The endpoint type used to produce the imputations.}
 }
 \description{
 Creates an analysis object ensuring that all components are

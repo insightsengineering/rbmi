@@ -328,7 +328,12 @@ analyse <- function(
         delta = delta,
         transform = transform,
         fun = fun,
-        method = imputations$method
+        method = imputations$method,
+        outcome_type = if (has_class(imputations, "imputation_count")) {
+            "count"
+        } else {
+            "continuous"
+        }
     )
     validate(ret)
     return(ret)
@@ -446,14 +451,17 @@ extract_imputed_df <- function(imputation, ld, delta = NULL, idmap = FALSE) {
 #' @param fun The analysis function that was used.
 #' @param fun_name The character name of the analysis function (used for printing)
 #' purposes.
+#' @param outcome_type The endpoint type used to produce the imputations.
 as_analysis <- function(
     results,
     method,
     delta = NULL,
     transform = NULL,
     fun = NULL,
-    fun_name = NULL
+    fun_name = NULL,
+    outcome_type = c("continuous", "count")
 ) {
+    outcome_type <- match.arg(outcome_type)
     next_class <- switch(
         class(method)[[2]],
         bayes = "rubin",
@@ -481,7 +489,7 @@ as_analysis <- function(
         fun_name = fun_name,
         method = method
     )
-    class(x) <- c("analysis", "list")
+    class(x) <- c(paste0("analysis_", outcome_type), "analysis", "list")
     validate(x)
     return(x)
 }

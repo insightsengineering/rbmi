@@ -8,21 +8,50 @@
 \alias{pool_internal.rubin}
 \title{Internal Pool Methods}
 \usage{
-pool_internal(results, conf.level, alternative, type, D)
+pool_internal(
+  results,
+  conf.level,
+  alternative,
+  type,
+  D,
+  outcome_type = "continuous"
+)
 
-\method{pool_internal}{jackknife}(results, conf.level, alternative, type, D)
+\method{pool_internal}{jackknife}(
+  results,
+  conf.level,
+  alternative,
+  type,
+  D,
+  outcome_type = "continuous"
+)
 
 \method{pool_internal}{bootstrap}(
   results,
   conf.level,
   alternative,
   type = c("percentile", "normal"),
-  D
+  D,
+  outcome_type = "continuous"
 )
 
-\method{pool_internal}{bmlmi}(results, conf.level, alternative, type, D)
+\method{pool_internal}{bmlmi}(
+  results,
+  conf.level,
+  alternative,
+  type,
+  D,
+  outcome_type = "continuous"
+)
 
-\method{pool_internal}{rubin}(results, conf.level, alternative, type, D)
+\method{pool_internal}{rubin}(
+  results,
+  conf.level,
+  alternative,
+  type,
+  D,
+  outcome_type = "continuous"
+)
 }
 \arguments{
 \item{results}{a list of results i.e. the \code{x$results} element of an
@@ -41,6 +70,8 @@ Only used if \code{method_condmean(type = "bootstrap")} was specified
 in the original call to \code{\link[=draws]{draws()}}.}
 
 \item{D}{numeric representing the number of imputations between each bootstrap sample in the BMLMI method.}
+
+\item{outcome_type}{A character string specifying the endpoint type.}
 }
 \value{
 A list containing the pooled results for a single parameter with elements

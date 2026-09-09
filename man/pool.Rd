@@ -93,8 +93,10 @@ call to \code{\link[=draws]{draws()}}; In particular:
 \itemize{
 \item \code{method_approxbayes()} & \code{method_bayes()} both use Rubin's rules to pool estimates
 and variances across multiple imputed datasets. Analyses with finite complete-data
-degrees of freedom use the Barnard-Rubin rule and a t distribution; analyses with
-infinite complete-data degrees of freedom use the standard normal distribution.
+degrees of freedom, and continuous outcomes with infinite complete-data degrees
+of freedom, use the Barnard-Rubin rule and a t distribution. Non-continuous
+outcomes with infinite complete-data degrees of freedom use the standard normal
+distribution.
 See Little & Rubin (2002).
 Here, the \code{mcse()} function can compute the Monte Carlo standard error (MCSE) of the
 pooled estimates, via a Jackknife variance estimator for all parameters; see
