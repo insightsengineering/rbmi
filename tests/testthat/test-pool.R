@@ -177,8 +177,25 @@ test_that("pool orders confidence limits after a decreasing transformation", {
     original_ci <- pooled$pars$p1$ci
     transformed_ci <- pooled$transformed_pars$p1$ci
 
-    expect_equal(transformed_ci, sort(-original_ci))
+    expect_equal(transformed_ci, rev(-original_ci))
     expect_lte(transformed_ci[1], transformed_ci[2])
+})
+
+
+test_that("pool rejects transformations that are not monotone over a confidence interval", {
+    analysis <- as_analysis(
+        results = list(
+            list(p1 = list(est = -0.1, se = 1, df = Inf)),
+            list(p1 = list(est = 0.1, se = 1, df = Inf))
+        ),
+        method = method_bayes(n_samples = 2),
+        transform = use_transform(x^2)
+    )
+
+    expect_error(
+        pool(analysis),
+        "must be monotone over the pooled confidence interval"
+    )
 })
 
 

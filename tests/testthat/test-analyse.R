@@ -262,12 +262,12 @@ test_that("analysis transformation specifications are validated", {
 
 test_that("use_transform creates a transformation and derivative from x", {
     transform <- use_transform(exp(x))
-    square_transform <- use_transform(x^2)
+    negation_transform <- use_transform(-x)
     identity_transform <- use_transform(x)
 
     expect_equal(transform$transform(c(0, log(2))), c(1, 2))
     expect_equal(transform$derivative(c(0, log(2))), c(1, 2))
-    expect_equal(square_transform$derivative(2), 4)
+    expect_equal(negation_transform$derivative(2), -1)
     expect_equal(identity_transform$derivative(c(1, 2)), c(1, 1))
     expect_error(use_transform(exp(y)), "expression in `x`")
 })

@@ -84,8 +84,10 @@
 #' The analysis estimates are always retained and pooled on their original
 #' scale. After pooling, the transformation is applied to the pooled estimate
 #' and confidence limits; its derivative is used to obtain the transformed
-#' standard error by the delta method. The original p-values are retained. See
-#' [pool()] for extracting transformed results.
+#' standard error by the delta method. Transformations must be monotone over
+#' each pooled confidence interval; this is checked from the supplied derivative
+#' before transformed results are reported. The original p-values are retained.
+#' See [pool()] for extracting transformed results.
 #'
 #' @seealso [extract_imputed_dfs()] for manually extracting imputed
 #' datasets.
@@ -587,14 +589,15 @@ validate_transform <- function(transform) {
 #' Creates the transformation specification used by [analyse()] from an
 #' expression in `x`. The expression is evaluated on the pooled estimate and
 #' confidence limits; its symbolic derivative, obtained with [D()], is used to
-#' calculate the transformed standard error by the delta method.
+#' calculate the transformed standard error by the delta method. The
+#' transformation must be monotone over every pooled confidence interval.
 #'
 #' @param expression An expression in `x` defining a vectorized
 #' transformation, for example `exp(x)`.
 #' @return A list suitable for the `transform` argument of [analyse()].
 #' @examples
 #' use_transform(exp(x))
-#' use_transform(x^2)
+#' use_transform(-x)
 #' @export
 use_transform <- function(expression) {
     transform_expression <- substitute(expression)

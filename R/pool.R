@@ -71,7 +71,8 @@
 #' - `transformed_pars`: when `analyse(..., transform = ...)` was used, a named
 #'   list of the corresponding transformed results. Point estimates and
 #'   confidence limits are transformed directly and standard errors use the
-#'   delta method. P-values are unchanged.
+#'   delta method. The transformation must be monotone over each confidence
+#'   interval; otherwise [pool()] errors. P-values are unchanged.
 #' - `conf.level`: the confidence level used for the confidence intervals.
 #' - `alternative`: the alternative hypothesis used to derive the p-values.
 #' - `N`: the number of analysis results that were combined.
@@ -231,16 +232,49 @@ transform_pooled_par <- function(par, transform) {
         par$ci,
         "transform"
     )
-    derivative <- apply_pool_transform(
-        transform$derivative,
-        par$est,
-        "derivative"
-    )
+    derivative <- validate_monotone_pool_transform(transform, par$ci, par$est)
 
     par$est <- transformed_est
-    par$ci <- sort(transformed_ci)
-    par$se <- abs(derivative) * par$se
+    par$ci <- if (derivative$increasing) transformed_ci else rev(transformed_ci)
+    par$se <- abs(derivative$at_estimate) * par$se
     par
+}
+
+
+#' Validate monotonicity of a pooled-result transformation
+#'
+#' @param transform A validated transformation specification.
+#' @param ci A two-element confidence interval on the original scale.
+#' @param est Point estimate on the original scale.
+#' @return A list containing the direction of the transformation and the
+#' derivative evaluated at the point estimate.
+#' @keywords internal
+#' @noRd
+validate_monotone_pool_transform <- function(transform, ci, est) {
+    derivative_grid <- apply_pool_transform(
+        transform$derivative,
+        seq(ci[[1]], ci[[2]], length.out = 1001),
+        "derivative"
+    )
+    assert_that(
+        all(is.finite(derivative_grid)),
+        msg = "`transform$derivative` must be finite over the pooled confidence interval"
+    )
+
+    increasing <- all(derivative_grid >= 0)
+    decreasing <- all(derivative_grid <= 0)
+    assert_that(
+        increasing || decreasing,
+        msg = paste(
+            "`transform` must be monotone over the pooled confidence interval;",
+            "its derivative changes sign"
+        )
+    )
+
+    list(
+        increasing = increasing,
+        at_estimate = apply_pool_transform(transform$derivative, est, "derivative")
+    )
 }
 
 

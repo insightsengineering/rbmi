@@ -127,8 +127,10 @@ Use \code{use_transform()} to create the specification from an expression in \co
 The analysis estimates are always retained and pooled on their original
 scale. After pooling, the transformation is applied to the pooled estimate
 and confidence limits; its derivative is used to obtain the transformed
-standard error by the delta method. The original p-values are retained. See
-\code{\link[=pool]{pool()}} for extracting transformed results.
+standard error by the delta method. Transformations must be monotone over
+each pooled confidence interval; this is checked from the supplied derivative
+before transformed results are reported. The original p-values are retained.
+See \code{\link[=pool]{pool()}} for extracting transformed results.
 }
 \section{Parallelisation}{
 

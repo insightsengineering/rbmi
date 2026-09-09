@@ -455,7 +455,9 @@ function `use_transform(expression)`, where `expression` is a vectorized express
 The estimates are pooled on the original scale; `pool()` then stores the transformed estimate, confidence
 limits, and delta-method standard error separately in `transformed_pars`.
 Confidence limits are transformed directly rather than reconstructed from that
-standard error. P-values are unchanged.
+standard error. Transformations must be monotone over each pooled confidence
+interval; `pool()` checks the supplied derivative and errors when it changes sign.
+P-values are unchanged.
 
 For example, the preceding logistic regression estimates a log odds ratio. We declare
 odds-ratio reporting with the `exp` transformation. `print(pool_obj_prop)` and `as.data.frame(pool_obj_prop)`

@@ -17,9 +17,10 @@ A list suitable for the \code{transform} argument of \code{\link[=analyse]{analy
 Creates the transformation specification used by \code{\link[=analyse]{analyse()}} from an
 expression in \code{x}. The expression is evaluated on the pooled estimate and
 confidence limits; its symbolic derivative, obtained with \code{\link[=D]{D()}}, is used to
-calculate the transformed standard error by the delta method.
+calculate the transformed standard error by the delta method. The
+transformation must be monotone over every pooled confidence interval.
 }
 \examples{
 use_transform(exp(x))
-use_transform(x^2)
+use_transform(-x)
 }
