@@ -107,12 +107,18 @@ sas_results <- read.csv(
 The inputs to the `draws()` function are now:
 
 - `data`: The data frame as prepared above.
-- `data_ice`: The data with follow-up intercurrent event (ICE) imputation strategies for each patient
+- `data_ice`: Subject-specific imputation strategies for missing count periods
 - `vars`: The variables to be used in the model
 - `method`: Here we can only use `method_bayes()` for fully Bayesian multiple imputation for our count data
 - `outcome` (new): The outcome type, which defaults to "continuous", but here we will choose "count"
 
-Note that for count data we do not need to provide the time points of the intercurrent events in `data_ice`, because these are calculated automatically from the `duration` variable in the data.
+For count outcomes, `data_ice` contains only the subject ID and strategy columns;
+it has no period or visit column. It does not record an intercurrent-event (ICE)
+time, and no ICE time is inferred from `duration`. The strategy assigned to a
+subject applies to every missing positive-duration period for that subject.
+Consequently, `JR` and `CR` are reference-based assumptions for all of that
+subject's missing periods, rather than post-ICE-only assumptions. Use `MAR` for
+subjects whose missing periods should retain their randomized-arm trajectory.
 
 ### Imputation strategies
 

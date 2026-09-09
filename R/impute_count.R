@@ -8,6 +8,10 @@
 #'
 #' `get_count_strategies()` returns the built-in MAR, JR and CR count strategies
 #' together with any named user-defined strategies supplied through `...`.
+#' For count outcomes, the strategy is assigned at the subject level and applies
+#' to every missing positive-duration period for that subject. No ICE time is
+#' supplied or inferred; consequently, JR and CR are not restricted to periods
+#' after an ICE.
 #'
 #' @param base Character. The base count imputation strategy, one of `"MAR"`,
 #'   `"JR"`, or `"CR"`.

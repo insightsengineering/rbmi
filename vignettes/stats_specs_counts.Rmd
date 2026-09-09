@@ -104,11 +104,21 @@ Note that these priors are currently fixed in the package. In the future we migh
 
 ### Reference assumptions
 
-Depending how we structure the design matrix $X_i$ for each patient who withdrew from the study, we can use different assumptions for the imputation of $Y_{i3}$ when running the MCMC for the imputation model:
+For count outcomes, `rbmi` does not collect or infer the time of an
+intercurrent event. A subject-level strategy is instead applied to every
+missing positive-duration period for that subject. In the three-period example
+above, only $Y_{i3}$ is missing, so this distinction is not visible; it is
+important when a subject has missing values in other periods.
 
-- MAR: We keep the same randomised treatment assignment for the withdrawn patient in the design matrix for all three periods.
-- CR: We change the treatment assignment for the withdrawn patient in the design matrix for the whole trial to reflect the control arm, so we assume that this patient behaves as if they were in the control arm.
-- J2R: We change the treatment assignment for the withdrawn patient in the design matrix for period 3 to reflect the control arm, so we assume that this patient behaves as if they were in the control arm after stopping treatment, but not before stopping treatment.
+The available assumptions are therefore:
+
+- MAR: Missing periods use the patient's randomized-arm design.
+- CR: Missing periods use the reference-arm design. Observed periods also use the reference-arm design when fitting the count model.
+- JR: Missing periods use the reference-arm design, while observed periods retain the patient's randomized-arm design.
+
+Thus, count-outcome `JR` is not a post-ICE-only J2R implementation: it applies
+to all missing positive-duration periods for the subject. The same applies to
+the reference-based component of `CR`.
 
 ### Off-treatment Modeling
 
@@ -130,7 +140,7 @@ Y_{i3} | Y_{i1}, Y_{i2} \sim \text{NegativeBinomial}\left(
 \right)
 $$ {#eq-impute-cond-dist}
 
-Here the quantities $\hat{\mu}_{ij}$ are the expected number of events for patient $i$ in period $j$ based on the regression coefficients $\beta$ and dispersion parameter $\phi$, and the covariates for patient $i$ in period $j$. Depending on which assumptions we use (MAR vs. CR vs. J2R) we would use different covariate values for patient $i$ in period 3 to calculate $\hat{\mu}_{i3}$.
+Here the quantities $\hat{\mu}_{ij}$ are the expected number of events for patient $i$ in period $j$ based on the regression coefficients $\beta$ and dispersion parameter $\phi$, and the covariates for patient $i$ in period $j$. Depending on which assumptions we use (MAR, CR, or JR), we may use different covariate values for a missing period to calculate $\hat{\mu}_{ij}$.
 Similarly, depending on how we model the off-treatment periods 2 and 3, we would use different covariate values for patient $i$ in periods 2 and 3 to calculate $\hat{\mu}_{i2}$ and $\hat{\mu}_{i3}$. Therefore we still need to keep $y_{i2}$ and $y_{i3}$ as separate variables and don't combine them into a single stage.
 
 Note that in the second parameter of the negative binomial distribution we have the actually observed number of events $y_{i1}$ and $y_{i2}$.

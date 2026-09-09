@@ -93,8 +93,8 @@
 #' computation) then you are advised
 #' to manually cast your character covariates to factor in advance of running [draws()].
 #'
-#' The argument `data_ice` contains information about the occurrence of ICEs. It is a
-#' `data.frame` with 3 columns:
+#' For continuous outcomes, `data_ice` contains information about the occurrence
+#' of ICEs. It is a `data.frame` with 3 columns:
 #' - **Subject ID**: a character vector containing the ids of the subjects that experienced
 #'   the ICE. This column must be named as specified in `vars$subjid`.
 #' - **Visit**: a character vector containing the first visit after the occurrence of the ICE
@@ -114,7 +114,14 @@
 #' and Wolbers et al (2022).
 #' Please note that user-defined imputation strategies can also be set.
 #'
-#' The `data_ice` argument is necessary at this stage since (as explained in Wolbers et al (2022)), the model is fitted
+#' For count outcomes, `data_ice` has only the **Subject ID** and **Strategy**
+#' columns. It has no period or visit column: no ICE time is collected or inferred
+#' from the duration variable. The strategy assigned to a subject applies to every
+#' missing positive-duration period for that subject. Therefore, for count outcomes,
+#' `JR` and `CR` use the reference-arm design for all of the subject's missing
+#' positive-duration periods; they are not post-ICE-only assumptions.
+#'
+#' For continuous outcomes, the `data_ice` argument is necessary at this stage since (as explained in Wolbers et al (2022)), the model is fitted
 #' after removing the observations which are incompatible with the imputation model, i.e.
 #' any observed data on or after `data_ice[[vars$visit]]` that are addressed with an imputation
 #' strategy different from MAR are excluded for the model fit. However such observations
@@ -122,12 +129,14 @@
 #' (performed with the function ([impute()]). To summarize, **at this stage only pre-ICE data
 #' and post-ICE data that is after ICEs for which MAR imputation is specified are used**.
 #'
-#' If the `data_ice` argument is omitted, or if a subject doesn't have a record within `data_ice`, then it is
+#' For continuous outcomes, if the `data_ice` argument is omitted, or if a subject doesn't have a record within `data_ice`, then it is
 #' assumed that all of the relevant subject's data is pre-ICE and as such all missing
 #' visits will be imputed under the MAR assumption and all observed data will be used to fit the base imputation model.
 #' Please note that the ICE visit cannot be updated via the `update_strategy` argument
 #' in [impute()]; this means that subjects who didn't have a record in `data_ice` will always have their
 #' missing data imputed under the MAR assumption even if their strategy is updated.
+#' For count outcomes, a subject without a `data_ice` record initially has the
+#' MAR strategy; their strategy can be changed with `update_strategy` in [impute()].
 #'
 #' The `vars` argument is a named list that specifies the names of key variables within
 #' `data` and `data_ice`. This list is created by [set_vars()] and contains the following named elements:
