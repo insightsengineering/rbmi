@@ -31,11 +31,10 @@ For the statistical method details please see the [separate vignette](stat_specs
 
 ## The Data
 
-We use the simulated example data set from Roger et al. The data contain three treatment arms and up to three rows per patient, corresponding to the on-treatment, off-treatment but observed, and post-withdrawal periods.
+We use the simulated example data set from Roger et al. TODO add reference The data contain three treatment arms and up to three rows per patient, corresponding to the on-treatment, off-treatment but observed, and post-withdrawal periods.
 
 ```{r, message = FALSE}
 library(dplyr)
-pkgload::load_all()
 
 dat_count_raw <- read.csv(
     system.file("extdata", "sim_rogeretal.csv", package = "rbmi")
@@ -79,6 +78,7 @@ dat_count_filled <- dat_count |>
     )
 ```
 
+TODO add explanation of data
 The SAS reference results for the three models illustrated below are included as
 a CSV file with the package. We retain the two active-treatment versus placebo
 contrasts, so they can be compared directly with the pooled `rbmi` estimates.
