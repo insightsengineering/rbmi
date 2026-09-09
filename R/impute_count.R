@@ -424,6 +424,19 @@ prepare_count_imputation_data <- function(
         all(data$ids %in% names(strategy_specs_by_id)),
         msg = "Count strategy specifications must cover every subject"
     )
+    specified_periods <- unique(unlist(lapply(
+        strategy_specs_by_id[data$ids],
+        `[[`,
+        "period"
+    )))
+    unmatched_periods <- setdiff(specified_periods, as.character(data$periods))
+    assert_that(
+        !length(unmatched_periods),
+        msg = paste(
+            "Count strategy periods not found in the data:",
+            paste(unmatched_periods, collapse = ", ")
+        )
+    )
     rate_multiplier <- rep(1, length(id))
     fixed_lambda_rate <- rep(NA_real_, length(id))
     for (subject_id in data$ids) {

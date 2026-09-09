@@ -342,6 +342,28 @@ test_that("controlled count strategy inputs are validated", {
     )
 })
 
+test_that("controlled count strategy periods must occur in the data", {
+    draws <- make_count_draws(strategy = "MAR")
+    strategies <- get_count_strategies(
+        INVALID_PERIOD = count_strategy(
+            base = "MAR",
+            rate_multiplier = 2,
+            period = "99"
+        )
+    )
+
+    expect_error(
+        impute(
+            draws,
+            update_strategy = data.frame(
+                id = "active",
+                strategy = "INVALID_PERIOD"
+            ),
+            strategies = strategies
+        ),
+        "Count strategy periods not found in the data: 99"
+    )
+})
 
 test_that("group-specific dispersion draws must be named", {
     expect_error(
