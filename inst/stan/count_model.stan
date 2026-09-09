@@ -3,15 +3,15 @@ data {
   int<lower=1> R;                       // Number of observed cells
   int<lower=1> P;                       // Number of regression coefficients
   int<lower=1> G;                       // Number of dispersion parameter groups
-  int<lower=1, upper=G> group[N];       // Dispersion parameter group by patient
-  int<lower=1, upper=N> subject[R];      // Patient index for each observed cell
-  int<lower=0> y[R];                    // Observed cell counts
+  array[N] int<lower=1, upper=G> group; // Dispersion parameter group by patient
+  array[R] int<lower=1, upper=N> subject; // Patient index for each observed cell
+  array[R] int<lower=0> y;              // Observed cell counts
   matrix[R, P] X;                       // Cell-level design matrix
   vector[R] log_offset;                 // log cell exposure
 }
 
 transformed data {
-  int<lower=0> y_sum[N];
+  array[N] int<lower=0> y_sum;
   for (n in 1:N) {
     y_sum[n] = 0;
   }
