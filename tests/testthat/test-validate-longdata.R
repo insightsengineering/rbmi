@@ -69,6 +69,22 @@ vars_period <- set_vars(
 )
 
 
+test_that("period_levels orders periods according to their type", {
+    period_data <- tibble(period = c(1, 10, 2))
+
+    expect_equal(period_levels(period_data, vars_period), c("1", "2", "10"))
+
+    period_data$period <- as.character(period_data$period)
+    expect_equal(period_levels(period_data, vars_period), c("1", "10", "2"))
+
+    period_data$period <- factor(
+        period_data$period,
+        levels = c("2", "10", "1")
+    )
+    expect_equal(period_levels(period_data, vars_period), c("2", "10", "1"))
+})
+
+
 test_that("extract_covariates", {
     expect_equal(extract_covariates("age"), "age")
     expect_equal(extract_covariates(c("age", "sex")), c("age", "sex"))
