@@ -248,6 +248,39 @@ test_that("count Stan data supports ragged observed cells", {
 })
 
 
+test_that("count Stan data drops subjects without observed positive-duration cells", {
+    subjid <- factor(rep(c("1", "2", "3"), each = 2))
+    period <- rep(c("1", "2"), 3)
+    group <- factor(
+        rep(c("Control", "Control", "Active"), each = 2),
+        levels = c("Control", "Active")
+    )
+    duration <- c(1, 1, 1, 1, 0, 0)
+    outcome <- c(1, NA, NA, NA, 0, NA)
+    design <- cbind(intercept = 1, active = as.integer(group == "Active"))
+
+    expect_message(
+        actual <- prepare_stan_data_count(
+            ddat = design,
+            subjid = subjid,
+            period = period,
+            duration = duration,
+            outcome = outcome,
+            group = group,
+            same_cov = TRUE
+        ),
+        "Dropping subject\\(s\\).*: `2`, `3`"
+    )
+
+    expect_equal(actual$N, 1)
+    expect_equal(actual$R, 1)
+    expect_equal(actual$subject, 1L)
+    expect_equal(actual$y, 1L)
+    expect_equal(actual$group, 1L)
+    expect_true(validate(actual))
+})
+
+
 test_that("ragged and fixed-period negative-multinomial likelihoods agree", {
     count <- c(2, 3)
     mu <- c(4, 5)

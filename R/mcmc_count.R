@@ -52,17 +52,33 @@ prepare_stan_data_count <- function(
         all(is.finite(as.matrix(ddat)))
     )
 
-    subject_ids <- unique(as.character(subjid))
-    subject_all <- match(as.character(subjid), subject_ids)
     observed <- !is.na(outcome) & duration > 0
     assert_that(
         all(outcome[duration == 0 & !is.na(outcome)] == 0),
-        all(tabulate(subject_all[observed], nbins = length(subject_ids)) > 0),
-        msg = paste(
-            "Each subject must have at least one observed positive-duration",
-            "count cell, and zero-duration cells cannot have positive counts"
-        )
+        msg = "Zero-duration cells cannot have positive counts"
     )
+
+    has_observed <- tapply(observed, as.character(subjid), any)
+    removed_subjects <- names(has_observed)[!has_observed]
+    if (length(removed_subjects) > 0) {
+        message(sprintf(
+            paste(
+                "Dropping subject(s) with no observed positive-duration",
+                "count cells: `%s`"
+            ),
+            paste0(removed_subjects, collapse = "`, `")
+        ))
+        keep <- !as.character(subjid) %in% removed_subjects
+        ddat <- ddat[keep, , drop = FALSE]
+        subjid <- subjid[keep]
+        duration <- duration[keep]
+        outcome <- outcome[keep]
+        group <- group[keep]
+        observed <- observed[keep]
+    }
+
+    subject_ids <- unique(as.character(subjid))
+    subject_all <- match(as.character(subjid), subject_ids)
 
     ddat <- as.matrix(ddat[observed, , drop = FALSE])
     subjid_observed <- subject_all[observed]
@@ -75,7 +91,7 @@ prepare_stan_data_count <- function(
     G <- ife(same_cov, 1L, nlevels(group))
     group_integer <- as.integer(group)
     group_is_constant <- vapply(
-        split(group_integer, subjid),
+        split(group_integer, as.character(subjid)),
         function(x) length(unique(x)) == 1,
         logical(1)
     )
