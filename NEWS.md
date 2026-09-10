@@ -2,7 +2,15 @@
 
 ## New Features
 
-* Count outcomes are now supported. Please see the new counts outcomes vignette, as well as the corresponding new statistical specifications for count outcomes vignette, for an introduction.
+* Count outcomes with negative multinomial regression imputation models are now supported. Please see the new counts outcomes vignette, as well as the corresponding new statistical specifications for count outcomes vignette, for an introduction. In addition to new S3 methods and new arguments for existing functions, the analysis function `neg_bin_regression()` conducting negative binomial regression analysis, as well as the data wrangling function `split_time()` to support more complex time period patterns, have been added.
+
+* New `transform` argument is available in `analyse()` to support transformations that are applied after the pooling of original scale parameters.
+
+* The corresponding new `scale` argument in `print.pool()` and `as.data.frame.pool()` methods allows to choose the original or transformed scale to look at for the pooled results.
+
+## Bug Fixes
+
+* `scalerConstructor` previously failed when applied to a matrix instead of a `data.frame`. This is fixed now.
 
 # rbmi 1.6.1
 
