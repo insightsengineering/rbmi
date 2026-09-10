@@ -30,7 +30,8 @@ treatment group and one column per period. If \code{NULL}, all log rates are 0.}
 \item{duration}{Positive numeric exposure for each period. Either a scalar or
 a vector with one value per period.}
 
-\item{phi}{Positive frailty variance. Either a scalar shared by all groups or
+\item{phi}{Positive frailty variance, or dispersion parameter.
+Either a scalar shared by all groups or
 one value per treatment group. Conditional on its frailty, a subject's
 period counts are independent Poisson variables. The frailty has mean 1
 and variance \code{phi}.}
@@ -48,7 +49,7 @@ A \code{data.frame} with one row per subject and period and columns \code{id},
 The \code{outcome_full} column contains the count before missingness is applied.
 }
 \description{
-Simulates data from the gamma--Poisson model used for count outcomes in
+Simulates data from the negative multinomial model used for count outcomes in
 \code{rbmi}. Each subject has a gamma-distributed frailty shared by all periods,
 so the marginal period counts are negative binomial and counts from the same
 subject are correlated.

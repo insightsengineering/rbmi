@@ -460,38 +460,31 @@ For the purpose of this vignette, we simulate data similarly to the simulation s
 <span id="cb1-57"><a href="#cb1-57" tabindex="-1"></a>)</span>
 <span id="cb1-58"><a href="#cb1-58" tabindex="-1"></a></span>
 <span id="cb1-59"><a href="#cb1-59" tabindex="-1"></a><span class="fu">head</span>(data)</span>
-<span id="cb1-60"><a href="#cb1-60" tabindex="-1"></a><span class="co">#&gt;     id visit   group outcome_bl outcome_noICE ind_ice1 ind_ice2 dropout_ice1</span></span>
-<span id="cb1-61"><a href="#cb1-61" tabindex="-1"></a><span class="co">#&gt; 1 id_1     0 Control   57.32704      57.32704        0        0            0</span></span>
-<span id="cb1-62"><a href="#cb1-62" tabindex="-1"></a><span class="co">#&gt; 2 id_1     1 Control   57.32704      54.69751        1        0            1</span></span>
-<span id="cb1-63"><a href="#cb1-63" tabindex="-1"></a><span class="co">#&gt; 3 id_1     2 Control   57.32704      58.60702        1        0            1</span></span>
-<span id="cb1-64"><a href="#cb1-64" tabindex="-1"></a><span class="co">#&gt; 4 id_1     3 Control   57.32704      61.50119        1        0            1</span></span>
-<span id="cb1-65"><a href="#cb1-65" tabindex="-1"></a><span class="co">#&gt; 5 id_1     4 Control   57.32704      56.68363        1        0            1</span></span>
-<span id="cb1-66"><a href="#cb1-66" tabindex="-1"></a><span class="co">#&gt; 6 id_1     5 Control   57.32704      66.14799        1        0            1</span></span>
-<span id="cb1-67"><a href="#cb1-67" tabindex="-1"></a><span class="co">#&gt;    outcome</span></span>
-<span id="cb1-68"><a href="#cb1-68" tabindex="-1"></a><span class="co">#&gt; 1 57.32704</span></span>
-<span id="cb1-69"><a href="#cb1-69" tabindex="-1"></a><span class="co">#&gt; 2       NA</span></span>
-<span id="cb1-70"><a href="#cb1-70" tabindex="-1"></a><span class="co">#&gt; 3       NA</span></span>
-<span id="cb1-71"><a href="#cb1-71" tabindex="-1"></a><span class="co">#&gt; 4       NA</span></span>
-<span id="cb1-72"><a href="#cb1-72" tabindex="-1"></a><span class="co">#&gt; 5       NA</span></span>
-<span id="cb1-73"><a href="#cb1-73" tabindex="-1"></a><span class="co">#&gt; 6       NA</span></span>
-<span id="cb1-74"><a href="#cb1-74" tabindex="-1"></a></span>
-<span id="cb1-75"><a href="#cb1-75" tabindex="-1"></a><span class="co"># As a simple descriptive of the simulated data, summarize the number of subjects with ICEs and missing data </span></span>
-<span id="cb1-76"><a href="#cb1-76" tabindex="-1"></a>data <span class="sc">%&gt;%</span></span>
-<span id="cb1-77"><a href="#cb1-77" tabindex="-1"></a>  <span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span></span>
-<span id="cb1-78"><a href="#cb1-78" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb1-79"><a href="#cb1-79" tabindex="-1"></a>    <span class="at">group =</span> group[<span class="dv">1</span>],</span>
-<span id="cb1-80"><a href="#cb1-80" tabindex="-1"></a>    <span class="at">any_ICE =</span> (<span class="fu">any</span>(ind_ice1 <span class="sc">==</span> <span class="dv">1</span>)),</span>
-<span id="cb1-81"><a href="#cb1-81" tabindex="-1"></a>    <span class="at">any_NA =</span> <span class="fu">any</span>(<span class="fu">is.na</span>(outcome))) <span class="sc">%&gt;%</span></span>
-<span id="cb1-82"><a href="#cb1-82" tabindex="-1"></a>  <span class="fu">group_by</span>(group) <span class="sc">%&gt;%</span></span>
-<span id="cb1-83"><a href="#cb1-83" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb1-84"><a href="#cb1-84" tabindex="-1"></a>      <span class="at">subjects_with_ICE =</span> <span class="fu">sum</span>(any_ICE),</span>
-<span id="cb1-85"><a href="#cb1-85" tabindex="-1"></a>      <span class="at">subjects_with_missings =</span> <span class="fu">sum</span>(any_NA)</span>
-<span id="cb1-86"><a href="#cb1-86" tabindex="-1"></a>  )</span>
-<span id="cb1-87"><a href="#cb1-87" tabindex="-1"></a><span class="co">#&gt; # A tibble: 2 × 3</span></span>
-<span id="cb1-88"><a href="#cb1-88" tabindex="-1"></a><span class="co">#&gt;   group        subjects_with_ICE subjects_with_missings</span></span>
-<span id="cb1-89"><a href="#cb1-89" tabindex="-1"></a><span class="co">#&gt;   &lt;fct&gt;                    &lt;int&gt;                  &lt;int&gt;</span></span>
-<span id="cb1-90"><a href="#cb1-90" tabindex="-1"></a><span class="co">#&gt; 1 Control                     18                      8</span></span>
-<span id="cb1-91"><a href="#cb1-91" tabindex="-1"></a><span class="co">#&gt; 2 Intervention                25                     14</span></span></code></pre></div>
+<span id="cb1-60"><a href="#cb1-60" tabindex="-1"></a><span class="co">#&gt;     id visit   group outcome_bl outcome_noICE ind_ice1 ind_ice2 dropout_ice1  outcome</span></span>
+<span id="cb1-61"><a href="#cb1-61" tabindex="-1"></a><span class="co">#&gt; 1 id_1     0 Control   57.32704      57.32704        0        0            0 57.32704</span></span>
+<span id="cb1-62"><a href="#cb1-62" tabindex="-1"></a><span class="co">#&gt; 2 id_1     1 Control   57.32704      54.69751        1        0            1       NA</span></span>
+<span id="cb1-63"><a href="#cb1-63" tabindex="-1"></a><span class="co">#&gt; 3 id_1     2 Control   57.32704      58.60702        1        0            1       NA</span></span>
+<span id="cb1-64"><a href="#cb1-64" tabindex="-1"></a><span class="co">#&gt; 4 id_1     3 Control   57.32704      61.50119        1        0            1       NA</span></span>
+<span id="cb1-65"><a href="#cb1-65" tabindex="-1"></a><span class="co">#&gt; 5 id_1     4 Control   57.32704      56.68363        1        0            1       NA</span></span>
+<span id="cb1-66"><a href="#cb1-66" tabindex="-1"></a><span class="co">#&gt; 6 id_1     5 Control   57.32704      66.14799        1        0            1       NA</span></span>
+<span id="cb1-67"><a href="#cb1-67" tabindex="-1"></a></span>
+<span id="cb1-68"><a href="#cb1-68" tabindex="-1"></a><span class="co"># As a simple descriptive of the simulated data, summarize the number of subjects with ICEs and missing data </span></span>
+<span id="cb1-69"><a href="#cb1-69" tabindex="-1"></a>data <span class="sc">%&gt;%</span></span>
+<span id="cb1-70"><a href="#cb1-70" tabindex="-1"></a>  <span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span></span>
+<span id="cb1-71"><a href="#cb1-71" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb1-72"><a href="#cb1-72" tabindex="-1"></a>    <span class="at">group =</span> group[<span class="dv">1</span>],</span>
+<span id="cb1-73"><a href="#cb1-73" tabindex="-1"></a>    <span class="at">any_ICE =</span> (<span class="fu">any</span>(ind_ice1 <span class="sc">==</span> <span class="dv">1</span>)),</span>
+<span id="cb1-74"><a href="#cb1-74" tabindex="-1"></a>    <span class="at">any_NA =</span> <span class="fu">any</span>(<span class="fu">is.na</span>(outcome))) <span class="sc">%&gt;%</span></span>
+<span id="cb1-75"><a href="#cb1-75" tabindex="-1"></a>  <span class="fu">group_by</span>(group) <span class="sc">%&gt;%</span></span>
+<span id="cb1-76"><a href="#cb1-76" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb1-77"><a href="#cb1-77" tabindex="-1"></a>      <span class="at">subjects_with_ICE =</span> <span class="fu">sum</span>(any_ICE),</span>
+<span id="cb1-78"><a href="#cb1-78" tabindex="-1"></a>      <span class="at">subjects_with_missings =</span> <span class="fu">sum</span>(any_NA)</span>
+<span id="cb1-79"><a href="#cb1-79" tabindex="-1"></a>  )</span>
+<span id="cb1-80"><a href="#cb1-80" tabindex="-1"></a><span class="co">#&gt; # A tibble: 2 × 3</span></span>
+<span id="cb1-81"><a href="#cb1-81" tabindex="-1"></a><span class="co">#&gt;   group        subjects_with_ICE subjects_with_missings</span></span>
+<span id="cb1-82"><a href="#cb1-82" tabindex="-1"></a><span class="co">#&gt;   &lt;fct&gt;                    &lt;int&gt;                  &lt;int&gt;</span></span>
+<span id="cb1-83"><a href="#cb1-83" tabindex="-1"></a><span class="co">#&gt; 1 Control                     18                      8</span></span>
+<span id="cb1-84"><a href="#cb1-84" tabindex="-1"></a><span class="co">#&gt; 2 Intervention                25                     14</span></span></code></pre></div>
 </div>
 <div id="sec:postICEobs" class="section level1" number="3">
 <h1><span class="header-section-number">3</span> Handling of observed post-ICE data in <code>rbmi</code> under reference-based imputation</h1>
@@ -717,7 +710,7 @@ As an example, the user can check how the CIR strategy was implemented by lookin
 <span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt;     pars &lt;- list(mu = mu, sigma = sigma)</span></span>
 <span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt;     return(pars)</span></span>
 <span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x79ebdf000&gt;</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xc3970b9d8&gt;</span></span>
 <span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:rbmi&gt;</span></span></code></pre></div>
 <p>To further illustrate this for a simple example, assume that a new strategy is to be implemented as follows:
 - The marginal mean of the imputation distribution is equal to the marginal mean trajectory for the subject according to their assigned group and covariates up to the ICE.
@@ -885,7 +878,9 @@ function <code>use_transform(expression)</code>, where <code>expression</code> i
 The estimates are pooled on the original scale; <code>pool()</code> then stores the transformed estimate, confidence
 limits, and delta-method standard error separately in <code>transformed_pars</code>.
 Confidence limits are transformed directly rather than reconstructed from that
-standard error. P-values are unchanged.</p>
+standard error. Transformations must be monotone over each pooled confidence
+interval; <code>pool()</code> checks the supplied derivative and errors when it changes sign.
+P-values are unchanged.</p>
 <p>For example, the preceding logistic regression estimates a log odds ratio. We declare
 odds-ratio reporting with the <code>exp</code> transformation. <code>print(pool_obj_prop)</code> and <code>as.data.frame(pool_obj_prop)</code>
 now automatically use that scale, while the original log-odds-ratio result
