@@ -82,6 +82,48 @@ test_that("prepare_init_vals works as expected", {
     expect_identical(result_us_lkj, expected_us_lkj)
 })
 
+test_that("complete_control_bayes_common works as expected", {
+    result <- complete_control_bayes_common(
+        control = control_bayes(init = "random"),
+        n_samples = 1000,
+        quiet = FALSE
+    )
+
+    expect_true(is.list(result))
+    expect_equal(result$iter, result$warmup + result$thin * 1000)
+    expect_equal(result$refresh, ceiling(result$iter / 10))
+    expect_identical(result$init, "random")
+})
+
+test_that("complete_control_bayes_common validates forbidden arguments", {
+    expect_error(
+        complete_control_bayes_common(
+            control = c(control_bayes(), list(iter = 1000)),
+            n_samples = 10,
+            quiet = TRUE
+        ),
+        "must not be specified directly"
+    )
+
+    expect_error(
+        complete_control_bayes_common(
+            control = c(control_bayes(), list(refresh = 1000)),
+            n_samples = 10,
+            quiet = TRUE
+        ),
+        "must not be specified directly"
+    )
+
+    expect_error(
+        complete_control_bayes_common(
+            control = c(control_bayes(), list(object = 1)),
+            n_samples = 10,
+            quiet = TRUE
+        ),
+        "must not be specified"
+    )
+})
+
 test_that("complete_control_bayes works as expected", {
     control <- control_bayes()
     # We use dummy inputs here for simplicity.
@@ -104,4 +146,17 @@ test_that("complete_control_bayes works as expected", {
         is.list(result$init),
         setequal(names(result$init), c("theta", "sigma", "tau"))
     )
+})
+
+
+test_that("count control uses random initialization for the default MMRM option", {
+    result <- complete_control_bayes_count(
+        control = control_bayes(init = "mmrm"),
+        n_samples = 4,
+        quiet = TRUE,
+        stan_data = list()
+    )
+
+    expect_identical(result$init, "random")
+    expect_equal(result$iter, result$warmup + result$thin * 4)
 })

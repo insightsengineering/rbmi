@@ -1,0 +1,938 @@
+---
+title: "rbmi: Modeling count data"
+author: Daniel Sabanés Bové
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 4
+    number_sections: true
+    citation_package: natbib
+    base_format: rmarkdown::html_vignette
+bibliography: "references.bib"
+link-citations: true   
+linkcolor: blue
+pkgdown:
+  as_is: true
+vignette: >
+  %\VignetteIndexEntry{rbmi: Modeling count data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>"
+)
+```
+
+Now we'll walk through how count data can be modeled using the `rbmi` package. The following sections will cover the necessary steps to prepare your data, draw parameter samples, impute missing values, and pool estimates across multiple imputations.
+For the statistical method details please see the [separate vignette](stat_specs_counts.html).
+
+## The Data
+
+We use the simulated example data set generated with the `NM_Simdata2.sas` macro by James Roger previously available from the [LSHTM website](https://www.lshtm.ac.uk/research/centres-projects-groups/missing-data) (they host content for DIA SWG on Estimands and Missing Data). The data contain three treatment arms and up to three rows per patient, corresponding to the on-treatment, off-treatment but observed, and post-withdrawal periods.
+
+The simulation was informed by characteristics of the METREO study of mepolizumab in eosinophilic chronic obstructive pulmonary disease, but these are not trial data and the simulated treatment effects should not be interpreted as METREO results. Patients either complete follow-up on treatment, discontinue treatment and remain observed until the end of follow-up, discontinue treatment and remain observed for a time before withdrawing, or discontinue treatment and withdraw immediately. Period 1 represents time on treatment, period 2 observed time off treatment, and period 3 unobserved time after withdrawal. Counts were also simulated for period 3 and retained as the complete-data truth for evaluating the analysis, although they are set to missing in the observed outcome.
+
+```{r, message = FALSE}
+library(dplyr)
+
+dat_count_raw <- read.csv(
+    system.file("extdata", "sim_rogeretal.csv", package = "rbmi")
+)
+dat_count <- dat_count_raw |>
+    dplyr::select(
+        patient,
+        period,
+        TreatLab,
+        OnOff,
+        Length,
+        BaseCount,
+        Observed_Count
+    ) |> 
+    mutate(
+        patient = factor(patient),
+        period = as.character(period),
+        TreatLab = factor(TreatLab, levels = c("Placebo", "100mg", "300mg")),
+        OnOff = factor(OnOff, levels = c("On", "Off"))
+    )
+head(dat_count)
+```
+
+The variables retained for this example are:
+
+- `patient`: patient identifier.
+- `period`: follow-up period (1 = on treatment, 2 = off treatment but observed, and 3 = off treatment and unobserved).
+- `TreatLab`: randomized treatment group (`Placebo`, `100mg`, or `300mg`).
+- `OnOff`: indicator of whether the patient was on or off treatment during the period.
+- `Length`: time spent in the period, in days.
+- `BaseCount`: number of events experienced during the year before the study, used as a baseline covariate.
+- `Observed_Count`: observed number of events during the period; this is missing for period 3 because that period occurs after withdrawal.
+
+The source data omit periods with zero length. We use `expand_locf()` to add these rows so that every patient has all three periods. The treatment arm and baseline count are carried forward, while `OnOff` is derived from the period. Added rows have zero length and a missing observed count.
+
+```{r}
+dat_count_filled <- dat_count |>
+    expand_locf(
+        patient = levels(dat_count$patient),
+        period = as.character(1:3),
+        vars = c("TreatLab", "BaseCount"),
+        group = "patient",
+        order = c("patient", "period")
+    ) |> 
+    mutate(
+        OnOff = factor(
+            ifelse(period == "1", "On", "Off"),
+            levels = c("On", "Off")
+        ),
+        Length = ifelse(is.na(Length), 0, Length)
+    )
+```
+
+The SAS reference results for the three models illustrated below are included as
+a CSV file with the package. We retain the two active-treatment versus placebo
+contrasts, so they can be compared directly with the pooled `rbmi` estimates.
+
+```{r}
+sas_results <- read.csv(
+    system.file("extdata", "results.csv", package = "rbmi"),
+    check.names = FALSE
+) |>
+    dplyr::filter(
+        (TreatLab == "100mg" & `_TreatLab` == "Placebo") |
+            (TreatLab == "300mg" & `_TreatLab` == "Placebo")
+    ) |>
+    dplyr::transmute(
+        model = Label,
+        comparison = paste(TreatLab, "vs", `_TreatLab`),
+        sas_rate_ratio = EXP_Est,
+        sas_lower_95 = Low_95PCT,
+        sas_upper_95 = Upp_95PCT,
+        sas_p_value = Pvalue
+    )
+
+check_rate_ratio_results <- function(x, sas_model) {
+    expected_comparisons <- c(
+        "100mg vs Placebo",
+        "300mg vs Placebo"
+    )
+    sas_subset <- dplyr::filter(sas_results, model == sas_model)
+    stopifnot(
+        setequal(x$comparison, expected_comparisons),
+        nrow(x) == 2,
+        all(is.finite(as.matrix(x[, setdiff(names(x), "comparison")]))),
+        all(x[[2]] > 0),
+        all(x[[3]] < x[[2]]),
+        all(x[[2]] < x[[4]]),
+        all(x[[5]] >= 0 & x[[5]] <= 1),
+        setequal(sas_subset$comparison, expected_comparisons),
+        all(is.finite(as.matrix(
+            sas_subset[, setdiff(names(sas_subset), c("model", "comparison"))]
+        )))
+    )
+    invisible(x)
+}
+```
+
+## Draws
+
+The inputs to the `draws()` function are now:
+
+- `data`: The data frame as prepared above.
+- `data_ice`: Subject-specific imputation strategies for missing count periods
+- `vars`: The variables to be used in the model
+- `method`: Here we can only use `method_bayes()` for fully Bayesian multiple imputation for our count data
+- `outcome` (new): The outcome type, which defaults to "continuous", but here we will choose "count"
+
+For count outcomes, `data_ice` contains only the subject ID and strategy columns;
+it has no period or visit column. It does not record an intercurrent-event (ICE)
+time, and no ICE time is inferred from `duration`. The strategy assigned to a
+subject applies to every missing positive-duration period for that subject.
+Consequently, `JR` and `CR` are reference-based assumptions for all of that
+subject's missing periods, rather than post-ICE-only assumptions. Use `MAR` for
+subjects whose missing periods should retain their randomized-arm trajectory.
+
+### Imputation strategies
+
+Here we just use the same imputation strategy for all patients, but we would also be able to provide different strategies for each patient.
+
+Let's use the Missing At Random (MAR) strategy for all patients with positive post-withdrawal exposure in period 3. This matches the first model in the "Another case with three periods" analysis, where the period-3 design matrix retains each patient's randomized treatment arm:
+
+```{r}
+dat_ice <- dat_count_filled |> 
+    filter(period == "3", Length > 0) |>
+    dplyr::select(patient) |>
+    distinct() |> 
+    mutate(
+        strategy = "MAR"
+    )
+```
+
+### Variables
+
+Next we define the variables to be used in the model. 
+
+```{r}
+vars <- set_vars(
+    outcome = "Observed_Count",
+    subjid = "patient",
+    period = "period",
+    duration = "Length",
+    group = "TreatLab",
+    covariates = c("TreatLab * OnOff", "BaseCount")
+)
+```
+
+Note that here we can also specify interaction terms in the `covariates` argument,
+which will then be included in the draws step model.
+
+### Method
+
+We just use the standard Bayesian method options:
+
+```{r}
+method <- method_bayes(
+    n_samples = 1000,
+    control = control_bayes(
+        warmup = 200,
+        thin = 5,
+        seed = 1821 # Seed to be used by Stan
+    )
+)
+```
+
+### Sampling
+
+Finally we can call the `draws()` function to draw samples from the posterior distribution of the model parameters:
+
+```{r}
+set.seed(987)
+drawObj <- draws(
+    outcome = "count",
+    data = dat_count_filled,
+    data_ice = dat_ice,
+    vars = vars,
+    method = method,
+    quiet = TRUE
+)
+drawObj
+```
+
+## Impute
+
+Now we basically just run the imputation:
+
+```{r}
+imputeObj <- impute(drawObj)
+imputeObj
+```
+
+## Analyse
+
+Then the next step is the analysis of the imputed data. We can use a similar negative binomial regression model
+as above, however here we don't have anymore the `OnOff` variable, because we have imputed the post-withdrawal
+periods. So we just use baseline count as additional covariate, next to the treatment group.
+The imputed values replace the missing values in the original outcome column. We therefore keep
+`Observed_Count` as the outcome name. The analysis function sums this outcome and `Length` over periods for
+each patient before fitting the model; it does not require a separate `Imputed_Count` column.
+
+```{r}
+ana_vars <- set_vars(
+    outcome = "Observed_Count",
+    subjid = "patient",
+    period = "period",
+    duration = "Length",
+    group = "TreatLab",
+    covariates = c("BaseCount")
+)
+
+anaObj <- analyse(
+    imputeObj,
+    neg_bin_regression,
+    vars = ana_vars
+)
+```
+
+## Pool
+
+Finally we can pool all regression coefficients across the multiple
+imputations. Pooling is performed on the log-rate scale using Rubin's rules,
+with confidence intervals and p-values based on the standard normal
+distribution.
+
+```{r}
+poolObj <- pool(
+    anaObj,
+    conf.level = 0.95,
+    alternative = "two.sided"
+)
+poolObj
+```
+
+The displayed results have been exponentiated to obtain rate ratios. The
+original log-rate-scale results remain available in `poolObj$pars`, and can be shown
+with the `print` option `scale = "original"`:
+
+```{r}
+print(poolObj, scale = "original")
+```
+
+We can also look at the Monte Carlo standard errors for the results:
+
+```{r}
+mcse(poolObj, anaObj)
+```
+
+## Comparison with SAS results
+
+The corresponding SAS results are labelled `NM_Reg: Treat*OnOff BaseCount`.
+
+```{r}
+rate_ratios_shared <- as.data.frame(poolObj) |>
+    dplyr::filter(parameter %in% c("TreatLab100mg", "TreatLab300mg")) |>
+    dplyr::transmute(
+        comparison = dplyr::recode(
+            parameter,
+            TreatLab100mg = "100mg vs Placebo",
+            TreatLab300mg = "300mg vs Placebo"
+        ),
+        rbmi_rate_ratio = est,
+        rbmi_lower_95 = lci,
+        rbmi_upper_95 = uci,
+        rbmi_p_value = pval
+    )
+check_rate_ratio_results(
+    rate_ratios_shared,
+    "NM_Reg: Treat*OnOff BaseCount"
+)
+
+dplyr::left_join(
+    rate_ratios_shared,
+    dplyr::filter(sas_results, model == "NM_Reg: Treat*OnOff BaseCount"),
+    by = "comparison"
+) |>
+    dplyr::select(-model) |> 
+    dplyr::mutate(dplyr::across(dplyr::where(is.numeric), ~ round(.x, 4)))
+```
+
+## Additional modeling options
+
+### Separate draw model sampling for each treatment group
+
+The default count model uses one dispersion/frailty parameter across all
+treatment groups. To estimate a separate parameter for each group, set
+`same_cov = FALSE` in `method_bayes()`. The name is retained for consistency
+with continuous-outcome models; for count outcomes it controls whether `phi`
+is shared between groups.
+
+To make the complete imputation model separate by treatment arm, all fixed
+effects must also be interacted with treatment. For the example data this is:
+
+```{r}
+vars_by_arm <- set_vars(
+    outcome = "Observed_Count",
+    subjid = "patient",
+    period = "period",
+    duration = "Length",
+    group = "TreatLab",
+    covariates = c(
+        "TreatLab:OnOff",
+        "TreatLab:BaseCount"
+    )
+)
+
+method_by_arm <- method_bayes(
+    same_cov = FALSE,
+    n_samples = 1000,
+    control = control_bayes(
+        warmup = 200,
+        thin = 5,
+        seed = 1821
+    )
+)
+
+drawObj_by_arm <- draws(
+    outcome = "count",
+    data = dat_count_filled,
+    data_ice = dat_ice,
+    vars = vars_by_arm,
+    method = method_by_arm,
+    quiet = TRUE
+)
+```
+
+This is fitted in one Stan call, but with treatment-specific fixed effects and
+independent treatment-specific `phi` parameters the posterior factorizes by
+arm. It therefore represents the same statistical model as fitting each arm
+separately, while retaining a single rbmi draws object and the usual downstream
+workflow.
+
+For MAR imputation, each subject uses the `phi` for their randomized treatment
+arm. For JR and CR, the mapped reference arm's `phi` is used for the whole
+subject-level conditional distribution. In particular, JR still calculates
+the observed-cell means from the subject's randomized-arm design, but uses the
+reference-arm `phi` when conditioning on those observed cells and when drawing
+the missing cells. JR therefore combines the randomized-arm observed mean
+trajectory with the reference arm's frailty distribution; it is not only a
+design-matrix substitution for missing periods. This distinction disappears
+with the default shared `phi`.
+
+#### Impute
+
+The downstream workflow is unchanged. Setting the seed immediately before
+`impute()` makes the conditional negative-binomial draws reproducible.
+
+```{r}
+set.seed(123)
+imputeObj_by_arm <- impute(drawObj_by_arm)
+```
+
+#### Analyse and pool
+
+The treatment-policy analysis still combines all randomized treatment arms and
+uses the same analysis model as above. Only the imputation model has changed.
+
+```{r}
+anaObj_by_arm <- analyse(
+    imputeObj_by_arm,
+    neg_bin_regression,
+    vars = ana_vars
+)
+
+poolObj_by_arm <- pool(
+    anaObj_by_arm,
+    conf.level = 0.95,
+    alternative = "two.sided"
+)
+poolObj_by_arm
+```
+
+For comparison with implementations that report treatment effects as rate
+ratios, extract the transformed pooled results:
+
+```{r}
+rate_ratios_by_arm <- as.data.frame(poolObj_by_arm) |>
+    filter(parameter %in% c("TreatLab100mg", "TreatLab300mg")) |>
+    transmute(
+        comparison = recode(
+            parameter,
+            TreatLab100mg = "100mg vs Placebo",
+            TreatLab300mg = "300mg vs Placebo"
+        ),
+        rate_ratio = est,
+        lower_95 = lci,
+        upper_95 = uci,
+        p_value = pval
+    )
+check_rate_ratio_results(
+    rate_ratios_by_arm,
+    "NM_Reg: Separate for each Treat."
+)
+rate_ratios_by_arm
+```
+
+#### Comparison with SAS results
+
+The corresponding SAS results are labelled `NM_Reg: Separate for each Treat.`.
+
+```{r}
+dplyr::left_join(
+    rate_ratios_by_arm |>
+        dplyr::rename(
+            rbmi_rate_ratio = rate_ratio,
+            rbmi_lower_95 = lower_95,
+            rbmi_upper_95 = upper_95,
+            rbmi_p_value = p_value
+        ),
+    dplyr::filter(sas_results, model == "NM_Reg: Separate for each Treat."),
+    by = "comparison"
+) |>
+    dplyr::select(-model) |> 
+    dplyr::mutate(dplyr::across(dplyr::where(is.numeric), ~ round(.x, 4)))
+```
+
+### Treatment interaction terms on all model covariates
+
+This model also gives each treatment arm its own on- and off-treatment rates
+and baseline-count slope. Unlike the preceding model, all arms are fitted in
+one model, so they share a single dispersion/frailty parameter. This matches
+the `Separate each Treat. Shared frai` model in the SAS reference analysis.
+
+#### Draw and impute
+
+The model formula is `~ 0 + TreatLab:OnOff + TreatLab:BaseCount`. The
+interactions with `TreatLab` give each randomized treatment arm a separate
+coefficient for every covariate; `same_cov = TRUE` (the default) retains the
+shared count-model dispersion parameter.
+
+```{r}
+vars_all_treatment_interactions <- set_vars(
+    outcome = "Observed_Count",
+    subjid = "patient",
+    period = "period",
+    duration = "Length",
+    group = "TreatLab",
+    covariates = c(
+        "TreatLab:OnOff",
+        "TreatLab:BaseCount"
+    )
+)
+
+drawObj_all_treatment_interactions <- draws(
+    outcome = "count",
+    data = dat_count_filled,
+    data_ice = dat_ice,
+    vars = vars_all_treatment_interactions,
+    method = method,
+    quiet = TRUE
+)
+
+set.seed(123)
+imputeObj_all_treatment_interactions <- impute(
+    drawObj_all_treatment_interactions
+)
+```
+
+#### Analyse and pool
+
+The treatment-policy analysis model is unchanged: it uses randomized
+treatment and baseline count, without distinguishing on- and off-treatment
+periods.
+
+```{r}
+anaObj_all_treatment_interactions <- analyse(
+    imputeObj_all_treatment_interactions,
+    neg_bin_regression,
+    vars = ana_vars
+)
+
+poolObj_all_treatment_interactions <- pool(
+    anaObj_all_treatment_interactions,
+    conf.level = 0.95,
+    alternative = "two.sided"
+)
+poolObj_all_treatment_interactions
+```
+
+#### Comparison with SAS results
+
+The corresponding SAS results are labelled `Separate each Treat. Shared frai`.
+
+```{r}
+rate_ratios_all_treatment_interactions <- as.data.frame(
+    poolObj_all_treatment_interactions
+) |>
+    dplyr::filter(parameter %in% c("TreatLab100mg", "TreatLab300mg")) |>
+    dplyr::transmute(
+        comparison = dplyr::recode(
+            parameter,
+            TreatLab100mg = "100mg vs Placebo",
+            TreatLab300mg = "300mg vs Placebo"
+        ),
+        rbmi_rate_ratio = est,
+        rbmi_lower_95 = lci,
+        rbmi_upper_95 = uci,
+        rbmi_p_value = pval
+    )
+check_rate_ratio_results(
+    rate_ratios_all_treatment_interactions,
+    "Separate each Treat. Shared frai"
+)
+
+dplyr::left_join(
+    rate_ratios_all_treatment_interactions,
+    dplyr::filter(
+        sas_results,
+        model == "Separate each Treat. Shared frai"
+    ),
+    by = "comparison"
+) |>
+    dplyr::select(-model) |> 
+    dplyr::mutate(dplyr::across(dplyr::where(is.numeric), ~ round(.x, 4)))
+```
+
+### More complex model which also splits time by season
+
+The preceding models use the original three periods. We can also split those
+periods into smaller calendar cells and include a recurring seasonal effect in
+the imputation model. This is a genuinely ragged representation: patients need
+not contribute the same interval identifiers, and a withdrawn patient can have
+several missing cells.
+
+The source data include `Times1`--`Times20`, one-based event-day offsets within
+each original period: a value of 1 denotes the first day of that period and a
+value of `Length` denotes its last day. There is one non-missing `Times` value
+for each event in `Observed_Count`, with the remaining columns left missing;
+the simulation allowed at most 20 events per period. The start of a period on
+the study calendar is `StartDate + Lengthsofar`, so an event's calendar day is
+`StartDate + Lengthsofar + TimesN - 1`. Although simulated event times also
+exist for the unobserved third period as part of the complete-data truth,
+`Observed_Count` is missing there and the split cell outcomes remain missing.
+
+`split_time()` uses these offsets to allocate each observed aggregate count to
+91-day cells. A fixed width of 91 days reproduces the quarter definition in the
+SAS example. For other applications, `interval` can instead be `"week"`,
+`"month"`, `"quarter"`, or `"year"`; calendar months, quarters, and years
+require a `Date` start variable.
+
+```{r}
+dat_count_season <- dat_count_raw |>
+    mutate(
+        patient = factor(patient),
+        TreatLab = factor(TreatLab, levels = c("Placebo", "100mg", "300mg")),
+        OnOff = factor(OnOff, levels = c("On", "Off")),
+        cell_start = StartDate + Lengthsofar
+    ) |>
+    split_time(
+        start = "cell_start",
+        duration = "Length",
+        outcome = "Observed_Count",
+        event_times = paste0("Times", 1:20),
+        interval = 91,
+        origin = 0,
+        period = "period"
+    ) |>
+    mutate(
+        Quarter = factor(1 + split_interval %% 4, levels = 1:4)
+    )
+
+nrow(dat_count_season)
+table(dat_count_season$Quarter)
+```
+
+The split data have 3,518 rows and 24 distinct crossed period/quarter cells.
+As checks on the restructuring, split durations sum to the original duration,
+observed cell counts sum to the original observed count, and the 83 withdrawn
+patients contribute 204 missing positive-duration cells.
+
+```{r}
+season_check <- dat_count_season |>
+    group_by(patient, period) |>
+    summarise(
+        split_length = sum(split_duration),
+        split_count = if (all(is.na(split_outcome))) {
+            NA_integer_
+        } else {
+            sum(split_outcome)
+        },
+        original_length = first(Length),
+        original_count = first(Observed_Count),
+        .groups = "drop"
+    )
+
+stopifnot(
+    nrow(dat_count_season) == 3518,
+    nlevels(dat_count_season$split_period) == 24,
+    sum(
+        is.na(dat_count_season$split_outcome) &
+            dat_count_season$split_duration > 0
+    ) == 204,
+    n_distinct(
+        dat_count_season$patient[is.na(dat_count_season$split_outcome)]
+    ) == 83,
+    all(season_check$split_length == season_check$original_length),
+    all(
+        season_check$split_count[season_check$period != 3] ==
+            season_check$original_count[season_check$period != 3]
+    ),
+    all(is.na(season_check$split_count[season_check$period == 3]))
+)
+```
+
+The count draw model uses a ragged negative-multinomial likelihood: it accepts
+one row per observed positive-duration cell and accumulates the cell means and
+counts by patient. There is no padding to a common set of periods and no fixed
+upper limit on the number of periods.
+
+We add `Quarter` to the imputation model. `split_period` uniquely identifies
+the original period crossed with the absolute 91-day interval and supplies the
+within-patient ordering used for sequential imputation.
+
+```{r}
+dat_ice_season <- dat_count_season |>
+    filter(is.na(split_outcome), split_duration > 0) |>
+    distinct(patient) |>
+    mutate(strategy = "MAR")
+
+vars_season <- set_vars(
+    outcome = "split_outcome",
+    subjid = "patient",
+    period = "split_period",
+    duration = "split_duration",
+    group = "TreatLab",
+    covariates = c(
+        "TreatLab:OnOff",
+        "BaseCount",
+        "Quarter"
+    )
+)
+
+drawObj_season <- draws(
+    outcome = "count",
+    data = dat_count_season,
+    data_ice = dat_ice_season,
+    vars = vars_season,
+    method = method,
+    quiet = TRUE
+)
+```
+
+During imputation, missing cells are visited in `split_period` order. For each
+patient, a draw conditions first on all observed cells. After each missing-cell
+draw, its sampled count and fitted mean are added to the conditioning totals
+before drawing the next cell. With only one missing cell, this reduces exactly
+to the conditional negative-binomial calculation used by the original
+three-period implementation.
+
+```{r}
+set.seed(123)
+imputeObj_season <- impute(drawObj_season)
+imputeObj_season
+```
+
+Season is used only in the imputation model. The treatment-policy analysis
+still aggregates all observed and imputed counts and exposure within patient.
+
+```{r}
+ana_vars_season <- set_vars(
+    outcome = "split_outcome",
+    subjid = "patient",
+    period = "split_period",
+    duration = "split_duration",
+    group = "TreatLab",
+    covariates = "BaseCount"
+)
+
+anaObj_season <- analyse(
+    imputeObj_season,
+    neg_bin_regression,
+    vars = ana_vars_season
+)
+poolObj_season <- pool(
+    anaObj_season,
+    conf.level = 0.95,
+    alternative = "two.sided"
+)
+poolObj_season
+```
+
+The corresponding SAS results are labelled `4 Seasons: Treat*OnOff BaseCount`.
+
+```{r}
+rate_ratios_season <- as.data.frame(poolObj_season) |>
+    filter(parameter %in% c("TreatLab100mg", "TreatLab300mg")) |>
+    transmute(
+        comparison = recode(
+            parameter,
+            TreatLab100mg = "100mg vs Placebo",
+            TreatLab300mg = "300mg vs Placebo"
+        ),
+        rbmi_rate_ratio = est,
+        rbmi_lower_95 = lci,
+        rbmi_upper_95 = uci,
+        rbmi_p_value = pval
+    )
+check_rate_ratio_results(
+    rate_ratios_season,
+    "4 Seasons: Treat*OnOff BaseCount"
+)
+
+left_join(
+    rate_ratios_season,
+    filter(sas_results, model == "4 Seasons: Treat*OnOff BaseCount"),
+    by = "comparison"
+) |>
+    select(-model) |> 
+    dplyr::mutate(dplyr::across(dplyr::where(is.numeric), ~ round(.x, 4)))
+```
+
+### Fixed rate model for the active arms
+
+The next controlled-imputation analysis retains the estimated off-treatment
+rate for placebo, but replaces the model-based period-3 rate for both active
+arms with a fixed value.
+
+There is an important parameterization detail. The executed SAS code fixes
+`0.0021` on its negative-multinomial lambda scale. If
+$r = \phi^{-1}$ is the negative-multinomial shape parameter, the
+Poisson mean supplied for period 3 is therefore
+
+$$
+\mu_{i3} = r L_{i3} \times 0.0021
+          = \frac{L_{i3} \times 0.0021}{\phi}.
+$$
+
+Consequently, `0.0021` is not a fixed marginal event rate. A genuinely fixed
+Poisson event rate would instead use
+$\mu_{i3} = L_{i3} \times 0.0021$, i.e. without the division by $\phi$. 
+In the joint count model, $\mu_{i3}$ is the
+unconditional marginal mean of $Y_{i3}$. The actual imputation distribution,
+however, conditions on the observed counts $y_{i1},y_{i2}$. Given these counts
+and fitted observed-cell means $\hat\mu_{i1},\hat\mu_{i2}$, its conditional mean
+is
+
+$$
+\mathbb{E}(Y_{i3} \mid y_{i1},y_{i2}) =
+\frac{r + y_{i1} + y_{i2}}
+     {r + \hat\mu_{i1} + \hat\mu_{i2}}\,\mu_{i3}.
+$$
+
+For a `fixed_lambda_rate` strategy based on JR or CR, $r$ is calculated from
+the mapped reference arm's `phi`; under JR this is so even though the fitted
+observed-cell means in the denominator use the subject's randomized-arm
+design.
+
+Controlled count strategies are applied in `impute()`, after the posterior
+parameters have been drawn. Each strategy has a base trajectory (`MAR`, `JR`,
+or `CR`) and an optional transformation of the missing-cell rate. Thus the
+original `drawObj` can be reused without refitting the observed-data model.
+
+First, we identify the period-3 withdrawals in the active arms and update only
+their imputation strategy. Placebo patients retain MAR imputation using the
+estimated placebo off-treatment rate.
+
+```{r}
+active_period3_strategy <- dat_count_filled |>
+    filter(
+        period == "3",
+        Length > 0,
+        TreatLab != "Placebo"
+    ) |>
+    distinct(patient) |>
+    mutate(strategy = "FIXED_LAMBDA")
+
+fixed_lambda_strategies <- get_count_strategies(
+    FIXED_LAMBDA = count_strategy(
+        base = "MAR",
+        fixed_lambda_rate = 0.0021,
+        period = "3"
+    )
+)
+
+set.seed(123)
+imputeObj_fixed_lambda <- impute(
+    drawObj,
+    update_strategy = active_period3_strategy,
+    strategies = fixed_lambda_strategies
+)
+```
+
+The treatment-policy analysis and pooling steps are unchanged.
+
+```{r}
+anaObj_fixed_lambda <- analyse(
+    imputeObj_fixed_lambda,
+    neg_bin_regression,
+    vars = ana_vars
+)
+
+poolObj_fixed_lambda <- pool(
+    anaObj_fixed_lambda,
+    conf.level = 0.95,
+    alternative = "two.sided"
+)
+
+rate_ratios_fixed_lambda <- as.data.frame(poolObj_fixed_lambda) |>
+    filter(parameter %in% c("TreatLab100mg", "TreatLab300mg")) |>
+    transmute(
+        comparison = recode(
+            parameter,
+            TreatLab100mg = "100mg vs Placebo",
+            TreatLab300mg = "300mg vs Placebo"
+        ),
+        rbmi_rate_ratio = est,
+        rbmi_lower_95 = lci,
+        rbmi_upper_95 = uci,
+        rbmi_p_value = pval
+    )
+check_rate_ratio_results(
+    rate_ratios_fixed_lambda,
+    "Fixed 0.01 active imputed"
+)
+
+left_join(
+    rate_ratios_fixed_lambda,
+    filter(sas_results, model == "Fixed 0.01 active imputed"),
+    by = "comparison"
+) |>
+    select(-model) |>
+    dplyr::mutate(dplyr::across(dplyr::where(is.numeric), ~ round(.x, 4)))
+```
+
+### Off-treatment estimate is doubled for the active arms
+
+The same controlled-imputation mechanism can multiply rather than replace the
+model-based mean. Here the active-arm period-3 mean is twice the corresponding
+estimated off-treatment mean, while placebo is unchanged:
+
+$$
+\mu_{i3}^{\text{impute}} = 2\mu_{i3}^{\text{model}}.
+$$
+
+Only the strategy definition changes. Its base remains MAR, so each active-arm
+patient retains their randomized arm's modeled off-treatment trajectory and
+dispersion parameter before the multiplier is applied.
+
+```{r}
+active_period3_double_strategy <- active_period3_strategy |>
+    mutate(strategy = "DOUBLE_RATE")
+
+double_rate_strategies <- get_count_strategies(
+    DOUBLE_RATE = count_strategy(
+        base = "MAR",
+        rate_multiplier = 2,
+        period = "3"
+    )
+)
+
+set.seed(123)
+imputeObj_double_rate <- impute(
+    drawObj,
+    update_strategy = active_period3_double_strategy,
+    strategies = double_rate_strategies
+)
+```
+
+```{r}
+anaObj_double_rate <- analyse(
+    imputeObj_double_rate,
+    neg_bin_regression,
+    vars = ana_vars
+)
+
+poolObj_double_rate <- pool(
+    anaObj_double_rate,
+    conf.level = 0.95,
+    alternative = "two.sided"
+)
+
+rate_ratios_double_rate <- as.data.frame(poolObj_double_rate) |>
+    filter(parameter %in% c("TreatLab100mg", "TreatLab300mg")) |>
+    transmute(
+        comparison = recode(
+            parameter,
+            TreatLab100mg = "100mg vs Placebo",
+            TreatLab300mg = "300mg vs Placebo"
+        ),
+        rbmi_rate_ratio = est,
+        rbmi_lower_95 = lci,
+        rbmi_upper_95 = uci,
+        rbmi_p_value = pval
+    )
+check_rate_ratio_results(
+    rate_ratios_double_rate,
+    "Delta Active double rate off"
+)
+
+left_join(
+    rate_ratios_double_rate,
+    filter(sas_results, model == "Delta Active double rate off"),
+    by = "comparison"
+) |>
+    select(-model) |>
+    dplyr::mutate(dplyr::across(dplyr::where(is.numeric), ~ round(.x, 4)))
+```
+
+
+## References 

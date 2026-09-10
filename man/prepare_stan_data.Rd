@@ -2,7 +2,7 @@
 % Please edit documentation in R/mcmc.R
 \name{prepare_stan_data}
 \alias{prepare_stan_data}
-\title{Prepare input data to run the Stan model}
+\title{Prepare input data to run the Stan model for continuous outcome}
 \usage{
 prepare_stan_data(ddat, subjid, visit, outcome, group)
 }
@@ -35,7 +35,7 @@ A \code{stan_data} object. A named list as per \verb{data\{\}} block of the rela
 }
 }
 \description{
-Prepare input data to run the Stan model.
+Prepare input data to run the Stan model for continuous outcome.
 Creates / calculates all the required inputs as required by the \verb{data\{\}} block of the MMRM Stan program.
 }
 \details{

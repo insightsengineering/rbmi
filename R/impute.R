@@ -18,9 +18,12 @@
 #' originally set via the `data_ice` option in [draws()]. See the details section for more
 #' information.
 #'
-#' @param strategies A named list of functions. Defines the imputation functions to be used.
-#' The names of the list should mirror the values specified in `strategy` column of `data_ice`.
-#' Default = [getStrategies()]. See [getStrategies()] for more details.
+#' @param strategies A named list defining the imputation strategies to be used.
+#' The names of the list should mirror the values specified in the `strategy`
+#' column of `data_ice` or `update_strategy`. For continuous outcomes the
+#' default is [getStrategies()]. For count outcomes, use
+#' [get_count_strategies()] to define controlled rate transformations in
+#' addition to the built-in MAR, JR and CR strategies.
 #'
 #' @details
 #'
@@ -62,7 +65,9 @@
 #' those defined in the `vars` argument as specified in the call to [draws()]. Please note that this
 #' argument only allows you to update the imputation strategy and not other arguments such as the
 #' time of the first visit affected by the ICE.
-#' A key limitation of this functionality is
+#' For count outcomes, it can also assign controlled count strategies created
+#' with [count_strategy()] after the posterior draws have been obtained.
+#' For visit-based continuous outcomes, a key limitation of this functionality is
 #' that one can only switch between a MAR and a non-MAR strategy (or vice versa) for subjects without
 #' observed post-ICE data. The reason for this is that such a change would affect whether the post-ICE data is included
 #' in the base imputation model or not (as explained in the help to [draws()]).
@@ -894,15 +899,16 @@ print.imputation <- function(x, ...) {
     ref_strings <- sprintf(sstring, ref_from, ref_to)
 
     ### % of missing data strings
+    timepoints <- x$data$visits
     is_miss <- matrix(
         unlist(x$data$is_missing),
-        ncol = length(x$data$visits),
+        ncol = length(timepoints),
         byrow = TRUE
     )
     is_miss_perc <- round((apply(is_miss, 2, sum) / nrow(is_miss)) * 100)
-    width <- max(nchar(x$data$visits))
+    width <- max(nchar(timepoints))
     sstring <- paste0("%-", width, "s: %3s%%")
-    miss_strings <- sprintf(sstring, x$data$visits, is_miss_perc)
+    miss_strings <- sprintf(sstring, timepoints, is_miss_perc)
 
     n_imp <- length(x$imputations)
     n_imp_string <- ife(

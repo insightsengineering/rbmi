@@ -25,9 +25,12 @@ an imputation strategy (as defined by \code{data_ice[[vars$strategy]]} in the ca
 originally set via the \code{data_ice} option in \code{\link[=draws]{draws()}}. See the details section for more
 information.}
 
-\item{strategies}{A named list of functions. Defines the imputation functions to be used.
-The names of the list should mirror the values specified in \code{strategy} column of \code{data_ice}.
-Default = \code{\link[=getStrategies]{getStrategies()}}. See \code{\link[=getStrategies]{getStrategies()}} for more details.}
+\item{strategies}{A named list defining the imputation strategies to be used.
+The names of the list should mirror the values specified in the \code{strategy}
+column of \code{data_ice} or \code{update_strategy}. For continuous outcomes the
+default is \code{\link[=getStrategies]{getStrategies()}}. For count outcomes, use
+\code{\link[=get_count_strategies]{get_count_strategies()}} to define controlled rate transformations in
+addition to the built-in MAR, JR and CR strategies.}
 
 \item{condmean}{logical. If TRUE will impute using the conditional mean values, if values
 will impute by taking a random draw from the multivariate normal distribution.}

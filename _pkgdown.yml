@@ -12,5 +12,7 @@ articles:
         - '`stat_specs`'
         - advanced
         - '`retrieved_dropout`'
-        - '`CondMean_Inference`'
+        - '`CondMean_Inference`'        
+        - count
+        - '`stat_specs_counts`'
         - FAQ

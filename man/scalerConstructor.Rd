@@ -36,6 +36,7 @@ variable, all other variables are the predictors.}
     \item \href{#method-scaler-scale}{\code{scaler$scale()}}
     \item \href{#method-scaler-unscale_sigma}{\code{scaler$unscale_sigma()}}
     \item \href{#method-scaler-unscale_beta}{\code{scaler$unscale_beta()}}
+    \item \href{#method-scaler-unscale_beta_log_link}{\code{scaler$unscale_beta_log_link()}}
     \item \href{#method-scaler-clone}{\code{scaler$clone()}}
   }
 }
@@ -135,6 +136,30 @@ variable.
   }
   \subsection{Returns}{
     A numeric vector.
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-scaler-unscale_beta_log_link"></a>}}
+\if{latex}{\out{\hypertarget{method-scaler-unscale_beta_log_link}{}}}
+\subsection{\code{scaler$unscale_beta_log_link()}}{
+  Unscales regression coefficients for a model with a log link. Unlike
+\code{unscale_beta()}, this transformation does not use the location or
+scale of the outcome because the response itself is not transformed.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{scaler$unscale_beta_log_link(beta)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{beta}}{A numeric vector whose first element is the intercept.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A numeric vector of coefficients for the original predictors.
   }
 }
 

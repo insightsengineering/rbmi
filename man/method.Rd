@@ -49,10 +49,13 @@ method_bmlmi(
 matrix to be used in the imputation model. Must be one of \code{"us"} (default), \code{"ad"},
 \code{"adh"}, \code{"ar1"}, \code{"ar1h"}, \code{"cs"}, \code{"csh"}, \code{"toep"}, or \code{"toeph"}). See details.}
 
-\item{same_cov}{a logical, if \code{TRUE} the imputation model will be fitted using a single
-shared covariance matrix for all observations. If \code{FALSE} a separate covariance
-matrix will be fit for each group as determined by the \code{group} argument of
-\code{set_vars()}.}
+\item{same_cov}{a logical controlling whether within-subject dependence
+parameters are shared between treatment groups. For continuous outcomes, if
+\code{TRUE} the imputation model uses one shared covariance matrix; if \code{FALSE}, it
+uses a separate covariance matrix for each group. For count outcomes, \code{TRUE}
+uses one shared dispersion/frailty parameter and \code{FALSE} uses a separate
+dispersion/frailty parameter for each group. Groups are determined by the
+\code{group} argument of \code{\link[=set_vars]{set_vars()}}.}
 
 \item{n_samples}{a numeric that determines how many imputed datasets are generated.
 In the case of \code{method_condmean(type = "jackknife")} this argument

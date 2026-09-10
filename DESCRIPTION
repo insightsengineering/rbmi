@@ -21,7 +21,6 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 URL: https://openpharma.github.io/rbmi/, https://github.com/openpharma/rbmi
 BugReports: https://github.com/openpharma/rbmi/issues
-RoxygenNote: 8.0.0
 Suggests: 
     dplyr,
     tidyr,
@@ -42,6 +41,7 @@ Suggests:
     spelling
 Config/testthat/edition: 3
 Imports:
+    MASS,
     mmrm,
     pkgload,
     Matrix,
@@ -52,10 +52,11 @@ Imports:
     jinjar,
     fs,
     stringr,
-    lifecycle
+    lifecycle,
+    stats
 Depends: 
     R (>= 3.4.0)
 License: Apache License (>= 2)
 VignetteBuilder: R.rsp
 Language: en-GB
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.0

@@ -15,6 +15,17 @@ test_that("basic constructions of `analysis` work as expected", {
         method = method_condmean(n_samples = 1)
     )
     expect_true(validate(x))
+    expect_s3_class(x, "analysis_continuous")
+
+    x_count <- as_analysis(
+        results = list(
+            list(p1 = list("est" = 1)),
+            list(p1 = list("est" = 2))
+        ),
+        method = method_condmean(n_samples = 1),
+        outcome_type = "count"
+    )
+    expect_s3_class(x_count, "analysis_count")
 
     x <- as_analysis(
         results = list(
@@ -232,6 +243,54 @@ test_that("incorrect constructions of as_analysis fail", {
         method = method_condmean(n_sample = 1)
     )
     expect_true(validate(x))
+})
+
+
+test_that("analysis transformation specifications are validated", {
+    results <- list(
+        list(p1 = list(est = 1, df = 4, se = 1)),
+        list(p1 = list(est = 2, df = 3, se = 3))
+    )
+
+    expect_error(
+        as_analysis(
+            results = results,
+            method = method_bayes(n_samples = 2),
+            transform = list(transform = exp)
+        ),
+        "functions named"
+    )
+    expect_error(
+        as_analysis(
+            results = results,
+            method = method_bayes(n_samples = 2),
+            transform = list(transform = exp, derivative = "exp")
+        ),
+        "functions named"
+    )
+})
+
+
+test_that("use_transform creates a transformation and derivative from x", {
+    transform <- use_transform(exp(x))
+    negation_transform <- use_transform(-x)
+    identity_transform <- use_transform(x)
+
+    expect_equal(transform$transform(c(0, log(2))), c(1, 2))
+    expect_equal(transform$derivative(c(0, log(2))), c(1, 2))
+    expect_equal(negation_transform$derivative(2), -1)
+    expect_equal(identity_transform$derivative(c(1, 2)), c(1, 1))
+    expect_error(use_transform(exp(y)), "expression in `x`")
+})
+
+
+test_that("analyse defaults to the analysis function transformation", {
+    transform <- eval(
+        formals(analyse)$transform,
+        envir = list(fun = neg_bin_regression)
+    )
+
+    expect_equal(transform$transform(log(2)), 2)
 })
 
 

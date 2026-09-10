@@ -37,6 +37,9 @@ longDataConstructor <- R6::R6Class(
         #' @field visits A character vector containing the distinct visit levels
         visits = NULL,
 
+        #' @field periods A character vector containing the distinct period levels
+        periods = NULL,
+
         #' @field ids A character vector containing the unique ids of each subject in `self$data`
         ids = NULL,
 
@@ -344,7 +347,7 @@ longDataConstructor <- R6::R6Class(
             self$strategy_lock[[id]] <- FALSE
             self$indexes[[id]] <- indexes
             self$is_missing[[id]] <- is_missing
-            self$ice_visit_index[[id]] <- length(self$visits) + 1
+            self$ice_visit_index[[id]] <- length(indexes) + 1
         },
 
         #' @description
@@ -429,11 +432,17 @@ longDataConstructor <- R6::R6Class(
                 new_strategy <- dat_ice_pt[[self$vars$strategy]]
 
                 if (!update) {
-                    visit <- dat_ice_pt[[self$vars$visit]]
-                    self$ice_visit_index[[subject]] <- which(
-                        self$visits == visit
-                    )
+                    if (uses_visit(self$vars)) {
+                        visit <- dat_ice_pt[[self$vars$visit]]
+                        self$ice_visit_index[[subject]] <- which(
+                            self$visits == visit
+                        )
+                    }
                 } else {
+                    assert_that(
+                        uses_visit(self$vars),
+                        msg = "update=TRUE is only valid for visit based data"
+                    )
                     if (self$strategy_lock[[subject]]) {
                         current_strategy <- self$strategies[[subject]]
                         if (current_strategy == "MAR" & new_strategy != "MAR") {
@@ -452,7 +461,15 @@ longDataConstructor <- R6::R6Class(
 
                 index <- self$ice_visit_index[[subject]]
 
-                if (new_strategy != "MAR") {
+                if (uses_period(self$vars)) {
+                    # Count strategies alter the design matrices used for
+                    # conditional imputation. All observed count cells remain
+                    # available to the posterior draw model.
+                    self$is_mar[[subject]] <- rep(
+                        TRUE,
+                        length(self$indexes[[subject]])
+                    )
+                } else if (new_strategy != "MAR") {
                     self$is_mar[[subject]] <- seq_along(self$visits) < index
                 } else {
                     self$is_mar[[subject]] <- rep(TRUE, length(self$visits))
@@ -462,7 +479,11 @@ longDataConstructor <- R6::R6Class(
                     next()
                 }
 
-                is_post_ice <- seq_along(self$visits) >= index
+                is_post_ice <- if (uses_period(self$vars)) {
+                    self$is_missing[[subject]]
+                } else {
+                    seq_along(self$visits) >= index
+                }
                 self$is_post_ice[[subject]] <- is_post_ice
 
                 # Lock strategy if patient has non-missing data post their ICE
@@ -481,7 +502,17 @@ longDataConstructor <- R6::R6Class(
                 ))
             }
 
-            self$check_has_data_at_each_visit()
+            if (!uses_period(self$vars)) {
+                self$check_has_data_at_each_visit()
+            }
+        },
+
+        #' @description
+        #' Legacy period-data validation method. Count data may be ragged, so
+        #' this now checks that subject-period cells are unique.
+        check_has_all_periods = function() {
+            validate_datalong_complete(self$data, self$vars)
+            invisible(self)
         },
 
         #' @description
@@ -549,24 +580,48 @@ longDataConstructor <- R6::R6Class(
             validate_datalong(data_raw, vars)
             data_nochar <- char2fct(
                 data_raw,
-                extract_covariates(vars$covariates)
+                unique(c(vars$visit, extract_covariates(vars$covariates)))
             )
-            # rerun as_dataframe to reset the rownames
-            self$data <- as_dataframe(sort_by(
-                data_nochar,
-                c(vars$subjid, vars$visit)
-            ))
-            self$vars <- vars
-            self$visits <- levels(self$data[[self$vars$visit]])
-            frmvars <- c(
-                ife(
-                    nlevels(self$data[[vars$group]]) >= 2,
-                    vars$group,
-                    character()
-                ),
-                vars$visit,
-                vars$covariates
-            )
+            if (uses_period(vars)) {
+                periods <- period_levels(data_nochar, vars)
+                data_nochar[[vars$period]] <- factor(
+                    data_nochar[[vars$period]],
+                    levels = periods
+                )
+                # rerun as_dataframe to reset the rownames
+                self$data <- as_dataframe(sort_by(
+                    data_nochar,
+                    c(vars$subjid, vars$period)
+                ))
+                self$vars <- vars
+                self$periods <- periods
+                frmvars <- c(
+                    ife(
+                        nlevels(self$data[[vars$group]]) >= 2,
+                        vars$group,
+                        character()
+                    ),
+                    vars$covariates
+                )
+            } else {
+                assert_that(uses_visit(vars))
+                # rerun as_dataframe to reset the rownames
+                self$data <- as_dataframe(sort_by(
+                    data_nochar,
+                    c(vars$subjid, vars$visit)
+                ))
+                self$vars <- vars
+                self$visits <- levels(self$data[[self$vars$visit]])
+                frmvars <- c(
+                    ife(
+                        nlevels(self$data[[vars$group]]) >= 2,
+                        vars$group,
+                        character()
+                    ),
+                    vars$visit,
+                    vars$covariates
+                )
+            }
             self$formula <- as_simple_formula(vars$outcome, frmvars)
             subjects <- levels(self$data[[self$vars$subjid]])
             for (id in subjects) {
@@ -574,7 +629,9 @@ longDataConstructor <- R6::R6Class(
             }
             self$ids <- subjects
             self$set_strata()
-            self$check_has_data_at_each_visit()
+            if (!uses_period(vars)) {
+                self$check_has_data_at_each_visit()
+            }
         }
     )
 )

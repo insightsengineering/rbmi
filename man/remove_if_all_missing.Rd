@@ -4,10 +4,12 @@
 \alias{remove_if_all_missing}
 \title{Remove subjects from dataset if they have no observed values}
 \usage{
-remove_if_all_missing(dat)
+remove_if_all_missing(dat, timevar = "visit")
 }
 \arguments{
 \item{dat}{a \code{data.frame}}
+
+\item{timevar}{the name of the time variable (e.g. \code{visit} or \code{period}) to use}
 }
 \description{
 This function takes a \code{data.frame} with variables \code{visit}, \code{outcome} & \code{subjid}.

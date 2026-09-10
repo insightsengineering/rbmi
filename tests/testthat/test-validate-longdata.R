@@ -51,6 +51,39 @@ vars <- set_vars(
     covariates = c("sex", "age")
 )
 
+dat_period <- dat %>%
+    mutate(
+        period = as.character(as.integer(visit)),
+        duration = rep(c(2, 0, 1), times = n)
+    )
+
+vars_period <- set_vars(
+    outcome = "outcome",
+    period = "period",
+    duration = "duration",
+    subjid = "subjid",
+    group = "group",
+    strata = "strata",
+    strategy = "strategy",
+    covariates = c("sex", "age")
+)
+
+
+test_that("period_levels orders periods according to their type", {
+    period_data <- tibble(period = c(1, 10, 2))
+
+    expect_equal(period_levels(period_data, vars_period), c("1", "2", "10"))
+
+    period_data$period <- as.character(period_data$period)
+    expect_equal(period_levels(period_data, vars_period), c("1", "10", "2"))
+
+    period_data$period <- factor(
+        period_data$period,
+        levels = c("2", "10", "1")
+    )
+    expect_equal(period_levels(period_data, vars_period), c("2", "10", "1"))
+})
+
 
 test_that("extract_covariates", {
     expect_equal(extract_covariates("age"), "age")
@@ -68,6 +101,17 @@ test_that("extract_covariates", {
 
 test_that("validate.ivars", {
     expect_true(validate(vars))
+    expect_true(validate(vars_period))
+
+    expect_error(
+        set_vars(period = "period"),
+        "`vars\\$duration`"
+    )
+
+    expect_error(
+        set_vars(visit = "visit", period = "period", duration = "duration"),
+        "Only one of `visit` and `period`"
+    )
 
     vars2 <- vars
     vars2$subjid <- NULL
@@ -83,6 +127,14 @@ test_that("validate.ivars", {
 
     vars2 <- vars
     vars2$visit <- NULL
+    expect_error(validate(vars2))
+
+    vars2 <- vars_period
+    vars2$duration <- NULL
+    expect_error(validate(vars2))
+
+    vars2 <- vars_period
+    vars2$duration <- c("duration", "duration2")
     expect_error(validate(vars2))
 
     vars2 <- vars
@@ -109,6 +161,7 @@ test_that("validate.ivars", {
 
 test_that("validate_datalong_varExists", {
     expect_true(validate_datalong_varExists(dat, vars))
+    expect_true(validate_datalong_varExists(dat_period, vars_period))
 
     dat2 <- dat
     dat2$subjid <- NULL
@@ -137,11 +190,16 @@ test_that("validate_datalong_varExists", {
     dat2 <- dat
     dat2$visit <- NULL
     expect_error(validate_datalong_varExists(dat2, vars))
+
+    dat2 <- dat_period
+    dat2$duration <- NULL
+    expect_error(validate_datalong_varExists(dat2, vars_period))
 })
 
 
 test_that("validate_datalong_types", {
     expect_true(validate_datalong_types(dat, vars))
+    expect_true(validate_datalong_types(dat_period, vars_period))
 
     dat2 <- dat
     dat2$subjid <- rnorm(nrow(dat))
@@ -206,6 +264,13 @@ test_that("validate_datalong_types", {
     dat2$visit <- factor("A")
     expect_true(validate_datalong_types(dat2, vars))
 
+    # The period can be character, factor, or numeric, with arbitrary values.
+    dat2 <- dat_period
+    dat2$period <- factor(dat2$period)
+    expect_true(validate_datalong_types(dat2, vars_period))
+    dat2$period <- as.numeric(as.character(dat2$period))
+    expect_true(validate_datalong_types(dat2, vars_period))
+
     # Test that if group or visit variables have unobserved levels return error
     dat2 <- dat[dat$visit != "Visit 1", ]
     expect_error(
@@ -217,11 +282,28 @@ test_that("validate_datalong_types", {
         validate_datalong_types(dat2, vars),
         "`group`"
     )
+
+    dat2 <- dat_period
+    dat2$period[1] <- "4"
+    expect_true(validate_datalong_types(dat2, vars_period))
+
+    dat2 <- dat_period
+    dat2$duration[1] <- -1
+    expect_error(validate_datalong_types(dat2, vars_period), "`duration`")
+
+    dat2 <- dat_period
+    dat2$duration[1] <- Inf
+    expect_error(validate_datalong_types(dat2, vars_period), "`duration`")
+
+    dat2 <- dat_period
+    dat2$duration <- as.character(dat2$duration)
+    expect_error(validate_datalong_types(dat2, vars_period), "`duration`")
 })
 
 
 test_that("validate_datalong_notMissing", {
     expect_true(validate_datalong_notMissing(dat, vars))
+    expect_true(validate_datalong_notMissing(dat_period, vars_period))
 
     dat2 <- dat
     dat2$age[c(1, 2, 3)] <- NA
@@ -246,11 +328,23 @@ test_that("validate_datalong_notMissing", {
     dat2 <- dat
     dat2$strata[c(1, 2, 3)] <- NA
     expect_error(validate_datalong_notMissing(dat2, vars))
+
+    dat2 <- dat_period
+    dat2$duration[c(1, 2, 3)] <- NA
+    expect_error(
+        validate_datalong_notMissing(dat2, vars_period),
+        "Variable duration contains missing data"
+    )
+
+    dat2 <- dat_period
+    dat2$period[c(1, 2, 3)] <- NA
+    expect_error(validate_datalong_notMissing(dat2, vars_period))
 })
 
 
 test_that("validate_datalong_complete", {
     expect_true(validate_datalong_complete(dat, vars))
+    expect_true(validate_datalong_complete(dat_period, vars_period))
 
     ### Duplicate visits per patient
     dat2 <- bind_rows(dat, dat)
@@ -263,24 +357,42 @@ test_that("validate_datalong_complete", {
     ### Completely remove 1 visit (should check against the levels)
     dat2 <- dat %>% filter(visit != "Visit 1")
     expect_error(validate_datalong_complete(dat2, vars))
+
+    dat2 <- dat_period %>% filter(period != "3")
+    expect_true(validate_datalong_complete(dat2, vars_period))
+
+    dat2 <- dat_period[-1, ]
+    expect_true(validate_datalong_complete(dat2, vars_period))
+    expect_s3_class(longDataConstructor$new(dat2, vars_period), "longdata")
+
+    dat2 <- bind_rows(dat_period, dat_period[1, ])
+    expect_error(validate_datalong_complete(dat2, vars_period), "duplicated")
 })
 
 
-test_that("validate_datalong_unifromStrata", {
-    expect_true(validate_datalong_unifromStrata(dat, vars))
+test_that("validate_datalong_uniformStrata", {
+    expect_true(validate_datalong_uniformStrata(dat, vars))
 
     vars2 <- vars
     vars2$strata <- character(0)
-    expect_true(validate_datalong_unifromStrata(dat, vars2))
+    expect_true(validate_datalong_uniformStrata(dat, vars2))
 
     dat2 <- dat
     dat2$strata[[1]] <- "AXS"
-    expect_error(validate_datalong_unifromStrata(dat2, vars))
+    expect_error(validate_datalong_uniformStrata(dat2, vars))
 })
 
 
 test_that("validate_data_long", {
     expect_true(validate_datalong(dat, vars))
+    expect_true(validate_datalong(dat_period, vars_period))
+
+    dat2 <- dat_period
+    dat2$duration[1] <- NA_real_
+    expect_error(
+        validate_datalong(dat2, vars_period),
+        "Variable duration contains missing data"
+    )
 })
 
 

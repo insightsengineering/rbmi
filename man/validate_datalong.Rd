@@ -6,7 +6,7 @@
 \alias{validate_datalong_types}
 \alias{validate_datalong_notMissing}
 \alias{validate_datalong_complete}
-\alias{validate_datalong_unifromStrata}
+\alias{validate_datalong_uniformStrata}
 \alias{validate_dataice}
 \title{Validate a \code{longdata} object}
 \usage{
@@ -20,7 +20,7 @@ validate_datalong_notMissing(data, vars)
 
 validate_datalong_complete(data, vars)
 
-validate_datalong_unifromStrata(data, vars)
+validate_datalong_uniformStrata(data, vars)
 
 validate_dataice(data, data_ice, vars, update = FALSE)
 }
@@ -45,12 +45,13 @@ to be used in \code{\link[=draws]{draws()}}, \code{\link[=impute]{impute()}}, \c
 \item \code{validate_datalong_varExists} - Checks that each variable listed in \code{vars} actually exists
 in the \code{data}
 \item \code{validate_datalong_types} - Checks that the types of each key variable is as expected
-i.e. that visit is a factor variable
+i.e. that visit is a factor variable, or period is a character, factor, or
+numeric variable when \code{period} is specified via \code{\link[=set_vars]{set_vars()}}
 \item \code{validate_datalong_notMissing} - Checks that none of the key variables (except the outcome variable)
 contain any missing values
 \item \code{validate_datalong_complete} - Checks that \code{data} is complete i.e. there is 1 row for each subject *
 visit combination. e.g. that \code{nrow(data) == length(unique(subjects)) * length(unique(visits))}
-\item \code{validate_datalong_unifromStrata} - Checks to make sure that any variables listed as stratification
+\item \code{validate_datalong_uniformStrata} - Checks to make sure that any variables listed as stratification
 variables do not vary over time. e.g. that subjects don't switch between stratification groups.
 }
 }

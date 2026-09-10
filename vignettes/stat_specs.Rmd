@@ -1,5 +1,5 @@
 ---
-title: "rbmi: Statistical Specifications"
+title: "rbmi: Statistical Specifications for Continuous Outcomes"
 author: Alessandro Noci, Craig Gower-Page, and Marcel Wolbers
 output: 
   bookdown::html_document2:
@@ -14,7 +14,7 @@ linkcolor: blue
 pkgdown:
   as_is: true
 vignette: >
-  %\VignetteIndexEntry{rbmi: Statistical Specifications}
+  %\VignetteIndexEntry{rbmi: Statistical Specifications for Continuous Outcomes}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -29,7 +29,8 @@ knitr::opts_chunk$set(
 
 # Scope of this document
 
-This document describes the statistical methods implemented in the `rbmi` R package for standard and reference-based multiple imputation of continuous longitudinal outcomes. 
+This document describes the statistical methods implemented in the `rbmi` R package for standard and reference-based multiple imputation of continuous longitudinal outcomes. Please see the [separate vignette](stat_specs_counts.html) for details on the implemented statistical methods for count outcomes.
+
 The package implements three classes of multiple imputation (MI) approaches: 
 
 1. Conventional MI methods based on Bayesian (or approximate Bayesian) posterior draws of model parameters combined with Rubin's rules to make inferences as described in @CarpenterEtAl2013 and @CroEtAlTutorial2020.

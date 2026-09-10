@@ -425,25 +425,51 @@ compare_prop_lastvisit <- function(data, ...) {
     )
     return(res)
 }
-    
+   
 ana_obj_prop <- analyse(
   impute_obj_CIR,
   fun = compare_prop_lastvisit,
-  vars = vars_an
+  vars = vars_an,
+  transform = list(
+      transform = exp,
+      derivative = exp
+  )
 )
 
 pool_obj_prop <- pool(ana_obj_prop)
 pool_obj_prop
 
-tmp <- as.data.frame(pool_obj_prop) %>% 
-    mutate(
-        OR = exp(est),
-        OR.lci = exp(lci),
-        OR.uci = exp(uci)
-    ) %>% 
-    select(parameter, OR, OR.lci, OR.uci)
+tmp <- as.data.frame(pool_obj_prop) %>%
+    select(parameter, OR = est, OR.lci = lci, OR.uci = uci)
 tmp
 ```
+
+### Transforming pooled parameters
+
+Some analysis functions estimate a parameter on a convenient model scale but
+need to report it on another scale. This is possible with the `transform` argument 
+to `analyse()`. Alternatively you can attach a transformation to the analysis
+function with `attr(my_analysis, "transform")`. You can specify the transformation
+directly as a list with elements `transform` and `derivative`, or use the convenience
+function `use_transform(expression)`, where `expression` is a vectorized expression in `x`. 
+The estimates are pooled on the original scale; `pool()` then stores the transformed estimate, confidence
+limits, and delta-method standard error separately in `transformed_pars`.
+Confidence limits are transformed directly rather than reconstructed from that
+standard error. Transformations must be monotone over each pooled confidence
+interval; `pool()` checks the supplied derivative and errors when it changes sign.
+P-values are unchanged.
+
+For example, the preceding logistic regression estimates a log odds ratio. We declare
+odds-ratio reporting with the `exp` transformation. `print(pool_obj_prop)` and `as.data.frame(pool_obj_prop)`
+now automatically use that scale, while the original log-odds-ratio result
+remains in `pool_obj_prop$pars`:
+
+```{r}
+as.data.frame(pool_obj_prop)
+as.data.frame(pool_obj_prop, scale = "original")
+```
+
+The same pattern can be used for other smooth, componentwise transformations.
 
 Note that if the user wants `rbmi` to use a normal approximation to the pooled test statistics, then the degrees of freedom need to be set to `df = NA` (as per the above example). If the degrees of freedom of the complete data test statistics are known or if the degrees of freedom are set to `df = Inf`, then `rbmi` pools the degrees of freedom across imputed datasets according to the rule by Barnard and Rubin (see the "Statistical Specifications" vignette (`vignette("stat_specs", package = "rbmi")` for details). According to this rule, infinite degrees of freedom for the complete data analysis do not imply that the pooled degrees of freedom are also infinite.
 Rather, in this case the pooled degrees of freedom are `(M-1)/lambda^2`, where `M` is the number of imputations and `lambda` is the fraction of missing information (see @Barnard1999 for details).

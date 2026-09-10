@@ -47,7 +47,7 @@ standard_checks <- function(dobj, d, meth) {
         c("samples", "formula", "data", "method", "fit", "n_failures") %in%
             names(dobj)
     ))
-    expect_true(class(dobj)[[1]] == "draws")
+    expect_true("draws" %in% class(dobj))
     expect_true(class(dobj$formula) == "formula")
     expect_equal(meth, dobj$method)
     expect_true(all(vapply(dobj$samples, function(x) !x$failed, logical(1))))

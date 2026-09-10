@@ -11,7 +11,9 @@ set_vars(
   group = "group",
   covariates = character(0),
   strata = group,
-  strategy = "strategy"
+  strategy = "strategy",
+  period = NULL,
+  duration = NULL
 )
 }
 \arguments{
@@ -30,6 +32,15 @@ See details.}
 sampling. See details.}
 
 \item{strategy}{The name of the "strategy" variable. A length 1 character vector.}
+
+\item{period}{Alternatively to \code{visit}, the name of the "Period" variable.
+A length 1 character vector. The corresponding data column contains the periods
+which are typically character or factor valued.}
+
+\item{duration}{The name of the "Duration" variable. A length 1 character
+vector or \code{NULL}. If \code{period} is specified, this argument is required. The
+corresponding data column must be numeric, finite, and greater than or equal
+to zero, apart from missing values.}
 }
 \value{
 A \code{vars} object; a named list of class \code{ivars} recording the names of the key

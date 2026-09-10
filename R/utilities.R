@@ -348,6 +348,15 @@ sort_by <- function(df, vars = NULL, decreasing = FALSE) {
 #'
 #' @param visit The name of the "Visit" variable. A length 1 character vector.
 #'
+#' @param period Alternatively to `visit`, the name of the "Period" variable.
+#' A length 1 character vector. The corresponding data column contains the periods
+#' which are typically character or factor valued.
+#'
+#' @param duration The name of the "Duration" variable. A length 1 character
+#' vector or `NULL`. If `period` is specified, this argument is required. The
+#' corresponding data column must be numeric, finite, and greater than or equal
+#' to zero, apart from missing values.
+#'
 #' @param outcome The name of the "Outcome" variable. A length 1 character vector.
 #'
 #' @param group The name of the "Group" variable. A length 1 character vector.
@@ -407,11 +416,22 @@ set_vars <- function(
     group = "group",
     covariates = character(0),
     strata = group,
-    strategy = "strategy"
+    strategy = "strategy",
+    period = NULL,
+    duration = NULL
 ) {
+    if (!is.null(period)) {
+        assert_that(
+            missing(visit),
+            msg = "Only one of `visit` and `period` should be specified"
+        )
+        visit <- NULL
+    }
     x <- list(
         subjid = subjid,
         visit = visit,
+        period = period,
+        duration = duration,
         outcome = outcome,
         group = group,
         covariates = covariates,
@@ -434,6 +454,11 @@ set_vars <- function(
 #' @export
 validate.ivars <- function(x, ...) {
     assert_that(
+        !is.null(x$visit) || !is.null(x$period),
+        msg = "One of `vars$visit` and `vars$period` must be specified"
+    )
+
+    assert_that(
         is_char_one(x$outcome),
         msg = "`vars$outcome` should be a length 1 character"
     )
@@ -443,10 +468,30 @@ validate.ivars <- function(x, ...) {
         msg = "`vars$group` should be a length 1 character"
     )
 
-    assert_that(
-        is_char_one(x$visit),
-        msg = "`vars$visit` should be a length 1 character"
-    )
+    if (!is.null(x$visit)) {
+        assert_that(
+            is_char_one(x$visit),
+            msg = "`vars$visit` should be a length 1 character"
+        )
+        assert_that(
+            is.null(x$period),
+            msg = "`vars$period` should be NULL when `vars$visit` is specified"
+        )
+    }
+    if (!is.null(x$period) || !is.null(x$duration)) {
+        assert_that(
+            is_char_one(x$period),
+            msg = "`vars$period` should be a length 1 character when `vars$duration` is specified"
+        )
+        assert_that(
+            is_char_one(x$duration),
+            msg = "`vars$duration` should be a length 1 character when `vars$period` is specified"
+        )
+        assert_that(
+            is.null(x$visit),
+            msg = "`vars$visit` should be NULL when `vars$period` is specified"
+        )
+    }
 
     assert_that(
         is_char_one(x$subjid),
@@ -752,25 +797,59 @@ get_unique_hash <- function(content) {
 }
 
 
-#' Get Compiled Stan Object
+#' Render a Stan model template
 #'
-#' Gets a compiled Stan object that can be used with `rstan::sampling()`,
-#' based on the choice of the covariance structure and the prior on the parameters.
+#' Parses and renders a Stan file using the whitespace handling shared by the
+#' package's top-level model templates.
 #'
-#' @param covariance A string indicating the covariance structure to be used.
-#' @param prior_cov A string indicating the prior on the covariance parameters.
-#' @return The compiled Stan model object.
+#' @param file Path to a Stan template file.
+#' @param data Named list of values made available to the template.
+#'
+#' @return The rendered Stan model code as a character string.
 #'
 #' @keywords internal
-get_stan_model <- function(covariance, prior_cov) {
+render_stan_model <- function(file, data = list()) {
+    assert_that(assertthat::is.string(file))
+    assert_that(is.list(data))
+
+    model_template <- jinjar::parse_template(
+        fs::path(file),
+        .config = jinjar::jinjar_config(
+            trim_blocks = TRUE,
+            lstrip_blocks = TRUE
+        )
+    )
+    do.call(
+        jinjar::render,
+        c(
+            list(.x = model_template),
+            data
+        )
+    )
+}
+
+
+#' Compile a Stan model
+#'
+#' Compiles rendered Stan code, optionally using the rbmi model cache. Cached
+#' filenames include a hash of the model code and relevant package versions so
+#' stale compiled models are not reused. The random-number-generator state is
+#' restored after compilation because Stan compilation can modify it.
+#'
+#' @param model_string Rendered Stan model code.
+#' @param model_name Name passed to [rstan::stan_model()].
+#'
+#' @return A compiled `rstan::stanmodel` object.
+#'
+#' @keywords internal
+compile_stan_model <- function(model_string, model_name) {
+    assert_that(assertthat::is.string(model_string))
+    assert_that(assertthat::is.string(model_name))
+
     # Compiling Stan models updates the current seed state. This can lead to
-    # non-reproducibility as compiling is conditional on wether there is a cached
-    # model available or not. Thus we save the current seed state and restore it
-    # at the end of this function so that it is in the same state regardless of
-    # whether the model was compiled or not.
+    # non-reproducibility as compiling is conditional on whether a cached model
+    # is available. Restore the state so both paths behave identically.
     # See https://github.com/openpharma/rbmi/issues/469
-    # Note that .Random.seed is only set if the seed has been set or if a random number
-    # has been generated.
     current_seed_state <- globalenv()$.Random.seed
     on.exit({
         if (
@@ -790,53 +869,13 @@ get_stan_model <- function(covariance, prior_cov) {
 
     ensure_rstan()
 
-    # Find the correct MMRM and covariance prior model Stan files.
-    file_loc_cov_prior <- find_stan_file(
-        paste0(covariance, "_", prior_cov, ".stan"),
-        subdir = "covariance_priors"
-    )
-
-    # Replace constants in the covariance prior file and parse it
-    # into a list of Stan code blocks.
-    cov_prior_template <- jinjar::parse_template(
-        fs::path(file_loc_cov_prior)
-    )
-    cov_prior_string <- jinjar::render(
-        .x = cov_prior_template,
-        machine_double_eps = .Machine$double.eps
-    )
-    cov_prior_blocks <- as_stan_fragments(cov_prior_string)
-    cov_prior_blocks <- lapply(cov_prior_blocks, paste, collapse = "\n")
-
-    model_template <- jinjar::parse_template(
-        fs::path(find_stan_file("MMRM.stan")),
-        .config = jinjar::jinjar_config(
-            trim_blocks = TRUE,
-            lstrip_blocks = TRUE
-        )
-    )
-    model_data <- c(
-        cov_prior_blocks,
-        machine_double_eps = .Machine$double.eps
-    )
-    model_string <- do.call(
-        jinjar::render,
-        c(
-            list(.x = model_template),
-            model_data
-        )
-    )
-
-    model_name <- paste0("rbmi_MMRM_", covariance, "_", prior_cov)
     if (getOption("rbmi.enable_cache")) {
         cache_dir <- getOption("rbmi.cache_dir")
         if (
-            is.null(cache_dir) ||
-                is.na(cache_dir) ||
+            !is.character(cache_dir) ||
                 length(cache_dir) != 1 ||
-                !is.character(cache_dir) ||
-                cache_dir == "" ||
-                nchar(cache_dir) == 0
+                is.na(cache_dir) ||
+                !nzchar(cache_dir)
         ) {
             stop("option(rbmi.cache_dir) is not a valid directory path")
         }
@@ -865,6 +904,49 @@ get_stan_model <- function(covariance, prior_cov) {
         )
     }
     model
+}
+
+
+#' Get Compiled Stan Object
+#'
+#' Gets a compiled Stan object that can be used with `rstan::sampling()`,
+#' based on the choice of the covariance structure and the prior on the parameters.
+#'
+#' @param covariance A string indicating the covariance structure to be used.
+#' @param prior_cov A string indicating the prior on the covariance parameters.
+#' @return The compiled Stan model object.
+#'
+#' @keywords internal
+get_stan_model <- function(covariance, prior_cov) {
+    # Find the correct MMRM and covariance prior model Stan files.
+    file_loc_cov_prior <- find_stan_file(
+        paste0(covariance, "_", prior_cov, ".stan"),
+        subdir = "covariance_priors"
+    )
+
+    # Replace constants in the covariance prior file and parse it
+    # into a list of Stan code blocks.
+    cov_prior_template <- jinjar::parse_template(
+        fs::path(file_loc_cov_prior)
+    )
+    cov_prior_string <- jinjar::render(
+        .x = cov_prior_template,
+        machine_double_eps = .Machine$double.eps
+    )
+    cov_prior_blocks <- as_stan_fragments(cov_prior_string)
+    cov_prior_blocks <- lapply(cov_prior_blocks, paste, collapse = "\n")
+
+    model_data <- c(
+        cov_prior_blocks,
+        machine_double_eps = .Machine$double.eps
+    )
+    model_string <- render_stan_model(
+        file = find_stan_file("MMRM.stan"),
+        data = model_data
+    )
+
+    model_name <- paste0("rbmi_MMRM_", covariance, "_", prior_cov)
+    compile_stan_model(model_string, model_name)
 }
 
 

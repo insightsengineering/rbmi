@@ -8,6 +8,7 @@ analyse(
   imputations,
   fun = ancova,
   delta = NULL,
+  transform = attr(fun, "transform"),
   ...,
   ncores = 1,
   .validate = TRUE
@@ -20,6 +21,10 @@ analyse(
 
 \item{delta}{A \code{data.frame} containing the delta transformation to be applied to the imputed
 datasets prior to running \code{fun}. See details.}
+
+\item{transform}{Either \code{NULL} or a transformation specification created by
+\code{use_transform()}. Defaults to \code{attr(fun, "transform")}, if present. The
+transformation is common to every pooled parameter. See details.}
 
 \item{...}{Additional arguments passed onto \code{fun}.}
 
@@ -35,6 +40,7 @@ An \code{analysis} object; a list of class \code{"analysis"} containing the anal
 \code{results} (one entry per imputed dataset, each a named list of parameter
 estimates), the name of the analysis function (\code{fun_name}), the applied
 \code{delta} data.frame, the analysis function (\code{fun}) and the imputation \code{method}.
+If supplied, the reporting-scale \code{transform} specification is also retained.
 This object is normally passed on to \code{\link[=pool]{pool()}}.
 }
 \description{
@@ -113,6 +119,18 @@ imputed. Care must be taken when defining offsets. It is recommend that you
 use the helper function \code{\link[=delta_template]{delta_template()}} to define the delta datasets as
 this provides utility variables such as \code{is_missing} which can be used to identify
 exactly which visits have been imputed.
+
+The optional \code{transform} argument specifies a transformation to apply to all
+pooled parameters for reporting. It defaults to the \code{"transform"} attribute
+of \code{fun}, so an analysis function can declare its usual reporting scale.
+Use \code{use_transform()} to create the specification from an expression in \code{x}.
+The analysis estimates are always retained and pooled on their original
+scale. After pooling, the transformation is applied to the pooled estimate
+and confidence limits; its derivative is used to obtain the transformed
+standard error by the delta method. Transformations must be monotone over
+each pooled confidence interval; this is checked from the supplied derivative
+before transformed results are reported. The original p-values are retained.
+See \code{\link[=pool]{pool()}} for extracting transformed results.
 }
 \section{Parallelisation}{
 

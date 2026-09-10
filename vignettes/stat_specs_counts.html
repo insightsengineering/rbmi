@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Daniel Sabanés Bové" />
+
+
+<title>rbmi: Statistical Specifications for Count Outcomes</title>
+
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">rbmi: Statistical Specifications for Count Outcomes</h1>
+<h4 class="author">Daniel Sabanés Bové</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#scope-of-this-document" id="toc-scope-of-this-document"><span class="toc-section-number">1</span> Scope of this document</a></li>
+<li><a href="#sec:statsMethods" id="toc-sec:statsMethods"><span class="toc-section-number">2</span> Statistical methodology</a>
+<ul>
+<li><a href="#notation" id="toc-notation"><span class="toc-section-number">2.1</span> Notation</a></li>
+<li><a href="#model" id="toc-model"><span class="toc-section-number">2.2</span> Model</a></li>
+<li><a href="#priors" id="toc-priors"><span class="toc-section-number">2.3</span> Priors</a></li>
+<li><a href="#reference-assumptions" id="toc-reference-assumptions"><span class="toc-section-number">2.4</span> Reference assumptions</a></li>
+<li><a href="#off-treatment-modeling" id="toc-off-treatment-modeling"><span class="toc-section-number">2.5</span> Off-treatment Modeling</a></li>
+<li><a href="#imputation" id="toc-imputation"><span class="toc-section-number">2.6</span> Imputation</a></li>
+<li><a href="#analysis" id="toc-analysis"><span class="toc-section-number">2.7</span> Analysis</a></li>
+<li><a href="#pooling" id="toc-pooling"><span class="toc-section-number">2.8</span> Pooling</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="scope-of-this-document" class="section level2" number="1">
+<h2><span class="header-section-number">1</span> Scope of this document</h2>
+<p>This document describes the statistical methods implemented in the <code>rbmi</code> R package for multiple imputation of count outcomes. Please see the <a href="stat_specs.html">separate vignette</a> for details on the implemented statistical methods for continuous outcomes.</p>
+<p>The package focuses on multiple imputation (MI) for count outcomes following these approaches:</p>
+<ol style="list-style-type: decimal">
+<li><span class="citation">(<a href="#ref-keene2014"><strong>keene2014?</strong></a>)</span> is the basic proposal for Bayesian MI for negative binomial count data, covering two time periods: before and after discontinuing the trial and treatment at the same time.</li>
+<li><span class="citation">(<a href="#ref-roger2019"><strong>roger2019?</strong></a>)</span> extends this to more than two time periods, in particular a third time period where patients are still continuing the trial, but have stopped treatment already. This is the more general setting, which is implemented in <code>rbmi</code>.</li>
+</ol>
+<p>Note that time to recurrent events can also be analyzed with Andersen-Gill models, but this is not available in the package at this point.</p>
+</div>
+<div id="sec:statsMethods" class="section level2" number="2">
+<h2><span class="header-section-number">2</span> Statistical methodology</h2>
+<div id="notation" class="section level3" number="2.1">
+<h3><span class="header-section-number">2.1</span> Notation</h3>
+<p>We follow quite closely the notation in <span class="citation">(<a href="#ref-roger2019"><strong>roger2019?</strong></a>)</span>.</p>
+<ul>
+<li>We have <span class="math inline">\(i = 1, \dotsc, N\)</span> patients in the considered analysis population of the trial.</li>
+<li>There are <span class="math inline">\(m = 3\)</span> periods for each patient:
+<ul>
+<li><span class="math inline">\(j= 1\)</span>: the period on-treatment</li>
+<li><span class="math inline">\(j= 2\)</span>: the period after stopping treatment and before withdrawal from the study (off-treatment)</li>
+<li><span class="math inline">\(j= 3\)</span>: the period after withdrawal from the study (post-withdrawal)</li>
+</ul></li>
+<li>Let <span class="math inline">\(Y_{ij}\)</span> be the number of events for patient <span class="math inline">\(i\)</span> in period <span class="math inline">\(j\)</span>, <span class="math inline">\(j = 1, 2, 3\)</span>.
+<ul>
+<li>Note that we never observe <span class="math inline">\(Y_{i3}\)</span>, but we always observe <span class="math inline">\(Y_{i1}\)</span> and <span class="math inline">\(Y_{i2}\)</span> for all patients.</li>
+</ul></li>
+<li>Let <span class="math inline">\(T_{ij}\)</span> be the length of time for patient <span class="math inline">\(i\)</span> in period <span class="math inline">\(j\)</span>, <span class="math inline">\(j = 1, 2, 3\)</span>.
+<ul>
+<li>We use here for simplicity a fixed duration trial, where according to the protocol all patients are followed for the same amount of time <span class="math inline">\(t\)</span>.</li>
+<li>Therefore <span class="math inline">\(T_{i1} + T_{i2} + T_{i3} = t\)</span> for all <span class="math inline">\(i\)</span></li>
+<li>However, some of <span class="math inline">\(T_{i2}\)</span> and <span class="math inline">\(T_{i3}\)</span> may be zero, if the patient did not stop treatment (then <span class="math inline">\(T_{i2} = T_{i3} = 0\)</span>), immediately withdrew when stopping treatment (then <span class="math inline">\(T_{i2} = 0\)</span> but <span class="math inline">\(T_{i3} &gt; 0\)</span>), or always stayed in the study after stopping treatment (then <span class="math inline">\(T_{i2} &gt; 0\)</span> but <span class="math inline">\(T_{i3} = 0\)</span>).</li>
+</ul></li>
+</ul>
+</div>
+<div id="model" class="section level3" number="2.2">
+<h3><span class="header-section-number">2.2</span> Model</h3>
+<p>We want to model the number of events <span class="math inline">\(Y_{ij}\)</span> for patient <span class="math inline">\(i\)</span> in period <span class="math inline">\(j\)</span> using a joint <a href="https://en.wikipedia.org/wiki/Negative_multinomial_distribution">negative multinomial distribution</a> <span class="citation">(<a href="#ref-keene2014"><strong>keene2014?</strong></a>)</span>:</p>
+<p><span class="math display">\[
+\mathbb{P}(Y_{i} = (y_{i1}, y_{i2}, y_{i3})) =
+\frac{\Gamma(y_0 + \sum_{j=1}^3 y_{ij})}{\Gamma(y_0) \prod_{j=1}^3 \Gamma(y_{ij} + 1)}
+\prod_{j=0}^3 p_{ij}^{y_{ij}}
+\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(y_0 = \phi^{-1}\)</span> is the shape parameter in the negative multinomial representation, and <span class="math inline">\(\phi\)</span> is the dispersion parameter.</li>
+<li><span class="math inline">\(\lambda_{ij}\)</span> is the event rate for patient <span class="math inline">\(i\)</span> in period <span class="math inline">\(j\)</span> for <span class="math inline">\(j = 1, 2, 3\)</span>.</li>
+<li><span class="math inline">\(\mu_{ij} = t_{ij} \lambda_{ij}\)</span> is the expected number of events for patient <span class="math inline">\(i\)</span> in period <span class="math inline">\(j\)</span>, given that the patient stays for time <span class="math inline">\(t_{ij}\)</span> in that period.</li>
+<li><span class="math inline">\(p_{ij} = \frac{\mu_{ij}}{\phi^{-1} + \sum_{k=1}^3 \mu_{ik}}\)</span> is the probability of an event for patient <span class="math inline">\(i\)</span> in period <span class="math inline">\(j\)</span>.</li>
+<li><span class="math inline">\(p_{i0} = 1 - \sum_{j=1}^3 p_{ij}\)</span> is the complementary probability of no event for patient <span class="math inline">\(i\)</span> in any of the three periods.</li>
+</ul>
+<p>We can model the event rate <span class="math inline">\(\lambda_{ij}\)</span> as:</p>
+<p><span class="math display">\[
+\lambda_{ij} = \exp(\eta_{ij} + u_{i})
+\]</span></p>
+<p>where <span class="math inline">\(\eta_{ij} = x_{ij}^{\top} \beta\)</span> is the linear predictor for patient <span class="math inline">\(i\)</span> in period <span class="math inline">\(j\)</span>, given a vector of covariates <span class="math inline">\(x_{ij}\)</span> (which includes the treatment assignment and possibly other covariates) and the corresponding regression coefficient vector <span class="math inline">\(\beta\)</span>. The random intercept <span class="math inline">\(u_{i}\)</span> models the patient-specific frailty term, often formulated as <span class="math inline">\(\gamma_{i} = \exp(u_{i})\)</span>, which captures the unobserved heterogeneity between patients in their event rates.</p>
+<p>Conditional on a fixed frailty <span class="math inline">\(\gamma_{i}\)</span>, <span class="math inline">\(Y_{ij}\)</span> has a Poisson distribution with mean <span class="math inline">\(\mu_{ij} = t_{ij} \lambda_{ij} = t_{ij} \gamma_{i} \exp(\eta_{ij})\)</span>.
+If, on the other hand, we assume that <span class="math inline">\(\gamma_i\)</span> follow an iid gamma distribution with mean 1 and shape <span class="math inline">\(\phi^{-1}\)</span> for <span class="math inline">\(i= 1, \dotsc, N\)</span>, then we obtain a Poisson-gamma mixture model. Integrating out <span class="math inline">\(\gamma_i\)</span> gives us a negative binomial distribution for each <span class="math inline">\(Y_{ij}\)</span>, or the above negative multinomial distribution for the vector <span class="math inline">\(Y_i\)</span> with dispersion parameter <span class="math inline">\(\phi\)</span>.</p>
+<p>For the implementation of this model we are using Stan. The negative multinomial distribution is not available as a built-in distribution. In principle, there is an option to add it as a custom distribution relatively easily (see <a href="https://mc-stan.org/docs/2_38/stan-users-guide/custom-probability.html">docs</a>). Unfortunately, it is not possible to add it already now as a <a href="https://cran.r-project.org/web/packages/brms/vignettes/brms_customfamilies.html">custom family</a> to <code>brms</code>, see the discussion in <a href="https://github.com/paul-buerkner/brms/issues/1728">here</a>. We therefore stay with the native Stan implementation.</p>
+</div>
+<div id="priors" class="section level3" number="2.3">
+<h3><span class="header-section-number">2.3</span> Priors</h3>
+<p>We fit the above model with the following priors:</p>
+<ul>
+<li>For the regression coefficients <span class="math inline">\(\beta\)</span>, an improper uniform prior is used.</li>
+<li>For the dispersion parameter <span class="math inline">\(\phi\)</span>, a gamma distribution <span class="math inline">\(G(a, b)\)</span> with shape <span class="math inline">\(a\)</span> and inverse scale <span class="math inline">\(b\)</span> parameters both equal to 0.0001 is used.</li>
+</ul>
+<p>We use a lower bound of <span class="math inline">\(10^{-6}\)</span> on <code>phi</code> as a numerical safeguard. It makes the gamma prior
+technically truncated, but at this value the negative binomial is, for these
+data, effectively at its Poisson limit. The safeguard is needed because the
+very diffuse gamma prior has an integrable singularity at zero; and unconstrained exploration can cause
+divergent transitions even though still smaller values are not practically
+distinguishable from the Poisson limit.</p>
+<p>Note that these priors are currently fixed in the package. In the future we might offer additional prior options for users to choose from.</p>
+</div>
+<div id="reference-assumptions" class="section level3" number="2.4">
+<h3><span class="header-section-number">2.4</span> Reference assumptions</h3>
+<p>For count outcomes, <code>rbmi</code> does not collect or infer the time of an
+intercurrent event. A subject-level strategy is instead applied to every
+missing positive-duration period for that subject. In the three-period example
+above, only <span class="math inline">\(Y_{i3}\)</span> is missing, so this distinction is not visible; it is
+important when a subject has missing values in other periods.</p>
+<p>The available assumptions are therefore:</p>
+<ul>
+<li>MAR: Missing periods use the patient’s randomized-arm design.</li>
+<li>CR: Missing periods use the reference-arm design. Observed periods also use the reference-arm design when fitting the count model.</li>
+<li>JR: Missing periods use the reference-arm design, while observed periods retain the patient’s randomized-arm design.</li>
+</ul>
+<p>Thus, count-outcome <code>JR</code> is not a post-ICE-only J2R implementation: it applies
+to all missing positive-duration periods for the subject. The same applies to
+the reference-based component of <code>CR</code>.</p>
+<p>When treatment-specific dispersion parameters are fitted, the strategy also
+determines which frailty distribution is used for the conditional imputation.
+MAR uses the dispersion parameter for the patient’s randomized arm, whereas JR
+and CR use the dispersion parameter for the mapped reference arm. This choice
+affects the entire subject-level conditional distribution: under JR, the
+observed-period means are still calculated from the randomized-arm design, but
+the reference-arm dispersion is used both for conditioning on the observed
+counts and for sampling the missing counts. Thus, JR combines the subject’s
+randomized-arm observed mean trajectory with the reference arm’s frailty
+distribution; it is not solely a change to the design matrix for missing
+periods. This is a controlled-imputation sensitivity assumption. It has no
+effect when a common dispersion parameter is fitted across treatment arms.</p>
+</div>
+<div id="off-treatment-modeling" class="section level3" number="2.5">
+<h3><span class="header-section-number">2.5</span> Off-treatment Modeling</h3>
+<p>As described in <span class="citation">(<a href="#ref-roger2019"><strong>roger2019?</strong></a>)</span>, we can adapt the model for the off-treatment period (period 2) to reflect different assumptions about the treatment effect after stopping treatment, which will then also affect the imputation of <span class="math inline">\(Y_{i3}\)</span> for patients who withdrew later from the study:</p>
+<ul>
+<li>Off-treatment arm levels can be introduced separately for each randomised treatment arm. This can be implemented by including an interaction term between the treatment arm and the off-treatment period indicator, which would apply to both periods 2 and 3.</li>
+<li>The off-treatment arm level can also be shared across randomised treatment arms, which can be implemented by introducing a new factor level for the treatment arm variable, which is only active in periods 2 and 3, but not in period 1. This would correspond to the assumption that all patients behave the same after stopping treatment, regardless of their randomised treatment arm.</li>
+</ul>
+</div>
+<div id="imputation" class="section level3" number="2.6">
+<h3><span class="header-section-number">2.6</span> Imputation</h3>
+<p>We use the negative multinomial model (i.e. with the frailty integrated out) for the observed data to get the MCMC samples for the regression coefficients <span class="math inline">\(\beta\)</span> and dispersion parameter <span class="math inline">\(\phi\)</span>, and then use these to impute <span class="math inline">\(Y_{i3}\)</span> in a separate step. Note that we will only need to impute the missing values for <span class="math inline">\(Y_{i3}\)</span>, as we observe <span class="math inline">\(Y_{i1}\)</span> and <span class="math inline">\(Y_{i2}\)</span> for all patients.</p>
+<p>This is also described briefly in <span class="citation">(<a href="#ref-roger2019"><strong>roger2019?</strong></a>)</span> on p. 89. The required conditional distribution for <span class="math inline">\(Y_{i3}\)</span> given <span class="math inline">\(Y_{i1}\)</span> and <span class="math inline">\(Y_{i2}\)</span> can be derived from formula (7) in <span class="citation">(<a href="#ref-keene2014"><strong>keene2014?</strong></a>)</span>:</p>
+<p><span class="math display">\[
+Y_{i3} | Y_{i1}, Y_{i2} \sim \text{NegativeBinomial}\left(
+  \frac{\phi_{g_i^*}^{-1} + \hat{\mu}_{i1} + \hat{\mu}_{i2}}{\phi_{g_i^*}^{-1} + \hat{\mu}_{i1} + \hat{\mu}_{i2} + \hat{\mu}_{i3}},
+  \phi_{g_i^*}^{-1} + y_{i1} + y_{i2}
+\right)
+\]</span> {#eq-impute-cond-dist}</p>
+<p>Here the quantities <span class="math inline">\(\hat{\mu}_{ij}\)</span> are the expected number of events for patient <span class="math inline">\(i\)</span> in period <span class="math inline">\(j\)</span> based on the regression coefficients <span class="math inline">\(\beta\)</span> and the covariates for patient <span class="math inline">\(i\)</span> in period <span class="math inline">\(j\)</span>. Depending on which assumptions we use (MAR, CR, or JR), we may use different covariate values for a missing period to calculate <span class="math inline">\(\hat{\mu}_{ij}\)</span>.
+Similarly, depending on how we model the off-treatment periods 2 and 3, we would use different covariate values for patient <span class="math inline">\(i\)</span> in periods 2 and 3 to calculate <span class="math inline">\(\hat{\mu}_{i2}\)</span> and <span class="math inline">\(\hat{\mu}_{i3}\)</span>. Therefore we still need to keep <span class="math inline">\(y_{i2}\)</span> and <span class="math inline">\(y_{i3}\)</span> as separate variables and don’t combine them into a single stage.</p>
+<p>In this formula, <span class="math inline">\(g_i^*\)</span> is the randomized arm under MAR and the mapped
+reference arm under JR or CR. Under JR, <span class="math inline">\(\hat{\mu}_{i1}\)</span> and
+<span class="math inline">\(\hat{\mu}_{i2}\)</span> use the randomized-arm design for the observed periods, while
+<span class="math inline">\(\hat{\mu}_{i3}\)</span> uses the reference-arm design and every occurrence of
+<span class="math inline">\(\phi_{g_i^*}\)</span> uses the reference-arm dispersion. Under CR, both the observed-
+and missing-period designs, as well as the dispersion, are from the reference
+arm. With a shared dispersion parameter, the group index can be dropped.</p>
+<p>Note that in the second parameter of the negative binomial distribution we have the actually observed number of events <span class="math inline">\(y_{i1}\)</span> and <span class="math inline">\(y_{i2}\)</span>.</p>
+</div>
+<div id="analysis" class="section level3" number="2.7">
+<h3><span class="header-section-number">2.7</span> Analysis</h3>
+<p>The analysis model is actually simpler than the imputation model. Since we want to use a treatment policy estimand, we do not differentiate any longer between the three periods, and we just want to model the total number of events <span class="math inline">\(Y_i = Y_{i1} + Y_{i2} + Y_{i3}\)</span> for each patient <span class="math inline">\(i\)</span> using a negative binomial regression model with an offset for the total follow-up time <span class="math inline">\(T_i = T_{i1} + T_{i2} + T_{i3}\)</span>.</p>
+<p>We note that all withdrawn patients will have the same total follow-up time <span class="math inline">\(t \equiv T_i\)</span> due to the fixed duration trial design and the fact that we impute for the same overall time. However, there might be patients who were not withdrawn who stayed slightly longer or shorter in the study. Therefore we still use offset terms <span class="math inline">\(t_{i}\)</span> for each patient <span class="math inline">\(i\)</span> in the analysis model.</p>
+<p>Patients should be analysed according to their assigned randomised treatment, in order to be aligned with the treatment policy estimand. This is regardless of the changes for the imputation model’s design matrix in the Impute step.</p>
+<p>We fit this with maximum likelihood estimation for each imputed dataset (e.g. with <code>MASS::glm.nb</code>). The model should include the same covariates as the imputation model.</p>
+<p>We need to be careful how to obtain the standard error. As reported in the CAMIS repository <a href="https://psiaims.github.io/CAMIS/Comp/r-sas_negbin.html">here</a>, we need to recalculate the variance-covariance matrix for the model parameters with a custom function in order to match the <code>SAS PROC GENMOD</code> results.</p>
+</div>
+<div id="pooling" class="section level3" number="2.8">
+<h3><span class="header-section-number">2.8</span> Pooling</h3>
+<p>Finally, Rubin’s rules are applied to pool the estimates (on the log-rate scale, i.e. the regression coefficients <span class="math inline">\(\beta\)</span>) across the imputed datasets, and we can then exponentiate the pooled estimates and confidence intervals to get the results for the rate ratios.</p>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -13,7 +13,7 @@
 <meta name="author" content="Alessandro Noci, Craig Gower-Page, and Marcel Wolbers" />
 
 
-<title>rbmi: Statistical Specifications</title>
+<title>rbmi: Statistical Specifications for Continuous Outcomes</title>
 
 
 <style type="text/css">
@@ -245,7 +245,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">rbmi: Statistical Specifications</h1>
+<h1 class="title toc-ignore">rbmi: Statistical Specifications for Continuous Outcomes</h1>
 <h4 class="author">Alessandro Noci, Craig Gower-Page, and Marcel Wolbers</h4>
 
 
@@ -322,8 +322,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <div id="scope-of-this-document" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Scope of this document</h1>
-<p>This document describes the statistical methods implemented in the <code>rbmi</code> R package for standard and reference-based multiple imputation of continuous longitudinal outcomes.
-The package implements three classes of multiple imputation (MI) approaches:</p>
+<p>This document describes the statistical methods implemented in the <code>rbmi</code> R package for standard and reference-based multiple imputation of continuous longitudinal outcomes. Please see the <a href="stat_specs_counts.html">separate vignette</a> for details on the implemented statistical methods for count outcomes.</p>
+<p>The package implements three classes of multiple imputation (MI) approaches:</p>
 <ol style="list-style-type: decimal">
 <li><p>Conventional MI methods based on Bayesian (or approximate Bayesian) posterior draws of model parameters combined with Rubin’s rules to make inferences as described in <span class="citation">Carpenter et al. (<a href="#ref-CarpenterEtAl2013">2013</a>)</span> and <span class="citation">Cro et al. (<a href="#ref-CroEtAlTutorial2020">2020</a>)</span>.</p></li>
 <li><p>Conditional mean imputation methods combined with re-sampling techniques as described in <span class="citation">Wolbers et al. (<a href="#ref-Wolbers2021">2022</a>)</span>.</p></li>

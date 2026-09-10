@@ -28,7 +28,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-The purpose of this vignette is to provide a 15 minute quickstart guide to the core functions of the `rbmi` package.
+The purpose of this vignette is to provide a 15 minute quickstart guide to the core functions of the `rbmi` package. Note that the examples will focus on continuous outcomes; for modeling count outcomes please refer to the [separate vignette](count.html).
 
 The `rbmi` package consists of 4 core functions (plus several helper functions) which are typically called in sequence:
 
@@ -36,7 +36,6 @@ The `rbmi` package consists of 4 core functions (plus several helper functions) 
 - `impute()` - creates multiple imputed datasets
 - `analyse()` - analyses each of the multiple imputed datasets
 - `pool()` - combines the analysis results across imputed datasets into a single statistic
-
 
 This example in this vignette makes use of Bayesian multiple imputation; this functionality
 requires the installation of the suggested package [`rstan`](https://CRAN.R-project.org/package=rstan).

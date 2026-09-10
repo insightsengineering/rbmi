@@ -404,7 +404,11 @@ R system, in alignment with the system’s broader validation process.</p>
 </div>
 <div id="how-does-rbmi-compare-to-general-purpose-software-for-multiple-imputation-mi-such-as-mice" class="section level2" number="1.3">
 <h2><span class="header-section-number">1.3</span> How does <code>rbmi</code> compare to general-purpose software for multiple imputation (MI) such as <code>mice</code>?</h2>
-<p><code>rbmi</code> covers only “MMRM-type” settings, i.e. settings with a single longitudinal continuous outcome which may be missing at some visits and hence require imputation.</p>
+<p><code>rbmi</code> currently covers only continuous and count outcome data, i.e. settings with</p>
+<ul>
+<li>a single longitudinal continuous outcome which may be missing at some visits and hence require imputation.</li>
+<li>a single count outcome which may be missing for some observation periods and hence require imputation.</li>
+</ul>
 <p>For these settings, it has several <strong>advantages</strong> over general-purpose MI software:</p>
 <ul>
 <li><code>rbmi</code> supports imputation under a range of different missing data assumptions whereas general-purpose MI software is mostly focused on MAR-based imputation. In particular, it is unclear how to implement jump to reference (JR) or copy increments in reference (CIR) methods with such software.</li>

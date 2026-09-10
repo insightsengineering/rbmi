@@ -55,6 +55,10 @@ get_within <- function(x, real) {
         mutate(inside = real >= lci & real <= uci)
 }
 
+get_shared_sigma_draws <- function(samples) {
+    lapply(samples, function(sample_sigma) sample_sigma[[1]])
+}
+
 test_extract_draws <- function(draws_extracted, same_cov, n_groups, n_visits) {
     expect_type(draws_extracted, "list")
     expect_length(draws_extracted, 2)
@@ -153,6 +157,149 @@ test_that("split_dim creates a list from an array as expected", {
 })
 
 
+test_that("get_ESS excludes lp__ from the Stan summary", {
+    methods::setClass("stanfit_ess_test", slots = c(sim = "list"))
+    methods::setMethod(
+        "summary",
+        "stanfit_ess_test",
+        function(object, pars) {
+            expect_identical(pars, c("beta", "sigma"))
+            list(summary = cbind(n_eff = c(beta = 100, sigma = 200)))
+        }
+    )
+    withr::defer(methods::removeMethod("summary", "stanfit_ess_test"))
+    stan_fit <- methods::new(
+        "stanfit_ess_test",
+        sim = list(pars_oi = c("beta", "lp__", "sigma"))
+    )
+
+    ESS <- get_ESS(stan_fit)
+
+    expect_identical(ESS, c(beta = 100, sigma = 200))
+})
+
+
+test_that("count Stan data supports shared and group-specific dispersion", {
+    subjid <- factor(rep(c("1", "2"), each = 3))
+    period <- rep(as.character(1:3), 2)
+    group <- factor(
+        rep(c("Control", "Active"), each = 3),
+        levels = c("Control", "Active")
+    )
+    duration <- rep(1, 6)
+    outcome <- c(1, 2, NA, 3, 4, NA)
+    design <- cbind(intercept = 1, active = as.integer(group == "Active"))
+
+    shared <- prepare_stan_data_count(
+        ddat = design,
+        subjid = subjid,
+        period = period,
+        duration = duration,
+        outcome = outcome,
+        group = group,
+        same_cov = TRUE
+    )
+    separate <- prepare_stan_data_count(
+        ddat = design,
+        subjid = subjid,
+        period = period,
+        duration = duration,
+        outcome = outcome,
+        group = group,
+        same_cov = FALSE
+    )
+
+    expect_equal(shared$G, 1L)
+    expect_equal(shared$group, c(1L, 1L))
+    expect_equal(separate$G, 2L)
+    expect_equal(separate$group, c(1L, 2L))
+    expect_true(validate(shared))
+    expect_true(validate(separate))
+})
+
+
+test_that("count Stan data supports ragged observed cells", {
+    subjid <- factor(c("1", "1", "1", "2", "2"))
+    period <- c("1:1", "1:2", "3:2", "1:1", "3:1")
+    group <- factor(
+        c("Control", "Control", "Control", "Active", "Active"),
+        levels = c("Control", "Active")
+    )
+    duration <- c(2, 2, 1, 3, 2)
+    outcome <- c(1, 0, NA, 2, NA)
+    design <- cbind(intercept = 1, active = as.integer(group == "Active"))
+
+    actual <- prepare_stan_data_count(
+        ddat = design,
+        subjid = subjid,
+        period = period,
+        duration = duration,
+        outcome = outcome,
+        group = group,
+        same_cov = FALSE
+    )
+
+    expect_equal(actual$N, 2)
+    expect_equal(actual$R, 3)
+    expect_equal(actual$subject, c(1L, 1L, 2L))
+    expect_equal(actual$y, c(1L, 0L, 2L))
+    expect_equal(actual$group, c(1L, 2L))
+    expect_true(validate(actual))
+})
+
+
+test_that("count Stan data drops subjects without observed positive-duration cells", {
+    subjid <- factor(rep(c("1", "2", "3"), each = 2))
+    period <- rep(c("1", "2"), 3)
+    group <- factor(
+        rep(c("Control", "Control", "Active"), each = 2),
+        levels = c("Control", "Active")
+    )
+    duration <- c(1, 1, 1, 1, 0, 0)
+    outcome <- c(1, NA, NA, NA, 0, NA)
+    design <- cbind(intercept = 1, active = as.integer(group == "Active"))
+
+    expect_message(
+        actual <- prepare_stan_data_count(
+            ddat = design,
+            subjid = subjid,
+            period = period,
+            duration = duration,
+            outcome = outcome,
+            group = group,
+            same_cov = TRUE
+        ),
+        "Dropping subject\\(s\\).*: `2`, `3`"
+    )
+
+    expect_equal(actual$N, 1)
+    expect_equal(actual$R, 1)
+    expect_equal(actual$subject, 1L)
+    expect_equal(actual$y, 1L)
+    expect_equal(actual$group, 1L)
+    expect_true(validate(actual))
+})
+
+
+test_that("ragged and fixed-period negative-multinomial likelihoods agree", {
+    count <- c(2, 3)
+    mu <- c(4, 5)
+    shape <- 2
+    probability <- mu / (shape + sum(mu))
+
+    fixed_period <- lgamma(shape + sum(count)) - lgamma(shape) -
+        sum(lgamma(count + 1)) +
+        sum(count * log(probability)) +
+        shape * log1p(-sum(probability))
+    ragged <- sum(count * log(mu) - lgamma(count + 1)) +
+        lgamma(shape + sum(count)) - lgamma(shape) +
+        shape * log(shape) -
+        (shape + sum(count)) * log(shape + sum(mu))
+
+    expect_equal(ragged, fixed_period, tolerance = 1e-14)
+})
+
+
 test_that("Verbose suppression works", {
     skip_if_not(is_core_test())
     set.seed(301)
@@ -241,6 +388,18 @@ test_that("as_indices", {
     expect_error(as_indices(c("12")), "must be 0 or 1")
     expect_error(as_indices(c("11", "1")), "same length")
     expect_error(as_indices(c("11", "111")), "same length")
+})
+
+test_that("prepare_stan_data creates valid continuous Stan data", {
+    stan_data <- prepare_stan_data(
+        ddat = matrix(c(1, 2, 3, 4), ncol = 1),
+        subjid = factor(c("1", "1", "2", "2")),
+        visit = factor(c("1", "2", "1", "2")),
+        outcome = c(1, 2, 3, 4),
+        group = factor(c("A", "A", "B", "B"))
+    )
+
+    expect_s3_class(stan_data, "stan_data_continuous")
 })
 
 
@@ -559,7 +718,10 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
     assert_that(all(beta_within$inside))
 
-    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    sigma_within <- get_within(
+        get_shared_sigma_draws(fit$samples$sigma),
+        unlist(as.list(sigma))
+    )
     assert_that(all(sigma_within$inside))
 
     # check extract_draws() worked properly
@@ -588,7 +750,10 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
     assert_that(all(beta_within$inside))
 
-    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    sigma_within <- get_within(
+        get_shared_sigma_draws(fit$samples$sigma),
+        unlist(as.list(sigma))
+    )
     assert_that(all(sigma_within$inside))
 
     # check extract_draws() worked properly
@@ -626,7 +791,10 @@ test_that("fit_mcmc can recover known values with same_cov = TRUE", {
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
     assert_that(all(beta_within$inside))
 
-    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    sigma_within <- get_within(
+        get_shared_sigma_draws(fit$samples$sigma),
+        unlist(as.list(sigma))
+    )
     assert_that(all(sigma_within$inside))
 
     # check extract_draws() worked properly
@@ -866,7 +1034,10 @@ test_that("fit_mcmc works with multiple chains", {
     beta_within <- get_within(fit$samples$beta, c(10, 6, 3, 7, 0, 0, 7, 14))
     assert_that(all(beta_within$inside))
 
-    sigma_within <- get_within(fit$samples$sigma, unlist(as.list(sigma)))
+    sigma_within <- get_within(
+        get_shared_sigma_draws(fit$samples$sigma),
+        unlist(as.list(sigma))
+    )
     assert_that(all(sigma_within$inside))
 
     # check extract_draws() worked properly
@@ -927,7 +1098,7 @@ test_fit_mcmc <- function(
     assert_that(all(beta_within$inside))
 
     sigma_within <- get_within(
-        fit$samples$sigma,
+        if (same_cov) get_shared_sigma_draws(fit$samples$sigma) else fit$samples$sigma,
         rep(unlist(as.list(sigma)), ifelse(same_cov, 1, 2))
     )
     assert_that(all(sigma_within$inside))
