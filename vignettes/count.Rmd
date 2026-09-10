@@ -100,6 +100,28 @@ sas_results <- read.csv(
         sas_upper_95 = Upp_95PCT,
         sas_p_value = Pvalue
     )
+
+check_rate_ratio_results <- function(x, sas_model) {
+    expected_comparisons <- c(
+        "100mg vs Placebo",
+        "300mg vs Placebo"
+    )
+    sas_subset <- dplyr::filter(sas_results, model == sas_model)
+    stopifnot(
+        setequal(x$comparison, expected_comparisons),
+        nrow(x) == 2,
+        all(is.finite(as.matrix(x[, setdiff(names(x), "comparison")]))),
+        all(x[[2]] > 0),
+        all(x[[3]] < x[[2]]),
+        all(x[[2]] < x[[4]]),
+        all(x[[5]] >= 0 & x[[5]] <= 1),
+        setequal(sas_subset$comparison, expected_comparisons),
+        all(is.finite(as.matrix(
+            sas_subset[, setdiff(names(sas_subset), c("model", "comparison"))]
+        )))
+    )
+    invisible(x)
+}
 ```
 
 ## Draws
@@ -269,6 +291,10 @@ rate_ratios_shared <- as.data.frame(poolObj) |>
         rbmi_upper_95 = uci,
         rbmi_p_value = pval
     )
+check_rate_ratio_results(
+    rate_ratios_shared,
+    "NM_Reg: Treat*OnOff BaseCount"
+)
 
 dplyr::left_join(
     rate_ratios_shared,
@@ -388,6 +414,10 @@ rate_ratios_by_arm <- as.data.frame(poolObj_by_arm) |>
         upper_95 = uci,
         p_value = pval
     )
+check_rate_ratio_results(
+    rate_ratios_by_arm,
+    "NM_Reg: Separate for each Treat."
+)
 rate_ratios_by_arm
 ```
 
@@ -494,6 +524,10 @@ rate_ratios_all_treatment_interactions <- as.data.frame(
         rbmi_upper_95 = uci,
         rbmi_p_value = pval
     )
+check_rate_ratio_results(
+    rate_ratios_all_treatment_interactions,
+    "Separate each Treat. Shared frai"
+)
 
 dplyr::left_join(
     rate_ratios_all_treatment_interactions,
@@ -679,6 +713,10 @@ rate_ratios_season <- as.data.frame(poolObj_season) |>
         rbmi_upper_95 = uci,
         rbmi_p_value = pval
     )
+check_rate_ratio_results(
+    rate_ratios_season,
+    "4 Seasons: Treat*OnOff BaseCount"
+)
 
 left_join(
     rate_ratios_season,
@@ -788,6 +826,10 @@ rate_ratios_fixed_lambda <- as.data.frame(poolObj_fixed_lambda) |>
         rbmi_upper_95 = uci,
         rbmi_p_value = pval
     )
+check_rate_ratio_results(
+    rate_ratios_fixed_lambda,
+    "Fixed 0.01 active imputed"
+)
 
 left_join(
     rate_ratios_fixed_lambda,
@@ -858,6 +900,10 @@ rate_ratios_double_rate <- as.data.frame(poolObj_double_rate) |>
         rbmi_upper_95 = uci,
         rbmi_p_value = pval
     )
+check_rate_ratio_results(
+    rate_ratios_double_rate,
+    "Delta Active double rate off"
+)
 
 left_join(
     rate_ratios_double_rate,
