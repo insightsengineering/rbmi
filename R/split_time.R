@@ -19,7 +19,8 @@
 #' @param origin Optional interval origin. For fixed intervals this is the
 #'   boundary immediately before interval zero. For calendar intervals it must
 #'   be the first day of a month. Defaults to `0` for numeric starts and
-#'   `1970-01-01` for `Date` starts.
+#'   `1970-01-01` for `Date` starts. (Note that `interval = "week"`` with the default
+#'   numeric origin 0 / `1970-01-01`` (a Thursday) produces Thursday-based weeks.)
 #' @param period Optional name of the original period variable. When supplied,
 #'   `split_period` combines this value with `split_interval`, which allows two
 #'   original periods intersecting the same interval to remain distinct.
@@ -137,10 +138,12 @@ split_time <- function(
         original = match(original_period, original_levels),
         stringsAsFactors = FALSE
     ))
-    period_keys <- period_keys[order(
-        period_keys$interval,
-        period_keys$original
-    ), ]
+    period_keys <- period_keys[
+        order(
+            period_keys$interval,
+            period_keys$original
+        ),
+    ]
     result$split_period <- factor(
         result$split_period,
         levels = period_keys$key,
@@ -356,7 +359,10 @@ split_time_row <- function(
     }
 
     if (length(event_offsets) == 0) {
-        result$split_outcome <- c(as.integer(row_outcome), rep(0L, number_cells - 1))
+        result$split_outcome <- c(
+            as.integer(row_outcome),
+            rep(0L, number_cells - 1)
+        )
     } else {
         event_day <- as.numeric(row_start) + event_offsets - 1
         result$split_outcome <- vapply(
@@ -394,8 +400,10 @@ count_interval_index <- function(value, interval_info, is_date) {
     value_parts <- as.POSIXlt(value)
     origin_parts <- as.POSIXlt(interval_info$origin)
     month_difference <-
-        (value_parts$year - origin_parts$year) * 12L +
-        value_parts$mon - origin_parts$mon
+        (value_parts$year - origin_parts$year) *
+        12L +
+        value_parts$mon -
+        origin_parts$mon
     as.integer(floor(month_difference / interval_info$calendar_months))
 }
 

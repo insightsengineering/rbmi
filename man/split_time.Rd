@@ -36,7 +36,7 @@ Calendar months, quarters, and years require \code{Date} starts.}
 \item{origin}{Optional interval origin. For fixed intervals this is the
 boundary immediately before interval zero. For calendar intervals it must
 be the first day of a month. Defaults to \code{0} for numeric starts and
-\code{1970-01-01} for \code{Date} starts.}
+\code{1970-01-01} for \code{Date} starts. (Note that \verb{interval = "week"`` with the default numeric origin 0 / }1970-01-01`` (a Thursday) produces Thursday-based weeks.)}
 
 \item{period}{Optional name of the original period variable. When supplied,
 \code{split_period} combines this value with \code{split_interval}, which allows two
