@@ -1085,7 +1085,10 @@ mcse_combine_all_pars <- function(jackknife_results) {
 #' `mcse()` returns an `mcse` object; a list of class `"mcse"` containing `pars`
 #' (the Monte Carlo standard errors of the pooled estimates, in the same
 #' structure as the `pars` element of a `pool` object) and `N` (the number of
-#' results combined).
+#' results combined). When a reporting transformation was supplied to
+#' [analyse()], `transformed_pars` contains MCSEs computed by applying the same
+#' transformation (including its delta-method standard error) to every
+#' jackknife replicate.
 #' @rdname pool
 #' @export
 mcse <- function(x, results) {
@@ -1110,10 +1113,18 @@ mcse <- function(x, results) {
         conf.level = x$conf.level,
         alternative = x$alternative
     )
-    ret <- list(
-        pars = mcse_combine_all_pars(jackknife_results),
-        N = x$N
-    )
+    ret <- list(pars = mcse_combine_all_pars(jackknife_results), N = x$N)
+    if (!is.null(results$transform)) {
+        transformed_jackknife_results <- lapply(
+            jackknife_results,
+            transform_pooled_pars,
+            transform = results$transform
+        )
+        ret$transformed_pars <- mcse_combine_all_pars(
+            transformed_jackknife_results
+        )
+        ret$transform <- results$transform
+    }
     structure(
         ret,
         class = "mcse"
@@ -1122,7 +1133,22 @@ mcse <- function(x, results) {
 
 #' @rdname pool
 #' @export
-as.data.frame.mcse <- function(x, ...) {
+as.data.frame.mcse <- function(
+    x,
+    ...,
+    scale = c("auto", "original", "transformed")
+) {
+    scale <- match.arg(scale)
+    if (scale == "auto") {
+        scale <- if (is.null(x$transformed_pars)) "original" else "transformed"
+    }
+    if (scale == "transformed") {
+        assert_that(
+            !is.null(x$transformed_pars),
+            msg = "Transformed results are unavailable because no `transform` was supplied to `analyse()`"
+        )
+        return(as_data_frame_internal(x, pars = x$transformed_pars))
+    }
     as_data_frame_internal(x)
 }
 
@@ -1136,11 +1162,16 @@ print.mcse <- function(
     ...,
     pval_digits = 2,
     pval_eps = 1e-6,
-    pval_nsmall = 5
+    pval_nsmall = 5,
+    scale = c("auto", "original", "transformed")
 ) {
+    scale <- match.arg(scale)
+    if (scale == "auto") {
+        scale <- if (is.null(x$transformed_pars)) "original" else "transformed"
+    }
     n_string <- as.character(x$N)
 
-    df <- as.data.frame(x)
+    df <- as.data.frame(x, scale = scale)
     # Handle the p-value formatting here in the data frame,
     # so as_ascii_table() does not have to do it.
     df$pval <- format.pval(
@@ -1156,7 +1187,11 @@ print.mcse <- function(
         "-----------",
         sprintf("Number of Results Combined: %s", n_string),
         "",
-        "Results:",
+        if (scale == "original") {
+            "Results:"
+        } else {
+            "Results (transformation applied; original-scale results are in `$pars`):"
+        },
         as_ascii_table(df),
         ""
     )

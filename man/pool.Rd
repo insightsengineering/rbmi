@@ -22,9 +22,16 @@ pool(
 
 mcse(x, results)
 
-\method{as.data.frame}{mcse}(x, ...)
+\method{as.data.frame}{mcse}(x, ..., scale = c("auto", "original", "transformed"))
 
-\method{print}{mcse}(x, ..., pval_digits = 2, pval_eps = 1e-06, pval_nsmall = 5)
+\method{print}{mcse}(
+  x,
+  ...,
+  pval_digits = 2,
+  pval_eps = 1e-06,
+  pval_nsmall = 5,
+  scale = c("auto", "original", "transformed")
+)
 }
 \arguments{
 \item{results}{an analysis object created by \code{\link[=analyse]{analyse()}}.}
@@ -81,7 +88,10 @@ parameter (columns \code{parameter}, \code{est}, \code{se}, \code{lci}, \code{uc
 \code{mcse()} returns an \code{mcse} object; a list of class \code{"mcse"} containing \code{pars}
 (the Monte Carlo standard errors of the pooled estimates, in the same
 structure as the \code{pars} element of a \code{pool} object) and \code{N} (the number of
-results combined).
+results combined). When a reporting transformation was supplied to
+\code{\link[=analyse]{analyse()}}, \code{transformed_pars} contains MCSEs computed by applying the same
+transformation (including its delta-method standard error) to every
+jackknife replicate.
 }
 \description{
 Pool analysis results obtained from the imputed datasets

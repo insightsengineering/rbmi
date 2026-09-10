@@ -1083,3 +1083,37 @@ test_that("mcse works as expected", {
     skip_if_not(is_core_test())
     expect_snapshot(print(result), cran = TRUE)
 })
+
+test_that("mcse honours the pooled reporting transformation", {
+    analysis <- as_analysis(
+        results = list(
+            list(p1 = list(est = log(2), se = 0.20, df = Inf)),
+            list(p1 = list(est = log(3), se = 0.25, df = Inf)),
+            list(p1 = list(est = log(4), se = 0.30, df = Inf))
+        ),
+        method = method_bayes(n_samples = 3),
+        transform = use_transform(exp(x))
+    )
+    pooled <- pool(analysis)
+    observed <- mcse(pooled, analysis)
+    original_jackknife <- lapply(
+        seq_len(pooled$N),
+        mcse_jackknife,
+        results = analysis,
+        conf.level = pooled$conf.level,
+        alternative = pooled$alternative
+    )
+    expected <- mcse_combine_all_pars(lapply(
+        original_jackknife,
+        transform_pooled_pars,
+        transform = analysis$transform
+    ))
+
+    expect_equal(observed$transformed_pars, expected)
+    expect_equal(as.data.frame(observed), as_data_frame_internal(observed, expected))
+    expect_equal(
+        as.data.frame(observed, scale = "original"),
+        as_data_frame_internal(observed)
+    )
+    expect_output(print(observed), "transformation applied")
+})
