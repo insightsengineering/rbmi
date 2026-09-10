@@ -103,21 +103,29 @@ Relevant only for \code{method_condmean(type = "bootstrap")}, \code{method_appro
 }
 \description{
 \code{draws} fits the base imputation model to the observed outcome data
-according to the given multiple imputation methodology.
-According to the user's method specification, it returns either draws from the posterior distribution of the
-model parameters as required for Bayesian multiple imputation or frequentist parameter estimates from the
+according to the given multiple imputation methodology. The models are different depending
+on the outcome type that is used.
+
+For continuous outcomes, according to the user's method specification, it returns either draws from the posterior
+distribution of the model parameters as required for Bayesian multiple imputation or frequentist parameter estimates from the
 original data and bootstrapped or leave-one-out datasets as required for conditional mean imputation.
 The purpose of the imputation model is to estimate model parameters
 in the absence of intercurrent events (ICEs) handled using reference-based imputation methods.
-For this reason, any observed outcome data after ICEs, for which reference-based imputation methods are
+For this reason, any observed continuous outcome data after ICEs, for which reference-based imputation methods are
 specified, are removed and considered as missing for the purpose of estimating the imputation model, and for
-this purpose only. The imputation model is a mixed model for repeated measures (MMRM) that is valid
-under a missing-at-random (MAR) assumption.
+this purpose only. The imputation model for continuous outcomes is a mixed model for repeated measures (MMRM)
+that is valid under a missing-at-random (MAR) assumption.
 It can be fit using maximum likelihood (ML) or restricted ML (REML) estimation,
 a Bayesian approach, or an approximate Bayesian approach according to the user's method specification.
 The ML/REML approaches and the approximate Bayesian approach support several possible covariance structures,
 while the Bayesian approach based on MCMC sampling supports only an unstructured covariance structure.
 In any case the covariance matrix can be assumed to be the same or different across each group.
+
+For count outcomes, a Bayesian joint negative multinomial model is fitted to the event counts
+across periods, accounting for each period's duration. Posterior draws of the regression
+coefficients and dispersion parameter are returned for use in the imputation step.
+Further details about the model are available in the statistical specifications for count
+outcomes vignette.
 }
 \details{
 \code{draws} performs the first step of the multiple imputation (MI) procedure: fitting the
@@ -244,10 +252,12 @@ in the model (including interactions which are specified as \code{"covariateName
 If no covariates are provided the default model specification of \code{outcome ~ 1 + visit + group} will be used.
 Please note that the \code{group*visit} interaction
 is \strong{not} included in the model by default.
-\item \code{strata}: covariates used as stratification variables in the bootstrap sampling.
+\item \code{strata}: for continuous outcomes, covariates used as stratification variables in the bootstrap sampling.
 By default only the \code{vars$group} is set as stratification variable.
 Needed only for \code{method_condmean(type = "bootstrap")} and \code{method_approxbayes()}.
 \item \code{strategy}: name of the column in \code{data_ice} which contains the subject-specific imputation strategy.
+\item \code{period}: for count outcomes, name of the column in \code{data} which contains the period variable.
+\item \code{duration}: for count outcomes, name of the column in \code{data} which contains the duration variable.
 }
 
 The \code{outcome} argument allows to select either the continuous outcome or the count outcome.
