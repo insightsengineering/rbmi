@@ -31,7 +31,9 @@ For the statistical method details please see the [separate vignette](stat_specs
 
 ## The Data
 
-We use the simulated example data set from Roger et al. TODO add reference The data contain three treatment arms and up to three rows per patient, corresponding to the on-treatment, off-treatment but observed, and post-withdrawal periods.
+We use the simulated example data set generated with the `NM_Simdata2.sas` macro by James Roger previously available from the [LSHTM website](https://www.lshtm.ac.uk/research/centres-projects-groups/missing-data) (they host content for DIA SWG on Estimands and Missing Data). The data contain three treatment arms and up to three rows per patient, corresponding to the on-treatment, off-treatment but observed, and post-withdrawal periods.
+
+The simulation was informed by characteristics of the METREO study of mepolizumab in eosinophilic chronic obstructive pulmonary disease, but these are not trial data and the simulated treatment effects should not be interpreted as METREO results. Patients either complete follow-up on treatment, discontinue treatment and remain observed until the end of follow-up, discontinue treatment and remain observed for a time before withdrawing, or discontinue treatment and withdraw immediately. Period 1 represents time on treatment, period 2 observed time off treatment, and period 3 unobserved time after withdrawal. Counts were also simulated for period 3 and retained as the complete-data truth for evaluating the analysis, although they are set to missing in the observed outcome.
 
 ```{r, message = FALSE}
 library(dplyr)
@@ -58,6 +60,16 @@ dat_count <- dat_count_raw |>
 head(dat_count)
 ```
 
+The variables retained for this example are:
+
+- `patient`: patient identifier.
+- `period`: follow-up period (1 = on treatment, 2 = off treatment but observed, and 3 = off treatment and unobserved).
+- `TreatLab`: randomized treatment group (`Placebo`, `100mg`, or `300mg`).
+- `OnOff`: indicator of whether the patient was on or off treatment during the period.
+- `Length`: time spent in the period, in days.
+- `BaseCount`: number of events experienced during the year before the study, used as a baseline covariate.
+- `Observed_Count`: observed number of events during the period; this is missing for period 3 because that period occurs after withdrawal.
+
 The source data omit periods with zero length. We use `expand_locf()` to add these rows so that every patient has all three periods. The treatment arm and baseline count are carried forward, while `OnOff` is derived from the period. Added rows have zero length and a missing observed count.
 
 ```{r}
@@ -78,7 +90,6 @@ dat_count_filled <- dat_count |>
     )
 ```
 
-TODO add explanation of data
 The SAS reference results for the three models illustrated below are included as
 a CSV file with the package. We retain the two active-treatment versus placebo
 contrasts, so they can be compared directly with the pooled `rbmi` estimates.
@@ -549,12 +560,21 @@ the imputation model. This is a genuinely ragged representation: patients need
 not contribute the same interval identifiers, and a withdrawn patient can have
 several missing cells.
 
-The source data include `Times1`--`Times20`, one-based event times within each
-original period. `split_time()` uses these to allocate each observed aggregate
-count to 91-day cells. A fixed width of 91 days reproduces the quarter
-definition in the SAS example. For other applications, `interval` can instead
-be `"week"`, `"month"`, `"quarter"`, or `"year"`; calendar months, quarters,
-and years require a `Date` start variable.
+The source data include `Times1`--`Times20`, one-based event-day offsets within
+each original period: a value of 1 denotes the first day of that period and a
+value of `Length` denotes its last day. There is one non-missing `Times` value
+for each event in `Observed_Count`, with the remaining columns left missing;
+the simulation allowed at most 20 events per period. The start of a period on
+the study calendar is `StartDate + Lengthsofar`, so an event's calendar day is
+`StartDate + Lengthsofar + TimesN - 1`. Although simulated event times also
+exist for the unobserved third period as part of the complete-data truth,
+`Observed_Count` is missing there and the split cell outcomes remain missing.
+
+`split_time()` uses these offsets to allocate each observed aggregate count to
+91-day cells. A fixed width of 91 days reproduces the quarter definition in the
+SAS example. For other applications, `interval` can instead be `"week"`,
+`"month"`, `"quarter"`, or `"year"`; calendar months, quarters, and years
+require a `Date` start variable.
 
 ```{r}
 dat_count_season <- dat_count_raw |>
