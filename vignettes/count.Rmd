@@ -332,8 +332,14 @@ separately, while retaining a single rbmi draws object and the usual downstream
 workflow.
 
 For MAR imputation, each subject uses the `phi` for their randomized treatment
-arm. For JR and CR, the mapped reference arm's `phi` is used, consistently with
-the reference-arm model used for imputation.
+arm. For JR and CR, the mapped reference arm's `phi` is used for the whole
+subject-level conditional distribution. In particular, JR still calculates
+the observed-cell means from the subject's randomized-arm design, but uses the
+reference-arm `phi` when conditioning on those observed cells and when drawing
+the missing cells. JR therefore combines the randomized-arm observed mean
+trajectory with the reference arm's frailty distribution; it is not only a
+design-matrix substitution for missing periods. This distinction disappears
+with the default shared `phi`.
 
 #### Impute
 
@@ -691,8 +697,8 @@ arms with a fixed value.
 
 There is an important parameterization detail. The executed SAS code fixes
 `0.0021` on its negative-multinomial lambda scale. If
-$r = \phi^{-1}$ is the negative-multinomial shape parameter, the mean used to
-impute period 3 is therefore
+$r = \phi^{-1}$ is the negative-multinomial shape parameter, the
+Poisson mean supplied for period 3 is therefore
 
 $$
 \mu_{i3} = r L_{i3} \times 0.0021
@@ -700,7 +706,24 @@ $$
 $$
 
 Consequently, `0.0021` is not a fixed marginal event rate. A genuinely fixed
-event rate would instead use $\mu_{i3} = L_{i3} \times 0.0021$.
+Poisson event rate would instead use
+$\mu_{i3} = L_{i3} \times 0.0021$, i.e. without the division by $\phi$. 
+In the joint count model, $\mu_{i3}$ is the
+unconditional marginal mean of $Y_{i3}$. The actual imputation distribution,
+however, conditions on the observed counts $y_{i1},y_{i2}$. Given these counts
+and fitted observed-cell means $\hat\mu_{i1},\hat\mu_{i2}$, its conditional mean
+is
+
+$$
+\mathbb{E}(Y_{i3} \mid y_{i1},y_{i2}) =
+\frac{r + y_{i1} + y_{i2}}
+     {r + \hat\mu_{i1} + \hat\mu_{i2}}\,\mu_{i3}.
+$$
+
+For a `fixed_lambda_rate` strategy based on JR or CR, $r$ is calculated from
+the mapped reference arm's `phi`; under JR this is so even though the fitted
+observed-cell means in the denominator use the subject's randomized-arm
+design.
 
 Controlled count strategies are applied in `impute()`, after the posterior
 parameters have been drawn. Each strategy has a base trajectory (`MAR`, `JR`,

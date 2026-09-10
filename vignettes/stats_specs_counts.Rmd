@@ -120,6 +120,19 @@ Thus, count-outcome `JR` is not a post-ICE-only J2R implementation: it applies
 to all missing positive-duration periods for the subject. The same applies to
 the reference-based component of `CR`.
 
+When treatment-specific dispersion parameters are fitted, the strategy also
+determines which frailty distribution is used for the conditional imputation.
+MAR uses the dispersion parameter for the patient's randomized arm, whereas JR
+and CR use the dispersion parameter for the mapped reference arm. This choice
+affects the entire subject-level conditional distribution: under JR, the
+observed-period means are still calculated from the randomized-arm design, but
+the reference-arm dispersion is used both for conditioning on the observed
+counts and for sampling the missing counts. Thus, JR combines the subject's
+randomized-arm observed mean trajectory with the reference arm's frailty
+distribution; it is not solely a change to the design matrix for missing
+periods. This is a controlled-imputation sensitivity assumption. It has no
+effect when a common dispersion parameter is fitted across treatment arms.
+
 ### Off-treatment Modeling
 
 As described in @roger2019, we can adapt the model for the off-treatment period (period 2) to reflect different assumptions about the treatment effect after stopping treatment, which will then also affect the imputation of $Y_{i3}$ for patients who withdrew later from the study:
@@ -135,13 +148,21 @@ This is also described briefly in @roger2019 on p. 89. The required conditional 
 
 $$
 Y_{i3} | Y_{i1}, Y_{i2} \sim \text{NegativeBinomial}\left(
-  \frac{\phi^{-1} + \hat{\mu}_{i1} + \hat{\mu}_{i2}}{\phi^{-1} + \hat{\mu}_{i1} + \hat{\mu}_{i2} + \hat{\mu}_{i3}}, 
-  \phi^{-1} + y_{i1} + y_{i2}
+  \frac{\phi_{g_i^*}^{-1} + \hat{\mu}_{i1} + \hat{\mu}_{i2}}{\phi_{g_i^*}^{-1} + \hat{\mu}_{i1} + \hat{\mu}_{i2} + \hat{\mu}_{i3}},
+  \phi_{g_i^*}^{-1} + y_{i1} + y_{i2}
 \right)
 $$ {#eq-impute-cond-dist}
 
-Here the quantities $\hat{\mu}_{ij}$ are the expected number of events for patient $i$ in period $j$ based on the regression coefficients $\beta$ and dispersion parameter $\phi$, and the covariates for patient $i$ in period $j$. Depending on which assumptions we use (MAR, CR, or JR), we may use different covariate values for a missing period to calculate $\hat{\mu}_{ij}$.
+Here the quantities $\hat{\mu}_{ij}$ are the expected number of events for patient $i$ in period $j$ based on the regression coefficients $\beta$ and the covariates for patient $i$ in period $j$. Depending on which assumptions we use (MAR, CR, or JR), we may use different covariate values for a missing period to calculate $\hat{\mu}_{ij}$.
 Similarly, depending on how we model the off-treatment periods 2 and 3, we would use different covariate values for patient $i$ in periods 2 and 3 to calculate $\hat{\mu}_{i2}$ and $\hat{\mu}_{i3}$. Therefore we still need to keep $y_{i2}$ and $y_{i3}$ as separate variables and don't combine them into a single stage.
+
+In this formula, $g_i^*$ is the randomized arm under MAR and the mapped
+reference arm under JR or CR. Under JR, $\hat{\mu}_{i1}$ and
+$\hat{\mu}_{i2}$ use the randomized-arm design for the observed periods, while
+$\hat{\mu}_{i3}$ uses the reference-arm design and every occurrence of
+$\phi_{g_i^*}$ uses the reference-arm dispersion. Under CR, both the observed-
+and missing-period designs, as well as the dispersion, are from the reference
+arm. With a shared dispersion parameter, the group index can be dropped.
 
 Note that in the second parameter of the negative binomial distribution we have the actually observed number of events $y_{i1}$ and $y_{i2}$.
 

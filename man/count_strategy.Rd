@@ -23,8 +23,13 @@ model-based mean for affected missing cells.}
 
 \item{fixed_lambda_rate}{\code{NULL} or a non-negative numeric scalar. When set,
 it replaces the model-based rate on the SAS negative-multinomial lambda
-scale. For exposure \code{L} and dispersion \code{phi}, the marginal mean used for
-imputation is \code{L * fixed_lambda_rate / phi}.}
+scale. For exposure \code{L} and the strategy-selected dispersion \code{phi}, the
+Poisson mean supplied to the negative-binomial imputation is
+\code{L * fixed_lambda_rate / phi}. MAR selects \code{phi} from the subject's arm;
+JR and CR select it from the mapped reference arm. This is the unconditional
+marginal mean for that cell in the joint count model; the mean of the
+imputation distribution conditional on the other observed cells also
+depends on their counts and fitted means.}
 
 \item{period}{\code{NULL} or a vector of period values. If supplied, the rate
 adjustment is restricted to missing cells in these periods. The base

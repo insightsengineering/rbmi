@@ -19,8 +19,13 @@
 #'   model-based mean for affected missing cells.
 #' @param fixed_lambda_rate `NULL` or a non-negative numeric scalar. When set,
 #'   it replaces the model-based rate on the SAS negative-multinomial lambda
-#'   scale. For exposure `L` and dispersion `phi`, the marginal mean used for
-#'   imputation is `L * fixed_lambda_rate / phi`.
+#'   scale. For exposure `L` and the strategy-selected dispersion `phi`, the
+#'   Poisson mean supplied to the negative-binomial imputation is
+#'   `L * fixed_lambda_rate / phi`. MAR selects `phi` from the subject's arm;
+#'   JR and CR select it from the mapped reference arm. This is the unconditional
+#'   marginal mean for that cell in the joint count model; the mean of the
+#'   imputation distribution conditional on the other observed cells also
+#'   depends on their counts and fitted means.
 #' @param period `NULL` or a vector of period values. If supplied, the rate
 #'   adjustment is restricted to missing cells in these periods. The base
 #'   strategy still applies to other missing periods.
@@ -114,12 +119,15 @@ validate_count_strategy <- function(x) {
     assert_that(
         has_class(x, "count_strategy"),
         is.list(x),
-        identical(names(x), c(
-            "base",
-            "rate_multiplier",
-            "fixed_lambda_rate",
-            "period"
-        )),
+        identical(
+            names(x),
+            c(
+                "base",
+                "rate_multiplier",
+                "fixed_lambda_rate",
+                "period"
+            )
+        ),
         x$base %in% c("MAR", "JR", "CR"),
         length(x$base) == 1,
         is.numeric(x$rate_multiplier),
@@ -131,8 +139,10 @@ validate_count_strategy <- function(x) {
         is.na(x$fixed_lambda_rate) ||
             (is.finite(x$fixed_lambda_rate) && x$fixed_lambda_rate >= 0),
         is.null(x$period) ||
-            (is.character(x$period) && length(x$period) >= 1 &&
-                all(!is.na(x$period)) && all(nzchar(x$period))),
+            (is.character(x$period) &&
+                length(x$period) >= 1 &&
+                all(!is.na(x$period)) &&
+                all(nzchar(x$period))),
         msg = "Invalid `count_strategy` object"
     )
     assert_that(
@@ -443,10 +453,9 @@ prepare_count_imputation_data <- function(
         strategy_spec <- strategy_specs_by_id[[subject_id]]
         validate_count_strategy(strategy_spec)
         subject_rows <- id == subject_id
-        affected_rows <- subject_rows & (
-            is.null(strategy_spec$period) |
-                period %in% strategy_spec$period
-        )
+        affected_rows <- subject_rows &
+            (is.null(strategy_spec$period) |
+                period %in% strategy_spec$period)
         rate_multiplier[affected_rows] <- strategy_spec$rate_multiplier
         fixed_lambda_rate[affected_rows] <-
             strategy_spec$fixed_lambda_rate
@@ -508,15 +517,17 @@ sample_count_outcomes <- function(prepared, sample) {
     }
 
     mu_observed <- numeric(length(prepared$id))
-    mu_observed[observed_available] <- prepared$duration[observed_available] * exp(
-        prepared$design_observed[observed_available, , drop = FALSE] %*%
-            sample$beta
-    )
+    mu_observed[observed_available] <- prepared$duration[observed_available] *
+        exp(
+            prepared$design_observed[observed_available, , drop = FALSE] %*%
+                sample$beta
+        )
     mu_missing <- numeric(length(prepared$id))
-    mu_missing[needs_random_draw] <- prepared$duration[needs_random_draw] * exp(
-        prepared$design_missing[needs_random_draw, , drop = FALSE] %*%
-            sample$beta
-    )
+    mu_missing[needs_random_draw] <- prepared$duration[needs_random_draw] *
+        exp(
+            prepared$design_missing[needs_random_draw, , drop = FALSE] %*%
+                sample$beta
+        )
 
     observed_count <- ifelse(observed_available, prepared$outcome, 0)
     sum_by_subject <- function(x) {
@@ -566,7 +577,8 @@ sample_count_outcomes <- function(prepared, sample) {
                 mu_missing[missing_row] *
                     prepared$rate_multiplier[missing_row],
                 prepared$duration[missing_row] *
-                    prepared$fixed_lambda_rate[missing_row] * inv_phi
+                    prepared$fixed_lambda_rate[missing_row] *
+                    inv_phi
             )
             prob <- conditioning_mass /
                 (conditioning_mass + imputation_mean)
