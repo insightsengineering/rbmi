@@ -240,5 +240,5 @@ glm_nb_covariance <- function(model) {
 
     parameter_names <- c(names(stats::coef(model)), "dispersion")
     dimnames(observed_information) <- list(parameter_names, parameter_names)
-    solve(observed_information, tol = 1e-20)
+    solve(observed_information)
 }
