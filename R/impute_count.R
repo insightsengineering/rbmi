@@ -474,6 +474,7 @@ prepare_count_imputation_data <- function(
         subject_ids = data$ids,
         subject_index = subject_index,
         period = period,
+        period_index = match(period, data$periods),
         duration = duration,
         outcome = outcome,
         is_missing = is_missing,
@@ -509,6 +510,24 @@ sample_count_outcomes <- function(prepared, sample) {
 
     observed_available <- !prepared$is_missing & prepared$duration > 0
     needs_random_draw <- prepared$is_missing & prepared$duration > 0
+    missing_period_index <- prepared$period_index[needs_random_draw]
+    period_index_by_subject <- split(
+        missing_period_index,
+        prepared$subject_index[needs_random_draw]
+    )
+    assert_that(
+        length(prepared$period_index) == length(prepared$id),
+        !anyNA(missing_period_index),
+        all(vapply(
+            period_index_by_subject,
+            function(index) !is.unsorted(index),
+            logical(1)
+        )),
+        msg = paste(
+            "Positive-duration missing cells must be ordered by period",
+            "within each subject"
+        )
+    )
     if (is.null(prepared$rate_multiplier)) {
         prepared$rate_multiplier <- rep(1, length(prepared$id))
     }

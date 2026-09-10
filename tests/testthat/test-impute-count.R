@@ -125,6 +125,7 @@ test_that("count imputation sequentially conditions multiple missing cells", {
         subject_ids = c("control", "active"),
         subject_index = rep(1:2, each = 4),
         period = rep(as.character(1:4), 2),
+        period_index = rep(1:4, 2),
         duration = rep(1, 8),
         outcome = c(2, 3, NA, NA, 1, 2, NA, NA),
         is_missing = rep(c(FALSE, FALSE, TRUE, TRUE), 2),
@@ -166,6 +167,28 @@ test_that("count imputation sequentially conditions multiple missing cells", {
     actual <- sample_count_outcomes(prepared, sample)
 
     expect_identical(actual, expected)
+})
+
+
+test_that("count imputation requires missing cells in period order", {
+    draws <- make_count_draws("MAR")
+    prepared <- prepare_count_imputation_data(
+        data = draws$data,
+        references = add_class(
+            c("Control" = "Control", "Active" = "Active"),
+            "references"
+        ),
+        strategy_by_id = unlist(draws$data$strategies)
+    )
+    active_rows <- which(prepared$id == "active")
+    prepared$is_missing[active_rows[2]] <- TRUE
+    prepared$outcome[active_rows[2]] <- NA
+    prepared$period_index[active_rows[2:3]] <- c(3, 2)
+
+    expect_error(
+        sample_count_outcomes(prepared, draws$samples[[1]]),
+        "missing cells must be ordered by period"
+    )
 })
 
 
