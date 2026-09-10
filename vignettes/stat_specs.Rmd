@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 
 # Scope of this document
 
-This document describes the statistical methods implemented in the `rbmi` R package for standard and reference-based multiple imputation of continuous longitudinal outcomes. Please see the [separate vignette](stats_specs_counts.html) for details on the implemented statistical methods for count outcomes.
+This document describes the statistical methods implemented in the `rbmi` R package for standard and reference-based multiple imputation of continuous longitudinal outcomes. Please see the [separate vignette](stat_specs_counts.html) for details on the implemented statistical methods for count outcomes.
 
 The package implements three classes of multiple imputation (MI) approaches: 
 

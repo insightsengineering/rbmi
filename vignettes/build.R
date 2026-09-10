@@ -27,9 +27,9 @@ rmarkdown::render(
 )
 
 rmarkdown::render(
-    input = "./vignettes/stats_specs_counts.Rmd",
+    input = "./vignettes/stat_specs_counts.Rmd",
     output_dir = "./vignettes/",
-    output_file = "stats_specs_counts.html"
+    output_file = "stat_specs_counts.html"
 )
 
 rmarkdown::render(
