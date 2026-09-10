@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Daniel Sabanés Bové" />
+
+
+<title>rbmi: Modeling count data</title>
+
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">rbmi: Modeling count data</h1>
+<h4 class="author">Daniel Sabanés Bové</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#the-data" id="toc-the-data"><span class="toc-section-number">1</span> The Data</a></li>
+<li><a href="#draws" id="toc-draws"><span class="toc-section-number">2</span> Draws</a>
+<ul>
+<li><a href="#imputation-strategies" id="toc-imputation-strategies"><span class="toc-section-number">2.1</span> Imputation strategies</a></li>
+<li><a href="#variables" id="toc-variables"><span class="toc-section-number">2.2</span> Variables</a></li>
+<li><a href="#method" id="toc-method"><span class="toc-section-number">2.3</span> Method</a></li>
+<li><a href="#sampling" id="toc-sampling"><span class="toc-section-number">2.4</span> Sampling</a></li>
+</ul></li>
+<li><a href="#impute" id="toc-impute"><span class="toc-section-number">3</span> Impute</a></li>
+<li><a href="#analyse" id="toc-analyse"><span class="toc-section-number">4</span> Analyse</a></li>
+<li><a href="#pool" id="toc-pool"><span class="toc-section-number">5</span> Pool</a></li>
+<li><a href="#comparison-with-sas-results" id="toc-comparison-with-sas-results"><span class="toc-section-number">6</span> Comparison with SAS results</a></li>
+<li><a href="#additional-modeling-options" id="toc-additional-modeling-options"><span class="toc-section-number">7</span> Additional modeling options</a>
+<ul>
+<li><a href="#separate-draw-model-sampling-for-each-treatment-group" id="toc-separate-draw-model-sampling-for-each-treatment-group"><span class="toc-section-number">7.1</span> Separate draw model sampling for each treatment group</a>
+<ul>
+<li><a href="#impute-1" id="toc-impute-1"><span class="toc-section-number">7.1.1</span> Impute</a></li>
+<li><a href="#analyse-and-pool" id="toc-analyse-and-pool"><span class="toc-section-number">7.1.2</span> Analyse and pool</a></li>
+<li><a href="#comparison-with-sas-results-1" id="toc-comparison-with-sas-results-1"><span class="toc-section-number">7.1.3</span> Comparison with SAS results</a></li>
+</ul></li>
+<li><a href="#treatment-interaction-terms-on-all-model-covariates" id="toc-treatment-interaction-terms-on-all-model-covariates"><span class="toc-section-number">7.2</span> Treatment interaction terms on all model covariates</a>
+<ul>
+<li><a href="#draw-and-impute" id="toc-draw-and-impute"><span class="toc-section-number">7.2.1</span> Draw and impute</a></li>
+<li><a href="#analyse-and-pool-1" id="toc-analyse-and-pool-1"><span class="toc-section-number">7.2.2</span> Analyse and pool</a></li>
+<li><a href="#comparison-with-sas-results-2" id="toc-comparison-with-sas-results-2"><span class="toc-section-number">7.2.3</span> Comparison with SAS results</a></li>
+</ul></li>
+<li><a href="#more-complex-model-which-also-splits-time-by-season" id="toc-more-complex-model-which-also-splits-time-by-season"><span class="toc-section-number">7.3</span> More complex model which also splits time by season</a></li>
+<li><a href="#fixed-rate-model-for-the-active-arms" id="toc-fixed-rate-model-for-the-active-arms"><span class="toc-section-number">7.4</span> Fixed rate model for the active arms</a></li>
+<li><a href="#off-treatment-estimate-is-doubled-for-the-active-arms" id="toc-off-treatment-estimate-is-doubled-for-the-active-arms"><span class="toc-section-number">7.5</span> Off-treatment estimate is doubled for the active arms</a></li>
+</ul></li>
+<li><a href="#references" id="toc-references"><span class="toc-section-number">8</span> References</a></li>
+</ul>
+</div>
+
+<p>Now we’ll walk through how count data can be modeled using the <code>rbmi</code> package. The following sections will cover the necessary steps to prepare your data, draw parameter samples, impute missing values, and pool estimates across multiple imputations.
+For the statistical method details please see the <a href="stat_specs_counts.html">separate vignette</a>.</p>
+<div id="the-data" class="section level2" number="1">
+<h2><span class="header-section-number">1</span> The Data</h2>
+<p>We use the simulated example data set from Roger et al. TODO add reference The data contain three treatment arms and up to three rows per patient, corresponding to the on-treatment, off-treatment but observed, and post-withdrawal periods.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>dat_count_raw <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;sim_rogeretal.csv&quot;</span>, <span class="at">package =</span> <span class="st">&quot;rbmi&quot;</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>dat_count <span class="ot">&lt;-</span> dat_count_raw <span class="sc">|&gt;</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>        patient,</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>        period,</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>        TreatLab,</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>        OnOff,</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>        Length,</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>        BaseCount,</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>        Observed_Count</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>        <span class="at">patient =</span> <span class="fu">factor</span>(patient),</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>        <span class="at">period =</span> <span class="fu">as.character</span>(period),</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>        <span class="at">TreatLab =</span> <span class="fu">factor</span>(TreatLab, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Placebo&quot;</span>, <span class="st">&quot;100mg&quot;</span>, <span class="st">&quot;300mg&quot;</span>)),</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>        <span class="at">OnOff =</span> <span class="fu">factor</span>(OnOff, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;On&quot;</span>, <span class="st">&quot;Off&quot;</span>))</span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>    )</span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="fu">head</span>(dat_count)</span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co">#&gt;   patient period TreatLab OnOff Length BaseCount Observed_Count</span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="co">#&gt; 1       1      1  Placebo    On    367         1              2</span></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co">#&gt; 2       2      1  Placebo    On    360         4              1</span></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a><span class="co">#&gt; 3       3      1  Placebo    On    372         5              2</span></span>
+<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a><span class="co">#&gt; 4       4      1  Placebo    On    358         7              3</span></span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a><span class="co">#&gt; 5       5      1  Placebo    On    370         3              1</span></span>
+<span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a><span class="co">#&gt; 6       6      1  Placebo    On    370         3              2</span></span></code></pre></div>
+<p>The source data omit periods with zero length. We use <code>expand_locf()</code> to add these rows so that every patient has all three periods. The treatment arm and baseline count are carried forward, while <code>OnOff</code> is derived from the period. Added rows have zero length and a missing observed count.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>dat_count_filled <span class="ot">&lt;-</span> dat_count <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>    <span class="fu">expand_locf</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>        <span class="at">patient =</span> <span class="fu">levels</span>(dat_count<span class="sc">$</span>patient),</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>        <span class="at">period =</span> <span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>        <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;TreatLab&quot;</span>, <span class="st">&quot;BaseCount&quot;</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>        <span class="at">group =</span> <span class="st">&quot;patient&quot;</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>        <span class="at">order =</span> <span class="fu">c</span>(<span class="st">&quot;patient&quot;</span>, <span class="st">&quot;period&quot;</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>        <span class="at">OnOff =</span> <span class="fu">factor</span>(</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>            <span class="fu">ifelse</span>(period <span class="sc">==</span> <span class="st">&quot;1&quot;</span>, <span class="st">&quot;On&quot;</span>, <span class="st">&quot;Off&quot;</span>),</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>            <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;On&quot;</span>, <span class="st">&quot;Off&quot;</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>        ),</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>        <span class="at">Length =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(Length), <span class="dv">0</span>, Length)</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>    )</span></code></pre></div>
+<p>TODO add explanation of data
+The SAS reference results for the three models illustrated below are included as
+a CSV file with the package. We retain the two active-treatment versus placebo
+contrasts, so they can be compared directly with the pooled <code>rbmi</code> estimates.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>sas_results <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>    <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;results.csv&quot;</span>, <span class="at">package =</span> <span class="st">&quot;rbmi&quot;</span>),</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>    <span class="at">check.names =</span> <span class="cn">FALSE</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>        (TreatLab <span class="sc">==</span> <span class="st">&quot;100mg&quot;</span> <span class="sc">&amp;</span> <span class="st">`</span><span class="at">_TreatLab</span><span class="st">`</span> <span class="sc">==</span> <span class="st">&quot;Placebo&quot;</span>) <span class="sc">|</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>            (TreatLab <span class="sc">==</span> <span class="st">&quot;300mg&quot;</span> <span class="sc">&amp;</span> <span class="st">`</span><span class="at">_TreatLab</span><span class="st">`</span> <span class="sc">==</span> <span class="st">&quot;Placebo&quot;</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">transmute</span>(</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>        <span class="at">model =</span> Label,</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>        <span class="at">comparison =</span> <span class="fu">paste</span>(TreatLab, <span class="st">&quot;vs&quot;</span>, <span class="st">`</span><span class="at">_TreatLab</span><span class="st">`</span>),</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>        <span class="at">sas_rate_ratio =</span> EXP_Est,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>        <span class="at">sas_lower_95 =</span> Low_95PCT,</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>        <span class="at">sas_upper_95 =</span> Upp_95PCT,</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>        <span class="at">sas_p_value =</span> Pvalue</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>    )</span></code></pre></div>
+</div>
+<div id="draws" class="section level2" number="2">
+<h2><span class="header-section-number">2</span> Draws</h2>
+<p>The inputs to the <code>draws()</code> function are now:</p>
+<ul>
+<li><code>data</code>: The data frame as prepared above.</li>
+<li><code>data_ice</code>: Subject-specific imputation strategies for missing count periods</li>
+<li><code>vars</code>: The variables to be used in the model</li>
+<li><code>method</code>: Here we can only use <code>method_bayes()</code> for fully Bayesian multiple imputation for our count data</li>
+<li><code>outcome</code> (new): The outcome type, which defaults to “continuous”, but here we will choose “count”</li>
+</ul>
+<p>For count outcomes, <code>data_ice</code> contains only the subject ID and strategy columns;
+it has no period or visit column. It does not record an intercurrent-event (ICE)
+time, and no ICE time is inferred from <code>duration</code>. The strategy assigned to a
+subject applies to every missing positive-duration period for that subject.
+Consequently, <code>JR</code> and <code>CR</code> are reference-based assumptions for all of that
+subject’s missing periods, rather than post-ICE-only assumptions. Use <code>MAR</code> for
+subjects whose missing periods should retain their randomized-arm trajectory.</p>
+<div id="imputation-strategies" class="section level3" number="2.1">
+<h3><span class="header-section-number">2.1</span> Imputation strategies</h3>
+<p>Here we just use the same imputation strategy for all patients, but we would also be able to provide different strategies for each patient.</p>
+<p>Let’s use the Missing At Random (MAR) strategy for all patients with positive post-withdrawal exposure in period 3. This matches the first model in the “Another case with three periods” analysis, where the period-3 design matrix retains each patient’s randomized treatment arm:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>dat_ice <span class="ot">&lt;-</span> dat_count_filled <span class="sc">|&gt;</span> </span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>    <span class="fu">filter</span>(period <span class="sc">==</span> <span class="st">&quot;3&quot;</span>, Length <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(patient) <span class="sc">|&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    <span class="fu">distinct</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>        <span class="at">strategy =</span> <span class="st">&quot;MAR&quot;</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>    )</span></code></pre></div>
+</div>
+<div id="variables" class="section level3" number="2.2">
+<h3><span class="header-section-number">2.2</span> Variables</h3>
+<p>Next we define the variables to be used in the model.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;Observed_Count&quot;</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>    <span class="at">subjid =</span> <span class="st">&quot;patient&quot;</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>    <span class="at">period =</span> <span class="st">&quot;period&quot;</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    <span class="at">duration =</span> <span class="st">&quot;Length&quot;</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">&quot;TreatLab&quot;</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>    <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;TreatLab * OnOff&quot;</span>, <span class="st">&quot;BaseCount&quot;</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>)</span></code></pre></div>
+<p>Note that here we can also specify interaction terms in the <code>covariates</code> argument,
+which will then be included in the draws step model.</p>
+</div>
+<div id="method" class="section level3" number="2.3">
+<h3><span class="header-section-number">2.3</span> Method</h3>
+<p>We just use the standard Bayesian method options:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>method <span class="ot">&lt;-</span> <span class="fu">method_bayes</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>    <span class="at">n_samples =</span> <span class="dv">1000</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>    <span class="at">control =</span> <span class="fu">control_bayes</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>        <span class="at">warmup =</span> <span class="dv">200</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>        <span class="at">thin =</span> <span class="dv">5</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>        <span class="at">seed =</span> <span class="dv">1821</span> <span class="co"># Seed to be used by Stan</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>    )</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="sampling" class="section level3" number="2.4">
+<h3><span class="header-section-number">2.4</span> Sampling</h3>
+<p>Finally we can call the <code>draws()</code> function to draw samples from the posterior distribution of the model parameters:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">987</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>drawObj <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;count&quot;</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>    <span class="at">data =</span> dat_count_filled,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>    <span class="at">data_ice =</span> dat_ice,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    <span class="at">vars =</span> vars,</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>    <span class="at">method =</span> method,</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>    <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>)</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>drawObj</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; Draws Object</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; ------------</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; Number of Samples: 1000</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; Number of Failed Samples: 0</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; Model Formula: Observed_Count ~ 1 + TreatLab + TreatLab * OnOff + BaseCount</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; Endpoint Type: count</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; Imputation Type: random</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; Method:</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt;     name: Bayes</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt;     same_cov: TRUE</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt;     n_samples: 1000</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt; Controls:</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt;     warmup: 200</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt;     thin: 5</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt;     chains: 1</span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt;     seed: 1821</span></span></code></pre></div>
+</div>
+</div>
+<div id="impute" class="section level2" number="3">
+<h2><span class="header-section-number">3</span> Impute</h2>
+<p>Now we basically just run the imputation:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>imputeObj <span class="ot">&lt;-</span> <span class="fu">impute</span>(drawObj)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>imputeObj</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; Imputation Object</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; -----------------</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; Number of Imputed Datasets: 1000</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; Endpoint Type: count</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; Number of Patients with Positive Duration by Period:</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt;     1: 674</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt;     2: 58</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt;     3: 83</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; References:</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt;     Placebo -&gt; Placebo</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt;     100mg   -&gt; 100mg</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt;     300mg   -&gt; 300mg</span></span></code></pre></div>
+</div>
+<div id="analyse" class="section level2" number="4">
+<h2><span class="header-section-number">4</span> Analyse</h2>
+<p>Then the next step is the analysis of the imputed data. We can use a similar negative binomial regression model
+as above, however here we don’t have anymore the <code>OnOff</code> variable, because we have imputed the post-withdrawal
+periods. So we just use baseline count as additional covariate, next to the treatment group.
+The imputed values replace the missing values in the original outcome column. We therefore keep
+<code>Observed_Count</code> as the outcome name. The analysis function sums this outcome and <code>Length</code> over periods for
+each patient before fitting the model; it does not require a separate <code>Imputed_Count</code> column.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>ana_vars <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;Observed_Count&quot;</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>    <span class="at">subjid =</span> <span class="st">&quot;patient&quot;</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>    <span class="at">period =</span> <span class="st">&quot;period&quot;</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>    <span class="at">duration =</span> <span class="st">&quot;Length&quot;</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">&quot;TreatLab&quot;</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>    <span class="at">covariates =</span> <span class="fu">c</span>(<span class="st">&quot;BaseCount&quot;</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>)</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>anaObj <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>    imputeObj,</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>    neg_bin_regression,</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>    <span class="at">vars =</span> ana_vars</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="pool" class="section level2" number="5">
+<h2><span class="header-section-number">5</span> Pool</h2>
+<p>Finally we can pool all regression coefficients across the multiple
+imputations. Pooling is performed on the log-rate scale using Rubin’s rules,
+with confidence intervals and p-values based on the standard normal
+distribution.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>poolObj <span class="ot">&lt;-</span> <span class="fu">pool</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>    anaObj,</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>    <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>    <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>poolObj</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; Pool Object</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; -----------</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; Number of Results Combined: 1000</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; Method: rubin</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt; Confidence Level: 0.95</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt; Alternative: two.sided</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; Results (transformation applied; original-scale results are in `$pars`):</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt;   ===================================================</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt;      parameter     est    se     lci    uci    pval  </span></span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt;   ---------------------------------------------------</span></span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="co">#&gt;     (Intercept)   0.003    0    0.002  0.003  &lt;0.001 </span></span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a><span class="co">#&gt;    TreatLab100mg  0.766  0.086  0.615  0.955  0.018  </span></span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a><span class="co">#&gt;    TreatLab300mg  0.838  0.09   0.679  1.035  0.101  </span></span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a><span class="co">#&gt;      BaseCount    1.214  0.024  1.168  1.261  &lt;0.001 </span></span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a><span class="co">#&gt;   ---------------------------------------------------</span></span></code></pre></div>
+<p>The displayed results have been exponentiated to obtain rate ratios. The
+original log-rate-scale results remain available in <code>poolObj$pars</code>, and can be shown
+with the <code>print</code> option <code>scale = &quot;original&quot;</code>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">print</span>(poolObj, <span class="at">scale =</span> <span class="st">&quot;original&quot;</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt; Pool Object</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; -----------</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; Number of Results Combined: 1000</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; Method: rubin</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; Confidence Level: 0.95</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; Alternative: two.sided</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt; Results:</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt;   ======================================================</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt;      parameter     est     se     lci     uci     pval  </span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt;   ------------------------------------------------------</span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt;     (Intercept)   -5.982  0.093  -6.164  -5.801  &lt;0.001 </span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt;    TreatLab100mg  -0.266  0.112  -0.487  -0.046  0.018  </span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt;    TreatLab300mg  -0.177  0.108  -0.388  0.034   0.101  </span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt;      BaseCount    0.194   0.019  0.156   0.232   &lt;0.001 </span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co">#&gt;   ------------------------------------------------------</span></span></code></pre></div>
+<p>We can also look at the Monte Carlo standard errors for the results:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">mcse</span>(poolObj, anaObj)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; Monte Carlo Standard Errors for Pooled Estimates (mcse Object)</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; -----------</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; Number of Results Combined: 1000</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; Results (transformation applied; original-scale results are in `$pars`):</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt;   ====================================================</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt;      parameter     est   se   lci    uci      pval    </span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt;   ----------------------------------------------------</span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt;     (Intercept)     0    0     0      0    &lt; 0.000001 </span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#&gt;    TreatLab100mg  0.001  0   0.001  0.001   0.00054   </span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co">#&gt;    TreatLab300mg  0.001  0   0.001  0.001   0.00208   </span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt;      BaseCount      0    0     0      0    &lt; 0.000001 </span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt;   ----------------------------------------------------</span></span></code></pre></div>
+</div>
+<div id="comparison-with-sas-results" class="section level2" number="6">
+<h2><span class="header-section-number">6</span> Comparison with SAS results</h2>
+<p>The corresponding SAS results are labelled <code>NM_Reg: Treat*OnOff BaseCount</code>.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>rate_ratios_shared <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(poolObj) <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(parameter <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;TreatLab100mg&quot;</span>, <span class="st">&quot;TreatLab300mg&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">transmute</span>(</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>        <span class="at">comparison =</span> dplyr<span class="sc">::</span><span class="fu">recode</span>(</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>            parameter,</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>            <span class="at">TreatLab100mg =</span> <span class="st">&quot;100mg vs Placebo&quot;</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>            <span class="at">TreatLab300mg =</span> <span class="st">&quot;300mg vs Placebo&quot;</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>        ),</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>        <span class="at">rbmi_rate_ratio =</span> est,</span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>        <span class="at">rbmi_lower_95 =</span> lci,</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>        <span class="at">rbmi_upper_95 =</span> uci,</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>        <span class="at">rbmi_p_value =</span> pval</span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>    )</span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>    rate_ratios_shared,</span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(sas_results, model <span class="sc">==</span> <span class="st">&quot;NM_Reg: Treat*OnOff BaseCount&quot;</span>),</span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">&quot;comparison&quot;</span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>model) <span class="sc">|&gt;</span> </span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(dplyr<span class="sc">::</span><span class="fu">across</span>(dplyr<span class="sc">::</span><span class="fu">where</span>(is.numeric), <span class="sc">~</span> <span class="fu">round</span>(.x, <span class="dv">4</span>)))</span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a><span class="co">#&gt;         comparison rbmi_rate_ratio rbmi_lower_95 rbmi_upper_95 rbmi_p_value</span></span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a><span class="co">#&gt; 1 100mg vs Placebo          0.7662        0.6147        0.9550       0.0178</span></span>
+<span id="cb13-24"><a href="#cb13-24" tabindex="-1"></a><span class="co">#&gt; 2 300mg vs Placebo          0.8381        0.6787        1.0349       0.1007</span></span>
+<span id="cb13-25"><a href="#cb13-25" tabindex="-1"></a><span class="co">#&gt;   sas_rate_ratio sas_lower_95 sas_upper_95 sas_p_value</span></span>
+<span id="cb13-26"><a href="#cb13-26" tabindex="-1"></a><span class="co">#&gt; 1         0.7663       0.6150       0.9548      0.0177</span></span>
+<span id="cb13-27"><a href="#cb13-27" tabindex="-1"></a><span class="co">#&gt; 2         0.8382       0.6792       1.0344      0.1000</span></span></code></pre></div>
+</div>
+<div id="additional-modeling-options" class="section level2" number="7">
+<h2><span class="header-section-number">7</span> Additional modeling options</h2>
+<div id="separate-draw-model-sampling-for-each-treatment-group" class="section level3" number="7.1">
+<h3><span class="header-section-number">7.1</span> Separate draw model sampling for each treatment group</h3>
+<p>The default count model uses one dispersion/frailty parameter across all
+treatment groups. To estimate a separate parameter for each group, set
+<code>same_cov = FALSE</code> in <code>method_bayes()</code>. The name is retained for consistency
+with continuous-outcome models; for count outcomes it controls whether <code>phi</code>
+is shared between groups.</p>
+<p>To make the complete imputation model separate by treatment arm, all fixed
+effects must also be interacted with treatment. For the example data this is:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>vars_by_arm <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;Observed_Count&quot;</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>    <span class="at">subjid =</span> <span class="st">&quot;patient&quot;</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>    <span class="at">period =</span> <span class="st">&quot;period&quot;</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>    <span class="at">duration =</span> <span class="st">&quot;Length&quot;</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">&quot;TreatLab&quot;</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>    <span class="at">covariates =</span> <span class="fu">c</span>(</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>        <span class="st">&quot;TreatLab:OnOff&quot;</span>,</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>        <span class="st">&quot;TreatLab:BaseCount&quot;</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>    )</span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>)</span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>method_by_arm <span class="ot">&lt;-</span> <span class="fu">method_bayes</span>(</span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>    <span class="at">same_cov =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>    <span class="at">n_samples =</span> <span class="dv">1000</span>,</span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>    <span class="at">control =</span> <span class="fu">control_bayes</span>(</span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a>        <span class="at">warmup =</span> <span class="dv">200</span>,</span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a>        <span class="at">thin =</span> <span class="dv">5</span>,</span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a>        <span class="at">seed =</span> <span class="dv">1821</span></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a>    )</span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a>)</span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a>drawObj_by_arm <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
+<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;count&quot;</span>,</span>
+<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a>    <span class="at">data =</span> dat_count_filled,</span>
+<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a>    <span class="at">data_ice =</span> dat_ice,</span>
+<span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a>    <span class="at">vars =</span> vars_by_arm,</span>
+<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a>    <span class="at">method =</span> method_by_arm,</span>
+<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a>    <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a>)</span></code></pre></div>
+<p>This is fitted in one Stan call, but with treatment-specific fixed effects and
+independent treatment-specific <code>phi</code> parameters the posterior factorizes by
+arm. It therefore represents the same statistical model as fitting each arm
+separately, while retaining a single rbmi draws object and the usual downstream
+workflow.</p>
+<p>For MAR imputation, each subject uses the <code>phi</code> for their randomized treatment
+arm. For JR and CR, the mapped reference arm’s <code>phi</code> is used for the whole
+subject-level conditional distribution. In particular, JR still calculates
+the observed-cell means from the subject’s randomized-arm design, but uses the
+reference-arm <code>phi</code> when conditioning on those observed cells and when drawing
+the missing cells. JR therefore combines the randomized-arm observed mean
+trajectory with the reference arm’s frailty distribution; it is not only a
+design-matrix substitution for missing periods. This distinction disappears
+with the default shared <code>phi</code>.</p>
+<div id="impute-1" class="section level4" number="7.1.1">
+<h4><span class="header-section-number">7.1.1</span> Impute</h4>
+<p>The downstream workflow is unchanged. Setting the seed immediately before
+<code>impute()</code> makes the conditional negative-binomial draws reproducible.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>imputeObj_by_arm <span class="ot">&lt;-</span> <span class="fu">impute</span>(drawObj_by_arm)</span></code></pre></div>
+</div>
+<div id="analyse-and-pool" class="section level4" number="7.1.2">
+<h4><span class="header-section-number">7.1.2</span> Analyse and pool</h4>
+<p>The treatment-policy analysis still combines all randomized treatment arms and
+uses the same analysis model as above. Only the imputation model has changed.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>anaObj_by_arm <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>    imputeObj_by_arm,</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>    neg_bin_regression,</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>    <span class="at">vars =</span> ana_vars</span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>)</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>poolObj_by_arm <span class="ot">&lt;-</span> <span class="fu">pool</span>(</span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>    anaObj_by_arm,</span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>    <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>    <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a>)</span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a>poolObj_by_arm</span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co">#&gt; Pool Object</span></span>
+<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="co">#&gt; -----------</span></span>
+<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co">#&gt; Number of Results Combined: 1000</span></span>
+<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt; Method: rubin</span></span>
+<span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a><span class="co">#&gt; Confidence Level: 0.95</span></span>
+<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt; Alternative: two.sided</span></span>
+<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="co">#&gt; Results (transformation applied; original-scale results are in `$pars`):</span></span>
+<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt;   ===================================================</span></span>
+<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="co">#&gt;      parameter     est    se     lci    uci    pval  </span></span>
+<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a><span class="co">#&gt;   ---------------------------------------------------</span></span>
+<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a><span class="co">#&gt;     (Intercept)   0.003    0    0.002  0.003  &lt;0.001 </span></span>
+<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a><span class="co">#&gt;    TreatLab100mg  0.767  0.086  0.617  0.955  0.018  </span></span>
+<span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a><span class="co">#&gt;    TreatLab300mg  0.838  0.089  0.68   1.032  0.096  </span></span>
+<span id="cb16-29"><a href="#cb16-29" tabindex="-1"></a><span class="co">#&gt;      BaseCount    1.214  0.024  1.169  1.261  &lt;0.001 </span></span>
+<span id="cb16-30"><a href="#cb16-30" tabindex="-1"></a><span class="co">#&gt;   ---------------------------------------------------</span></span></code></pre></div>
+<p>For comparison with implementations that report treatment effects as rate
+ratios, extract the transformed pooled results:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>rate_ratios_by_arm <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(poolObj_by_arm) <span class="sc">|&gt;</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>    <span class="fu">filter</span>(parameter <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;TreatLab100mg&quot;</span>, <span class="st">&quot;TreatLab300mg&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>    <span class="fu">transmute</span>(</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>        <span class="at">comparison =</span> <span class="fu">recode</span>(</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>            parameter,</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>            <span class="at">TreatLab100mg =</span> <span class="st">&quot;100mg vs Placebo&quot;</span>,</span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>            <span class="at">TreatLab300mg =</span> <span class="st">&quot;300mg vs Placebo&quot;</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>        ),</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>        <span class="at">rate_ratio =</span> est,</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>        <span class="at">lower_95 =</span> lci,</span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>        <span class="at">upper_95 =</span> uci,</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>        <span class="at">p_value =</span> pval</span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a>    )</span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a>rate_ratios_by_arm</span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a><span class="co">#&gt;         comparison rate_ratio  lower_95  upper_95    p_value</span></span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a><span class="co">#&gt; 1 100mg vs Placebo  0.7674504 0.6167366 0.9549946 0.01765458</span></span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a><span class="co">#&gt; 2 300mg vs Placebo  0.8375729 0.6797940 1.0319721 0.09602634</span></span></code></pre></div>
+</div>
+<div id="comparison-with-sas-results-1" class="section level4" number="7.1.3">
+<h4><span class="header-section-number">7.1.3</span> Comparison with SAS results</h4>
+<p>The corresponding SAS results are labelled <code>NM_Reg: Separate for each Treat.</code>.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>    rate_ratios_by_arm <span class="sc">|&gt;</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">rename</span>(</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>            <span class="at">rbmi_rate_ratio =</span> rate_ratio,</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>            <span class="at">rbmi_lower_95 =</span> lower_95,</span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>            <span class="at">rbmi_upper_95 =</span> upper_95,</span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>            <span class="at">rbmi_p_value =</span> p_value</span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>        ),</span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(sas_results, model <span class="sc">==</span> <span class="st">&quot;NM_Reg: Separate for each Treat.&quot;</span>),</span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">&quot;comparison&quot;</span></span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>model) <span class="sc">|&gt;</span> </span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(dplyr<span class="sc">::</span><span class="fu">across</span>(dplyr<span class="sc">::</span><span class="fu">where</span>(is.numeric), <span class="sc">~</span> <span class="fu">round</span>(.x, <span class="dv">4</span>)))</span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a><span class="co">#&gt;         comparison rbmi_rate_ratio rbmi_lower_95 rbmi_upper_95 rbmi_p_value</span></span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a><span class="co">#&gt; 1 100mg vs Placebo          0.7675        0.6167         0.955       0.0177</span></span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a><span class="co">#&gt; 2 300mg vs Placebo          0.8376        0.6798         1.032       0.0960</span></span>
+<span id="cb18-17"><a href="#cb18-17" tabindex="-1"></a><span class="co">#&gt;   sas_rate_ratio sas_lower_95 sas_upper_95 sas_p_value</span></span>
+<span id="cb18-18"><a href="#cb18-18" tabindex="-1"></a><span class="co">#&gt; 1         0.7668       0.6164       0.9539      0.0172</span></span>
+<span id="cb18-19"><a href="#cb18-19" tabindex="-1"></a><span class="co">#&gt; 2         0.8362       0.6786       1.0305      0.0933</span></span></code></pre></div>
+</div>
+</div>
+<div id="treatment-interaction-terms-on-all-model-covariates" class="section level3" number="7.2">
+<h3><span class="header-section-number">7.2</span> Treatment interaction terms on all model covariates</h3>
+<p>This model also gives each treatment arm its own on- and off-treatment rates
+and baseline-count slope. Unlike the preceding model, all arms are fitted in
+one model, so they share a single dispersion/frailty parameter. This matches
+the <code>Separate each Treat. Shared frai</code> model in the SAS reference analysis.</p>
+<div id="draw-and-impute" class="section level4" number="7.2.1">
+<h4><span class="header-section-number">7.2.1</span> Draw and impute</h4>
+<p>The model formula is <code>~ 0 + TreatLab:OnOff + TreatLab:BaseCount</code>. The
+interactions with <code>TreatLab</code> give each randomized treatment arm a separate
+coefficient for every covariate; <code>same_cov = TRUE</code> (the default) retains the
+shared count-model dispersion parameter.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>vars_all_treatment_interactions <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;Observed_Count&quot;</span>,</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>    <span class="at">subjid =</span> <span class="st">&quot;patient&quot;</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>    <span class="at">period =</span> <span class="st">&quot;period&quot;</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>    <span class="at">duration =</span> <span class="st">&quot;Length&quot;</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">&quot;TreatLab&quot;</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>    <span class="at">covariates =</span> <span class="fu">c</span>(</span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a>        <span class="st">&quot;TreatLab:OnOff&quot;</span>,</span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a>        <span class="st">&quot;TreatLab:BaseCount&quot;</span></span>
+<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a>    )</span>
+<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a>)</span>
+<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a></span>
+<span id="cb19-13"><a href="#cb19-13" tabindex="-1"></a>drawObj_all_treatment_interactions <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
+<span id="cb19-14"><a href="#cb19-14" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;count&quot;</span>,</span>
+<span id="cb19-15"><a href="#cb19-15" tabindex="-1"></a>    <span class="at">data =</span> dat_count_filled,</span>
+<span id="cb19-16"><a href="#cb19-16" tabindex="-1"></a>    <span class="at">data_ice =</span> dat_ice,</span>
+<span id="cb19-17"><a href="#cb19-17" tabindex="-1"></a>    <span class="at">vars =</span> vars_all_treatment_interactions,</span>
+<span id="cb19-18"><a href="#cb19-18" tabindex="-1"></a>    <span class="at">method =</span> method,</span>
+<span id="cb19-19"><a href="#cb19-19" tabindex="-1"></a>    <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb19-20"><a href="#cb19-20" tabindex="-1"></a>)</span>
+<span id="cb19-21"><a href="#cb19-21" tabindex="-1"></a></span>
+<span id="cb19-22"><a href="#cb19-22" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb19-23"><a href="#cb19-23" tabindex="-1"></a>imputeObj_all_treatment_interactions <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
+<span id="cb19-24"><a href="#cb19-24" tabindex="-1"></a>    drawObj_all_treatment_interactions</span>
+<span id="cb19-25"><a href="#cb19-25" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="analyse-and-pool-1" class="section level4" number="7.2.2">
+<h4><span class="header-section-number">7.2.2</span> Analyse and pool</h4>
+<p>The treatment-policy analysis model is unchanged: it uses randomized
+treatment and baseline count, without distinguishing on- and off-treatment
+periods.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>anaObj_all_treatment_interactions <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>    imputeObj_all_treatment_interactions,</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>    neg_bin_regression,</span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>    <span class="at">vars =</span> ana_vars</span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>)</span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>poolObj_all_treatment_interactions <span class="ot">&lt;-</span> <span class="fu">pool</span>(</span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>    anaObj_all_treatment_interactions,</span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>    <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a>    <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span></span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a>)</span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a>poolObj_all_treatment_interactions</span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a><span class="co">#&gt; Pool Object</span></span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a><span class="co">#&gt; -----------</span></span>
+<span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a><span class="co">#&gt; Number of Results Combined: 1000</span></span>
+<span id="cb20-17"><a href="#cb20-17" tabindex="-1"></a><span class="co">#&gt; Method: rubin</span></span>
+<span id="cb20-18"><a href="#cb20-18" tabindex="-1"></a><span class="co">#&gt; Confidence Level: 0.95</span></span>
+<span id="cb20-19"><a href="#cb20-19" tabindex="-1"></a><span class="co">#&gt; Alternative: two.sided</span></span>
+<span id="cb20-20"><a href="#cb20-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-21"><a href="#cb20-21" tabindex="-1"></a><span class="co">#&gt; Results (transformation applied; original-scale results are in `$pars`):</span></span>
+<span id="cb20-22"><a href="#cb20-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-23"><a href="#cb20-23" tabindex="-1"></a><span class="co">#&gt;   ===================================================</span></span>
+<span id="cb20-24"><a href="#cb20-24" tabindex="-1"></a><span class="co">#&gt;      parameter     est    se     lci    uci    pval  </span></span>
+<span id="cb20-25"><a href="#cb20-25" tabindex="-1"></a><span class="co">#&gt;   ---------------------------------------------------</span></span>
+<span id="cb20-26"><a href="#cb20-26" tabindex="-1"></a><span class="co">#&gt;     (Intercept)   0.003    0    0.002  0.003  &lt;0.001 </span></span>
+<span id="cb20-27"><a href="#cb20-27" tabindex="-1"></a><span class="co">#&gt;    TreatLab100mg  0.766  0.086  0.615  0.954  0.017  </span></span>
+<span id="cb20-28"><a href="#cb20-28" tabindex="-1"></a><span class="co">#&gt;    TreatLab300mg  0.836  0.09   0.677  1.032  0.096  </span></span>
+<span id="cb20-29"><a href="#cb20-29" tabindex="-1"></a><span class="co">#&gt;      BaseCount    1.215  0.024  1.169  1.262  &lt;0.001 </span></span>
+<span id="cb20-30"><a href="#cb20-30" tabindex="-1"></a><span class="co">#&gt;   ---------------------------------------------------</span></span></code></pre></div>
+</div>
+<div id="comparison-with-sas-results-2" class="section level4" number="7.2.3">
+<h4><span class="header-section-number">7.2.3</span> Comparison with SAS results</h4>
+<p>The corresponding SAS results are labelled <code>Separate each Treat. Shared frai</code>.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>rate_ratios_all_treatment_interactions <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>    poolObj_all_treatment_interactions</span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(parameter <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;TreatLab100mg&quot;</span>, <span class="st">&quot;TreatLab300mg&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">transmute</span>(</span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>        <span class="at">comparison =</span> dplyr<span class="sc">::</span><span class="fu">recode</span>(</span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>            parameter,</span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a>            <span class="at">TreatLab100mg =</span> <span class="st">&quot;100mg vs Placebo&quot;</span>,</span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a>            <span class="at">TreatLab300mg =</span> <span class="st">&quot;300mg vs Placebo&quot;</span></span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a>        ),</span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1"></a>        <span class="at">rbmi_rate_ratio =</span> est,</span>
+<span id="cb21-12"><a href="#cb21-12" tabindex="-1"></a>        <span class="at">rbmi_lower_95 =</span> lci,</span>
+<span id="cb21-13"><a href="#cb21-13" tabindex="-1"></a>        <span class="at">rbmi_upper_95 =</span> uci,</span>
+<span id="cb21-14"><a href="#cb21-14" tabindex="-1"></a>        <span class="at">rbmi_p_value =</span> pval</span>
+<span id="cb21-15"><a href="#cb21-15" tabindex="-1"></a>    )</span>
+<span id="cb21-16"><a href="#cb21-16" tabindex="-1"></a></span>
+<span id="cb21-17"><a href="#cb21-17" tabindex="-1"></a>dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb21-18"><a href="#cb21-18" tabindex="-1"></a>    rate_ratios_all_treatment_interactions,</span>
+<span id="cb21-19"><a href="#cb21-19" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb21-20"><a href="#cb21-20" tabindex="-1"></a>        sas_results,</span>
+<span id="cb21-21"><a href="#cb21-21" tabindex="-1"></a>        model <span class="sc">==</span> <span class="st">&quot;Separate each Treat. Shared frai&quot;</span></span>
+<span id="cb21-22"><a href="#cb21-22" tabindex="-1"></a>    ),</span>
+<span id="cb21-23"><a href="#cb21-23" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">&quot;comparison&quot;</span></span>
+<span id="cb21-24"><a href="#cb21-24" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb21-25"><a href="#cb21-25" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>model) <span class="sc">|&gt;</span> </span>
+<span id="cb21-26"><a href="#cb21-26" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(dplyr<span class="sc">::</span><span class="fu">across</span>(dplyr<span class="sc">::</span><span class="fu">where</span>(is.numeric), <span class="sc">~</span> <span class="fu">round</span>(.x, <span class="dv">4</span>)))</span>
+<span id="cb21-27"><a href="#cb21-27" tabindex="-1"></a><span class="co">#&gt;         comparison rbmi_rate_ratio rbmi_lower_95 rbmi_upper_95 rbmi_p_value</span></span>
+<span id="cb21-28"><a href="#cb21-28" tabindex="-1"></a><span class="co">#&gt; 1 100mg vs Placebo          0.7656        0.6145        0.9539       0.0173</span></span>
+<span id="cb21-29"><a href="#cb21-29" tabindex="-1"></a><span class="co">#&gt; 2 300mg vs Placebo          0.8359        0.6771        1.0320       0.0955</span></span>
+<span id="cb21-30"><a href="#cb21-30" tabindex="-1"></a><span class="co">#&gt;   sas_rate_ratio sas_lower_95 sas_upper_95 sas_p_value</span></span>
+<span id="cb21-31"><a href="#cb21-31" tabindex="-1"></a><span class="co">#&gt; 1         0.7656       0.6138       0.9549      0.0178</span></span>
+<span id="cb21-32"><a href="#cb21-32" tabindex="-1"></a><span class="co">#&gt; 2         0.8351       0.6761       1.0315      0.0945</span></span></code></pre></div>
+</div>
+</div>
+<div id="more-complex-model-which-also-splits-time-by-season" class="section level3" number="7.3">
+<h3><span class="header-section-number">7.3</span> More complex model which also splits time by season</h3>
+<p>The preceding models use the original three periods. We can also split those
+periods into smaller calendar cells and include a recurring seasonal effect in
+the imputation model. This is a genuinely ragged representation: patients need
+not contribute the same interval identifiers, and a withdrawn patient can have
+several missing cells.</p>
+<p>The source data include <code>Times1</code>–<code>Times20</code>, one-based event times within each
+original period. <code>split_time()</code> uses these to allocate each observed aggregate
+count to 91-day cells. A fixed width of 91 days reproduces the quarter
+definition in the SAS example. For other applications, <code>interval</code> can instead
+be <code>&quot;week&quot;</code>, <code>&quot;month&quot;</code>, <code>&quot;quarter&quot;</code>, or <code>&quot;year&quot;</code>; calendar months, quarters,
+and years require a <code>Date</code> start variable.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>dat_count_season <span class="ot">&lt;-</span> dat_count_raw <span class="sc">|&gt;</span></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a>        <span class="at">patient =</span> <span class="fu">factor</span>(patient),</span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a>        <span class="at">TreatLab =</span> <span class="fu">factor</span>(TreatLab, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Placebo&quot;</span>, <span class="st">&quot;100mg&quot;</span>, <span class="st">&quot;300mg&quot;</span>)),</span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a>        <span class="at">OnOff =</span> <span class="fu">factor</span>(OnOff, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;On&quot;</span>, <span class="st">&quot;Off&quot;</span>)),</span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a>        <span class="at">cell_start =</span> StartDate <span class="sc">+</span> Lengthsofar</span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a>    <span class="fu">split_time</span>(</span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a>        <span class="at">start =</span> <span class="st">&quot;cell_start&quot;</span>,</span>
+<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a>        <span class="at">duration =</span> <span class="st">&quot;Length&quot;</span>,</span>
+<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a>        <span class="at">outcome =</span> <span class="st">&quot;Observed_Count&quot;</span>,</span>
+<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a>        <span class="at">event_times =</span> <span class="fu">paste0</span>(<span class="st">&quot;Times&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>),</span>
+<span id="cb22-13"><a href="#cb22-13" tabindex="-1"></a>        <span class="at">interval =</span> <span class="dv">91</span>,</span>
+<span id="cb22-14"><a href="#cb22-14" tabindex="-1"></a>        <span class="at">origin =</span> <span class="dv">0</span>,</span>
+<span id="cb22-15"><a href="#cb22-15" tabindex="-1"></a>        <span class="at">period =</span> <span class="st">&quot;period&quot;</span></span>
+<span id="cb22-16"><a href="#cb22-16" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb22-17"><a href="#cb22-17" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb22-18"><a href="#cb22-18" tabindex="-1"></a>        <span class="at">Quarter =</span> <span class="fu">factor</span>(<span class="dv">1</span> <span class="sc">+</span> split_interval <span class="sc">%%</span> <span class="dv">4</span>, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)</span>
+<span id="cb22-19"><a href="#cb22-19" tabindex="-1"></a>    )</span>
+<span id="cb22-20"><a href="#cb22-20" tabindex="-1"></a></span>
+<span id="cb22-21"><a href="#cb22-21" tabindex="-1"></a><span class="fu">nrow</span>(dat_count_season)</span>
+<span id="cb22-22"><a href="#cb22-22" tabindex="-1"></a><span class="co">#&gt; [1] 3518</span></span>
+<span id="cb22-23"><a href="#cb22-23" tabindex="-1"></a><span class="fu">table</span>(dat_count_season<span class="sc">$</span>Quarter)</span>
+<span id="cb22-24"><a href="#cb22-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-25"><a href="#cb22-25" tabindex="-1"></a><span class="co">#&gt;   1   2   3   4 </span></span>
+<span id="cb22-26"><a href="#cb22-26" tabindex="-1"></a><span class="co">#&gt; 892 844 906 876</span></span></code></pre></div>
+<p>The split data have 3,518 rows and 24 distinct crossed period/quarter cells.
+As checks on the restructuring, split durations sum to the original duration,
+observed cell counts sum to the original observed count, and the 83 withdrawn
+patients contribute 204 missing positive-duration cells.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>season_check <span class="ot">&lt;-</span> dat_count_season <span class="sc">|&gt;</span></span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>    <span class="fu">group_by</span>(patient, period) <span class="sc">|&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>    <span class="fu">summarise</span>(</span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>        <span class="at">split_length =</span> <span class="fu">sum</span>(split_duration),</span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>        <span class="at">split_count =</span> <span class="cf">if</span> (<span class="fu">all</span>(<span class="fu">is.na</span>(split_outcome))) {</span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a>            <span class="cn">NA_integer_</span></span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a>            <span class="fu">sum</span>(split_outcome)</span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a>        },</span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a>        <span class="at">original_length =</span> <span class="fu">first</span>(Length),</span>
+<span id="cb23-11"><a href="#cb23-11" tabindex="-1"></a>        <span class="at">original_count =</span> <span class="fu">first</span>(Observed_Count),</span>
+<span id="cb23-12"><a href="#cb23-12" tabindex="-1"></a>        <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb23-13"><a href="#cb23-13" tabindex="-1"></a>    )</span>
+<span id="cb23-14"><a href="#cb23-14" tabindex="-1"></a></span>
+<span id="cb23-15"><a href="#cb23-15" tabindex="-1"></a><span class="fu">stopifnot</span>(</span>
+<span id="cb23-16"><a href="#cb23-16" tabindex="-1"></a>    <span class="fu">nrow</span>(dat_count_season) <span class="sc">==</span> <span class="dv">3518</span>,</span>
+<span id="cb23-17"><a href="#cb23-17" tabindex="-1"></a>    <span class="fu">nlevels</span>(dat_count_season<span class="sc">$</span>split_period) <span class="sc">==</span> <span class="dv">24</span>,</span>
+<span id="cb23-18"><a href="#cb23-18" tabindex="-1"></a>    <span class="fu">sum</span>(</span>
+<span id="cb23-19"><a href="#cb23-19" tabindex="-1"></a>        <span class="fu">is.na</span>(dat_count_season<span class="sc">$</span>split_outcome) <span class="sc">&amp;</span></span>
+<span id="cb23-20"><a href="#cb23-20" tabindex="-1"></a>            dat_count_season<span class="sc">$</span>split_duration <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb23-21"><a href="#cb23-21" tabindex="-1"></a>    ) <span class="sc">==</span> <span class="dv">204</span>,</span>
+<span id="cb23-22"><a href="#cb23-22" tabindex="-1"></a>    <span class="fu">n_distinct</span>(</span>
+<span id="cb23-23"><a href="#cb23-23" tabindex="-1"></a>        dat_count_season<span class="sc">$</span>patient[<span class="fu">is.na</span>(dat_count_season<span class="sc">$</span>split_outcome)]</span>
+<span id="cb23-24"><a href="#cb23-24" tabindex="-1"></a>    ) <span class="sc">==</span> <span class="dv">83</span>,</span>
+<span id="cb23-25"><a href="#cb23-25" tabindex="-1"></a>    <span class="fu">all</span>(season_check<span class="sc">$</span>split_length <span class="sc">==</span> season_check<span class="sc">$</span>original_length),</span>
+<span id="cb23-26"><a href="#cb23-26" tabindex="-1"></a>    <span class="fu">all</span>(</span>
+<span id="cb23-27"><a href="#cb23-27" tabindex="-1"></a>        season_check<span class="sc">$</span>split_count[season_check<span class="sc">$</span>period <span class="sc">!=</span> <span class="dv">3</span>] <span class="sc">==</span></span>
+<span id="cb23-28"><a href="#cb23-28" tabindex="-1"></a>            season_check<span class="sc">$</span>original_count[season_check<span class="sc">$</span>period <span class="sc">!=</span> <span class="dv">3</span>]</span>
+<span id="cb23-29"><a href="#cb23-29" tabindex="-1"></a>    ),</span>
+<span id="cb23-30"><a href="#cb23-30" tabindex="-1"></a>    <span class="fu">all</span>(<span class="fu">is.na</span>(season_check<span class="sc">$</span>split_count[season_check<span class="sc">$</span>period <span class="sc">==</span> <span class="dv">3</span>]))</span>
+<span id="cb23-31"><a href="#cb23-31" tabindex="-1"></a>)</span></code></pre></div>
+<p>The count draw model uses a ragged negative-multinomial likelihood: it accepts
+one row per observed positive-duration cell and accumulates the cell means and
+counts by patient. There is no padding to a common set of periods and no fixed
+upper limit on the number of periods.</p>
+<p>We add <code>Quarter</code> to the imputation model. <code>split_period</code> uniquely identifies
+the original period crossed with the absolute 91-day interval and supplies the
+within-patient ordering used for sequential imputation.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a>dat_ice_season <span class="ot">&lt;-</span> dat_count_season <span class="sc">|&gt;</span></span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="fu">is.na</span>(split_outcome), split_duration <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a>    <span class="fu">distinct</span>(patient) <span class="sc">|&gt;</span></span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">strategy =</span> <span class="st">&quot;MAR&quot;</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a>vars_season <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;split_outcome&quot;</span>,</span>
+<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a>    <span class="at">subjid =</span> <span class="st">&quot;patient&quot;</span>,</span>
+<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a>    <span class="at">period =</span> <span class="st">&quot;split_period&quot;</span>,</span>
+<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a>    <span class="at">duration =</span> <span class="st">&quot;split_duration&quot;</span>,</span>
+<span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">&quot;TreatLab&quot;</span>,</span>
+<span id="cb24-12"><a href="#cb24-12" tabindex="-1"></a>    <span class="at">covariates =</span> <span class="fu">c</span>(</span>
+<span id="cb24-13"><a href="#cb24-13" tabindex="-1"></a>        <span class="st">&quot;TreatLab:OnOff&quot;</span>,</span>
+<span id="cb24-14"><a href="#cb24-14" tabindex="-1"></a>        <span class="st">&quot;BaseCount&quot;</span>,</span>
+<span id="cb24-15"><a href="#cb24-15" tabindex="-1"></a>        <span class="st">&quot;Quarter&quot;</span></span>
+<span id="cb24-16"><a href="#cb24-16" tabindex="-1"></a>    )</span>
+<span id="cb24-17"><a href="#cb24-17" tabindex="-1"></a>)</span>
+<span id="cb24-18"><a href="#cb24-18" tabindex="-1"></a></span>
+<span id="cb24-19"><a href="#cb24-19" tabindex="-1"></a>drawObj_season <span class="ot">&lt;-</span> <span class="fu">draws</span>(</span>
+<span id="cb24-20"><a href="#cb24-20" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;count&quot;</span>,</span>
+<span id="cb24-21"><a href="#cb24-21" tabindex="-1"></a>    <span class="at">data =</span> dat_count_season,</span>
+<span id="cb24-22"><a href="#cb24-22" tabindex="-1"></a>    <span class="at">data_ice =</span> dat_ice_season,</span>
+<span id="cb24-23"><a href="#cb24-23" tabindex="-1"></a>    <span class="at">vars =</span> vars_season,</span>
+<span id="cb24-24"><a href="#cb24-24" tabindex="-1"></a>    <span class="at">method =</span> method,</span>
+<span id="cb24-25"><a href="#cb24-25" tabindex="-1"></a>    <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb24-26"><a href="#cb24-26" tabindex="-1"></a>)</span></code></pre></div>
+<p>During imputation, missing cells are visited in <code>split_period</code> order. For each
+patient, a draw conditions first on all observed cells. After each missing-cell
+draw, its sampled count and fitted mean are added to the conditioning totals
+before drawing the next cell. With only one missing cell, this reduces exactly
+to the conditional negative-binomial calculation used by the original
+three-period implementation.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>imputeObj_season <span class="ot">&lt;-</span> <span class="fu">impute</span>(drawObj_season)</span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>imputeObj_season</span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a><span class="co">#&gt; Imputation Object</span></span>
+<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a><span class="co">#&gt; -----------------</span></span>
+<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a><span class="co">#&gt; Number of Imputed Datasets: 1000</span></span>
+<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a><span class="co">#&gt; Endpoint Type: count</span></span>
+<span id="cb25-9"><a href="#cb25-9" tabindex="-1"></a><span class="co">#&gt; Number of Patients with Positive Duration by Period:</span></span>
+<span id="cb25-10"><a href="#cb25-10" tabindex="-1"></a><span class="co">#&gt;     1:0: 167</span></span>
+<span id="cb25-11"><a href="#cb25-11" tabindex="-1"></a><span class="co">#&gt;     2:0: 2</span></span>
+<span id="cb25-12"><a href="#cb25-12" tabindex="-1"></a><span class="co">#&gt;     1:1: 300</span></span>
+<span id="cb25-13"><a href="#cb25-13" tabindex="-1"></a><span class="co">#&gt;     2:1: 11</span></span>
+<span id="cb25-14"><a href="#cb25-14" tabindex="-1"></a><span class="co">#&gt;     1:2: 482</span></span>
+<span id="cb25-15"><a href="#cb25-15" tabindex="-1"></a><span class="co">#&gt;     2:2: 26</span></span>
+<span id="cb25-16"><a href="#cb25-16" tabindex="-1"></a><span class="co">#&gt;     3:2: 10</span></span>
+<span id="cb25-17"><a href="#cb25-17" tabindex="-1"></a><span class="co">#&gt;     1:3: 636</span></span>
+<span id="cb25-18"><a href="#cb25-18" tabindex="-1"></a><span class="co">#&gt;     2:3: 36</span></span>
+<span id="cb25-19"><a href="#cb25-19" tabindex="-1"></a><span class="co">#&gt;     3:3: 21</span></span>
+<span id="cb25-20"><a href="#cb25-20" tabindex="-1"></a><span class="co">#&gt;     1:4: 620</span></span>
+<span id="cb25-21"><a href="#cb25-21" tabindex="-1"></a><span class="co">#&gt;     2:4: 50</span></span>
+<span id="cb25-22"><a href="#cb25-22" tabindex="-1"></a><span class="co">#&gt;     3:4: 45</span></span>
+<span id="cb25-23"><a href="#cb25-23" tabindex="-1"></a><span class="co">#&gt;     1:5: 446</span></span>
+<span id="cb25-24"><a href="#cb25-24" tabindex="-1"></a><span class="co">#&gt;     2:5: 38</span></span>
+<span id="cb25-25"><a href="#cb25-25" tabindex="-1"></a><span class="co">#&gt;     3:5: 49</span></span>
+<span id="cb25-26"><a href="#cb25-26" tabindex="-1"></a><span class="co">#&gt;     1:6: 310</span></span>
+<span id="cb25-27"><a href="#cb25-27" tabindex="-1"></a><span class="co">#&gt;     2:6: 27</span></span>
+<span id="cb25-28"><a href="#cb25-28" tabindex="-1"></a><span class="co">#&gt;     3:6: 51</span></span>
+<span id="cb25-29"><a href="#cb25-29" tabindex="-1"></a><span class="co">#&gt;     1:7: 144</span></span>
+<span id="cb25-30"><a href="#cb25-30" tabindex="-1"></a><span class="co">#&gt;     2:7: 12</span></span>
+<span id="cb25-31"><a href="#cb25-31" tabindex="-1"></a><span class="co">#&gt;     3:7: 27</span></span>
+<span id="cb25-32"><a href="#cb25-32" tabindex="-1"></a><span class="co">#&gt;     1:8: 7</span></span>
+<span id="cb25-33"><a href="#cb25-33" tabindex="-1"></a><span class="co">#&gt;     3:8: 1</span></span>
+<span id="cb25-34"><a href="#cb25-34" tabindex="-1"></a><span class="co">#&gt; References:</span></span>
+<span id="cb25-35"><a href="#cb25-35" tabindex="-1"></a><span class="co">#&gt;     Placebo -&gt; Placebo</span></span>
+<span id="cb25-36"><a href="#cb25-36" tabindex="-1"></a><span class="co">#&gt;     100mg   -&gt; 100mg</span></span>
+<span id="cb25-37"><a href="#cb25-37" tabindex="-1"></a><span class="co">#&gt;     300mg   -&gt; 300mg</span></span></code></pre></div>
+<p>Season is used only in the imputation model. The treatment-policy analysis
+still aggregates all observed and imputed counts and exposure within patient.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>ana_vars_season <span class="ot">&lt;-</span> <span class="fu">set_vars</span>(</span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="st">&quot;split_outcome&quot;</span>,</span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>    <span class="at">subjid =</span> <span class="st">&quot;patient&quot;</span>,</span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a>    <span class="at">period =</span> <span class="st">&quot;split_period&quot;</span>,</span>
+<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a>    <span class="at">duration =</span> <span class="st">&quot;split_duration&quot;</span>,</span>
+<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">&quot;TreatLab&quot;</span>,</span>
+<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a>    <span class="at">covariates =</span> <span class="st">&quot;BaseCount&quot;</span></span>
+<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a>)</span>
+<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a>anaObj_season <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb26-11"><a href="#cb26-11" tabindex="-1"></a>    imputeObj_season,</span>
+<span id="cb26-12"><a href="#cb26-12" tabindex="-1"></a>    neg_bin_regression,</span>
+<span id="cb26-13"><a href="#cb26-13" tabindex="-1"></a>    <span class="at">vars =</span> ana_vars_season</span>
+<span id="cb26-14"><a href="#cb26-14" tabindex="-1"></a>)</span>
+<span id="cb26-15"><a href="#cb26-15" tabindex="-1"></a>poolObj_season <span class="ot">&lt;-</span> <span class="fu">pool</span>(</span>
+<span id="cb26-16"><a href="#cb26-16" tabindex="-1"></a>    anaObj_season,</span>
+<span id="cb26-17"><a href="#cb26-17" tabindex="-1"></a>    <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
+<span id="cb26-18"><a href="#cb26-18" tabindex="-1"></a>    <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span></span>
+<span id="cb26-19"><a href="#cb26-19" tabindex="-1"></a>)</span>
+<span id="cb26-20"><a href="#cb26-20" tabindex="-1"></a>poolObj_season</span>
+<span id="cb26-21"><a href="#cb26-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb26-22"><a href="#cb26-22" tabindex="-1"></a><span class="co">#&gt; Pool Object</span></span>
+<span id="cb26-23"><a href="#cb26-23" tabindex="-1"></a><span class="co">#&gt; -----------</span></span>
+<span id="cb26-24"><a href="#cb26-24" tabindex="-1"></a><span class="co">#&gt; Number of Results Combined: 1000</span></span>
+<span id="cb26-25"><a href="#cb26-25" tabindex="-1"></a><span class="co">#&gt; Method: rubin</span></span>
+<span id="cb26-26"><a href="#cb26-26" tabindex="-1"></a><span class="co">#&gt; Confidence Level: 0.95</span></span>
+<span id="cb26-27"><a href="#cb26-27" tabindex="-1"></a><span class="co">#&gt; Alternative: two.sided</span></span>
+<span id="cb26-28"><a href="#cb26-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb26-29"><a href="#cb26-29" tabindex="-1"></a><span class="co">#&gt; Results (transformation applied; original-scale results are in `$pars`):</span></span>
+<span id="cb26-30"><a href="#cb26-30" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb26-31"><a href="#cb26-31" tabindex="-1"></a><span class="co">#&gt;   ===================================================</span></span>
+<span id="cb26-32"><a href="#cb26-32" tabindex="-1"></a><span class="co">#&gt;      parameter     est    se     lci    uci    pval  </span></span>
+<span id="cb26-33"><a href="#cb26-33" tabindex="-1"></a><span class="co">#&gt;   ---------------------------------------------------</span></span>
+<span id="cb26-34"><a href="#cb26-34" tabindex="-1"></a><span class="co">#&gt;     (Intercept)   0.003    0    0.002  0.003  &lt;0.001 </span></span>
+<span id="cb26-35"><a href="#cb26-35" tabindex="-1"></a><span class="co">#&gt;    TreatLab100mg  0.766  0.086  0.615  0.955  0.018  </span></span>
+<span id="cb26-36"><a href="#cb26-36" tabindex="-1"></a><span class="co">#&gt;    TreatLab300mg  0.837  0.09   0.678  1.034   0.1   </span></span>
+<span id="cb26-37"><a href="#cb26-37" tabindex="-1"></a><span class="co">#&gt;      BaseCount    1.214  0.024  1.168  1.261  &lt;0.001 </span></span>
+<span id="cb26-38"><a href="#cb26-38" tabindex="-1"></a><span class="co">#&gt;   ---------------------------------------------------</span></span></code></pre></div>
+<p>The corresponding SAS results are labelled <code>4 Seasons: Treat*OnOff BaseCount</code>.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>rate_ratios_season <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(poolObj_season) <span class="sc">|&gt;</span></span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>    <span class="fu">filter</span>(parameter <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;TreatLab100mg&quot;</span>, <span class="st">&quot;TreatLab300mg&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>    <span class="fu">transmute</span>(</span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>        <span class="at">comparison =</span> <span class="fu">recode</span>(</span>
+<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a>            parameter,</span>
+<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a>            <span class="at">TreatLab100mg =</span> <span class="st">&quot;100mg vs Placebo&quot;</span>,</span>
+<span id="cb27-7"><a href="#cb27-7" tabindex="-1"></a>            <span class="at">TreatLab300mg =</span> <span class="st">&quot;300mg vs Placebo&quot;</span></span>
+<span id="cb27-8"><a href="#cb27-8" tabindex="-1"></a>        ),</span>
+<span id="cb27-9"><a href="#cb27-9" tabindex="-1"></a>        <span class="at">rbmi_rate_ratio =</span> est,</span>
+<span id="cb27-10"><a href="#cb27-10" tabindex="-1"></a>        <span class="at">rbmi_lower_95 =</span> lci,</span>
+<span id="cb27-11"><a href="#cb27-11" tabindex="-1"></a>        <span class="at">rbmi_upper_95 =</span> uci,</span>
+<span id="cb27-12"><a href="#cb27-12" tabindex="-1"></a>        <span class="at">rbmi_p_value =</span> pval</span>
+<span id="cb27-13"><a href="#cb27-13" tabindex="-1"></a>    )</span>
+<span id="cb27-14"><a href="#cb27-14" tabindex="-1"></a></span>
+<span id="cb27-15"><a href="#cb27-15" tabindex="-1"></a><span class="fu">left_join</span>(</span>
+<span id="cb27-16"><a href="#cb27-16" tabindex="-1"></a>    rate_ratios_season,</span>
+<span id="cb27-17"><a href="#cb27-17" tabindex="-1"></a>    <span class="fu">filter</span>(sas_results, model <span class="sc">==</span> <span class="st">&quot;4 Seasons: Treat*OnOff BaseCount&quot;</span>),</span>
+<span id="cb27-18"><a href="#cb27-18" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">&quot;comparison&quot;</span></span>
+<span id="cb27-19"><a href="#cb27-19" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb27-20"><a href="#cb27-20" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>model) <span class="sc">|&gt;</span> </span>
+<span id="cb27-21"><a href="#cb27-21" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(dplyr<span class="sc">::</span><span class="fu">across</span>(dplyr<span class="sc">::</span><span class="fu">where</span>(is.numeric), <span class="sc">~</span> <span class="fu">round</span>(.x, <span class="dv">4</span>)))</span>
+<span id="cb27-22"><a href="#cb27-22" tabindex="-1"></a><span class="co">#&gt;         comparison rbmi_rate_ratio rbmi_lower_95 rbmi_upper_95 rbmi_p_value</span></span>
+<span id="cb27-23"><a href="#cb27-23" tabindex="-1"></a><span class="co">#&gt; 1 100mg vs Placebo          0.7661        0.6146        0.9550       0.0178</span></span>
+<span id="cb27-24"><a href="#cb27-24" tabindex="-1"></a><span class="co">#&gt; 2 300mg vs Placebo          0.8374        0.6781        1.0343       0.0995</span></span>
+<span id="cb27-25"><a href="#cb27-25" tabindex="-1"></a><span class="co">#&gt;   sas_rate_ratio sas_lower_95 sas_upper_95 sas_p_value</span></span>
+<span id="cb27-26"><a href="#cb27-26" tabindex="-1"></a><span class="co">#&gt; 1         0.7642       0.6131       0.9525      0.0167</span></span>
+<span id="cb27-27"><a href="#cb27-27" tabindex="-1"></a><span class="co">#&gt; 2         0.8345       0.6756       1.0306      0.0929</span></span></code></pre></div>
+</div>
+<div id="fixed-rate-model-for-the-active-arms" class="section level3" number="7.4">
+<h3><span class="header-section-number">7.4</span> Fixed rate model for the active arms</h3>
+<p>The next controlled-imputation analysis retains the estimated off-treatment
+rate for placebo, but replaces the model-based period-3 rate for both active
+arms with a fixed value.</p>
+<p>There is an important parameterization detail. The executed SAS code fixes
+<code>0.0021</code> on its negative-multinomial lambda scale. If
+<span class="math inline">\(r = \phi^{-1}\)</span> is the negative-multinomial shape parameter, the
+Poisson mean supplied for period 3 is therefore</p>
+<p><span class="math display">\[
+\mu_{i3} = r L_{i3} \times 0.0021
+          = \frac{L_{i3} \times 0.0021}{\phi}.
+\]</span></p>
+<p>Consequently, <code>0.0021</code> is not a fixed marginal event rate. A genuinely fixed
+Poisson event rate would instead use
+<span class="math inline">\(\mu_{i3} = L_{i3} \times 0.0021\)</span>, i.e. without the division by <span class="math inline">\(\phi\)</span>.
+In the joint count model, <span class="math inline">\(\mu_{i3}\)</span> is the
+unconditional marginal mean of <span class="math inline">\(Y_{i3}\)</span>. The actual imputation distribution,
+however, conditions on the observed counts <span class="math inline">\(y_{i1},y_{i2}\)</span>. Given these counts
+and fitted observed-cell means <span class="math inline">\(\hat\mu_{i1},\hat\mu_{i2}\)</span>, its conditional mean
+is</p>
+<p><span class="math display">\[
+\mathbb{E}(Y_{i3} \mid y_{i1},y_{i2}) =
+\frac{r + y_{i1} + y_{i2}}
+     {r + \hat\mu_{i1} + \hat\mu_{i2}}\,\mu_{i3}.
+\]</span></p>
+<p>For a <code>fixed_lambda_rate</code> strategy based on JR or CR, <span class="math inline">\(r\)</span> is calculated from
+the mapped reference arm’s <code>phi</code>; under JR this is so even though the fitted
+observed-cell means in the denominator use the subject’s randomized-arm
+design.</p>
+<p>Controlled count strategies are applied in <code>impute()</code>, after the posterior
+parameters have been drawn. Each strategy has a base trajectory (<code>MAR</code>, <code>JR</code>,
+or <code>CR</code>) and an optional transformation of the missing-cell rate. Thus the
+original <code>drawObj</code> can be reused without refitting the observed-data model.</p>
+<p>First, we identify the period-3 withdrawals in the active arms and update only
+their imputation strategy. Placebo patients retain MAR imputation using the
+estimated placebo off-treatment rate.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>active_period3_strategy <span class="ot">&lt;-</span> dat_count_filled <span class="sc">|&gt;</span></span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a>    <span class="fu">filter</span>(</span>
+<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a>        period <span class="sc">==</span> <span class="st">&quot;3&quot;</span>,</span>
+<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a>        Length <span class="sc">&gt;</span> <span class="dv">0</span>,</span>
+<span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a>        TreatLab <span class="sc">!=</span> <span class="st">&quot;Placebo&quot;</span></span>
+<span id="cb28-6"><a href="#cb28-6" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb28-7"><a href="#cb28-7" tabindex="-1"></a>    <span class="fu">distinct</span>(patient) <span class="sc">|&gt;</span></span>
+<span id="cb28-8"><a href="#cb28-8" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">strategy =</span> <span class="st">&quot;FIXED_LAMBDA&quot;</span>)</span>
+<span id="cb28-9"><a href="#cb28-9" tabindex="-1"></a></span>
+<span id="cb28-10"><a href="#cb28-10" tabindex="-1"></a>fixed_lambda_strategies <span class="ot">&lt;-</span> <span class="fu">get_count_strategies</span>(</span>
+<span id="cb28-11"><a href="#cb28-11" tabindex="-1"></a>    <span class="at">FIXED_LAMBDA =</span> <span class="fu">count_strategy</span>(</span>
+<span id="cb28-12"><a href="#cb28-12" tabindex="-1"></a>        <span class="at">base =</span> <span class="st">&quot;MAR&quot;</span>,</span>
+<span id="cb28-13"><a href="#cb28-13" tabindex="-1"></a>        <span class="at">fixed_lambda_rate =</span> <span class="fl">0.0021</span>,</span>
+<span id="cb28-14"><a href="#cb28-14" tabindex="-1"></a>        <span class="at">period =</span> <span class="st">&quot;3&quot;</span></span>
+<span id="cb28-15"><a href="#cb28-15" tabindex="-1"></a>    )</span>
+<span id="cb28-16"><a href="#cb28-16" tabindex="-1"></a>)</span>
+<span id="cb28-17"><a href="#cb28-17" tabindex="-1"></a></span>
+<span id="cb28-18"><a href="#cb28-18" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb28-19"><a href="#cb28-19" tabindex="-1"></a>imputeObj_fixed_lambda <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
+<span id="cb28-20"><a href="#cb28-20" tabindex="-1"></a>    drawObj,</span>
+<span id="cb28-21"><a href="#cb28-21" tabindex="-1"></a>    <span class="at">update_strategy =</span> active_period3_strategy,</span>
+<span id="cb28-22"><a href="#cb28-22" tabindex="-1"></a>    <span class="at">strategies =</span> fixed_lambda_strategies</span>
+<span id="cb28-23"><a href="#cb28-23" tabindex="-1"></a>)</span></code></pre></div>
+<p>The treatment-policy analysis and pooling steps are unchanged.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>anaObj_fixed_lambda <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a>    imputeObj_fixed_lambda,</span>
+<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>    neg_bin_regression,</span>
+<span id="cb29-4"><a href="#cb29-4" tabindex="-1"></a>    <span class="at">vars =</span> ana_vars</span>
+<span id="cb29-5"><a href="#cb29-5" tabindex="-1"></a>)</span>
+<span id="cb29-6"><a href="#cb29-6" tabindex="-1"></a></span>
+<span id="cb29-7"><a href="#cb29-7" tabindex="-1"></a>poolObj_fixed_lambda <span class="ot">&lt;-</span> <span class="fu">pool</span>(</span>
+<span id="cb29-8"><a href="#cb29-8" tabindex="-1"></a>    anaObj_fixed_lambda,</span>
+<span id="cb29-9"><a href="#cb29-9" tabindex="-1"></a>    <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
+<span id="cb29-10"><a href="#cb29-10" tabindex="-1"></a>    <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span></span>
+<span id="cb29-11"><a href="#cb29-11" tabindex="-1"></a>)</span>
+<span id="cb29-12"><a href="#cb29-12" tabindex="-1"></a></span>
+<span id="cb29-13"><a href="#cb29-13" tabindex="-1"></a>rate_ratios_fixed_lambda <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(poolObj_fixed_lambda) <span class="sc">|&gt;</span></span>
+<span id="cb29-14"><a href="#cb29-14" tabindex="-1"></a>    <span class="fu">filter</span>(parameter <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;TreatLab100mg&quot;</span>, <span class="st">&quot;TreatLab300mg&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb29-15"><a href="#cb29-15" tabindex="-1"></a>    <span class="fu">transmute</span>(</span>
+<span id="cb29-16"><a href="#cb29-16" tabindex="-1"></a>        <span class="at">comparison =</span> <span class="fu">recode</span>(</span>
+<span id="cb29-17"><a href="#cb29-17" tabindex="-1"></a>            parameter,</span>
+<span id="cb29-18"><a href="#cb29-18" tabindex="-1"></a>            <span class="at">TreatLab100mg =</span> <span class="st">&quot;100mg vs Placebo&quot;</span>,</span>
+<span id="cb29-19"><a href="#cb29-19" tabindex="-1"></a>            <span class="at">TreatLab300mg =</span> <span class="st">&quot;300mg vs Placebo&quot;</span></span>
+<span id="cb29-20"><a href="#cb29-20" tabindex="-1"></a>        ),</span>
+<span id="cb29-21"><a href="#cb29-21" tabindex="-1"></a>        <span class="at">rbmi_rate_ratio =</span> est,</span>
+<span id="cb29-22"><a href="#cb29-22" tabindex="-1"></a>        <span class="at">rbmi_lower_95 =</span> lci,</span>
+<span id="cb29-23"><a href="#cb29-23" tabindex="-1"></a>        <span class="at">rbmi_upper_95 =</span> uci,</span>
+<span id="cb29-24"><a href="#cb29-24" tabindex="-1"></a>        <span class="at">rbmi_p_value =</span> pval</span>
+<span id="cb29-25"><a href="#cb29-25" tabindex="-1"></a>    )</span>
+<span id="cb29-26"><a href="#cb29-26" tabindex="-1"></a></span>
+<span id="cb29-27"><a href="#cb29-27" tabindex="-1"></a><span class="fu">left_join</span>(</span>
+<span id="cb29-28"><a href="#cb29-28" tabindex="-1"></a>    rate_ratios_fixed_lambda,</span>
+<span id="cb29-29"><a href="#cb29-29" tabindex="-1"></a>    <span class="fu">filter</span>(sas_results, model <span class="sc">==</span> <span class="st">&quot;Fixed 0.01 active imputed&quot;</span>),</span>
+<span id="cb29-30"><a href="#cb29-30" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">&quot;comparison&quot;</span></span>
+<span id="cb29-31"><a href="#cb29-31" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb29-32"><a href="#cb29-32" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>model) <span class="sc">|&gt;</span></span>
+<span id="cb29-33"><a href="#cb29-33" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(dplyr<span class="sc">::</span><span class="fu">across</span>(dplyr<span class="sc">::</span><span class="fu">where</span>(is.numeric), <span class="sc">~</span> <span class="fu">round</span>(.x, <span class="dv">4</span>)))</span>
+<span id="cb29-34"><a href="#cb29-34" tabindex="-1"></a><span class="co">#&gt;         comparison rbmi_rate_ratio rbmi_lower_95 rbmi_upper_95 rbmi_p_value</span></span>
+<span id="cb29-35"><a href="#cb29-35" tabindex="-1"></a><span class="co">#&gt; 1 100mg vs Placebo          0.7835        0.6287        0.9765       0.0299</span></span>
+<span id="cb29-36"><a href="#cb29-36" tabindex="-1"></a><span class="co">#&gt; 2 300mg vs Placebo          0.8525        0.6902        1.0531       0.1388</span></span>
+<span id="cb29-37"><a href="#cb29-37" tabindex="-1"></a><span class="co">#&gt;   sas_rate_ratio sas_lower_95 sas_upper_95 sas_p_value</span></span>
+<span id="cb29-38"><a href="#cb29-38" tabindex="-1"></a><span class="co">#&gt; 1         0.7850       0.6291       0.9794      0.0320</span></span>
+<span id="cb29-39"><a href="#cb29-39" tabindex="-1"></a><span class="co">#&gt; 2         0.8531       0.6906       1.0538      0.1405</span></span></code></pre></div>
+</div>
+<div id="off-treatment-estimate-is-doubled-for-the-active-arms" class="section level3" number="7.5">
+<h3><span class="header-section-number">7.5</span> Off-treatment estimate is doubled for the active arms</h3>
+<p>The same controlled-imputation mechanism can multiply rather than replace the
+model-based mean. Here the active-arm period-3 mean is twice the corresponding
+estimated off-treatment mean, while placebo is unchanged:</p>
+<p><span class="math display">\[
+\mu_{i3}^{\text{impute}} = 2\mu_{i3}^{\text{model}}.
+\]</span></p>
+<p>Only the strategy definition changes. Its base remains MAR, so each active-arm
+patient retains their randomized arm’s modeled off-treatment trajectory and
+dispersion parameter before the multiplier is applied.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>active_period3_double_strategy <span class="ot">&lt;-</span> active_period3_strategy <span class="sc">|&gt;</span></span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">strategy =</span> <span class="st">&quot;DOUBLE_RATE&quot;</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a></span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a>double_rate_strategies <span class="ot">&lt;-</span> <span class="fu">get_count_strategies</span>(</span>
+<span id="cb30-5"><a href="#cb30-5" tabindex="-1"></a>    <span class="at">DOUBLE_RATE =</span> <span class="fu">count_strategy</span>(</span>
+<span id="cb30-6"><a href="#cb30-6" tabindex="-1"></a>        <span class="at">base =</span> <span class="st">&quot;MAR&quot;</span>,</span>
+<span id="cb30-7"><a href="#cb30-7" tabindex="-1"></a>        <span class="at">rate_multiplier =</span> <span class="dv">2</span>,</span>
+<span id="cb30-8"><a href="#cb30-8" tabindex="-1"></a>        <span class="at">period =</span> <span class="st">&quot;3&quot;</span></span>
+<span id="cb30-9"><a href="#cb30-9" tabindex="-1"></a>    )</span>
+<span id="cb30-10"><a href="#cb30-10" tabindex="-1"></a>)</span>
+<span id="cb30-11"><a href="#cb30-11" tabindex="-1"></a></span>
+<span id="cb30-12"><a href="#cb30-12" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb30-13"><a href="#cb30-13" tabindex="-1"></a>imputeObj_double_rate <span class="ot">&lt;-</span> <span class="fu">impute</span>(</span>
+<span id="cb30-14"><a href="#cb30-14" tabindex="-1"></a>    drawObj,</span>
+<span id="cb30-15"><a href="#cb30-15" tabindex="-1"></a>    <span class="at">update_strategy =</span> active_period3_double_strategy,</span>
+<span id="cb30-16"><a href="#cb30-16" tabindex="-1"></a>    <span class="at">strategies =</span> double_rate_strategies</span>
+<span id="cb30-17"><a href="#cb30-17" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>anaObj_double_rate <span class="ot">&lt;-</span> <span class="fu">analyse</span>(</span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>    imputeObj_double_rate,</span>
+<span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a>    neg_bin_regression,</span>
+<span id="cb31-4"><a href="#cb31-4" tabindex="-1"></a>    <span class="at">vars =</span> ana_vars</span>
+<span id="cb31-5"><a href="#cb31-5" tabindex="-1"></a>)</span>
+<span id="cb31-6"><a href="#cb31-6" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" tabindex="-1"></a>poolObj_double_rate <span class="ot">&lt;-</span> <span class="fu">pool</span>(</span>
+<span id="cb31-8"><a href="#cb31-8" tabindex="-1"></a>    anaObj_double_rate,</span>
+<span id="cb31-9"><a href="#cb31-9" tabindex="-1"></a>    <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
+<span id="cb31-10"><a href="#cb31-10" tabindex="-1"></a>    <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span></span>
+<span id="cb31-11"><a href="#cb31-11" tabindex="-1"></a>)</span>
+<span id="cb31-12"><a href="#cb31-12" tabindex="-1"></a></span>
+<span id="cb31-13"><a href="#cb31-13" tabindex="-1"></a>rate_ratios_double_rate <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(poolObj_double_rate) <span class="sc">|&gt;</span></span>
+<span id="cb31-14"><a href="#cb31-14" tabindex="-1"></a>    <span class="fu">filter</span>(parameter <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;TreatLab100mg&quot;</span>, <span class="st">&quot;TreatLab300mg&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb31-15"><a href="#cb31-15" tabindex="-1"></a>    <span class="fu">transmute</span>(</span>
+<span id="cb31-16"><a href="#cb31-16" tabindex="-1"></a>        <span class="at">comparison =</span> <span class="fu">recode</span>(</span>
+<span id="cb31-17"><a href="#cb31-17" tabindex="-1"></a>            parameter,</span>
+<span id="cb31-18"><a href="#cb31-18" tabindex="-1"></a>            <span class="at">TreatLab100mg =</span> <span class="st">&quot;100mg vs Placebo&quot;</span>,</span>
+<span id="cb31-19"><a href="#cb31-19" tabindex="-1"></a>            <span class="at">TreatLab300mg =</span> <span class="st">&quot;300mg vs Placebo&quot;</span></span>
+<span id="cb31-20"><a href="#cb31-20" tabindex="-1"></a>        ),</span>
+<span id="cb31-21"><a href="#cb31-21" tabindex="-1"></a>        <span class="at">rbmi_rate_ratio =</span> est,</span>
+<span id="cb31-22"><a href="#cb31-22" tabindex="-1"></a>        <span class="at">rbmi_lower_95 =</span> lci,</span>
+<span id="cb31-23"><a href="#cb31-23" tabindex="-1"></a>        <span class="at">rbmi_upper_95 =</span> uci,</span>
+<span id="cb31-24"><a href="#cb31-24" tabindex="-1"></a>        <span class="at">rbmi_p_value =</span> pval</span>
+<span id="cb31-25"><a href="#cb31-25" tabindex="-1"></a>    )</span>
+<span id="cb31-26"><a href="#cb31-26" tabindex="-1"></a></span>
+<span id="cb31-27"><a href="#cb31-27" tabindex="-1"></a><span class="fu">left_join</span>(</span>
+<span id="cb31-28"><a href="#cb31-28" tabindex="-1"></a>    rate_ratios_double_rate,</span>
+<span id="cb31-29"><a href="#cb31-29" tabindex="-1"></a>    <span class="fu">filter</span>(sas_results, model <span class="sc">==</span> <span class="st">&quot;Delta Active double rate off&quot;</span>),</span>
+<span id="cb31-30"><a href="#cb31-30" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">&quot;comparison&quot;</span></span>
+<span id="cb31-31"><a href="#cb31-31" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb31-32"><a href="#cb31-32" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>model) <span class="sc">|&gt;</span></span>
+<span id="cb31-33"><a href="#cb31-33" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(dplyr<span class="sc">::</span><span class="fu">across</span>(dplyr<span class="sc">::</span><span class="fu">where</span>(is.numeric), <span class="sc">~</span> <span class="fu">round</span>(.x, <span class="dv">4</span>)))</span>
+<span id="cb31-34"><a href="#cb31-34" tabindex="-1"></a><span class="co">#&gt;         comparison rbmi_rate_ratio rbmi_lower_95 rbmi_upper_95 rbmi_p_value</span></span>
+<span id="cb31-35"><a href="#cb31-35" tabindex="-1"></a><span class="co">#&gt; 1 100mg vs Placebo          0.7939        0.6345        0.9934       0.0436</span></span>
+<span id="cb31-36"><a href="#cb31-36" tabindex="-1"></a><span class="co">#&gt; 2 300mg vs Placebo          0.8614        0.6958        1.0664       0.1707</span></span>
+<span id="cb31-37"><a href="#cb31-37" tabindex="-1"></a><span class="co">#&gt;   sas_rate_ratio sas_lower_95 sas_upper_95 sas_p_value</span></span>
+<span id="cb31-38"><a href="#cb31-38" tabindex="-1"></a><span class="co">#&gt; 1         0.7931       0.6344       0.9915      0.0419</span></span>
+<span id="cb31-39"><a href="#cb31-39" tabindex="-1"></a><span class="co">#&gt; 2         0.8606       0.6957       1.0647      0.1667</span></span></code></pre></div>
+</div>
+</div>
+<div id="references" class="section level2" number="8">
+<h2><span class="header-section-number">8</span> References</h2>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

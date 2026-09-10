@@ -63,7 +63,3 @@ docs
 local/
 *.rds
 revdep/
-vignettes/count.typ
-vignettes/count.html
-vignettes/.quarto/typst/available-fonts.json
-vignettes/count.html
