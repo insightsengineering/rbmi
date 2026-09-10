@@ -34,8 +34,8 @@ sampling. See details.}
 \item{strategy}{The name of the "strategy" variable. A length 1 character vector.}
 
 \item{period}{Alternatively to \code{visit}, the name of the "Period" variable.
-A length 1 character vector. The corresponding data column must contain
-character values \code{"1"}, \code{"2"} and \code{"3"}.}
+A length 1 character vector. The corresponding data column contains the periods
+which are typically character or factor valued.}
 
 \item{duration}{The name of the "Duration" variable. A length 1 character
 vector or \code{NULL}. If \code{period} is specified, this argument is required. The

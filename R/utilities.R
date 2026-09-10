@@ -349,8 +349,8 @@ sort_by <- function(df, vars = NULL, decreasing = FALSE) {
 #' @param visit The name of the "Visit" variable. A length 1 character vector.
 #'
 #' @param period Alternatively to `visit`, the name of the "Period" variable.
-#' A length 1 character vector. The corresponding data column must contain
-#' character values `"1"`, `"2"` and `"3"`.
+#' A length 1 character vector. The corresponding data column contains the periods
+#' which are typically character or factor valued.
 #'
 #' @param duration The name of the "Duration" variable. A length 1 character
 #' vector or `NULL`. If `period` is specified, this argument is required. The
