@@ -12,6 +12,7 @@ CR
 Clin
 Cov
 Cro
+DIA
 Delmar
 Demitrack
 Detke
@@ -28,8 +29,11 @@ Kenward
 LKJ
 LMCF
 LOCF
+LSHTM
 Lukas
 MCSE
+MCSEs
+METREO
 MIWithD
 MMRM
 MNAR
@@ -37,8 +41,8 @@ MSB
 MSW
 Mallinckrodt
 Modeling
-NegativeBinomial
 NSDCR
+NegativeBinomial
 ORCID
 Poisson
 Psychopharmacol
@@ -47,6 +51,7 @@ RCTs
 RM
 SDCR
 STS
+SWG
 Sabanes
 ScaledInvChiSquare
 Stata
@@ -56,8 +61,8 @@ Un
 Unscales
 Wiltse
 Yiu
-antedependence
 analyzed
+antedependence
 anymore
 bd
 bmatrix
@@ -78,6 +83,7 @@ lsmean
 lsmeans
 mathbb
 mbox
+mepolizumab
 mim
 modeled
 modeling
