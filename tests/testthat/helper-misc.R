@@ -123,6 +123,9 @@ is_core_test <- function() {
 is_extended_test <- function() {
     is_envvar_true("RBMI_TEST_EXTENDED")
 }
+
+# Convenience function to be used during development only interactively.
+# Therefore this is not called anywhere.
 activate_extended_test <- function() {
     Sys.setenv(RBMI_TEST_EXTENDED = "TRUE")
 }
